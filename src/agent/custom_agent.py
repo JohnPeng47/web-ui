@@ -56,6 +56,9 @@ from google.api_core.exceptions import ResourceExhausted
 from openai import RateLimitError
 from pydantic import ValidationError
 
+from johnllm.johnllm import LLMModel
+
+from .state import CurrentState
 from .custom_message_manager import CustomMessageManager, CustomMessageManagerSettings
 from .custom_views import CustomAgentOutput, CustomAgentStepInfo, CustomAgentState
 from .http_handler import HTTPMessage, HTTPRequest, HTTPResponse
@@ -202,7 +205,7 @@ class CustomAgent(Agent):
     def __init__(
             self,
             task: str,
-            llm: BaseChatModel,
+            llm: LLMModel,
             add_infos: str = "",
             # Optional parameters
             browser: Browser | None = None,
@@ -355,7 +358,7 @@ class CustomAgent(Agent):
     async def get_next_action(self, input_messages: list[BaseMessage]) -> AgentOutput:
         """Get next action from LLM based on current state"""
 
-        ai_message = self.llm.invoke(input_messages)
+        ai_message = self.llm.invoke(input_messages, response_format=CurrentState)
         self.message_manager._add_message_with_tokens(ai_message)
 
         if hasattr(ai_message, "reasoning_content"):
