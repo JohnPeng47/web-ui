@@ -36,7 +36,10 @@ from src.utils.default_config_settings import default_config, load_config_from_f
     save_current_config, update_ui_from_config
 from src.utils.utils import update_model_dropdown, get_latest_files, capture_screenshot
 
+from johnllm.johnllm import LLMModel
 from logger import init_root_logger
+from src.agent.init_agent import init_custom_agent
+from src.agent.custom_views import CustomAgentState
 
 # Global variables for persistence
 _global_browser = None
@@ -171,14 +174,16 @@ async def run_browser_agent(
         task = resolve_sensitive_env_variables(task)
 
         # Run the agent
-        llm = utils.get_llm_model(
-            provider=llm_provider,
-            model_name=llm_model_name,
-            num_ctx=llm_num_ctx,
-            temperature=llm_temperature,
-            base_url=llm_base_url,
-            api_key=llm_api_key,
-        )
+        # llm = utils.get_llm_model(
+        #     provider=llm_provider,
+        #     model_name=llm_model_name,
+        #     num_ctx=llm_num_ctx,
+        #     temperature=llm_temperature,
+        #     base_url=llm_base_url,
+        #     api_key=llm_api_key,
+        # )
+        
+        llm = LLMModel()
         if agent_type == "org":
             final_result, errors, model_actions, model_thoughts, trace_file, history_file = await run_org_agent(
                 llm=llm,
@@ -409,7 +414,6 @@ async def run_custom_agent(
         controller = CustomController()
 
         # Initialize global browser if needed
-        # if chrome_cdp not empty string nor None
         if (_global_browser is None) or (cdp_url and cdp_url != "" and cdp_url != None):
             _global_browser = CustomBrowser(
                 config=BrowserConfig(
@@ -433,18 +437,16 @@ async def run_custom_agent(
                 )
             )
 
-        # Create and run agent
+        # Create and run agent using the new initialization function
         if _global_agent is None:
-            _global_agent = CustomAgent(
+            _global_agent = init_custom_agent(
                 task=task,
-                add_infos=add_infos,
-                use_vision=use_vision,
                 llm=llm,
+                add_infos=add_infos,
                 browser=_global_browser,
                 browser_context=_global_browser_context,
                 controller=controller,
-                system_prompt_class=CustomSystemPrompt,
-                agent_prompt_class=CustomAgentMessagePrompt,
+                use_vision=use_vision,
                 max_actions_per_step=max_actions_per_step,
                 tool_calling_method=tool_calling_method,
                 max_input_tokens=max_input_tokens,
@@ -453,6 +455,7 @@ async def run_custom_agent(
 
         history = await _global_agent.run(max_steps=max_steps)
 
+        # Use the agent_id from CustomAgentState
         history_file = os.path.join(save_agent_history_path, f"{_global_agent.state.agent_id}.json")
         _global_agent.save_history(history_file)
 

@@ -64,6 +64,7 @@ from .custom_views import CustomAgentOutput, CustomAgentStepInfo, CustomAgentSta
 from .http_handler import HTTPMessage, HTTPRequest, HTTPResponse
 from .pentest_prompts import get_pentest_message
 
+
 import logging
 import os
 
@@ -76,6 +77,7 @@ Context = TypeVar('Context')
 DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text"]
 DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
 MAX_PAYLOAD_SIZE = 4000
+MODEL_NAME = "gpt-4o"
 
 class HTTPHandler:
     def __init__(self):
@@ -201,6 +203,7 @@ def filter_http_messages(messages: List[HTTPMessage],
             
         filtered_messages.append(msg)
     return filtered_messages
+
 class CustomAgent(Agent):
     def __init__(
             self,
@@ -358,24 +361,16 @@ class CustomAgent(Agent):
     async def get_next_action(self, input_messages: list[BaseMessage]) -> AgentOutput:
         """Get next action from LLM based on current state"""
 
-        ai_message = self.llm.invoke(input_messages, response_format=CurrentState)
-        self.message_manager._add_message_with_tokens(ai_message)
+        ai_message: CurrentState = self.llm.invoke(input_messages, model_name=MODEL_NAME, response_format=CurrentState)
+        converted_msg = BaseMessage(content=ai_message.model_dump())
+        self.message_manager._add_message_with_tokens(converted_msg)
 
-        if hasattr(ai_message, "reasoning_content"):
-            logger.info("🤯 Start Deep Thinking: ")
-            logger.info(ai_message.reasoning_content)
-            logger.info("🤯 End Deep Thinking")
+        # if ai_message.reasoning_content:
+        #     logger.info("🤯 Start Deep Thinking: ")
+        #     logger.info(ai_message.reasoning_content)
+        #     logger.info("🤯 End Deep Thinking")
 
-        if isinstance(ai_message.content, list):
-            ai_content = ai_message.content[0]
-        else:
-            ai_content = ai_message.content
-
-        ai_content = ai_content.replace("```json", "").replace("```", "")
-        ai_content = repair_json(ai_content)
-        parsed_json = json.loads(ai_content)
-        parsed: AgentOutput = self.AgentOutput(**parsed_json)
-
+        parsed: AgentOutput = self.AgentOutput(**ai_message.model_dump())
         if parsed is None:
             logger.debug(ai_message.content)
             raise ValueError('Could not parse response.')
@@ -385,7 +380,7 @@ class CustomAgent(Agent):
             parsed.action = parsed.action[: self.settings.max_actions_per_step]
         self._log_response(parsed)
         return parsed
-
+    
     async def _run_planner(self) -> Optional[str]:
         """Run the planner to analyze state and suggest next steps"""
         # Skip planning if no planner_llm is set
@@ -466,8 +461,8 @@ class CustomAgent(Agent):
 
             pentest_prompt = await get_pentest_message(state, self.state.last_action, self.state.last_result, step_info, filtered_msgs)
             if pentest_prompt.content[0]:
-                pentest_messages = self.llm.invoke([pentest_prompt])
-                pentest_analysis = pentest_messages.content
+                pentest_messages = self.llm.invoke([pentest_prompt], model_name=MODEL_NAME)
+                pentest_analysis = pentest_messages
             else:
                 pentest_analysis = ""
             

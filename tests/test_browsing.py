@@ -17,8 +17,12 @@ import pytest
 from browser_use import Agent
 from browser_use.agent.views import AgentHistoryList
 
+from src.agent.custom_agent import CustomAgent
+from src.agent.custom_prompts import CustomSystemPrompt, CustomAgentMessagePrompt
+
 from logger import init_root_logger
 from src.utils import utils
+from johnllm.johnllm import LLMModel
 
 @pytest.mark.asyncio
 async def test_browser_login():
@@ -34,20 +38,9 @@ async def test_browser_login():
             BrowserContextWindowSize,
         )
 
-        llm = utils.get_llm_model(
-            provider="openai",
-            model_name="gpt-4o",
-            temperature=0.8,
-            base_url=os.getenv("OPENAI_ENDPOINT", ""),
-            api_key=os.getenv("OPENAI_API_KEY", ""),
-        )
-        # llm = utils.get_llm_model(
-        #     provider="ollama", model_name="deepseek-r1:14b", temperature=0.5
-        # )
-
+        llm = LLMModel()
         window_w, window_h = 1920, 1080
         use_vision = False
-
         browser = Browser(
             config=BrowserConfig(
                 headless=True,
@@ -65,14 +58,16 @@ async def test_browser_login():
                     ),
                 )
         ) as browser_context:
-            agent = Agent(
+            agent = CustomAgent(
                 task="Go to http://localhost:5000/login, login with username 'admin' and password 'admin', then read and return the text displayed on the page after login",
                 llm=llm,
                 browser_context=browser_context,
                 use_vision=use_vision,
-                tool_calling_method="function_calling"
+                tool_calling_method="function_calling",
+                system_prompt_class=CustomSystemPrompt,
+                agent_prompt_class=CustomAgentMessagePrompt,
             )
-            history = await agent.run(max_steps=10)
+            history = await agent.run(max_steps=5)
 
             print("Final Result:")
             pprint(history.final_result(), indent=4)
