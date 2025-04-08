@@ -17,6 +17,13 @@
             "request": "launch",
             "program": "webui.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Test Browser",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "test_browser.py",
+            "console": "integratedTerminal"
         }
     ]
 }

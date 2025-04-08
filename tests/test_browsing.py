@@ -13,6 +13,7 @@ from pprint import pprint
 import subprocess
 import time
 import pytest
+from pathlib import Path
 
 from browser_use import Agent
 from browser_use.agent.views import AgentHistoryList
@@ -23,6 +24,8 @@ from src.agent.custom_prompts import CustomSystemPrompt, CustomAgentMessagePromp
 from logger import init_root_logger
 from src.utils import utils
 from johnllm.johnllm import LLMModel
+
+HISTORY_PATH = Path(__file__).parent / "history.json"
 
 @pytest.mark.asyncio
 async def test_browser_login():
@@ -68,14 +71,14 @@ async def test_browser_login():
                 agent_prompt_class=CustomAgentMessagePrompt,
             )
             history = await agent.run(max_steps=5)
+            agent.save_history(HISTORY_PATH)
 
             print("Final Result:")
             pprint(history.final_result(), indent=4)
 
             # Verify that "Hello World" is in the history
-            success = any("Hello World" in str(action) for action in history.model_actions())
-            print(f"\nTest {'passed' if success else 'failed'}: Found 'Hello World' in history")
-
+            assert any("Hello World" in str(action) for action in history.model_actions()), "Expected to find 'Hello World' in history"
+            
             print("\nErrors:")
             pprint(history.errors(), indent=4)
 

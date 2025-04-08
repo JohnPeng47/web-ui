@@ -93,13 +93,3 @@ def init_root_logger():
     root_logger.setLevel(logging.INFO)
     root_logger.addHandler(get_incremental_file_handler(file_prefix="main"))
     root_logger.addHandler(get_console_handler())
-
-
-# def set_log_level(level=logging.INFO):
-#     """
-#     Sets the logging level for all defined loggers.
-#     """
-#     for logger in loggers:
-#         logger.setLevel(level)
-#         for handler in logger.handlers:
-#             handler.setLevel(level)

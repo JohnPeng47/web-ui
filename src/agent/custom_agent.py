@@ -45,6 +45,7 @@ from langchain_core.messages import (
 )
 from browser_use.browser.views import BrowserState, BrowserStateHistory
 from browser_use.agent.prompts import PlannerPrompt
+from browser_use.http import HTTPMessage, HTTPRequest, HTTPResponse
 from playwright.sync_api import Request, Response
 from dataclasses import dataclass
 
@@ -58,13 +59,14 @@ from pydantic import ValidationError
 
 from johnllm.johnllm import LLMModel
 
-from .state import CurrentState
+# from .state import CustomAgentOutput
+from .custom_views import CustomAgentOutput
 from .custom_message_manager import CustomMessageManager, CustomMessageManagerSettings
-from .custom_views import CustomAgentOutput, CustomAgentStepInfo, CustomAgentState
-from .http_handler import HTTPMessage, HTTPRequest, HTTPResponse
+from .custom_views import CustomAgentStepInfo, CustomAgentState
+from .http_history import HTTPHistory, HTTPFilter, DEFAULT_HTTP_FILTER
 from .pentest_prompts import get_pentest_message
 
-
+import json
 import logging
 import os
 
@@ -77,26 +79,27 @@ Context = TypeVar('Context')
 DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text"]
 DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
 MAX_PAYLOAD_SIZE = 4000
+
 MODEL_NAME = "gpt-4o"
 
 class HTTPHandler:
     def __init__(self):
         self._messages = []
         # track messages at each agent step
-        self._step_messages = []
-        self._request_queue = []
+        self._step_messages: List[HTTPMessage] = []
+        self._request_queue: List[HTTPRequest] = []
         
     async def handle_request(self, request: Request):
-        http_request = HTTPRequest(request)
+        http_request = HTTPRequest.from_pw(request)
         self._request_queue.append(http_request)
 
     async def handle_response(self, response: Response):
         if not response:
             return
-        req_match = HTTPRequest(response.request)
-        http_response = HTTPResponse(response)
+        req_match = HTTPRequest.from_pw(response.request)
+        http_response = HTTPResponse.from_pw(response)
         matching_request = next(
-            (req for req in self._request_queue if req._request == response.request),
+            (req for req in self._request_queue if req.url == response.request.url and req.method == response.request.method),
             None
         )
         if matching_request:
@@ -117,92 +120,6 @@ class HTTPHandler:
         self._messages.extend(session_msgs)
 
         return session_msgs
-
-# TODO: consider making this stateful so that we can track messages across steps
-def filter_http_messages(messages: List[HTTPMessage], 
-                         include_mime_types: List[str] = DEFAULT_INCLUDE_MIME,
-                         include_status_codes: List[str] = DEFAULT_INCLUDE_STATUS,
-                         max_payload_size: int = 4000) -> List[HTTPMessage]:
-    """
-    Filter HTTP messages based on specified criteria
-    
-    Args:
-        messages: List of HTTPMessage objects to filter
-        include_mime_types: List of MIME types to include (html, script, xml, flash, other_text, css, images, other_binary)
-        include_status_codes: List of status code ranges to include (2xx, 3xx, 4xx, 5xx)
-        max_payload_size: Maximum payload size in bytes (if None, no limit)
-        
-    Returns:
-        Filtered list of HTTPMessage objects
-    """
-    # Default values matching the screenshot
-    if include_mime_types is None:
-        include_mime_types = ["html", "script", "xml", "flash", "other_text"]
-    
-    if include_status_codes is None:
-        include_status_codes = ["2xx", "3xx", "4xx", "5xx"]
-    
-    # MIME type filters  
-    mime_filters = {
-        "html": lambda ct: "text/html" in ct,
-        "script": lambda ct: "javascript" in ct or "application/json" in ct,
-        "xml": lambda ct: "xml" in ct,
-        "flash": lambda ct: "application/x-shockwave-flash" in ct,
-        "other_text": lambda ct: "text/" in ct and not any(x in ct for x in ["html", "xml", "css"]),
-        "css": lambda ct: "text/css" in ct,
-        "images": lambda ct: "image/" in ct,
-        "other_binary": lambda ct: not any(x in ct for x in ["text/", "image/", "application/json", "application/javascript"])
-    }
-    
-    # Status code filters
-    status_filters = {
-        "2xx": lambda code: 200 <= code < 300,
-        "3xx": lambda code: 300 <= code < 400,
-        "4xx": lambda code: 400 <= code < 500,
-        "5xx": lambda code: 500 <= code < 600
-    }
-    
-    filtered_messages = []
-    
-    for msg in messages:
-        # Skip messages with no response
-        if not msg.response:
-            print(f"[FILTER] Excluding {msg.request.url} - No response")
-            continue
-            
-        content_type = msg.response.get_content_type()
-        payload_size = msg.response.get_response_size()
-        status_code = msg.response.status
-        
-        # Check MIME type filter
-        mime_match = False
-        for mime_type in include_mime_types:
-            if mime_type in mime_filters and mime_filters[mime_type](content_type):
-                mime_match = True
-                break
-                
-        if not mime_match:
-            print(f"[FILTER] Excluding {msg.request.url} - MIME type {content_type} not in allowed types")
-            continue
-            
-        # Check status code filter
-        status_match = False
-        for status_range in include_status_codes:
-            if status_range in status_filters and status_filters[status_range](status_code):
-                status_match = True
-                break
-                
-        if not status_match:
-            print(f"[FILTER] Excluding {msg.request.url} - Status code {status_code} not in allowed ranges")
-            continue
-            
-        # Check payload size filter if specified
-        if max_payload_size is not None and payload_size > max_payload_size:
-            print(f"[FILTER] Excluding {msg.request.url} - Payload size {payload_size} exceeds max {max_payload_size}")
-            continue
-            
-        filtered_messages.append(msg)
-    return filtered_messages
 
 class CustomAgent(Agent):
     def __init__(
@@ -257,6 +174,10 @@ class CustomAgent(Agent):
             context: Context | None = None,
     ):
         self.http_handler = HTTPHandler()
+        self.http_history = HTTPHistory(
+            exclude_patterns=[], 
+            http_filter=DEFAULT_HTTP_FILTER
+        )
         if browser_context:
             browser_context.req_handler = self.http_handler.handle_request
             browser_context.res_handler = self.http_handler.handle_response
@@ -361,8 +282,15 @@ class CustomAgent(Agent):
     async def get_next_action(self, input_messages: list[BaseMessage]) -> AgentOutput:
         """Get next action from LLM based on current state"""
 
-        ai_message: CurrentState = self.llm.invoke(input_messages, model_name=MODEL_NAME, response_format=CurrentState)
-        converted_msg = BaseMessage(content=ai_message.model_dump())
+        ai_message: CustomAgentOutput = self.llm.invoke(
+            input_messages, 
+            model_name=MODEL_NAME, 
+            response_format=CustomAgentOutput
+        )
+        converted_msg = BaseMessage(
+            content=ai_message.to_prompt(),
+            type="user"
+        )
         self.message_manager._add_message_with_tokens(converted_msg)
 
         # if ai_message.reasoning_content:
@@ -455,8 +383,7 @@ class CustomAgent(Agent):
             # TODO: alternatively, we can consider encapsulating res/req in promises, and adding belated pairs to
             # future state
             msgs = self.http_handler.flush()
-            filtered_msgs = filter_http_messages(msgs)
-            
+            filtered_msgs = self.http_history.filter_http_messages(msgs)
             state = await self.browser_context.get_state()
 
             pentest_prompt = await get_pentest_message(state, self.state.last_action, self.state.last_result, step_info, filtered_msgs)
@@ -470,23 +397,35 @@ class CustomAgent(Agent):
             logger.info(f"[Pentest Analysis]: {pentest_analysis}")
 
             await self._raise_if_stopped_or_paused()
-            self.message_manager.add_state_message(state, self.state.last_action, self.state.last_result, step_info, pentest_analysis, use_vision=self.settings.use_vision)
+            self.message_manager.add_state_message(
+                state, 
+                self.state.last_action, 
+                self.state.last_result, 
+                step_info, 
+                pentest_analysis, 
+                use_vision=self.settings.use_vision
+            )
             if self.settings.planner_llm and self.state.n_steps % self.settings.planner_interval == 0:
                 await self._run_planner()
             input_messages = self.message_manager.get_messages()
+            
+            logger.info(">>>>>>>>>>>>>>>>>>>>> INPUT MESSAGE >>>>>>>>>>>>>>>>>>>>>>>>")
+            for msg in input_messages:
+                logger.info(msg)
+
             tokens = self._message_manager.state.history.current_tokens
 
             # logging
-            for i, msg in enumerate(input_messages):
-                logger.info(f"{i + 1}. [MESSAGE]")
-                if isinstance(msg.content, list): 
-                    content = ""
-                    for item in msg.content:
-                        if isinstance(item, dict) and "text" in item:
-                            content += item["text"]
-                    logger.info(content)
-                else:
-                    logger.info(msg.content)
+            # for i, msg in enumerate(input_messages):
+            #     logger.info(f"{i + 1}. [MESSAGE]")
+            #     if isinstance(msg.content, list): 
+            #         content = ""
+            #         for item in msg.content:
+            #             if isinstance(item, dict) and "text" in item:
+            #                 content += item["text"]
+            #         logger.info(content)``
+            #     else:
+            #         logger.info(msg.content)
 
             logger.info(f"📨 Input messages: {len(input_messages )}")
             try:
@@ -506,6 +445,7 @@ class CustomAgent(Agent):
                     # remove prev message
                     self.message_manager._remove_state_message_by_index(-1)
                 await self._raise_if_stopped_or_paused()
+
             except Exception as e:
                 # model call failed, remove last state message from history
                 self.message_manager._remove_state_message_by_index(-1)
@@ -571,7 +511,7 @@ class CustomAgent(Agent):
                     step_end_time=step_end_time,
                     input_tokens=tokens,
                 )
-                self._make_history_item(model_output, state, result, metadata)
+                self._make_history_item(model_output, state, result, filtered_msgs,metadata=metadata)
 
     async def run(self, max_steps: int = 100) -> AgentHistoryList:
         """Execute the task with maximum number of steps"""
