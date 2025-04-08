@@ -21,16 +21,18 @@ from browser_use.agent.views import AgentHistoryList
 from src.agent.custom_agent import CustomAgent
 from src.agent.custom_prompts import CustomSystemPrompt, CustomAgentMessagePrompt
 
+from tests.server import PORT
 from logger import init_root_logger
 from src.utils import utils
-from johnllm.johnllm import LLMModel
+from johnllm import LLMModel
 
 HISTORY_PATH = Path(__file__).parent / "history.json"
 
 @pytest.mark.asyncio
 async def test_browser_login():
+    print("USING PYTHON: ", sys.executable)
     # Start the Flask server in a subprocess
-    server_process = subprocess.Popen(["python", "tests/server.py"])
+    server_process = subprocess.Popen([sys.executable, "tests/server.py"])
     # Give the server a moment to start
     time.sleep(2)   
 
@@ -46,7 +48,7 @@ async def test_browser_login():
         use_vision = False
         browser = Browser(
             config=BrowserConfig(
-                headless=True,
+                headless=False,
                 disable_security=True,
                 extra_chromium_args=[f"--window-size={window_w},{window_h}"],
             )
@@ -62,7 +64,7 @@ async def test_browser_login():
                 )
         ) as browser_context:
             agent = CustomAgent(
-                task="Go to http://localhost:5000/login, login with username 'admin' and password 'admin', then read and return the text displayed on the page after login",
+                task=f"Go to http://localhost:{str(PORT)}/login, login with username 'admin' and password 'admin', then read and return the text displayed on the page after login",
                 llm=llm,
                 browser_context=browser_context,
                 use_vision=use_vision,

@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from functools import wraps
 
+PORT = 5000
+
 app = Flask(__name__)
 app.secret_key = "your-secret-key"  # In production, use a secure secret key
 
@@ -29,4 +31,4 @@ def protected():
     return render_template("protected.html")
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000) 
+    app.run(debug=True, port=PORT) 

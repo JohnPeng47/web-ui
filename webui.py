@@ -36,9 +36,8 @@ from src.utils.default_config_settings import default_config, load_config_from_f
     save_current_config, update_ui_from_config
 from src.utils.utils import update_model_dropdown, get_latest_files, capture_screenshot
 
-from johnllm.johnllm import LLMModel
+from johnllm import LLMModel
 from logger import init_root_logger
-from src.agent.init_agent import init_custom_agent
 from src.agent.custom_views import CustomAgentState
 
 # Global variables for persistence
@@ -439,7 +438,7 @@ async def run_custom_agent(
 
         # Create and run agent using the new initialization function
         if _global_agent is None:
-            _global_agent = init_custom_agent(
+            _global_agent = CustomAgent(
                 task=task,
                 llm=llm,
                 add_infos=add_infos,

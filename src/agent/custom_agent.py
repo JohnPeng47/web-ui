@@ -57,7 +57,7 @@ from google.api_core.exceptions import ResourceExhausted
 from openai import RateLimitError
 from pydantic import ValidationError
 
-from johnllm.johnllm import LLMModel
+from johnllm import LLMModel
 
 # from .state import CustomAgentOutput
 from .custom_views import CustomAgentOutput
@@ -282,13 +282,13 @@ class CustomAgent(Agent):
     async def get_next_action(self, input_messages: list[BaseMessage]) -> AgentOutput:
         """Get next action from LLM based on current state"""
 
-        ai_message: CustomAgentOutput = self.llm.invoke(
+        ai_message: str = self.llm.invoke(
             input_messages, 
             model_name=MODEL_NAME, 
-            response_format=CustomAgentOutput
+            response_format=None
         )
         converted_msg = BaseMessage(
-            content=ai_message.to_prompt(),
+            content=ai_message,
             type="user"
         )
         self.message_manager._add_message_with_tokens(converted_msg)
@@ -298,7 +298,11 @@ class CustomAgent(Agent):
         #     logger.info(ai_message.reasoning_content)
         #     logger.info("🤯 End Deep Thinking")
 
-        parsed: AgentOutput = self.AgentOutput(**ai_message.model_dump())
+        ai_content = ai_message.replace("```json", "").replace("```", "")
+        ai_content = repair_json(ai_content)
+        parsed_json = json.loads(ai_content)
+        parsed: AgentOutput = self.AgentOutput(**parsed_json)
+        
         if parsed is None:
             logger.debug(ai_message.content)
             raise ValueError('Could not parse response.')
@@ -478,9 +482,9 @@ class CustomAgent(Agent):
             ]
             return
 
-        except (ValidationError, ValueError, RateLimitError, ResourceExhausted) as e:
-            result = await self._handle_step_error(e)
-            self.state.last_result = result
+        # except (ValidationError, ValueError, RateLimitError, ResourceExhausted) as e:
+        #     result = await self._handle_step_error(e)
+        #     self.state.last_result = result
 
         except Exception as e:
             logger.error(f"Error in step {self.state.n_steps}: {e}")

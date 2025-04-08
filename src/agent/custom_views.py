@@ -24,14 +24,7 @@ class CustomAgentBrain(BaseModel):
     thought: str
     next_goal: str
 
-    def to_prompt(self) -> str:
-        return (
-            f"Evaluation: {self.evaluation_previous_goal}\n"
-            f"Important Contents: {self.important_contents}\n"
-            f"Thought: {self.thought}\n"
-            f"Next Goal: {self.next_goal}"
-        )
-    
+
 class CustomAgentOutput(AgentOutput):
     """Output model for agent
 
@@ -57,15 +50,6 @@ class CustomAgentOutput(AgentOutput):
         model_.__doc__ = 'AgentOutput model with custom actions'
         return model_
 
-    def to_prompt(self) -> str:
-        actions_str = "\n".join(
-            f"Action {i+1}: {action}" 
-            for i, action in enumerate(self.action)
-        )
-        return (
-            f"Current State:\n{self.current_state.to_prompt()}\n"
-            f"Actions:\n{actions_str}"
-        )
 
 class CustomAgentState(BaseModel):
     agent_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
