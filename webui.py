@@ -449,13 +449,16 @@ async def run_custom_agent(
                 max_actions_per_step=max_actions_per_step,
                 tool_calling_method=tool_calling_method,
                 max_input_tokens=max_input_tokens,
-                generate_gif=True
+                generate_gif=True,
+                system_prompt_class=CustomSystemPrompt,
+                agent_prompt_class=CustomAgentMessagePrompt
             )
 
         history = await _global_agent.run(max_steps=max_steps)
 
         # Use the agent_id from CustomAgentState
-        history_file = os.path.join(save_agent_history_path, f"{_global_agent.state.agent_id}.json")
+        # history_file = os.path.join(save_agent_history_path, f"{_global_agent.state.agent_id}.json")
+        history_file = "history.json"
         _global_agent.save_history(history_file)
 
         final_result = history.final_result()

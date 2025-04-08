@@ -302,7 +302,7 @@ class CustomAgent(Agent):
         ai_content = repair_json(ai_content)
         parsed_json = json.loads(ai_content)
         parsed: AgentOutput = self.AgentOutput(**parsed_json)
-        
+
         if parsed is None:
             logger.debug(ai_message.content)
             raise ValueError('Could not parse response.')
@@ -412,24 +412,7 @@ class CustomAgent(Agent):
             if self.settings.planner_llm and self.state.n_steps % self.settings.planner_interval == 0:
                 await self._run_planner()
             input_messages = self.message_manager.get_messages()
-            
-            logger.info(">>>>>>>>>>>>>>>>>>>>> INPUT MESSAGE >>>>>>>>>>>>>>>>>>>>>>>>")
-            for msg in input_messages:
-                logger.info(msg)
-
             tokens = self._message_manager.state.history.current_tokens
-
-            # logging
-            # for i, msg in enumerate(input_messages):
-            #     logger.info(f"{i + 1}. [MESSAGE]")
-            #     if isinstance(msg.content, list): 
-            #         content = ""
-            #         for item in msg.content:
-            #             if isinstance(item, dict) and "text" in item:
-            #                 content += item["text"]
-            #         logger.info(content)``
-            #     else:
-            #         logger.info(msg.content)
 
             logger.info(f"📨 Input messages: {len(input_messages )}")
             try:
@@ -515,7 +498,8 @@ class CustomAgent(Agent):
                     step_end_time=step_end_time,
                     input_tokens=tokens,
                 )
-                self._make_history_item(model_output, state, result, filtered_msgs,metadata=metadata)
+                json_msgs = [await msg.to_json() for msg in filtered_msgs]
+                self._make_history_item(model_output, state, result, json_msgs, metadata=metadata)
 
     async def run(self, max_steps: int = 100) -> AgentHistoryList:
         """Execute the task with maximum number of steps"""
