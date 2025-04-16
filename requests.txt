@@ -1,0 +1,1019 @@
+[Request]: 
+GET http://localhost:8000/
+host : localhost:8000
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : none
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "http://localhost:8000/",
+            "type": {
+                "name": "homepage",
+                "description": "Represents the homepage of the application",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/
+host : localhost:8000
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+referer : http://localhost:8000/products/23/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "8000",
+            "type": {
+                "name": "resource",
+                "description": "Main page or index resource",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        },
+        {
+            "id": "23",
+            "type": {
+                "name": "product",
+                "description": "Specific product page",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/api/products/2/variants/
+host : localhost:8000
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+sec-ch-ua-mobile : ?0
+accept : */*
+sec-fetch-site : same-origin
+sec-fetch-mode : cors
+sec-fetch-dest : empty
+referer : http://localhost:8000/inventory/create/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "2",
+            "type": {
+                "name": "product",
+                "description": "Represents a product resource, identified by the product ID in the URL.",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/api/products/2/variants/
+host : localhost:8000
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+sec-ch-ua-mobile : ?0
+accept : */*
+sec-fetch-site : same-origin
+sec-fetch-mode : cors
+sec-fetch-dest : empty
+referer : http://localhost:8000/inventory/create/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "2",
+            "type": {
+                "name": "product",
+                "description": "A product resource from the products API endpoint.",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/api/products/2/variants/
+host : localhost:8000
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+sec-ch-ua-mobile : ?0
+accept : */*
+sec-fetch-site : same-origin
+sec-fetch-mode : cors
+sec-fetch-dest : empty
+referer : http://localhost:8000/inventory/create/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "2",
+            "type": {
+                "name": "product_variant",
+                "description": "This represents a variant of a product, determined by the endpoint '/api/products/{product_id}/variants/'.",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/api/products/2/variants/
+host : localhost:8000
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+sec-ch-ua-mobile : ?0
+accept : */*
+sec-fetch-site : same-origin
+sec-fetch-mode : cors
+sec-fetch-dest : empty
+referer : http://localhost:8000/inventory/create/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "2",
+            "type": {
+                "name": "product",
+                "description": "A product listed in the inventory management system.",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/favicon.ico/
+host : localhost:8000
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+sec-ch-ua-mobile : ?0
+accept : image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+sec-fetch-site : same-origin
+sec-fetch-mode : no-cors
+sec-fetch-dest : image
+referer : http://localhost:8000/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "http://localhost:8000/favicon.ico/",
+            "type": {
+                "name": "favicon.ico",
+                "description": "An icon resource typically used by web browsers to display a site's favicon.",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/inventory/
+host : localhost:8000
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+referer : http://localhost:8000/orders/4/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "4",
+            "type": {
+                "name": "order",
+                "description": "An order resource likely represents a customer's order, identified by its unique ID.",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        },
+        {
+            "id": "8000",
+            "type": {
+                "name": "inventory",
+                "description": "Represents the inventory resource accessed at port 8000.",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/inventory/
+host : localhost:8000
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+referer : http://localhost:8000/inventory/list/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "inventory",
+            "type": {
+                "name": "inventory",
+                "description": "Accessing the inventory list",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/inventory/create/
+host : localhost:8000
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+referer : http://localhost:8000/inventory/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "inventory",
+            "type": {
+                "name": "Resource",
+                "description": "Represents inventory-related resources in the application.",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+POST http://localhost:8000/inventory/create/
+host : localhost:8000
+content-length : 166
+cache-control : max-age=0
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+origin : http://localhost:8000
+content-type : application/x-www-form-urlencoded
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+referer : http://localhost:8000/inventory/create/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{'csrfmiddlewaretoken': 'BYmPwj4go2yKC3558sH4Evcc9dK9JMWZF1ns4i6VxmXtox8eCoFs6al2UMEG7ezt', 'product': '2', 'variant': '', 'quantity': '11', 'transaction_type': 'received', 'reference': '11', 'notes': 'WGEWG'}
+{
+    "resources": [
+        {
+            "id": "11",
+            "type": {
+                "name": "Inventory Transaction",
+                "description": "An inventory transaction entry, representing the movement of products in the inventory.",
+                "requests": []
+            },
+            "request_part": "BODY",
+            "selected_slice": {}
+        },
+        {
+            "id": "2",
+            "type": {
+                "name": "Product",
+                "description": "A product entry in the inventory system.",
+                "requests": []
+            },
+            "request_part": "BODY",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/inventory/create/
+host : localhost:8000
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+referer : http://localhost:8000/inventory/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "inventory",
+            "type": {
+                "name": "inventory",
+                "description": "Represents an inventory resource",
+                "requests": [
+                    "GET"
+                ]
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+POST http://localhost:8000/inventory/create/
+host : localhost:8000
+content-length : 162
+cache-control : max-age=0
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+origin : http://localhost:8000
+content-type : application/x-www-form-urlencoded
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+referer : http://localhost:8000/inventory/create/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{'csrfmiddlewaretoken': 'h0EclP8OYE80II6kTnXGYgTqiyFPhTBxl3FPTOat7YxJuc9tnjV4qV2g37zmFle1', 'product': '2', 'variant': '', 'quantity': '11', 'transaction_type': 'received', 'reference': '1', 'notes': 'sg'}
+{
+    "resources": [
+        {
+            "id": "inventory",
+            "type": {
+                "name": "inventory",
+                "description": "Represents an inventory item being created",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        },
+        {
+            "id": "product",
+            "type": {
+                "name": "product",
+                "description": "Represents a product in the inventory",
+                "requests": []
+            },
+            "request_part": "BODY",
+            "selected_slice": {}
+        },
+        {
+            "id": "variant",
+            "type": {
+                "name": "variant",
+                "description": "Represents a variant of the product in the inventory",
+                "requests": []
+            },
+            "request_part": "BODY",
+            "selected_slice": {}
+        },
+        {
+            "id": "quantity",
+            "type": {
+                "name": "quantity",
+                "description": "Represents quantity of the product in the transaction",
+                "requests": []
+            },
+            "request_part": "BODY",
+            "selected_slice": {}
+        },
+        {
+            "id": "transaction_type",
+            "type": {
+                "name": "transaction_type",
+                "description": "Represents the type of transaction (e.g., received, sent)",
+                "requests": []
+            },
+            "request_part": "BODY",
+            "selected_slice": {}
+        },
+        {
+            "id": "reference",
+            "type": {
+                "name": "reference",
+                "description": "Represents a reference ID for the transaction",
+                "requests": []
+            },
+            "request_part": "BODY",
+            "selected_slice": {}
+        },
+        {
+            "id": "notes",
+            "type": {
+                "name": "notes",
+                "description": "Represents additional notes for the transaction",
+                "requests": []
+            },
+            "request_part": "BODY",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/inventory/list/
+host : localhost:8000
+cache-control : max-age=0
+accept-language : en-US,en;q=0.9
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+referer : http://localhost:8000/inventory/create/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+
+{
+    "resources": [
+        {
+            "id": "list",
+            "type": {
+                "name": "inventory",
+                "description": "Resource representing an inventory list in the application.",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/inventory/list/
+host : localhost:8000
+cache-control : max-age=0
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+referer : http://localhost:8000/inventory/create/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "inventory",
+            "type": {
+                "name": "inventory",    
+                "description": "Represents the inventory resource in the application",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/inventory/list/
+host : localhost:8000
+cache-control : max-age=0
+accept-language : en-US,en;q=0.9
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+referer : http://localhost:8000/inventory/create/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "list",
+            "type": {
+                "name": "inventory",
+                "description": "Represents an inventory list in the application",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/orders/
+host : localhost:8000
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+referer : http://localhost:8000/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "http://localhost:8000/orders/",
+            "type": {
+                "name": "order endpoint",
+                "description": "This represents the order resource for orders management.",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/orders/4/
+host : localhost:8000
+cache-control : max-age=0
+accept-language : en-US,en;q=0.9
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+referer : http://localhost:8000/orders/4/add-items/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "4",
+            "type": {
+                "name": "order",
+                "description": "An order resource in the application representing a purchase or transaction.",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/orders/4/add-items/
+host : localhost:8000
+cache-control : max-age=0
+accept-language : en-US,en;q=0.9
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+referer : http://localhost:8000/orders/create/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "4",
+            "type": {
+                "name": "order",
+                "description": "An order to which items can be added",
+                "requests": [
+                    "GET /orders/{id}/add-items/"
+                ]
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+POST http://localhost:8000/orders/4/add-items/
+host : localhost:8000
+content-length : 241
+cache-control : max-age=0
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+origin : http://localhost:8000
+content-type : application/x-www-form-urlencoded
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+referer : http://localhost:8000/orders/4/add-items/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{'csrfmiddlewaretoken': 'tIF5b1nxroHGIreJaoC5vXsisnO3yWiYxLGIJ0pcAI6puVhSEkAtXCB8dWIAWoVs', 'items-TOTAL_FORMS': '1', 'items-INITIAL_FORMS': '0', 'items-MIN_NUM_FORMS': '0', 'items-MAX_NUM_FORMS': '1000', 'items-0-product': '', 'items-0-variant': '', 'items-0-quantity': '1', 'items-0-price': ''}
+{
+    "resources": [
+        {
+            "id": "4",
+            "type": {
+                "name": "order",
+                "description": "Represents an order in the system.",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/orders/create/
+host : localhost:8000
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+referer : http://localhost:8000/orders/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "orders",
+            "type": {
+                "name": "order",
+                "description": "A resource representing an order in the system.",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+POST http://localhost:8000/orders/create/
+host : localhost:8000
+content-length : 147
+cache-control : max-age=0
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+origin : http://localhost:8000
+content-type : application/x-www-form-urlencoded
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+referer : http://localhost:8000/orders/create/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{'csrfmiddlewaretoken': 'HWNMVs9AWYLw3tuOYbbYPsoPTEUCX1YBLZOptrbf5iafPXxXs79mh7xFEdO9ltB5', 'customer': '3', 'shipping_address': 'EG', 'billing_address': 'WWGE', 'notes': 'GWGE'}
+{
+    "resources": [
+        {
+            "id": "orders",
+            "type": {
+                "name": "order",
+                "description": "An order resource created using the API",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        },
+        {
+            "id": "3",
+            "type": {
+                "name": "customer",
+                "description": "A customer associated with the order.",
+                "requests": []
+            },
+            "request_part": "BODY",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": [
+        {
+            "id": "3",
+            "request_part": "BODY",
+            "selected_slice": {}
+        }
+    ]
+}[Request]: 
+GET http://localhost:8000/products/
+host : localhost:8000
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+referer : http://localhost:8000/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "products",
+            "type": {
+                "name": "Product List",
+                "description": "Represents a list of products",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/products/23/
+host : localhost:8000
+cache-control : max-age=0
+accept-language : en-US,en;q=0.9
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+referer : http://localhost:8000/products/create/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "23",
+            "type": {
+                "name": "product",
+                "description": "Represents a product in the system",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+GET http://localhost:8000/products/create/
+host : localhost:8000
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+referer : http://localhost:8000/products/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "products",
+            "type": {
+                "name": "Product",
+                "description": "A product resource that might be managed or accessed in the application.",
+                "requests": []
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}[Request]: 
+POST http://localhost:8000/products/create/
+host : localhost:8000
+content-length : 181
+cache-control : max-age=0
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+sec-ch-ua-mobile : ?0
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+origin : http://localhost:8000
+content-type : application/x-www-form-urlencoded
+upgrade-insecure-requests : 1
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+accept : text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+sec-fetch-site : same-origin
+sec-fetch-mode : navigate
+sec-fetch-user : ?1
+sec-fetch-dest : document
+referer : http://localhost:8000/products/create/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+connection : keep-alive
+{'csrfmiddlewaretoken': 'Aw3GYBBE5pNkl6SIuK1bC9q15KgXCbbiEz4jwADjeJc37AVRYGZz4OzRQjau0DOM', 'name': 'hello', 'description': 'world', 'specifications': '%7B%7D', 'price': '11', 'stock_level': '0122', 'category': '', 'active': 'on'}
+{
+    "resources": [
+        {
+            "id": "hello",
+            "type": {
+                "name": "product",
+                "description": "A product in the store.",
+                "requests": []
+            },
+            "request_part": "BODY",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": []
+}[Request]: 
+GET http://localhost:8000/static/js/scripts.js
+host : localhost:8000
+sec-ch-ua-platform : "Windows"
+accept-language : en-US,en;q=0.9
+sec-ch-ua : "Chromium";v="135", "Not-A.Brand";v="8"
+user-agent : Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+sec-ch-ua-mobile : ?0
+accept : */*
+sec-fetch-site : same-origin
+sec-fetch-mode : no-cors
+sec-fetch-dest : script
+referer : http://localhost:8000/
+accept-encoding : gzip, deflate, br
+cookie : csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx
+if-modified-since : Fri, 11 Apr 2025 02:33:33 GMT
+connection : keep-alive
+{}
+{
+    "resources": [
+        {
+            "id": "/static/js/scripts.js",
+            "type": {
+                "name": "static/js/scripts.js",
+                "description": "JavaScript file at static/js/ location",
+                "requests": [
+                    "GET"
+                ]
+            },
+            "request_part": "URL",
+            "selected_slice": {}
+        }
+    ],
+    "user_ids": null
+}

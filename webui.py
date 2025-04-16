@@ -394,6 +394,7 @@ async def run_custom_agent(
         max_input_tokens
 ):
     try:
+        history_file = "history.json"
         global _global_browser, _global_browser_context, _global_agent
 
         extra_chromium_args = [f"--window-size={window_w},{window_h}"]
@@ -458,8 +459,6 @@ async def run_custom_agent(
 
         # Use the agent_id from CustomAgentState
         # history_file = os.path.join(save_agent_history_path, f"{_global_agent.state.agent_id}.json")
-        history_file = "history.json"
-        _global_agent.save_history(history_file)
 
         final_result = history.final_result()
         errors = history.errors()
@@ -475,6 +474,8 @@ async def run_custom_agent(
         errors = str(e) + "\n" + traceback.format_exc()
         return '', errors, '', '', None, None
     finally:
+        _global_agent.save_history(history_file)
+
         _global_agent = None
         # Handle cleanup based on persistence configuration
         if not keep_browser_open:
