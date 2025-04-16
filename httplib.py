@@ -16,14 +16,23 @@ class HTTPRequestData:
     url: str
     headers: Dict[str, str]
     post_data: Optional[str]
-    redirected_from_url: Optional[str]
-    redirected_to_url: Optional[str] 
-    is_iframe: bool
+    redirected_from_url: Optional[str] = ""
+    redirected_to_url: Optional[str] = ""
+    is_iframe: bool = False
 
+# TODO: support for CSRF tokens
+class AuthSession:
+    """An authenticated user session that represents keys in the body or headers"""
+    def __init__(self, headers: Dict[str, str], body: Optional[Dict[str, str]] = None):
+        self.headers = headers
+        self.body = body
+
+# TODO: we need to log the user role
 class HTTPRequest:
     """HTTP request class with unified implementation"""
     def __init__(self, data: HTTPRequestData):
         self._data = data
+        self._auth_session = AuthSession(self._data.headers, {})
 
     @property
     def method(self) -> str:

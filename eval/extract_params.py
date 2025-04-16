@@ -4,7 +4,7 @@ from opik import evaluate_prompt
 import yaml
 import json
 from typing import Dict, Any
-from src.llm import EXTRACT_REQUESTS_PROMPT, RequestInfo
+from src.llm import EXTRACT_REQUESTS_PROMPT, RequestAuthInfo
 from eval.core import JohnLLMModel, parse_eval_args
 from eval.scores import EqualsJSON
 
@@ -91,7 +91,7 @@ POST http://localhost:8000/orders/create/
 ])
 
 
-def convert_to_json(request_info: RequestInfo, expected_out) -> Dict[str, Any]:
+def convert_to_json(request_info: RequestAuthInfo, expected_out) -> Dict[str, Any]:
     # TODO: implement this as decorator
     return {
         "output": request_info.model_dump(),
@@ -99,7 +99,7 @@ def convert_to_json(request_info: RequestInfo, expected_out) -> Dict[str, Any]:
     }
 
 if __name__ == "__main__":
-    experiment_name, project_name = parse_eval_args(EXTRACT_REQUESTS_PROMPT, response_format=RequestInfo)
+    experiment_name, project_name = parse_eval_args(EXTRACT_REQUESTS_PROMPT, response_format=RequestAuthInfo)
     evaluate_prompt(
         messages = [
             {
@@ -108,7 +108,7 @@ if __name__ == "__main__":
             },
         ],
         dataset=EXTRACT_PARAMS_DATASET, 
-        model=JohnLLMModel(model_name="gpt-4o", response_format=RequestInfo),
+        model=JohnLLMModel(model_name="gpt-4o", response_format=RequestAuthInfo),
         eval_fn= convert_to_json,
         scoring_metrics=[
             EqualsJSON(exclude_fields=["description"])

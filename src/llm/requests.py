@@ -5,9 +5,9 @@ from enum import Enum
 # TODO: create an ExtractInjectionInformation request that takes into account the webpage context
 class ResourceType(BaseModel):
     name: str
-    description: str
     # TODO: still need to decide on a unique way of identifying requests
     requests: List[str] = Field(default_factory=list)
+    description: Optional[str] = None
     
     def to_prompt_str(self):
         return f"Resource Type: {self.name}\nDescription: {self.description}\n"
@@ -28,7 +28,14 @@ class UserID(BaseModel):
     request_part: RequestPart
     selected_slice: Dict[RequestPart, str] = Field(default_factory=dict)
 
-class RequestInfo(BaseModel):
+# TODO: roll user_ids into resource_ids
+# Improving parameter extraction
+# 1. add description to request
+# 2. explicitly ask it to identify resource vs. non-resource parameters
+# 3. split up resource identification in URL vs. Body
+# 4. provide additional context from web page to help with identification
+class RequestAuthInfo(BaseModel):
+    description: str = Field(default="")
     resources: Optional[List[Resource]] = Field(default_factory=list)
     user_ids: Optional[List[UserID]] = Field(default_factory=list)
 
