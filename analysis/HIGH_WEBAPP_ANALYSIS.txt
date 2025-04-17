@@ -1,0 +1,50 @@
+
+Vulnerability Analysis by Category and Severity
+=============================================
+
+WEB_APP Vulnerabilities (Total: 280)
+-----------------------------------
+HIGH  : 103 (36.8%)
+MEDIUM: 110 (39.3%)
+LOW   :  67 (23.9%)
+
+API Vulnerabilities (Total: 69)
+-----------------------------------
+HIGH  :  16 (23.2%)
+MEDIUM:  39 (56.5%)
+LOW   :  14 (20.3%)
+
+Weakness Analysis for ALL HIGH Severity Reports
+=============================================
+
+Total weaknesses found: 119
+-----------------------------------
+None:  13 (10.9%)
+SQL Injection:  12 (10.1%)
+Information Disclosure:  11 (9.2%)
+Cross-site Scripting (XSS) - Stored:   9 (7.6%)
+Improper Access Control - Generic:   9 (7.6%)
+Insecure Direct Object Reference (IDOR):   6 (5.0%)
+Code Injection:   6 (5.0%)
+Uncontrolled Resource Consumption:   6 (5.0%)
+Server-Side Request Forgery (SSRF):   6 (5.0%)
+Improper Authentication - Generic:   5 (4.2%)
+Path Traversal:   4 (3.4%)
+Business Logic Errors:   4 (3.4%)
+Improper Restriction of Authenticatffion Attempts:   4 (3.4%)
+Command Injection - Generic:   4 (3.4%)
+Cross-site Scripting (XSS) - DOM:   2 (1.7%)
+Cross-Site Request Forgery (CSRF):   2 (1.7%)
+Violation of Secure Design Principles:   2 (1.7%)
+Cross-site Scripting (XSS) - Reflected:   2 (1.7%)
+Privacy Violation:   2 (1.7%)
+Cleartext Storage of Sensitive Information:   1 (0.8%)
+Privilege Escalation:   1 (0.8%)
+Phishing:   1 (0.8%)
+Unverified Password Change:   1 (0.8%)
+Leftover Debug Code (Backdoor):   1 (0.8%)
+Insufficiently Protected Credentials:   1 (0.8%)
+Authentication Bypass Using an Alternate Path or Channel:   1 (0.8%)
+Buffer Over-read:   1 (0.8%)
+Cross-site Scripting (XSS) - Generic:   1 (0.8%)
+Remote File Inclusion:   1 (0.8%)
