@@ -34,41 +34,37 @@ class UserID(BaseModel):
 # 2. explicitly ask it to identify resource vs. non-resource parameters
 # 3. split up resource identification in URL vs. Body
 # 4. provide additional context from web page to help with identification
-class RequestAuthInfo(BaseModel):
+class RequestResources(BaseModel):
     description: str = Field(default="")
     resources: Optional[List[Resource]] = Field(default_factory=list)
-    user_ids: Optional[List[UserID]] = Field(default_factory=list)
 
 EXTRACT_REQUESTS_PROMPT = """
 {{request}}
 
 You are given an HTTP request.
-Your task is to extract the following information from the request:
+Your task is to extract resource identifiers from the request:
 
-1. resources
-These request parameters represent a resource used in the application.
+These request parameters represent a resource used in the application, that is not just a configuration parameter for the API call. In thinking of a request as an action,
+a request can be seen to perform some action on a resource. It is important to note that some requests will not have resource identifiers
 For example:
 - A request to "/api/posts/456/comments" likely represents a comment resource related to post "456"
-- A request to "/api/data" with JSON payload {"user": {"name": "John"}} likely represents a user resource
+- A request to "/api/update/tweet" with JSON payload {"tweet": 1234, "message": "hello world", "picture": "https://pic.png"} has ONLY the valid resource tweet:1234
+- A request to "/api/list/tweets" HAS no resource identifiers, as it is just an action to list of tweets
 
 {% if resource_types %}
 Does the resource match any of the existing resource types? If so then select that type
 {% endif %}
 
 If this is a new resource, then create it
-Be careful to differentiate resource names from actions and parameters
 
-2. user_ids
-These request parameters represent user IDs that are used in the application
-
-When returning the identified resource_ids and user_ids, please provide the selected_slice parameter, which identifies the specific position
+When returning the identified resource_ids, please provide the selected_slice parameter, which identifies the specific position
 of the resource in the request. The way you should give this data is to:
-1. Take the surrounding of the resource/user_id, but make sure to not step across request element boundaries ie. if param in URL do not include the headers in surround
-2. Next identify where in the request the resource/user_id is located by the following steps:
+1. Take the surrounding of the resource, but make sure to not step across request element boundaries ie. if param in URL do not include the headers in surround
+2. Next identify where in the request the resource is located by the following steps:
 Identify whether its in the URL, BODY, or HEADERS:
 NOTE: SEPARATOR = "$%&" ie. /post/$%&user1234$%&/comments
     if URL:
-        - return selected_slice as the URL where selected resource/user_id value is enclosed within the SEPARATOR
+        - return selected_slice as the URL where selected resource value is enclosed within the SEPARATOR
         ie. /post/$%&user1234$%&/comments
         ie. /tweets?id=1234
     elif BODY:
@@ -80,13 +76,11 @@ Here are some examples:
 1. GET http://localhost:8000/tweets/list/
 {
     "resources": []
-    "user_ids": []
 }
 
 2. GET http://localhost:8000/messages/
 {
     "resources": []
-    "user_ids": []
 }
 
 3. GET http://twitter.com/api/tweets/2/replies/
@@ -104,8 +98,7 @@ Here are some examples:
                 "URL": "/api/tweets/$%&2$%&/replies/"
             }
         }
-    ],
-    "user_ids": null
+    ]
 }
 
 4. POST http://twitter.com/reply/
@@ -123,10 +116,19 @@ Here are some examples:
             "selected_slice": {
                 "BODY": "tweet"
             }
-        },
-    ],
-    "user_ids": []
+        }
+    ]
 }
 
-Now give your answer
+First give an overall description of the request and what it is trying to accomplish
+Use this section to think aloud on the purpose of the request, what parameters are being used,
+and most crucially, which ones are the resource identifiers and which ones are simply regular parameters
+
+To reiterate:
+Your task is to extract resource identifiers from the request:
+
+These request parameters represent a resource used in the application, that is not just a configuration parameter for the API call. In thinking of a request as an action,
+a request can be seen to perform some action on a resource
+
+Now give your response
 """
