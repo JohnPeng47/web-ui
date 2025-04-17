@@ -1,1 +1,1 @@
-from .requests import *
+from .resource_params import *

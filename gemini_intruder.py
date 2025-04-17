@@ -8,7 +8,7 @@ import httpx # Added import
 
 from playwright.sync_api import Request
 from httplib import HTTPRequest, HTTPRequestData, AuthSession
-from src.llm import RequestAuthInfo, RequestPart, Resource, ResourceType # Added Resource, ResourceType
+from src.llm import RequestResources, RequestPart, Resource, ResourceType # Added Resource, ResourceType
 
 # --- HTTPClient Wrapper ---
 class HTTPClient:
@@ -84,7 +84,7 @@ class IntruderRequest(HTTPRequest):
     def __init__(self,
                  data: HTTPRequestData,
                  user_id: Optional[str] = None,
-                 auth_info: Optional[RequestAuthInfo] = None) -> None: # Kept auth_info param name for compatibility
+                 auth_info: Optional[RequestResources] = None) -> None: # Kept auth_info param name for compatibility
         """Represents an HTTP request for the Intruder tool."""
         super().__init__(data)
 
@@ -99,7 +99,7 @@ class IntruderRequest(HTTPRequest):
     def from_json(cls,
                   data: Dict[str, Any],
                   user_id: Optional[str] = None,
-                  auth_info: Optional[RequestAuthInfo] = None) -> "IntruderRequest":
+                  auth_info: Optional[RequestResources] = None) -> "IntruderRequest":
         http_request = super().from_json(data)
         return cls(http_request._data, user_id, auth_info)
 
@@ -108,7 +108,7 @@ class IntruderRequest(HTTPRequest):
         cls,
         request: Request,
         user_id: Optional[str] = None,
-        auth_info: Optional[RequestAuthInfo] = None
+        auth_info: Optional[RequestResources] = None
     ) -> "IntruderRequest":
         http_request = super().from_pw(request)
         return cls(http_request._data, user_id, auth_info)
@@ -447,7 +447,7 @@ if __name__ == '__main__':
     prod_type = ResourceType(name="Product", description="Store product")
     # Assume product ID '25' is in the URL path
     res_info_prod = Resource(id="25", type=prod_type, request_part=RequestPart.URL, selected_slice={RequestPart.URL: "/products/{id}/"})
-    auth_info_prod = RequestAuthInfo(resources=[res_info_prod], description="Access product 25")
+    auth_info_prod = RequestResources(resources=[res_info_prod], description="Access product 25")
     user1_id = "evil_corp-store_admin1"
     # Manually construct JSON data from raw request
     json_data1 = {
@@ -490,7 +490,7 @@ if __name__ == '__main__':
     # For simplicity, let's use the user_id as the resource ID here, assuming /profile/ maps to the session user.
     user2_id = "good_corp-store_admin1"
     res_info_profile = Resource(id=user2_id, type=profile_type, request_part=RequestPart.URL, selected_slice={RequestPart.URL: "/profile/"}) # Using user ID as resource ID
-    auth_info_profile = RequestAuthInfo(resources=[res_info_profile], description="Access own profile")
+    auth_info_profile = RequestResources(resources=[res_info_profile], description="Access own profile")
     # Manually construct JSON data from raw request
     json_data2 = {
         "method": "GET",

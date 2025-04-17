@@ -128,8 +128,6 @@ class JohnLLMModel(base_model.OpikBaseModel):
         response = self._engine.invoke(
             messages, model_name=self.model_name, response_format=self._response_format, **all_kwargs
         )
-
-        print("MODEL RETURNED RESPONSE: ", response)
         return response
 
     async def agenerate_string(self, input: str, **kwargs: Any) -> str:

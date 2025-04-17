@@ -4,14 +4,14 @@ from opik import evaluate_prompt
 import yaml
 import json
 from typing import Dict, Any
-from src.llm import EXTRACT_REQUESTS_PROMPT, RequestAuthInfo
+from src.llm import EXTRACT_REQUESTS_PROMPT, RequestResources
 from eval.core import JohnLLMModel, parse_eval_args
 from eval.scores import EqualsJSON
 
-# Get or create a dataset
-# TODO: we should remove description for this
 client = Opik()
-EXTRACT_PARAMS_DATASET = client.get_or_create_dataset(name="EXTRACT_PARAMS_DATASET")
+client.delete_dataset("EXTRACT_PARAMS_DATASET")
+
+EXTRACT_PARAMS_DATASET = client.create_dataset(name="EXTRACT_PARAMS_DATASET")
 EXTRACT_PARAMS_DATASET.insert([
     {
         "request": """
@@ -20,7 +20,6 @@ GET http://localhost:8000/inventory/list/
         "name": "Empty GET",
         "expected_output": json.dumps({
             "resources": [],
-            "user_ids": []
         })
     },   
     {
@@ -42,8 +41,7 @@ POST http://localhost:8000/orders/4/add-items/
                     "URL": "/orders/$%&4$%&/add-items/"
                 }
             }
-        ],
-        "user_ids": []
+        ]
     })
     },
     {
@@ -65,33 +63,35 @@ POST http://localhost:8000/inventory/create/
                         "BODY": "product"
                     }
                 }
-            ],
-            "user_ids": []
+            ]
         })
     },
     {
-    "request": """
+        "request": """
 POST http://localhost:8000/orders/create/
 {'csrfmiddlewaretoken': 'HWNMVs9AWYLw3tuOYbbYPsoPTEUCX1YBLZOptrbf5iafPXxXs79mh7xFEdO9ltB5', 'customer': '3', 'shipping_address': 'EG', 'billing_address': 'WWGE', 'notes': 'GWGE'}
-    """,
-    "name": "Customer ID in POST body",
-    "expected_output": json.dumps({
-        "resources": [],
-        "user_ids": [
-            {
-                "id": "3",
-                "request_part": "BODY",
-                "selected_slice": {
-                    "BODY": "customer"
+        """,
+        "name": "Customer ID in POST body",
+        "expected_output": json.dumps({
+            "resources": [
+                {
+                    "id": "3",
+                    "request_part": "BODY",
+                    "type": {
+                        "name": "customer",
+                        "requests": []
+                    },
+                    "selected_slice": {
+                        "BODY": "customer"
+                    }
                 }
-            }
-        ]
-    })
-}
+            ]
+        })
+    }
 ])
 
 
-def convert_to_json(request_info: RequestAuthInfo, expected_out) -> Dict[str, Any]:
+def convert_to_json(request_info: RequestResources, expected_out) -> Dict[str, Any]:
     # TODO: implement this as decorator
     return {
         "output": request_info.model_dump(),
@@ -99,7 +99,7 @@ def convert_to_json(request_info: RequestAuthInfo, expected_out) -> Dict[str, An
     }
 
 if __name__ == "__main__":
-    experiment_name, project_name = parse_eval_args(EXTRACT_REQUESTS_PROMPT, response_format=RequestAuthInfo)
+    experiment_name, project_name = parse_eval_args(EXTRACT_REQUESTS_PROMPT, response_format=RequestResources)
     evaluate_prompt(
         messages = [
             {
@@ -108,10 +108,10 @@ if __name__ == "__main__":
             },
         ],
         dataset=EXTRACT_PARAMS_DATASET, 
-        model=JohnLLMModel(model_name="gpt-4o", response_format=RequestAuthInfo),
+        model=JohnLLMModel(model_name="gpt-4o", response_format=RequestResources),
         eval_fn= convert_to_json,
         scoring_metrics=[
-            EqualsJSON(exclude_fields=["description"])
+            EqualsJSON(exclude_fields=["description"], only_expected_keys=True)
         ],
         experiment_name=experiment_name,
         # project_name=project_name

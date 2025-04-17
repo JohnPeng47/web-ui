@@ -7,7 +7,6 @@ import sys
 
 sys.path.append(".")
 import asyncio
-import os
 import sys
 from pprint import pprint
 import subprocess

@@ -51,6 +51,8 @@ For example:
 - A request to "/api/update/tweet" with JSON payload {"tweet": 1234, "message": "hello world", "picture": "https://pic.png"} has ONLY the valid resource tweet:1234
 - A request to "/api/list/tweets" HAS no resource identifiers, as it is just an action to list of tweets
 
+If you did not identify any resources, make sure to return [] and not null for the resources field 
+
 {% if resource_types %}
 Does the resource match any of the existing resource types? If so then select that type
 {% endif %}
@@ -130,5 +132,21 @@ Your task is to extract resource identifiers from the request:
 These request parameters represent a resource used in the application, that is not just a configuration parameter for the API call. In thinking of a request as an action,
 a request can be seen to perform some action on a resource
 
+When returning the identified resource_ids, please provide the selected_slice parameter, which identifies the specific position
+of the resource in the request. The way you should give this data is to:
+1. Take the surrounding of the resource, but make sure to not step across request element boundaries ie. if param in URL do not include the headers in surround
+2. Next identify where in the request the resource is located by the following steps:
+Identify whether its in the URL, BODY, or HEADERS:
+NOTE: SEPARATOR = "$%&" ie. /post/$%&user1234$%&/comments
+    if URL:
+        - return selected_slice as the URL where selected resource value is enclosed within the SEPARATOR
+        ie. /post/$%&user1234$%&/comments
+        ie. /tweets?id=1234
+    elif BODY:
+        - return selected_slice as the name of body field
+    elif HEADERS:
+        - return selected_slice as {}
+
+If you did not identify any resources, make sure to return [] and not null for the resources field
 Now give your response
 """
