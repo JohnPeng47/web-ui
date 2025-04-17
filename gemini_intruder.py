@@ -177,9 +177,7 @@ class AuthzTester:
             # print(f"Warning: Could not extract necessary info from request {request.url}. Skipping ingest.")
             return
 
-        new_user_id, new_resources, new_action_url = extracted_info # new_action_url is the URL
-
-        # --- State Update ---
+        new_user_id, new_resources, new_action_url = extracted_info
         is_truly_new_user = new_user_id not in self.user_sessions
         user_session_added = False
         # Update user session if available in the request object
@@ -205,7 +203,6 @@ class AuthzTester:
             # Update resource type actions state
             self.resource_type_actions[res_type_name].add(new_action_url)
             # print(f"  Updated state: User '{new_user_id}' accessed Resource '{res_id}' (Type: {res_type_name}). Action '{new_action_url}' associated with type '{res_type_name}'.")
-
 
         # --- Trigger Tests ---
         all_users_with_sessions = set(self.user_sessions.keys())
@@ -256,7 +253,6 @@ class AuthzTester:
                               self.performed_tests.add(test_sig)
                          # else: print(f"    - Skipping test (2): No action template found for '{existing_action_url}'.")
 
-
         # 3. If new_user (and session was successfully added): Try all existing actions + their original associated resources for this new user
         if is_truly_new_user and user_session_added:
              # print(f"  -> New User Trigger: Testing user '{new_user_id}' against existing actions/resources.")
@@ -289,8 +285,6 @@ class AuthzTester:
         Creates a modified copy of the base request targeting the specific resource ID.
         Needs robust implementation based on how resource IDs appear in requests.
         """
-        # print(f"    Attempting to modify '{base_request.method} {base_request.url}' to target resource '{target_resource_id}'")
-
         original_resource_id = None
         resource_location_info: Optional[Resource] = None # Type hint
         auth_info = base_request.attack_info.get("AUTH") # Use attack_info
@@ -310,14 +304,10 @@ class AuthzTester:
              print(f"      Error: Invalid or missing 'request_part' in resource location info for {base_request.url}.")
              return None
 
-
         new_url = base_request.url
         new_post_data = base_request.post_data
         new_headers = base_request.headers.copy()
-
         modification_successful = False # Flag to track if modification occurred
-
-        # --- Modification based on Resource Location ---
         if resource_location_info.request_part == RequestPart.URL:
             if original_resource_id in new_url:
                  new_url = new_url.replace(original_resource_id, target_resource_id, 1)
@@ -334,19 +324,20 @@ class AuthzTester:
 
 
         elif resource_location_info.request_part == RequestPart.HEADERS:
+            raise Exception("Header params not currently supported!")
             # selected_slice should indicate which header
-            header_to_modify = None
-            if hasattr(resource_location_info, 'selected_slice') and isinstance(resource_location_info.selected_slice, dict):
-                 header_to_modify = resource_location_info.selected_slice.get(RequestPart.HEADERS) # Assuming key is the enum member
+            # header_to_modify = None
+            # if hasattr(resource_location_info, 'selected_slice') and isinstance(resource_location_info.selected_slice, dict):
+            #      header_to_modify = resource_location_info.selected_slice.get(RequestPart.HEADERS) # Assuming key is the enum member
 
-            if header_to_modify and isinstance(header_to_modify, str) and header_to_modify.lower() in new_headers:
-                  original_value = new_headers[header_to_modify.lower()]
-                  if original_resource_id in original_value:
-                       new_headers[header_to_modify.lower()] = original_value.replace(original_resource_id, target_resource_id, 1)
-                       modification_successful = True
-                       # print(f"      Modified Header '{header_to_modify}' (naive replace)")
-                  # else: print(f"      Warning: Could not find original ID '{original_resource_id}' in Header '{header_to_modify}' value for replacement.")
-            # else: print(f"      Warning: Header '{header_to_modify}' for resource ID modification not found or invalid slice info.")
+            # if header_to_modify and isinstance(header_to_modify, str) and header_to_modify.lower() in new_headers:
+            #       original_value = new_headers[header_to_modify.lower()]
+            #       if original_resource_id in original_value:
+            #            new_headers[header_to_modify.lower()] = original_value.replace(original_resource_id, target_resource_id, 1)
+            #            modification_successful = True
+            #            # print(f"      Modified Header '{header_to_modify}' (naive replace)")
+            #       # else: print(f"      Warning: Could not find original ID '{original_resource_id}' in Header '{header_to_modify}' value for replacement.")
+            # # else: print(f"      Warning: Header '{header_to_modify}' for resource ID modification not found or invalid slice info.")
 
 
         if not modification_successful:
@@ -433,101 +424,3 @@ class AuthzTester:
             print(f"    Error during request processing: {e}")
 
         # print(f"    Test Result Logged: {result}") # Logged internally via self.findings
-
-
-# --- Example Usage (Conceptual) ---
-if __name__ == '__main__':
-    # Instantiate the HTTPClient first
-    client = HTTPClient(follow_redirects=True, timeout=10.0)
-    # Pass the client to the tester
-    tester = AuthzTester(http_client=client)
-
-    # --- New Test Case 1: Product Access ---
-    print("\n--- Ingesting New Test Case 1 (Product) ---")
-    prod_type = ResourceType(name="Product", description="Store product")
-    # Assume product ID '25' is in the URL path
-    res_info_prod = Resource(id="25", type=prod_type, request_part=RequestPart.URL, selected_slice={RequestPart.URL: "/products/{id}/"})
-    auth_info_prod = RequestResources(resources=[res_info_prod], description="Access product 25")
-    user1_id = "evil_corp-store_admin1"
-    # Manually construct JSON data from raw request
-    json_data1 = {
-        "method": "GET",
-        "url": "http://localhost:8000/products/25/",
-        "headers": {
-            "Host": "localhost:8000",
-            "sec-ch-ua": '"Chromium";v="135", "Not-A.Brand";v="8"',
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": '"Windows"',
-            "Accept-Language": "en-US,en;q=0.9",
-            "Upgrade-Insecure-Requests": "1",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-            "Sec-Fetch-Site": "none",
-            "Sec-Fetch-Mode": "navigate",
-            "Sec-Fetch-User": "?1",
-            "Sec-Fetch-Dest": "document",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Cookie": "csrftoken=edbNI9cPjuzTWEdjE68yCPj0VJ4HyCNE; sessionid=aremi6hp8o2mh26gbtgv1lsiuym8eqcx",
-            "Connection": "keep-alive"
-        },
-        "post_data": None, # Assuming no post data for GET
-        "is_iframe": False, # Assuming default
-        "redirected_from": None, # Assuming default
-        "redirected_to": None # Assuming default
-    }
-    intruder_req_prod = IntruderRequest.from_json(data=json_data1, user_id=user1_id, auth_info=auth_info_prod)
-    tester.ingest(intruder_req_prod)
-
-    print("\nState after new test case 1:")
-    print("Observed Access:", json.dumps(tester.observed_access, indent=2, default=str))
-    print("User Sessions:", list(tester.user_sessions.keys()))
-
-    # --- New Test Case 2: Profile Access ---
-    print("\n--- Ingesting New Test Case 2 (Profile) ---")
-    profile_type = ResourceType(name="UserProfile", description="User profile page")
-    # Assume profile access implies access to the logged-in user's profile.
-    # We might need a way to represent "self" or use the user ID directly.
-    # For simplicity, let's use the user_id as the resource ID here, assuming /profile/ maps to the session user.
-    user2_id = "good_corp-store_admin1"
-    res_info_profile = Resource(id=user2_id, type=profile_type, request_part=RequestPart.URL, selected_slice={RequestPart.URL: "/profile/"}) # Using user ID as resource ID
-    auth_info_profile = RequestResources(resources=[res_info_profile], description="Access own profile")
-    # Manually construct JSON data from raw request
-    json_data2 = {
-        "method": "GET",
-        "url": "http://localhost:8000/profile/",
-        "headers": {
-            "Host": "localhost:8000",
-            "Cache-Control": "max-age=0",
-            "sec-ch-ua": '"Chromium";v="135", "Not-A.Brand";v="8"',
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": '"Windows"',
-            "Accept-Language": "en-US,en;q=0.9",
-            "Upgrade-Insecure-Requests": "1",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-            "Sec-Fetch-Site": "same-origin",
-            "Sec-Fetch-Mode": "navigate",
-            "Sec-Fetch-User": "?1",
-            "Sec-Fetch-Dest": "document",
-            "Referer": "http://localhost:8000/",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Cookie": "csrftoken=XzDD7mdqORrBK5hvTTNK3rt228vsBZry; sessionid=et0u6y8f4wkxboq3jz0n1a9xpybmoa3c",
-            "Connection": "keep-alive"
-        },
-        "post_data": None,
-        "is_iframe": False,
-        "redirected_from": None,
-        "redirected_to": None
-    }
-    intruder_req_profile = IntruderRequest.from_json(data=json_data2, user_id=user2_id, auth_info=auth_info_profile)
-    tester.ingest(intruder_req_profile)
-
-    print("\nState after new test case 2:")
-    print("Observed Access:", json.dumps(tester.observed_access, indent=2, default=str))
-    print("User Sessions:", list(tester.user_sessions.keys()))
-    print("\nPotential Findings After All Tests:")
-    if tester.findings:
-        for finding in tester.findings:
-            print(f"- {finding}")
-    else:
-        print("(No findings logged)")
