@@ -163,11 +163,6 @@ class AccessGraph:
         return result
 
 
-# ---------------------------------------------------------------------------
-# Planner – decide which tests to run
-# ---------------------------------------------------------------------------
-
-
 @dataclass(slots=True)
 class PlannedTest:
     user: str
@@ -182,14 +177,14 @@ class TestPlanner:
     def __init__(self, graph: AccessGraph, templates: TemplateRegistry):
         self._graph = graph
         self._templates = templates
-        self._executed: Set[Tuple[str, str, str]] = set()  # (user,id,action)
+        # Use (user, action, type_name) key for deduplication
+        self._executed: Set[Tuple[str, str, str]] = set()
 
     # API
-
     def schedule_from_ingest(
-        self, *, new_user: str, new_types: Sequence[Tuple[str, str]], new_action: str
+        self, *, new_user: str, new_types: Sequence[Tuple[str, str]], new_action: str, is_new_user: bool
     ) -> Iterable[PlannedTest]:
-        """Yield PlannedTests, deduplicated."""
+        """Yield PlannedTests, deduplicated, using original 3-case logic."""
 
         # 1) New action → try it with existing users/resources
         for type_name, res_id in new_types:
@@ -199,19 +194,34 @@ class TestPlanner:
         # 2) Existing action(s) of types → try them with new resource
         for type_name, res_id in new_types:
             for action in self._actions_for_type(type_name):
+                # Avoid re-testing the exact triggering request combination immediately
+                if action == new_action:
+                    continue
                 for user in self._graph.other_users(new_user):
                     yield from self._dedup(user, res_id, action, type_name)
 
         # 3) New user → try them on every existing (action,resource)
-        for action in self._templates.actions():
-            template = self._templates.template(action)
-            for rl in template.resource_locators:
-                for res_id in self._graph.resources_of_type(rl.type_name):
-                    yield from self._dedup(new_user, res_id, action, rl.type_name)
+        # Check if the user is genuinely new by seeing if they are in the graph *before* this ingest
+        if is_new_user:
+            for action in self._templates.actions():
+                template = self._templates.template(action)
+                for rl in template.resource_locators:
+                    # Skip testing the new user on the exact action/type combo from the triggering request
+                    # (This check might be redundant if action == new_action is handled, but keep for safety)
+                    is_triggering_action_type = (
+                        action == new_action and
+                        rl.type_name in [t for t, r in new_types]
+                    )
+                    if is_triggering_action_type:
+                        continue
+
+                    # Test the new_user against the specific resource (rl.id) from the template
+                    yield from self._dedup(new_user, rl.id, action, rl.type_name)
 
     # helpers
 
     def _actions_for_type(self, type_name: str) -> Iterable[str]:
+        """Yields actions associated with a given resource type."""
         for action in self._templates.actions():
             template = self._templates.template(action)
             if any(rl.type_name == type_name for rl in template.resource_locators):
@@ -220,8 +230,10 @@ class TestPlanner:
     def _dedup(
         self, user: str, resource_id: str, action: str, type_name: str
     ) -> Iterable[PlannedTest]:
-        sig = (user, resource_id, action)
+        """Deduplicates tests based on (user, action, type_name) key."""
+        sig = (user, action, type_name)
         if sig not in self._executed:
+            # Add signature *before* yielding
             self._executed.add(sig)
             yield PlannedTest(user, resource_id, action, type_name)
 
@@ -310,15 +322,15 @@ class AuthzTester:
             
         # Convert the imported RequestPart to our local RequestPart
         resource_part = resource.request_part
-        part_str = str(resource_part)
-        
-        if part_str == "url":
+        # Use direct enum comparison instead of string conversion
+        if resource_part == RequestPart.URL:
             local_part = RequestPart.URL
-        elif part_str == "body":
+        elif resource_part == RequestPart.BODY:
             local_part = RequestPart.BODY
-        elif part_str == "headers":
+        elif resource_part == RequestPart.HEADERS:
             local_part = RequestPart.HEADERS
         else:
+            log.warning("Unknown RequestPart type: %s", resource_part)
             return None
         
         return ResourceLocator(
@@ -374,6 +386,9 @@ class AuthzTester:
         """Feed a single *observed* request into the system."""
         action = request.url  # naive – could be method+url later
 
+        # Check if user is new *before* recording them in the graph
+        is_truly_new_user = user not in self._graph._graph
+
         # Persist structures
         self._templates.add(action, RequestTemplate(request, resource_locators))
         if session:
@@ -384,7 +399,7 @@ class AuthzTester:
         # Plan tests
         new_types = [(rl.type_name, rl.id) for rl in resource_locators]
         for test in self._planner.schedule_from_ingest(
-            new_user=user, new_types=new_types, new_action=action
+            new_user=user, new_types=new_types, new_action=action, is_new_user=is_truly_new_user
         ):
             res = self._executor.execute(test)
             self.findings.append(res)
