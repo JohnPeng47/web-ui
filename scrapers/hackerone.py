@@ -205,8 +205,6 @@ async def extract_report_content(page, report_url):
     Extract content from a HackerOne report page by finding the interactive-markdown element
     and its child elements.
     """                    
-    await page.goto(report_url, timeout=30000, wait_until="networkidle")
-
     content = ""
     try:
         # Wait for the interactive-markdown element to load
@@ -252,7 +250,6 @@ async def init_browser():
             "--window-size=1920,1080",
         ]
     )
-    
     browser = Browser(config=browser_config)
     # Create a new browser context with default config
     context = await browser.get_playwright_browser()
@@ -272,7 +269,7 @@ async def scrape_reports(start_index=0):
         extra_chromium_args=[
             "--window-size=1920,1080",
         ],
-        proxy_server="http://147.79.78.153:3128",
+        # proxy_server="http://147.79.78.153:3128",
         _force_keep_browser_alive=True
     )
     browser = Browser(config=browser_config)
@@ -353,27 +350,50 @@ async def main():
     start_index = int(open("last_index.txt", "r").read())
     await scrape_reports(start_index=start_index)
 
-if __name__ == "__main__":
-    asyncio.run(main())
-
 # if __name__ == "__main__":
-#     async def test_reports():
-#         browser, page = await init_browser()
-#         TEST_URLS = [
-#             # "https://hackerone.com/reports/1032610"
-#             # "https://hackerone.com/reports/1032610"
-#             # "https://hackerone.com/reports/1457471"
-#             "https://hackerone.com/reports/2946927"
-#         ]
-        
-#         for url in TEST_URLS:
-#             report_content = await extract_report_content(page, url)
-#             print(report_content.content)
-#             print(report_content.screenshots)
+#     asyncio.run(main())
 
-#             with open("test_report.json", "w") as f:
-#                 json.dump(report_content.model_dump(), f, indent=2)
-        
-#         await browser.close()
+if __name__ == "__main__":
+    async def test_reports():
+        browser, page = await init_browser()
 
-#     asyncio.run(test_reports())
+
+        TEST_URLS = [
+            # "https://hackerone.com/reports/1032610"
+            # "https://hackerone.com/reports/1032610"
+            # "https://hackerone.com/reports/1457471"
+            "https://hackerone.com/reports/270981"
+        ]
+
+
+        for url in TEST_URLS:
+            await page.goto(url, timeout=30000, wait_until="networkidle")
+
+            report_content = await extract_report_content(page, url)
+            from lxml import html
+            from bs4 import BeautifulSoup
+            import requests
+
+            res = requests.get(url)
+            soup = BeautifulSoup(await page.content(), 'html.parser')
+            text = soup.get_text(strip=True)
+            print(text)
+
+            # Get the HTML content from the page
+            # html_content = await page.content()
+
+            # # Extract just the text content
+            # tree = html.fromstring(html_content)
+            # text_content = tree.text_content()
+            # print(text_content)
+
+            # print(report_content.content)
+            # print(report_content.screenshots)
+
+            # with open("test_report.json", "w") as f:
+            #     json.dump(report_content.model_dump(), f, indent=2)
+            break
+        
+        await browser.close()
+
+    asyncio.run(test_reports())
