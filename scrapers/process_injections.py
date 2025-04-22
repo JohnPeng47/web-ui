@@ -29,11 +29,7 @@ class CategorizeReports(LMP):
     prompt = """
 {{report}}
 
-You are a senior application-security analyst.  
-Your task is to read an *unstructured* vulnerability report (any length) and decide how easy it is to exploit each injection vulnerability
-Classify the level of exploitability according to the following designation:
 
-EASY - the vulnerability exists in an easily 
 
 """
     response_format = InjectionClassifications

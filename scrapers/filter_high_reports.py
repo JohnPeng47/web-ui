@@ -1,12 +1,8 @@
 from .utils import convert_weakness, Weaknesses
 
-
 import json
 import shutil
 from pathlib import Path
-from collections import defaultdict
-from typing import Dict, List, Any
-
 
 def filter_medium_complex_injections():
     """

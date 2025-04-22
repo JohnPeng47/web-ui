@@ -1,32 +1,14 @@
 from pathlib import Path
 import json
-from collections import Counter
 from enum import Enum
 from typing import List, Union
 
-import time
-import sys
 from pydantic import BaseModel
 from johnllm import LLMModel, LMP
 from concurrent.futures import ThreadPoolExecutor
 from tqdm import tqdm
 from random import shuffle
 from pydantic import BaseModel
-
-
-AUTHORIZATION = [
-    "Improper Access Control - Generic",
-    "Insecure Direct Object Reference (IDOR)",
-    "Improper Authentication - Generic", 
-    "Authentication Bypass Using an Alternate Path or Channel",
-    "Improper Authorization",
-    "Authentication Bypass",
-    "Missing Critical Step in Authentication",
-    "Incorrect Authorization",
-    "Improper Privilege Management",
-    "Incorrect Privilege Assignment",
-    "Privilege Escalation",
-]
 
 class VulnCategory(str, Enum):
     WEB_APP = "WEB_APP"
@@ -36,6 +18,35 @@ class SeverityLevel(str, Enum):
     HIGH = "HIGH"
     MEDIUM = "MEDIUM"
     LOW = "LOW"
+
+class AuthNZVulnInfo(BaseModel):
+    idor_detectable: bool
+    authnz_byppass_detectable: bool
+
+
+class InjectionReport(BaseModel):
+    reported_to: str
+    reported_by: str
+    title: str
+    content: str
+    severity: List[float]
+    bounty: Union[float, None]
+    weaknesses: List[str]
+    screenshots: dict
+    disclosed_date: int
+    report_url: str
+    is_multi_component: bool
+    complexity: str
+    novelty: str
+    vuln_category: str
+    steps: List[List[Union[int, str]]]
+    vuln_description: str
+    reason: str
+    new_complexity: str
+    requires_code: bool
+    requires_CVE: bool
+    is_ctf: bool
+    other_report: Union[str, None]
 
 class Weaknesses(str, Enum):
     XSS = "XSS"
@@ -246,6 +257,15 @@ def read_reports_in_batches(reports_dir: Path, batch_size: int = 50):
                 report = json.load(f)
                 if not report:
                     continue
+
+                # FILTER LOGIC
+                weakness = report.get("weaknesses", [])
+                if weakness:
+                    weakness = weakness[0]
+                    weakness = convert_weakness(weakness)
+                    if weakness != Weaknesses.AUTHZ_AUTN:
+                        continue
+
         except (json.JSONDecodeError, OSError) as e:
             print(f"Error reading {report_file}: {e}")
             continue

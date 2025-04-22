@@ -4,7 +4,6 @@ from pydantic import BaseModel
 from enum import Enum
 from pathlib import Path
 
-
 from .utils import process_reports_in_batches
 
 class Level(str, Enum):
