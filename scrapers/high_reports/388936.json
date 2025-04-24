@@ -1,0 +1,57 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "pontus_johnson ",
+  "title": "[egg-scripts] Command injection",
+  "content": "\nI would like to report a command injection vulnerability in egg-scripts.\nIt allows arbitrary shell command execution through a maliciously crafted command line argument.\nModule\nmodule name: [egg-scripts]\nversion: [2.6.0]\nnpm page: https://www.npmjs.com/package/egg-scripts\nModule Description\n\"deploy tool for egg project.\"\nModule Stats\nReplace stats below with numbers from npm\u2019s module page:\n209 downloads in the last day\n1,958 downloads in the last week\n8,333 downloads in the last month\nVulnerability\nVulnerability Description\negg-script does not sanitize the --stderr command line argument, and subsequently passes it to child_process.exec(), thus allowing arbitrary shell command injection.\nSteps To Reproduce:\nInstall egg: npm i egg --save\nInstall egg-scripts: sudo npm i egg-scripts -g --save\nRun eggctl with malicious argument: eggctl start --daemon --stderr=/tmp/eggctl_stderr.log; touch /tmp/malicious\nCheck that the injected command was executed: ls /tmp/\nStop eggctl: eggctl stop\nPatch\nCommand execution happens here:\nCode 55 Bytes\n1const [ stdout ] = yield exec('tail -n 100 ' + stderr);\nexec could be replaced by execFile, which would force developers to separate the command and its arguments.\nSupporting Material/References:\nOperating system: Debian GNU/Linux 9.5 (stretch)\nNode.js v8.11.3\nnpm v5.6.0\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nArbitrary shell command execution.\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1534678020,
+  "report_url": "https://hackerone.com/reports/388936",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install egg: npm i egg --save"
+    ],
+    [
+      2,
+      "Install egg-scripts: sudo npm i egg-scripts -g --save"
+    ],
+    [
+      3,
+      "Run eggctl with malicious argument: eggctl start --daemon --stderr=/tmp/eggctl_stderr.log; touch /tmp/malicious"
+    ],
+    [
+      4,
+      "Check that the injected command was executed: ls /tmp/"
+    ],
+    [
+      5,
+      "Stop eggctl: eggctl stop"
+    ]
+  ],
+  "vuln_description": "egg-script does not sanitize the --stderr command line argument, and subsequently passes it to child_process.exec(), thus allowing arbitrary shell command injection.",
+  "reason": "The vulnerability involves a straightforward command injection through unsanitized input passed to child_process.exec(). The attack does not require multiple components, complex state manipulation, or novel logic. It is a classic example of command injection with a clear path to exploitation.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection through unsanitized command line arguments passed to child_process.exec(), which is not related to authentication or authorization (AuthN/AuthZ) boundaries. The proposed methodologies focus on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, not on command injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

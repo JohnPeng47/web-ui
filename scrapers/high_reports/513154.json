@@ -1,0 +1,38 @@
+{
+  "reported_to": "Valve",
+  "reported_by": "nyancat0131 ",
+  "title": "Unchecked weapon id in WeaponList message parser on client leads to RCE",
+  "content": "\nLet's look at WeaponList message parser code in the HLSDK:\nCode 575 Bytes\n1int CHudAmmo::MsgFunc_WeaponList(const char *pszName, int iSize, void *pbuf )\n2{\n3\tBEGIN_READ( pbuf, iSize );\n4\t\n5\tWEAPON Weapon;\n6\n7\tstrcpy( Weapon.szName, READ_STRING() );\n8\tWeapon.iAmmoType = (int)READ_CHAR();\t\n9\t\n10\tWeapon.iMax1 = READ_BYTE();\n11\tif (Weapon.iMax1 == 255)\n12\t\tWeapon.iMax1 = -1;\n13\n14\tWeapon.iAmmo2Type = READ_CHAR();\n15\tWeapon.iMax2 = READ_BYTE();\n16\tif (Weapon.iMax2 == 255)\n17\t\tWeapon.iMax2 = -1;\n18\n19\tWeapon.iSlot = READ_CHAR();\n20\tWeapon.iSlotPos = READ_CHAR();\n21\tWeapon.iId = READ_CHAR();\n22\tWeapon.iFlags = READ_BYTE();\n23\tWeapon.iClip = 0;\n24\n25\tgWR.AddWeapon( &Weapon );\n26\n27\treturn 1;\n28}\nAnd WeaponResource::AddWeapon:\nCode 111 Bytes\n1void AddWeapon( WEAPON *wp ) \n2{ \n3\t\trgWeapons[ wp->iId ] = *wp;\t\n4\t\tLoadWeaponSprites( &rgWeapons[ wp->iId ] );\n5}\nThere are no boundary check, and the range of iId is [-128, 128), so I can modify many things in the data section.\nIn client.dll, there's an object called gEngfuncs, it is a function table that has various functions of the engine. After some calculations on latest CS 1.6 client.dll, I concluded that this function table could be overwritten using the above bug.\nI have attached a PoC that will pop calc.exe on latest CS 1.6 client when connected to malicious server. The AMXX plugin will catch InitHUD message, and send crafted WeaponList message to overwrite the address of function used in HUD_DirectorMessage to execute client cmds to a ROP gadget that will trigger the chain sent in the next SendCmd call. To overwrite that address, I used a crafted weapon sprite list (weapon_pwn.txt) (see WEAPON struct, file cl_dll/ammo.h in the HLSDK).\nImpact\nSince it's RCE, attacker can do almost anything that don't require higher privilege (ex. compromise account, inject malware, ...)\n\n",
+  "severity": [
+    9.8,
+    null
+  ],
+  "bounty": 3000,
+  "weaknesses": [
+    "Array Index Underflow"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1568756040,
+  "report_url": "https://hackerone.com/reports/513154",
+  "is_multi_component": false,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Craft a malicious WeaponList message with an unchecked weapon id that falls outside the expected range [-128, 128)."
+    ],
+    [
+      2,
+      "Send the crafted WeaponList message to the client to overwrite the gEngfuncs function table in client.dll, leading to RCE."
+    ]
+  ],
+  "vuln_description": "The vulnerability is an unchecked weapon id in the WeaponList message parser on the client, which leads to Remote Code Execution (RCE). The attacker can craft a message to overwrite the gEngfuncs function table in client.dll, allowing arbitrary code execution.",
+  "reason": "This vulnerability involves multiple components: crafting a malicious message, understanding the memory layout of client.dll, and manipulating the function table to achieve RCE. The interaction between these components is subtle and requires deep knowledge of the game's internals.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

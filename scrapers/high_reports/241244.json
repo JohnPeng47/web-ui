@@ -1,0 +1,56 @@
+{
+  "reported_to": "GoCD",
+  "reported_by": "4cad ",
+  "title": "Spring security configuration allows agent sessions to be hijacked",
+  "content": "\nSummary\nIf agents have successfully logged in, then unauthenticated requests to /go/agent-websocket or /go/remoting/* will randomly succeed sometimes.\nDescription\nThe deprecated X509ProcessingFilter apparently does not work without a HttpSessionContextIntegrationFilter earlier on the chain. After a successful authentication it sets a thread-local security context that never gets cleared - meaning that future requests on /go/remoting or /go/agent-websocket will successfully authenticate if they randomly happen to be processed by one of the threads which has a valid security context.\nSteps to Reproduce\n1) Start up a server.\n2) Run the following command a bunch of times. It should always return a 403 Forbidden\n\"curl http://localhost:8153/go/remoting/api/admin/config.xml | grep -B 2 Error\"\n3) Start up an agent, and wait about two minutes\n4) Repeat the command from step 2. It should occasionally return a 500 Server Error. This happens when the request was successfully authenticated, and then fails in the GoCD code that is handling the request.\nIf the server has any artifacts, the URL from step (2) can be changed to a path to that URL. In this case it will sometimes return 403 Forbidden, and sometimes return the artifact itself.\nRisk\nThis allows an attacker without any credentials to read all artifacts or even upload artifacts (combined with #240198 they could use this to execute a stored XSS). While preparing this ticket, I was able to successfully upload a stored XSS file without any credentials by submitting a bunch of POST requests to http://localhost:8153/go/remoting/files/up42/1/up42_stage/1/up42_job/attack_unauthenticated.html\nThis is also really easy to discover - I stumbled across it when I noticed some requests were randomly being denied as unauthorized. It turns out all of my requests should have been unauthorized!\nRecommended Fix\nAdd httpSessionContextIntegrationFilter immediately before x509ProcessingFilter in the acegi-security.xml file, for the /remoting/ and /agent-websocket/ entries.\nThis fixes it because the httpSessionContextIntegrationFilter clears the thread-local security context after each request, thus fixing the problem.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Authentication - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1533080100,
+  "report_url": "https://hackerone.com/reports/241244",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Start up a server."
+    ],
+    [
+      2,
+      "Run the following command multiple times to verify it returns a 403 Forbidden: 'curl http://localhost:8153/go/remoting/api/admin/config.xml | grep -B 2 Error'"
+    ],
+    [
+      3,
+      "Start up an agent and wait about two minutes."
+    ],
+    [
+      4,
+      "Repeat the command from step 2. Observe that it occasionally returns a 500 Server Error, indicating successful authentication."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows unauthenticated requests to /go/agent-websocket or /go/remoting/* to randomly succeed due to a thread-local security context not being cleared after authentication. This can lead to unauthorized access to artifacts or even file uploads, potentially enabling stored XSS attacks.",
+  "reason": "The vulnerability involves understanding the interaction between the deprecated X509ProcessingFilter and the missing HttpSessionContextIntegrationFilter, which is a subtle but critical security misconfiguration. The attack requires knowledge of how thread-local security contexts persist and affect subsequent requests.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "240198",
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true
+  }
+}

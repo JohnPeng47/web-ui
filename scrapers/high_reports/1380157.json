@@ -1,0 +1,38 @@
+{
+    "reported_to": "Rocket.Chat",
+    "reported_by": "gronke ",
+    "title": "Content-Security Policy bypass with File Uploads",
+    "content": "\nSummary\nThe current default CSP header in Rocket.Chat prevents inline script execution, which can be bypassed by importing a script file uploaded via the Rocket.Chat file upload.\nDescription\nThe default CSP header blocks execution of inline-scripts. When a HTML injection vulnerability occurs though, that restriction can be bypassed by uploading a JavaScript file via the file-upload feature (with application/javascript or text/javascript content-type) to include it in a `<script src=\"<UPLOAD_URL></script>\" tag.\nIt is worth noticing that script tags are removed from message content, but this filter can also be bypassed as following:\nCode 91 Bytes\n1<iframe srcdoc=\"&#x3c;script src='/file-upload/<UPLOAD ID>/payload.js?download'></script>\">\nReleases Affected:\n4.0.3\n3.18.2\nSteps To Reproduce (from initial installation to vulnerability):\nUpload payload as payload.js via File Upload feature\nInject iframe with srcdoc via arbitary XSS\nSuggested mitigation\nBlock script content-types from file-uploads\nFilter frames from message body\nImpact\nThe CSP unsafe-inline restriction can be bypassed by uploading script payload as File Upload.\n\n",
+    "severity": [
+        8.3,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1723341360,
+    "report_url": "https://hackerone.com/reports/1380157",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Upload a JavaScript file (payload.js) via the Rocket.Chat file upload feature."
+        ],
+        [
+            2,
+            "Inject an iframe with srcdoc attribute containing a script tag that references the uploaded JavaScript file."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows bypassing the Content-Security Policy (CSP) that prevents inline script execution by uploading a script file and referencing it in an iframe with srcdoc. This bypasses the CSP's unsafe-inline restriction, enabling arbitrary JavaScript execution.",
+    "reason": "The attack involves understanding CSP restrictions, file upload mechanisms, and HTML injection techniques. While the components are not overly complex, the interaction between CSP bypass and file upload is non-obvious and requires knowledge of how CSP and file uploads interact in the application.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

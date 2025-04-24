@@ -1,0 +1,49 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "claudijd ",
+  "title": "Mercurial can be tricked into granting authorized users access to the Python debugger",
+  "content": "\nI reported this bug privately to Mercurial and they produced an out of band release to fix the bug here:\nhttps://www.mercurial-scm.org/wiki/WhatsNew#Mercurial_4.1.3_.282017-4-18.29\nI produced a very detailed proof of concept with a Metasploit exploit module, which can be seen publicly here:\nhttps://github.com/rapid7/metasploit-framework/pull/8263\nThe TLDR is that many services which host Mercurial servers often write their own hg-ssh wrapper or heavily customize the hg-ssh wrapper. If the customized wrapped does not explicitly validate user input to the repo attribute, an attacker can supply a string of \"--debugger\", which causes the internal hg binary to drop to a Pdb shell, which allows arbitrary Python code execution.\nI'm submitting to this program because I believe source code management software like git and mercurial is considered critical infrastructure for the Internet.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1499884500,
+  "report_url": "https://hackerone.com/reports/222020",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify a service hosting a Mercurial server with a customized hg-ssh wrapper that does not validate user input to the repo attribute."
+    ],
+    [
+      2,
+      "Supply a string of \"--debugger\" as the repo attribute when interacting with the Mercurial server."
+    ],
+    [
+      3,
+      "This causes the internal hg binary to drop to a Pdb shell, allowing arbitrary Python code execution."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows authorized users to trick Mercurial into granting access to the Python debugger by exploiting a lack of input validation in customized hg-ssh wrappers. This can lead to arbitrary Python code execution.",
+  "reason": "The attack involves understanding the interaction between the hg-ssh wrapper and the Mercurial binary, as well as recognizing the opportunity to inject the \"--debugger\" argument. While the concept of argument injection is not novel, the specific interaction with Mercurial's debugger feature is non-obvious and requires knowledge of Mercurial's internal workings.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a custom hg-ssh wrapper not validating user input, leading to arbitrary Python code execution. This is not detectable by the proposed methodology because it requires specific knowledge of the custom wrapper's behavior and the ability to inject '--debugger' as input, which is not covered by the general (user_session, action, resource_id) tuple analysis.",
+    "is_detectable": false
+  }
+}

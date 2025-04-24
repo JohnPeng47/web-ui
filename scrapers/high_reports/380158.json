@@ -1,0 +1,60 @@
+{
+    "reported_to": "Starbucks",
+    "reported_by": "txt3rob ",
+    "title": "svcardproxydevus.starbucks.com Subdomain take over",
+    "content": "\nYou have left a dns record pointing to a dead cloudapp vm.\nCode 139 Bytes\n1svcardproxydevus.starbucks.com -> s00307ntmp0svcardproxydev0.trafficmanager.net -> s00307dpipsvcardproxy00.eastus.cloudapp.azure.com = Dead\nImpact\nCode 466 Bytes\n11) Attacker takes over subdomain and then puts something like porn or something that shouldn't be on the domain.\n22) hacker then contacts support pretending to be a concerned user.\n33) support click on it to check what is going on\n44) attacker has put responder on the page via a image file using a UNC path (https://github.com/SpiderLabs/Responder)\n55) attacker is then sent supports hash for their windows login.\n66) attacker then cracks hash and uses the VPN to pivot \nThey can also use it to phish and other bad activitys\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1532382420,
+    "report_url": "https://hackerone.com/reports/380158",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify the subdomain svcardproxydevus.starbucks.com pointing to a dead cloudapp VM."
+        ],
+        [
+            2,
+            "Verify the DNS chain: svcardproxydevus.starbucks.com -> s00307ntmp0svcardproxydev0.trafficmanager.net -> s00307dpipsvcardproxy00.eastus.cloudapp.azure.com (dead)."
+        ],
+        [
+            3,
+            "Take over the subdomain by registering the dead cloudapp VM or pointing it to a malicious server."
+        ],
+        [
+            4,
+            "Host malicious content (e.g., phishing page or responder tool) on the subdomain."
+        ],
+        [
+            5,
+            "Exploit the subdomain for hash capture (via responder) or phishing attacks."
+        ]
+    ],
+    "vuln_description": "The subdomain svcardproxydevus.starbucks.com is vulnerable to takeover due to a dangling DNS record pointing to a dead cloudapp VM. An attacker can hijack the subdomain to host malicious content, capture credentials (e.g., via responder), or conduct phishing campaigns.",
+    "reason": "The vulnerability involves straightforward DNS reconnaissance and subdomain takeover techniques. While the impact is severe, the discovery process is simple and does not require complex interactions or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": true,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": false
+    }
+}

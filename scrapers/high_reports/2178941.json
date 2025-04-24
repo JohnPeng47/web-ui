@@ -1,0 +1,48 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "ashutosh7 ",
+    "title": "Unauthenticated Jenkins instance exposed information related to \u2588\u2588\u2588\u2588\u2588",
+    "content": "\nAffected URLs - \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588blue/organizations/jenkins/pipelines\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\nAlso notice that the information is transmitted in clear text as the server is running on HTTP.\nImpact\nAn attacker can read or edit sensitive information belonging to \u2588\u2588\u2588\u2588\u2588 by abusing this vulnerability.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nNavigate to \u2588\u2588\u2588\u2588\u2588\u2588\u2588 , and other sections. It is exposing information related to \u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\nIt is recommended to Implement authentication on this Jenkins instance\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Authentication - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1706313300,
+    "report_url": "https://hackerone.com/reports/2178941",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the exposed Jenkins instance URL (\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588blue/organizations/jenkins/pipelines)"
+        ],
+        [
+            2,
+            "Observe the exposed information transmitted in clear text over HTTP"
+        ]
+    ],
+    "vuln_description": "An unauthenticated Jenkins instance exposes sensitive information over HTTP, allowing attackers to read or edit this information without authentication.",
+    "reason": "The vulnerability is straightforward to discover as it only requires accessing a publicly exposed URL and observing the unencrypted data. There are no complex interactions or state manipulations involved.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": true,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

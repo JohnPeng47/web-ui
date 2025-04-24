@@ -1,0 +1,38 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "pirneci ",
+  "title": "Arbitrary File Deletion (CVE-2020-3187) on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+  "content": "\nHello team,\nI hope you're doing well, healthy & wealthy.\nI found an Arbitrary File Deletion (CVE-2020-3187) vulnerability on https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/+CSCOE+/session_password.html that allows the Arbitrary File Deletion.\nReferences\nhttps://twitter.com/aboul3la/status/1286809567989575685\nhttp://packetstormsecurity.com/files/158648/Cisco-Adaptive-Security-Appliance-Software-9.7-Arbitrary-File-Deletion.html\nhttps://tools.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-asaftd-path-JE3azWw43\nArbitrary File Deletion Reference:\nhttps://video.twimg.com/ext_tw_video/1286808440271183873/pu/vid/1270x720/8tccA2VgHV9TDtW4.mp4\nclassification:\ncvss-metrics: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N\ncvss-score: 9.10\ncve-id: CVE-2020-3187\ncwe-id: CWE-22\nImpact\nA vulnerability in the web services interface of Cisco Adaptive Security Appliance (ASA) Software and Cisco Firepower Threat Defense (FTD) Software could allow an unauthenticated, remote attacker to conduct directory traversal attacks and obtain read and delete access to sensitive files on a targeted system.\nBest regards\n@pirneci\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCisco Adaptive Security Appliance (ASA) Software and Cisco Firepower Threat Defense (FTD) Software\nCVE Numbers\nCVE-2020-3187\nSteps to Reproduce\nHere is the PoC. If you can see \"webvpn:\" cookie, then you can delete any arbitrary file. I didn't do it. It's enough to prove the vulnerability.\nPoC\nCode 652 Bytes\n1GET /+CSCOE+/session_password.html HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\n3Sec-Ch-Ua: \"Chromium\";v=\"97\", \" Not;A Brand\";v=\"99\"\n4Sec-Ch-Ua-Mobile: ?0\n5Sec-Ch-Ua-Platform: \"Windows\"\n6Upgrade-Insecure-Requests: 1\n7User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36\n8Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\n9Sec-Fetch-Site: none\n10Sec-Fetch-Mode: navigate\n11Sec-Fetch-User: ?1\n12Sec-Fetch-Dest: document\n13Accept-Encoding: gzip, deflate\n14Accept-Language: tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7\n15Connection: close\n16\n17\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\nPlease upgrade to the latest version.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1647644640,
+  "report_url": "https://hackerone.com/reports/1455266",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a GET request to the vulnerable endpoint: /+CSCOE+/session_password.html on the target Cisco ASA/FTD device."
+    ],
+    [
+      2,
+      "Observe the presence of the 'webvpn' cookie in the response, which confirms the vulnerability's existence and potential for arbitrary file deletion."
+    ]
+  ],
+  "vuln_description": "An unauthenticated directory traversal vulnerability in Cisco ASA/FTD software (CVE-2020-3187) allows remote attackers to delete arbitrary files via a crafted request to the web services interface. The vulnerability is triggered by accessing a specific endpoint (/+CSCOE+/session_password.html) and leverages improper path validation.",
+  "reason": "The vulnerability requires minimal components (single HTTP request) and has obvious interaction (presence of 'webvpn' cookie directly indicates exploitability). No complex state manipulation or novel logic is involved - it follows common directory traversal patterns.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

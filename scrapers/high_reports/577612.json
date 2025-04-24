@@ -1,0 +1,53 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "bohdansec ",
+  "title": "MSSQL injection via param Customwho in https://\u2588\u2588\u2588\u2588\u2588/News/Transcripts/Search/Sort/ and WAF bypass",
+  "content": "\nSummary:\nMSSQL injection via param Customwho in https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/News/Transcripts/Search/Sort/\nDescription:\nMSSQL injection via param Customwho in https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/News/Transcripts/Search/Sort/\nThere is WAF, but we can make bypass and via global variable @@LANGID we can know that the base is used here - MSSQL\nImpact\nCritical\nStep-by-step Reproduction Instructions\nVia global variable @@LANGID we can find out that here is MSSQL database. \u2588\u2588\u2588\u2588\nhttps://\u2588\u2588\u2588\u2588\u2588/News/Transcripts/Search/Sort/?Customwho=31002//|//@@LANGID\nAnd if use a non-existing global variable, then we get an error. \u2588\u2588\u2588\u2588\u2588\u2588\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/News/Transcripts/Search/Sort/?Customwho=31002//|//@@nonexisting\nSuggested Mitigation/Remediation Actions\nUsing prepared statement\nImpact\nWe can read and do other manipulations in the database. We can also try to make RCE\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1570749180,
+  "report_url": "https://hackerone.com/reports/577612",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify the vulnerable parameter 'Customwho' in the URL: https://\u2588\u2588\u2588\u2588\u2588/News/Transcripts/Search/Sort/"
+    ],
+    [
+      2,
+      "Inject a SQL query using the 'Customwho' parameter to test for SQL injection, e.g., https://\u2588\u2588\u2588\u2588\u2588/News/Transcripts/Search/Sort/?Customwho=31002//|//@@LANGID"
+    ],
+    [
+      3,
+      "Confirm the database is MSSQL by observing the response to the injected query with @@LANGID"
+    ],
+    [
+      4,
+      "Attempt to bypass the WAF by using non-existing global variables or other bypass techniques, e.g., https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/News/Transcripts/Search/Sort/?Customwho=31002//|//@@nonexisting"
+    ]
+  ],
+  "vuln_description": "The vulnerability is an MSSQL injection via the 'Customwho' parameter in the specified URL, which allows an attacker to execute arbitrary SQL queries. The presence of a WAF can be bypassed, potentially leading to data manipulation or RCE.",
+  "reason": "The attack involves identifying a vulnerable parameter, crafting SQL injection payloads, and bypassing a WAF. While the steps are straightforward, the need to bypass a WAF adds complexity. However, the techniques used (e.g., using @@LANGID) are well-known in the SQL injection context.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves MSSQL injection via a parameter in a specific URL, which is a server-side issue not directly related to authentication or authorization boundaries crossed by user sessions or resource IDs. The methodology described focuses on AuthN/AuthZ bypasses and IDORs by manipulating user sessions and resource IDs, not SQL injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

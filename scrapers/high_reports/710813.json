@@ -1,0 +1,46 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "pirateducky ",
+    "title": "Able to log in with default \u2588\u2588\u2588\u2588\u2588\u2588g creds at  https\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil ",
+    "content": "\nSummary\u2588\u2588\u2588\u2588\nwas able to use \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 to log into this instance of Adobe Experience Manager, though it does not seem to be in used at the moment\nDescription\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nwhile navigating to https\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil, I performed some fuzzing and found that /repository was available which asked for authentication using \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 worked and I could then access another path found by fuzing lc https%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88.mil/lc which then showed me the \u2588\u2588\u2588\u2588\u2588\u2588 panel.\nImpact\nMedium since it is not being used\n## Step-by-step Reproduction Instructions\nNavigate to https\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil/repository\nuse \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 (username\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588password)\nnavigate to https\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil/lc\nProduct, Version, and Configuration (If applicable)\nAdobe Experience Manager\nSuggested Mitigation/Remediation Actions\nRemove this application if it is not being used\nImpact\nMedium - I was able to use \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 to log in\nThanks\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Exposure Through an Error Message"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1610505480,
+    "report_url": "https://hackerone.com/reports/710813",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to https\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil/repository"
+        ],
+        [
+            2,
+            "Use default credentials (username: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, password: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588)"
+        ],
+        [
+            3,
+            "Access the Adobe Experience Manager repository"
+        ],
+        [
+            4,
+            "Navigate to https\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil/lc to view the \u2588\u2588\u2588\u2588\u2588\u2588 panel"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows unauthorized access to an Adobe Experience Manager instance using default credentials. The tester discovered this by fuzzing paths (/repository and /lc) and using common/default credentials to gain access to the system's administrative interface.",
+    "reason": "The attack involves basic fuzzing techniques and the use of default credentials, which are well-known and commonly documented. There are no complex interactions or state manipulations required, and the vulnerability follows a straightforward pattern seen in many systems with default credentials.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

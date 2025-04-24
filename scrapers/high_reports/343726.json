@@ -1,0 +1,42 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "patrickrbc ",
+  "title": "Unrestricted file upload (RCE)",
+  "content": "\nI would like to report an unrestricted file upload in express-cart.\nIt allows a user with administrative privileges to upload a file to any path.\nModule\nmodule name: express-cart\nversion: 1.1.5\nnpm page: https://www.npmjs.com/package/express-cart\nModule Description\nexpressCart is a fully functional shopping cart built in Node.js (Express, MongoDB) with Stripe, PayPal and Authorize.net payments.\nVulnerability\nVulnerability Description\nA privileged user can use the upload functionality to gain access to the server.\nThe application offers the possibility of uploading product images. However, there are many problems with the way it handles these uploads.\nFirstly, it uses a path provided by the user. This path is not validated, therefore, it would allow the user to upload the file to any path on the hosting server.\nSecondly, it does not restrict the type of the file being uploaded, therefore, it would allow the user to upload a malicious file to gain access to the server.\nFinally, it does not restrict the size of the file. This would allow to easily exhaust the host resources and consequently produce a DoS.\nSteps To Reproduce:\nThere are many ways this vulnerability could be exploited. Supposing our goal would be to establish access to the host machine, we could replace the app.js file with a malicious JavaScript that would give us a web shell.\nOnce you have administrator privileges you can use a request similar to:\nCode 810 Bytes\n1POST /admin/file/upload HTTP/1.1\n2Host: localhost:1111\n3Referer: http://localhost:1111/\n4Content-Type: multipart/form-data; boundary=---------------------------1099055603892737061752875043\n5Cookie: [ADMINISTRATOR_COOKIE]\n6\n7-----------------------------1099055603892737061752875043\n8Content-Disposition: form-data; name=\"upload_file\"; filename=\"app.js\"\n9Content-Type: image/png\n10\n11[MALICIOUS_JAVASCRIPT]\n12-----------------------------1099055603892737061752875043\n13Content-Disposition: form-data; name=\"productId\"\n14\n155ae2228d995e3e5d7c96474d\n16-----------------------------1099055603892737061752875043\n17Content-Disposition: form-data; name=\"directory\"\n18\n19../../\n20-----------------------------1099055603892737061752875043\n21Content-Disposition: form-data; name=\"saveButton\"\n22\n23-----------------------------1099055603892737061752875043--\nWrap up\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nImpact\nThis vulnerability would allow a privileged user to gain access in the hosting machine.\n\n",
+  "severity": [
+    9.1,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1527938400,
+  "report_url": "https://hackerone.com/reports/343726",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Log in to the express-cart admin panel with administrator privileges."
+    ],
+    [
+      2,
+      "Use the file upload functionality to upload a malicious JavaScript file (e.g., app.js) by specifying a path traversal in the 'directory' parameter (e.g., '../../') and setting the 'filename' to the target file."
+    ],
+    [
+      3,
+      "The server will save the malicious file to the specified path, potentially overwriting critical files and allowing remote code execution."
+    ]
+  ],
+  "vuln_description": "An unrestricted file upload vulnerability in express-cart allows privileged users to upload malicious files to arbitrary paths on the server, potentially leading to remote code execution (RCE). The vulnerability stems from lack of validation on file paths, types, and sizes.",
+  "reason": "The vulnerability is relatively straightforward to discover as it involves common web application testing techniques (file upload testing with path traversal). The attack components (file upload, path traversal) are well-known and don't require complex interactions or state manipulation.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

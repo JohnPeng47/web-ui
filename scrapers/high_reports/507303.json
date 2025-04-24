@@ -1,0 +1,53 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "johnssimon007 ",
+  "title": "[file-browser] Inadequate Output Encoding and Escaping ",
+  "content": "\nI would like to report stored xss in file-browser module\nIt allows an attacker to embed malicious js code as filenames,which get executed once browsed to the file over the web browser\nModule\nmodule name: file-browser\nversion: 0.0.5\nnpm page: https://www.npmjs.com/package/file-browser\nModule Description\nfile-browser is a utility to browse files on your file system using your browser. Its equivalent of creating a file share that can be accessed over http. Using this you can share files between different machines, and across different operating systems.\nVulnerability Description\ndue to improper output encoding and escaping ,it was possible for an attacker to embed malicious js code as filenames,which get executed once browsed to the file over the web browser\n## Steps To Reproduce:\nnpm -g install file-browser\n2.now running below command will start a file server on the specified port:\nfile-browser\n3.now create a file with xss payload as filename in current dir\ntouch '\"><img src=x onerror=alert(\"xss\")>.jpg'\n4.now goto url at which the file server is running\nhttp://127.0.0.1:8088/lib/template.html\nnow xss will popup\nSupporting Material/References:\n[OPERATING SYSTEM VERSION] Kali linux\n[NODEJS VERSION] 11.8.0\n[NPM VERSION] 6.5.0\nWrap up\nSelect Y or N for the following statements:\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nImpact\nthis could have enabled an attacker to execute malicous js code which might lead to session stealing,hooking up browser with frameworks like beef and so on\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1580333040,
+  "report_url": "https://hackerone.com/reports/507303",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install file-browser globally: `npm -g install file-browser`"
+    ],
+    [
+      2,
+      "Start the file server: `file-browser`"
+    ],
+    [
+      3,
+      "Create a file with an XSS payload as the filename: `touch '\"><img src=x onerror=alert(\"xss\")>.jpg'`"
+    ],
+    [
+      4,
+      "Access the file server URL in a browser: `http://127.0.0.1:8088/lib/template.html`"
+    ]
+  ],
+  "vuln_description": "The file-browser module suffers from a stored XSS vulnerability due to improper output encoding and escaping. An attacker can embed malicious JavaScript code in filenames, which gets executed when the file is browsed via the web interface.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common XSS pattern (filename manipulation) in a simple file server application. The attack does not require complex interactions or state manipulation.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves stored XSS due to improper output encoding and escaping in filenames, which is not related to authentication or authorization (AuthN/AuthZ) issues. The proposed methodologies focus on AuthN/AuthZ bypass and IDOR vulnerabilities by testing session and resource access controls, not output encoding issues.",
+    "is_detectable": false
+  }
+}

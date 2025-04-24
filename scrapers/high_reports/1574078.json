@@ -1,0 +1,73 @@
+{
+  "reported_to": "Node.js",
+  "reported_by": "haxatron1 ",
+  "title": "DNS rebinding in --inspect (again) via invalid IP addresses ",
+  "content": "\nThe IsAllowedHost check in https://github.com/nodejs/node/blob/fdf0a84e826d3a9ec0ce6f5a3f5adc967fe99408/src/inspector_socket.cc#L580 can easily be bypassed because IsIPAddress does not properly check if an IP address is invalid or not. When an invalid IPv4 address is provided (for instance 10.0.2.555 is provided), the browser will make a DNS requests to the DNS server, providing a vector for an attacker-controlled DNS server to perform a rebinding attack and hence access the JSON file containing the WebSocket file.\nSteps To Reproduce:\nThe steps to reproduce is mostly the same as https://hackerone.com/reports/1069487, but replace localhost6 with 10.0.2.555, I am copying it here for reference.\nVictim runs node with --inspect option\nVictim visits attacker's webpage\nThe attacker's webpage redirects to http://10.0.2.555:9229\n10.0.2.555 is not a valid IP address so the browser asks the malicious DNS server and gets <attacker's-IP> with a short TTL.\nVictim loads webpage http://10.0.2.555:9229 from <attacker's-IP>.\nThe webpage http://10.0.2.555:9229 tries to load http://10.0.2.555:9229/json from attacker's server.\nDue to a short TTL, the DNS server will be soon asked again about an entry for \u201c10.0.2.555\u201d. This time, the DNS server responds \u201c127.0.0.1\u201d. The http://10.0.2.555:9229 website (i.e., the one hosted on <attacker's IP>) will retrieve http://10.0.2.555:9229/json from 127.0.0.1, including webSocketDebuggerUrl. Now, the attacker knows the webSocketDebuggerUrl and can connect to is using WebSocket. Note that WebSocket is not restricted by same-origin-policy. By doing so, they can gain the privileges of the Node.js instance.\nIn https://github.com/nodejs/node/blob/fdf0a84e826d3a9ec0ce6f5a3f5adc967fe99408/src/inspector_socket.cc#L164L175, the debugger does not recognise that 10.0.2.555 is not a valid IP address and so will allow disclosure of /json file.\nTo confirm this issue, I will just show two things (let me know if this is not enough):\nA) That when 10.0.2.555 is keyed into the browser (Firefox used), a DNS resolution request will be made by a browser to a DNS server, (thus, allowing the DNS rebinding vector to occur,\nOpen Wireshark\nAdd a redirector\nCode 55 Bytes\n1<?php\n2\n3header(\"Location: http://10.0.2.555:9229/json\");\n3: In the browser visit the the redirector\n4. In Wireshark, see that DNS resolution request is being made for 10.0.2.555\nB) That when 10.0.2.555 is resolved, the browser will send a Host: 10.0.2.555 which the NodeJS debugger accepts and exposes the /json file.\nModify /etc/hosts file\nCode 25 Bytes\n110.0.2.555      127.0.0.1\nVisit the redirector in A) to get redirected to the /json file.\nImpact:\nAttacker can gain access to the Node.js debugger, which can result in remote code execution.\nReferences:\nhttps://hackerone.com/reports/1069487\nhttps://nodejs.org/en/docs/guides/debugging-getting-started/\nRecommended Fix\nThe isIPAddress() check in https://github.com/nodejs/node/blob/fdf0a84e826d3a9ec0ce6f5a3f5adc967fe99408/src/inspector_socket.cc#L164L175 should be more stricter in validation.\nImpact\nAttacker can gain access to the Node.js debugger, which can result in remote code execution.\n\n",
+  "severity": [
+    7.1,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "OS Command Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1691786280,
+  "report_url": "https://hackerone.com/reports/1574078",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Victim runs node with --inspect option"
+    ],
+    [
+      2,
+      "Victim visits attacker's webpage"
+    ],
+    [
+      3,
+      "The attacker's webpage redirects to http://10.0.2.555:9229"
+    ],
+    [
+      4,
+      "10.0.2.555 is not a valid IP address so the browser asks the malicious DNS server and gets <attacker's-IP> with a short TTL."
+    ],
+    [
+      5,
+      "Victim loads webpage http://10.0.2.555:9229 from <attacker's-IP>."
+    ],
+    [
+      6,
+      "The webpage http://10.0.2.555:9229 tries to load http://10.0.2.555:9229/json from attacker's server."
+    ],
+    [
+      7,
+      "Due to a short TTL, the DNS server will be soon asked again about an entry for \u201c10.0.2.555\u201d. This time, the DNS server responds \u201c127.0.0.1\u201d."
+    ],
+    [
+      8,
+      "The http://10.0.2.555:9229 website (i.e., the one hosted on <attacker's IP>) will retrieve http://10.0.2.555:9229/json from 127.0.0.1, including webSocketDebuggerUrl."
+    ],
+    [
+      9,
+      "Now, the attacker knows the webSocketDebuggerUrl and can connect to is using WebSocket. Note that WebSocket is not restricted by same-origin-policy. By doing so, they can gain the privileges of the Node.js instance."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a DNS rebinding attack in Node.js's --inspect feature, where an invalid IP address (like 10.0.2.555) is used to bypass the IsAllowedHost check. This allows an attacker to trick the browser into making DNS requests to a malicious DNS server, which can then rebind to localhost (127.0.0.1) and access the Node.js debugger's JSON file, leading to potential remote code execution.",
+  "reason": "The attack involves multiple components (Node.js debugger, DNS server, browser behavior) and requires understanding of DNS rebinding, but the core vulnerability stems from a straightforward validation flaw in the IsIPAddress check. The interaction between these components is somewhat subtle but not overly complex.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "1069487",
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves DNS rebinding and invalid IP address validation in Node.js's --inspect feature, which is not directly related to the authentication or authorization bypass methodologies described. The proposed methodologies focus on testing user sessions, actions, and resource IDs within the same application context, whereas this issue involves external DNS manipulation and IP validation.",
+    "is_detectable": false
+  }
+}

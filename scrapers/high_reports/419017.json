@@ -1,0 +1,54 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "arinerron2 ",
+  "title": "SQL Injection in \u2588\u2588\u2588\u2588",
+  "content": "\nSummary:\nThere is an SQL injection vulnerability in the SSN field at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588/candidate_app/status_scholarship.aspx\nImpact\nAn attacker could use this vulnerability to control the content in the database, exfiltrate information, and potentially obtain remote code execution.\nStep-by-step Reproduction Instructions\nFollow these steps:\nVisit https://\u2588\u2588\u2588/\u2588\u2588\u2588/candidate_app/status_scholarship.aspx\nRight click on the SSN field, click Inspect Element, and edit maxlength=\"9\" by changing it to maxlength=\"9999\" (or something similar, so that a longer payload can be put in)\nChoose a random birth date, for example, January 1, 1990.\nEnter in your SQL injection payload into the SSN field. For example, try ' OR '1'='1.\nClick \"Check Status\". Your SQLi payload will execute. If you did the example payload in step 4, assuming someone has the birth date you entered, it will log in as them and check their scholarship status.\nAlso, I didn't do much testing, but I think the birth date is also vulnerable to SQL injection. After sending the request, in the network tab, Edit and Resend Request after changing the birth day, month, or year to a payload that will cause invalid syntax like '. It will give you an HTTP 500 response. If you do a payload that won't cause invalid syntax like '', it will give you an HTTP 200.\nSuggested Mitigation/Remediation Actions\nSanitize everything (use prepared statements) and validate the data.\nImpact\nAn attacker could use this vulnerability to control the content in the database, exfiltrate information, and potentially obtain remote code execution.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1566231720,
+  "report_url": "https://hackerone.com/reports/419017",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Visit the target URL: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588/candidate_app/status_scholarship.aspx"
+    ],
+    [
+      2,
+      "Inspect and modify the SSN field's maxlength attribute to allow a longer input (e.g., change maxlength=\"9\" to maxlength=\"9999\")"
+    ],
+    [
+      3,
+      "Enter a random birth date (e.g., January 1, 1990)"
+    ],
+    [
+      4,
+      "Input an SQL injection payload into the SSN field (e.g., ' OR '1'='1)"
+    ],
+    [
+      5,
+      "Click \"Check Status\" to execute the payload"
+    ]
+  ],
+  "vuln_description": "An SQL injection vulnerability exists in the SSN field of the scholarship status check page. Attackers can manipulate database queries to exfiltrate data or execute arbitrary commands.",
+  "reason": "The vulnerability involves straightforward manipulation of input fields and uses common SQL injection techniques. No complex application states or novel logic are required.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability involves manipulating input fields (SSN and birth date) to execute arbitrary SQL queries, which is a different class of vulnerability from the authN/authZ bypass or IDOR methodologies described. The proposed methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs, not on input validation or SQL query manipulation.",
+    "is_detectable": false
+  }
+}

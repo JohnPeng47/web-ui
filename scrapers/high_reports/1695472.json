@@ -1,0 +1,38 @@
+{
+  "reported_to": "Hyperledger",
+  "reported_by": "cre8 ",
+  "title": "DOS validator nodes of blockchain to block external connections",
+  "content": "\nAttack was documented in the in the github repo: https://github.com/hyperledger/indy-node/security/advisories/GHSA-x996-7qh9-7ff7\nAttack:\nThe attacker sends 500 read requests to each node and opens a new one when\nholding 500 parallel connections. Every user is able to send read requests\nsince it's a public readable registry so setting up an allowlist like it's\ndone with the nodes' port for the consensus does not work here. To increase\nthe efficiency:\nthe custom read request is increased with more bytes (random header or\njson values)\nthe bandwidth of the sender machine is limited\nRequirements on the attacker side:\nIndy-VDR: comment out the timeouts. Using another tool to send the requests\ncould be even more efficient\nVM: attack can be performed from one or multiple VMs limited connection: using\nTC to limit the bandwidth (value depends on the amount of connections)\nSample Implementation\nWe set up a VON-Network and added the firewall rules. The VM had 32 CPUs\nand 64 GB RAM\nResult:\nthere is no damage to the blockchain, only an unreachable network as long\nas the attack is going on .\nOther clients are not able to send read or write requests to the nodes. In\nthe \"best case\" their requests will go through but with a response time of\nmultiple seconds, see:\nNot available [image: image.png]\nNot available [image: image.png]\nCounteractions:\nblacklisting actors: It does not matter what is in the body since the\nfirewall rule acts in front of indy that is processing the information. To\navoid big requests the firewall could set a limit of the request size, but\nthis could also block valid requests.\nScaling via the observer-pattern: Right now the amount of nodes is\nlimited so blocking 25*500 connections is very easy. When adding nodes in\nfront of the validators to prevent accessing from the internet the\nvalidators are save, but then all the observers are under attack\nScalability: Giving the VMs more CPU and RAM to increase the parallel\nconnections amount can help in first run, but the DoS attack can be\nperformed as a DDos. An attacker does not have to DoS the network 24/7, but\ncan scale up the VMs on demand to attack a specific network. The setup is\ndone in about 2 minutes automatically. In our test we used 500 as the\nlimit. Maybe there is some kind of algorithm for the node administrators to\ncalculate the limit based on their CPU. But in this case the attacker can\nalso increase his ressources.\nImpact\nAn attacker can max out the number of client connections allowed by the ledger, leaving the ledger unable to be used for its intended purpose.\nHowever, the ledger content will not be impacted and the ledger will resume servicing client requests after the conclusion of the attack.\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": 1500,
+  "weaknesses": [
+    "Uncontrolled Resource Consumption"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1663070160,
+  "report_url": "https://hackerone.com/reports/1695472",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Set up a VON-Network and configure firewall rules to simulate the target environment."
+    ],
+    [
+      2,
+      "Use Indy-VDR or another tool to send 500 read requests to each validator node, opening new connections when holding 500 parallel connections. Customize requests with additional bytes to increase efficiency and limit bandwidth using TC."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to perform a Denial of Service (DoS) attack on Indy blockchain validator nodes by maxing out the number of client connections with read requests. This renders the network unreachable for legitimate users during the attack, though it does not damage the blockchain data.",
+  "reason": "The attack involves understanding the network's public readable registry nature, manipulating connection limits, and optimizing request efficiency. However, the core concept of overwhelming a service with requests is a well-known attack vector, making the discovery process less complex despite the specific optimizations applied.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

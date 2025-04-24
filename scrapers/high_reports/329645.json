@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "tiran ",
+  "title": "Silent omission of certificate hostname verification in LibreSSL and BoringSSL",
+  "content": "\nAbstract\nLibreSSL and BoringSSL implemented X509_VERIFY_PARAM_set1_host differently than OpenSSL. All applications that use the preferred and documented way to configure a TLS connection for hostname validation, silently neglect to perform hostname validation at all. As a consequence, they are vulnerable to MitM attacks.\nDescription\nOpenSSL 1.0.2 introduced the function X509_VERIFY_PARAM_set1_host. It sets the expected DNS hostname for a TLS connection. During the handshake, OpenSSL verifies, that the hostname matches one of the DNS names in the subject alternative name extension of the server's X.509 certificate. It's a critical step to authenticate the identity of a TLS server. A client must properly validate the server's DNS name.\nThe X509_VERIFY_PARAM_set1_host function takes three parameters. The second parameter is the expected host name, the third parameter is the length of the host name. OpenSSL allows the caller to pass in 0 as namelen. It indicates that the server name is a NULL terminated C string. It's documented in the man page for the function and used as example on OpenSSL's wiki page about hostname validation. The wiki page is the top hit for a Google search for \"openssl hostname validation\".\nLibreSSL and BoringSSL implement the same function. LibreSSL release 2.7.0 added X509_VERIFY_PARAM_set1_host just a few days ago. However both libraries behave differently in very subtle but critical way. Their implementation of X509_VERIFY_PARAM_set1_host(param, \"hostname\", 0) does not configure the TLS/SSL connection to validate the hostname. Instead the call only clears any previously configured hostname and returns success. As a consequence, LibreSSL and BoringSSL do not perform any hostname validation and except just any arbitrary certificate for any hostname as long as the certificate is generally trusted. Since the function call returns success, the application never sees an error, too.\nThe man page for LibreSSL 2.7.0 even documented to support the calling convention. The release took the divergent implementation from BoringSSL but the documentation from OpenSSL.\nDemo\nThe attached files and https://github.com/tiran/CVE-2018-8970 are a demo for the bug. WIth OpenSSL the command fails as expected with a hostname mismatch error:\nCode 206 Bytes\n1$ make\n2...\n3Error connecting to server\n4140678245971584:error:1416F086:SSL routines:tls_process_server_certificate:certificate verify failed:ssl/statem/statem_clnt.c:1230:\n5X509 verify error: Hostname mismatch\nWith LibreSSL 2.7.0 the command does not fail\nCode 367 Bytes\n1$ make SSL_BASEDIR=/path/to/libressl/2.7.0\n2...\n3./cve2018_8970_demo\n4HTTP/1.1 200 OK\n5Server: nginx\n6Content-Type: text/plain\n7X-Frame-Options: SAMEORIGIN\n8x-xss-protection: 1; mode=block\n9X-Clacks-Overhead: GNU Terry Pratchett\n10Via: 1.1 varnish\n11Content-Length: 539\n12Accept-Ranges: bytes\n13Date: Sun, 25 Mar 2018 12:30:49 GMT\n14...\n15CVE2018-8970: Expected a hostname mismatch error\nResources\nLibreSSL CVE https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-8970\nLibreSSL 2.7.1 fix https://github.com/libressl-portable/openbsd/commit/0654414afcce51a16d35d05060190a3ec4618d42\nBoringSSL ticket https://bugs.chromium.org/p/chromium/issues/detail?id=824799\nBoringSSL fix https://boringssl.googlesource.com/boringssl/+/e759a9cd84198613199259dbed401f4951747cff\nImpact\nThe silent omission of hostname verification completely breaks confidence of TLS/SSL protocol. It consequently allows man-in-the-middle attackers to spoof servers and obtain sensitive information via any certificate. An attacker can use any trusted certificate from any CA and pretend to be any website. For example a malicious Wifi provider could use a Lets Encrypt cert to spoof a user to be Apple, Google, or Facebook.\nCPython\nCPython's ssl module was directly affected by the bug. Since Python 3.7 the module uses X509_VERIFY_PARAM_set1_host(param, server_hostname, 0) to match the server's hostname against the certificate.\nMongo DB\nMongo DB's C driver also uses X509_VERIFY_PARAM_set1_host with namelen=0. The code segment is currently disabled for LibreSSL because it hasn't been ported to LibreSSL 2.7 yet. With high probability they would have been vulnerable, too.\nMore\nI suspect that more application are vulnerable to the bug. OpenSSL's wiki page https://wiki.openssl.org/index.php/Hostname_validation recommends X509_VERIFY_PARAM_set1_host(param, servername, 0); as preferred way to enable hostname verification. The namelen=0 is also explicitly mentioned in the documentation and man page for X509_VERIFY_PARAM_set1_host since OpenSSL 1.0.2 and LibreSSL 2.7.0.\n\n",
+  "severity": [
+    9.1,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Certificate Validation"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1569544680,
+  "report_url": "https://hackerone.com/reports/329645",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Use LibreSSL or BoringSSL to implement X509_VERIFY_PARAM_set1_host with namelen=0 for hostname validation."
+    ],
+    [
+      2,
+      "Observe that the function call returns success but no hostname validation is performed, allowing any trusted certificate to be accepted."
+    ]
+  ],
+  "vuln_description": "LibreSSL and BoringSSL incorrectly implement the X509_VERIFY_PARAM_set1_host function when called with namelen=0, silently omitting hostname verification. This allows man-in-the-middle attackers to spoof servers using any trusted certificate, as the client fails to validate the server's hostname against the certificate.",
+  "reason": "The vulnerability involves a subtle but critical divergence in the implementation of a security-critical function between OpenSSL and its forks. The issue is non-obvious because the function returns success while silently failing to perform its intended security check, and it affects a fundamental TLS security mechanism (hostname validation).",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

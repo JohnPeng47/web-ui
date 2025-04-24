@@ -1,0 +1,53 @@
+{
+  "reported_to": "Ubiquiti Inc.",
+  "reported_by": "vibs123i ",
+  "title": "Stored XSS in community.ubnt.com",
+  "content": "\nI have created two accounts\none attacker account: vibhuti123_i\nother victim account: John_victim\nattacker account:vibhuti123_i who will create a malicious link after uploading svg file embeded with script and doing stored xss.Now attacker vibhuti123_i will send this stored xss malicious link to victim:john_victim by posts,message,reply of ubnt community features or anyother way of communication.After this John_victim will believe this link as it is saved on community.ubnt.com server.It's no way look dangerous so john_victim will click this link and xss gets executed.\nThis stored xss link created by attacker will execute in every account and also it is accessible without login.\nhttp://community.ubnt.com/t5/image/serverpage/image-id/0iA7662344C5BC7B7E/image-size/thumb/is-preview/true?v=v2&px=100\nPlease go through Video POC:--\nhttps://youtu.be/Z0UCmv-Tpqs\nPLease read the Document of OWASP.org about svg xss below:\nhttps://www.owasp.org/images/0/03/Mario_Heiderich_OWASP_Sweden_The_image_that_called_me.pdf\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1493387700,
+  "report_url": "https://hackerone.com/reports/179164",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create two accounts on community.ubnt.com: one attacker account (vibhuti123_i) and one victim account (John_victim)."
+    ],
+    [
+      2,
+      "Using the attacker account, upload an SVG file embedded with a malicious script to perform stored XSS."
+    ],
+    [
+      3,
+      "Generate a malicious link from the uploaded SVG file and send it to the victim account via posts, messages, replies, or other communication methods within the community."
+    ],
+    [
+      4,
+      "The victim clicks the link, believing it to be safe since it is hosted on community.ubnt.com, and the XSS payload executes."
+    ]
+  ],
+  "vuln_description": "This vulnerability is a stored XSS in community.ubnt.com where an attacker can upload an SVG file containing a malicious script. The script is then executed when a victim clicks a link to the uploaded file, which is hosted on the community server. The attack is persistent and can affect multiple users, including those who are not logged in.",
+  "reason": "The attack involves uploading a malicious SVG file and crafting a link to it, which is a known technique for stored XSS. The interaction between the SVG file and the community platform is straightforward, and the attack does not require complex application state manipulation or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The stored XSS vulnerability involves an attacker uploading a malicious SVG file embedded with a script, which is then stored on the server. The attacker sends the link to the victim, who clicks it, executing the XSS. This vulnerability is not directly related to authentication or authorization bypass but rather to improper input validation and output encoding. The methodology described focuses on AuthN/AuthZ and IDOR vulnerabilities, which are different from XSS vulnerabilities.",
+    "is_detectable": false
+  }
+}

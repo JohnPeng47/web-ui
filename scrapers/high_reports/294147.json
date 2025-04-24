@@ -1,0 +1,45 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "pnig0s ",
+  "title": "Mercurial git subrepo lead to arbritary command injection",
+  "content": "\nHi IBB,\nI'd like to submit a issue exist in Mercurial.\nCode 324 Bytes\n1It is possible that a specially malformed repository can cause Git subrepositories to run arbitrary code in \n2the form of a .git/hooks/post-update script checked in to the repository in Mercurial 4.4 and earlier. \n3Typical use of Mercurial prevents construction of such repositories, but they can be created \n4programmatically.\nFurther details of my original report can be found at:\nhttps://bz.mercurial-scm.org/show_bug.cgi?id=5730\nAnd the Mercurial security advisory\nhttps://www.mercurial-scm.org/wiki/WhatsNew#Mercurial_4.4.1_.282017-11-07.29\nThanks,\nTerry\nImpact\nA crafted mercurial repo with an evil git subrepo can lead to execute arbritary command on user's OS. And other web applications or clients support mercurial repo management or invoke hg related command also have a risk affected by this vulnerability.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1569543300,
+  "report_url": "https://hackerone.com/reports/294147",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create a specially malformed Mercurial repository containing a Git subrepository with a malicious .git/hooks/post-update script."
+    ],
+    [
+      2,
+      "Programmatically push this repository to a target system or share it with a victim who uses Mercurial 4.4 or earlier."
+    ]
+  ],
+  "vuln_description": "A crafted Mercurial repository with a malicious Git subrepository can lead to arbitrary command execution on the user's OS via a .git/hooks/post-update script. This affects Mercurial 4.4 and earlier, particularly when repositories are created programmatically.",
+  "reason": "The vulnerability requires understanding both Mercurial and Git subrepository interactions, as well as the specific hook mechanism in Git. The attack involves manipulating repository states in a non-obvious way, but the components (hooks, subrepos) are well-documented features.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a crafted Mercurial repository with a malicious Git subrepository that can execute arbitrary commands. This is not directly related to authentication or authorization within a web application context, but rather a security flaw in the Mercurial software itself. The proposed methodologies focus on detecting authN/authZ bugs within web applications by manipulating user sessions and resource IDs, which does not apply to this Mercurial-specific vulnerability.",
+    "is_detectable": false
+  }
+}

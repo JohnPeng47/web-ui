@@ -1,0 +1,64 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "ledz1996 ",
+  "title": "Insufficient Type Check on GraphQL leading to Maintainer delete repository",
+  "content": "\nSummary\nAs you have know, Maintainer cannot delete/archive repository. But via GraphQL, they can do as there exists an sufficient check on GraphQL API\napp/graphql/mutations/snippets/destroy.rb\nCode 143 Bytes\n1  def resolve(id:)\n2        snippet = authorized_find!(id: id)\n3\n4        response = ::Snippets::DestroyService.new(current_user, snippet).execute\nThe function authorized_find lead to object_from_id!\napp/graphql/mutations/snippets/base.rb\nCode 305 Bytes\n1  def find_object(id:)\n2        GitlabSchema.object_from_id(id)\n3      end\n4\n5      def authorized_resource?(snippet)\n6        Ability.allowed?(context[:current_user], ability_for(snippet), snippet)\n7      end\n8\n9      def ability_for(snippet)\n10        \"#{ability_name}_#{snippet.to_ability_name}\".to_sym\n11      end\nHere there is no check for whether the Object returned from find_object is a Snippet. I could specify any object which the user have permission of\n\"#{ability_name}_#{snippet.to_ability_name}\".to_sym to.\nFor example: A DiffNote that is created by a Maintainer in the Project as the function.\nIf I have such a ID:\nCode 91 Bytes\n1mutation test{\n2  destroySnippet(input: {id: \"gid://gitlab/DiffNote/116\"}){\n3    errors\n4  }\n5}\nIt refer to an DiffNote with id 116\nPerfectly, a Maintainer have an admin_note and admin_snippet on a DiffNote (!!!)\nIn the mutation Destroy the call to ::Snippets::DestroyService.new(current_user, snippet) but the Object of snippet is actually a DiffNote\napp/services/snippets/destroy_service.rb\nCode 185 Bytes\n1  def attempt_destroy!\n2      result = Repositories::DestroyService.new(snippet.repository).execute\n3\n4      raise DestroyError if result[:status] == :error\n5\n6      snippet.destroy!\n7    end\nand in\napp/models/diff_note.rb\nCode 103 Bytes\n1  def repository\n2    noteable.respond_to?(:repository) ? noteable.repository : project.repository\n3  end\nIt return the project.repository which in turn the Project that the DestroyService gonna delete\nSteps to reproduce\nCreate 2 User: User A, User B\nUser A create a project set User B as Maintainer. unauthen1.PNG (F802288)\nUser B create 2 branch with the same file but different content unauthen2.PNG (F802287) unauthen3.PNG (F802289)\nCreate a merge request for those 2 Branch unauthen4.PNG (F802290)\nCreate a diff note for the file by clicking at the comment on a line of the file then Submit it unauthen5.PNG (F802291)\nTo know the ID of diff note, delete this one, the ID will show up in burp then you will know the ID of the next one unauthen6.PNG (F802292)\nUse the /-/graphiql-explorer to execute the following the query\nCode 91 Bytes\n1mutation test{\n2  destroySnippet(input: {id: \"gid://gitlab/DiffNote/118\"}){\n3    errors\n4  }\n5}\nunauthen7.PNG (F802293)\n8. Enjoy no repository\nunauthen8.PNG (F802294)\n9. If you click on Create empty repository It will actually make the Project 404 but It still show up on the User's project feed\nunauthen10.PNG (F802295)\nunauthen9.PNG (F802296)\n### Impact\nUnauthorized deleting of repository/project by maintainers\nOutput of checks\nThis bug happens on GitLab.com\nImpact\nUnauthorized deleting of repository/project by maintainers\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 1000,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1604351460,
+  "report_url": "https://hackerone.com/reports/858671",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Create two users: User A (owner) and User B (maintainer). User A creates a project and sets User B as maintainer."
+    ],
+    [
+      2,
+      "User B creates two branches with the same file but different content and creates a merge request."
+    ],
+    [
+      3,
+      "User B creates a diff note on the merge request by commenting on a line of the file."
+    ],
+    [
+      4,
+      "Identify the ID of the diff note (e.g., by deleting it and observing the ID in the response)."
+    ],
+    [
+      5,
+      "Use GraphQL to execute the mutation `destroySnippet` with the ID of the diff note (e.g., `gid://gitlab/DiffNote/118`)."
+    ],
+    [
+      6,
+      "Observe that the repository is deleted, and the project may become inaccessible."
+    ]
+  ],
+  "vuln_description": "A maintainer can delete a repository by exploiting a type-check flaw in the GraphQL API. The `destroySnippet` mutation does not verify that the provided ID belongs to a snippet, allowing any object (e.g., a `DiffNote`) to be passed. If the user has permissions to delete the object (e.g., `admin_note` on a `DiffNote`), the `Snippets::DestroyService` will attempt to delete the object's repository, which for a `DiffNote` is the project repository, leading to unauthorized deletion.",
+  "reason": "The vulnerability involves understanding the GraphQL mutation flow, the lack of type checking, and the interaction between the `destroySnippet` mutation and the `DiffNote` object's repository. The attacker must also recognize that a `DiffNote` can be used to indirectly target a project repository. This requires knowledge of GitLab's internal object model and permission system.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "idor_detectable": true,
+    "authnz_byppass_detectable": false
+  }
+}

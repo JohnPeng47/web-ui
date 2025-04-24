@@ -1,0 +1,64 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "mr_sparrow ",
+    "title": "Otp  bypass in verifying nin",
+    "content": "\nSummary:\nwhile conducting my research in your website I found that while verifying NIN number it send the otp to the enterd mobile number that can be bypassed.\nSteps To Reproduce:\n1) Go to https://nin.mtnonline.com/nin/\n2) click submit nin.Now it will redirect to another page https://nin.mtnonline.com/nin/\n3) It asks for mobile number and National Identity Number [NIN].\n4) Enter the mobile and NIN number and click Next.It will send the otp to the mobile number.\n5) Enter any 6 digit code and click verify and capture the request in bupsuite and click action and select \"Do intercept and response to the request\"\n6) Now change the response status to success.\n------>Now successfully verified mobile number.\nImpact\nThe attacker can able to verify NIN with any number.\nNote: I had attached the poc video below please take a look.\nRegards,\n@aaruthra.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Authentication - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1666002420,
+    "report_url": "https://hackerone.com/reports/1314172",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to https://nin.mtnonline.com/nin/"
+        ],
+        [
+            2,
+            "Click submit NIN, which redirects to another page"
+        ],
+        [
+            3,
+            "Enter mobile number and NIN, then click Next to receive OTP"
+        ],
+        [
+            4,
+            "Enter any 6-digit OTP and capture the request in Burp Suite"
+        ],
+        [
+            5,
+            "Intercept the response and modify the status to 'success'"
+        ],
+        [
+            6,
+            "Bypass OTP verification and successfully verify the NIN"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to bypass OTP verification for NIN (National Identity Number) validation by intercepting and modifying the server response to indicate a successful verification, even with an incorrect OTP.",
+    "reason": "The attack involves intercepting and modifying a server response, which is a straightforward technique for someone familiar with tools like Burp Suite. The steps are linear and do not require deep understanding of complex application states or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

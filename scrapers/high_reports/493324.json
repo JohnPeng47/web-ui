@@ -1,0 +1,91 @@
+{
+    "reported_to": "GitLab",
+    "reported_by": "skavans ",
+    "title": "Privilege escalation from any user (including external) to gitlab admin when admin impersonates you",
+    "content": "\nSummary:\nHey team,\nI have discovered a way for any logged in user (attacker) to escalate his privileges to gitlab administrator if the real gitlab administrator impersonates attacker's account.\nDescription:\nWhen the gitlab admin impersonates some user, he gets new _gitlab_session cookie and then clicking at Stop impersonating he gets his own admin's cookie back. The vulnerability is that the impersonated user (attacker in our case) can see impersonated session at the Active sessions so he can switch to it (manually setting it in cookie) and click Stop impersonating by himself. This is a way how he can become gitlab administrator.\nSteps To Reproduce:\nSign into gitlab app as some user (attacker)\nGo to the active sessions settings tab and revoke all the sessions besides the current active one\nSign into gitlab app in other browser as administrator (admin)\nGo to users admin section and impersonate attacker user\n<image_0>\nInspect the Revoke button and make sure you see the session ID there. Copy it. \u2588\u2588\u2588\u2588\nGo to index page of gitlab as attacker (http://gitlab.bb/ in my case), I do not know why, but it is important step\nClear attacker browser's cookie\nOpen the developer console as attacker and manually set _gitlab_session to the copied one with:\nCode 42 Bytes\n1document.cookie = \"_gitlab_session=\u2588\u2588\u2588\u2588\u2588\";\n<image_1>\nClick Stop impersonating at the top-right corner as attacker and make sure you are now logged in as gitlab admin. \u2588\u2588\u2588\nImpact\nEvery gitlab authenticated user can escalate his privileges to admin ones and give complete access to all gitlab services, projects and abilities. Only he needs to do is ask admin to impersonate his account because of something works bad there.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Privilege Escalation"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/420/971/5dac29fdf1a53e4c13e203e6f45719a7272f4a53/Untitled.jpeg?response-content-disposition=attachment%3B%20filename%3D%22Untitled.jpeg%22%3B%20filename%2A%3DUTF-8%27%27Untitled.jpeg&response-content-type=image%2Fjpeg&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYTA2PCB7%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T225957Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCKX632%2Fp25g5R%2FtwWWb8kPMBxK1ddX%2F%2BdSJD4%2Bs0wSPQIgKa%2BtmeMp8IKjDURUG15YU6FdRwqLvosUlGcJxiiR1IQqsgUIIBADGgwwMTM2MTkyNzQ4NDkiDIIgY4gsJwKHjc2rHiqPBQgGjxYmWhuEH9NVvonJoOmJFca3x7by%2F%2FngcoSUkLq5g923AjuGAZc8BVtu52fb4TBS1Zu8Cd%2Bh0DIEqwVraNkwmb2NgcJLsp%2FJxknz2eY50Py%2FyV21HFlstZwtnR%2F2jpJa6B6HIqnciMWzNhBBaQi4Cl7RizuoGHDwf86U6kyWccBCVl97I1NGlCEv7Vga1bZcKy0VWQZXVs5ZX6xvvvOiZ6qNavAA0Ecvb33k9L2X7MPPN32xSPtJB2M1mRRocXBvwTivpBZyuDfPnUGBL1o1VM0Uc8xX%2BFR%2BK%2BO7osgup5TKwH%2FF8RjmP3T3z1h56B1KSoD3awEJXSUR7UWOXzvXcx68dtpp1Yb%2BpcR%2BODxVsDqidhR5R0%2FIoYGmzEJOOHL%2BJ27U%2BiRQOEiDr7RZPwl2xUrOmyWyVYr%2BaSCZ%2FgnnePhbRJxF1O%2BrKnD%2Fy2%2BpTpdeGAFp%2BNkRwGfQ88RAgTyUtTKl12G8gB%2BnxzL74ol3CxFMGLxTfV%2FoJJimjfrus%2BwWfF7ynH9xxdAPWZwMtYbdoYKZFvFVC%2FJbJWW3NH6lBoFXYLC1ujGgPCOeYmjRHtiJiBKm9xbtOym0%2BQn6VKfYogabJCusRZ8iwhE5mXdDddVOoW5304ISWqnJBYGjYgFxIkBEb46jzmljgrk4wzCIG%2FNPH%2BqwnlN84y4cii3JjMutJbsWfeg4K%2FfHzppSsQIYCHiZ29%2BOfl2BNNwr7P8GfofLoKLYRNy2sh3Mw0FdCVytZsecE9O1ohidk6KJuHk9imrtoZn24HESoHQJkO1uNGccy%2FxwsFRA6Dzw9DeRCWafzN%2FD5QK84qTkms8ALE6R3Dk%2B4CanKe%2Fog0sKpwRgEl2kusBDC1QO9L2F9u4wzOaMvwY6sQEIDVL2HhLMZMfDsNZl2RS%2BJvygnQe3JL2i9yeh6o7XwqWpJCWGSq1fgLGhWqQfOYxKJlTyV9HemQ112%2BccScB9%2BNNrgSITKmoxhWDaGSPefsjL%2F6cfBpgA6gW46ymzipm%2BxQ%2FxfeQYjEw7Rjwc5yi3eDJHe7BVeeNnyVVA9AvX%2BGjS%2Bzq8zyQZ1LxZDbP0eXhj0mFOJZHo4bxKEiSdoJzRqn6SCcH3KSFc2AJ%2BoZbPZk8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=24cafffcb4ad36a5f7df6920d41062f06ecb99870ebd3a98438c950dbd2825e7",
+        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/420/978/70fbaacfce19717f5d13564625f525bc8bd50d98/Untitled2.jpeg?response-content-disposition=attachment%3B%20filename%3D%22Untitled2.jpeg%22%3B%20filename%2A%3DUTF-8%27%27Untitled2.jpeg&response-content-type=image%2Fjpeg&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYTA2PCB7%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T225957Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCKX632%2Fp25g5R%2FtwWWb8kPMBxK1ddX%2F%2BdSJD4%2Bs0wSPQIgKa%2BtmeMp8IKjDURUG15YU6FdRwqLvosUlGcJxiiR1IQqsgUIIBADGgwwMTM2MTkyNzQ4NDkiDIIgY4gsJwKHjc2rHiqPBQgGjxYmWhuEH9NVvonJoOmJFca3x7by%2F%2FngcoSUkLq5g923AjuGAZc8BVtu52fb4TBS1Zu8Cd%2Bh0DIEqwVraNkwmb2NgcJLsp%2FJxknz2eY50Py%2FyV21HFlstZwtnR%2F2jpJa6B6HIqnciMWzNhBBaQi4Cl7RizuoGHDwf86U6kyWccBCVl97I1NGlCEv7Vga1bZcKy0VWQZXVs5ZX6xvvvOiZ6qNavAA0Ecvb33k9L2X7MPPN32xSPtJB2M1mRRocXBvwTivpBZyuDfPnUGBL1o1VM0Uc8xX%2BFR%2BK%2BO7osgup5TKwH%2FF8RjmP3T3z1h56B1KSoD3awEJXSUR7UWOXzvXcx68dtpp1Yb%2BpcR%2BODxVsDqidhR5R0%2FIoYGmzEJOOHL%2BJ27U%2BiRQOEiDr7RZPwl2xUrOmyWyVYr%2BaSCZ%2FgnnePhbRJxF1O%2BrKnD%2Fy2%2BpTpdeGAFp%2BNkRwGfQ88RAgTyUtTKl12G8gB%2BnxzL74ol3CxFMGLxTfV%2FoJJimjfrus%2BwWfF7ynH9xxdAPWZwMtYbdoYKZFvFVC%2FJbJWW3NH6lBoFXYLC1ujGgPCOeYmjRHtiJiBKm9xbtOym0%2BQn6VKfYogabJCusRZ8iwhE5mXdDddVOoW5304ISWqnJBYGjYgFxIkBEb46jzmljgrk4wzCIG%2FNPH%2BqwnlN84y4cii3JjMutJbsWfeg4K%2FfHzppSsQIYCHiZ29%2BOfl2BNNwr7P8GfofLoKLYRNy2sh3Mw0FdCVytZsecE9O1ohidk6KJuHk9imrtoZn24HESoHQJkO1uNGccy%2FxwsFRA6Dzw9DeRCWafzN%2FD5QK84qTkms8ALE6R3Dk%2B4CanKe%2Fog0sKpwRgEl2kusBDC1QO9L2F9u4wzOaMvwY6sQEIDVL2HhLMZMfDsNZl2RS%2BJvygnQe3JL2i9yeh6o7XwqWpJCWGSq1fgLGhWqQfOYxKJlTyV9HemQ112%2BccScB9%2BNNrgSITKmoxhWDaGSPefsjL%2F6cfBpgA6gW46ymzipm%2BxQ%2FxfeQYjEw7Rjwc5yi3eDJHe7BVeeNnyVVA9AvX%2BGjS%2Bzq8zyQZ1LxZDbP0eXhj0mFOJZHo4bxKEiSdoJzRqn6SCcH3KSFc2AJ%2BoZbPZk8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=210e2ec2c9ca8ef4ec9ff08b72b6285d3bdb08c340a535928d55446b8a89c960"
+    },
+    "disclosed_date": 1598465400,
+    "report_url": "https://hackerone.com/reports/493324",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Login to GitLab as a normal user (the 'attacker')"
+        ],
+        [
+            2,
+            "Navigate to the Active Sessions settings tab"
+        ],
+        [
+            3,
+            "Revoke all sessions except your current active session"
+        ],
+        [
+            4,
+            "Have a GitLab administrator login (in a different browser) and impersonate your account"
+        ],
+        [
+            5,
+            "As the attacker, refresh your Active Sessions page - you'll now see a second active session (this is the administrator's impersonation session)"
+        ],
+        [
+            6,
+            "Inspect the 'Revoke' button for this second session and copy the session ID"
+        ],
+        [
+            7,
+            "Navigate to the GitLab homepage (http://gitlab.bb/ in the example)"
+        ],
+        [
+            8,
+            "Clear your browser cookies"
+        ],
+        [
+            9,
+            "Open developer console and manually set the GitLab session cookie to the copied session ID"
+        ],
+        [
+            10,
+            "Refresh the page - you are now in the administrator's impersonation session"
+        ],
+        [
+            11,
+            "Click 'Stop impersonating' in the top-right corner"
+        ],
+        [
+            12,
+            "You now have full administrator access to GitLab"
+        ]
+    ],
+    "vuln_description": "This vulnerability allows a regular GitLab user to gain administrator privileges when an administrator uses the impersonation feature to access their account. The issue occurs because the impersonated user can access and hijack the administrator's impersonation session, then exit the impersonation mode to gain the administrator's original privileges.",
+    "reason": "This vulnerability involves understanding how the session impersonation feature works in different contexts, one from the user side and one from the admin side. It also contains a non-obvious interaction logic between the impersonated and impersonator, namely that the current session ID of the impersonator would be saved and stored on the client side, and readable to the impersonated user.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

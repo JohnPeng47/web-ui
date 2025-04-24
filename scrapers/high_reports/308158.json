@@ -1,0 +1,38 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "bayotop ",
+    "title": "[html-janitor] Bypassing sanitization using DOM clobbering",
+    "content": "\nModule:\nName: html-janitor\nVersion: 2.0.2\nSummary:\nArbitrary HTML can pass the sanitization process, which can be unexpected and dangerous (XSS) in case user-controlled input is passed to the clean function.\nDescription:\nProof of concept:\nCode 278 Bytes\n1var myJanitor = new HTMLJanitor({tags:{p:{}}});\n2var cleanHtml = myJanitor.clean(\"<form><object onmouseover=alert(document.domain) name=_sanitized></object></form>\")\n3console.log(cleanHtml) // logs: <form><object onmouseover=alert(document.domain) name=_sanitized></object></form>\nThe following check can be leveraged to bypass the whole sanitization process:\nCode 104 Bytes\n1do {\n2  // Ignore nodes that have already been sanitized\n3  if (node._sanitized) {\n4      continue;\n5  }\n6...\nAs node is the first child in the created tree walker (i.e. in this case the <form> tag) node._sanitized will point to the inner <object> and the check passes.\nTo learn more about DOM clobbering see: https://www.youtube.com/watch?v=5W-zGBKvLxk (by Mario Heiderich)\nRecommendation:\nIt should be enough to set node._sanitized to false every time a new node is being processed.\nNote that I previously reported this issue at https://github.com/guardian/html-janitor/issues/35\nImpact\nGiven the module's description I would assume it should be used to prevent XSS vulnerabilities. This is currently a very dangerous assumption given that the whole sanitization process can be bypassed.\nNote that the author might have never intended to feed untrusted data into the clean() function. In that case this is just a regular issue. Furthermore, the fact that untrusted data is unexpected should be at least mentioned in the documentation, because other developers most certainly will use the package in such scenarios.\n\n",
+    "severity": [
+        8.8,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1517871240,
+    "report_url": "https://hackerone.com/reports/308158",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Create a new HTMLJanitor instance with limited allowed tags (e.g., only <p> tags)"
+        ],
+        [
+            2,
+            "Call the clean() method with a malicious HTML string containing DOM clobbering (e.g., <form><object onmouseover=alert(document.domain) name=_sanitized></object></form>)"
+        ]
+    ],
+    "vuln_description": "The html-janitor module fails to properly sanitize HTML input due to a DOM clobbering vulnerability. By creating a specific HTML structure with a node named '_sanitized', an attacker can bypass the entire sanitization process, potentially leading to XSS attacks when user-controlled input is passed to the clean() function.",
+    "reason": "This vulnerability requires understanding of DOM clobbering techniques and how they interact with the sanitizer's internal checks. While the attack vector itself is straightforward once known, discovering it requires knowledge of both the sanitizer's implementation details and DOM clobbering techniques.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "https://github.com/guardian/html-janitor/issues/35"
+}

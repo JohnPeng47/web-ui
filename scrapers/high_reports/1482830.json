@@ -1,0 +1,38 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "q9m ",
+    "title": "Insecure Storage of Sensitive Information on lonestarcell.com server",
+    "content": "\nHello , i hope your doing well\ni found some sensitive information disclosure at those endpoint\nit is disclosure server status and some other stuff\nhttps://simregistration.lonestarcell.com//monitoring/DB02/DB02.html#System\nhttps://simregistration.lonestarcell.com//monitoring/DB01/index.html\nhttps://simregistration.lonestarcell.com//monitoring\nImpact\nSensitive Information disclosure on lonestarcell server\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Insecure Storage of Sensitive Information"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1649545080,
+    "report_url": "https://hackerone.com/reports/1482830",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the URL: https://simregistration.lonestarcell.com//monitoring/DB02/DB02.html#System"
+        ],
+        [
+            2,
+            "Observe the exposed server status and other sensitive information on the page"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the insecure storage and exposure of sensitive information on the lonestarcell.com server. The endpoints listed in the report disclose server status and other sensitive data, which could be leveraged by an attacker for further exploitation.",
+    "reason": "The vulnerability was discovered by simply navigating to publicly accessible URLs, which directly exposed sensitive information without any need for complex interactions or manipulations. The discovery did not involve multiple components, subtle interactions, complex states, or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,58 @@
+{
+  "reported_to": "Ed",
+  "reported_by": "h1_analyst_everton ",
+  "title": "Physical Laptop Takeover",
+  "content": "\n<image_0>\nReport Summary\nDuring our analysis and reconnaissance of how Ed program worked during the h1-702 event, we realized there was a critical flaw on how the program was setup.\nReport Description\nDuring the process, we realized that the program manager had tendency to leave secrets open in the wild. While analyzing this, we decided to look into hardware hacking. So as we looked around, we found that the owner of the program left their computer open. What was worse is that it allowed us to to use this to exploit this and get root access into multiple services.\n<image_1>\nAfter we had access to the laptop, we decided to start the first exploiting for PoC by taking a screenshot of our team. This helps to prove that we could do anything we wanted.\nImpact\nAccess to internal documentations, Ed program statistics and internal details.\nMOST IMPORTANT IMPACT\nShame Ed on the company Slack\n<image_2>\nThe Triage send their regards!\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Privacy Violation"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/332/214/73716a9caa8121d82b346b1e2221dcc1c2f4297a/chris.gif?response-content-disposition=attachment%3B%20filename%3D%22chris.gif%22%3B%20filename%2A%3DUTF-8%27%27chris.gif&response-content-type=image%2Fgif&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQXBSRKY2D%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T163638Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBjLdF7v3LjH78Xfq78bU%2FrdLRb7kzYtq2C%2BZCEI6rHiAiEAxV%2FRygmQgUTn5yEdeNExn3DuNc56SQRuLSHpVdcwjuoqsgUILRADGgwwMTM2MTkyNzQ4NDkiDI%2Fm7W6vUElGJhP8tiqPBVzxLwaAD5CG2dGnoK6tr80yVbHc4CRci%2FNOyKiCadpQmJkp8qNIQ4gtNf3dy7dEbHnk%2FTMB0AOmT4pwYJ7Rjel%2BmfU%2BBqhen9wjOGqPLwhOWfJApmL5lfWbtqJho1en9BjLamm%2FQgrCfk6CxWxqs6GBcLQOfQmbEo8zAOAxHhglEDY78NPhzHiLa2kegesS19ouSMB3pgwn%2FJOh5cMrUtFh%2Fv1JrVcFv%2Bt2zSON8oFeXZS9ZSBblVKWW6Q8kg2tkjgeJpKXv1ZBOtU7NQYVTSMlwx1DtiyDsjHG7VEl7RBjsLvTy9EJSxNmS5Q0Y0wVZdhaLHK%2Fqe%2BY8sao0mvC16ea5VOpaEkhiZcFwWjl%2F%2F2h%2BJZej8Os3Z6SoDTZE7T5%2B8ZpwubClxZtFwvzq1a7itRDHwO7bNfrqpl4yvFs7m5Jbqjna6%2FgcoKq6DsDcVImizCU5Syn%2B%2BjhBrvdbAM9n0bQKi8WcdbEl8KlXVsACpP4Z6%2B5AZgkfcWz%2FUA9i0n%2BYHGFF56Z9LHf8XhDjy7Uyc3ECcja874fFyPv2bl1tqZOLJp35bYvO10PCTCq4IPujuCvydRrplZB42uLHYfPif9sbDqyH4tiVZRr%2BdDciutFQBYnJSYasZwKDwG%2F3qboqv7fXBJIZWK7VmvDUBijsFAtvgsumrU7s5mfo9R37HeXpgdvWjXHcBEfLJ64Xieh4lBDXJgTaH3E1jzl8eFes6FlPo3SLsgoRAxLrVOVlFltabBCXFOh5Y%2FBWmQTzKjKFa2xwoEOf7AmM9JMrviN%2BzHdcfV9sUF7cjMv7UZxk%2FZDN9Zt0jkfBVepiOIubaAiAMpnfU%2BmcpjlpDlQ%2FoWjJXOcdahYd3UnGAmJxc%2Bn0mgwh8mPvwY6sQFywJP9AkdA7Z31aMrgZ%2FIt58Cb%2FZMITAeGUgghS0tI4mRouKJWoVH%2BPq%2BACgMEkxDsIJlhSdZXHDbaAvpIxr8eTrnfP3eR5gP33WesQDUzTuM9Lfh9XSAD%2BlvocYkw2sUt9NjRrg3FYn1YHP0EU3%2BJw%2BjpgnO%2FCdL%2FnVXVojz7nvjTZiN7eFE6hD%2BnTLBAiiXYqjQhpXZj4VvPPqAeZRTtzEQ6eLk4IVJI1sanGrA1vAY%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=6424148bb0d4c7d2fc6ce6c194633a7951db9d1434aea637de831aa9a14daa12",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/332/215/79126a8f3b33174a05c6ac19fe945cd367d1e3c0/damn.gif?response-content-disposition=attachment%3B%20filename%3D%22damn.gif%22%3B%20filename%2A%3DUTF-8%27%27damn.gif&response-content-type=image%2Fgif&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQXBSRKY2D%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T163638Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBjLdF7v3LjH78Xfq78bU%2FrdLRb7kzYtq2C%2BZCEI6rHiAiEAxV%2FRygmQgUTn5yEdeNExn3DuNc56SQRuLSHpVdcwjuoqsgUILRADGgwwMTM2MTkyNzQ4NDkiDI%2Fm7W6vUElGJhP8tiqPBVzxLwaAD5CG2dGnoK6tr80yVbHc4CRci%2FNOyKiCadpQmJkp8qNIQ4gtNf3dy7dEbHnk%2FTMB0AOmT4pwYJ7Rjel%2BmfU%2BBqhen9wjOGqPLwhOWfJApmL5lfWbtqJho1en9BjLamm%2FQgrCfk6CxWxqs6GBcLQOfQmbEo8zAOAxHhglEDY78NPhzHiLa2kegesS19ouSMB3pgwn%2FJOh5cMrUtFh%2Fv1JrVcFv%2Bt2zSON8oFeXZS9ZSBblVKWW6Q8kg2tkjgeJpKXv1ZBOtU7NQYVTSMlwx1DtiyDsjHG7VEl7RBjsLvTy9EJSxNmS5Q0Y0wVZdhaLHK%2Fqe%2BY8sao0mvC16ea5VOpaEkhiZcFwWjl%2F%2F2h%2BJZej8Os3Z6SoDTZE7T5%2B8ZpwubClxZtFwvzq1a7itRDHwO7bNfrqpl4yvFs7m5Jbqjna6%2FgcoKq6DsDcVImizCU5Syn%2B%2BjhBrvdbAM9n0bQKi8WcdbEl8KlXVsACpP4Z6%2B5AZgkfcWz%2FUA9i0n%2BYHGFF56Z9LHf8XhDjy7Uyc3ECcja874fFyPv2bl1tqZOLJp35bYvO10PCTCq4IPujuCvydRrplZB42uLHYfPif9sbDqyH4tiVZRr%2BdDciutFQBYnJSYasZwKDwG%2F3qboqv7fXBJIZWK7VmvDUBijsFAtvgsumrU7s5mfo9R37HeXpgdvWjXHcBEfLJ64Xieh4lBDXJgTaH3E1jzl8eFes6FlPo3SLsgoRAxLrVOVlFltabBCXFOh5Y%2FBWmQTzKjKFa2xwoEOf7AmM9JMrviN%2BzHdcfV9sUF7cjMv7UZxk%2FZDN9Zt0jkfBVepiOIubaAiAMpnfU%2BmcpjlpDlQ%2FoWjJXOcdahYd3UnGAmJxc%2Bn0mgwh8mPvwY6sQFywJP9AkdA7Z31aMrgZ%2FIt58Cb%2FZMITAeGUgghS0tI4mRouKJWoVH%2BPq%2BACgMEkxDsIJlhSdZXHDbaAvpIxr8eTrnfP3eR5gP33WesQDUzTuM9Lfh9XSAD%2BlvocYkw2sUt9NjRrg3FYn1YHP0EU3%2BJw%2BjpgnO%2FCdL%2FnVXVojz7nvjTZiN7eFE6hD%2BnTLBAiiXYqjQhpXZj4VvPPqAeZRTtzEQ6eLk4IVJI1sanGrA1vAY%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=1a9eaaa504aab0176c3c95b1abc44cf7a92a1b041bfc9f9b8518950ff9752f7b",
+    "image_2": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/332/216/38e0ec1ff0eed33ca16a933ec3e55a378f5950f7/Photo_on_11.08.18_at_18.16.jpg?response-content-disposition=attachment%3B%20filename%3D%22Photo_on_11.08.18_at_18.16.jpg%22%3B%20filename%2A%3DUTF-8%27%27Photo_on_11.08.18_at_18.16.jpg&response-content-type=image%2Fjpeg&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQXBSRKY2D%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T163638Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBjLdF7v3LjH78Xfq78bU%2FrdLRb7kzYtq2C%2BZCEI6rHiAiEAxV%2FRygmQgUTn5yEdeNExn3DuNc56SQRuLSHpVdcwjuoqsgUILRADGgwwMTM2MTkyNzQ4NDkiDI%2Fm7W6vUElGJhP8tiqPBVzxLwaAD5CG2dGnoK6tr80yVbHc4CRci%2FNOyKiCadpQmJkp8qNIQ4gtNf3dy7dEbHnk%2FTMB0AOmT4pwYJ7Rjel%2BmfU%2BBqhen9wjOGqPLwhOWfJApmL5lfWbtqJho1en9BjLamm%2FQgrCfk6CxWxqs6GBcLQOfQmbEo8zAOAxHhglEDY78NPhzHiLa2kegesS19ouSMB3pgwn%2FJOh5cMrUtFh%2Fv1JrVcFv%2Bt2zSON8oFeXZS9ZSBblVKWW6Q8kg2tkjgeJpKXv1ZBOtU7NQYVTSMlwx1DtiyDsjHG7VEl7RBjsLvTy9EJSxNmS5Q0Y0wVZdhaLHK%2Fqe%2BY8sao0mvC16ea5VOpaEkhiZcFwWjl%2F%2F2h%2BJZej8Os3Z6SoDTZE7T5%2B8ZpwubClxZtFwvzq1a7itRDHwO7bNfrqpl4yvFs7m5Jbqjna6%2FgcoKq6DsDcVImizCU5Syn%2B%2BjhBrvdbAM9n0bQKi8WcdbEl8KlXVsACpP4Z6%2B5AZgkfcWz%2FUA9i0n%2BYHGFF56Z9LHf8XhDjy7Uyc3ECcja874fFyPv2bl1tqZOLJp35bYvO10PCTCq4IPujuCvydRrplZB42uLHYfPif9sbDqyH4tiVZRr%2BdDciutFQBYnJSYasZwKDwG%2F3qboqv7fXBJIZWK7VmvDUBijsFAtvgsumrU7s5mfo9R37HeXpgdvWjXHcBEfLJ64Xieh4lBDXJgTaH3E1jzl8eFes6FlPo3SLsgoRAxLrVOVlFltabBCXFOh5Y%2FBWmQTzKjKFa2xwoEOf7AmM9JMrviN%2BzHdcfV9sUF7cjMv7UZxk%2FZDN9Zt0jkfBVepiOIubaAiAMpnfU%2BmcpjlpDlQ%2FoWjJXOcdahYd3UnGAmJxc%2Bn0mgwh8mPvwY6sQFywJP9AkdA7Z31aMrgZ%2FIt58Cb%2FZMITAeGUgghS0tI4mRouKJWoVH%2BPq%2BACgMEkxDsIJlhSdZXHDbaAvpIxr8eTrnfP3eR5gP33WesQDUzTuM9Lfh9XSAD%2BlvocYkw2sUt9NjRrg3FYn1YHP0EU3%2BJw%2BjpgnO%2FCdL%2FnVXVojz7nvjTZiN7eFE6hD%2BnTLBAiiXYqjQhpXZj4VvPPqAeZRTtzEQ6eLk4IVJI1sanGrA1vAY%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=464032890986a452689f3f468765f1e57f9082e64ccc9072b7002afad2c5bda5"
+  },
+  "disclosed_date": 1534076340,
+  "report_url": "https://hackerone.com/reports/393615",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "IOT",
+  "steps": [
+    [
+      1,
+      "Identify that the program manager has a tendency to leave secrets exposed in the environment."
+    ],
+    [
+      2,
+      "Locate the unattended and unlocked laptop belonging to the program manager."
+    ],
+    [
+      3,
+      "Physically access the laptop to gain root access to multiple services."
+    ],
+    [
+      4,
+      "Take a screenshot or perform other actions to demonstrate control over the system."
+    ],
+    [
+      5,
+      "Access internal documentation, program statistics, and other sensitive data."
+    ],
+    [
+      6,
+      "Optionally, exploit the access to post messages on the company Slack to shame the program manager."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves physical access to an unattended and unlocked laptop belonging to a program manager, which allowed unauthorized root access to multiple internal services and sensitive data.",
+  "reason": "The attack primarily relies on physical access and does not involve complex interactions between multiple components or manipulation of application states. The discovery difficulty is low as it is straightforward to identify an unattended device.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": true,
+  "other_report": null
+}

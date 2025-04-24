@@ -1,0 +1,63 @@
+{
+    "reported_to": "Acronis",
+    "reported_by": "adr ",
+    "title": "Arbitrary file creation via symlink attack on syncagentsrv (Acronis Sync Agent Service)",
+    "content": "\nIssue class description\nArbitrary file creation is a vulnerability that allows attacker to create file in arbitrary location within filesystem. This includes protected directories, such as C:\\Windows, C:\\windows\\system32 and \"C:\\Program Files\". If in addition, attacker has control over the file content, it is possible to create DLL file which will be loaded by known operating system components and will result in Privilege Elevation to Local System (the highest level of privileges on local Windows system).\nThere are many known paths for this attacks, e.g. every desktop version of Windows will periodically run \"schedule\" service. The service will try to load non-existing library named WptsExtensions.dll. If attacker manages to plant custom version of this library, the code will be executed with highest privileges and can be used to add new administrative user or start reverse shell. The issue can be force by triggering system reboot as well. More details can be found here: https://itm4n.github.io/windows-dll-hijacking-clarified/\nTo perform this attack, typically we need privileged process that blindly follows symlinks (reparse points), without verifying destination. NTFS symlinks require extra privileges, but attacker can use other kind of symlinks: directory junctions mixed with object directory symlinks. The ready to use solution is hosted on Google's Project Zero's github: https://github.com/googleprojectzero/symboliclink-testing-tools\nCreateSymlink.exe binary used in this attack originates from this source and can be downloaded to reproduce the attack.\nAffected software\n<image_0>\nThe vulnerable service is syncagentsrv (\"C:\\Program Files (x86)\\Common Files\\Acronis\\SyncAgent\\syncagentsrv.exe\")\nWhen service is running, it logs information into C:\\ProgramData\\Acronis\\SyncAgent\\logs\\syncagent.log file. The file is not exclusively opened, nor protected, and can be deleted at any time. The C:\\ProgramData\\Acronis\\SyncAgent\\logs\\ directory remains empty, thus can be transformed into directoy junction and symlink.\nOnce new entry is added to the log, the write operation will follow the symlink and write into arbitrary location. Attacker also controls the name of resulting file. The resulting file grants full control to EVERYONE, hence it is trivial to replace its content with custom code.\n<image_1>\nThe attack has been confirmed on my local system (when proper libraries were targeted) and I was able to elevate privileges.\nSteps to reproduce\nDelete C:\\ProgramData\\Acronis\\SyncAgent\\logs\\syncagent.log file. Make sure that directory is now empty.\nUse following command to create symlink: CreateSymlink.exe C:\\ProgramData\\Acronis\\SyncAgent\\logs\\syncagent.log C:\\Windows\\system32\\WptsExtensions.dll\nWait for data to be written into the log or force it by triggering system reboot. After the reboot verify successful file creation.\nReplace new file content (C:\\Windows\\system32\\WptsExtensions.dll) with custom DLL functionality - e.g. adding administrative user or spawning remote shell connection.\nReboot again to trigger Windows Scheduler loading new dll.\nImpact\nLow privileged user can overwrite any file in the system (this could lead to DoS) or create arbitrary files anywhere on the system. By creating arbitrary DLL, then replacing its content with custom code, user can elevate privileges up to Local System (the highest Windows privilege).\n\n",
+    "severity": [
+        8.7,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Privilege Escalation"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/pT547inJoTbSHjmHf5ADeDgZ?response-content-disposition=attachment%3B%20filename%3D%22TrueImage.png%22%3B%20filename%2A%3DUTF-8%27%27TrueImage.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ2Y6G2NUU%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T203632Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDJuqn9kdtu2Unz0Z7wyEsUibPx2F7drbSBOWFTL45NiAIge4cG2%2B%2FCYBRquViHAf1ya0yjWFza%2FbVJYvKGVp9AMAMqsgUIHRADGgwwMTM2MTkyNzQ4NDkiDAOQ94LYZ1Z2I%2FbT3iqPBZNoZ5Qv%2B6zwPjuiNOg%2B3bkXtXWKvZ3ms0qFE07q2iHxcWQUOVHSVmtoLfBGgOAVJ4UTChA9cehYQTyUrcfugsEnTnmmmuHNqhQoRlOkaDd0JdKKBQoddVioIXbRmIS7NYUOBGCRCAhg8SvRoMVwCSoCexVF4X%2FXHlEJphH82fzlJSBuDti8rAXeTRTqmkGp0oU9JQQHQL8xsJidlEKyPoRNW8xaNVlX%2BwN21KRoEDqlCIkHCEQGrt4gkgGLCJfDxrgr5f8FRA0N1VjtnFiKyr5v%2BE0pysS%2BJVmEffnsy8e3jNksHIwvaTS3DIRCAq%2Fg%2B6bV3m79B565y%2Fg9CgKPwYZ9UEu07JTnFpwqmwEQQEYzcviuU5wqHXFWf5oQLnqVHsKFX4s1QPEll74yw%2BzzmLRbWP7MriOVAZ0mr%2FeFn8xyEp0NEi1ry8biDtDGNl724FHGegwg81ar32RlncV%2B44raHdyYrFCgQS%2Fj86OVhe%2F2GOfWG%2BN14Dn1PRl6oOgjnqbd6cBPVglZA0S3zJ9TthJdqnxPIRGaU3dwuJpVmL%2Bvvtuid4NX%2FG6en7plOAX5IfYRvH84XWqY%2F%2FmcVkIQ6ViMLmWJuXvLuarqZzBldX9Vp8f4VLzJtVvxHCqUs7RBhN3PdDi0L0itzE85dpR2LDtXK2S%2F4bxtmPpzXG4jULH61Cgr277FE2XpOQDqpXrqTGibfanLYklNBliety5RMhusoGfSLVsY9%2F1vFj6Q58f4gR6TNeAwsUBeu3A%2B25yZORFE2NLz9Ws%2B9Gfbw%2FhL3%2FxJjIMrV10Sk6M8JdyZqfTI85Kq%2FlJc0tjmP4MhmsylrhI5VbE03gXJatRO%2BwZcivdG3BxDMOWcv78LZyfhvRgwgpGMvwY6sQFgw%2BWnsIdVBUuwXZ4atbgtCjB%2BL%2FYDSWwVvNsmQgwigXDKIrA4%2FXuCcmT9Ja%2Fo2btzVyeKU2W3BtD1lVfd5sQXH76dj5ggdRuKpmKNPFGfpZyOxcvaA%2FbDdvbGQI0IQ2XHcfbuXi3lC0dQifpqefiLpk27Z17BEKw8OJHiMDLBhiNp26sIBDCT8URGtSIN4%2B6yuL%2BtaKnxIxjuyPzjAR8okSQUl94hX9Y6h3D3BO6iRPg%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=7894c564aea3e28f352917534adeb3e2c074d8ddc55d6c628d6819910a576c49",
+        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/wJSfS2QSrqgu2MWG1hDXWFBi?response-content-disposition=attachment%3B%20filename%3D%22dll.png%22%3B%20filename%2A%3DUTF-8%27%27dll.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ2Y6G2NUU%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T203632Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDJuqn9kdtu2Unz0Z7wyEsUibPx2F7drbSBOWFTL45NiAIge4cG2%2B%2FCYBRquViHAf1ya0yjWFza%2FbVJYvKGVp9AMAMqsgUIHRADGgwwMTM2MTkyNzQ4NDkiDAOQ94LYZ1Z2I%2FbT3iqPBZNoZ5Qv%2B6zwPjuiNOg%2B3bkXtXWKvZ3ms0qFE07q2iHxcWQUOVHSVmtoLfBGgOAVJ4UTChA9cehYQTyUrcfugsEnTnmmmuHNqhQoRlOkaDd0JdKKBQoddVioIXbRmIS7NYUOBGCRCAhg8SvRoMVwCSoCexVF4X%2FXHlEJphH82fzlJSBuDti8rAXeTRTqmkGp0oU9JQQHQL8xsJidlEKyPoRNW8xaNVlX%2BwN21KRoEDqlCIkHCEQGrt4gkgGLCJfDxrgr5f8FRA0N1VjtnFiKyr5v%2BE0pysS%2BJVmEffnsy8e3jNksHIwvaTS3DIRCAq%2Fg%2B6bV3m79B565y%2Fg9CgKPwYZ9UEu07JTnFpwqmwEQQEYzcviuU5wqHXFWf5oQLnqVHsKFX4s1QPEll74yw%2BzzmLRbWP7MriOVAZ0mr%2FeFn8xyEp0NEi1ry8biDtDGNl724FHGegwg81ar32RlncV%2B44raHdyYrFCgQS%2Fj86OVhe%2F2GOfWG%2BN14Dn1PRl6oOgjnqbd6cBPVglZA0S3zJ9TthJdqnxPIRGaU3dwuJpVmL%2Bvvtuid4NX%2FG6en7plOAX5IfYRvH84XWqY%2F%2FmcVkIQ6ViMLmWJuXvLuarqZzBldX9Vp8f4VLzJtVvxHCqUs7RBhN3PdDi0L0itzE85dpR2LDtXK2S%2F4bxtmPpzXG4jULH61Cgr277FE2XpOQDqpXrqTGibfanLYklNBliety5RMhusoGfSLVsY9%2F1vFj6Q58f4gR6TNeAwsUBeu3A%2B25yZORFE2NLz9Ws%2B9Gfbw%2FhL3%2FxJjIMrV10Sk6M8JdyZqfTI85Kq%2FlJc0tjmP4MhmsylrhI5VbE03gXJatRO%2BwZcivdG3BxDMOWcv78LZyfhvRgwgpGMvwY6sQFgw%2BWnsIdVBUuwXZ4atbgtCjB%2BL%2FYDSWwVvNsmQgwigXDKIrA4%2FXuCcmT9Ja%2Fo2btzVyeKU2W3BtD1lVfd5sQXH76dj5ggdRuKpmKNPFGfpZyOxcvaA%2FbDdvbGQI0IQ2XHcfbuXi3lC0dQifpqefiLpk27Z17BEKw8OJHiMDLBhiNp26sIBDCT8URGtSIN4%2B6yuL%2BtaKnxIxjuyPzjAR8okSQUl94hX9Y6h3D3BO6iRPg%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=d8fe7f6e95c9ea0d2e56f12fcd59e4f5544c018509b229ba89d0d6e5e3fc613f"
+    },
+    "disclosed_date": 1615902300,
+    "report_url": "https://hackerone.com/reports/945122",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Delete C:\\ProgramData\\Acronis\\SyncAgent\\logs\\syncagent.log file and ensure the directory is empty."
+        ],
+        [
+            2,
+            "Use CreateSymlink.exe to create a symlink: CreateSymlink.exe C:\\ProgramData\\Acronis\\SyncAgent\\logs\\syncagent.log C:\\Windows\\system32\\WptsExtensions.dll"
+        ],
+        [
+            3,
+            "Wait for data to be written into the log or trigger a system reboot to force the write operation."
+        ],
+        [
+            4,
+            "Replace the content of the newly created file (C:\\Windows\\system32\\WptsExtensions.dll) with a custom DLL."
+        ],
+        [
+            5,
+            "Reboot the system to trigger Windows Scheduler to load the malicious DLL."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows arbitrary file creation via a symlink attack on the Acronis Sync Agent Service (syncagentsrv). By exploiting the service's logging behavior, an attacker can create a symlink that redirects log writes to a protected system directory (e.g., C:\\Windows\\system32). This can lead to privilege escalation by planting a malicious DLL (e.g., WptsExtensions.dll) that is loaded by system components with elevated privileges.",
+    "reason": "The attack involves multiple components: understanding the service's logging behavior, creating a symlink, and exploiting a known DLL hijacking vector (WptsExtensions.dll). While the individual steps are documented, combining them requires knowledge of both the service's behavior and Windows internals. The symlink creation and DLL hijacking are known techniques, but their application here is non-trivial.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": false
+    }
+}

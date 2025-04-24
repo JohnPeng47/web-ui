@@ -1,0 +1,44 @@
+{
+  "reported_to": "Flickr",
+  "reported_by": "asad0x01_ ",
+  "title": "Arbitrary file read via ffmpeg HLS parser at https://www.flickr.com/photos/upload",
+  "content": "\nSummary: FFmpeg is a video and audio software that is used for generating previews and for converting videos. Your current installation allows HLS playlists that contain references to external files, which leads to local file disclosure.\nSteps to Reproduce:\n1.Download the attached file. READ__etc_passwd.avi (F413554)\n2.Go to https://www.flickr.com/photos/upload/ and upload the attached file.\n<image_0>\nPlease let me know if you need any help :)\nImpact\nAn attacker can read files of etc/passwd or other contents.Also what I've seen it is possible to escalate this vulnerability to SSRF(https://www.blackhat.com/docs/us-16/materials/us-16-Ermishkin-Viral-Video-Exploiting-Ssrf-In-Video-Converters.pdf).Since I don't have any server I couldn't test :(\n\n",
+  "severity": [
+    9.9,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/413/555/c5306dc589f69f36180647856f3f9ddf58c3e5c2/Screenshot_2019-01-28_at_3.24.17_AM.png?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_2019-01-28_at_3.24.17_AM.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_2019-01-28_at_3.24.17_AM.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYTA2PCB7%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T015248Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCKX632%2Fp25g5R%2FtwWWb8kPMBxK1ddX%2F%2BdSJD4%2Bs0wSPQIgKa%2BtmeMp8IKjDURUG15YU6FdRwqLvosUlGcJxiiR1IQqsgUIIBADGgwwMTM2MTkyNzQ4NDkiDIIgY4gsJwKHjc2rHiqPBQgGjxYmWhuEH9NVvonJoOmJFca3x7by%2F%2FngcoSUkLq5g923AjuGAZc8BVtu52fb4TBS1Zu8Cd%2Bh0DIEqwVraNkwmb2NgcJLsp%2FJxknz2eY50Py%2FyV21HFlstZwtnR%2F2jpJa6B6HIqnciMWzNhBBaQi4Cl7RizuoGHDwf86U6kyWccBCVl97I1NGlCEv7Vga1bZcKy0VWQZXVs5ZX6xvvvOiZ6qNavAA0Ecvb33k9L2X7MPPN32xSPtJB2M1mRRocXBvwTivpBZyuDfPnUGBL1o1VM0Uc8xX%2BFR%2BK%2BO7osgup5TKwH%2FF8RjmP3T3z1h56B1KSoD3awEJXSUR7UWOXzvXcx68dtpp1Yb%2BpcR%2BODxVsDqidhR5R0%2FIoYGmzEJOOHL%2BJ27U%2BiRQOEiDr7RZPwl2xUrOmyWyVYr%2BaSCZ%2FgnnePhbRJxF1O%2BrKnD%2Fy2%2BpTpdeGAFp%2BNkRwGfQ88RAgTyUtTKl12G8gB%2BnxzL74ol3CxFMGLxTfV%2FoJJimjfrus%2BwWfF7ynH9xxdAPWZwMtYbdoYKZFvFVC%2FJbJWW3NH6lBoFXYLC1ujGgPCOeYmjRHtiJiBKm9xbtOym0%2BQn6VKfYogabJCusRZ8iwhE5mXdDddVOoW5304ISWqnJBYGjYgFxIkBEb46jzmljgrk4wzCIG%2FNPH%2BqwnlN84y4cii3JjMutJbsWfeg4K%2FfHzppSsQIYCHiZ29%2BOfl2BNNwr7P8GfofLoKLYRNy2sh3Mw0FdCVytZsecE9O1ohidk6KJuHk9imrtoZn24HESoHQJkO1uNGccy%2FxwsFRA6Dzw9DeRCWafzN%2FD5QK84qTkms8ALE6R3Dk%2B4CanKe%2Fog0sKpwRgEl2kusBDC1QO9L2F9u4wzOaMvwY6sQEIDVL2HhLMZMfDsNZl2RS%2BJvygnQe3JL2i9yeh6o7XwqWpJCWGSq1fgLGhWqQfOYxKJlTyV9HemQ112%2BccScB9%2BNNrgSITKmoxhWDaGSPefsjL%2F6cfBpgA6gW46ymzipm%2BxQ%2FxfeQYjEw7Rjwc5yi3eDJHe7BVeeNnyVVA9AvX%2BGjS%2Bzq8zyQZ1LxZDbP0eXhj0mFOJZHo4bxKEiSdoJzRqn6SCcH3KSFc2AJ%2BoZbPZk8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=c728209dc41183b9ac4b56403582dae35a4b9841ce041b9d7d9d2bc818eb3979"
+  },
+  "disclosed_date": 1579928580,
+  "report_url": "https://hackerone.com/reports/487008",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Download the attached file READ__etc_passwd.avi (F413554)."
+    ],
+    [
+      2,
+      "Go to https://www.flickr.com/photos/upload/ and upload the attached file."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves an arbitrary file read via the ffmpeg HLS parser on Flickr. By uploading a specially crafted AVI file containing an HLS playlist with references to external files, an attacker can disclose local files such as /etc/passwd. This could potentially be escalated to SSRF (Server-Side Request Forgery) under certain conditions.",
+  "reason": "The attack requires knowledge of ffmpeg's HLS parser behavior and crafting a malicious AVI file, but the steps to reproduce are straightforward once the exploit file is prepared. The interaction between the uploaded file and the ffmpeg parser is non-obvious but not highly complex.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an arbitrary file read via ffmpeg HLS parser, which is not related to authentication or authorization (AuthN/AuthZ) boundaries. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, which does not apply to this file read vulnerability.",
+    "is_detectable": false
+  }
+}

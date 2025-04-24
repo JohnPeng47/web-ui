@@ -1,0 +1,38 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "orange ",
+    "title": "Path Traversal on Resolve-Path",
+    "content": "\nThe author of resolve-path told me that I can submit this to here. The vulnerability already reported to the author and got a fixed!\nModule\nmodule name: resolve-path\nversion: 1.3.3\nnpm page: https://www.npmjs.com/package/resolve-path\nDescription\nResolve a relative path against a root path with validation.\nThis module would protect against commons attacks like GET /../file.js which reaches outside the root folder.\nModule Stats\nStats\n[8264] downloads in the last day\n[48226] downloads in the last week\n[210556] downloads in the last month\n~[2526672] estimated downloads per year\nDescription\nThe library failed to process path like C:../../ on Windows\nSteps To Reproduce:\nCode 55 Bytes\n1require('resolve-path')(\"C:/windows/temp/\", \"C:../../\")\nSupporting Material/References:\nWindows 10\nNode v8.9.4\nNPM 5.6.0\nWrap up\n[Y] I contacted the maintainer to let him know\n[N] I opened an issue in the related repository\nImpact\nThis is a high-dependency library, for example: KoaJS is suffered from this vulnerability\n[21086] downloads in the last day\n[113573] downloads in the last week\n[462543] downloads in the last month\n~[5550516] estimated downloads per year\n\n",
+    "severity": [
+        8.6,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Path Traversal"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1519352400,
+    "report_url": "https://hackerone.com/reports/315760",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Install the vulnerable version of resolve-path (1.3.3) in a Windows environment."
+        ],
+        [
+            2,
+            "Run the following code: `require('resolve-path')('C:/windows/temp/', 'C:../../')`"
+        ]
+    ],
+    "vuln_description": "The resolve-path library fails to properly validate and resolve paths on Windows when given input like 'C:../../', allowing path traversal outside the intended root directory.",
+    "reason": "The vulnerability involves a straightforward path manipulation technique specific to Windows path handling. While it requires knowledge of Windows path conventions, the attack vector is simple and doesn't involve multiple components or complex interactions.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

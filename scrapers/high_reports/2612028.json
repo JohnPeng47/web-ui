@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "xi4o7unj1e ",
+  "title": "important: Apache HTTP Server: SSRF with mod_rewrite in server/vhost context on Windows (CVE-2024-40898)",
+  "content": "\nI reported this vulnerability through the official Apache HTTP Server security email on 2024-07-12, and received a CVE number on 2024-07-17. You can check detailed information from here:\nhttps://httpd.apache.org/security/vulnerabilities_24.html\nImpact\nSSRF in Apache HTTP Server on Windows with mod_rewrite in server/vhost context, allows to potentially leak NTLM hashes to a malicious server via SSRF and malicious requests.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 4263,
+  "weaknesses": [
+    "None"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1724755620,
+  "report_url": "https://hackerone.com/reports/2612028",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Configure an Apache HTTP Server on Windows with mod_rewrite enabled in server/vhost context."
+    ],
+    [
+      2,
+      "Craft a malicious request that leverages mod_rewrite rules to perform an SSRF, potentially leaking NTLM hashes to a malicious server."
+    ]
+  ],
+  "vuln_description": "This vulnerability is an SSRF (Server-Side Request Forgery) in Apache HTTP Server on Windows when mod_rewrite is used in server/vhost context. It allows an attacker to potentially leak NTLM hashes to a malicious server via crafted requests.",
+  "reason": "The vulnerability involves understanding the interaction between mod_rewrite rules and Windows-specific NTLM authentication, which is a non-obvious interaction. Additionally, the attacker needs to craft specific requests to exploit this interaction, adding to the complexity.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

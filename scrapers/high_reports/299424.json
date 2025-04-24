@@ -1,0 +1,50 @@
+{
+  "reported_to": "Shopify",
+  "reported_by": "dr_dragon ",
+  "title": "Bypass Filter and get Stored Xss ",
+  "content": "\nDescription\nShopify allows developers to create a special type of application called a \"Sales Channel\". Developers are allowed to upload a 16x16 SVG \"Navigation Icon\" for their app provided the SVG follows the design guidelines which limits the allowed elements and attributes. For some reason when the SVG contains an XML entity this whitelist is no longer enforced allowing the developer to include malicious attributes such as onload. By uploading a malicious SVG a developer can obtain XSS on both partners.shopify.com, as well as any the admin panel of any shop which has authorized the sales channel.\nProof of Concept\nThis is relatively easy to reproduce, first create a new application within the Partners dashboard then navigate to \"Extensions\" -> \"Sales channel\" to convert the application. After saving those changes a new field within the \"App info\" section titled \"Navigation icon\". Upload the following SVG:\nCode 57 Bytes\n1<svg><!--?php \"--><script>confirm(20)</script>?&gt;</svg>\nImpact\nAn attacker can use XSS to send a malicious script to an unsuspecting user. The end user\u2019s browser has no way to know that the script should not be trusted, and will execute the script. Because it thinks the script came from a trusted source, the malicious script can access any cookies, session tokens, or other sensitive information retained by the browser and used with that site. These scripts can even rewrite the content of the HTML page. For more details on the different types of XSS flaws\n\n",
+  "severity": [
+    8.1,
+    null
+  ],
+  "bounty": 3000,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1544655000,
+  "report_url": "https://hackerone.com/reports/299424",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create a new application within the Partners dashboard."
+    ],
+    [
+      2,
+      "Navigate to 'Extensions' -> 'Sales channel' to convert the application."
+    ],
+    [
+      3,
+      "After saving changes, find the 'Navigation icon' field in the 'App info' section."
+    ],
+    [
+      4,
+      "Upload the malicious SVG: <svg><!--?php \"--><script>confirm(20)</script>?&gt;</svg>"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows developers to bypass SVG content restrictions by including an XML entity, which disables the whitelist enforcement. This enables the inclusion of malicious attributes like 'onload', leading to stored XSS in both partners.shopify.com and the admin panels of shops using the sales channel.",
+  "reason": "The attack requires understanding the SVG upload functionality and the specific bypass involving XML entities, but the steps are straightforward once the bypass method is known. The interaction between the XML entity and the whitelist enforcement is subtle but not highly complex.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves bypassing SVG filtering by including an XML entity, which is not directly related to authentication or authorization checks. The described methodology focuses on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, which does not apply to this SVG filtering bypass issue.",
+    "is_detectable": false
+  }
+}

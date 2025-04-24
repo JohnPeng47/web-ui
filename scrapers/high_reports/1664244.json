@@ -1,0 +1,38 @@
+{
+  "reported_to": "Hyperledger",
+  "reported_by": "bhaskar_ram ",
+  "title": "fix(security):Path Traversal Bug",
+  "content": "\nUnsanitized input from CLI argument flows into io.ioutil.ReadFile, where it is used as a path. This may result in a Path Traversal vulnerability and allow an attacker to read arbitrary files.\nSee this fix : https://github.com/hyperledger/fabric/pull/3573\nImpact\nThere is a path traversal vulnerability in the source code of fabric\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1660261980,
+  "report_url": "https://hackerone.com/reports/1664244",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify the CLI argument that is passed unsanitized to the io.ioutil.ReadFile function in the Hyperledger Fabric source code."
+    ],
+    [
+      2,
+      "Craft a malicious input that includes path traversal sequences (e.g., '../') to access arbitrary files outside the intended directory."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a path traversal issue where unsanitized input from a CLI argument is directly used in the io.ioutil.ReadFile function, allowing an attacker to read arbitrary files on the system by manipulating the input to include path traversal sequences.",
+  "reason": "The vulnerability is straightforward to discover as it involves a direct flow of unsanitized input into a file read operation, a common and well-documented security issue. The attack does not require multiple components, complex interactions, or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

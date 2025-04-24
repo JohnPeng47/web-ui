@@ -1,0 +1,38 @@
+{
+  "reported_to": "AWS VDP",
+  "reported_by": "perigou ",
+  "title": "CVE-2020-5902 ",
+  "content": "\nCVE ID: CVE-2020-5902\nDescription:\nAffected Product: F5 BIG-IP Traffic Management User Interface (TMUI)\nSeverity: Critical\nCVSS Score: 9.8\nDescription: Remote Code Execution (RCE) vulnerability in undisclosed pages of the TMUI\nCVE-2020-5902 is a critical vulnerability affecting the BIG-IP Traffic Management User Interface (TMUI), also known as the Configuration utility. This vulnerability allows for Remote Code Execution (RCE) in undisclosed pages of the TMUI.\nAffected Versions\nBIG-IP versions \u2588\u2588\u2588\u2588\nBIG-IP versions \u2588\u2588\u2588\u2588\u2588\nBIG-IP versions \u2588\u2588\u2588\nBIG-IP versions \u2588\u2588\u2588\nBIG-IP versions \u2588\u2588\u2588\nSteps To Reproduce:\nURL :\n\u2588\u2588\u2588\npayload used :/..;/tmui/locallb/workspace/fileRead.jsp?fileName=/etc/passwd\nFull URL:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588?fileName=/etc/passwd\nImpact\nSummary:\nThe vulnerability can be exploited by an attacker to execute arbitrary code on the affected system, leading to unauthorized access, data breaches, and system compromise.\n\n",
+  "severity": [
+    9.8,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Using Components with Known Vulnerabilities"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1735081620,
+  "report_url": "https://hackerone.com/reports/2794126",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Access the F5 BIG-IP TMUI using the vulnerable URL structure"
+    ],
+    [
+      2,
+      "Append the payload '/..;/tmui/locallb/workspace/fileRead.jsp?fileName=/etc/passwd' to the URL to read system files"
+    ]
+  ],
+  "vuln_description": "CVE-2020-5902 is a critical Remote Code Execution (RCE) vulnerability in the F5 BIG-IP Traffic Management User Interface (TMUI). It allows attackers to execute arbitrary code by exploiting a path traversal issue in undisclosed pages of the TMUI, leading to unauthorized access and potential system compromise.",
+  "reason": "The vulnerability involves a simple path traversal technique that is well-documented and does not require complex interactions or state manipulation. The attack vector is straightforward and does not involve novel logic or multiple components.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

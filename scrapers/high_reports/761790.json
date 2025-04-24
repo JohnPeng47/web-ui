@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "al-madjus ",
+    "title": "Leaked DB credentials on https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil/\u2588\u2588\u2588",
+    "content": "\nSummary:\nInformation disclosure with login credentials for ms-sql database exposed.\nDescription:\nI've found a PHP info file disclosed on https://\u2588\u2588\u2588\u2588\u2588.mil/\u2588\u2588\u2588\u2588\u2588\u2588 containing login credentials for a database cloud server (\u2588\u2588\u2588\u2588\u2588\u2588\u2588) as well as information on the host system such as hostname, username and full paths. The database server is up, but I have not tried connecting to it with the credentials, as I feel that would be going too far.\nImpact\nPossible access to database as well as disclosure of sensitive host information.\nStep-by-step Reproduction Instructions\nGo to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSearch for 'password', you should see this: Data Source=tcp:\u2588\u2588\u2588,\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588;Initial Catalog=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588;User Id=\u2588\u2588\u2588\u2588@\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588;Password=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nRun nc -vvv \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588 to confirm database is running and service ms-sql-s is accepting connections: (UNKNOWN) [\u2588\u2588\u2588\u2588\u2588\u2588\u2588] \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 (ms-sql-s) open ^C sent 0, rcvd 0\nProduct, Version, and Configuration (If applicable)\nSuggested Mitigation/Remediation Actions\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588 should not be available on the server.\nImpact\nPossible access to database as well as disclosure of sensitive host information.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1607049120,
+    "report_url": "https://hackerone.com/reports/761790",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to the exposed PHP info file at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
+        ],
+        [
+            2,
+            "Search for 'password' in the file to find the database credentials"
+        ]
+    ],
+    "vuln_description": "Information disclosure vulnerability where a PHP info file exposes login credentials for an MS-SQL database, including hostname, username, and full paths. The database server is accessible, potentially allowing unauthorized access.",
+    "reason": "The vulnerability involves a straightforward discovery process: accessing a publicly exposed PHP info file and searching for credentials. There are no complex interactions or novel logic required.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

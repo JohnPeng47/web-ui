@@ -1,0 +1,60 @@
+{
+  "reported_to": "Rocket.Chat",
+  "reported_by": "gronke ",
+  "title": "Guest Privilege Escalation to admin group",
+  "content": "\nDue to improper ACLs it was found possible to escalate privileges from a guest user to admin.\nAs first step the guest user adds itself to the bot group that holds the manage-own-integrations permission. With this permission it is possible to create a custom Integration with a script that, if triggered, adds the user to the admin group.\nThe insertOrUpdateUser method improperly validates a users permissions to change its groups. Because an explicit check prevents from adding itself to the admin group directly, the privileges of the bot group need to be used to further escalate to global admin.\nReleases Affected:\ndevelop@5f0180d\nSteps To Reproduce (from initial installation to vulnerability):\n(Add details for how we can reproduce the issue)\nLogin Guest user\nDetermine own users _id from browser traffic\nEscalate to bot group\nCreate malicious Integration script\nTrigger Integration\nSupporting Material/References:\nBot group privilege escalation\nCode 142 Bytes\n1[\"{\\\"msg\\\":\\\"method\\\",\\\"method\\\":\\\"insertOrUpdateUser\\\",\\\"params\\\":[{\\\"_id\\\": \\\"<USER_ID>\\\", \\\"roles\\\": [\\\"user\\\", \\\"bot\\\"]}],\\\"id\\\":\\\"17\\\"}\"]\nMalicious Integrations Script\nCode 114 Bytes\n1this.Roles.addUserRoles(\"9HN4Brdmo2Qc2wsiX\", \"admin\")\n2class Script {\n3  process_incoming_request({ request }) {};\n4}\nSuggested mitigation\nOnly allow administrators to modify user groups\nIsolate Integration script context from server application\nImpact\nGuest users can become server administrator.\n\n",
+  "severity": [
+    9.9,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1723341600,
+  "report_url": "https://hackerone.com/reports/501081",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Login as Guest user"
+    ],
+    [
+      2,
+      "Determine own user's _id from browser traffic"
+    ],
+    [
+      3,
+      "Escalate to bot group by sending a method call to insertOrUpdateUser with roles including 'bot'"
+    ],
+    [
+      4,
+      "Create a custom Integration with a script that adds the user to the admin group"
+    ],
+    [
+      5,
+      "Trigger the Integration to execute the script and gain admin privileges"
+    ]
+  ],
+  "vuln_description": "Due to improper ACLs, a guest user can escalate privileges to admin by first adding themselves to the bot group (which has manage-own-integrations permission), then creating a malicious Integration script that adds them to the admin group when triggered. The insertOrUpdateUser method improperly validates permissions for group changes.",
+  "reason": "This vulnerability involves multiple steps including role manipulation, custom script creation, and triggering integrations. The interaction between the bot group permissions and the integration script execution is non-obvious, requiring understanding of both user role management and integration capabilities.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "idor_detectable": true,
+    "authnz_byppass_detectable": true
+  }
+}

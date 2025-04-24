@@ -1,0 +1,46 @@
+{
+    "reported_to": "Automattic",
+    "reported_by": "cryptordx ",
+    "title": "Able to comment/view in others support ticket at https://en.instagram-brand.com/requests/dashboard",
+    "content": "\nSummary:\nI reported the vulnerability to Facebook, and they have said to report it here for the bounty.\nPlatform(s) Affected:\nhttps://en.instagram-brand.com/requests/dashboard\n## Steps To Reproduce:\nCreate two account User A, User B at https://en.instagram-brand.com/\nApply for Instagram brand from https://en.instagram-brand.com/requests/dashboard by User A\nLogin to user B and intercept the request\n4.Send a post request with cookie and other header got by intercepting user B in the below endpoint and replace comment 44799 with User A support ticket id\nPOST /wp-json/brc/v1/approval-requests/44799/comments HTTP/1.1\ntext=sure thanks&files=1597287925578-44741-%3Etest.jpg&sizes=4249\nSupporting Material/References:\nvideo POC - https://drive.google.com/file/d/1My6MQuQTmYwCWQw_7uw1veGFkn13WkDP/view?usp=sharing\nscreenshot of viewing other's messages - https://drive.google.com/file/d/1WnDGPDHGA6pP9RIPBQpEAIXxPTaFJZVX/view?usp=sharing&fbclid=IwAR3k4cEfCcUcfBKhlffQgjDcy4ASRf7V3fsS7FmZcHyyd_HZZfFk1OlDpf8\nImpact\n1) can comment in other's support ticket\n2) can view other's support ticket comments (Both Instagram as well as user's)\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1607192460,
+    "report_url": "https://hackerone.com/reports/1007988",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "steps": [
+        [
+            1,
+            "Create two accounts (User A and User B) at https://en.instagram-brand.com/"
+        ],
+        [
+            2,
+            "User A applies for Instagram brand access via https://en.instagram-brand.com/requests/dashboard"
+        ],
+        [
+            3,
+            "User B logs in and intercepts the request using a proxy tool"
+        ],
+        [
+            4,
+            "User B sends a POST request to the endpoint /wp-json/brc/v1/approval-requests/[User_A_Ticket_ID]/comments with User B's cookies and headers, replacing the comment ID with User A's support ticket ID"
+        ]
+    ],
+    "vuln_description": "This vulnerability allows an authenticated user (User B) to comment on and view another user's (User A) support ticket by manipulating the ticket ID in a POST request. This leads to unauthorized access to sensitive support ticket information and the ability to impersonate or interfere with another user's support requests.",
+    "reason": "The vulnerability involves intercepting and modifying a request, which requires some technical knowledge of HTTP requests and proxy tools. However, the attack is straightforward once the endpoint structure is understood, and it does not involve complex application states or novel logic.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

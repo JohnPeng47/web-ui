@@ -1,0 +1,42 @@
+{
+  "reported_to": "Node.js",
+  "reported_by": "jzebor ",
+  "title": "HTTP/2 Denial of Service Vulnerability",
+  "content": "\nSummary: Malformed HTTP/2 frames cause NodeJS http2 module to perform an uninitialized read. This results in a segmentation fault of the node process, causing a denial of service for all users of the instance.\nDescription: I have already worked extensively with the nodejs core security team on this issue. The issue has already been acknowledged by James Snell so this report is to officially get the issue on the books. All necessary details for this bug report have already been provided via security mailing list for nodejs. This issue is known to be present in v9 and v10 of nodejs.\nSteps To Reproduce:\nAgain, all the necessary repro instructions, core file, and stack traces have been provided to nodejs core security team.\nSetup HTTP/2 server with node.\nSend malformed HTTP/2 frames - I've noticed the issue with a GOAWAY frame, there are potentially others which also cause this issue.\nObserve crash of nodejs instance. Segmentation fault results in core file generation.\nImpact: Segfaults lead to denial of service vulnerability. Attacker is able to send malformed frame to crash the instance.\nSupporting Material/References: Already provided to nodejs core security team. Reference email threads with James Snell for additional details.\nList any additional material (e.g. screenshots, logs, references, commits, code examples, etc.).\nImpact\nDenial of service on NodeJS instances which use HTTP/2.\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Memory Corruption - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1581655560,
+  "report_url": "https://hackerone.com/reports/335533",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Setup an HTTP/2 server using Node.js."
+    ],
+    [
+      2,
+      "Send malformed HTTP/2 frames (e.g., a GOAWAY frame) to the server."
+    ],
+    [
+      3,
+      "Observe the Node.js instance crash due to a segmentation fault, resulting in a core file generation."
+    ]
+  ],
+  "vuln_description": "A malformed HTTP/2 frame causes the Node.js http2 module to perform an uninitialized read, leading to a segmentation fault and denial of service for all users of the instance.",
+  "reason": "The vulnerability involves sending malformed HTTP/2 frames, which is a straightforward process but requires knowledge of HTTP/2 protocol specifics. The interaction between the malformed frame and the Node.js http2 module is subtle but not overly complex.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

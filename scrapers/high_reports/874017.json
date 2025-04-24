@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "pvm ",
+    "title": "SSN is exposed on slides, previous critical report was not fixed in an appropriate way",
+    "content": "\nSummary:\nSSN is exposed on slides, previous critical report was not fixed in an appropriate way\nDescription:\nSSN is exposed on a screenshot. Slide 13th. SSN is covered by an olive/green rectangle which is moveable. The image itself was not updated.\n\u2588\u2588\u2588\u2588\u2588\u2588wp-content/uploads/2018/12/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nThe issue was previously submitted and was not fixed in an appropriate way.\nhttps://hackerone.com/reports/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nThe file is easy to find by the file name.\nhttps://duckduckgo.com/?q=%22\u2588\u2588\u2588%22&t=hj&ia=web\nImpact\nCritical\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588 is a real person (officer) according to \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nStep-by-step Reproduction Instructions\nDownload the file \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588wp-content/uploads/2018/12/\u2588\u2588\u2588\u2588\u2588\nNavigate to slide 13\nMove the olive rectangle which covers SSN\nProduct, Version, and Configuration (If applicable)\nN/A\nSuggested Mitigation/Remediation Actions\nBlur/remove/cover the SSN on the image and replace the image on the slides.\nImpact\nPII leakage. Name and SSN.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cleartext Storage of Sensitive Information"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1591913940,
+    "report_url": "https://hackerone.com/reports/874017",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Locate the exposed file by searching for the filename on a search engine (e.g., DuckDuckGo)."
+        ],
+        [
+            2,
+            "Download the file and navigate to slide 13. Move the olive/green rectangle covering the SSN to reveal the sensitive information."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the exposure of a Social Security Number (SSN) on a slide within a downloadable file. The SSN is covered by a movable rectangle, which can be easily moved to reveal the underlying sensitive information. This issue was previously reported but not adequately fixed.",
+    "reason": "The vulnerability is straightforward to discover as it involves locating a publicly accessible file and manipulating a visible element (the rectangle) to expose the SSN. There are no complex interactions or states involved, and the attack does not require novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
+}

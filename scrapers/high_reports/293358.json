@@ -1,0 +1,42 @@
+{
+    "reported_to": "Uber",
+    "reported_by": "gregoryvperry ",
+    "title": "The Microsoft Store Uber App Does Not Implement Certificate Pinning",
+    "content": "\nSummary\nThe Microsoft Store Uber App (Windows Phone Architecture) does not properly implement certificate pinning.\nSecurity Impact\nLayer-2+ network traffic transmitted from and received by the app can be surreptitiously intercepted and transparently modified by an attacker, with no warnings or errors presented to the app user.\nReproduction Steps\nA transparent Layer-2 MITM proxy was configured between a device running the most recent release of the Uber app for Windows Phone Architecture and an Internet gateway. Self-signed certificates were asserted on behalf of the remote systems that the app communicated with. All traffic transmitted and received by the Uber app was able to be captured and then modified transparently, without any notifications or certificate warnings sent to the app user.\nSpecifics\nAccount GregPerry804@gmail.com was used for testing\nIt appears that the apps for iOS and Android properly implement certificate pinning, with only the Windows Phone Architecture Uber App affected by this vulnerability.\nImpact\nIn this scenario an attacker has the ability to modify a rider's profile, to access previous trip histories, to schedule and/or cancel Uber driver dispatches, and the ability to access and/or modify stored payment information.\nDriver functionality was not tested. If the Uber Driver role is also implemented within the Microsoft Phone Architecture Uber App, then all functionality encapsulated within the app as relates to driver functionality could be surreptitiously observed and/or transparently modified as well.\nThis particular vulnerability can be implemented as an ARP cache poisoning attack, making it especially relevant to Uber riders who utilize wireless access points at public hotspots to dispatch Uber rides.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Certificate Validation"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1514164560,
+    "report_url": "https://hackerone.com/reports/293358",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "MOBILE",
+    "steps": [
+        [
+            1,
+            "Configure a transparent Layer-2 MITM proxy between a device running the Uber app for Windows Phone Architecture and an Internet gateway."
+        ],
+        [
+            2,
+            "Assert self-signed certificates on behalf of the remote systems the app communicates with."
+        ],
+        [
+            3,
+            "Observe that all traffic transmitted and received by the Uber app can be captured and modified without any notifications or certificate warnings."
+        ]
+    ],
+    "vuln_description": "The Microsoft Store Uber App (Windows Phone Architecture) does not properly implement certificate pinning, allowing Layer-2+ network traffic to be intercepted and modified by an attacker without user warnings. This can lead to unauthorized access to and modification of user data, including profile information, trip histories, driver dispatches, and payment details.",
+    "reason": "The vulnerability involves a straightforward MITM attack setup with self-signed certificates, a common technique in security testing. The lack of certificate pinning is a well-known issue and does not require complex interactions or novel logic to exploit.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

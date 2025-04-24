@@ -1,0 +1,38 @@
+{
+    "reported_to": "Shopify",
+    "reported_by": "ngalog ",
+    "title": "[Part II] Email Confirmation Bypass in myshop.myshopify.com that Leads to Full Privilege Escalation",
+    "content": "\nSummary\nIn #791775, I submitted a bug at Sunday 5pm Canada time, it was triaged two hours later, and I got the temp fix message at around 3am the next day in Canada time. Truly awesome, the next day I retested after the first fix, and found that I\nCannot receive the email confirmation in the email used to sign up\nCannot integrate across stores/partner even they share the same email address after confirming them\nAnd the report was later resolved after I verified the fix.\nFor some reason, I decided to test again to see what's something new that I can find.\nThen I found user can change their email prior to receiving the verification message on their original email. i.e. the same technique, I don't know what went wrong in my first retest, but Shopify security and engineering team again showed their professionalism, quickly resolving the second comments I left in ~3.5 hrs.\nAnd when I thought this is the end of story, I later received a comment asking me to open a new report about the second retest, and here I am writing this report.\nThanks,\nRon\nImpact\n.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": 15000,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1585789320,
+    "report_url": "https://hackerone.com/reports/796808",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Sign up for a Shopify account using an email address."
+        ],
+        [
+            2,
+            "Before receiving the email verification on the original email, change the email address associated with the account."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows a user to bypass email verification by changing their email address before confirming the original email. This leads to privilege escalation as the user can gain access without proper verification.",
+    "reason": "The attack involves manipulating the application state during the email verification process, which is a subtle interaction that is not immediately obvious. It requires understanding the timing and sequence of email verification and email change operations.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "791775"
+}

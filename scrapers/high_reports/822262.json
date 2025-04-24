@@ -1,0 +1,48 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "saltyyolk ",
+  "title": "Path traversal in Nuget Package Registry",
+  "content": "\nSummary\nThere's a path traversal issue in Nuget package registry which was released to GitLab-EE recently. The issue allows an attacker to create any file with an extension \u201c.nupkg\u201d in the filesystem. By combining the bug with a race condition in Gitaly which I used several times before (#762421, #732330). It could finally be used to read sensitive files in a GitLab instance.\nFor some context, a large part of the exploit were explained in #762421, the npm registry issue. Here I will focus on the simple path traversal part which makes a little bit difference.\nThe root cause of the path traversal lies at ee/app/services/packages/nuget/metadata_extraction_service.rb\nCode 677 Bytes\n1      XPATHS = {                                                               \n2        package_name: '//xmlns:package/xmlns:metadata/xmlns:id',               \n3        package_version: '//xmlns:package/xmlns:metadata/xmlns:version'        \n4      }.freeze \n5...\n6      def extract_metadata(file)                                               \n7        doc = Nokogiri::XML(file)                                              \n8                                                                               \n9        XPATHS.map do |key, query|                                             \n10          [key, doc.xpath(query).text]                                         \n11        end.to_h \nIt extracts the uploaded nupkg (which is in zip format) for the contained nuspec file (which is an XML). And then looks for attribute id and version. Then the extracted package_name(id), and package_version(version) will be concatenated into a new filename in ee/app/services/packages/nuget/update_package_from_metadata_service.rb\nCode 515 Bytes\n1        @package_file.transaction do                                           \n2          @package_file.update!(                                               \n3            file_name: package_filename,                                       \n4            file: @package_file.file                                           \n5          )      \n6...\n7      def package_filename                                                     \n8        \"#{package_name.downcase}.#{package_version.downcase}.nupkg\"           \n9      end    \nSo my payload is:\nCode 572 Bytes\n1  <?xml version=\"1.0\" encoding=\"utf-8\"?>                                       \n2  <package xmlns=\"http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd\">  \n3    <metadata>                                                                 \n4      <id>DummyProject.DummyPackage</id>                                       \n5      <version>../../../../../nyangawa</version>                                            \n6    </metadata>                                                                \n7  </package>                                                                   \nname the file above as dummy.nuspec and zip it into dummy.nupkg and upload it through PUT /api/v4/projects/#{id}/packages/nuget/ endpoint will make GitLab to create a nyangawa.nupkg somewhere in the filesystem.\nThen I wrote a script (I used in #762421) to combine this issue and the race in Gitaly. I could finally read any file I want in my GitLab instance.\nSteps to reproduce\nDownload the attached exploit.tar.gz and extract it.\nInstall some requirements by gem install faraday and gem install rubyzip\nEdit exp.rb to update some url and credentials\nExecute the exp.rb to watch the result of .gitlab_shell_secret of target GitLab instance.\nExamples\n<image_0>\nResults of GitLab environment info\nCode 871 Bytes\n1root@localhost:/# gitlab-rake gitlab:env:info\n2\n3System information\n4System:\t\t\n5Proxy:\t\tno\n6Current User:\tgit\n7Using RVM:\tno\n8Ruby Version:\t2.6.5p114\n9Gem Version:\t2.7.10\n10Bundler Version:1.17.3\n11Rake Version:\t12.3.3\n12Redis Version:\t5.0.7\n13Git Version:\t2.24.1\n14Sidekiq Version:5.2.7\n15Go Version:\tunknown\n16\n17GitLab information\n18Version:\t12.8.7-ee\n19Revision:\t2643fd87200\n20Directory:\t/opt/gitlab/embedded/service/gitlab-rails\n21DB Adapter:\tPostgreSQL\n22DB Version:\t10.12\n23URL:\t\thttp://10.26.0.5\n24HTTP Clone URL:\thttp://10.26.0.5/some-group/some-project.git\n25SSH Clone URL:\tgit@10.26.0.5:some-group/some-project.git\n26Elasticsearch:\tno\n27Geo:\t\tno\n28Using LDAP:\tno\n29Using Omniauth:\tyes\n30Omniauth Providers: \n31\n32GitLab Shell\n33Version:\t11.0.0\n34Repository storage paths:\n35- default: \t/var/opt/gitlab/git-data/repositories\n36GitLab Shell path:\t\t/opt/gitlab/embedded/service/gitlab-shell\n37Git:\t\t/opt/gitlab/embedded/bin/git\nps. I changed my username because of a lost bet, don't be strange :p\nBest regards,\nSaltyYolk\nImpact\nCommon arbitrary file read issue caused by path traversal similar to my previous reports.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 12000,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/E9Ap6Era4ypQ4R3XqBVvjKMh?response-content-disposition=attachment%3B%20filename%3D%222020-03-17-234802_649x700_scrot.png%22%3B%20filename%2A%3DUTF-8%27%272020-03-17-234802_649x700_scrot.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ4RDPBG2Z%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T024129Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIGGH331%2Bzp2R%2F3jzEDRZXWcGyNkXVm4l37jsrrngdhS3AiEAiGKoE%2BpbO4KbVLe2k%2BDcqavCzJMwtCDETSjwTqVf2QMqugUI%2Bv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDD9b1dAzPquDLyR64yqOBbDdMMB6qRiZbGj5ntUaOEuErgIaX0VyjFKOdAv8USvULuMUqjn0OpXaE%2FLmuqHwwSM21%2FVpSZlTq83Y7vOVS2eeF8XjZ1WQ7vIvEcY7AdX0eMbac77lcCB4RxK9kvRhcZYCIdAF%2FREEy7ZpMzm5BfyBPC2AaWFudYPoijGzHRa1xtmw8ZC4kRymq6hn%2F4l6EGAC43TTWjjXlYrfoT16B7zJv9JX%2Bk965dMsxFrX%2BKtCFDOLQYpSSUSw3GHmNBQWOpprJ9eB%2Bhmdrp9W8XK1u%2BGCQE%2BaS2PYwsDMkPfbCSnCJs9Fp9QP%2BIPczrURYaazZb%2F5xx6O1niQSUZGElZpjOvGkosJ40d5Oj6i6ElK9ALWKph1lwNLL4UkPex4t2RglP6mm%2B%2F6rxMW%2Bn41B%2By7jgh%2FklODd8pIPZqfu16zYwpdHfeQh8w9p03LhGbLr9CB9rlESYDPOnBm5BQZ6rk708GIcgjtCiUqikJt81Xh5vWwQ0xqU7Lw4mB%2BBUf74QeaGHzG4Wu%2FQCdBLHDyVi2fzGIwpt%2F1NY%2BBLG3kLMi67zFDltERgDCXGzqBvOPT9RZL7kluufKLjpNKroirqZPBoX3qNLSXOdy3otN%2FAJGJUO6BVy%2BbRoXqWowrX%2Fx6yr067GUM%2F1UXPFaOErEPTpVGnlBe56ssOXrBJXWBSOrDMeTSn2ofZ9AT%2F7EFAlamOiSxB1dWguNf7DC2Wxo2Hkd3y2jiHELq4uqCqcloB81hHnswIpxUxTvpz7Fx0U6dn0EppJZSgPaoX389BVcsmm1MTygTO1e1N%2B5y1E6IqbNwdAjnooP4mlaVIfd%2BmItX%2FBbIyUrzclTCs5qx1s3YqDV%2FnPDXlDkG2f0pymIl4RuRCDCJ84e%2FBjqxAdBjfelTIjQNt5OmwjqwnEC%2B2k%2Fi%2B%2FnCbWRx5jGMsl%2BBDw3WyQ%2BdMc98N2kltrLhYUngG91IDwo2wQcESeG2WiytY6EaItO0vDlYwYDAQACYfwmfCa6InheZUeBiyisGvON%2BzpFiC2d4%2FFEVjLODKA66zdsYAnpY%2F8plOozk%2B%2FifqMoRnX8NixExqtMAgyITi2Ix82EJls2oavnrXaQIZapNo58Ejj3e7h7vmu4gVS9P1A%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=999e5badcc626604859c6ebd3519fa3893a91af253b62dc5546ee4d124bda66c"
+  },
+  "disclosed_date": 1654625760,
+  "report_url": "https://hackerone.com/reports/822262",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create a malicious .nuspec file with path traversal in the version field (e.g., '../../../../../nyangawa') and package it into a .nupkg file"
+    ],
+    [
+      2,
+      "Upload the malicious .nupkg file to the GitLab NuGet package registry using the PUT /api/v4/projects/#{id}/packages/nuget/ endpoint"
+    ],
+    [
+      3,
+      "Combine this with a race condition exploit in Gitaly (referenced in previous reports) to read sensitive files on the GitLab instance"
+    ],
+    [
+      4,
+      "Execute the exploit to access sensitive files like .gitlab_shell_secret"
+    ]
+  ],
+  "vuln_description": "A path traversal vulnerability in GitLab's NuGet package registry allows attackers to create arbitrary .nupkg files anywhere in the filesystem. When combined with a known race condition in Gitaly, this can be exploited to read sensitive files on the GitLab instance.",
+  "reason": "This vulnerability requires understanding multiple components: the NuGet package processing logic, path traversal techniques, and a separate race condition in Gitaly. The attacker needs to chain these vulnerabilities together in a non-obvious way to achieve file read capabilities.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "#762421"
+}

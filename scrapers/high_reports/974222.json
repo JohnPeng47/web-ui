@@ -1,0 +1,70 @@
+{
+    "reported_to": "Automattic",
+    "reported_by": "ali ",
+    "title": "IDOR leads to Edit Anyone's Blogs / Websites",
+    "content": "\nHello there,\nI hope all is well!\nSteps:\nGo to https://intensedebate.com/signup and create 2 accounts.\nLogin as victim and go to https://www.intensedebate.com/edit-user-profile\nClick Add Blog / Website text and fill the form > click Save Settings button\n<image_0>\nThen login as attacker.\nGo to https://www.intensedebate.com/edit-user-profile > click Add Blog / Website text and fill the form > click Save Settings button\nGo to https://www.intensedebate.com/edit-user-profile, again and click Save Settings button > open burp suite and change hidBlogID parameter with victim's hidBlogID.\nForward the request and go to victim's account. Check your website informations. You will see it's changed.\nImpact\nChanging victim's website/blog informations.\nBest Regards,\n@mygf\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 15,
+    "weaknesses": [
+        "Insecure Direct Object Reference (IDOR)"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/zDibM3MsPfKztY8qux4QWUqh?response-content-disposition=attachment%3B%20filename%3D%221.png%22%3B%20filename%2A%3DUTF-8%27%271.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7WFQ6TR5%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T221002Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIFYlvq0QpvGhsKxxtiUOfW8bWxbvtjVQOPl%2BSpu4fqNbAiB%2B7IsKWKw2RNrySrWFHbaxJ1FBPmNS4j%2FfYtD4Ks89NCqyBQgeEAMaDDAxMzYxOTI3NDg0OSIMfAJheXSJk9n%2FN2lSKo8FMoo11pdFqlZGOpJnB2cSWBWDnNWmH1i4igKcX9F%2Bw0U32ztwWwi7iJdoNAJjAvZLaGptNu3VejiPGjBJTYRzHzFPsG3JDIcNOS8OMoNQapM68ePs1xYiuGRHmn9SzWaCFm60kw3nzGY%2F92yYapujqeFMbClJqU1Lyff%2BvfO%2BS2nkD%2B34s1sJ2ov5daTTsjFSMM9VamWCrhAWXJwUrbujPnvo8uUI7yQPHa2oeT7xEw8%2FRaBDUdUfVsu5BtLyqefqjA1sqeDuuW9j4XbxuYIuTflV8GDaoncZPL44MWRxW6NWw0UWjJ5PjtUQmxIfIgWzsYhLs8WfU%2FpFG%2FjoZRCQZNtpZqqww3xtn5yS%2BWQheuZJSPI9fLD4rDeSOJ0wyRR8w02CpG27etJ0LE2ksmjtA61CIwVay%2FtxIWxEgBD%2F%2Bip7eja5M%2ByD6mt5AdgIagWocJ8AUr8rxR0zY2JfhY0EJCUdPv9F4qzmvaxIDmYadjSOzc2wsj0mEmLWLDsXSXYDiBMlyTgKJhmniTmxlM6dORp%2FhS98Wjio7UcHolpVvYCByYYO9kBzN1ASpGvVMfYiOlJFPo7uU4%2FtCd75rQyZPvsd7s0GzZyeZq8aYm4GDhj1H0ELMaYQlZnwwNRmhouZRiRfT8mJkgLNdM1Uf51lHESm8yGUPWR5x4tyWvg5am8lF%2Fup4xP5du0T2oVJal08nz2Y2bcf7hDJzshsuwbgbBHQgGc9J9DFX8yKXrZdVg4bIYsKOmFcUIDbrDzoHGju7yITwDYNj72JefsVK1cx061Kl2PYyhPE8%2FwyrY5UNNwAtjdZuJcdlrQkrDWN5AYoxUKTAVtygXxNPw4B4m7YKQ0CdbBelhUpTukglIGmgTDAsIy%2FBjqyAWGydm6A%2FzvA9uNGXLTeflWaeCp0%2BNTNGu0zgTGIcc9%2FLIqZkVtlJnEVyEeQKcQsNEYhKMGxnLnjg1L9Omq7LWyLXcD0gMl9hnBkyFilmPRTkk3Q7sLoP%2FgR6QIPsNZzX7wuVOEEmzYWU1BkjsFXGwJMV3yaE68jaLa8Y4sGzP%2FBnbcUthcirEVtk57qeidnuxfm94CDGs1%2F70xoF3H7OD3O1VNsitvewYXn2PgtpYZQNNY%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=ccd9eb19c1759e2987b2d942254925d4733f4917ce562fa519126b5764fa7fd6"
+    },
+    "disclosed_date": 1605727200,
+    "report_url": "https://hackerone.com/reports/974222",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create two accounts on https://intensedebate.com/signup"
+        ],
+        [
+            2,
+            "Log in as the victim and navigate to https://www.intensedebate.com/edit-user-profile"
+        ],
+        [
+            3,
+            "Click 'Add Blog / Website', fill the form, and save settings"
+        ],
+        [
+            4,
+            "Log in as the attacker and repeat step 3"
+        ],
+        [
+            5,
+            "Navigate to the same profile edit page again and open Burp Suite"
+        ],
+        [
+            6,
+            "Intercept the request and modify the 'hidBlogID' parameter to the victim's 'hidBlogID'"
+        ],
+        [
+            7,
+            "Forward the request and verify the victim's website/blog information has been changed"
+        ]
+    ],
+    "vuln_description": "An Insecure Direct Object Reference (IDOR) vulnerability allows an attacker to modify another user's blog/website information by manipulating the 'hidBlogID' parameter in a request.",
+    "reason": "The vulnerability involves straightforward parameter manipulation without requiring deep understanding of complex application states or novel logic. The steps are linear and do not involve subtle interactions between components.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": true,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": false
+    }
+}

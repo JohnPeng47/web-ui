@@ -1,0 +1,38 @@
+{
+  "reported_to": "Glovo",
+  "reported_by": "mehdisadir ",
+  "title": "Exposed valid AWS, Mysql, Sendgrid and other secrets",
+  "content": "\nSummary:\nHi team,\nI just discovered some hardcoded credentials allowing access to AWS, Mysql database, ...\nTo make this report short, here is the POC:\nsee \u2588\u2588\u2588 & \u2588\u2588\u2588\u2588\u2588\n## Steps To Reproduce:\nwhere there are the info :\nCode 1.05 KiB\n1<p>\n2APP_NAME=Glovo\n3APP_ENV=local\n4APP_KEY=\u2588\u2588\u2588\u2588\u2588\n5APP_DEBUG=false\n6APP_URL=http://localhost\n7LOG_CHANNEL=stack\n8LOG_LEVEL=debug\n9DB_CONNECTION=mysql\n10DB_HOST=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n11DB_PORT=3306\n12DB_DATABASE=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n13DB_USERNAME=\u2588\u2588\u2588\u2588\u2588\n14DB_PASSWORD=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n15BROADCAST_DRIVER=log\n16CACHE_DRIVER=file\n17QUEUE_CONNECTION=sync\n18SESSION_DRIVER=file\n19SESSION_LIFETIME=120\n20MEMCACHED_HOST=127.0.0.1\n21REDIS_HOST=\u2588\u2588\u2588\u2588\u2588\n22REDIS_PASSWORD=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n23REDIS_PORT=11773\n24MAIL_MAILER=smtp\n25MAIL_HOST=mailhog\n26MAIL_PORT=1025\n27MAIL_USERNAME=null\n28MAIL_PASSWORD=null\n29MAIL_ENCRYPTION=null\n30MAIL_FROM_ADDRESS=null\n31MAIL_FROM_NAME=\"${APP_NAME}\"\n32AWS_ACCESS_KEY_ID=\u2588\u2588\u2588\n33AWS_SECRET_ACCESS_KEY=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n34AWS_DEFAULT_REGION=eu-central-1\n35AWS_BUCKET=glovos3\n36PUSHER_APP_ID=\n37PUSHER_APP_KEY=\n38PUSHER_APP_SECRET=\n39PUSHER_APP_CLUSTER=mt1\n40MIX_PUSHER_APP_KEY=\"${PUSHER_APP_KEY}\"\n41MIX_PUSHER_APP_CLUSTER=\"${PUSHER_APP_CLUSTER}\"\n42SENDGRID_API_KEY=\u2588\u2588\u2588\u2588\n43MAIL_FROM=glovo@appsmart.ro\n44MAIL_REPLY_TO=glovo@appsmart.ro\n45REDIS_URL=\u2588\u2588\u2588\u2588\u2588\n46LINK_RECEIPT=https://glovo.onlineservice.io/g/c/\n47SENDGRID_TEMPLATE=d-6ae3f2fe536c41fda21ad60a18c10cce\n48SENDGRID_PUBLIC_KEY=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n49</p>\nThe leak was found using Leakix : https://leakix.net/host/16.170.179.191\nMitigation :\nRemove the exposed credentials and revoke them.\nRegards,\nNB: After checking some files which i deleted immediatly, I found the company name is GLOVOAPPRO SRL and im not sure if it is related to Glovo company, but I can confirm a little bit from the database where I could see delivery fees ... which is about Glovo's principal service (delivery).\nImpact\nAnyone could access\n\n",
+  "severity": [
+    10.0,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Use of Hard-coded Credentials"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1657309680,
+  "report_url": "https://hackerone.com/reports/1580567",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Use a tool like Leakix to search for exposed credentials or manually inspect publicly accessible files for hardcoded secrets."
+    ],
+    [
+      2,
+      "Locate and verify the exposed credentials in the configuration file (e.g., AWS keys, MySQL credentials, SendGrid API keys)."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves the exposure of hardcoded credentials (AWS, MySQL, SendGrid, etc.) in a publicly accessible configuration file, allowing unauthorized access to sensitive systems and data.",
+  "reason": "The discovery of this vulnerability is straightforward as it involves using automated tools or manual inspection to find exposed credentials in configuration files, which is a common and well-documented issue.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

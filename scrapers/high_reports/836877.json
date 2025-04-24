@@ -1,0 +1,42 @@
+{
+  "reported_to": "Informatica",
+  "reported_by": "moebius ",
+  "title": "XXE through injection of a payload in the XMP metadata of a JPEG file",
+  "content": "\nUsers are able to change their avatar picture. The avatar picture upload functionality is prone to a XXE attack when parsing the image file. Specifically, the XXE attack is executed through the injection of a payload in the \"XMP metadata\" of the uploaded JPEG file.\nProof of concept (note the \"Burp Collaborator Payload pointing to an External DTD\"):\nCode 139 Bytes\n1POST /edit-profile-avatar!uploadImage.jspa HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588informatica.com\n3\n4  [...REDACTED...PLEASE.SEE.SCREENSHOTS.FOR.FULL.PAYLOAD]\nAnd I received the following calls (note the User-Agent \"Java\u2588\u2588\u2588\u2588\u2588\u2588\" confirming the vulnerability):\nCode 357 Bytes\n1Interaction 0 \n2Type: HTTP \n3Client IP: \u2588\u2588\u2588\u2588\u2588\u2588\u2588 \n4Timestamp: 2020-Apr-02 01:44:27 UTC  \n5Protocol: HTTP  \n6\n7RAW HTTP request: \n8\n9GET /x.dtd HTTP/1.1 \n10Cache-Control: no-cache \n11Pragma: no-cache \n12User-Agent: Java\u2588\u2588\u2588\u2588\u2588\u2588 \n13Host: N.syuj65rfsb27o1u78jcinsinnet6ky8n.burpcollaborator.net \n14Accept: text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2 Connection: keep-alive\nSimilar calls were received from another IP address: 146.112.138.73\nFurthermore, the affected host should not be allowed to start a new connection to the Internet.\nImpact\nThis issue can be abused to read arbitrary files and list directory contents from the filesystem of the XML processor application. I didn't try any reading, but JAVA (JSPA is a JAVA Servlet File) is calling my external service, so the vulnerability is confirmed.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "XML External Entities (XXE)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1587475740,
+  "report_url": "https://hackerone.com/reports/836877",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Upload a JPEG file containing a malicious XMP metadata payload to the avatar upload functionality."
+    ],
+    [
+      2,
+      "Monitor the Burp Collaborator or similar service for HTTP requests from the server, indicating successful XXE exploitation."
+    ]
+  ],
+  "vuln_description": "The vulnerability is an XML External Entity (XXE) attack through the injection of a payload in the XMP metadata of a JPEG file uploaded as an avatar. The server processes the malicious metadata, leading to arbitrary file reads or directory listings on the server's filesystem.",
+  "reason": "The attack requires knowledge of XXE vulnerabilities and how to embed malicious payloads in XMP metadata, but the steps to exploit are straightforward once the payload is crafted. The interaction between the JPEG file upload and XML parsing is non-obvious but not highly complex.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XXE vulnerability involves parsing XMP metadata in a JPEG file, which is not related to authentication or authorization boundaries. The methodology described focuses on testing AuthN/AuthZ bypasses and IDORs by manipulating user sessions, actions, and resource IDs within the same application context. The XXE attack does not fit into these categories as it exploits XML parsing behavior rather than authorization flaws.",
+    "is_detectable": false
+  }
+}

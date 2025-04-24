@@ -1,0 +1,64 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "vakzz ",
+  "title": "SSRF on project import via the remote_attachment_url on a Note",
+  "content": "\nSummary\nThe Note model has an attachment which is provided by a CarrierWave uploader:\nCode 46 Bytes\n1mount_uploader :attachment, AttachmentUploader\nOne of the features this provides is the ability to download and attach a file via a url, see https://github.com/carrierwaveuploader/carrierwave/blob/v1.3.1/lib/carrierwave/mount.rb#L80. This means that the Note model has a method remote_attachment_url= which can be used to perform this action.\nAs this attribute isn't removed by the AttributeCleaner on project import, it can be set in the project.json for a note and will be set when the note is created, downloading the file:\nhttps://github.com/carrierwaveuploader/carrierwave/blob/v1.3.1/lib/carrierwave/mounter.rb#L72\nCode 357 Bytes\n1  def remote_urls=(urls)\n2      return if not urls or urls == \"\" or urls.all?(&:blank?)\n3\n4      @remote_urls = urls\n5      @download_error = nil\n6      @integrity_error = nil\n7\n8      @uploaders = urls.zip(remote_request_headers || []).map do |url, header|\n9        uploader = blank_uploader\n10        uploader.download!(url, header || {})\n11        uploader\n12      end\nhttps://github.com/carrierwaveuploader/carrierwave/blob/v1.3.1/lib/carrierwave/uploader/download.rb#L43\nCode 297 Bytes\n1    def file\n2          if @file.blank?\n3            headers = @remote_headers.\n4              reverse_merge('User-Agent' => \"CarrierWave/#{CarrierWave::VERSION}\")\n5\n6            @file = Kernel.open(@uri.to_s, headers)\n7            @file = @file.is_a?(String) ? StringIO.new(@file) : @file\n8          end\nThe downloaded file is then attached to the note and can be viewed from the newly imported project.\nAny model that has a mount_uploader and is importable is potentially vulnerable to the same attack, although the majority of the others are AvatarUploader which checks the file type and prevents the response from being viewed.\nSteps to reproduce\nCreate a new project\nCreate an issue in the project\nAdd a note to the issue\nExport the project\nExtract the export\nAdd remote_attachment_url to the note hash with a url\nRecompress the export and import it\nView the note on the issue\nExamples\nExample of project import on gitlab.com hitting postbin:\n<image_0>\nWhat is the current bug behavior?\nWhen importing a model that has a mount_uploader it's possible to use the carrierwave uploader seed attributes to download a file from any host: https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Upload-remote-image-urls-to-your-seedfile\nWhat is the expected correct behavior?\nThe attributes should be prohibited and removed via the AttributeCleaner\nOutput of checks\nThis bug happens on gitlab.com\nResults of GitLab environment info\nCode 853 Bytes\n1System information\n2System:\t\tUbuntu 18.04\n3Proxy:\t\tno\n4Current User:\tgit\n5Using RVM:\tno\n6Ruby Version:\t2.6.5p114\n7Gem Version:\t2.7.10\n8Bundler Version:1.17.3\n9Rake Version:\t12.3.3\n10Redis Version:\t5.0.7\n11Git Version:\t2.24.1\n12Sidekiq Version:5.2.7\n13Go Version:\tunknown\n14\n15GitLab information\n16Version:\t12.8.7-ee\n17Revision:\t2643fd87200\n18Directory:\t/opt/gitlab/embedded/service/gitlab-rails\n19DB Adapter:\tPostgreSQL\n20DB Version:\t10.12\n21URL:\t\thttp://gitlab-vm.local\n22HTTP Clone URL:\thttp://gitlab-vm.local/some-group/some-project.git\n23SSH Clone URL:\tgit@gitlab-vm.local:some-group/some-project.git\n24Elasticsearch:\tno\n25Geo:\t\tno\n26Using LDAP:\tno\n27Using Omniauth:\tyes\n28Omniauth Providers:\n29\n30GitLab Shell\n31Version:\t11.0.0\n32Repository storage paths:\n33- default: \t/var/opt/gitlab/git-data/repositories\n34GitLab Shell path:\t\t/opt/gitlab/embedded/service/gitlab-shell\n35Git:\t\t/opt/gitlab/embedded/bin/git\nImpact\nAllows an attacker to access internal services, for example the Omnibus GitLab has all of the exporters, Prometheus, Alertmanager exposed on localhost.\nIf GitLab is hosted on AWS it allows for the instance metadata to be accessed.\nRedis is running locally or accessible via tcp (address could be found by looking at the targets in Prometheus at http://localhost:9090/api/v1/targets) it could be possible to obtain RCE (similar to https://github.com/jas502n/gitlab-SSRF-redis-RCE#poc). A POST request is not possible here, but as remote_attachment_request_header= is also available (https://github.com/carrierwaveuploader/carrierwave/blob/v1.3.1/lib/carrierwave/mount.rb#L169) and not blacklisted, the payload could be set via a header.\nIf GitLab is hosted on Google Cloud, the above could be used to set the Metadata-Flavor: Google header and access http://metadata.google.internal/\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 10000,
+  "weaknesses": [
+    "Server-Side Request Forgery (SSRF)"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/pD6Xf8ZiqbysXKVRzQ9ocWFQ?response-content-disposition=attachment%3B%20filename%3D%22Screen_Shot_2020-03-22_at_11.22.06_pm.png%22%3B%20filename%2A%3DUTF-8%27%27Screen_Shot_2020-03-22_at_11.22.06_pm.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ6H5VU6N2%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T002600Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIGAKFOh1FHbJaZY1RxuAGSrHEXBRmkDCGZ1Mvr6vv70SAiBit3uFFRFC8N%2FDz6SxXhFvFOwfnXfsSN2AgvhauGjpEiqxBQggEAMaDDAxMzYxOTI3NDg0OSIMg4eaX2DrHVjEuzHnKo4FlkbM7r1JjiznnwEghk6FJE4NI7YBc9yN0RGL1JEFvfc9U7vG827%2Bt0Fs6Al7%2FMfHEj8nQnLqV2l7b7Q8yvmtNWB8k%2B6JkqNPEWbGMEPbiz3QsPYoK%2BYS8RKrlNxLeZZJq6OX%2F%2FtOFSDB80ql1RsXmZjhW34yzjjulFK4%2BjDWjAJqNT9zaFM%2Fe6fF44zAB98nVb40nYTfYRKwiqqBhM2FaFd21wbLSH%2B5890poLP4NptchbsdjlmAP%2BGQgDaBuFDluSIokXptHgLyhQEWYanM2KzJJR83d5YguVnvXtdreqyvJAxESU8pavqE16RUzmNNFv8Gpkjpo6eUXvKcUIE9KFs6ZhgTUETL6uZv%2FHUzaXyZr%2B0UDjIkATMZjE4PWb5mjQOB%2B%2FQE%2Fobhz3tCJutmvbToNQq2GKsruO2aUWdqMVSaTB0%2BXJklJ22D5Ja1IIelqFLADDbgoSio%2FvFJjm4pNeZd3cyQ8IZ5wqmmN1Dsa9bBYuHL3PU9bkB7p%2BuNIryUSXN9DSAKD5VqNyIAqR9DziM0RNWA2xeH%2BrYlSp8ea89rlib5U324Q%2BwPRIrkHavRPXZVIUyda4caupKS%2FacMMfLiW1pcuakVQak5tM7UrE1QIRAsGw%2FVgS%2FAu%2BD6OoRwBbW0YpbyIsS3k0XHi2cBP8vtavQn5Zb0EZcT4MFwff2O%2F99ei4Lr9W%2FTddXwORp%2BRIenIiwxanbGAxFBDQX1oG8IuVZ1sn8XEhIME82E6XqTy1Tbd32NdknhR5J1mfoj%2BW2ppPrg1nf2JCGKaMIj5AuH4jvC7L3uJ0DQoIeOhSaILFTRDN7H%2FxL%2BPP4M7EEWNucJLinunqF3n7WmuyJ%2BkdQF%2Bl3Jg%2FGmmZjRklXpMNzZjL8GOrIBS7JFCC2tMlRSokp%2F6xDb3MimfciEEcf7wK1jFXL%2FAK2kTaXdbntCllkoflZgs3z2Lje3NRdOPPv6AIo%2BwBrgik5bwXlJc4mm4YQlor3Hj5%2Fh8tFxmnjQ3GoWjpQjLd9P0yJ%2FWSL9qNG5Eo8tthQl%2B42EesTkWV1aKatrnJR07unu0BI7nAY2sRRdBACw5AX4TWjNv6YyggBduMV5M%2FeaY9WkSXnJt1EJEoC%2FhdvgsYBzYg%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=3ed459529c818552f026daddd8e73a882ccdc011c6ebabb8a1391adaa3ee57e6"
+  },
+  "disclosed_date": 1591584060,
+  "report_url": "https://hackerone.com/reports/826361",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create a new project"
+    ],
+    [
+      2,
+      "Create an issue in the project"
+    ],
+    [
+      3,
+      "Add a note to the issue"
+    ],
+    [
+      4,
+      "Export the project"
+    ],
+    [
+      5,
+      "Extract the export"
+    ],
+    [
+      6,
+      "Add remote_attachment_url to the note hash with a url"
+    ],
+    [
+      7,
+      "Recompress the export and import it"
+    ],
+    [
+      8,
+      "View the note on the issue"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to perform a Server-Side Request Forgery (SSRF) by exploiting the Note model's attachment feature during project import. By manipulating the remote_attachment_url attribute in the project.json file, an attacker can force the server to download a file from any host, potentially accessing internal services or sensitive data.",
+  "reason": "This vulnerability involves understanding the CarrierWave uploader's functionality, the project import process, and the AttributeCleaner's limitations. The attacker must also be aware of the potential internal services that could be accessed via SSRF. The interaction between these components is non-obvious, requiring knowledge of both the application's internals and the exploit's implications.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

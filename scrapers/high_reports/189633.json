@@ -1,0 +1,38 @@
+{
+  "reported_to": "shopify-scripts",
+  "reported_by": "dkasak ",
+  "title": "Certain inputs cause tight C-level recursion leading to process stack overflow",
+  "content": "\nIntroduction\nCertain legal Ruby programs can cause a tight recursion on the C-level (without using eval) while spending very little of the Ruby-level stack. This precludes triggering a Ruby stack overflow exception and eventually leads to a process stack overflow and a segfault. Both vanilla mruby and mruby running inside mruby-engine are vulnerable.\nProof of concept\nrecursive_to_i.rb:\ndef to_i\n'' * self\nend\nto_i\nSave the above code as recursive_to_i.rb.\nRun either: a) mruby recursive_to_i.rb b) sandbox recursive_to_i.rb\nBoth cause a segfault due to a process stack overflow.\nDiscussion\nEverything below assumes the latest master of the mruby repository as of Dec 08th, which is commit b84e005fc36a3c669586cc66ab3c87630d7a5509.\nSince the above POC redefines to_i on Object, it is very easy to trigger the crash afterwards, for instance, by trying to use any subclass of Object without its own to_i in an integer context.\nIncidentally, that mruby uses to_i for implicit conversion to an Integer seems wrong (the offending code being in object.c, line 561). For instance, MRI Ruby gives the following for the above POC:\nrecursive_to_i.rb:2:in *': no implicit conversion of Object into Integer (TypeError) from recursive_to_i.rb:2:in to_i'\nfrom recursive_to_i.rb:5:in `<main>'<Paste>\nHowever, the problem isn't limited to overriding to_i. Some other inputs that exploit the same bug:\nnil_method_ensure.rb\ndef nil.m\nm a ensure m + a\nend\nnil.m\nThis one crashes only mruby and not the sandbox:\nmodule_new_do.rb\ndef a\nModule.new do\na\nend\nend\na\nThere are probably others since the underlying cause is the same.\nSolution\nWhile there may be a way to fix these cases individually, it is our opinion that the C-level recursion depth should be tracked and, ideally, limited according to the size of the process stack.\nWe managed to produce recursions that spend as much as 3200 bytes of the process stack between two recursive mrb_vm_run calls while only spending 80 bytes of the Ruby stack. Based on some testing, we've derived a loose upper limit of the number of recursions needed to crash the interpreter in this scenario:\n(stack_size * 0.98) / 3200\nTightening the factors up a bit, we arrive at the following formula that should give a good safety margin (assumptions: 10% of the stack used before first call to mrb_vm_run, 4096 bytes of the process stack used between two recursive calls):\n(stack_size * 0.9) / 4096 - 1\nWe supply a patch where we've implemented C-level recursion depth tracking based on this formula, hardcoded to a stack size of 8 MiB (defined as a macro constant). Ideally, the process stack size should be determined using a method appropriate for the OS (for instance, getrlimit on POSIX).\n--\nDenis Kasak\nDamir Jeli\u0107\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": 10000,
+  "weaknesses": [
+    "Memory Corruption - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1489544520,
+  "report_url": "https://hackerone.com/reports/189633",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create a Ruby file named 'recursive_to_i.rb' with the following content:\n\ndef to_i\n'' * self\nend\nto_i"
+    ],
+    [
+      2,
+      "Run the file using mruby: 'mruby recursive_to_i.rb'"
+    ]
+  ],
+  "vuln_description": "Certain legal Ruby programs can cause a tight recursion on the C-level (without using eval) while spending very little of the Ruby-level stack. This precludes triggering a Ruby stack overflow exception and eventually leads to a process stack overflow and a segfault.",
+  "reason": "The vulnerability involves understanding the interaction between Ruby-level and C-level stack management, which is a subtle and non-obvious aspect of the interpreter's implementation. The attack requires knowledge of how method redefinition affects implicit type conversion in mruby.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

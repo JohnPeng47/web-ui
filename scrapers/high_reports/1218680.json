@@ -1,0 +1,64 @@
+{
+    "reported_to": "Elastic",
+    "reported_by": "superman85 ",
+    "title": "Improper authorization on `/api/as/v1/credentials/` for  Dev Role User with Limited Engine Access",
+    "content": "\nSummary:\nDear Team,\nSince #1168528 was resolved. I have checking again for other roles. At Dev Role with Limited Engine Access, an user still can access API endpoint\n/api/as/v1/credentials/ to get all API keys (private-key, search-key ... )\nSteps To Reproduce:\n1 - Log in Kibana with the admin (elastic) user and go to the Stack Management > Users page (/app/management/security/users/)\n2 - Choose an username , password and role for this user. For example you can choose username: dev\n3 - Log in App Search with the admin (elastic) user and go to the Users & roles page (/as#/role-mappings/)\n4 - Click Add mapping\n5 - External Attribute choose username , in the Attribute value field enter dev\n6 - In the Role box select Dev\n7 - In Engine Access select Limited Engine Access, no need to select any engine\n8 - Login to App Search with user dev\n9 - Go to endpoint https://your_app_search_instance/api/as/v1/credentials/\n10 - You still can get all api keys\nI have attached video PoC\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nPrivilege escalation. The default App Search install has a Private API Key with read/write access to all engines. If a Private Admin Key has been created before. the attacker can use it to create new API keys or delete existing ones.\nWith Limited Engine Acess, an user should create and managed their own api keys\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1628025120,
+    "report_url": "https://hackerone.com/reports/1218680",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Log in to Kibana as admin (elastic) and navigate to Stack Management > Users"
+        ],
+        [
+            2,
+            "Create a new user 'dev' with Dev Role"
+        ],
+        [
+            3,
+            "Log in to App Search as admin and go to Users & roles"
+        ],
+        [
+            4,
+            "Add a new mapping for user 'dev' with Dev Role and Limited Engine Access"
+        ],
+        [
+            5,
+            "Log in to App Search as user 'dev'"
+        ],
+        [
+            6,
+            "Access the endpoint /api/as/v1/credentials/ to retrieve all API keys"
+        ]
+    ],
+    "vuln_description": "A user with Dev Role and Limited Engine Access can access the /api/as/v1/credentials/ endpoint to retrieve all API keys, including private keys, which should not be accessible with limited permissions. This allows privilege escalation as the user can use these keys to create or delete API keys.",
+    "reason": "The vulnerability involves understanding role-based access control in Kibana and App Search, and the interaction between user roles and API key permissions. The steps are straightforward but require knowledge of the system's role and permission structure.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "1168528",
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": true
+    }
+}

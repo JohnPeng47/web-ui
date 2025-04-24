@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "0x9747 ",
+    "title": "Sensitive information about a \u2588\u2588\u2588\u2588\u2588\u2588",
+    "content": "\nSummary:\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ is an U.S. Government (USG) Information System (IS) that is provided for USG-authorized use only.Due to some reason a document which contains the information about a special \u2588\u2588\u2588 for the \u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588 which possibly is \u2588\u2588\u2588\u2588\u2588\u2588\u2588or \u2588\u2588\u2588\u2588\u2588.The pdf file is located at https://\u2588\u2588\u2588\u2588\u2588\u2588/spi/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.pdf and also contains some drawings for the packaging of the machine.\nTo confirm that it indeed was a confidential document it was found that a basic search related to this pdf returns a meta info containing a label about criminal penalties for foreign export:\n\"WARNING \u2013 This document contains technical data whose export is restricted by the Arms Export Control Act (Title 22, U.S.C., Sec 2751 et seq.) or the Export Administration Act of 1979, (Title 50, U.S.C., App. 2401 et seq.), as amended. Violations of these export laws are subject to severe criminal penalties. Disseminate in accordance with provisions of DoD Directive 5230.25.\"\nTo confirm that the file is not just another special \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 it was discovered that the SPI number is not labeled at https://\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/spi?OpenPage&TableRow=2.1.1#2.1.\nStep-by-step Reproduction Instructions\n1.Open any browser of your choice\n2.Head over to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/spi/\u2588\u2588\u2588\u2588\u2588\u2588\u2588.pdf\n3.Observe the content listed in the pdf and analyse the products mentioned in there\nProduct, Version, and Configuration (If applicable)\nNull\n## Suggested Mitigation/Remediation Actions\nRemoval of such documents or introduction of certain authentication mechanisms would be ideal.\nImpact\nThis exposes highly sensitive information about not just the packaging info but also the designs mentioned.\nAny person can access this document and cause information leakage.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cleartext Storage of Sensitive Information"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1600714140,
+    "report_url": "https://hackerone.com/reports/893970",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Open any browser and navigate to the URL: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/spi/\u2588\u2588\u2588\u2588\u2588\u2588\u2588.pdf"
+        ],
+        [
+            2,
+            "Analyze the content of the PDF, noting the sensitive information and the warning label about criminal penalties for foreign export."
+        ]
+    ],
+    "vuln_description": "This vulnerability involves the unauthorized access to a PDF document containing sensitive U.S. Government information, including designs and packaging details of a special machine. The document is publicly accessible without any authentication, leading to potential information leakage.",
+    "reason": "The discovery of this vulnerability is straightforward as it only requires accessing a publicly available URL and analyzing the content of the PDF. There are no complex interactions or state manipulations involved.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

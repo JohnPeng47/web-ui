@@ -1,0 +1,38 @@
+{
+    "reported_to": "Slack",
+    "reported_by": "rubaljain ",
+    "title": "Real Time Error Logs Through Debug Information",
+    "content": "\nSummary: During the assessment, I have found the debug URL on slackb.com which is disclosing the World Wide real time error logs of Slack users.\nThe information leaked includes the following:\nUser Device Information\nRedacted Token\nClient IP Address\nDescription\nSession ID\nTeam ID\nUser ID\nUser Agent\nServer Response\nTimestamp\napi_call\nx-amz-cf-id\nx-amz-id-2\nAnd other user sensitive information.\nSteps to Reproduce\nOpen below URL in browser and refresh it to see real time logs.\nhttps://slackb.com/debug\nThe vulnerable domain here is slackb.com. I have confirmed this with Slack to report this on Hackerone and mention the vulnerable domain.\nImpact\nBy exploiting this vulnerabiliti\u200by, an attacker can dump the real-time logs and information gained through this is critical which includes the team ID, user ID and redacted token which allows attackers to gather information which can be used later in the attack lifecycle, in order to achieve more than they could if they didn\u2019t get access to such information.\n\n",
+    "severity": [
+        8.2,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Exposure Through Debug Information"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1554988500,
+    "report_url": "https://hackerone.com/reports/503283",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Open the URL https://slackb.com/debug in a browser"
+        ],
+        [
+            2,
+            "Refresh the page to observe real-time error logs containing sensitive user information"
+        ]
+    ],
+    "vuln_description": "The debug URL at slackb.com exposes real-time error logs containing sensitive user information such as User Device Information, Redacted Token, Client IP Address, Session ID, Team ID, User ID, User Agent, Server Response, Timestamp, and other critical data. This information disclosure could be leveraged by attackers to gather intelligence for further attacks.",
+    "reason": "The vulnerability involves accessing a publicly exposed debug endpoint without any authentication or complex manipulation. The discovery simply requires navigating to the URL and observing the logs, making it straightforward and not requiring any advanced techniques or understanding of complex interactions.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

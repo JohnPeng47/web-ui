@@ -1,0 +1,38 @@
+{
+  "reported_to": "shopify-scripts",
+  "reported_by": "h72 ",
+  "title": "Range constructor type confusion DoS",
+  "content": "\nIt's possible to crash mruby by redefining the Range class and then using the range literal syntax:\nRange = Array\n(1..2).inspect\nThe mrb_range_new function allocates and initializes a range object backed by the RRange struct, however it uses runtime constant lookup to find the Range class object. Redefining the Range constant to point to a different class and calling an instance method causes a segfault, as the RRange::edges field is confused for the iv field on other structs.\nIt may be possible to achieve RCE through this vulnerability, but there are significant complicating factors and I have not spent the time trying to develop an RCE PoC.\nI have attached a patch which fixes this bug. My patch adds a range_class field to mrb_state, following the pattern other core classes use to avoid runtime constant lookups.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 10000,
+  "weaknesses": [
+    "Uncontrolled Resource Consumption"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1481954580,
+  "report_url": "https://hackerone.com/reports/181910",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Redefine the Range class to point to Array: Range = Array"
+    ],
+    [
+      2,
+      "Use range literal syntax and call an instance method: (1..2).inspect"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows crashing mruby by redefining the Range class and then using range literal syntax. This occurs because mrb_range_new function uses runtime constant lookup for the Range class, and redefining it causes memory corruption when instance methods are called on the range object.",
+  "reason": "The vulnerability requires understanding of mruby internals (how Range objects are allocated and how constant lookup works) and a non-obvious interaction between class redefinition and memory layout. However, the attack itself is straightforward once these concepts are understood.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

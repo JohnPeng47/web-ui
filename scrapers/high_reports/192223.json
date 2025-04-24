@@ -1,0 +1,45 @@
+{
+  "reported_to": "Discourse",
+  "reported_by": "alberto__segura ",
+  "title": "XSS vulnerability on Audio and Video parsers",
+  "content": "\nJust like in the XSS vulnerability on Image parser, there is the same vulnerability on Audio (https://github.com/discourse/onebox/blob/394409ca319cc1a1cd31fefa50c9468c990531a3/lib/onebox/engine/audio_onebox.rb) and Video (https://github.com/discourse/onebox/blob/394409ca319cc1a1cd31fefa50c9468c990531a3/lib/onebox/engine/video_onebox.rb) parsers.\nA malicious user can include a \"fake\" audio or video URL with a ' character, allowing him to execute Javascript code.\nAudio URL example: http://host/path'onerror=alert(1);//k.mp3\nVideo URL example: http://host/path'onerror=alert(1);//k.mp4\nAsk me if you need more info to reproduce the vulnerability.\nBest regards,\nAlberto\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 256,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1484060460,
+  "report_url": "https://hackerone.com/reports/192223",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify an audio or video parser in the application that processes user-provided URLs."
+    ],
+    [
+      2,
+      "Craft a malicious URL with an XSS payload, such as: http://host/path'onerror=alert(1);//k.mp3 for audio or http://host/path'onerror=alert(1);//k.mp4 for video."
+    ]
+  ],
+  "vuln_description": "The vulnerability is an XSS (Cross-Site Scripting) issue in the audio and video parsers of the application. By injecting a maliciously crafted URL containing a single quote and JavaScript code, an attacker can execute arbitrary JavaScript in the context of the user's browser session.",
+  "reason": "The attack is straightforward and does not involve multiple components or complex interactions. The vulnerability is a classic XSS flaw that requires only the injection of a simple payload into a URL, which is a well-known and common attack vector.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves injecting malicious scripts via audio/video URLs, which is unrelated to authentication or authorization (AuthN/AuthZ) boundaries. The proposed methodologies focus on testing AuthN/AuthZ bypasses and IDOR vulnerabilities by manipulating user sessions and resource access, not input validation or script injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

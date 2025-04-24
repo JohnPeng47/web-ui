@@ -1,0 +1,60 @@
+{
+    "reported_to": "Helium",
+    "reported_by": "amr_ ",
+    "title": "Read-Only user can delete users",
+    "content": "\nhello\nthis endpoint (DELETE /api/invitations/0ff7e9f9-877a-40cc-b99f-f6b3b1bea3f8 )vulnerable to Insecure Direct Object Reference\nSteps to reproduce the bug\nLet's assume that three accounts exist:\nadmin@helium.com (role Administrator)\nattacker@helium.com (role Read-Only)\nvictim@helium.com (invited user )\nall three account in same organization (h1)\nattacker@helium.com cant delete victim@helium.com but we can do that\nfrom admin@helium.com go to delete victim@helium.com\nrequest like that DELETE /api/invitations/0ff7e9f9-877a-40cc-b99f-f6b3b1bea3f8\ntake id victim@helium.com 0ff7e9f9-877a-40cc-b99f-f6b3b1bea3f8\ngo to attacker@helium.com switch another organization (h2)\nand go to delete invited user from this organization(h2)\nDELETE /api/invitations/a996881d-7177-43fb-be7c-da3a6b005f40\nchange id (a996881d-7177-43fb-be7c-da3a6b005f40) to id you got from admin@helium.com(0ff7e9f9-877a-40cc-b99f-f6b3b1bea3f8)\nrespond\nHTTP/1.1 204 No Content\nDate: Mon, 01 Jun 2020 18:47:43 GMT\nContent-Length: 0\nConnection: close\nCache-Control: max-age=0, private, must-revalidate\nMessage: User removed from organization\nStrict-Transport-Security: max-age=31536000\nVia: 1.1 vegur\nCF-Cache-Status: DYNAMIC\ncf-request-id: 0312cf14d40000edeb299e9200000001\nExpect-CT: max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"\nServer: cloudflare\nCF-RAY: 59cb1ace2eeaedeb-CDG\nnow account victim@helium.com deleted from attacker@helium.com\ni can make poc\nthanks\nImpact\nRead-Only user can delete users\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Insecure Direct Object Reference (IDOR)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1594420200,
+    "report_url": "https://hackerone.com/reports/888729",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Identify three accounts in the same organization (h1): admin@helium.com (Administrator), attacker@helium.com (Read-Only), victim@helium.com (invited user)."
+        ],
+        [
+            2,
+            "From admin@helium.com, attempt to delete victim@helium.com and capture the DELETE request: DELETE /api/invitations/0ff7e9f9-877a-40cc-b99f-f6b3b1bea3f8."
+        ],
+        [
+            3,
+            "Switch to attacker@helium.com in another organization (h2) and attempt to delete a user there, capturing the DELETE request: DELETE /api/invitations/a996881d-7177-43fb-be7c-da3a6b005f40."
+        ],
+        [
+            4,
+            "Modify the request from attacker@helium.com to use the victim's ID (0ff7e9f9-877a-40cc-b99f-f6b3b1bea3f8) instead of the original ID."
+        ],
+        [
+            5,
+            "Observe the response: HTTP/1.1 204 No Content, indicating successful deletion of victim@helium.com by the Read-Only user."
+        ]
+    ],
+    "vuln_description": "A Read-Only user can delete users due to an Insecure Direct Object Reference (IDOR) vulnerability. The attacker exploits the lack of proper authorization checks by reusing a victim's ID from a different organization in a DELETE request, allowing unauthorized deletion.",
+    "reason": "The vulnerability involves understanding the IDOR flaw and manipulating the request to use a victim's ID. However, the steps are straightforward once the ID is known, and the attack does not require complex interactions or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": true,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": false
+    }
+}

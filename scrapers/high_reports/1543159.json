@@ -1,0 +1,38 @@
+{
+    "reported_to": "Reddit",
+    "reported_by": "bisesh ",
+    "title": "Able to approve admin approval and change effective status without adding payment details . ",
+    "content": "\nSummary:\nIn https://ads.reddit.com/ you can create campaign under which you can create ads , once you create new campaign , it is on pending stage and will not be delivered unless you add payment details and is reviewed by admin and approved according to what it says here https://advertising.reddithelp.com/en/categories/ad-review/about-reddits-ad-review-process . But changing the value of admin_approval to APPROVED and effective_status to ACTIVE , the ads is approved and thus we receive the confirmation email from reddit ads that our ads is approved .\nImpact:\nCan bypass the review process and change the ads status to approve and active without payment process .\nSteps To Reproduce:\n[add details for how we can reproduce the issue]\nCreate a campaign from https://ads.reddit.com\nGo to https://ads.reddit.com/dashboard, you will see a table list that shows your ads and campaign , there the status is stated as PENDING . And we know according to what reddit says , our ads needs to get reviewed by reddit members , but updating the value from api changes our status to ACTIVE . Hence ad is successfully delivered . POC video is attached .\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nCode 605 Bytes\n1PATCH /api/v2.0/accounts/\u2588\u2588\u2588\u2588\u2588/ads/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/2\n2Host: ads-api.reddit.com\n3User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0\n4Accept: application/json\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate\n7Referer: https://ads.reddit.com/\n8Authorization: bearer token\n9Content-Type: application/json\n10Origin: https://ads.reddit.com\n11Content-Length: 101\n12Sec-Fetch-Dest: empty\n13Sec-Fetch-Mode: cors\n14Sec-Fetch-Site: same-site\n15X-Pwnfox-Color: magenta\n16Te: trailers\n17\n18{\"data\":\n19{\"configured_status\":\"ACTIVE\",\n20\"effective_status\":\"ACTIVE\",\n21\"admin_approval\":\"APPROVED\"\n22}}\n23\nSupporting Material/References:\n[attachment / reference]\nImpact\nCan bypass the review process and change the ads status to approve and active without payment process .\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 5000,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1655888700,
+    "report_url": "https://hackerone.com/reports/1543159",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Create a campaign from https://ads.reddit.com"
+        ],
+        [
+            2,
+            "Send a PATCH request to the API endpoint with the payload updating 'admin_approval' to 'APPROVED' and 'effective_status' to 'ACTIVE'"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows bypassing the ad review process and payment verification by directly modifying the 'admin_approval' and 'effective_status' fields via API, resulting in unauthorized ad approval and delivery.",
+    "reason": "The attack involves a straightforward API manipulation without requiring complex interactions or understanding of multiple components. The vulnerability is discovered by observing the API behavior and making a direct request to change status fields.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

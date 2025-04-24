@@ -1,0 +1,38 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "3sl4m-s4l3m ",
+  "title": "Server Side Request Forgery in Uppy npm module",
+  "content": "\nHi Team,\nWhile we were testing our security engine at Shieldfy (https://shieldfy.io), We found a server side request forgery (SSRF) vulnerability in Uppy npm package.\nIt allows hacker to easily extract inside information from the server or take control of internal services.\nModule\nmodule name: Uppy\nversion: Latest: 1.8.0\nnpm page: https://www.npmjs.com/package/uppy\nModule Description\nUppy is a sleek, modular JavaScript file uploader that integrates seamlessly with any application. It\u2019s fast, easy to use and lets you worry about more important problems than building a file uploader.\nModule Stats\n[1] weekly downloads : 23,153\nVulnerability\nServer Side Request Forgery ( SSRF )\nVulnerability Description\nin the source code of the module\nfile: packages/@uppy/companion/src/server/controllers/url.js line: 11\nYou will find the express is routing the /get endpoint to the function get declared in line 43\nThen it calls downloadURL in line`61 and pass req.body.url to it as argument\nin the function downloadURL declared in line 80\nIt calls the url directly without any kind of sanitization or validation, opens the door to send malicious ssrf attack, allowing the hacker to extract information from any internal resource, or take control of any internal service.\nSteps To Reproduce:\ndeploy the module in live server (ex: digital ocean server)\nrequest 'Add More button' then click on Link button\nSubmit Link of DigitalOcean metadata api http://169.254.169.254/metadata/v1/\nonce done uploading , download the file you should see the content of the server metadata\nCode 98 Bytes\n1id\n2hostname\n3user-data\n4vendor-data\n5public-keys\n6region\n7interfaces/\n8dns/\n9floating_ip/\n10tags/\n11features/\nPatch\nThe suggested fix.\nuse whitelist technique in the url protocol ( allow only http & https ), and on the port ( 80 & 443 )\nuse blacklist technique in the host (disable IPs v4 & v6 allowing only domains, disable domains that used as internal routing if any)\ndisable redirection followAllRedirects to avoid bypasses\nSupporting Material/References:\nMore info about ssrf can be found here : https://shieldfy.io/security-wiki/server-side-request-forgery/server-side-request-forgery/\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nScan local or external network\nRead files from affected server\nInteract with internal systems\nRemote code execution\n\n",
+  "severity": [
+    8.2,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Server-Side Request Forgery (SSRF)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1583152680,
+  "report_url": "https://hackerone.com/reports/786956",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Deploy the Uppy module on a live server (e.g., Digital Ocean server)."
+    ],
+    [
+      2,
+      "Request the 'Add More' button, then click on the 'Link' button and submit a link to the DigitalOcean metadata API (e.g., http://169.254.169.254/metadata/v1/). Once uploaded, download the file to view the server metadata content."
+    ]
+  ],
+  "vuln_description": "The Uppy npm package is vulnerable to Server Side Request Forgery (SSRF) due to lack of URL sanitization or validation in the downloadURL function. This allows an attacker to make requests to internal resources, potentially extracting sensitive information or interacting with internal systems.",
+  "reason": "The vulnerability involves a straightforward exploitation of an unvalidated URL parameter in a commonly used file uploader module. The attack does not require complex interactions between components or manipulation of application states, making it relatively easy to discover and exploit.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

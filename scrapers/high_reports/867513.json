@@ -1,0 +1,60 @@
+{
+    "reported_to": "Shopify",
+    "reported_by": "imgnotfound ",
+    "title": "Takeover an account that doesn't have a Shopify ID and more",
+    "content": "\nDetails\nThe https://pos-channel.shopifycloud.com/graphql-proxy/admin can be exploited to update a staff member email without any email confirmation.\nUsing the partner dashboard, we've the ability to create a store that doesn't have a Shopify ID account on https://accounts.shopify.com. By using these two together, all we have to do is create an arbitrary store to an email that we own and confirm it with received email, then use the the POS Staff endpoint to update our email without having to validate it.\nYou'll then be prompted to create a Shopify ID for your stores (the new created one alongs with the victim stores) and you won't need to validate that you own the email since it is already verified.\nSteps to reproduce\nHave a victim with a shop that doesn't have a Shopify ID\nOpen https://parners.shopify.com and create a development store\nWithin the store creation form, you'll need to update your shop email to one that doesn't exist within Shopify and that you own (so it can be validated). As the field is read-only, that can either be done by intercepting the request with an application like Burp or do the above within your browser console to update the form object.\nCode 148 Bytes\n1window.RailsData.current_organization.business_email = \"nonexistingemail@shopify.com\";\n2window.RailsData.user.email = \"nonexistingemail@shopify.com\";\n1.. Validate that you own the email address (Link sent to your email)\nAdd the POS to your shop Sales Channels\nOpen up the POS > Staff\nSave your own staff page and copy the CURL request by using browser inspection\nReplace the CURL payload email field with the victim email and send the request\nRefresh your profile page in your Shop, you'll then be prompt to combine your account and note that you're not asked to validated the new email (victim's one).\nProceed with the Shopify ID creation\nYou now own the Shopify ID, you can just change its email to yours as the victim could still be recovering them by doing a forget password.\nImpact\nThat vulnerability has multiple impacts so I wasn't sure if I should've been creating multiple reports\n<image_0>\nAbility to update Staff informations even when linked to a Shopify ID\nFor the later one, let's say you have a Shop with two staff members: A and B (the attacker). Staff B is aware that the Shop owner is about to transfer the Shop to Staff A. By exploiting the POS access endpoint, staff B would be able to move first name, last name and email between Staff A <--> Staff B so that once the shop owner would be selecting the right Staff within the UI, we would be sending it to the wrong person.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": 22500,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/R3SuGsznEDpQys6MkJQanSTt?response-content-disposition=attachment%3B%20filename%3D%22Screen_Shot_2020-05-06_at_7.19.49_PM.png%22%3B%20filename%2A%3DUTF-8%27%27Screen_Shot_2020-05-06_at_7.19.49_PM.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ2Y6G2NUU%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T210553Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDJuqn9kdtu2Unz0Z7wyEsUibPx2F7drbSBOWFTL45NiAIge4cG2%2B%2FCYBRquViHAf1ya0yjWFza%2FbVJYvKGVp9AMAMqsgUIHRADGgwwMTM2MTkyNzQ4NDkiDAOQ94LYZ1Z2I%2FbT3iqPBZNoZ5Qv%2B6zwPjuiNOg%2B3bkXtXWKvZ3ms0qFE07q2iHxcWQUOVHSVmtoLfBGgOAVJ4UTChA9cehYQTyUrcfugsEnTnmmmuHNqhQoRlOkaDd0JdKKBQoddVioIXbRmIS7NYUOBGCRCAhg8SvRoMVwCSoCexVF4X%2FXHlEJphH82fzlJSBuDti8rAXeTRTqmkGp0oU9JQQHQL8xsJidlEKyPoRNW8xaNVlX%2BwN21KRoEDqlCIkHCEQGrt4gkgGLCJfDxrgr5f8FRA0N1VjtnFiKyr5v%2BE0pysS%2BJVmEffnsy8e3jNksHIwvaTS3DIRCAq%2Fg%2B6bV3m79B565y%2Fg9CgKPwYZ9UEu07JTnFpwqmwEQQEYzcviuU5wqHXFWf5oQLnqVHsKFX4s1QPEll74yw%2BzzmLRbWP7MriOVAZ0mr%2FeFn8xyEp0NEi1ry8biDtDGNl724FHGegwg81ar32RlncV%2B44raHdyYrFCgQS%2Fj86OVhe%2F2GOfWG%2BN14Dn1PRl6oOgjnqbd6cBPVglZA0S3zJ9TthJdqnxPIRGaU3dwuJpVmL%2Bvvtuid4NX%2FG6en7plOAX5IfYRvH84XWqY%2F%2FmcVkIQ6ViMLmWJuXvLuarqZzBldX9Vp8f4VLzJtVvxHCqUs7RBhN3PdDi0L0itzE85dpR2LDtXK2S%2F4bxtmPpzXG4jULH61Cgr277FE2XpOQDqpXrqTGibfanLYklNBliety5RMhusoGfSLVsY9%2F1vFj6Q58f4gR6TNeAwsUBeu3A%2B25yZORFE2NLz9Ws%2B9Gfbw%2FhL3%2FxJjIMrV10Sk6M8JdyZqfTI85Kq%2FlJc0tjmP4MhmsylrhI5VbE03gXJatRO%2BwZcivdG3BxDMOWcv78LZyfhvRgwgpGMvwY6sQFgw%2BWnsIdVBUuwXZ4atbgtCjB%2BL%2FYDSWwVvNsmQgwigXDKIrA4%2FXuCcmT9Ja%2Fo2btzVyeKU2W3BtD1lVfd5sQXH76dj5ggdRuKpmKNPFGfpZyOxcvaA%2FbDdvbGQI0IQ2XHcfbuXi3lC0dQifpqefiLpk27Z17BEKw8OJHiMDLBhiNp26sIBDCT8URGtSIN4%2B6yuL%2BtaKnxIxjuyPzjAR8okSQUl94hX9Y6h3D3BO6iRPg%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=ec794cb9a241def1efa73126054b37dea3c474e9d7fa86410f6968b0a6687f60"
+    },
+    "disclosed_date": 1599072420,
+    "report_url": "https://hackerone.com/reports/867513",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create a development store via Shopify Partner Dashboard and set the email to one you own but doesn't exist in Shopify."
+        ],
+        [
+            2,
+            "Intercept or modify the request to update the email field using tools like Burp or browser console."
+        ],
+        [
+            3,
+            "Validate the email ownership via the confirmation link sent to your email."
+        ],
+        [
+            4,
+            "Add POS to the shop and access the Staff section via POS."
+        ],
+        [
+            5,
+            "Use the browser inspection to copy the CURL request from saving the staff page and modify the email field to the victim's email."
+        ],
+        [
+            6,
+            "Send the modified request and refresh your profile page to prompt Shopify ID creation without email validation."
+        ],
+        [
+            7,
+            "Proceed to create the Shopify ID, effectively taking over the victim's account."
+        ]
+    ],
+    "vuln_description": "This vulnerability allows an attacker to take over a Shopify account that doesn't have a Shopify ID by exploiting an email update flaw in the POS Staff endpoint and combining it with store creation via the Partner Dashboard. The attacker can bypass email validation during Shopify ID creation, gaining control over the victim's store.",
+    "reason": "The attack involves multiple components (Partner Dashboard, POS Staff endpoint, email validation bypass) and requires understanding of non-obvious interactions between these systems. The attacker must manipulate application states (store creation, email updates) and recognize the novel logic that allows combining these actions to bypass security checks.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

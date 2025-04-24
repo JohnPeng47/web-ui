@@ -1,0 +1,46 @@
+{
+  "reported_to": "Ruby on Rails",
+  "reported_by": "rosa ",
+  "title": "ActiveStorage service's signed URLs can be hijacked via AppCache+Cookie stuffing trick when using GCS or DiskService",
+  "content": "\nActiveStorage tries to force content-disposition: attachment for a list of content-types, including text/html. However, response-content-type and response-content-disposition in GCS and DiskService's URLs aren't signed, which means an attacker can modify them at will. This is not the case for Azure or S3.\nThis can be exploited using AppCache and cookie bombing as follows:\nUpload the following file as ActiveStorage::Blob File: fallback.html\nCode 101 Bytes\n1<html>\n2<script>\n3  alert('Your request to the page '+location.href+' is hijacked!');\n4</script>\n5</html>\nGrab the service signed URL for it and modify content type and content disposition params to text/html and inline.\nNow upload this other file using that URL as fallback: File: manifest.appcache\nCode 73 Bytes\n1CACHE MANIFEST \n2FALLBACK:\n3/bucket_name/ [fallback_url from previous step]\nIn the same way, grab the signed service URL and modify content disposition and type to ensure it's served inline and as text/cache-manifest.\nFinally, upload this file using the service URL for manifest.appcache: File: main.html\nCode 253 Bytes\n1<html manifest=\"[manifest_url from the manifest above]\">\n2Any requests to this bucket will be hijacked.\n3<script>\n4setTimeout(function(){\n5for(var i = 1e3; i>0; i--){document.cookie = i + '=' + Array(4e3).join('0') + '; path=/'};\n6}, 3000);\n7</script>\n8</html>\nGrab the service URL for main.html, modify content type and disposition to ensure it's served as inline and text/html, and trick a user of the Rails app with access to ActiveStorage attachments into clicking it.\nSince it'll be open inline and as HTML, the JS code to overflow the cookies for the service (storage.googleapis.com in the case of GCS) will be executed. Next time the user makes a request for a file under the same bucket as main.html, googleapis.com will return an error due to the size of the cookie headers. This will be interpreted as being offline by the browser, which will offer the fallback specified in the manifest. The fallback.html above will be opened inline and as HTML as well, and its JS code executed. That code can be made to send location.href (the signed URL) to the attacker.\nImpact\nGain access to signed URLs for private objects, which in practice means access to those objects, as signed URLs is all that is needed.\n\n",
+  "severity": [
+    7.4,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Information Disclosure"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1545964020,
+  "report_url": "https://hackerone.com/reports/407319",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Upload a file (fallback.html) as ActiveStorage::Blob and get its signed URL, then modify content type and disposition to text/html and inline."
+    ],
+    [
+      2,
+      "Upload a manifest file (manifest.appcache) using the modified URL from step 1 as fallback, modify its content type and disposition to text/cache-manifest and inline."
+    ],
+    [
+      3,
+      "Upload a main HTML file (main.html) using the modified URL from step 2, modify its content type and disposition to text/html and inline."
+    ],
+    [
+      4,
+      "Trick a user into clicking the main.html URL, which executes JS to overflow cookies and trigger the fallback mechanism, leading to the execution of fallback.html's JS."
+    ]
+  ],
+  "vuln_description": "ActiveStorage's signed URLs for GCS or DiskService can be hijacked via an AppCache and cookie stuffing trick, allowing attackers to modify content type and disposition parameters. This leads to execution of malicious JavaScript when a user accesses the manipulated URL, potentially exposing private objects.",
+  "reason": "The attack involves multiple components (file uploads, URL manipulation, AppCache, cookie stuffing) and subtle interactions between them (browser offline behavior triggering fallback). It also requires understanding of how ActiveStorage handles signed URLs and how browsers process AppCache manifests.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

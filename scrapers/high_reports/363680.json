@@ -1,0 +1,38 @@
+{
+  "reported_to": "Monero",
+  "reported_by": "anonimal ",
+  "title": "Constant-time comparison is not always implemented; critical areas are vulnerable to key-timing attacks",
+  "content": "\nIn my most superficial of reviews, constant-time comparison appears to not be globally implemented (at a glance, only implemented within the ref10 implementation).\nWith that said, the following areas either appear to be vulnerable, or are potentially vulnerable, to key-timing attacks:\nContainers used for RingCT (in particular, the key struct) as deployed throughout RingCT\nThe definition and implementations of CRYPTO_MAKE_COMPARABLE\nequalKeys in rctOps.cpp, whose comparison speed appears to be relative to its available hardware\nFor points 1 and 2, as a steadfast rule; do NOT use memcmp when comparing cryptographic secrets (or any cryptographic material for that matter). For point 3, be careful with conditional branches which can be optimized or subject to speculative execution. One possible fix for point 3 is to perform an XOR of all the bytes in both buffers, and then compare the result (see kovri below).\nAs the literature states, key timing vulnerabilities can range from somewhat-trivial to extremely-difficult to exploit. For this report, I cannot assess a difficulty. For an active attack, monero has a very simple yet friendly network layer which I imagine could make remote execution somewhat easier (depending on the context and application) but, I don't have PoC. Now, at the local level for, let's say, a malicious node that wants to forge X before sending to the next peer, the results could be easier to attain (again, no PoC).\nThis was only the most superficial of reviews - so please forgive any assumptions or inaccuracies on my part. If I had more time with this issue, I would love to look deeper in order to provide a more details and to assert a monero PoC. Unfortunately, I am too busy with kovri - but I hope that this report will at least raises awareness.\nMitigation:\nUse a function which provides constant-time comparison. For example, kovri has a crypto++ solution at its disposal.\nImpact\nAt first glance, a forged RingCT signature - but the extent of the problem could be possibly extended to other areas (to be determined).\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Missing Required Cryptographic Step"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1533582780,
+  "report_url": "https://hackerone.com/reports/363680",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify areas in the code where cryptographic comparisons are made, particularly in RingCT containers, CRYPTO_MAKE_COMPARABLE implementations, and equalKeys in rctOps.cpp."
+    ],
+    [
+      2,
+      "Analyze the comparison methods used in these areas to determine if they are vulnerable to timing attacks (e.g., use of memcmp or conditional branches)."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves the use of non-constant-time comparison methods in cryptographic operations, which can leak timing information and allow attackers to infer secret keys or forge signatures through timing attacks.",
+  "reason": "The vulnerability requires knowledge of cryptographic timing attacks and the ability to identify non-constant-time comparisons in the code. While the concept of timing attacks is well-known, pinpointing specific instances in a large codebase requires careful review and understanding of cryptographic best practices.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

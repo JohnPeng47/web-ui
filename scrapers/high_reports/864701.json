@@ -1,0 +1,25 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "awarau ",
+    "title": "Prototype Pollution lodash 4.17.15",
+    "content": "\nI would like to report Prototype Pollution in lodash version 4.17.15\nIt allows Denial of Service and more.\nModule\nmodule name: lodash\nversion: 4.17.15\nnpm page: https://www.npmjs.com/package/lodash\nModule Description\nThe Lodash library exported as Node.js modules.\nModule Stats\n27M in the last week\nVulnerability\nVulnerability Description\nSteps To Reproduce:\nCreate a JS file with this contents:\nlod = require('lodash')\nlod.setWith({}, \"proto[test]\", \"123\")\nlod.set({}, \"proto[test2]\", \"456\")\nconsole.log(test)\nconsole.log(test2)\nExecute it with node\nObserve that test and test2 are now on the Object.prototype.\nSupporting Material/References:\nThis is a variation on:\nhttps://hackerone.com/reports/380873\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\ntest and test2 could just have easily been toString(). This would allow an attacker to cause a denial of service as all objects inherit from the Object.prototype.\nAdditionally, if there are sensitive variables and attributes in a particular application, these can be controlled via the prototype.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Uncontrolled Resource Consumption"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1598020440,
+    "report_url": "https://hackerone.com/reports/864701",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "CODE",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "https://hackerone.com/reports/380873"
+}

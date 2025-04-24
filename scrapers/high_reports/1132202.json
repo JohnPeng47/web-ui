@@ -1,0 +1,65 @@
+{
+  "reported_to": "Rocket.Chat",
+  "reported_by": "sonarsource ",
+  "title": "Post-Auth Stored XSS with User Interaction leads to Remote Code Execution",
+  "content": "\nSummary:\nUnsafe usage of the toastr library leads to Stored XSS when combined with a validation bypass in the createRoom function. Targeting an admin account leads to Remote Code Execution.\nDescription:\nThe frontend uses the toastr library to display error messages to the user. However, it is used in an unsafe way which allows XSS when user input is reflected in an API error message. This happens for example when channel info is edited and the channel's name contains invalid characters.\nTo abuse this, an attacker can use a validation bypass in the createRoom function: the extraData parameter is merged with the room object without proper validation, which allows an attacker to override all previous properties such as the name or the owner. The attacker can use this to create a room that contains their XSS payload in the room's name.\nTriggering the XSS requires multiple steps of user interaction, because there are few API endpoints that reflect user input back. One of them is the rooms.saveRoomSettings endpoint which calls the saveRoomSettings method which in turn uses the getValidRoomName function. This function checks the room's name and reflects the user-provided value back if it is not a valid name.\nThe error returned by the API is unsafely handled by passing it to the toastr library without escaping it or using the library's escapeHtml option. The handleError function passes the value to the toastr library, it escapes the details property but not the message and title property.\nTo gain Remote Code Execution capabilities on the server, an attacker can follow these steps to take over an admin account. The attacker can then use the newly gained admin privileges to create an incoming web hook that has a script. This allows them to execute commands or get a shell on the server, because the script is executed on the server without a security boundary in place (which seems to be intended).\nNote: This issue is classified as Stored XSS because the payload is stored permanently in the database, but it could be argued that it is Reflected XSS because the payload is reflected by the API which then leads to the unsafe handling and execution of the payload.\nReleases Affected:\nWe tested on 3.12.1, but it is hard to confirm since when Rocket.Chat is vulnerable because there are many parts of the code base involved.\nSteps To Reproduce (from initial installation to vulnerability):\nSet up an instance of RocketChat 3.12.1, e.g. by cloning the repo and using Docker Compose:\ngit clone git@github.com:RocketChat/Rocket.Chat.git\ncd Rocket.Chat\ngit checkout tags/3.12.1\ndocker-compose up -d\nConfigure the instance with default settings\nCreate a normal (non-admin) user with username attacker and password attacker\nLog in as the attacker user\nOpen the browser's developer tools and execute the following line of code: Meteor.call('createChannel', 'valid-name', [], false, {}, { name: 'edit me <img src onerror=alert(origin)>' })\nInvite the admin to the newly created channel\nLog out and log in as an admin\nEdit the title of the newly created channel (e.g. change me to you)\nClick the save button\nA dialog should pop up that shows the site's origin (e.g. http://localhost:3000), confirming that the XSS payload has been executed (this is only for the demo, the payload can be arbitrary JavaScript code)\n(The demo ends here but it is trivial to get RCE capabilities when having access to an admin account, as explained before)\nSupporting Material/References:\nThe attached video shows the exploitation of the vulnerability with the attacker's view on the right and the victim's view (admin) on the left.\nSuggested mitigation\nRestrict and validate the extraData parameter when creating a room\nUse the toastr library with the escapeHtml option or sanitize the message and title manually\nSet a Content-Security-Policy header that prevents payload execution\npreventing inline scripts might not be enough here because users can upload files\na nonce-based CSP would fit best\npreventing inline scripts might not be enough here because users can upload files\na nonce-based CSP would fit best\nDisclosure Policy\nAll reported issues are subject to a 90 day disclosure deadline.\nAfter 90 days elapse, parts of the bug report will become visible to the public.\nDon't hesitate to ask if you have any questions or need further help with this issue.\nImpact\nAn attacker can use this vulnerability to target an admin user and take over their account, which is already a high impact. The attacker can then use certain features that are available to admins in order to gain Remote Code Execution capabilities.\nThis gives them complete control over the Rocket.Chat instance and exposes all attached components, e.g. the database or any external system whose credentials are stored within Rocket.Chat settings. An attacker can read, change, or delete all items in the database, impacting confidentiality, integrity, and availability.\n\n",
+  "severity": [
+    8.0,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1625064900,
+  "report_url": "https://hackerone.com/reports/1132202",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Set up an instance of RocketChat 3.12.1 using Docker Compose"
+    ],
+    [
+      2,
+      "Configure the instance with default settings and create a normal user (attacker)"
+    ],
+    [
+      3,
+      "Log in as the attacker user and execute the Meteor.call to create a channel with an XSS payload in the name"
+    ],
+    [
+      4,
+      "Invite the admin to the newly created channel"
+    ],
+    [
+      5,
+      "Log out and log in as an admin"
+    ],
+    [
+      6,
+      "Edit the title of the channel to trigger the XSS payload"
+    ],
+    [
+      7,
+      "Observe the XSS execution (e.g., alert showing the origin)"
+    ]
+  ],
+  "vuln_description": "The vulnerability involves a Stored XSS via unsafe usage of the toastr library combined with a validation bypass in the createRoom function. An attacker can create a room with an XSS payload in the name, which is then triggered when an admin edits the room's name. This can lead to Remote Code Execution by taking over the admin account and using admin privileges to execute arbitrary commands on the server.",
+  "reason": "The attack involves multiple components (toastr library, createRoom function, room settings API) and requires understanding of how these components interact. The validation bypass in extraData and the unsafe handling of error messages are subtle and non-obvious. Additionally, the attack requires manipulating the application state (creating a room, inviting an admin, triggering the XSS) and involves novel logic in combining these components to achieve RCE.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a stored XSS that requires user interaction and a validation bypass in the createRoom function. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, which is not directly applicable to this XSS vulnerability. The XSS is more about input validation and unsafe handling of user input rather than authorization checks between users and resources.",
+    "is_detectable": false
+  }
+}

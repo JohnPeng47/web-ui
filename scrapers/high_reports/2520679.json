@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "ooooooo_q ",
+  "title": "Possible DoS Vulnerability with Range Header in Rack",
+  "content": "\nI made a report and patch at https://hackerone.com/reports/2307813.\nhttps://discuss.rubyonrails.org/t/possible-dos-vulnerability-with-range-header-in-rack/84944\nThere is a possible DoS vulnerability relating to the Range request header in Rack. This vulnerability has been assigned the CVE identifier CVE-2024-26141.\nVersions Affected: >= 1.3.0. Not affected: < 1.3.0 Fixed Versions: 3.0.9.1, 2.2.8.1\nImpact\nCarefully crafted Range headers can cause a server to respond with an unexpectedly large response. Responding with such large responses could lead to a denial of service issue.\nVulnerable applications will use the Rack::File middleware or the Rack::Utils.byte_ranges methods (this includes Rails applications).\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 5420,
+  "weaknesses": [
+    "None"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1727236920,
+  "report_url": "https://hackerone.com/reports/2520679",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Send a crafted HTTP request with a malicious Range header to a server using Rack::File middleware or Rack::Utils.byte_ranges methods (e.g., a Rails application)."
+    ],
+    [
+      2,
+      "Observe the server responding with an unexpectedly large response, potentially causing a denial of service."
+    ]
+  ],
+  "vuln_description": "A carefully crafted Range header can cause a server using Rack::File middleware or Rack::Utils.byte_ranges methods to respond with an unexpectedly large response, leading to a denial of service issue.",
+  "reason": "The vulnerability involves a straightforward manipulation of the Range header, which is a well-known HTTP feature. The interaction between the header and the Rack middleware is not particularly subtle or complex.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

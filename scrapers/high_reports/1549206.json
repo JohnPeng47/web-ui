@@ -1,0 +1,42 @@
+{
+  "reported_to": "Reddit",
+  "reported_by": "abhiramsita ",
+  "title": "Reflected xss in https://sh.reddit.com",
+  "content": "\nSummary:\nReflected cross-site scripting (or XSS) arises when an application receives data in an HTTP request and includes that data within the immediate response in an unsafe way.\nImpact:\nattacker can execute malicious java script and steal cookies\nSteps To Reproduce:\n[add details for how we can reproduce the issue]\nHi team ,\nNavigate to below url\nscroll to page end find a option see more\nMove mouse over there and observe the execution of javascript\n## Supporting Material/References:\n[list any additional material (e.g. screenshots, logs, etc.)]\n[attachment / reference]\nImpact\nattacker can execute malicious java script and steal cookies\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 5000,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Reflected"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1652009760,
+  "report_url": "https://hackerone.com/reports/1549206",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to the URL: https://sh.reddit.com"
+    ],
+    [
+      2,
+      "Scroll to the page end and find the 'see more' option. Move the mouse over it and observe the execution of JavaScript."
+    ]
+  ],
+  "vuln_description": "Reflected cross-site scripting (XSS) vulnerability in https://sh.reddit.com where an attacker can execute malicious JavaScript and steal cookies by manipulating the 'see more' option at the end of the page.",
+  "reason": "The vulnerability is straightforward to discover as it involves a simple interaction with a visible UI element ('see more') and does not require complex state manipulation or understanding of subtle interactions between components.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The reflected XSS vulnerability involves injecting malicious JavaScript through user input that is then reflected back in the response. The proposed methodologies focus on authentication and authorization (AuthN/AuthZ) bypasses and IDOR vulnerabilities, which are different from XSS. XSS is a client-side vulnerability that doesn't involve session or resource ID manipulation, so it wouldn't be detected by the described methodologies.",
+    "is_detectable": false
+  }
+}

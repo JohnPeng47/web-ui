@@ -1,0 +1,38 @@
+{
+    "reported_to": "shopify-scripts",
+    "reported_by": "bugdelivery ",
+    "title": "ruby DoS https://www.mruby.science",
+    "content": "\nHi,\nWhen I sent 49000x \"A\" I was probably able to crash service running on https://www.mruby.science since new code can't be executed for now. Could you please verify what happened? Thanks.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 8000,
+    "weaknesses": [
+        "Uncontrolled Resource Consumption"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1484531340,
+    "report_url": "https://hackerone.com/reports/180695",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Send a request with 49000x 'A' characters to the service running on https://www.mruby.science."
+        ],
+        [
+            2,
+            "Observe that the service crashes and new code can no longer be executed."
+        ]
+    ],
+    "vuln_description": "The vulnerability is a Denial of Service (DoS) issue where sending a large input (49000x 'A' characters) crashes the service, preventing it from executing new code.",
+    "reason": "The attack is straightforward and involves sending a large payload to the service, which is a common and well-known method for triggering DoS conditions. There are no complex interactions or multiple components involved.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

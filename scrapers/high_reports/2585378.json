@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "orange ",
+  "title": "important: Apache HTTP Server weakness in mod_rewrite when first segment of substitution matches filesystem path. (CVE-2024-38475)",
+  "content": "\nI reported this vulnerability through the official Apache HTTP Server security email on April 1, 2024, and received a fix along with a CVE number on July 1, 2024. You can check detailed information from there:\nhttps://httpd.apache.org/security/vulnerabilities_24.html\nImpact\nImproper escaping of output in mod_rewrite in Apache HTTP Server 2.4.59 and earlier allows an attacker to map URLs to filesystem locations that are permitted to be served by the server but are not intentionally/directly reachable by any URL, resulting in code execution or source code disclosure.\nSubstitutions in server context that use a backreferences or variables as the first segment of the substitution are affected. Some unsafe RewiteRules will be broken by this change and the rewrite flag \"UnsafePrefixStat\" can be used to opt back in once ensuring the substitution is appropriately constrained.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 4920,
+  "weaknesses": [
+    "Improper Input Validation"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1720895760,
+  "report_url": "https://hackerone.com/reports/2585378",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Configure Apache HTTP Server 2.4.59 or earlier with mod_rewrite rules that use backreferences or variables as the first segment of the substitution in server context."
+    ],
+    [
+      2,
+      "Craft a URL that exploits the improper escaping in mod_rewrite to map to filesystem locations not directly reachable by any URL, leading to code execution or source code disclosure."
+    ]
+  ],
+  "vuln_description": "Improper escaping of output in mod_rewrite in Apache HTTP Server 2.4.59 and earlier allows an attacker to map URLs to filesystem locations that are permitted to be served by the server but are not intentionally/directly reachable by any URL, resulting in code execution or source code disclosure.",
+  "reason": "The vulnerability involves understanding the mod_rewrite module's behavior and how it processes substitutions with backreferences or variables. The interaction between the URL mapping and filesystem access is subtle but does not require manipulating complex application states or novel logic.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

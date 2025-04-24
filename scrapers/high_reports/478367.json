@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "simonscannell ",
+  "title": "efree() on uninitialized Heap data in imagescale leads to use-after-free",
+  "content": "\nThe core bug: https://bugs.php.net/bug.php?id=77269\nThis bugfix actually involves two vulnerabilities: a call to efree on uninitialized data and another free() based vulnerability. What is described below is a bug that was fixed in libgd two years ago (CVE-2016-10166), but the patch was never applied to PHP's libgd. Furthermore, the patch for that CVE introduced a use after free vulnerability, also in PHPs imagescale() function. This can be seen in the comment history of the PHP bug.\n\nThe bug occurs in ext/gd/libgd/gd_interpolation.c in the function _gdContributionsAlloc(int line_size, int windows_size). The function will attempt to allocate helper structs and receives two parameters: the line size and the windows size. To prevent integer overflows, each parameter is passed to gd's overflow2() function before being used in the gdMalloc function.\n(gdMalloc is just #define gdMalloc emalloc).\nHowever, if the overflow2 check for windows size is positive, overflow_error is set to true, which leads to gd attempting to free all the lines allocated so far. The issue is that gd does not check if any lines have been allocated so far at all. By supplying input that leads to overflow2 being true, .Weights is freed, which is an unintialized pointer.\nCode 628 Bytes\n1if (overflow2(line_length, sizeof(ContributionType))) {\n2\t\tgdFree(res);\n3\t\treturn NULL;\n4\t}\n5\tres->ContribRow = (ContributionType *) gdMalloc(line_length * sizeof(ContributionType));\n6\tif (res->ContribRow == NULL) {\n7\t\tgdFree(res);\n8\t\treturn NULL;\n9\t}\n10\tfor (u = 0 ; u < line_length ; u++) {\n11\t\tif (overflow2(windows_size, sizeof(double))) {\n12\t\t\toverflow_error = 1;\n13\t\t} else {\n14\t\t\tres->ContribRow[u].Weights = (double *) gdMalloc(windows_size * sizeof(double));\n15\t\t}\n16\t\tif (overflow_error == 1 || res->ContribRow[u].Weights == NULL) {\n17\t\t\tunsigned int i;\n18\t\t\tu--;\n19\t\t\tfor (i=0;i<=u;i++) {\n20                gdFree(res->ContribRow[i].Weights);\n21\t\t\t}\nWhen the for loop is reached that frees the uninitialized pointers, i will be 0 and u too. However, before the for loop is entered u is decremented by one so it will turn into -1 , which leads to the condition i <=0 never being met.\nImpact\nThis vulnerability can be used to write a local safe mode bypass and can potentially be exploited remotely.\n\n",
+  "severity": [
+    9.8,
+    null
+  ],
+  "bounty": 1500,
+  "weaknesses": [
+    "Use After Free"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1602332040,
+  "report_url": "https://hackerone.com/reports/478367",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Call the imagescale function with specific input parameters that trigger the overflow2 check for windows_size."
+    ],
+    [
+      2,
+      "Observe that the function attempts to free uninitialized memory due to the overflow_error condition and the decrement of 'u' leading to a use-after-free scenario."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves a use-after-free issue in PHP's imagescale function due to improper handling of memory allocation and deallocation when integer overflow checks fail. Specifically, the function attempts to free uninitialized memory when the overflow2 check for windows_size is true, leading to a potential use-after-free condition.",
+  "reason": "The vulnerability requires understanding of memory management in PHP's libgd, the specific conditions under which overflow checks fail, and the subsequent memory deallocation logic. The interaction between the overflow check, memory allocation, and the loop that frees memory is subtle and non-obvious.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

@@ -1,0 +1,38 @@
+{
+  "reported_to": "Node.js",
+  "reported_by": "tniessen ",
+  "title": "napi_get_value_string_X allow various kinds of memory corruption",
+  "content": "\nSummary:\nnapi_get_value_string_latin1, napi_get_value_string_utf8, napi_get_value_string_utf16 are vulnerable to buffer overflows, partially due to an integer underflow.\nDescription:\nnapi_get_value_string_latin1, napi_get_value_string_utf8, and napi_get_value_string_utf16 behave like this:\nIf the output pointer is NULL, return.\nWrite min(string_length, bufsize - 1) bytes to the output buffer. Note that bufsize is an unsigned type, so this leads to an integer underflow for bufsize == 0. Since this is a size_t, the underflow will cause the entire string to be written to memory, no matter how long the string is.\nFinally, write to buf[copied], where copied is the number of bytes previously written. Even if step 2 hadn't written out of bounds, this would (for bufsize == 0).\nSteps To Reproduce:\nCode 230 Bytes\n1Napi::Value Test(const Napi::CallbackInfo& info) {\n2  char buf[1];\n3  // This should be a valid call, e.g., due to a malloc(0).\n4  napi_get_value_string_latin1(info.Env(), info[0], buf, 0, nullptr);\n5  return info.Env().Undefined();\n6}\nCode 128 Bytes\n1const binding = require('bindings')('validation');\n2console.log(binding.test('this could be code that might later be executed'));\nRunning the above script corrupts the call stack:\nCode 120 Bytes\n1tniessen@local-vm:~/validation-fails$ node .\n2*** stack smashing detected ***: <unknown> terminated\n3Aborted (core dumped)\nThe best outcome is a crash, but a very likely outcome is data corruption. If the attacker can control the string's contents, they can even insert code into the process heap, or modify the call stack. Depending on the architecture and application, this can lead to various issues, up to remote code execution.\nIt is perfectly valid to pass in a non-NULL pointer for buf while specifying bufsize == 0. For example, malloc(0) is not guaranteed to return NULL. A npm package might correctly work on one machine based on the assumption that malloc(0) == NULL, but might create severe security issues on a different host. Passing a non-NULL pointer is also not ruled out by the documentation of N-API, so it is not valid to assume that buf will always be NULL if bufsize == 0.\nImpact\nnpm packages and other applications that use N-API may involuntarily open up severe security issues, that might even be exploitable remotely. Even if buf is a valid pointer, passing bufsize == 0 allows to write outside of the boundaries of that buffer.\nStep 2 of the description allows an attacker to precisely define what is written to memory by passing in a custom string. Depending on whether the pointer points to heap or stack, possible results include data corruption, crashes (and thus DoS), and possibly even remote code execution, either by writing instructions to heap memory or by corrupting the stack.\nMany attacks are likely caught by kernel and hardware protection mechanisms, but that depends on the specific hardware, kernel, and application, and memory layout. Even if they are caught, the entire process will crash (which is still good compared to other outcomes).\n\n",
+  "severity": [
+    8.5,
+    null
+  ],
+  "bounty": 250,
+  "weaknesses": [
+    "Memory Corruption - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1593733980,
+  "report_url": "https://hackerone.com/reports/784186",
+  "is_multi_component": false,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create a N-API function that calls napi_get_value_string_latin1, napi_get_value_string_utf8, or napi_get_value_string_utf16 with a non-NULL buffer and bufsize == 0."
+    ],
+    [
+      2,
+      "Pass a string to the function that is longer than the buffer size to trigger the buffer overflow."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves buffer overflow and integer underflow in N-API functions when a non-NULL buffer is provided with a bufsize of 0. This allows writing outside the buffer boundaries, potentially leading to memory corruption, crashes, or remote code execution.",
+  "reason": "The vulnerability requires understanding of N-API function behavior with zero-sized buffers and the implications of integer underflow in memory operations. However, the steps to reproduce are straightforward once the underlying issue is known.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

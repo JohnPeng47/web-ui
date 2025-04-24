@@ -1,0 +1,38 @@
+{
+  "reported_to": "Automattic",
+  "reported_by": "kolyasapphire ",
+  "title": "Gaining unlimited bonus points on websites with WooCommerce Points and Rewards",
+  "content": "\nIn WooCommerce Points and Rewards plugin there is an assumption that Processing order status is only for paid orders.\nHowever, this assumption is wrong for payment gateway Cash On Delivery, which immediately changes order status to Processing on all new orders. Plugin then increases bonus points for the order total which are immediately available to spend.\nThe problematic code is in class-wc-points-rewards-order.php in function maybe_update_points which gets triggered by following actions:\nCode 104 Bytes\n1woocommerce_order_status_processing\n2woocommerce_order_status_completed\n3woocommerce_order_status_on-hold \nThe code itself is on lines 50-58:\nCode 237 Bytes\n1public function maybe_update_points( $order_id ) {\n2\t\t$order = wc_get_order( $order_id );\n3\n4\t\t$this->maybe_deduct_redeemed_points( $order_id );\n5\n6\t\tif ( 'on-hold' !== $order->get_status() ) {\n7\t\t\t$this->add_points_earned( $order_id );\n8\t\t}\n9\t}\nThe solution is to either increase points only on completed orders or to add an extra check if status is processing and payment method is not cash on delivery.\nExample solution, change code to:\nCode 279 Bytes\n1public function maybe_update_points( $order_id ) {\n2\t\t$order = wc_get_order( $order_id );\n3\n4\t\t$this->maybe_deduct_redeemed_points( $order_id );\n5\n6\t\tif ( $order->get_status() !== 'on-hold' && $order->get_status() !== 'processing'  ) {\n7\t\t\t$this->add_points_earned( $order_id );\n8\t\t}\n9\t}\nImpact\nAn attacker can gain an unlimited amount of bonus points and spend them on next orders. The only requirements are WooCommerce Points and Rewards enabled on the website and payment gateway Cash On Delivery enabled, both are very common. Cash on delivery is a core WooCommerce payment gateway. Points and Rewards is easily identified by bonus messages on product pages and on checkout. This bug works on the latest plugin version. The only limit on spending bonus points is defined in plugin settings (eg maximum 50% point redemption).\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Business Logic Errors"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1562384580,
+  "report_url": "https://hackerone.com/reports/592803",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Enable WooCommerce Points and Rewards plugin and Cash On Delivery payment gateway on a WooCommerce site."
+    ],
+    [
+      2,
+      "Place an order using Cash On Delivery as the payment method. Observe that the order status changes to 'Processing' immediately, triggering the points reward system."
+    ]
+  ],
+  "vuln_description": "The WooCommerce Points and Rewards plugin incorrectly assumes that orders with 'Processing' status are paid, which is not true for Cash On Delivery orders. This allows attackers to gain unlimited bonus points by placing Cash On Delivery orders, as points are awarded immediately upon order status change to 'Processing'.",
+  "reason": "The vulnerability involves understanding the interaction between the Points and Rewards plugin and the Cash On Delivery payment gateway, specifically how order status changes trigger points allocation. The issue is subtle but does not require complex state manipulation or novel logic.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

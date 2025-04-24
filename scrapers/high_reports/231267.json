@@ -1,0 +1,38 @@
+{
+    "reported_to": "Pushwoosh",
+    "reported_by": "protector47 ",
+    "title": "Development configuration file",
+    "content": "\nHello,\nI found an Sensitive Information Disclosure.\nA configuration file (e.g. Vagrantfile, Gemfile, Rakefile, ...) was found in this directory. This file may expose sensitive information that could help a malicious user to prepare more advanced attacks. It's recommended to remove or restrict access to this type of files from production systems.\nPOC\nhttps://go.pushwoosh.com/composer.json\nhttps://go.pushwoosh.com/composer.lock\nOpen these URLs a configuration file will become download and these files contains very sensitive data.\nIMPACT:\nThese files may disclose sensitive information. This information can be used to launch further attacks.\nPATCH\nRemove or restrict access to all configuration files accessible from internet.\nThanks,\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1516288680,
+    "report_url": "https://hackerone.com/reports/231267",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the URLs: https://go.pushwoosh.com/composer.json and https://go.pushwoosh.com/composer.lock"
+        ],
+        [
+            2,
+            "Observe that the files are downloadable and contain sensitive information"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the exposure of sensitive information through publicly accessible configuration files (composer.json and composer.lock). These files can be downloaded directly from the web server, potentially revealing sensitive data that could be used for further attacks.",
+    "reason": "The discovery of this vulnerability is straightforward as it only requires accessing publicly available URLs and inspecting the downloaded files. There are no complex interactions or state manipulations involved.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

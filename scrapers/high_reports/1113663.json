@@ -1,0 +1,38 @@
+{
+  "reported_to": "curl",
+  "reported_by": "sanchitcfc ",
+  "title": "Inadequate Cryptographic Key Size and Insecure Cryptographic Mode.  File Name :- curl_ntlm_core.c",
+  "content": "\nThe application is generating cryptographic keys or key pairs using a short and inadequate length.\nThis application is using the ECB (Electronic Codebook) mode of operation to perform encryption, which is considered semantically insecure.\nVulnerable File name :- curl_ntlm_core.c\nVulnerable line no. 274 :- err = CCCrypt(kCCEncrypt, kCCAlgorithmDES, kCCOptionECBMode, key,\nImpact\nIf a message with identical blocks is encrypted, an attacker get a certain advantage to have information on plaintext, by only observing CipherText.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Use of a Broken or Risky Cryptographic Algorithm"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1615209840,
+  "report_url": "https://hackerone.com/reports/1113663",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify the vulnerable file 'curl_ntlm_core.c' and locate line 274 where the cryptographic operation is performed."
+    ],
+    [
+      2,
+      "Analyze the code to confirm the use of DES encryption with ECB mode and the inadequate key size."
+    ]
+  ],
+  "vuln_description": "The application uses DES encryption with ECB mode and an inadequate key size, which is semantically insecure. This allows attackers to gain information about the plaintext by observing ciphertext patterns, especially if identical blocks are encrypted.",
+  "reason": "The vulnerability involves a straightforward analysis of cryptographic practices in the code. The issues (DES with ECB mode and short key size) are well-known and easily identifiable without complex interactions or state manipulations.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

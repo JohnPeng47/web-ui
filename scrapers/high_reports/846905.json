@@ -1,0 +1,61 @@
+{
+  "reported_to": "Elastic",
+  "reported_by": "iamnoooob ",
+  "title": "Stored XSS in Elastic App Search",
+  "content": "\nSummary:\nThere exists a stored XSS via reference_ui in \"URL\" Parameter in the latest Elastic App Search v7.6.2 (Tested both on cloud and local instance)\nDescription:\nStored attacks are those where the injected script is permanently stored on the target servers, such as in a database, in a message forum, visitor log, comment field, etc. The victim then retrieves the malicious script from the server when it requests the stored information. Stored XSS is also sometimes referred to as Persistent or Type-I XSS.\nSteps To Reproduce:\nGo To https://cloud.elastic.co/ and login\nCreate a Deployment by visiting https://cloud.elastic.co/deployments/create\nFill & Select all necessary details but under \"Optimize your deployment\" section select \"App Search\" & Click Create Deployment\nNow go to your deployment and click \"launch\" on your App Search instance and you would be taken to something like https://069c551087be451bb8d1aecb3cf64341.app-search.us-east-1.aws.found.io/login\nNow Login with the provided credentials and Click \"Create an Engine\"\nOn the next screen, Click \"Paste JSON\" and put this\nCode 54 Bytes\n1{\n2\"url\":\"javascript://test%0aalert(document.domain)\"\n3}\n<image_0>\n<image_1>\nThe Generated link https://069c551087be451bb8d1aecb3cf64341.app-search.us-east-1.aws.found.io/as/engines/test/reference_application/preview?titleField=url&urlField=url can directly be shared with High privileged users etc.\nImpact\nA low privileged user with only access to create/index documents can create a document with such evil JSON and can send a link of Reference UI to Admin/Owner which when clicked would lead to Stored XSS\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 2000,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/ycfqVosgcm4u3mQMwMp9AQRK?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_106.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_106.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQVS47X3CA%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T232855Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQDxYss4YIGls0cszZQ1SH%2B1xSdoErdhUvyV5RSVsfYSpAIhALgtyBSIuiyvfvrOuahp2dR7dhplGI0zsujwEWu%2Bq6%2BEKrIFCCAQAxoMMDEzNjE5Mjc0ODQ5Igz7reJAfU2xzcJQlysqjwUwgbkDy8FeHuIgjjQZSSQ%2Fwz2JcJJwoIVgnjZMbFWvXxA0hPyrfIjcwtLeyzF3ok5GehIXn91Wy7fDCUkrUU7A5VMhWYEvLV3DxDrYmNMuLZpE%2FWRUJYWQmSgVx2gZtW9%2FqsiGnwRNXYUZa5T6KF%2BUA31gpR%2Bu%2BFMPUkwNvxNyEBRHypojNYRFlzo5EggbbRP8aZmRqD833mDpafMDKiDfNA28eH79vkmbDUKFi%2FRhWykONG8JRQheb75v1GX31hrk1L8u1zPHTFbLn71p2H5wjZmEoonQGf5RhFmpW1zbbUEV65nl5DnLFaOjxUYksFgcGBJco0OtVsqN8nqdspsBJvQy6Qqc4X%2FkzuDXD%2BPYx3S7BO8Xva3s8a8TN96v1gX95XTaTemTmeaj1ESU1Y%2BiCDkvEfkzPaez0cSRWNdsq9i%2B%2B3AB121pQv97UmKNnymRC9XrfNCjheJvP8%2B1ahif4EzzwIZyuwjBMezZKhGLW7ulcNmW88VKqKacmqlyNHYWfiCiGmndOCbeQyYCRid9KzfIQ2SeNeqsnghfx8JVdvGKKtPB1hk7OQNCqb%2BtpgQWm%2B8n%2BtDNRQImuMOGK14DG3yRHy9Avx%2FHOGeF8a9GVJ6NJimW9Ecb2T6E7RqL7ne5qRZDmafIXgH6mlCFVcf%2Flr5QeQ52RhBCPYo6TRRgBWZ%2FEovl46GkFsYVBX%2FIr4SzvdVa%2FNww4T5NYik3vIJ1NHswu7sqCeZdDw7s3nxsVMRVYSGo72HmcEKxy7ZvjHaQ7%2FA%2FhytntT5d9gFqm%2BJZS2feTkdBLll7%2FZmU%2F0J7tml4GCVi0gUlz6n7oXDJBImiDBsaAqob0HPuP1lnTDGOARLWRi1VAkeyiSiZx6MQML3cjL8GOrABJaY4PqkzyFbyL9b2dX4ahmhxVJurQJJj1YCo%2FWMfCIcjtRIVhFMbuG8aMIc9rpd5RnH%2BdThD0TThbFSeDBmVPFdFSLa8sb4P%2FriAdsyJGyDCYOkPOqU5CNy29uE2efF02gCJn%2F3WqBrgnyVPeV9MEustSu%2Bi2xovh9huv2%2ByWnLF8g1vc9Ecjq6wFibTWSxIYTLlafk7orczm6J8TcD3XYRmLnPpvaubR7I6XZoSaZU%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=128ef7ba81bdf3977652e55b2c2cd216911425d3f6d39ac03d95f3ec56a4a390",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/eWUSAhFLbjtzo5bcBG6Ljamr?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_105.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_105.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQVS47X3CA%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T232855Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQDxYss4YIGls0cszZQ1SH%2B1xSdoErdhUvyV5RSVsfYSpAIhALgtyBSIuiyvfvrOuahp2dR7dhplGI0zsujwEWu%2Bq6%2BEKrIFCCAQAxoMMDEzNjE5Mjc0ODQ5Igz7reJAfU2xzcJQlysqjwUwgbkDy8FeHuIgjjQZSSQ%2Fwz2JcJJwoIVgnjZMbFWvXxA0hPyrfIjcwtLeyzF3ok5GehIXn91Wy7fDCUkrUU7A5VMhWYEvLV3DxDrYmNMuLZpE%2FWRUJYWQmSgVx2gZtW9%2FqsiGnwRNXYUZa5T6KF%2BUA31gpR%2Bu%2BFMPUkwNvxNyEBRHypojNYRFlzo5EggbbRP8aZmRqD833mDpafMDKiDfNA28eH79vkmbDUKFi%2FRhWykONG8JRQheb75v1GX31hrk1L8u1zPHTFbLn71p2H5wjZmEoonQGf5RhFmpW1zbbUEV65nl5DnLFaOjxUYksFgcGBJco0OtVsqN8nqdspsBJvQy6Qqc4X%2FkzuDXD%2BPYx3S7BO8Xva3s8a8TN96v1gX95XTaTemTmeaj1ESU1Y%2BiCDkvEfkzPaez0cSRWNdsq9i%2B%2B3AB121pQv97UmKNnymRC9XrfNCjheJvP8%2B1ahif4EzzwIZyuwjBMezZKhGLW7ulcNmW88VKqKacmqlyNHYWfiCiGmndOCbeQyYCRid9KzfIQ2SeNeqsnghfx8JVdvGKKtPB1hk7OQNCqb%2BtpgQWm%2B8n%2BtDNRQImuMOGK14DG3yRHy9Avx%2FHOGeF8a9GVJ6NJimW9Ecb2T6E7RqL7ne5qRZDmafIXgH6mlCFVcf%2Flr5QeQ52RhBCPYo6TRRgBWZ%2FEovl46GkFsYVBX%2FIr4SzvdVa%2FNww4T5NYik3vIJ1NHswu7sqCeZdDw7s3nxsVMRVYSGo72HmcEKxy7ZvjHaQ7%2FA%2FhytntT5d9gFqm%2BJZS2feTkdBLll7%2FZmU%2F0J7tml4GCVi0gUlz6n7oXDJBImiDBsaAqob0HPuP1lnTDGOARLWRi1VAkeyiSiZx6MQML3cjL8GOrABJaY4PqkzyFbyL9b2dX4ahmhxVJurQJJj1YCo%2FWMfCIcjtRIVhFMbuG8aMIc9rpd5RnH%2BdThD0TThbFSeDBmVPFdFSLa8sb4P%2FriAdsyJGyDCYOkPOqU5CNy29uE2efF02gCJn%2F3WqBrgnyVPeV9MEustSu%2Bi2xovh9huv2%2ByWnLF8g1vc9Ecjq6wFibTWSxIYTLlafk7orczm6J8TcD3XYRmLnPpvaubR7I6XZoSaZU%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=ba59a242e3e29f1679f84ce66480e3f7bda113c06f2090c1863f51fc7e3b6c65"
+  },
+  "disclosed_date": 1595975160,
+  "report_url": "https://hackerone.com/reports/846905",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Go to https://cloud.elastic.co/ and login"
+    ],
+    [
+      2,
+      "Create a deployment with App Search selected under 'Optimize your deployment'"
+    ],
+    [
+      3,
+      "Launch the App Search instance and log in with provided credentials"
+    ],
+    [
+      4,
+      "Click 'Create an Engine' and select 'Paste JSON'"
+    ],
+    [
+      5,
+      "Insert the malicious JSON payload: {\"url\":\"javascript://test%0aalert(document.domain)\"}"
+    ],
+    [
+      6,
+      "Share the generated Reference UI link with a high-privileged user"
+    ]
+  ],
+  "vuln_description": "A stored XSS vulnerability exists in Elastic App Search v7.6.2 via the 'url' parameter in the reference_ui. A low-privileged user can inject malicious JavaScript that gets executed when a high-privileged user views the generated link.",
+  "reason": "The vulnerability requires understanding the JSON input mechanism and how the Reference UI processes URLs, but the attack vector is straightforward once these components are identified. The payload construction is simple and follows common XSS patterns.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a stored XSS via a JSON payload in the 'url' parameter, which is a client-side input manipulation rather than an authentication or authorization boundary crossing. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, which does not apply to this XSS vulnerability.",
+    "is_detectable": false
+  }
+}

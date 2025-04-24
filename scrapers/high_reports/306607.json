@@ -1,0 +1,54 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "bl4de ",
+  "title": "[html-pages] Path Traversal in html-pages module allows to read any file from the server with curl",
+  "content": "\nHi,\nThis report is about Directory Traversal vulnerability I found in html-pages module.\nModule:\nhtml-pages is a module which allows to browse directories and serve static files in the browser. The vulnerability exists in the latest available version (2.0.7)\nLink to npm page: https://www.npmjs.com/package/html-pages\nSummary:\nWhen html-pages server is run, browser does not allow toread files from arbitrary locations. However, I've noticed that using simple bypasses with %2e (.) or %2f (/) I can easily go up in the directory tree.\nBut it's not possible to open any file in the browser, due to characters used in the path, only directory listing is available:\n<image_0>\nHowever, with simple curl call we can read any file on the remote server where html-pages runs:\nCode 78 Bytes\n1$ curl -v --path-as-is http://localhost:8000/../../../../../Users/bl4de/.vimrc\n<image_1>\nHere is the part of the code, which read directory content, but does not validate against Directory Traversal in any way, which literally makes root config setting useless:\nhttps://github.com/danielcardoso/html-pages/blob/master/lib/server.js#L122\nThis vulnerability can be exploited regardless of some html-pages configuration settings, like root. All files on the server can be read by malicious user.\nSteps To Reproduce:\ninstall html-pages\nCode 24 Bytes\n1$ npm install html-pages\ncreate simple application which uses html-pages for serving static files from local server:\nCode 202 Bytes\n1const pages = require('html-pages')\n2\n3const pagesServer = pages(__dirname, {\n4    port: 8000,\n5    'directory-index': '',\n6    'root': './',\n7    'no-clipboard': true,\n8    ignore: ['.git', 'node_modules']\n9})\nrun application:\nCode 13 Bytes\n1$ node app.js\nopen the browser and go to 127.0.0.1:8000 You should see all directories and files in the directory, where app.js was run. Now, try to modify url into something like 127.0.0.1:8000/.%2e/.%2e/ - now content of directory two levels up in the file tree should be displayed. Try to open any directory or file (if available) by clicking on its name.\nYou should notice that application actually hangs on.\nfrom the terminal, execute following command (please adjust numbers of ../ to your system):\nCode 70 Bytes\n1$ curl -v --path-as-is http://127.0.0.1:8000/../../../../../etc/passwd\nYou should see the content of /etc/passwd file:\n<image_2>\nSupporting Material/References:\nConfiguration I've used to find this vulnerability:\nmacOS HighSierra 10.13.2\nnode 8.9.3\nnpm 5.5.1\ncurl 7.54.0\nWrap up\nI hope this report will help to keep Node ecosystem more safe. If you have any questions about any details of this finding, please let me know in comment.\nThank you\nRegards,\nRafal 'bl4de' Janicki\nImpact\nImpact:\nThis vulnerability allows malisious user to read content of any file on machine where similar to presented app is running. This might expose vectors to attack system with Remote Code Execution, reveals files with usernames and passwords and many other possibilites.\n\n",
+  "severity": [
+    9.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/255/390/43cd49c7e5464062c145a59be3100d6c56374434/1.png?response-content-disposition=attachment%3B%20filename%3D%221.png%22%3B%20filename%2A%3DUTF-8%27%271.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQVFTBBING%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T171134Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMj%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQC155FMBuXWspiup2nqAbTjvEG0L3Dnao5%2BxaNnY6soCQIhALPiS5rfWo6hNv0RgrkEfrdkhthoYXpffLLIrwN2u4WtKrEFCDEQAxoMMDEzNjE5Mjc0ODQ5IgycER9ru%2FK3fZvvyf8qjgUwhL3%2FJWASx2LNxFVHXbTkvtCtknJYNzIAAgq02wc9i7iEfkArWNduiGj0GWqhCDdIl1ZF6TjnCqQZfttNLhnMtqhI44lbm%2BPUBsnsjFactzAsFH8wHfPx1sAfxciXLxIWtB%2BgxfiVwEFQSwUiOaAXbjeBayC%2FevTerqm0yMi3YMQBHdGCz0Pll%2Bq0wDPB10weuNDy4Sae%2BIH6ZfGHNLdWhs3faezSGEtDuiWYOgc7BJowTYnuSzac9Sj9MNPsnwGqHzKZJzIQYJGGpoke9KzTSQ475liVLn%2FtL9EgVJ5bTpu4AVmr%2FpQH6hYozRZ9mLLxhfw9424X8Pjt5YTTTBDOR1X24WEXTvv502DwjrUXEymCghsmZ7gW1hhEwJ5o7rJCOpguPNDF2b2Y04YGIdWjAFxlrSqmrg9YdKL9VHuQbWGnmyDn%2BURc8EOesxjxaq%2BuOd4Qf6o05%2FrP24Rne3CvcatmVtpJmrCSEW73PjXHiU6AebYoK2FsqdWHNxHBWy6QWKSIlcptAqFiJAOKPBV%2FreDSUq2WqCjGoMnX7%2F6ARKVBFoZv7eg9mS5FlCcgb6B4MX%2Fg7lzMV050oGNPBsZTrOSHpFTHhncG3CjbVtVD9oRqOaM%2FMSfu76LxnXqvLuYVNW%2B7Q0Y7pXYfTbOVl3S%2Bi9Z1esuTsLBj16dCjN3m8ghebyMjqwd2cK1STR1nVme5ExuijeagJ1aIYmNP7eN0yDf6uKY7c2fhYNEE%2BZ%2BFW7rsUToFDGACKpG8vfnpHOy9vHke7tla2nXsyoEtJSlEeCBPdELW0CL99SN9z6w5cHAx3t5Ldr13%2FwWPZrtPZA2HRxHAkpTb9n6lAw2QXzPv1XRF5QeYfx0uBhAQ8T8wws%2BQvwY6sAEUHKjv65tCWO6NFMIg%2Bmnjn65n2tRbaVjCuW2HypVKdJp4jn7eHzoz7%2Fef9dpWOqHoWQDD441n7QrMlEGDfZJddBbWsCeURICWRBVWh0uYJaKU1wf50kotXvsSrlTzqN7qorTVUPOZTJNk9rTy5s2QZcaG%2Be2SAdp2UsZgXa%2B1Cbxc7giM6SDCpQQG%2BgPD%2FmuxQU6Y0gTFzzN2HJCT0i%2B%2BY2netO%2FMijzFqFVjXbIDEA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=f3f81c1e8f667b9c0091063325e2f303ce9d1ab8fa6fc1b8713b9ec032f3405b",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/255/392/495ee21e86fbd4cb5c162564dbb48efbb7f3137d/2.png?response-content-disposition=attachment%3B%20filename%3D%222.png%22%3B%20filename%2A%3DUTF-8%27%272.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQVFTBBING%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T171134Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMj%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQC155FMBuXWspiup2nqAbTjvEG0L3Dnao5%2BxaNnY6soCQIhALPiS5rfWo6hNv0RgrkEfrdkhthoYXpffLLIrwN2u4WtKrEFCDEQAxoMMDEzNjE5Mjc0ODQ5IgycER9ru%2FK3fZvvyf8qjgUwhL3%2FJWASx2LNxFVHXbTkvtCtknJYNzIAAgq02wc9i7iEfkArWNduiGj0GWqhCDdIl1ZF6TjnCqQZfttNLhnMtqhI44lbm%2BPUBsnsjFactzAsFH8wHfPx1sAfxciXLxIWtB%2BgxfiVwEFQSwUiOaAXbjeBayC%2FevTerqm0yMi3YMQBHdGCz0Pll%2Bq0wDPB10weuNDy4Sae%2BIH6ZfGHNLdWhs3faezSGEtDuiWYOgc7BJowTYnuSzac9Sj9MNPsnwGqHzKZJzIQYJGGpoke9KzTSQ475liVLn%2FtL9EgVJ5bTpu4AVmr%2FpQH6hYozRZ9mLLxhfw9424X8Pjt5YTTTBDOR1X24WEXTvv502DwjrUXEymCghsmZ7gW1hhEwJ5o7rJCOpguPNDF2b2Y04YGIdWjAFxlrSqmrg9YdKL9VHuQbWGnmyDn%2BURc8EOesxjxaq%2BuOd4Qf6o05%2FrP24Rne3CvcatmVtpJmrCSEW73PjXHiU6AebYoK2FsqdWHNxHBWy6QWKSIlcptAqFiJAOKPBV%2FreDSUq2WqCjGoMnX7%2F6ARKVBFoZv7eg9mS5FlCcgb6B4MX%2Fg7lzMV050oGNPBsZTrOSHpFTHhncG3CjbVtVD9oRqOaM%2FMSfu76LxnXqvLuYVNW%2B7Q0Y7pXYfTbOVl3S%2Bi9Z1esuTsLBj16dCjN3m8ghebyMjqwd2cK1STR1nVme5ExuijeagJ1aIYmNP7eN0yDf6uKY7c2fhYNEE%2BZ%2BFW7rsUToFDGACKpG8vfnpHOy9vHke7tla2nXsyoEtJSlEeCBPdELW0CL99SN9z6w5cHAx3t5Ldr13%2FwWPZrtPZA2HRxHAkpTb9n6lAw2QXzPv1XRF5QeYfx0uBhAQ8T8wws%2BQvwY6sAEUHKjv65tCWO6NFMIg%2Bmnjn65n2tRbaVjCuW2HypVKdJp4jn7eHzoz7%2Fef9dpWOqHoWQDD441n7QrMlEGDfZJddBbWsCeURICWRBVWh0uYJaKU1wf50kotXvsSrlTzqN7qorTVUPOZTJNk9rTy5s2QZcaG%2Be2SAdp2UsZgXa%2B1Cbxc7giM6SDCpQQG%2BgPD%2FmuxQU6Y0gTFzzN2HJCT0i%2B%2BY2netO%2FMijzFqFVjXbIDEA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=d9b493ee808fb58942d0139c9d49710b7dff1e3047ae47049fe711bca2159551",
+    "image_2": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/255/391/dcd72150639a52155275cd88055744f074c68ef5/3.png?response-content-disposition=attachment%3B%20filename%3D%223.png%22%3B%20filename%2A%3DUTF-8%27%273.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQVFTBBING%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T171134Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMj%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQC155FMBuXWspiup2nqAbTjvEG0L3Dnao5%2BxaNnY6soCQIhALPiS5rfWo6hNv0RgrkEfrdkhthoYXpffLLIrwN2u4WtKrEFCDEQAxoMMDEzNjE5Mjc0ODQ5IgycER9ru%2FK3fZvvyf8qjgUwhL3%2FJWASx2LNxFVHXbTkvtCtknJYNzIAAgq02wc9i7iEfkArWNduiGj0GWqhCDdIl1ZF6TjnCqQZfttNLhnMtqhI44lbm%2BPUBsnsjFactzAsFH8wHfPx1sAfxciXLxIWtB%2BgxfiVwEFQSwUiOaAXbjeBayC%2FevTerqm0yMi3YMQBHdGCz0Pll%2Bq0wDPB10weuNDy4Sae%2BIH6ZfGHNLdWhs3faezSGEtDuiWYOgc7BJowTYnuSzac9Sj9MNPsnwGqHzKZJzIQYJGGpoke9KzTSQ475liVLn%2FtL9EgVJ5bTpu4AVmr%2FpQH6hYozRZ9mLLxhfw9424X8Pjt5YTTTBDOR1X24WEXTvv502DwjrUXEymCghsmZ7gW1hhEwJ5o7rJCOpguPNDF2b2Y04YGIdWjAFxlrSqmrg9YdKL9VHuQbWGnmyDn%2BURc8EOesxjxaq%2BuOd4Qf6o05%2FrP24Rne3CvcatmVtpJmrCSEW73PjXHiU6AebYoK2FsqdWHNxHBWy6QWKSIlcptAqFiJAOKPBV%2FreDSUq2WqCjGoMnX7%2F6ARKVBFoZv7eg9mS5FlCcgb6B4MX%2Fg7lzMV050oGNPBsZTrOSHpFTHhncG3CjbVtVD9oRqOaM%2FMSfu76LxnXqvLuYVNW%2B7Q0Y7pXYfTbOVl3S%2Bi9Z1esuTsLBj16dCjN3m8ghebyMjqwd2cK1STR1nVme5ExuijeagJ1aIYmNP7eN0yDf6uKY7c2fhYNEE%2BZ%2BFW7rsUToFDGACKpG8vfnpHOy9vHke7tla2nXsyoEtJSlEeCBPdELW0CL99SN9z6w5cHAx3t5Ldr13%2FwWPZrtPZA2HRxHAkpTb9n6lAw2QXzPv1XRF5QeYfx0uBhAQ8T8wws%2BQvwY6sAEUHKjv65tCWO6NFMIg%2Bmnjn65n2tRbaVjCuW2HypVKdJp4jn7eHzoz7%2Fef9dpWOqHoWQDD441n7QrMlEGDfZJddBbWsCeURICWRBVWh0uYJaKU1wf50kotXvsSrlTzqN7qorTVUPOZTJNk9rTy5s2QZcaG%2Be2SAdp2UsZgXa%2B1Cbxc7giM6SDCpQQG%2BgPD%2FmuxQU6Y0gTFzzN2HJCT0i%2B%2BY2netO%2FMijzFqFVjXbIDEA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=5edd45dba31ab53209c08035cebcdeeccf6979a5dd76378122e240ef197abb1b"
+  },
+  "disclosed_date": 1526748900,
+  "report_url": "https://hackerone.com/reports/306607",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install html-pages module: `npm install html-pages`"
+    ],
+    [
+      2,
+      "Create a simple application using html-pages to serve static files from a local server"
+    ],
+    [
+      3,
+      "Run the application: `node app.js`"
+    ],
+    [
+      4,
+      "Access the server via browser and attempt directory traversal by modifying the URL to include `.%2e/.%2e/`"
+    ],
+    [
+      5,
+      "Use curl to exploit the vulnerability: `curl -v --path-as-is http://127.0.0.1:8000/../../../../../etc/passwd`"
+    ]
+  ],
+  "vuln_description": "The html-pages module is vulnerable to a directory traversal attack, allowing an attacker to read any file on the server by manipulating the URL path with encoded characters like `%2e` (.) or `%2f` (/). This bypasses the intended directory restrictions and exposes sensitive files.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common directory traversal technique with minimal components. The attacker only needs to manipulate the URL path and use curl to exploit the flaw, without any complex interactions or state manipulations.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

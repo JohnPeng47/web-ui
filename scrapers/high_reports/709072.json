@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "mohammedadam24 ",
+    "title": "Null byte Injection in https://\u2588\u2588\u2588\u2588/",
+    "content": "\nDescription:\nMicrosoft .NET Framework is prone to multiple NULL-byte injection vulnerabilities because it fails to adequately sanitize user-supplied data.\nVulnerable URL: https://\u2588\u2588\u2588\u2588/%2F%20This%20website%20is%20vulnerable%20to%20NULL%20BYTE%20INJECTION/\nSteps to Reproduce:\n1) An attacker can exploit this issue via a browser.\nThe following example URI request is available:\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/%2F%20This%20website%20is%20vulnerable%20to%20NULL%20BYTE%20INJECTION%00\nMitigation: https://www.securityfocus.com/bid/24791/solution\nSee Also: https://www.exploit-db.com/exploits/30281\nProof of Concept: Screenshots attached.\nImpact\nAn attacker can exploit these issues to access sensitive information that may aid in further attacks; other attacks are also possible.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Null Termination"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1589491020,
+    "report_url": "https://hackerone.com/reports/709072",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the vulnerable URL: https://\u2588\u2588\u2588\u2588/%2F%20This%20website%20is%20vulnerable%20to%20NULL%20BYTE%20INJECTION/"
+        ],
+        [
+            2,
+            "Append a null byte (%00) to the URL to trigger the vulnerability: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/%2F%20This%20website%20is%20vulnerable%20to%20NULL%20BYTE%20INJECTION%00"
+        ]
+    ],
+    "vuln_description": "Microsoft .NET Framework is prone to multiple NULL-byte injection vulnerabilities because it fails to adequately sanitize user-supplied data. An attacker can exploit this issue to access sensitive information or perform other attacks by injecting null bytes into the URL.",
+    "reason": "The vulnerability involves a straightforward injection of a null byte into a URL, which is a well-known and simple attack vector. There are no complex interactions or states to manipulate, and the attack does not require novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

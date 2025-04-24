@@ -1,0 +1,57 @@
+{
+  "reported_to": "Glovo",
+  "reported_by": "battle_angel ",
+  "title": "Server Side Template Injection on Name parameter during Sign Up process",
+  "content": "\nSummary:\nServer-side template injection is when an attacker is able to use native template syntax to inject a malicious payload into a template, which is then executed server-side.\nIn this scenario, when an attacker signs up on the platform and uses a payload in the First Name field, the payload is rendered server side and it gets executed in the promotional/welcome emails sent to the user\nSteps To Reproduce:\nStep 1: Navigate to [Glovoapp] (https://www.glovoapp.com/kg/en/bishkek/) and click on Register\nStep 2: Now, in the First Name field, enter the value {{7*7}}\n<image_0>\nStep 3: Fill in the rest of the values on the Register page and register your account.\n<image_1>\nStep 4: We have used the payload {{7*7}} here to verify that it is being evaluated at the backend\nStep 5: Now, wait for the welcome/promotional email to arrive in your Inbox\nStep 6: Notice that the email arrives with the Subject as 49, welcome to Glovo!\n<image_2>\nStep 7: The attacker can now further exploit this issue by injecting malicious payloads in the Name field and gathering sensitive information from the application.\nNote- After carrying out this attack, I didn't receive any welcome email for my other account maybe because the code broke.\nImpact\nTemplate engines are widely used by web applications to present dynamic data via web pages and emails. Unsafely embedding user input in templates enables Server-Side Template Injection, which can be used to directly attack web servers' internals and often obtain Remote Code Execution (RCE), turning every vulnerable application into a potential pivot point.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/tyonzrxy5n5ihjqvicbpptddidib?response-content-disposition=attachment%3B%20filename%3D%22PoC3.png%22%3B%20filename%2A%3DUTF-8%27%27PoC3.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ4RDPBG2Z%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T022159Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIGGH331%2Bzp2R%2F3jzEDRZXWcGyNkXVm4l37jsrrngdhS3AiEAiGKoE%2BpbO4KbVLe2k%2BDcqavCzJMwtCDETSjwTqVf2QMqugUI%2Bv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDD9b1dAzPquDLyR64yqOBbDdMMB6qRiZbGj5ntUaOEuErgIaX0VyjFKOdAv8USvULuMUqjn0OpXaE%2FLmuqHwwSM21%2FVpSZlTq83Y7vOVS2eeF8XjZ1WQ7vIvEcY7AdX0eMbac77lcCB4RxK9kvRhcZYCIdAF%2FREEy7ZpMzm5BfyBPC2AaWFudYPoijGzHRa1xtmw8ZC4kRymq6hn%2F4l6EGAC43TTWjjXlYrfoT16B7zJv9JX%2Bk965dMsxFrX%2BKtCFDOLQYpSSUSw3GHmNBQWOpprJ9eB%2Bhmdrp9W8XK1u%2BGCQE%2BaS2PYwsDMkPfbCSnCJs9Fp9QP%2BIPczrURYaazZb%2F5xx6O1niQSUZGElZpjOvGkosJ40d5Oj6i6ElK9ALWKph1lwNLL4UkPex4t2RglP6mm%2B%2F6rxMW%2Bn41B%2By7jgh%2FklODd8pIPZqfu16zYwpdHfeQh8w9p03LhGbLr9CB9rlESYDPOnBm5BQZ6rk708GIcgjtCiUqikJt81Xh5vWwQ0xqU7Lw4mB%2BBUf74QeaGHzG4Wu%2FQCdBLHDyVi2fzGIwpt%2F1NY%2BBLG3kLMi67zFDltERgDCXGzqBvOPT9RZL7kluufKLjpNKroirqZPBoX3qNLSXOdy3otN%2FAJGJUO6BVy%2BbRoXqWowrX%2Fx6yr067GUM%2F1UXPFaOErEPTpVGnlBe56ssOXrBJXWBSOrDMeTSn2ofZ9AT%2F7EFAlamOiSxB1dWguNf7DC2Wxo2Hkd3y2jiHELq4uqCqcloB81hHnswIpxUxTvpz7Fx0U6dn0EppJZSgPaoX389BVcsmm1MTygTO1e1N%2B5y1E6IqbNwdAjnooP4mlaVIfd%2BmItX%2FBbIyUrzclTCs5qx1s3YqDV%2FnPDXlDkG2f0pymIl4RuRCDCJ84e%2FBjqxAdBjfelTIjQNt5OmwjqwnEC%2B2k%2Fi%2B%2FnCbWRx5jGMsl%2BBDw3WyQ%2BdMc98N2kltrLhYUngG91IDwo2wQcESeG2WiytY6EaItO0vDlYwYDAQACYfwmfCa6InheZUeBiyisGvON%2BzpFiC2d4%2FFEVjLODKA66zdsYAnpY%2F8plOozk%2B%2FifqMoRnX8NixExqtMAgyITi2Ix82EJls2oavnrXaQIZapNo58Ejj3e7h7vmu4gVS9P1A%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=77811ab35b80172be87beec17715e0380bbadfb5de9b5ac80357a09db0f094e3",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/p1a1n6hil2rxpyousbhmwio4vbsx?response-content-disposition=attachment%3B%20filename%3D%22PoC1.png%22%3B%20filename%2A%3DUTF-8%27%27PoC1.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ4RDPBG2Z%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T022159Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIGGH331%2Bzp2R%2F3jzEDRZXWcGyNkXVm4l37jsrrngdhS3AiEAiGKoE%2BpbO4KbVLe2k%2BDcqavCzJMwtCDETSjwTqVf2QMqugUI%2Bv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDD9b1dAzPquDLyR64yqOBbDdMMB6qRiZbGj5ntUaOEuErgIaX0VyjFKOdAv8USvULuMUqjn0OpXaE%2FLmuqHwwSM21%2FVpSZlTq83Y7vOVS2eeF8XjZ1WQ7vIvEcY7AdX0eMbac77lcCB4RxK9kvRhcZYCIdAF%2FREEy7ZpMzm5BfyBPC2AaWFudYPoijGzHRa1xtmw8ZC4kRymq6hn%2F4l6EGAC43TTWjjXlYrfoT16B7zJv9JX%2Bk965dMsxFrX%2BKtCFDOLQYpSSUSw3GHmNBQWOpprJ9eB%2Bhmdrp9W8XK1u%2BGCQE%2BaS2PYwsDMkPfbCSnCJs9Fp9QP%2BIPczrURYaazZb%2F5xx6O1niQSUZGElZpjOvGkosJ40d5Oj6i6ElK9ALWKph1lwNLL4UkPex4t2RglP6mm%2B%2F6rxMW%2Bn41B%2By7jgh%2FklODd8pIPZqfu16zYwpdHfeQh8w9p03LhGbLr9CB9rlESYDPOnBm5BQZ6rk708GIcgjtCiUqikJt81Xh5vWwQ0xqU7Lw4mB%2BBUf74QeaGHzG4Wu%2FQCdBLHDyVi2fzGIwpt%2F1NY%2BBLG3kLMi67zFDltERgDCXGzqBvOPT9RZL7kluufKLjpNKroirqZPBoX3qNLSXOdy3otN%2FAJGJUO6BVy%2BbRoXqWowrX%2Fx6yr067GUM%2F1UXPFaOErEPTpVGnlBe56ssOXrBJXWBSOrDMeTSn2ofZ9AT%2F7EFAlamOiSxB1dWguNf7DC2Wxo2Hkd3y2jiHELq4uqCqcloB81hHnswIpxUxTvpz7Fx0U6dn0EppJZSgPaoX389BVcsmm1MTygTO1e1N%2B5y1E6IqbNwdAjnooP4mlaVIfd%2BmItX%2FBbIyUrzclTCs5qx1s3YqDV%2FnPDXlDkG2f0pymIl4RuRCDCJ84e%2FBjqxAdBjfelTIjQNt5OmwjqwnEC%2B2k%2Fi%2B%2FnCbWRx5jGMsl%2BBDw3WyQ%2BdMc98N2kltrLhYUngG91IDwo2wQcESeG2WiytY6EaItO0vDlYwYDAQACYfwmfCa6InheZUeBiyisGvON%2BzpFiC2d4%2FFEVjLODKA66zdsYAnpY%2F8plOozk%2B%2FifqMoRnX8NixExqtMAgyITi2Ix82EJls2oavnrXaQIZapNo58Ejj3e7h7vmu4gVS9P1A%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=ef1a6dba9dad0b2b05ae5c3c51fb73fc766406c02631f66ec43057b5f594f1ae",
+    "image_2": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/r996chnen4c5tso3fbg57s4iq0e3?response-content-disposition=attachment%3B%20filename%3D%22PoC2.png%22%3B%20filename%2A%3DUTF-8%27%27PoC2.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ4RDPBG2Z%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T022159Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIGGH331%2Bzp2R%2F3jzEDRZXWcGyNkXVm4l37jsrrngdhS3AiEAiGKoE%2BpbO4KbVLe2k%2BDcqavCzJMwtCDETSjwTqVf2QMqugUI%2Bv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDD9b1dAzPquDLyR64yqOBbDdMMB6qRiZbGj5ntUaOEuErgIaX0VyjFKOdAv8USvULuMUqjn0OpXaE%2FLmuqHwwSM21%2FVpSZlTq83Y7vOVS2eeF8XjZ1WQ7vIvEcY7AdX0eMbac77lcCB4RxK9kvRhcZYCIdAF%2FREEy7ZpMzm5BfyBPC2AaWFudYPoijGzHRa1xtmw8ZC4kRymq6hn%2F4l6EGAC43TTWjjXlYrfoT16B7zJv9JX%2Bk965dMsxFrX%2BKtCFDOLQYpSSUSw3GHmNBQWOpprJ9eB%2Bhmdrp9W8XK1u%2BGCQE%2BaS2PYwsDMkPfbCSnCJs9Fp9QP%2BIPczrURYaazZb%2F5xx6O1niQSUZGElZpjOvGkosJ40d5Oj6i6ElK9ALWKph1lwNLL4UkPex4t2RglP6mm%2B%2F6rxMW%2Bn41B%2By7jgh%2FklODd8pIPZqfu16zYwpdHfeQh8w9p03LhGbLr9CB9rlESYDPOnBm5BQZ6rk708GIcgjtCiUqikJt81Xh5vWwQ0xqU7Lw4mB%2BBUf74QeaGHzG4Wu%2FQCdBLHDyVi2fzGIwpt%2F1NY%2BBLG3kLMi67zFDltERgDCXGzqBvOPT9RZL7kluufKLjpNKroirqZPBoX3qNLSXOdy3otN%2FAJGJUO6BVy%2BbRoXqWowrX%2Fx6yr067GUM%2F1UXPFaOErEPTpVGnlBe56ssOXrBJXWBSOrDMeTSn2ofZ9AT%2F7EFAlamOiSxB1dWguNf7DC2Wxo2Hkd3y2jiHELq4uqCqcloB81hHnswIpxUxTvpz7Fx0U6dn0EppJZSgPaoX389BVcsmm1MTygTO1e1N%2B5y1E6IqbNwdAjnooP4mlaVIfd%2BmItX%2FBbIyUrzclTCs5qx1s3YqDV%2FnPDXlDkG2f0pymIl4RuRCDCJ84e%2FBjqxAdBjfelTIjQNt5OmwjqwnEC%2B2k%2Fi%2B%2FnCbWRx5jGMsl%2BBDw3WyQ%2BdMc98N2kltrLhYUngG91IDwo2wQcESeG2WiytY6EaItO0vDlYwYDAQACYfwmfCa6InheZUeBiyisGvON%2BzpFiC2d4%2FFEVjLODKA66zdsYAnpY%2F8plOozk%2B%2FifqMoRnX8NixExqtMAgyITi2Ix82EJls2oavnrXaQIZapNo58Ejj3e7h7vmu4gVS9P1A%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=8f5e68fa63310c66515e545ec0833d678a0e14580d3f55b4033c36881b8b1a84"
+  },
+  "disclosed_date": 1657543320,
+  "report_url": "https://hackerone.com/reports/1104349",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to the Glovo registration page and click on Register."
+    ],
+    [
+      2,
+      "Enter the payload {{7*7}} in the First Name field and complete the registration process."
+    ],
+    [
+      3,
+      "Wait for the welcome/promotional email to arrive and observe the evaluated payload in the email subject."
+    ],
+    [
+      4,
+      "Confirm the vulnerability by testing with other malicious payloads to gather sensitive information."
+    ]
+  ],
+  "vuln_description": "Server-side template injection vulnerability in the First Name field during the sign-up process, allowing execution of malicious payloads in promotional/welcome emails.",
+  "reason": "The attack involves a straightforward injection of a template payload into a user input field, which is a common and well-documented vulnerability pattern. The interaction between the input field and the email template is direct and does not require complex state manipulation or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves server-side template injection in the First Name field during sign-up, which is then executed in welcome emails. This is not directly related to authentication or authorization bypasses (AuthN/AuthZ) or insecure direct object references (IDOR). The methodology described focuses on testing AuthN/AuthZ and IDOR vulnerabilities by swapping user sessions and resource IDs, which does not apply to template injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

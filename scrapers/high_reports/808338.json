@@ -1,0 +1,50 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "un4gi ",
+    "title": "PII Leak via https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+    "content": "\nSummary:\nAn attacker can create an account on https://\u2588\u2588\u2588\u2588 and gain access to a wealth of PII for practically every member that is registered on the website. This includes e-mail addresses, physical addresses, telephone numbers, and other information about a vast majority of the US Air Force, as this portal is where \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 support is hosted.\nDescription:\nImpact\nAn adversary can sign up for an account on https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 to gather a vast amount of PII related to a large portion of the USAF. This can be used for many purposes and should not be accessible by a regular user.\nStep-by-step Reproduction Instructions\nBrowse to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nCreate an account or sign in and visit your profile page in the top right corner. \u2588\u2588\u2588\u2588\nClick on Department and select AU Registrar from the drop-down menu. Once selected, click the i icon to the left of the AU Registrar field. \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nIn the next screen, click the Users field in the Related Lists section. \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAll users in the AU Registrar department will be shown. Clicking a user will display PII and other account information. I have redacted any PII from the screenshot. \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nTo access data from ALL users, simply click the All field above the user table. You can search for specific users as well, as shown in the below screenshot were I searched for Bob. Once again, I redacted any PII from this screenshot. \u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\nLimit this function to administrators only, as regular users should not be able to access this type of data (especially when any user can sign up from the open internet, regardless of \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 enrollment).\nImpact\nAn adversary can sign up for an account on https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588 to gather a vast amount of PII related to a large portion of the USAF. This can be used for many purposes and should not be accessible by a regular user.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Insecure Storage of Sensitive Information"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1589229240,
+    "report_url": "https://hackerone.com/reports/808338",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Browse to the target website and create an account or sign in."
+        ],
+        [
+            2,
+            "Navigate to the profile page, select 'Department', and choose 'AU Registrar' from the drop-down menu."
+        ],
+        [
+            3,
+            "Click the 'i' icon next to the 'AU Registrar' field to access related user data."
+        ],
+        [
+            4,
+            "In the 'Related Lists' section, click on 'Users' to view all users in the AU Registrar department."
+        ],
+        [
+            5,
+            "Click on any user to display their PII or click 'All' to access data for all users."
+        ]
+    ],
+    "vuln_description": "An attacker can create an account on the target website and gain access to a vast amount of Personally Identifiable Information (PII) for registered members, including email addresses, physical addresses, and telephone numbers. This data pertains to a large portion of the US Air Force, as the portal hosts support services for them.",
+    "reason": "The vulnerability involves straightforward steps to access sensitive data without requiring deep technical knowledge or complex interactions between components. The attack path is linear and does not involve manipulating complex application states or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,53 @@
+{
+    "reported_to": "Automattic",
+    "reported_by": "fuzzme ",
+    "title": "SQL Injection Union Based",
+    "content": "\nSummary:\nHello,\nI have found a SQL Injection Union Based on https://intensedebate.com/commenthistory/$YourSiteId\nThe $YourSiteId into the url is vulnerable to SQL Injection.\nSteps to reproduce\nLogging into https://intensedebate.com\nAfter create your own site on https://intensedebate.com/install and follow all steps\nNow you need to know your site id, to get then you need go to https://intensedebate.com/user-dashboard and you can see on the right side of the page your site list, choice your site and click to the link Overview.\nYou will be redirected to https://intensedebate.com/dash/$YourSiteId.\nNow you have your site id, go to the vulnerable URL with your site id https://intensedebate.com/commenthistory/$YourSiteId.\nNow Trigger the SQL Injection with this following link https://intensedebate.com/commenthistory/$YourSiteId%20union%20select%201,2,@@VERSION%23 (!) You need to do this with your own site id (!)\nNow you can see 10.1.32-MariaDB on the page.\nPOC\n@@VERSION\n<image_0>\ncurrent_user()\n<image_1>\nVideo POC\nIMPORTANT\nCan you see my comment into #1044698 ??\nAnd I no longer want to put all SQL Injection issues on into my initial report #1042746, because i don't win any reputations\nThank you,\nFuzzme.\nImpact\nFull database access holding private user information and Reflected Cross-Site-Scripting\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/9t2mnbarjjludpvareuy75h07ou0?response-content-disposition=attachment%3B%20filename%3D%22version.png%22%3B%20filename%2A%3DUTF-8%27%27version.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ72HSHSM5%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T214351Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIACFIgPJymuvLs04o%2FphkqAZ0Ez2PLmvEd3i0xKi24cVAiEA3kYj3Jo3WWTumqRt16Zf2aUTT5VoLBaR1XwZ6Uzqoq4qsQUIGxADGgwwMTM2MTkyNzQ4NDkiDO%2FDV4Ln249zK5bi6yqOBWpXaujSA7c3UafccP753qZdwjkjabQrQzxvIfaHjPOVrvCuSfqOlksLzQy4UjDhnznIQRFWv4ZufvORCpXVyTWxC9r4tRnhYNP0LfGSW7%2FE0z9ka4mNsYj82%2BIdhPW97yJNOIvVMjxhwZODeOYzcEvsWRa%2F8BiTJbseqc6QnA2AZmSbuJq7xFO5R79VmHPYDWpCLzzekDWfqjFMYeQ085lDlqHBhE9JM9jx%2BC2bPOwWpX9bEup05YzKuXNiE5mr5TsfecbT6O%2F7afjBkGzwQzwcyLQ%2B7eEz9nVotv%2BCquJDz91XZlsHEQsq6b8HTrYdsNiR%2BioyiptlT%2By2kOsD3CI449g5r%2F9%2F3EzrpPHdGJYxBZ7JFxNuxf7kI%2BDY25Fa1hc6dv9DkkzfiE%2FSrVDl32Zfjbh3%2FTvBhKHtFSgzlhO%2BsA%2FwwRRxgPC7Yg43Bgke4x%2Bh1fA4sDEAj3p6ep4%2BAYkrix1sn7VKJd0Cx0y6%2FtrbRB8KV8dKmS9TXf2y6Q0yEGBnK4nNUHpXiio7gy%2FnRZTWe3XMe%2FKutH6GVpy9lQrGrw0Xep4xyg4YibEYBHZwJ02PFlxi2PxBdhvgzaas%2BcT8UeS1wc9sySkCeZollVnW7UHTwsnABsXbsvy9i9tk73XW%2BsVtXvsoQTEKNwCzL1SdazOIJJUXtTP4m%2F3GudOMdv9MVZMreckZldtLqbtgrjmN8poIi7MKytQL3uyhBc6oDpk99unLgCDd5WDmA26ajE62FryFIJRht1girTKbTbNHnadTTwjNpAidOeTx8h%2B8nNaQtbX0RM1d425ZKfkAhvgu9le%2BYvntBJCHHANOIw62Ic3mIQD0rVnxs40Pwc7yylR%2F2znYKbRdLdf7JTCK3Iu%2FBjqxARa%2BdYHRUv8L%2FwW74BhYYgChBDV7FCD%2BxKhQQ%2Bk1Cc2aQ8ROgWd1Yu4j5CmLym%2BMQKp8bgs6xwdGurSDrcS6cXYzMNQiiWPCh0dwqc8vdMkdgnsPAfQslKPiRhObpj5VMM6UrAelpsbauqgqJG%2FaF%2BR1smISimyV0GC9BAn3rE7Hq3hkWrdXdLOZi5CMjtGOuQMtGqST1%2BLXaGJUS8oZGqVIplOhjUWErsBamMGUvDARTA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=0a9c55be7039c9ea0018f50dce3b4968822ef70ec3f6b16e218c51ebd2fe7147",
+        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/fa3kixvecnjeelb0g2m5tzbeei5w?response-content-disposition=attachment%3B%20filename%3D%22currentUser.png%22%3B%20filename%2A%3DUTF-8%27%27currentUser.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ72HSHSM5%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T214351Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIACFIgPJymuvLs04o%2FphkqAZ0Ez2PLmvEd3i0xKi24cVAiEA3kYj3Jo3WWTumqRt16Zf2aUTT5VoLBaR1XwZ6Uzqoq4qsQUIGxADGgwwMTM2MTkyNzQ4NDkiDO%2FDV4Ln249zK5bi6yqOBWpXaujSA7c3UafccP753qZdwjkjabQrQzxvIfaHjPOVrvCuSfqOlksLzQy4UjDhnznIQRFWv4ZufvORCpXVyTWxC9r4tRnhYNP0LfGSW7%2FE0z9ka4mNsYj82%2BIdhPW97yJNOIvVMjxhwZODeOYzcEvsWRa%2F8BiTJbseqc6QnA2AZmSbuJq7xFO5R79VmHPYDWpCLzzekDWfqjFMYeQ085lDlqHBhE9JM9jx%2BC2bPOwWpX9bEup05YzKuXNiE5mr5TsfecbT6O%2F7afjBkGzwQzwcyLQ%2B7eEz9nVotv%2BCquJDz91XZlsHEQsq6b8HTrYdsNiR%2BioyiptlT%2By2kOsD3CI449g5r%2F9%2F3EzrpPHdGJYxBZ7JFxNuxf7kI%2BDY25Fa1hc6dv9DkkzfiE%2FSrVDl32Zfjbh3%2FTvBhKHtFSgzlhO%2BsA%2FwwRRxgPC7Yg43Bgke4x%2Bh1fA4sDEAj3p6ep4%2BAYkrix1sn7VKJd0Cx0y6%2FtrbRB8KV8dKmS9TXf2y6Q0yEGBnK4nNUHpXiio7gy%2FnRZTWe3XMe%2FKutH6GVpy9lQrGrw0Xep4xyg4YibEYBHZwJ02PFlxi2PxBdhvgzaas%2BcT8UeS1wc9sySkCeZollVnW7UHTwsnABsXbsvy9i9tk73XW%2BsVtXvsoQTEKNwCzL1SdazOIJJUXtTP4m%2F3GudOMdv9MVZMreckZldtLqbtgrjmN8poIi7MKytQL3uyhBc6oDpk99unLgCDd5WDmA26ajE62FryFIJRht1girTKbTbNHnadTTwjNpAidOeTx8h%2B8nNaQtbX0RM1d425ZKfkAhvgu9le%2BYvntBJCHHANOIw62Ic3mIQD0rVnxs40Pwc7yylR%2F2znYKbRdLdf7JTCK3Iu%2FBjqxARa%2BdYHRUv8L%2FwW74BhYYgChBDV7FCD%2BxKhQQ%2Bk1Cc2aQ8ROgWd1Yu4j5CmLym%2BMQKp8bgs6xwdGurSDrcS6cXYzMNQiiWPCh0dwqc8vdMkdgnsPAfQslKPiRhObpj5VMM6UrAelpsbauqgqJG%2FaF%2BR1smISimyV0GC9BAn3rE7Hq3hkWrdXdLOZi5CMjtGOuQMtGqST1%2BLXaGJUS8oZGqVIplOhjUWErsBamMGUvDARTA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=b2cdc705fcd96e94c7e272259ddbbe65ff99c6c2870f318302c1a55bfa35724a"
+    },
+    "disclosed_date": 1609510740,
+    "report_url": "https://hackerone.com/reports/1046084",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "steps": [
+        [
+            1,
+            "Log into https://intensedebate.com and create your own site by following the steps at https://intensedebate.com/install"
+        ],
+        [
+            2,
+            "Find your site ID by navigating to https://intensedebate.com/user-dashboard, selecting your site, and noting the ID in the URL after clicking 'Overview' (e.g., https://intensedebate.com/dash/$YourSiteId)"
+        ],
+        [
+            3,
+            "Access the vulnerable URL: https://intensedebate.com/commenthistory/$YourSiteId"
+        ],
+        [
+            4,
+            "Trigger the SQL injection by visiting: https://intensedebate.com/commenthistory/$YourSiteId%20union%20select%201,2,@@VERSION%23"
+        ],
+        [
+            5,
+            "Observe the database version (e.g., 10.1.32-MariaDB) or other injected data (e.g., current_user())"
+        ]
+    ],
+    "vuln_description": "A Union-Based SQL Injection vulnerability exists in the commenthistory endpoint of IntenseDebate, where the $YourSiteId parameter is improperly sanitized. This allows attackers to execute arbitrary SQL queries, potentially leading to full database access (including private user data) and Reflected Cross-Site Scripting (XSS).",
+    "reason": "The attack requires understanding the site's structure (finding the site ID) and basic SQL injection techniques, but the vulnerability itself is straightforward to exploit once the injection point is identified. No complex application state manipulation or novel logic is involved.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "1042746"
+}

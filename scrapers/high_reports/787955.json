@@ -1,0 +1,58 @@
+{
+    "reported_to": "Lab45",
+    "reported_by": "bonikia97 ",
+    "title": "PII of Users Disclosure using \"/members/invite/\" endpoint",
+    "content": "\nHello!\nI found PII Disclosue at https://connect.topcoder.com/projects/\nSteps to Reproduce.\n1) Go to https://connect.topcoder.com/projects\n2) Select an existing project, or create a new one.\n3) Select the \"Manage Invitations\" option. (on the left sidebar).\n4) Enter the Username/Email of the user you want to add.\n5) Intercept two Request (GET & POST) with BurpSuite, and send this to Repeater.\n6) With Requests:\n6.1)With GET Request: See that it is similar to a query in the database, you can manipulate them to get more information. Use this to get the ID of any user.\n6.2)With POST Request: Put any userIds, and send the Request.\n7) Look the Response, the email and more information of users can be seen.\nRegards!\nPoC:\n1) \"PII Email TopCoder\" Video.\n2) Image called \"Manipulated Email Request\", In which you will see the manipulated request to get all users with email-domain \"@wearehackerone.com\".\n(With this you could obtain the IDs of any user and any email domain by following the steps of the PoC in video.)\nRegards!\nImpact\nIf the attacker wanted, he could see the information of the Admins, or any Member of TopCoder. It could collect internal information from the company and continue to feed its attack vectors.\nIf you check other endpoints, nowhere is the user's email shown.\n\n",
+    "severity": [
+        7.1,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1586797860,
+    "report_url": "https://hackerone.com/reports/787955",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Go to https://connect.topcoder.com/projects"
+        ],
+        [
+            2,
+            "Select an existing project or create a new one"
+        ],
+        [
+            3,
+            "Select 'Manage Invitations' from the left sidebar"
+        ],
+        [
+            4,
+            "Enter the Username/Email of the user you want to add"
+        ],
+        [
+            5,
+            "Intercept the GET and POST requests with BurpSuite and send them to Repeater"
+        ],
+        [
+            6,
+            "Manipulate the GET request to query user IDs"
+        ],
+        [
+            7,
+            "Use the POST request with any user ID to retrieve PII (email and other information)"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the disclosure of Personally Identifiable Information (PII) through the '/members/invite/' endpoint. By manipulating GET and POST requests, an attacker can retrieve sensitive user information such as emails, including those of admins and other members, without proper authorization.",
+    "reason": "The attack requires understanding of API endpoint manipulation and the use of tools like BurpSuite to intercept and replay requests. However, the steps are straightforward once the endpoint behavior is understood, and the manipulation does not involve complex application states or novel logic.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

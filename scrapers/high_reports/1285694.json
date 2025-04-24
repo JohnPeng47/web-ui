@@ -1,0 +1,50 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "aliyugombe ",
+    "title": "No password length restriction in reset password endpoint at http://suppliers.mtn.cm",
+    "content": "\nHello\nSummary:\nI found no password length restriction in reset password endpoint at http://suppliers.mtn.cm when resetting new password\nSteps To Reproduce:\nVisit https://suppliers.mtn.cm/ and register.\nlogout and reset your password\ngo to your email and click on reset password link\nenter 150 characters as a password and confirm the characters\nyou will successfully logged in.\nImpact\nAttacker can do denial of service to your server since there is no restriction in the length of password.\nExample when he enter like 2500 character, your server will crash for some time,\nI did not attempt to ddos your server, because you exclude any activity related to denial of service to your assets, I only test for 150 character and its working.\nMitigation :\nRestrict user to use less than 40 character as a password, while the restriction should be both on back-end and front-end (with javascript ).\nThank you\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1662433200,
+    "report_url": "https://hackerone.com/reports/1285694",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Visit https://suppliers.mtn.cm/ and register an account."
+        ],
+        [
+            2,
+            "Log out and initiate a password reset for the registered account."
+        ],
+        [
+            3,
+            "Access the password reset link sent to your email."
+        ],
+        [
+            4,
+            "Enter a new password with 150 characters or more and confirm it."
+        ],
+        [
+            5,
+            "Observe successful login with the excessively long password."
+        ]
+    ],
+    "vuln_description": "The reset password endpoint at http://suppliers.mtn.cm lacks password length restrictions, allowing users to set excessively long passwords. This could lead to denial of service (DoS) attacks by overwhelming the server with resource-intensive password processing.",
+    "reason": "The vulnerability is straightforward to discover as it only involves testing password length during a standard password reset flow. No complex interactions, multi-step logic, or deep system understanding is required.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

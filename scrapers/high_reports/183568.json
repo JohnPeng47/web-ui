@@ -1,0 +1,50 @@
+{
+  "reported_to": "WordPress",
+  "reported_by": "mopman ",
+  "title": "[Buddypress] Arbitrary File Deletion through bp_avatar_set",
+  "content": "\nHi,\nThe bp_avatar_set action in BuddyPress when cropping avatars allows an attacker to arbitrarily delete a file the webserver can delete through the 'original_file' parameter.\nFor example:\nCreate a user on a Buddypress-powered Wordpress instance (any user is OK, doesn't need to be admin, just needs to have the ability to change it's own avatar in the Buddypress profile which is normal).\nNavigate to the avatar change URL for example /members/<username>/profile/change-avatar/ on my install.\nClick the button to upload an image and select any valid image. Allow the first request which uploads this image to submit as normal.\nSelect the crop button, but do not allow the request to complete (I used Burp and enabled intercept mode). Modify the request to change the original_file parameter to point to a file you wish to delete, traversing up with ../.. if needed. So for example where my legitimate param was:\noriginal_file=http%3A%2F%2Flocalhost%2F~sam%2Fwordpress%2Fwp-content%2Fuploads%2Favatars%2F2%2Fmy_ugly_face.jpg\nChange to:\noriginal_file=http%3A%2F%2Flocalhost%2F~sam%2Fwordpress%2Fwp-content%2Fuploads%2Favatars%2F2%2F../../../../../wp-config.php\nRemember it will be in a numbered folder probably, so you need one more .. than expected from the URL. You can upload an image for real to see how the path ends up for guidance on this if you're an attacker and don't know the folder structure.\nThe wp-config.php file will be deleted when unlink() is called and the blog will then be unavailable, of course, in this case.\nThis path needs to be somehow validated such that it can only delete uploaded avatars (constraining to the upload directory would still allow you to delete, say, other users avatars, or other uploaded files, which would still make me sad :()\nLet me know if you have any trouble reproducing or need any further info - I think I explained OK, but it is very late here. ;)\no/\n\n",
+  "severity": [
+    7.7,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "None"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1503439440,
+  "report_url": "https://hackerone.com/reports/183568",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create a user on a BuddyPress-powered WordPress instance (any user is OK, just needs to have the ability to change its own avatar)."
+    ],
+    [
+      2,
+      "Navigate to the avatar change URL (e.g., /members/<username>/profile/change-avatar/)."
+    ],
+    [
+      3,
+      "Upload an image and proceed to the crop step, but intercept the request (e.g., using Burp)."
+    ],
+    [
+      4,
+      "Modify the 'original_file' parameter in the intercepted request to traverse directories and point to a file you wish to delete (e.g., ../../../../../wp-config.php)."
+    ],
+    [
+      5,
+      "Allow the request to complete, resulting in the deletion of the specified file."
+    ]
+  ],
+  "vuln_description": "The bp_avatar_set action in BuddyPress allows arbitrary file deletion via the 'original_file' parameter during avatar cropping. An attacker can manipulate this parameter to delete any file accessible by the webserver, such as wp-config.php, by traversing directories.",
+  "reason": "The vulnerability involves a straightforward manipulation of a single parameter in a predictable request flow. While directory traversal is a common technique, the attack does not require complex interactions or deep understanding of the application's state.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

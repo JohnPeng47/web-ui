@@ -1,0 +1,38 @@
+{
+    "reported_to": "Greenhouse.io",
+    "reported_by": "ninadmathpati ",
+    "title": "Subdomain Takeover on demo.greenhouse.io pointing to unbouncepages",
+    "content": "\nActuall this report is same as of this one:- https://hackerone.com/reports/38007\nSubdomain takeover vulnerabilities occur when a subdomain (subdomain.example.com) is pointing to a service (e.g. GitHub pages, Heroku, etc.) that has been removed or deleted. This allows an attacker to set up a page on the service that was being used and point their page to that subdomain. For example, if subdomain.example.com was pointing to a GitHub page and the user decided to delete their GitHub page, an attacker can now create a GitHub page, add a CNAME file containing subdomain.example.com, and claim subdomain.example.com.\nHere there is a greenhouse domain (demo.greenhouse.io) which is pointing towards unbounce pages so this domain can be taken over can can be used to do any type of attacks mostly i can make a fake login page on your behalf and spoof your users, this is a critical vulnerability and needs to be fixed .\nVulnerable url : demo.greenhouse.io\nPoC\nSnapshot of the vulnerable page(actually for taking over from unbounce i need to take a paid subscription hich is of higher cost neraly 150-200$ i cannot afford that so as a poc i m showing you a vulnerable page hoping this should work )\ncname: unbouncepages.com\nName: demo.greenhouse.io\nType: CNAME\nClass: IN\nImpact\nImpact\nRisk\nfake website\nmalicious code injection\nusers tricking\ncompany impersonation\nThis issue can have really huge impact on the companies reputation someone could post malicious content on the compromised site and then your users will think it's official but it's not.\nRemediation\nRemove the cname entry or claim the subdomain demo.greenhouse.io on unbounce.com\nSee also\nhttps://github.com/EdOverflow/can-i-take-over-xyz#unbounce\nhttps://labs.detectify.com/2014/10/21/hostile-subdomain-takeover-using-herokugithubdesk-more/\nhttps://0xpatrik.com/subdomain-takeover/\nhttps://medium.com/@ajdumanhug/subdomain-takeover-through-external-services-f0f7ee2b93bd\nhttp://yassineaboukir.com/blog/neglected-dns-records-exploited-to-takeover-subdomains/\nBest regards,\nHacker2202\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 500,
+    "weaknesses": [
+        "Phishing"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1583425560,
+    "report_url": "https://hackerone.com/reports/407355",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify the subdomain demo.greenhouse.io pointing to unbouncepages.com via DNS lookup."
+        ],
+        [
+            2,
+            "Verify that the subdomain is not claimed on unbounce.com, making it vulnerable to takeover."
+        ]
+    ],
+    "vuln_description": "The subdomain demo.greenhouse.io is pointing to unbouncepages.com, which is not claimed. This allows an attacker to claim the subdomain on unbounce.com, potentially leading to malicious activities such as hosting fake login pages or injecting malicious code.",
+    "reason": "The vulnerability involves straightforward DNS lookup and verification of subdomain ownership, with no complex interactions or novel logic required.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "38007"
+}

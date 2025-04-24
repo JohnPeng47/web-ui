@@ -1,0 +1,46 @@
+{
+    "reported_to": "X (Formerly Twitter)",
+    "reported_by": "csanuragjain ",
+    "title": "Global defaming of any twitter user",
+    "content": "\nPrivate tweets can be used to keep any user's tweet secret from rest of twitter world. Once the user changes his setting from private tweets to public tweets, all his secret tweets become visible. This can become a major issue causing global distributed attacks\nSteps to Reproduce\nAssume the attacker is targeting certain president XYZ for the next election\nAttacker goes to settings and enable private tweet\nAttacker find famous tweets from 10000+ celebrity profiles\nAttacker replies on all those 10000+ celebrity profile tweets mentioning \"XYZ is the worst candidate. See what he did <some video or something>\"\nNone of the twitter user can see that reply from Attacker since it is a private tweet\nOnce the elections are really near, Attacker changes his setting from private to public tweet\nAttacker reply comments are now visible in all those 10000+ celebrity profile famous tweets\nThis can cause mass defaming, before twitter could actually intervene and remove attacker\nImpact\nThis can be used to defame any famous celebrity on a mass level\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1544157780,
+    "report_url": "https://hackerone.com/reports/434689",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Attacker enables private tweets in their Twitter settings."
+        ],
+        [
+            2,
+            "Attacker replies to 10,000+ celebrity tweets with defamatory content about target XYZ, which remains hidden due to private settings."
+        ],
+        [
+            3,
+            "Near election time, attacker switches tweets from private to public, making all replies visible simultaneously."
+        ],
+        [
+            4,
+            "Mass defamation occurs before Twitter can intervene to remove the content."
+        ]
+    ],
+    "vuln_description": "This vulnerability allows an attacker to globally defame a target by exploiting Twitter's private-to-public tweet visibility transition. By strategically timing the switch, the attacker can flood high-profile tweets with hidden defamatory replies that become visible en masse, creating a sudden and widespread reputational attack.",
+    "reason": "While the attack involves multiple steps (private mode, mass replies, timing the switch), the core vulnerability stems from a straightforward interaction between Twitter's privacy settings and reply visibility. The attack doesn't require deep system knowledge or complex state manipulation, just an understanding of how tweet visibility works.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

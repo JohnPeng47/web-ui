@@ -1,0 +1,38 @@
+{
+    "reported_to": "Hyperledger",
+    "reported_by": "xiaoc ",
+    "title": "Brute Force of fabric-ca server admin account",
+    "content": "\nfabric-ca server\nDefault configuration maxenrollments value -1(enable outside enrollment)\nListening 0.0.0.0:7054(easily discoved and can be reached)\nNo limit to wrong password try Above conditions result in brute force to CA server admin account\nImpact\nAttack gain a high-level permissioned account to permissioned network and can add\\delete\\update\\query\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Restriction of Authentication Attempts"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1659821760,
+    "report_url": "https://hackerone.com/reports/411364",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Identify the fabric-ca server running on 0.0.0.0:7054"
+        ],
+        [
+            2,
+            "Attempt brute force attacks on the admin account due to no limit on wrong password tries"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows brute force attacks on the fabric-ca server admin account due to default configurations like maxenrollments set to -1 (enabling outside enrollment), no restrictions on password attempts, and the server being easily discoverable on 0.0.0.0:7054. This can lead to gaining high-level permissions in a permissioned network.",
+    "reason": "The attack is straightforward, involving only the identification of the server and brute-forcing the admin password without any complex interactions or state manipulations.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

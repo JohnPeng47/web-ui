@@ -1,0 +1,45 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "jin ",
+  "title": "XXE in DoD website that may lead to RCE",
+  "content": "\nSummary:\nXXE in https://\u2588\u2588\u2588\u2588\u2588\nDescription:\nA malicious user can modify an XML-based request to include XML content that is then parsed locally.\nImpact\nAn attacker can use an XML external entity vulnerability to send specially crafted unauthorized XML requests, which will be processed by the XML parser. The attacker can use an XML external entity vulnerability for getting unauthorised access to the OS file system.\nPoC\nCode 168 Bytes\n1POST /PSIGW/PeopleSoftServiceListeningConnector HTTP/1.1\n2Host: https://\u2588\u2588\u2588\n3Content-type: text/xml\n4Content-Length: 50\n5\n6<!DOCTYPE a PUBLIC \"-//B/A/EN\" \"HELLO_XXE\"><a></a>\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "XML External Entities (XXE)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1570216920,
+  "report_url": "https://hackerone.com/reports/227880",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Send a POST request to /PSIGW/PeopleSoftServiceListeningConnector with a Content-Type header set to text/xml"
+    ],
+    [
+      2,
+      "Include a malicious XML payload in the request body that defines an external entity, e.g., <!DOCTYPE a PUBLIC \"-//B/A/EN\" \"HELLO_XXE\"><a></a>"
+    ]
+  ],
+  "vuln_description": "The vulnerability is an XML External Entity (XXE) injection in a DoD website. It allows an attacker to send specially crafted XML requests that the server processes, potentially leading to unauthorized access to the local file system or other server-side resources.",
+  "reason": "The attack is straightforward, involving only the modification of an XML request to include an external entity. It does not require multiple components, complex state manipulation, or novel logic. The vulnerability is a well-known type (XXE) and the steps to exploit it are standard.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The XXE vulnerability involves manipulating XML requests to access unauthorized resources, which is not directly related to the authentication or authorization bypass methodologies described. The proposed methodologies focus on testing user sessions, actions, and resource IDs within the same application context, whereas XXE exploits involve parsing malicious XML content.",
+    "is_detectable": false
+  }
+}

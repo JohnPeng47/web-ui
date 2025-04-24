@@ -1,0 +1,40 @@
+{
+    "reported_to": "Rockset",
+    "reported_by": "boy_child_ ",
+    "title": "S3 bucket data at http://rockset-support.s3-us-west-2.amazonaws.com/ reveals user addresses based on latitudes and longitudes.",
+    "content": "\n<image_0>\n{F930036}\nSteps to reproduce:\n1, Download the file in the bucket with the command:\nCode 34 Bytes\n1aws s3 sync s3://rockset-support .\nOpen the file labelled data.json.15.\nFor each line, there will be a set of latitudes and longitudes. Copy a single pair.\n{F930037}\nOpen Google Maps, enter the coordinates and click search.\n{F930058}\nImpact\nSpecific user location information violates the privacy policy stated by Rockset for its users allowing both targeted phishing attacks and physical risk.\n\n",
+    "severity": [
+        8.3,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {
+        "image_0": "At the s3 bucket located at http://rockset-support.s3-us-west-2.amazonaws.com/, a file was found called data.json.15that contains of interest latitudes and latitudes of user addresses."
+    },
+    "disclosed_date": 1596652680,
+    "report_url": "https://hackerone.com/reports/947725",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Download the file in the bucket with the command: `aws s3 sync s3://rockset-support .`"
+        ],
+        [
+            2,
+            "Open the file labelled `data.json.15`, copy a latitude and longitude pair, and search for it in Google Maps."
+        ]
+    ],
+    "vuln_description": "The S3 bucket at http://rockset-support.s3-us-west-2.amazonaws.com/ contains a file (`data.json.15`) with latitude and longitude coordinates that, when entered into Google Maps, reveal specific user addresses. This violates Rockset's privacy policy and exposes users to targeted phishing or physical risks.",
+    "reason": "The vulnerability involves straightforward steps: downloading a publicly accessible file and using publicly available tools (Google Maps) to interpret the data. No complex interactions, state manipulations, or novel logic are required.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

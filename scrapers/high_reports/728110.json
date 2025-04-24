@@ -1,0 +1,46 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "sp1d3rs ",
+  "title": "[HTAF4-213] [Pre-submission] CVE-2018-2879 (padding oracle attack in the Oracle Access Manager) at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+  "content": "\nDescription\nWe were able to identify CVE-2018-2879 in Oracle Access Manager, used on the https://\u2588\u2588\u2588\u2588\u2588\u2588\nLink to the CVE: https://nvd.nist.gov/vuln/detail/CVE-2018-2879\nThis vulnerability is rated critical, and may allow unauthenticated attacker with network access via HTTP to compromise Oracle Access Manager.\nIt's possible to conduct padding oracle attack and recover plaintext from encquery parameter\nMaterials:\nhttps://sec-consult.com/en/blog/2018/05/oracle-access-managers-identity-crisis/\nPOC\nWe modified https://github.com/redtimmy/OAMBuster/blob/master/oambuster.py proof-of concept for https://\u2588\u2588\u2588\u2588\u2588 (it required some changes, for example gcds-consent=true is necessary in all requests to not face with consent banner page.\nHere is it:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nIt can be launched in the next way to simply test for padding oracle and recover plaintext:\nCode 34 Bytes\n1oambuster.py -d https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nThe result (decrypt process can take some time, for example on the screenshot above it's not fully finished, but you can already see readable parts):\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nThis confirms that vulnerability is valid.\nSuggested fix\nApply patch & update OAM instance\nImpact\nPadding oracle attack allows us to decrypt any messages. As all the encrypted messages (encquery, encreply, OAMAuthnCookie) are encrypted with the same key, we can decrypt any of these messages.\nThis attack can also be used to encrypt messages. So if we construct a valid authentication cookie and encrypt it with our padding oracle attack, we can pass it off as valid to the web server and perform authentication bypass.\nWe will research this further and will update report with new information.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cryptographic Issues - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1627602180,
+  "report_url": "https://hackerone.com/reports/728110",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify the target Oracle Access Manager instance at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
+    ],
+    [
+      2,
+      "Use the modified oambuster.py script to test for the padding oracle vulnerability by running: oambuster.py -d https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
+    ],
+    [
+      3,
+      "Observe the decrypted plaintext output from the encquery parameter, confirming the vulnerability"
+    ],
+    [
+      4,
+      "Optionally, use the same vulnerability to encrypt a crafted authentication cookie for authentication bypass"
+    ]
+  ],
+  "vuln_description": "This vulnerability is a padding oracle attack in Oracle Access Manager, allowing an unauthenticated attacker to decrypt and potentially encrypt messages (like OAMAuthnCookie) by exploiting the encquery parameter. This can lead to authentication bypass and other security breaches.",
+  "reason": "The attack requires understanding of padding oracle vulnerabilities, modification of an existing proof-of-concept script, and knowledge of Oracle Access Manager's encryption mechanisms. While the attack is complex, the availability of public PoCs and documentation reduces the discovery difficulty.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

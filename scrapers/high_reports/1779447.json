@@ -1,0 +1,49 @@
+{
+  "reported_to": "MTN Group",
+  "reported_by": "mathara ",
+  "title": "Reflected - XSS",
+  "content": "\nSummary:\nHi, Team I'm Found Reflected XSS\nSteps To Reproduce:\n1.Nave to https://www.mtn.bj/\n2.Go to Messages\n3. Enter XSS Payload :\n<h1 onauxclick=confirm(document.domain)>RIGHT CLICK HERE\nReflected the popup\nImpact\nCross site scripting attacks can have devastating consequences. Code injected into a vulnerable application can exfiltrate data or install malware on the user's machine. Attackers can masquerade as authorized users via session cookies, allowing them to perform any action allowed by the user account.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Reflected"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1729519980,
+  "report_url": "https://hackerone.com/reports/1779447",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to https://www.mtn.bj/"
+    ],
+    [
+      2,
+      "Go to Messages and enter the XSS payload: <h1 onauxclick=confirm(document.domain)>RIGHT CLICK HERE"
+    ],
+    [
+      3,
+      "Right-click on the injected element to trigger the popup"
+    ]
+  ],
+  "vuln_description": "This is a reflected Cross-Site Scripting (XSS) vulnerability where user-supplied input is not properly sanitized before being reflected back in the response. An attacker can inject malicious JavaScript code that executes when a user interacts with the injected element, potentially leading to session hijacking or other malicious actions.",
+  "reason": "The vulnerability is straightforward to discover as it involves a simple injection of a common XSS payload and does not require complex interactions or understanding of multiple components. The payload is basic and the attack surface is obvious (user input field).",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves injecting a payload that triggers a popup when right-clicked, which is a client-side issue and does not involve authentication or authorization checks. The proposed methodologies focus on testing authentication and authorization boundaries by swapping user sessions and resource IDs, which are not applicable to reflected XSS vulnerabilities.",
+    "is_detectable": false
+  }
+}

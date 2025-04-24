@@ -1,0 +1,38 @@
+{
+    "reported_to": "HackerOne",
+    "reported_by": "faisalahmed ",
+    "title": "Partial disclosure of report activity through new \"Export as .zip\" feature",
+    "content": "\nHello Team,\nI noticed a new feature has been launched, which allows to export report. Great feature.\nBut unfortunately it discloses comments of partially disclosed reports which supposed to be hidden..\nPOC:\nGo to this partially disclosed report > https://hackerone.com/reports/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nClick Export Button.\nYou'll see comments are getting disclosed!\n{F134909}\nThis way you can see all the partially disclosed reports comments.\nPlease let me know if you need more information!\nLooking forward!\n\n",
+    "severity": [
+        7.5,
+        null
+    ],
+    "bounty": 10000,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1480402260,
+    "report_url": "https://hackerone.com/reports/182358",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to a partially disclosed report on HackerOne: https://hackerone.com/reports/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
+        ],
+        [
+            2,
+            "Click the 'Export as .zip' button to export the report"
+        ]
+    ],
+    "vuln_description": "The 'Export as .zip' feature in HackerOne inadvertently discloses comments from partially disclosed reports, which are supposed to remain hidden. This allows unauthorized users to view sensitive information that should not be accessible.",
+    "reason": "The vulnerability is straightforward to discover as it involves a single action (exporting the report) and does not require any complex interactions or understanding of multiple components. The issue is a simple oversight in the export functionality.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

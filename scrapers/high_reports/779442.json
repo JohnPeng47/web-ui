@@ -1,0 +1,50 @@
+{
+    "reported_to": "Lyst",
+    "reported_by": "parzel ",
+    "title": "Subdomain takeover of storybook.lystit.com",
+    "content": "\nSummary:\nThe subdomain storybook.lystit.com had an CNAME record pointing to an unclaimed S3 bucket. This is a high severity security issue because an attacker can register the bucket on AWS and therefore can serve her own content on the subdomain. This allows for various attacks.\nDescription:\nThe dangling CNAME record of storybook.lystit.com is pointing to \u2588\u2588\u2588\u2588\u2588\u2588\u2588 and the bucket which could not be found was: \"storybook.lystit.com\". I was able to register a S3 bucket with this name in AWS. After enabling static website hosting I was able to takeover the subdomain and serve arbitrary content. I am serving a POC to proof I am controlling the subdomain as well as a simple XSS POC.\nPOC\n<image_0>\nSupporting Material/References:\nhttps://www.hackerone.com/blog/Guide-Subdomain-Takeovers\nRecommendations for fix\nRemove the dangling CNAME record from storybook.lystit.com\nImpact\nThe domain takeover allows various attacks. As the full domain is attacker controlled it can be used to serve XSS attacks, phishing campaigns and might be used to bypass the Same Origin Policy on other lystit.com domains and services.\n\n",
+    "severity": [
+        7.3,
+        null
+    ],
+    "bounty": 1000,
+    "weaknesses": [
+        "Privilege Escalation"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/R8qSWEsmCsYWrjJoZR5UrE8P?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_from_2020-01-21_17-48-19.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_from_2020-01-21_17-48-19.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ5GHIQOIO%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T015839Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIGnzKZJrjntY2y%2FhGCDYApEGCf4rNojJCSPmBgWJNM%2BFAiBVVfjcSUJsmv9nOfbcFcqNnTR2VI12gld1QHPIEKIi%2FCqyBQggEAMaDDAxMzYxOTI3NDg0OSIMyAk2FQoaJglwwF03Ko8FCBBM%2Fp%2BbQhlo%2B4k3r%2BjfU2t8SOZ5jrFMkPANoyghH%2BaxKXRKgtpF4dkPve%2BdHc3GpmN3M2Us2NwBZ%2FJp1er02KkM32Ejso2yCGo09UqyFOxzN57qifmjUUUY9bQqj1pJOk%2BBJkCllv95wMA%2F6fKhseqvDHC%2BQww4JfD0kTOcaBqZBhrLVwrs93xP6biYeZbD4%2FYB3FofqpHKb9EJ%2BJgEZYFDFfcMEx2PcOp1XpaT5IVoRUBl9OUoICC3TIC8QzOIsoMtyEjw2N%2BzTmut89SYkiWp0NMELRQ8il0j3pahL7PTc0CUj9Oe3BygsuGhbggSqGCqRLGbdvrT4CcsInoG8znPGAb4zAGStWPMkzCRL1ziMZAviBOY1GQTqx1xEb4bjEHrk6OmMODqpL%2F3qS6JSVhg8nPj8MSe6vOnW3oMf%2FDJYHhwxBVfETvx6y3AIdN8WXCr1wmqooOVbwnJB2OORDIZIEe2DtGHNSaaWv%2BX2wwnSkwJEXuDpeHzm%2FF2EJTEGQsrS0d5aF4x9REmZuo3YtD6oP1yLrpJdXS9ilLQ8%2B57MfKZx3P759Ya%2BrznJW34LfsYkg1AJg7TI9wAguQDPKdd1d2SW0%2BvoRGIOUXJWQsU2O%2BNDXEXXyUQCA%2Fp8t0tQBN0bvNMV2ol8IfwEYuRrub68sl%2B%2BzLZAcpHw5QyR1y9El%2FUYooCqF7rLbBWypGnIfLA7GaNuAmLzL8Ofg4JegDsp%2FiDa3dL2lYyMUZRgMmKBI1ZfyukjFY26ydnlHSQwtVnATwduRT9A4eilfZaFkuXRnyFxWbtkxbTiXB1d%2Fe4O3yLAfjD9LsFiLRliQjzoaRW4xvEglRjl4u0R7S3kkJ%2BFQdxdrt4MUZDZS6MpDD%2F54y%2FBjqyAW134M4QyN8WJtdx4Cf07nz4H2peEFwAZTeVr%2FDGUo15TrmmKavSrqUAa4hFOI2pSA4MFCfKv1Rskr0nvfUHoqFWTiyJ0eDjR1PzRFxLQxfW4%2FWFahJowL%2B0yE4GCUP0nwGTycuhz23FH350CADEf3TXrnKDQF%2BqJo9n%2FlKC0zhMviM%2FhyqlF1j1CvtMwhb4Gi3eyMvm5HEIT5LpoysH9rwaLQvCBymbPXOfJlxBupdA0JA%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=46778657004626b504c213d1755a124c6fa2de3f0eb3c55533c9d57fc7f2e887"
+    },
+    "disclosed_date": 1579721880,
+    "report_url": "https://hackerone.com/reports/779442",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify the subdomain storybook.lystit.com and check its DNS records to find a CNAME pointing to an unclaimed S3 bucket."
+        ],
+        [
+            2,
+            "Register the S3 bucket with the name 'storybook.lystit.com' on AWS, enable static website hosting, and serve arbitrary content to demonstrate control over the subdomain."
+        ]
+    ],
+    "vuln_description": "The subdomain storybook.lystit.com had a CNAME record pointing to an unclaimed S3 bucket, allowing an attacker to register the bucket and serve malicious content. This could lead to various attacks such as XSS, phishing, and bypassing the Same Origin Policy.",
+    "reason": "The vulnerability involves identifying a dangling DNS record and registering an unclaimed S3 bucket, which is a straightforward process once the initial discovery is made. The attack does not require complex interactions or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": true,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": false
+    }
+}

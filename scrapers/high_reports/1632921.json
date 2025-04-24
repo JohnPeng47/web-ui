@@ -1,0 +1,80 @@
+{
+  "reported_to": "Node.js",
+  "reported_by": "zeyu2001 ",
+  "title": "DNS rebinding in --inspect (insufficient fix of CVE-2022-32212 affecting macOS devices)",
+  "content": "\nSummary: This is an insufficient fix of CVE-2022-32212, which itself is a fix of CVE-2018-7160. There exists a specific behaviour in browsers on macOS devices when handling the http://0.0.0.0URL that allows an attacker-controlled DNS server to bypass the DNS rebinding protection by resolving hosts in the .local domain.\nDescription:\nIn the latest version, only IP addresses and localhost are allowed in the Host header when connecting to the debugger endpoint. IsIPAddress ensures that IPv4 address octets only contain values ranging from 0 to 255, but this allows 0.0.0.0 which indicates an invalid or unroutable target.\nIn macOS devices, using fetch(\"http://0.0.0.0\")or opening http://0.0.0.0 through a top-level navigation in Chrome and Firefox will cause a DNS request to resolve <Computer Name>.local, where Computer Name is configured in the system preferences (the use of the .local TLD is a known feature of macOS devices). If such a request succeeds, http://0.0.0.0 is routed to the IP address provided in the DNS reply. This would typically be the same as the IP address of the device on the local network, so http://0.0.0.0 will typically route to any application listening on the local interface - working as intended.\nAn attacker-controlled DNS server can, however, resolve <Computer Name>.local to any arbitrary IP address, and consequently cause the victim's browser to load arbitrary content at http://0.0.0.0. This allows the attacker to bypass the DNS rebinding protection.\nNote: On Windows devices, http://0.0.0.0 is treated as an invalid URL and the request is blocked.\nSteps To Reproduce:\nGeneral Attack Flow\nVictim runs node with --inspect option\nVictim visits attacker's webpage\nThe attacker's webpage opens http://0.0.0.0:9229\nVictim asks the DNS server for <Computer Name>.local and gets <attacker's-IP>.\nVictim loads webpage http://0.0.0.0:9229 from <attacker's-IP>.\nThe webpage http://0.0.0.0:9229 tries to load http://0.0.0.0:9229/json.\nDue to a short TTL, the DNS server will be soon asked again about an entry for <Computer Name>.local. This time, the DNS server responds with \"127.0.0.1\".\nThe http://0.0.0.0:9229 website (i.e., the one hosted on <attacker's IP>) will retrieve http://0.0.0.0:9229/json from 127.0.0.1, including webSocketDebuggerUrl.\nNow, the attacker knows the webSocketDebuggerUrl and can connect to it using WebSocket. Note that WebSocket is not restricted by same-origin policy. By doing so, they can gain the privileges of the Node.js instance.\nVulnerable code segment: https://github.com/nodejs/node/blob/d9b71f4c241fa31cc2a48331a4fc28c15937875a/src/inspector_socket.cc#L164-L183\nDNS Setup\nIn this example I used dnsmasq as my DNS server. You can use dnsmasq_setup.zip (F1816108) for a minimal Docker setup that demonstrates the arbitrary resolution of <Computer Name>.local domains. The hosts file should be changed according to the configured Computer Name of the victim device (through system preferences). For example, my Computer Name is Zeyu\u2019s MacBook Pro, which means I had the Zeyus-Macbook-Pro.local domain.\nCode 81 Bytes\n1# Resolve <Computer Name>.local to any IP address\n21.1.1.1 Zeyus-Macbook-Pro.local\nWhen connecting to http://0.0.0.0, the page is loaded from 1.1.1.1 instead.\n<image_0>\nIf you observe the network traffic while connecting to http://0.0.0.0, you should see the relevant DNS requests and replies.\n<image_1>\nSubsequently <Computer Name>.local can be rebinded to 127.0.0.1, causing the page to be loaded from 127.0.0.1 where the debugger is listening.\n<image_2>\nSuggested Remediation\nAccording to IANA, 0.0.0.0/8 is a reserved address range. To prevent this vulnerability, this address range could be blocked.\nA way to check for this address range could simply be accum == 0 in the first octet or host.front() == '0' in IsIPAddress\nSupporting Material/References:\nOriginal vulnerability: https://nvd.nist.gov/vuln/detail/CVE-2018-7160\nCode segment: https://github.com/nodejs/node/blob/d9b71f4c241fa31cc2a48331a4fc28c15937875a/src/inspector_socket.cc#L164-L183\nImpact\nAttacker with access to a compromised DNS server or the ability to spoof its responses can gain access to the Node.js debugger, which can result in remote code execution.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/7kwf1vla5phjgchdubh54zre6e8r?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_2022-07-11_at_1.22.50_AM.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_2022-07-11_at_1.22.50_AM.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ4CEGVQVF%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T013905Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBn9JF5YBsDn7wrLjjbuhQX11Lhdv4CPVMHbW0ADm31hAiEAq0wbdjuTHDlQwCbc%2FkwI%2FwCAk8BQaggjjtbnyjBTcyUquwUI%2Bv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDMytwjL1Wxa9wStq0iqPBS%2BFKVWZ4QyrqLiVxXIsCQwqViaSBHFazbLFLAD0VCglYkWWGD%2FcvfGvu5dBtHq4eNCvNeJp2xOyyLA3NXalvkD1dlnTgUEfaLF9EXk9dNzkNpmAIz2kDayFdmBPHwhSsCLsGYQzhi3xSd8%2FoXcl8Va7GT6EWqywHv7K1CGNhPlwzcBUa0Ur9PLYrWfQBcDXkMv34jULqH8Ji5PpDtezafV3NorN%2BHHIjEwLdhdLJETqSX%2BnbTQz1njEPKDWoDS%2BRrC%2B0lNxVIx%2B2Sdwr%2BRkfJZFYdtWbBNZSBoh%2F0I24WFP0tIRXeOXVuhKz3w0S0hE%2Br9mSupMfaAznc5ifZXCfxkg8E7RLGtl0Q6CjKtpJIQwZshts0ljFeTk7dWcTOvY%2BIKS%2FfVPxua5o6SvyFp9fSZ0nCAozDPlXhsUorQ3HeKQRKOiwmAUA3GgOyAjhcHRjjcjSV%2BJke0HpXkoigPTosgZgLVnzqQ2McHh26%2FX7UgMz5rrLOl8RLNr4wPYuahTNx8hhS9mwwGmRX9RocfepPxiuc22Osd9EXWU3Y2%2B31nlJOUgbNxbwvgztffvCZWOutt%2BRev4ZoPHlrHjOpcxS1MRzdm7F2FgCedXPrJMsj1eJdeVFEmDU8IDDZGZ%2BeCEfw9HB0iyVZ6Z8VGle5trq148g9cqztDWYkYdq3ljMytqY9j2zrDvOwb4cZKAoXvdlAMH8o83332ZmNIFKBG0EAfpEeIpKVGtVxpQLmmH73K%2FArfEDU%2Bnjh8pSowxgiXjGab2OJVon24hdQDgl3LjIHP4oNLJ25JNDk5y%2Fz%2FIqC8VHIEtCGcS5pr29WZsFRjqkVwt9EZGnCCnEUenIxgK4SHR%2BzBN2LJiouSwWp5t7jQwrfCHvwY6sQEBIibq2rGZ0TfYccLBiWe45kG4JLtajymmaV8MzF11dMsElykq896KVuZ2HmMRg2YBHVXsnq2%2FAb2Bxg1aEibQzv%2BhIrxW1dNF%2BGeSKv2oKqGfkJUqOtWxI7NRUbgudZ54qMNCOz%2F6hz%2BJpr%2FTTxKs0Cq%2BXAQtFjWqUYu4IXotxpGL6zAPip397F0vDHr1X%2FbrW%2BavUnBY6l3ufG7CT4Uw1o9cpVzathLhPX5zA5nGelk%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=7950b344142e5e49926f6738ff1f1c7f868eb64c019b1e5a017e3f785543fa68",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/a2i9xnfx62bm6atfzpi8bljibuev?response-content-disposition=attachment%3B%20filename%3D%222022-07-10_23.16.44.jpg%22%3B%20filename%2A%3DUTF-8%27%272022-07-10_23.16.44.jpg&response-content-type=image%2Fjpeg&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ4CEGVQVF%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T013905Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBn9JF5YBsDn7wrLjjbuhQX11Lhdv4CPVMHbW0ADm31hAiEAq0wbdjuTHDlQwCbc%2FkwI%2FwCAk8BQaggjjtbnyjBTcyUquwUI%2Bv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDMytwjL1Wxa9wStq0iqPBS%2BFKVWZ4QyrqLiVxXIsCQwqViaSBHFazbLFLAD0VCglYkWWGD%2FcvfGvu5dBtHq4eNCvNeJp2xOyyLA3NXalvkD1dlnTgUEfaLF9EXk9dNzkNpmAIz2kDayFdmBPHwhSsCLsGYQzhi3xSd8%2FoXcl8Va7GT6EWqywHv7K1CGNhPlwzcBUa0Ur9PLYrWfQBcDXkMv34jULqH8Ji5PpDtezafV3NorN%2BHHIjEwLdhdLJETqSX%2BnbTQz1njEPKDWoDS%2BRrC%2B0lNxVIx%2B2Sdwr%2BRkfJZFYdtWbBNZSBoh%2F0I24WFP0tIRXeOXVuhKz3w0S0hE%2Br9mSupMfaAznc5ifZXCfxkg8E7RLGtl0Q6CjKtpJIQwZshts0ljFeTk7dWcTOvY%2BIKS%2FfVPxua5o6SvyFp9fSZ0nCAozDPlXhsUorQ3HeKQRKOiwmAUA3GgOyAjhcHRjjcjSV%2BJke0HpXkoigPTosgZgLVnzqQ2McHh26%2FX7UgMz5rrLOl8RLNr4wPYuahTNx8hhS9mwwGmRX9RocfepPxiuc22Osd9EXWU3Y2%2B31nlJOUgbNxbwvgztffvCZWOutt%2BRev4ZoPHlrHjOpcxS1MRzdm7F2FgCedXPrJMsj1eJdeVFEmDU8IDDZGZ%2BeCEfw9HB0iyVZ6Z8VGle5trq148g9cqztDWYkYdq3ljMytqY9j2zrDvOwb4cZKAoXvdlAMH8o83332ZmNIFKBG0EAfpEeIpKVGtVxpQLmmH73K%2FArfEDU%2Bnjh8pSowxgiXjGab2OJVon24hdQDgl3LjIHP4oNLJ25JNDk5y%2Fz%2FIqC8VHIEtCGcS5pr29WZsFRjqkVwt9EZGnCCnEUenIxgK4SHR%2BzBN2LJiouSwWp5t7jQwrfCHvwY6sQEBIibq2rGZ0TfYccLBiWe45kG4JLtajymmaV8MzF11dMsElykq896KVuZ2HmMRg2YBHVXsnq2%2FAb2Bxg1aEibQzv%2BhIrxW1dNF%2BGeSKv2oKqGfkJUqOtWxI7NRUbgudZ54qMNCOz%2F6hz%2BJpr%2FTTxKs0Cq%2BXAQtFjWqUYu4IXotxpGL6zAPip397F0vDHr1X%2FbrW%2BavUnBY6l3ufG7CT4Uw1o9cpVzathLhPX5zA5nGelk%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=2fdc5610446fb306325dbf2c7dab311c743302bf32e48bf17879cc8642c1e6a8",
+    "image_2": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/2to5483n9n8bn3qcz4czbuekp3mr?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_2022-07-11_at_1.33.41_AM.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_2022-07-11_at_1.33.41_AM.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ4CEGVQVF%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T013905Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBn9JF5YBsDn7wrLjjbuhQX11Lhdv4CPVMHbW0ADm31hAiEAq0wbdjuTHDlQwCbc%2FkwI%2FwCAk8BQaggjjtbnyjBTcyUquwUI%2Bv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDMytwjL1Wxa9wStq0iqPBS%2BFKVWZ4QyrqLiVxXIsCQwqViaSBHFazbLFLAD0VCglYkWWGD%2FcvfGvu5dBtHq4eNCvNeJp2xOyyLA3NXalvkD1dlnTgUEfaLF9EXk9dNzkNpmAIz2kDayFdmBPHwhSsCLsGYQzhi3xSd8%2FoXcl8Va7GT6EWqywHv7K1CGNhPlwzcBUa0Ur9PLYrWfQBcDXkMv34jULqH8Ji5PpDtezafV3NorN%2BHHIjEwLdhdLJETqSX%2BnbTQz1njEPKDWoDS%2BRrC%2B0lNxVIx%2B2Sdwr%2BRkfJZFYdtWbBNZSBoh%2F0I24WFP0tIRXeOXVuhKz3w0S0hE%2Br9mSupMfaAznc5ifZXCfxkg8E7RLGtl0Q6CjKtpJIQwZshts0ljFeTk7dWcTOvY%2BIKS%2FfVPxua5o6SvyFp9fSZ0nCAozDPlXhsUorQ3HeKQRKOiwmAUA3GgOyAjhcHRjjcjSV%2BJke0HpXkoigPTosgZgLVnzqQ2McHh26%2FX7UgMz5rrLOl8RLNr4wPYuahTNx8hhS9mwwGmRX9RocfepPxiuc22Osd9EXWU3Y2%2B31nlJOUgbNxbwvgztffvCZWOutt%2BRev4ZoPHlrHjOpcxS1MRzdm7F2FgCedXPrJMsj1eJdeVFEmDU8IDDZGZ%2BeCEfw9HB0iyVZ6Z8VGle5trq148g9cqztDWYkYdq3ljMytqY9j2zrDvOwb4cZKAoXvdlAMH8o83332ZmNIFKBG0EAfpEeIpKVGtVxpQLmmH73K%2FArfEDU%2Bnjh8pSowxgiXjGab2OJVon24hdQDgl3LjIHP4oNLJ25JNDk5y%2Fz%2FIqC8VHIEtCGcS5pr29WZsFRjqkVwt9EZGnCCnEUenIxgK4SHR%2BzBN2LJiouSwWp5t7jQwrfCHvwY6sQEBIibq2rGZ0TfYccLBiWe45kG4JLtajymmaV8MzF11dMsElykq896KVuZ2HmMRg2YBHVXsnq2%2FAb2Bxg1aEibQzv%2BhIrxW1dNF%2BGeSKv2oKqGfkJUqOtWxI7NRUbgudZ54qMNCOz%2F6hz%2BJpr%2FTTxKs0Cq%2BXAQtFjWqUYu4IXotxpGL6zAPip397F0vDHr1X%2FbrW%2BavUnBY6l3ufG7CT4Uw1o9cpVzathLhPX5zA5nGelk%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=75c7418e57031b20fd0b2f99c9b95ab4426551373d8a52125bc83e60868d916f"
+  },
+  "disclosed_date": 1664368680,
+  "report_url": "https://hackerone.com/reports/1632921",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Victim runs node with --inspect option"
+    ],
+    [
+      2,
+      "Victim visits attacker's webpage"
+    ],
+    [
+      3,
+      "The attacker's webpage opens http://0.0.0.0:9229"
+    ],
+    [
+      4,
+      "Victim asks the DNS server for <Computer Name>.local and gets <attacker's-IP>."
+    ],
+    [
+      5,
+      "Victim loads webpage http://0.0.0.0:9229 from <attacker's-IP>."
+    ],
+    [
+      6,
+      "The webpage http://0.0.0.0:9229 tries to load http://0.0.0.0:9229/json."
+    ],
+    [
+      7,
+      "Due to a short TTL, the DNS server will be soon asked again about an entry for <Computer Name>.local. This time, the DNS server responds with \"127.0.0.1\"."
+    ],
+    [
+      8,
+      "The http://0.0.0.0:9229 website (i.e., the one hosted on <attacker's IP>) will retrieve http://0.0.0.0:9229/json from 127.0.0.1, including webSocketDebuggerUrl."
+    ],
+    [
+      9,
+      "Now, the attacker knows the webSocketDebuggerUrl and can connect to it using WebSocket. Note that WebSocket is not restricted by same-origin policy. By doing so, they can gain the privileges of the Node.js instance."
+    ]
+  ],
+  "vuln_description": "This vulnerability allows an attacker to bypass DNS rebinding protection on macOS devices by exploiting the behavior of browsers when handling the http://0.0.0.0 URL. An attacker-controlled DNS server can resolve <Computer Name>.local to an arbitrary IP address, allowing the attacker to access the Node.js debugger and potentially execute remote code.",
+  "reason": "This vulnerability involves multiple components (DNS server behavior, browser handling of 0.0.0.0, Node.js debugger endpoint) and requires understanding subtle interactions between them. The attack also requires manipulating the DNS resolution process and exploiting a specific behavior in macOS browsers.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true
+  }
+}

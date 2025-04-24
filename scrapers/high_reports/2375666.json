@@ -1,0 +1,41 @@
+{
+  "reported_to": "MTN Group",
+  "reported_by": "deb0con ",
+  "title": "CVE-2018-0296 Cisco ASA Denial of Service & Path Traversal vulnerable on [mtn.co.ug]",
+  "content": "\nSummary:\nA vulnerability in the web interface of the Cisco Adaptive Security Appliance (ASA) could allow an unauthenticated, remote attacker to cause an affected device to reload unexpectedly, resulting in a denial of service (DoS) condition. It is also possible on certain software releases that the ASA will not reload, but an attacker could view sensitive system information without authentication by using directory traversal techniques. The vulnerability is due to lack of proper input validation of the HTTP URL. An attacker could exploit this vulnerability by sending a crafted HTTP request to an affected device. An exploit could allow the attacker to cause a DoS condition or unauthenticated disclosure of information. This vulnerability applies to IPv4 and IPv6 HTTP traffic. This vulnerability affects Cisco ASA Software and Cisco Firepower Threat Defense (FTD) Software that is running on the following Cisco products: 3000 Series Industrial Security Appliance (ISA), ASA 1000V Cloud Firewall, ASA 5500 Series Adaptive Security Appliances, ASA 5500-X Series Next-Generation Firewalls, ASA Services Module for Cisco Catalyst 6500 Series Switches and Cisco 7600 Series Routers, Adaptive Security Virtual Appliance (ASAv), Firepower 2100 Series Security Appliance, Firepower 4100 Series Security Appliance, Firepower 9300 ASA Security Module, FTD Virtual (FTDv).\nProof of concept\nVulnerability Host Server : https://h27da.n1.ips.mtn.co.ug/+CSCOU+/../+CSCOE+/files/file_list.json?path=%2bCSCOE%2b\nNavigate intercept request to burp-suite h27da.n1.ips.mtn.co.ug/+CSCOU+/../+CSCOE+/files/file_list.json\nSee the PoCs Screenshots of vulnerable bellow\n<image_0>\n<image_1>\nSupporting Material/References:\nhttps://tools.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-20180606-asaftd\nhttps://nvd.nist.gov/vuln/detail/CVE-2018-0296\nhttps://hackerone.com/reports/378698\nhttps://hackerone.com/reports/377542\nhttps://hackerone.com/reports/622864\nImpact\nHigh - This vulnerability allows the attacker to browse files past the authentication and disclose sensitive information.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal: '.../...//'"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/7nu5zpc3vavyex0lwuh1vnu8xmqe?response-content-disposition=attachment%3B%20filename%3D%22image.png%22%3B%20filename%2A%3DUTF-8%27%27image.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQWDNVDTOV%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T210534Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIFfYz76VgKIVelpAyZYrTFyd%2Bv888ECgb3hj5JkFANhaAiBakh4q7w5DF%2BQv%2FfR5eWubo4B2u%2Bo1QPF29kQLxJJCtSq7BQj0%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMaTuljdCxi50w8QUmKo8FD%2BiOVbeXUa7mNlCRPUySpi4kddXYtD2seD5WI2%2F2DmARIyxhjceaM8TKf%2BSYoZzhII3Lo%2BxB9bhtM5mq5GHf8dhuKa6wT1fnf6QzZEKaUgSCbLM07nMLMlW8kqutXY0X59awJLzZ1yQMPBhBi80DLAkNvswgcBRW4v5P7iqkX0ggbzpmcRST%2FVm29J8Y5JKSc3LejY6AEIsv4KP6HB8aQXd%2BfsBH5R%2Bv6nok8pt6DJSaPkv5WA74F1I2%2FsmQsyL3exdqZLhvUP%2B6eTtLSHhdrEDhOIY34aESXhoik3RW%2B8g32NTyeA3P2G9e%2F4F7a3Rx6v%2BE7XMojKylsb5WIGfTy8QvhnCQCH9ukOo6rO5xOtdoQw%2BU4WqZuOTJU74EkFLV6%2FyUVWSq4FVDYEYqrbwizaX9y%2FV2Cy9LgrEtMK6sn8DZ3ViZlKyuxY19GNuJ5sW0c0M4RHngn3EmFJO0aNsL0r%2BbolwLdLRfuYtJe5DmZwCoKEbDaNAUonhneBWF55jLQZHoGAoWZ6qMF%2BevUTo0Jql5kULJryvcc%2FFpS8lTO%2BOZ3fGiS1eQAI2Fz0703T3mmda4haYMEOXNijTbkWhBg5v9JYyT2oqNlXBK7WUSUCkENcoqMjC4Z4VbEGjG4jS2qi%2BTYrhX4S3Sb1T987q8w6MeoXfX6tGmDYwiyj5QpWbUDz7cYSR0EBMdQlqeDG94vE59xzsfUrmstdXm%2FFxukqgG%2B7WWbJ1DxPiM3ia6sOr977IrFajGqovgtqRLgyGpz%2F9TqWE3RwWypLQ084%2FW16SLKEEufJUuPDTkr6LyX%2FDeWbUHVMs85EWTJG9ustt2iOq1%2F11LdHrP2SbFR46XOj69Mtw5xz%2F6iYaqUFV4ejD8yoa%2FBjqyAYwDDYybi7D4pT0wCry5lOVh3Zq%2B8g6G5jdIa7jf8%2FaU312%2BiIcARtKrUoF2Sn0ak6xLhjw%2BJVOcFyXg%2FOHRvGjaHhYmekMQ96U1XkJfdyuitawsi7z%2FEymOHQV%2BY9%2Bfo8XothwNtx6eE%2FG6W1iLa%2BedAtMC1tXYp3IvbXoZrn4jPRRJ5G0BroF0e3VIz4sm1tGxNoieH9VOPyqjIvF8mLhji1Uw2M%2F8ryzZmpR%2Fx4z3q1Q%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=c664a0cf00440beb285b62cf3857743c2f8913ecccb87e01ac9fa65bd689804b",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/lcs2ox9z5yiy05o0w319gvwa9jp5?response-content-disposition=attachment%3B%20filename%3D%22image.png%22%3B%20filename%2A%3DUTF-8%27%27image.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQWDNVDTOV%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T210534Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIFfYz76VgKIVelpAyZYrTFyd%2Bv888ECgb3hj5JkFANhaAiBakh4q7w5DF%2BQv%2FfR5eWubo4B2u%2Bo1QPF29kQLxJJCtSq7BQj0%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMaTuljdCxi50w8QUmKo8FD%2BiOVbeXUa7mNlCRPUySpi4kddXYtD2seD5WI2%2F2DmARIyxhjceaM8TKf%2BSYoZzhII3Lo%2BxB9bhtM5mq5GHf8dhuKa6wT1fnf6QzZEKaUgSCbLM07nMLMlW8kqutXY0X59awJLzZ1yQMPBhBi80DLAkNvswgcBRW4v5P7iqkX0ggbzpmcRST%2FVm29J8Y5JKSc3LejY6AEIsv4KP6HB8aQXd%2BfsBH5R%2Bv6nok8pt6DJSaPkv5WA74F1I2%2FsmQsyL3exdqZLhvUP%2B6eTtLSHhdrEDhOIY34aESXhoik3RW%2B8g32NTyeA3P2G9e%2F4F7a3Rx6v%2BE7XMojKylsb5WIGfTy8QvhnCQCH9ukOo6rO5xOtdoQw%2BU4WqZuOTJU74EkFLV6%2FyUVWSq4FVDYEYqrbwizaX9y%2FV2Cy9LgrEtMK6sn8DZ3ViZlKyuxY19GNuJ5sW0c0M4RHngn3EmFJO0aNsL0r%2BbolwLdLRfuYtJe5DmZwCoKEbDaNAUonhneBWF55jLQZHoGAoWZ6qMF%2BevUTo0Jql5kULJryvcc%2FFpS8lTO%2BOZ3fGiS1eQAI2Fz0703T3mmda4haYMEOXNijTbkWhBg5v9JYyT2oqNlXBK7WUSUCkENcoqMjC4Z4VbEGjG4jS2qi%2BTYrhX4S3Sb1T987q8w6MeoXfX6tGmDYwiyj5QpWbUDz7cYSR0EBMdQlqeDG94vE59xzsfUrmstdXm%2FFxukqgG%2B7WWbJ1DxPiM3ia6sOr977IrFajGqovgtqRLgyGpz%2F9TqWE3RwWypLQ084%2FW16SLKEEufJUuPDTkr6LyX%2FDeWbUHVMs85EWTJG9ustt2iOq1%2F11LdHrP2SbFR46XOj69Mtw5xz%2F6iYaqUFV4ejD8yoa%2FBjqyAYwDDYybi7D4pT0wCry5lOVh3Zq%2B8g6G5jdIa7jf8%2FaU312%2BiIcARtKrUoF2Sn0ak6xLhjw%2BJVOcFyXg%2FOHRvGjaHhYmekMQ96U1XkJfdyuitawsi7z%2FEymOHQV%2BY9%2Bfo8XothwNtx6eE%2FG6W1iLa%2BedAtMC1tXYp3IvbXoZrn4jPRRJ5G0BroF0e3VIz4sm1tGxNoieH9VOPyqjIvF8mLhji1Uw2M%2F8ryzZmpR%2Fx4z3q1Q%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=c0bc7d32a3532860a69a404e6a5840da01d67220f1cb19d2d3966b075938747e"
+  },
+  "disclosed_date": 1725049680,
+  "report_url": "https://hackerone.com/reports/2375666",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to the vulnerable host server: https://h27da.n1.ips.mtn.co.ug/+CSCOU+/../+CSCOE+/files/file_list.json?path=%2bCSCOE%2b"
+    ],
+    [
+      2,
+      "Intercept the request using a tool like Burp Suite to observe the response, which may reveal sensitive system information or cause a denial of service (DoS)"
+    ]
+  ],
+  "vuln_description": "A vulnerability in the web interface of the Cisco Adaptive Security Appliance (ASA) allows an unauthenticated, remote attacker to cause a DoS condition or view sensitive system information without authentication. This is due to improper input validation of the HTTP URL, enabling directory traversal techniques.",
+  "reason": "The attack involves a straightforward directory traversal technique that is well-documented and does not require complex interactions or state manipulation. The vulnerability is publicly known and the exploit is relatively simple to execute.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": "378698"
+}

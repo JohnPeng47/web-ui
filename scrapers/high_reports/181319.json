@@ -1,0 +1,42 @@
+{
+  "reported_to": "shopify-scripts",
+  "reported_by": "isra17 ",
+  "title": "Memory disclosure in mruby String#lines method",
+  "content": "\nThis bug was found with jmlb337.\nHey again,\nwhile reviewing mruby for vulnerabilities, I stumble onto a case that allow an attacker to leak heap content including pointer that can be used along another vulnerability to craft a complete exploit.\nReproduction Step\nAllocate a string with a few lines.\nCall String#lines and free or reallocate the string.\nAllocate a few objects.\nThe next lines will now contains the value of the newly allocated data, including pointer used by mrb_values.\nPoC\nCode 103 Bytes\n1@a = []\n2$a = (\"a\"*0xf + \"\\n\") * 1000\n3$a.lines do |l|\n4  $a.clear\n5  foo = \"UUUUUUUU\" * 1000\n6  @a << l\n7end\nLook at @a to get the \"UUUU...\" mrb_value object and strings.\nExplaination\nThe bug is triggered due to the caching of p at string.c:310:\nCode 69 Bytes\n1  char *p = RSTRING_PTR(self), *t;\n2  char *e = p + RSTRING_LEN(self);\nHowever, while iterating on each line, the function allow the caller to provide a block to be called for each line string.c:324:\nCode 40 Bytes\n1      mrb_yield_argv(mrb, blk, 1, &arg);\nThis block let the attacker to update the self string, in which case p will now be a dangling pointer pointing to free memory. Allocating new objects will end up in this free location and let the next iteration read this data before giving it back to the block.\nExploitability\nThe vulnerability is exploitable as long as the attacker can run arbitrary ruby code in the mruby interpreter. It should cover mruby-engine case as used by Shopify.\nImpact\nThis vulnerability comes handy to locate object address in the heap, by allowing reliable, cheap and simple memory disclosure. We would use this bug to build a complete RCE along with another reported bug in the following 1 or 2 week (Will add a comment with the other report ID). I spoke with Fran\u00e7ois Chagnon and we preferred to report the bugs as soon as possible while working on provable RCE afterward so it can get patched earlier.\nProposed Fix\nSee patch in attachment.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Memory Corruption - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1481939580,
+  "report_url": "https://hackerone.com/reports/181319",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "HIGH",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Allocate a string with multiple lines (e.g., using `(\"a\"*0xf + \"\\n\") * 1000`)"
+    ],
+    [
+      2,
+      "Call `String#lines` with a block that clears the string and allocates new objects (e.g., `\"UUUUUUUU\" * 1000`)"
+    ],
+    [
+      3,
+      "Inspect the collected lines (`@a`) to observe leaked heap content, including pointers"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a memory disclosure issue in mruby's `String#lines` method. It occurs when the method caches a pointer to the string data (`p`) but allows the string to be modified or freed during iteration via a block. This results in a dangling pointer that can leak heap content, including sensitive pointers, when new objects are allocated in the freed memory.",
+  "reason": "The vulnerability involves understanding the internal caching behavior of `String#lines`, the interaction between Ruby code execution and memory management, and the non-obvious timing of when the cached pointer becomes invalid. The attacker must also recognize the opportunity to manipulate the string during iteration to trigger the memory disclosure.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

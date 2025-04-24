@@ -1,0 +1,48 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "ginden ",
+  "title": "Privilage escalation with malicious .npmrc",
+  "content": "\nHello.\nI'm forwarding to you my conversation with npm staff regarding security issue. It allows to escalate to root privilages of victim using either:\na) basic social engineering - convincing victim to run npm in attacker-controlled folder (eg. repository), including such innocent ones like \"npm help\" or \"npm whoami\"\n\nb) low-privilage process with access to writing files\nI believe that impact of this bug can be high, if someone is able to hijack well-positioned tutorial.\nMicha\u0142 Wadas\n---------- Forwarded message ----------\nJon Lamendola (npm)\nMay 22, 12:19 PDT\nHello Michal,\nWe're reviewing the impact of changing this behavior and still discussing internally how we might move forward. We understand that it's a risk, but it is also a feature that people use, so we need to fully understand the consequences of making major changes to it before we do. Unfortunately, this can take some time to analyze.\nIn the meantime, you can alias npm to something like npm --onload-script=\"\" \"$@\" for a temporary workaround.\nThanks again for reporting this to us.\nMicha\u0142 Wadas\nMay 21, 07:05 PDT\nHi.\nIs there any update on this?\nMicha\u0142 Wadas\nApr 26, 16:32 PDT\nJust noticed - if attacker can control .npmrc (either by writing it from low-privilage script or tricking user into using sudo npm in infected folder), he can set user flag in .npmrc too.\nJon Lamendola (npm)\nApr 26, 11:36 PDT\nHello Michal,\nThanks for reporting this to us. I agree, this is a legitimate concern, and I will pass this on to the npm CLI team for discussion.\nMicha\u0142 Wadas\nApr 26, 09:54 PDT\nSource of issue:\nonload-script is run with privilages of user running npm, in npm process.\nUser can be unaware of .npmrc behaviour\nI have pin-pointed it to line 236 in lib/npm.js file in master tree.\nAttack scenario:\nAttacker tricks victim into running \"sudo npm\" in folder (or descendant of folder) with malicious .npmrc This can be achieved in many ways - eg. by writing to $HOME/.npmrc from low-privilaged application or tricking victim to open infected directory\nExample: tutorial asks user to clone git repository, configure it and then run \"sudo npm i -g eslint\"\n** Example 2: attacker publish malicious code to npm. Code writes to $HOME/.npmrc. Then, attacker can just wait for anyone running sudo npm.\nThen npm runs arbitrary Node.js script with arbitrary permissions\nProposed actions:\nIgnore onload-script when run as super user\nAsk for confirmation before running onload-script\nRun onload-script in separate process with lower privilages (it's already supported for other scripts in npm - https://docs.npmjs.com/misc/<wbr>scripts#user</wbr> )\nThese actions should limit scope of attack.\nQuick survey in group of Polish programmer showed that around ~30% of npm users use sudo npm\nAll versions of npm between 3.10 and 6.0 are confirmed to be vulnerable.\nThanks for your attention,\n\nMicha\u0142 Wadas\nImpact\nAttacker can reliably run arbitrary code with user privilages if he is able to write to .npmrc.\nIf user use \"sudo npm\" in folder with malicious .npmrc, attacker can run arbitrary code with root privilages.\n\n",
+  "severity": [
+    8.1,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Privilege Escalation"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1530383640,
+  "report_url": "https://hackerone.com/reports/358359",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create a malicious .npmrc file with an 'onload-script' directive pointing to a script you control."
+    ],
+    [
+      2,
+      "Trick the victim into running 'npm' (or 'sudo npm') in a directory containing your malicious .npmrc file, or write the malicious .npmrc to their home directory if you have write access."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows privilege escalation via npm's handling of the .npmrc configuration file. When npm is run (even for benign commands like 'npm help'), it executes any script specified in the 'onload-script' directive from the .npmrc file with the privileges of the user running npm. This can be exploited to gain root access if the user runs npm with sudo.",
+  "reason": "The vulnerability involves understanding npm's configuration file behavior and the 'onload-script' feature, which is not commonly known. The attack requires either social engineering to trick users into running npm in a malicious directory or the ability to write to the user's .npmrc file. The interaction between npm's configuration parsing and script execution is subtle but not overly complex once understood.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "idor_detectable": false,
+    "authnz_byppass_detectable": false
+  }
+}

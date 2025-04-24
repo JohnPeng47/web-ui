@@ -1,0 +1,38 @@
+{
+  "reported_to": "Automattic",
+  "reported_by": "simonscannell ",
+  "title": "Authenticated Code Execution through Phar deserialization in CSV Importer as Shop manager in WooCommerce",
+  "content": "\nThis vulnerability is based on the following exploitation technique:\nhttps://blog.ripstech.com/2018/new-php-exploitation-technique/\nIt is easier to explain this vulnerability by having watched the PoC first:\nhttps://www.youtube.com/watch?v=mr3bAOIUwd4\nHere is what's happening:\nSince a valid phar file needs o be uploaded to the server (the extension doesn't matter) I upload the poc.jpg via the media uploader\nI begin the Import process with a valid CSV file\nThe importer asks if I am sure that I want to run the import on these files\nI confirm and modify the POST parameter to my phar:// wrapper and deserialize the file\nThe PHP code executes\nThe source of the vulnerability within the source code lies in the /woocommerce/includes/import/class-wc-product-csv-importer.php:\nCode 1.55 KiB\n1\tpublic function __construct( $file, $params = array() ) {\n2\t\t$default_args = array(\n3\t\t\t'start_pos'        => 0, // File pointer start.\n4\t\t\t'end_pos'          => -1, // File pointer end.\n5\t\t\t'lines'            => -1, // Max lines to read.\n6\t\t\t'mapping'          => array(), // Column mapping. csv_heading => schema_heading.\n7\t\t\t'parse'            => false, // Whether to sanitize and format data.\n8\t\t\t'update_existing'  => false, // Whether to update existing items.\n9\t\t\t'delimiter'        => ',', // CSV delimiter.\n10\t\t\t'prevent_timeouts' => true, // Check memory and time usage and abort if reaching limit.\n11\t\t\t'enclosure'        => '\"', // The character used to wrap text in the CSV.\n12\t\t\t'escape'           => \"\\0\", // PHP uses '\\' as the default escape character. This is not RFC-4180 compliant. This disables the escape character.\n13\t\t);\n14\n15\t\t$this->params = wp_parse_args( $params, $default_args );\n16\t\t$this->file   = $file;\n17\n18\t\tif ( isset( $this->params['mapping']['from'], $this->params['mapping']['to'] ) ) {\n19\t\t\t$this->params['mapping'] = array_combine( $this->params['mapping']['from'], $this->params['mapping']['to'] );\n20\t\t}\n21\n22\t\t$this->read_file();\n23\t}\n24\n25\t/**\n26\t * Read file.\n27\t */\n28\tprotected function read_file() {\n29\t\t$handle = fopen( $this->file, 'r' ); // @codingStandardsIgnoreLine.\n30\n31\t\tif ( false !== $handle ) {\n32\t\t\t$this->raw_keys = version_compare( PHP_VERSION, '5.3', '>=' ) ? fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ) : fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'] ); // @codingStandardsIgnoreLine\n33\n34...\nAs can be seen, the constructor calls read_file, which in turn calls fopen without any checks, which leads to the deserialization of the Phar object.\nI recommend to check the file parameter and see if it actually is a CSV file before calling fopen on it.\nI have attached the poc.jpg that worked for my PHP version.\nImpact\nI only displayed the contents of the /etc/passwd file in the PoC video. However, since I can execute arbitrary PHP code, a complete compromise of the WordPress installation is possible. If an attacker can gain access to a Shop manager account, he can easily and without restrictions take over the server.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Deserialization of Untrusted Data"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1576783560,
+  "report_url": "https://hackerone.com/reports/403083",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Upload a malicious PHAR file (e.g., poc.jpg) via the media uploader."
+    ],
+    [
+      2,
+      "Initiate the CSV import process with a valid CSV file, then modify the POST parameter to use a phar:// wrapper pointing to the uploaded file to trigger deserialization."
+    ]
+  ],
+  "vuln_description": "This vulnerability allows authenticated users with Shop Manager privileges in WooCommerce to execute arbitrary PHP code through Phar deserialization in the CSV Importer. The flaw arises from the lack of validation of the file parameter before passing it to fopen in the read_file method, enabling the deserialization of malicious PHAR objects.",
+  "reason": "The attack requires understanding of Phar deserialization vulnerabilities, the ability to upload a malicious file, and the manipulation of the import process to trigger the deserialization. While the components are not overly complex, the need to chain these steps together and the specific knowledge of Phar exploitation techniques add to the difficulty.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

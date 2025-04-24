@@ -1,0 +1,62 @@
+{
+  "reported_to": "X (Formerly Twitter)",
+  "reported_by": "z41b1337_ ",
+  "title": "Html Injection and Possible XSS via MathML",
+  "content": "\nHi,\nI would like to report HTML Injection and possible cross site scripting (XSS) vulnerability using the MathML on Firefox.\nAccount title of field is vulnerable to Html Injection which can lead an attacker to store javascript using the MathML in Firefox.\nModern Firefox versions allow usage of inline MathML. While other user agents don't support the href attribute for MathML elements (yet), Firefox does and thereby enables passive JavaScript execution. Note that supporting href for MathML elements is a feature - introduced with MathML 3. The same effect can be observed by using xlink:href. The statusline action further enables obfuscation of the actual link target - and in this example hides the JavaScript URI.\nStep to reproduce\n1- Login to your mopub account.\n2- Go to account settings.\n3- Click on Edit user settings.\n4- Add this payload in Title field\n<math href=\"javascript:alert(1)\">CLICKME</math>\nCode 129 Bytes\n1<math>\n2<!-- up to FF 13 -->\n3<maction actiontype=\"statusline#http://google.com\" xlink:href=\"javascript:alert(2)\">CLICKME</maction>\n<maction actiontype=\"statusline\" xlink:href=\"javascript:alert(3)\">CLICKME<mtext>http://http://google.com</mtext></maction>\n</math>\n5- Click on Submit Button.\n6- HTML link will be stored in account Title.\n7- Click on that html link and XSS will be executed in Firefox.\nPOC\nPlease see the images in the attachment.\nImpact\nThe vulnerability allow a malicious user to inject html tags and execute Javascript which could lead to steal user's session\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1567560180,
+  "report_url": "https://hackerone.com/reports/502926",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Login to your mopub account."
+    ],
+    [
+      2,
+      "Go to account settings."
+    ],
+    [
+      3,
+      "Click on Edit user settings."
+    ],
+    [
+      4,
+      "Add the payload in the Title field: <math href=\"javascript:alert(1)\">CLICKME</math>"
+    ],
+    [
+      5,
+      "Click on Submit Button."
+    ],
+    [
+      6,
+      "HTML link will be stored in account Title."
+    ],
+    [
+      7,
+      "Click on that html link and XSS will be executed in Firefox."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows HTML injection and possible XSS via MathML in Firefox. By injecting a MathML element with a JavaScript href attribute, an attacker can execute arbitrary JavaScript when the link is clicked. This can lead to session hijacking or other malicious actions.",
+  "reason": "The vulnerability involves understanding the specific behavior of Firefox's MathML implementation and how it can be abused to execute JavaScript. While the attack itself is straightforward once the payload is known, discovering the exact payload requires knowledge of Firefox's unique handling of MathML href attributes.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves HTML injection and XSS via MathML, which is a client-side issue and not directly related to authentication or authorization (AuthN/AuthZ) boundaries. The proposed methodologies focus on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, which does not apply to this type of vulnerability.",
+    "is_detectable": false
+  }
+}

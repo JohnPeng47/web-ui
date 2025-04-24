@@ -1,0 +1,42 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "hxhbrofessor ",
+    "title": "Exposure of Private Personal Information to an Unauthorized Actor - PII  and soldier data (mos, schools, and speciality training)",
+    "content": "\nDescription:\nAuthenticated users on https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/SelfService/home/selfservice can view other \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588's data by following the page site for My \u2588\u2588\u2588 Data and start manipulating URL requests to view the following tabs:\nPersonnel\nActive Duty Tours\nADOS\nAssignments\nATRRS\nData Discrepancies\nDJMS-RC Pay File Records\nDJMS-RC Pay Voucher\nDrill Attendance\nEducation/Training\nGains/Losses\nGI Bill Programs\nTester primarily focused on Personnel, ATRRS, and Education/Training tabs.\nReferences\nCWE-359: Exposure of Private Personal Information to an Unauthorized Actor\nCWE-200 - Information Disclosure\nCWE-284 - Improper Access Control\nContributers\nbadlifeguard\ntheonetruepengu\nImpact\nThe information displayed in Personnel, ATRRS, and Education/Training tabs shows a soldier's Last 4 of an SSN, Home of Record, MOS (Job title), and schools. Due to heightened tensions in today's GEO-Political climate, the availability of this information can be dangerous and potentially put a soldier's life at risk: scenario, insider threat working with an adversarial country to retrieve data.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nAuthenticate to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/SelfService/home/selfservice with burpsuite\nTurn Intercept off\nGo to the bottome of the page and click on My \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 Data\nOn Burp, click proxy HTTP History Scroll to the last GET request with message 200 URL should be https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/SelfService/Home/dynamicdata/section/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588%20TPU/61/124948002 Right click over the message and send to Intruder\nIntruder Set up Clear all variables in Postions Tab in the get request highlight the 2 in GET /SelfService/Home/dynamicdata/section/\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588%20TPU/61/124948002 and on the right hand side of Intruder click add variable Payload Tab * Payload Set > Payload Type > select numbers * Payload Options [Numbers] > From: 1 > To: 9 > Step: 1 Options Tab *** Grep Exact > add > refetch response > in the search box: search Primary MOS this will display a succesful record found.\nAdditional URLs to manipulate utilizing the same steps above are:\nCode 304 Bytes\n1Personnel\n2https://\u2588\u2588\u2588\u2588\u2588/SelfService/Home/dynamicdata/section/\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588%20TPU/61/124948002\n3\n4ATTRS\n5https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/SelfService/Home/dynamicdata/section/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588%20TPU/444/124948002\n6\n7Education/Training\n8https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/SelfService/Home/dynamicdata/section/\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588%20TPU/2001/124948002\n9\nSuggested Mitigation/Remediation Actions\nCorrect permissions on access to these URLs. Authenticated users should be checked against their own ID and data.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Violation of Secure Design Principles"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1737748140,
+    "report_url": "https://hackerone.com/reports/1556950",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Authenticate to the target system at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/SelfService/home/selfservice"
+        ],
+        [
+            2,
+            "Navigate to 'My \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 Data' and manipulate URL parameters to access unauthorized data (e.g., change numeric IDs in the URL to view other users' data)"
+        ],
+        [
+            3,
+            "Use tools like Burp Suite to automate parameter manipulation and identify accessible data (e.g., Personnel, ATRRS, Education/Training tabs)"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows authenticated users to access sensitive personal and military data (e.g., SSN last 4 digits, MOS, training records) of other users by manipulating URL parameters. This is due to improper access control checks on the server side.",
+    "reason": "The attack involves simple URL parameter manipulation and does not require complex interactions or novel logic. The vulnerability is a classic case of insecure direct object references (IDOR), which is a well-known issue.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

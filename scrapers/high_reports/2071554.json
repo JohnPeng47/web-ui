@@ -1,0 +1,46 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "ooooooo_q ",
+  "title": "[CVE-2023-27531] Possible Deserialization of Untrusted Data vulnerability in Kredis JSON",
+  "content": "\nI made a report and patch at https://hackerone.com/reports/1702859 .\nhttps://discuss.rubyonrails.org/t/cve-2023-27531-possible-deserialization-of-untrusted-data-vulnerability-in-kredis-json/82467\nThere is a deserialization of untrusted data vulnerability in the Kredis JSON deserialization code. This vulnerability has been assigned the CVE identifier CVE-2023-27531.\nImpact\nCarefully crafted JSON data processed by Kredis may result in deserialization of untrusted data, potentially leading to deserialization of unexpected objects in the system.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 4660,
+  "weaknesses": [
+    "Deserialization of Untrusted Data"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1692145260,
+  "report_url": "https://hackerone.com/reports/2071554",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify the Kredis JSON deserialization code in the application."
+    ],
+    [
+      2,
+      "Craft malicious JSON data that, when deserialized, could lead to unexpected object deserialization."
+    ],
+    [
+      3,
+      "Submit the crafted JSON data to the application via Kredis for processing."
+    ],
+    [
+      4,
+      "Observe the application's behavior to confirm the deserialization of untrusted data."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves the deserialization of untrusted JSON data in Kredis, which can lead to the deserialization of unexpected objects, potentially compromising the system's integrity.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common issue with JSON deserialization without proper validation. The attack does not require complex interactions or state manipulation, making it relatively easy to identify.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

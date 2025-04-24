@@ -1,0 +1,38 @@
+{
+  "reported_to": "shopify-scripts",
+  "reported_by": "geeknik ",
+  "title": "mirb only: stack-buffer-overflow (OOB write) in main()",
+  "content": "\nTriggered in 7e28510 (7 April 2017) with mirb only.\ncat test013.rb | mirb\nCode 1021 Bytes\n1==17976==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7fffeb477fb0 at pc 0x408c21 bp 0x7fffeb477a90 sp 0x7fffeb477a88\n2WRITE of size 1 at 0x7fffeb477fb0 thread T0\n3    #0 0x408c20 in main /root/mruby/mrbgems/mruby-bin-mirb/tools/mirb/mirb.c:466\n4    #1 0x7f96e4703b44 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b44)\n5    #2 0x40aefc (/root/mruby/bin/mirb+0x40aefc)\n6\n7Address 0x7fffeb477fb0 is located in stack of thread T0 at offset 1184 in frame\n8    #0 0x40549f in main /root/mruby/mrbgems/mruby-bin-mirb/tools/mirb/mirb.c:361\n9\n10  This frame has 4 object(s):\n11    [32, 56) 'args'\n12    [96, 126) 'unexpected_end'\n13    [160, 1184) 'last_code_line' <== Memory access at offset 1184 overflows this variable\n14    [1216, 5312) 'ruby_code'\n15HINT: this may be a false positive if your program uses some custom stack unwind mechanism or swapcontext\n16      (longjmp and C++ exceptions *are* supported)\n17SUMMARY: AddressSanitizer: stack-buffer-overflow /root/mruby/mrbgems/mruby-bin-mirb/tools/mirb/mirb.c:466 main\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 10000,
+  "weaknesses": [
+    "Stack Overflow"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1494348180,
+  "report_url": "https://hackerone.com/reports/219870",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Trigger the vulnerability by running: cat test013.rb | mirb"
+    ],
+    [
+      2,
+      "Observe the stack-buffer-overflow error reported by AddressSanitizer"
+    ]
+  ],
+  "vuln_description": "This is a stack-buffer-overflow vulnerability in the mirb component of mruby, triggered when processing input from a file. The overflow occurs in the main() function of mirb.c, specifically in the 'last_code_line' variable, allowing an out-of-bounds write of 1 byte.",
+  "reason": "The vulnerability is straightforward to trigger with a simple command and does not involve complex interactions or state manipulation. The error is immediately visible through standard sanitizer tools.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

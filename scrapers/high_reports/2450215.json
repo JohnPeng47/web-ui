@@ -1,0 +1,46 @@
+{
+    "reported_to": "HackerOne",
+    "reported_by": "hillybot_ ",
+    "title": "Any user could upload attachments to pentest scoping form they don't have access to",
+    "content": "\nhello team\nin my recent testing i found that any users could upload attachments to any users pentest scoping form without having access to it as long as they have the scope id.\nnote: before you start you will require two account to test for this bug.\nsteps to reproduce:\ncreate a sandbox\ngo to pentest an start an pentest form 3.copy the pentest form id from the url\nlog in to your second account\nsend the following request\nPOST /attachments HTTP/2 Host: hackerone.com Cookie: your cookies -----------------------------22121373215470710503552942440 Content-Disposition: form-data; name=\"tracer\"\n989953fa-5635-43c9-b584-48736d224b15\n-----------------------------22121373215470710503552942440\nContent-Disposition: form-data; name=\"context_type\"\nPentestOpportunity\n-----------------------------22121373215470710503552942440\nContent-Disposition: form-data; name=\"file\"; filename=\"does not have a option to change his own permission.png\"\nContent-Type: image/png\n====================================================================================================================\n6.from your previous account reload the scoping form and go to review and submit .\n7. you will notice that the file have been successfully uploaded.\nImpact\nbusiness logic error\ncould attach malicious files to anyones scoping form.\n\n",
+    "severity": [
+        7.7,
+        null
+    ],
+    "bounty": 10000,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1715805360,
+    "report_url": "https://hackerone.com/reports/2450215",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create a sandbox environment and log in with the first account."
+        ],
+        [
+            2,
+            "Start a pentest form and copy the form ID from the URL."
+        ],
+        [
+            3,
+            "Log in with a second account and send a POST request to the attachments endpoint with the copied form ID and a file."
+        ],
+        [
+            4,
+            "Switch back to the first account and verify that the file was uploaded to the pentest form."
+        ]
+    ],
+    "vuln_description": "Any user can upload attachments to another user's pentest scoping form without having access to it, as long as they have the scope ID. This is a business logic error that could allow malicious files to be attached to any scoping form.",
+    "reason": "The vulnerability involves understanding the attachment upload mechanism and the lack of proper access control checks. However, the steps to reproduce are straightforward and do not require complex interactions or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

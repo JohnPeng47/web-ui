@@ -1,0 +1,63 @@
+{
+  "reported_to": "Concrete CMS",
+  "reported_by": "cdl ",
+  "title": "Password Reset link hijacking via Host Header Poisoning ",
+  "content": "\nSummary\nConcrete5 uses the Host header when sending out password reset links. This allows an attacker to insert a malicious host header, leading to password reset link / token leakage.\nImpact\nThe victim will receive the malicious link in their email, and, when clicked, will leak the user's password reset link / token to the attacker, leading to full account takeover.\nReproduction\n1.) Open up Firefox and Burp Suite.)\n2.) Visit the forgot password page (/index.php/login/concrete/forgot_password)\n3.) Enter the victim's email address and click Reset and Email Password\n4.) Intercept the HTTP request in Burp Suite & change the Host Header to your malicious site / server.\n<image_0>\n5.) Forward the request and you'll be redirected to your server.\n<image_1>\nIf the victim clicks the link, the reset token will be leaked and the attacker will be able to find the reset token in the server logs. The attacker can then browse to the reset page with the token and change the password of the victim account!\nThis can also be reproduced using the curl command\nCode 541 Bytes\n1curl -i -s -k  -X $'POST' \\\n2   -H 'Host:sxcurity.pro' -H $'User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:53.0) Gecko/20100101 Firefox/53.0' -H $'Content-Type: application/x-www-form-urlencoded' -H $'Referer: http://<TARGET>/index.php/login/callback/concrete/forgot_password' -H $'Upgrade-Insecure-Requests: 1' \\\n3    -b $'<COOKIES>' \\\n4    --data-binary $'ccm_token=1494113992%3A02eb0471b7b6e3a498ba7e6b57573b04&uEmail=hacker1337%40mailinator.com&resetPassword=' \\\n5    $'http://<TARGET>/index.php/login/callback/concrete/forgot_password'\nPatch\nUse $_SERVER['SERVER_NAME'] rather than $_SERVER['HTTP_HOST']\nReferences\nhttp://www.skeletonscribe.net/2013/05/practical-http-host-header-attacks.html\nThanks!\n-Corben (@sxcurity)\nps: crayons\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Privilege Escalation"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/182/477/dc90f00d28a8c1f46648d85582b415642bfa5cb5/concrete5_poc.png?response-content-disposition=attachment%3B%20filename%3D%22concrete5_poc.png%22%3B%20filename%2A%3DUTF-8%27%27concrete5_poc.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ6NTJ2TO2%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T213443Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMn%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIGdvp4oCql9RiKZxzkIAg2nQqPsVK%2F6%2F2iUQEGwWtFt2AiEAtzlU89zlIjOMnL5991dG%2FArbfa14aO8FhKzs%2BMK67%2FkqsQUIMhADGgwwMTM2MTkyNzQ4NDkiDN8YIOYxoZX5LhW3oSqOBaEXwmIK7QeVwRxI4JCkf1pfub7SkSHbIC0Y4eltXSeZFiJRoEhmpIUHA3ayUx4osfP69ZYWYRdEeITbwfCzjNNZk73rPAGfOEFvu2YhUyFvFXDnTjOmtlNlHRxw9CiGrkcAxZXBjLwlP7y%2FMcLRQG%2BzUBmrmjDO4yVqjrRt%2BA%2BL%2F6iPMoq9IQ7Yg56b1pDxsSUDwnbYH1h4aAtPq7Qdlc6QlKN3ATp1won1ckwFCdzQkQ8EgZhTM%2BY%2BDXxSOw1xs1tMTzsYNKjiQpnqI%2BatqmdOXYfndaZlwR0wLOhvB0Tff4lwOwJo5zqTq0VEtWdZ5alYT3gy3VGm0uI0tz3d1%2BF3l8%2BFgJujMgUbF7dR8cDIJhfJneqUD1qQrrA8UQdXhhQMhd2rgPWDmOz7Shg8TRG3tceQZFMfp3i4vTgVS1IWEYH6SP8YTeSohK8zURYABvTTnviqP3iwGeTwB2WtjeJjDEy%2BPRjfUAyp8pzClgVRW%2FnA1vrh071%2BtmYKq5vwOOIdLp8Z7rxikKjrw339q1uKT74FgEkMGNzHB9FGVdSTW%2BVCukH2MxcOxikwV2OTUsa9PFodsyglgYS3%2FMQbjoMUqDTBHldoabbLgtkZd%2BYu0coLBk36zjQFEzWMDco8Ma4pQUPs4%2BA0bL4D3HEj3OjClWhVZyZ00%2F2iiR9x9swnDeg%2FQJGlrwgjlncga7xHLZ6NpQh7eBvmmcQrrkvIxGbDNW5nLRHYLhXJi6gTEz4ZzB7hdjHhgAp%2F9hxL79bOHCbqPGiGk9UfKuogFWYrbfKemwxSjprug2Yg8IbtoYIJ2Z2h2YNjdatpnaysfx9fc2EqG7%2B6Gq8ymsob8xz68TuFb2eEE0m55orVbUsbrzDa6ZC%2FBjqxAZ2%2BkBYeVhwL%2Boc22vjPozHgI5%2FYksS5p6VmTlRCUe%2F9I9npEcDIkpRKps23O2RXUhBhOMsaNtHJDWzQxMLtbQM3N2A3mC7wjdmbIwQlcbG5ZPj2ZSfiC0%2FUfgdq8BcwEnwXC2llkca8BJp7dniyLwBNrvhUeQjmnyfm%2BZvSkRKFy0OFA%2FTabbi3MhT8HaLSXMBISB9rB3Gorjg85WbHf0Oe3IgNWCnaxrMl%2BujrXbWw4Q%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=70ab2e062249adb457d8d3e2758ded9bd7db8dcc2b9f8bbd916755b846094720",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/182/478/110e94813015981b5e9ed33ea51abf908aca2dfb/poisoned_link.png?response-content-disposition=attachment%3B%20filename%3D%22poisoned_link.png%22%3B%20filename%2A%3DUTF-8%27%27poisoned_link.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ6NTJ2TO2%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T213443Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMn%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIGdvp4oCql9RiKZxzkIAg2nQqPsVK%2F6%2F2iUQEGwWtFt2AiEAtzlU89zlIjOMnL5991dG%2FArbfa14aO8FhKzs%2BMK67%2FkqsQUIMhADGgwwMTM2MTkyNzQ4NDkiDN8YIOYxoZX5LhW3oSqOBaEXwmIK7QeVwRxI4JCkf1pfub7SkSHbIC0Y4eltXSeZFiJRoEhmpIUHA3ayUx4osfP69ZYWYRdEeITbwfCzjNNZk73rPAGfOEFvu2YhUyFvFXDnTjOmtlNlHRxw9CiGrkcAxZXBjLwlP7y%2FMcLRQG%2BzUBmrmjDO4yVqjrRt%2BA%2BL%2F6iPMoq9IQ7Yg56b1pDxsSUDwnbYH1h4aAtPq7Qdlc6QlKN3ATp1won1ckwFCdzQkQ8EgZhTM%2BY%2BDXxSOw1xs1tMTzsYNKjiQpnqI%2BatqmdOXYfndaZlwR0wLOhvB0Tff4lwOwJo5zqTq0VEtWdZ5alYT3gy3VGm0uI0tz3d1%2BF3l8%2BFgJujMgUbF7dR8cDIJhfJneqUD1qQrrA8UQdXhhQMhd2rgPWDmOz7Shg8TRG3tceQZFMfp3i4vTgVS1IWEYH6SP8YTeSohK8zURYABvTTnviqP3iwGeTwB2WtjeJjDEy%2BPRjfUAyp8pzClgVRW%2FnA1vrh071%2BtmYKq5vwOOIdLp8Z7rxikKjrw339q1uKT74FgEkMGNzHB9FGVdSTW%2BVCukH2MxcOxikwV2OTUsa9PFodsyglgYS3%2FMQbjoMUqDTBHldoabbLgtkZd%2BYu0coLBk36zjQFEzWMDco8Ma4pQUPs4%2BA0bL4D3HEj3OjClWhVZyZ00%2F2iiR9x9swnDeg%2FQJGlrwgjlncga7xHLZ6NpQh7eBvmmcQrrkvIxGbDNW5nLRHYLhXJi6gTEz4ZzB7hdjHhgAp%2F9hxL79bOHCbqPGiGk9UfKuogFWYrbfKemwxSjprug2Yg8IbtoYIJ2Z2h2YNjdatpnaysfx9fc2EqG7%2B6Gq8ymsob8xz68TuFb2eEE0m55orVbUsbrzDa6ZC%2FBjqxAZ2%2BkBYeVhwL%2Boc22vjPozHgI5%2FYksS5p6VmTlRCUe%2F9I9npEcDIkpRKps23O2RXUhBhOMsaNtHJDWzQxMLtbQM3N2A3mC7wjdmbIwQlcbG5ZPj2ZSfiC0%2FUfgdq8BcwEnwXC2llkca8BJp7dniyLwBNrvhUeQjmnyfm%2BZvSkRKFy0OFA%2FTabbi3MhT8HaLSXMBISB9rB3Gorjg85WbHf0Oe3IgNWCnaxrMl%2BujrXbWw4Q%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=1e1fd95059549e8e3b816f6a19dcf0f29d3b9fadf2e4da300e3b76d1ca96bffb"
+  },
+  "disclosed_date": 1496727420,
+  "report_url": "https://hackerone.com/reports/226659",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Visit the forgot password page (/index.php/login/concrete/forgot_password) in a browser."
+    ],
+    [
+      2,
+      "Enter the victim's email address and click 'Reset and Email Password'."
+    ],
+    [
+      3,
+      "Intercept the HTTP request using Burp Suite and change the Host Header to a malicious site/server."
+    ],
+    [
+      4,
+      "Forward the request. The victim will receive a password reset link pointing to the attacker's server."
+    ],
+    [
+      5,
+      "When the victim clicks the link, the reset token is leaked in the attacker's server logs, allowing account takeover."
+    ]
+  ],
+  "vuln_description": "Concrete5 uses the Host header when sending out password reset links, allowing an attacker to poison the header and redirect the reset link to a malicious server. This leads to token leakage and full account takeover when the victim clicks the link.",
+  "reason": "The attack involves a straightforward manipulation of the Host header, a well-known technique in web security. The steps are linear and do not require complex state manipulation or understanding of subtle interactions between components.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true
+  }
+}

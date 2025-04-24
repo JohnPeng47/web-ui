@@ -1,0 +1,45 @@
+{
+  "reported_to": "Imgur",
+  "reported_by": "orange ",
+  "title": "Remote Code Execution on Git.imgur-dev.com ",
+  "content": "\nHi, Imgur Security Team:\nI just found that your GitHub Enterprise Server(https://git.imgur-dev.com/) didn't patch to the latest version(2.8.7). And there is a Rails static key leads to RCE vulnerability!\nYou can see the PoC from my screenshots :)\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 2500,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1492377540,
+  "report_url": "https://hackerone.com/reports/206227",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify that the GitHub Enterprise Server (https://git.imgur-dev.com/) is running an outdated version (below 2.8.7)."
+    ],
+    [
+      2,
+      "Exploit the known Rails static key vulnerability to achieve Remote Code Execution (RCE)."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves exploiting a known Rails static key vulnerability in an outdated version of GitHub Enterprise Server, leading to Remote Code Execution (RCE).",
+  "reason": "The vulnerability relies on a known issue (Rails static key) in an outdated software version, making it straightforward to exploit once the outdated version is identified. No novel or complex interactions are required.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a Rails static key leading to RCE on an unpatched GitHub Enterprise Server. This is not an authentication or authorization issue (AuthN/AuthZ or IDOR) but rather a remote code execution vulnerability due to a misconfiguration or unpatched software. The proposed methodologies focus on AuthN/AuthZ and IDOR vulnerabilities, not RCE or software versioning issues.",
+    "is_detectable": false
+  }
+}

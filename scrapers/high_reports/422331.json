@@ -1,0 +1,41 @@
+{
+    "reported_to": "Alliance of American Football ",
+    "reported_by": "gujjuboy10x00 ",
+    "title": "attacker can book unlimited tickets in free at https://aaf.com/checkout/order-received/21237/?key=wc_order_5bbef48fa35b2",
+    "content": "\nDear Team,\nSummary: [add summary of the vulnerability]\nAfter looking into https://aaf.com/\ni get to know that there is way where i can book a ticket and can play around , but it asked for valid credit card and all stuff\nso , i tried to bypass and bought a ticket 23 with 0$\nLive PoC:\nhttps://aaf.com/checkout/order-received/21237/?key=wc_order_5bbef48fa35b2 (check this one)\nDescription: [add more details about this vulnerability]\nattacker can book unlimited tickets in free at https://aaf.com/checkout/order-received/21237/?key=wc_order_5bbef48fa35b2\nSteps To Reproduce:\ngo to aaf.com and login with your account\n<image_0>\nCode 79 Bytes\n1Content-Disposition: form-data; name=\"addon-268-number-of-seats-0\"\n2\n310-seats-10\n<image_1>\nand book any number of ticket at 0$\nSupporting Material/References:\nPlease find attachment\nThanks,\nVishal\nImpact\nattacker can book unlimited tickets in free at https://aaf.com/checkout/order-received/21237/?key=wc_order_5bbef48fa35b2\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 500,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/358/789/991728a60442603cc66c7cdc274b0e89dc259fc6/t1.PNG?response-content-disposition=attachment%3B%20filename%3D%22t1.PNG%22%3B%20filename%2A%3DUTF-8%27%27t1.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYTA2PCB7%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T043258Z&X-Amz-Expires=2162&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCKX632%2Fp25g5R%2FtwWWb8kPMBxK1ddX%2F%2BdSJD4%2Bs0wSPQIgKa%2BtmeMp8IKjDURUG15YU6FdRwqLvosUlGcJxiiR1IQqsgUIIBADGgwwMTM2MTkyNzQ4NDkiDIIgY4gsJwKHjc2rHiqPBQgGjxYmWhuEH9NVvonJoOmJFca3x7by%2F%2FngcoSUkLq5g923AjuGAZc8BVtu52fb4TBS1Zu8Cd%2Bh0DIEqwVraNkwmb2NgcJLsp%2FJxknz2eY50Py%2FyV21HFlstZwtnR%2F2jpJa6B6HIqnciMWzNhBBaQi4Cl7RizuoGHDwf86U6kyWccBCVl97I1NGlCEv7Vga1bZcKy0VWQZXVs5ZX6xvvvOiZ6qNavAA0Ecvb33k9L2X7MPPN32xSPtJB2M1mRRocXBvwTivpBZyuDfPnUGBL1o1VM0Uc8xX%2BFR%2BK%2BO7osgup5TKwH%2FF8RjmP3T3z1h56B1KSoD3awEJXSUR7UWOXzvXcx68dtpp1Yb%2BpcR%2BODxVsDqidhR5R0%2FIoYGmzEJOOHL%2BJ27U%2BiRQOEiDr7RZPwl2xUrOmyWyVYr%2BaSCZ%2FgnnePhbRJxF1O%2BrKnD%2Fy2%2BpTpdeGAFp%2BNkRwGfQ88RAgTyUtTKl12G8gB%2BnxzL74ol3CxFMGLxTfV%2FoJJimjfrus%2BwWfF7ynH9xxdAPWZwMtYbdoYKZFvFVC%2FJbJWW3NH6lBoFXYLC1ujGgPCOeYmjRHtiJiBKm9xbtOym0%2BQn6VKfYogabJCusRZ8iwhE5mXdDddVOoW5304ISWqnJBYGjYgFxIkBEb46jzmljgrk4wzCIG%2FNPH%2BqwnlN84y4cii3JjMutJbsWfeg4K%2FfHzppSsQIYCHiZ29%2BOfl2BNNwr7P8GfofLoKLYRNy2sh3Mw0FdCVytZsecE9O1ohidk6KJuHk9imrtoZn24HESoHQJkO1uNGccy%2FxwsFRA6Dzw9DeRCWafzN%2FD5QK84qTkms8ALE6R3Dk%2B4CanKe%2Fog0sKpwRgEl2kusBDC1QO9L2F9u4wzOaMvwY6sQEIDVL2HhLMZMfDsNZl2RS%2BJvygnQe3JL2i9yeh6o7XwqWpJCWGSq1fgLGhWqQfOYxKJlTyV9HemQ112%2BccScB9%2BNNrgSITKmoxhWDaGSPefsjL%2F6cfBpgA6gW46ymzipm%2BxQ%2FxfeQYjEw7Rjwc5yi3eDJHe7BVeeNnyVVA9AvX%2BGjS%2Bzq8zyQZ1LxZDbP0eXhj0mFOJZHo4bxKEiSdoJzRqn6SCcH3KSFc2AJ%2BoZbPZk8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=0f48109e9d32f2ad31ed02d1cbd3ae876cdd7b5a0913a30cd7b1fb73f0062c65",
+        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/358/788/9eff099c5b059daa74cd594da990f5fe0329217b/t12.PNG?response-content-disposition=attachment%3B%20filename%3D%22t12.PNG%22%3B%20filename%2A%3DUTF-8%27%27t12.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYTA2PCB7%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T043258Z&X-Amz-Expires=2162&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCKX632%2Fp25g5R%2FtwWWb8kPMBxK1ddX%2F%2BdSJD4%2Bs0wSPQIgKa%2BtmeMp8IKjDURUG15YU6FdRwqLvosUlGcJxiiR1IQqsgUIIBADGgwwMTM2MTkyNzQ4NDkiDIIgY4gsJwKHjc2rHiqPBQgGjxYmWhuEH9NVvonJoOmJFca3x7by%2F%2FngcoSUkLq5g923AjuGAZc8BVtu52fb4TBS1Zu8Cd%2Bh0DIEqwVraNkwmb2NgcJLsp%2FJxknz2eY50Py%2FyV21HFlstZwtnR%2F2jpJa6B6HIqnciMWzNhBBaQi4Cl7RizuoGHDwf86U6kyWccBCVl97I1NGlCEv7Vga1bZcKy0VWQZXVs5ZX6xvvvOiZ6qNavAA0Ecvb33k9L2X7MPPN32xSPtJB2M1mRRocXBvwTivpBZyuDfPnUGBL1o1VM0Uc8xX%2BFR%2BK%2BO7osgup5TKwH%2FF8RjmP3T3z1h56B1KSoD3awEJXSUR7UWOXzvXcx68dtpp1Yb%2BpcR%2BODxVsDqidhR5R0%2FIoYGmzEJOOHL%2BJ27U%2BiRQOEiDr7RZPwl2xUrOmyWyVYr%2BaSCZ%2FgnnePhbRJxF1O%2BrKnD%2Fy2%2BpTpdeGAFp%2BNkRwGfQ88RAgTyUtTKl12G8gB%2BnxzL74ol3CxFMGLxTfV%2FoJJimjfrus%2BwWfF7ynH9xxdAPWZwMtYbdoYKZFvFVC%2FJbJWW3NH6lBoFXYLC1ujGgPCOeYmjRHtiJiBKm9xbtOym0%2BQn6VKfYogabJCusRZ8iwhE5mXdDddVOoW5304ISWqnJBYGjYgFxIkBEb46jzmljgrk4wzCIG%2FNPH%2BqwnlN84y4cii3JjMutJbsWfeg4K%2FfHzppSsQIYCHiZ29%2BOfl2BNNwr7P8GfofLoKLYRNy2sh3Mw0FdCVytZsecE9O1ohidk6KJuHk9imrtoZn24HESoHQJkO1uNGccy%2FxwsFRA6Dzw9DeRCWafzN%2FD5QK84qTkms8ALE6R3Dk%2B4CanKe%2Fog0sKpwRgEl2kusBDC1QO9L2F9u4wzOaMvwY6sQEIDVL2HhLMZMfDsNZl2RS%2BJvygnQe3JL2i9yeh6o7XwqWpJCWGSq1fgLGhWqQfOYxKJlTyV9HemQ112%2BccScB9%2BNNrgSITKmoxhWDaGSPefsjL%2F6cfBpgA6gW46ymzipm%2BxQ%2FxfeQYjEw7Rjwc5yi3eDJHe7BVeeNnyVVA9AvX%2BGjS%2Bzq8zyQZ1LxZDbP0eXhj0mFOJZHo4bxKEiSdoJzRqn6SCcH3KSFc2AJ%2BoZbPZk8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=f6c771a38e2ed44f4b2c34d9a803be805dbe963bc5a18f94be3f98e2635e248e"
+    },
+    "disclosed_date": 1556182620,
+    "report_url": "https://hackerone.com/reports/422331",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to aaf.com and log in with your account"
+        ],
+        [
+            2,
+            "Manipulate the form data to set the number of seats to a high value (e.g., '10-seats-10') and submit the form to book tickets for $0"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to book unlimited tickets for free by manipulating the form data during the checkout process, bypassing the payment requirement.",
+    "reason": "The attack involves a straightforward manipulation of form data without the need for complex interactions or understanding of multiple components. The vulnerability is relatively easy to discover as it does not require deep knowledge of the application's internal workings or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

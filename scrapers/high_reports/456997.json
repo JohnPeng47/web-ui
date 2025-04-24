@@ -1,0 +1,38 @@
+{
+  "reported_to": "Grab",
+  "reported_by": "phreak ",
+  "title": "Production secret key leak in config/secrets.yml",
+  "content": "\nSummary:\nProduction secret key leak in config/secrets.yml\nDescription:\nIn Github, http://engineering.grab.com/ secret_key_base is leaked which is present in the config/secrets.yml\nSteps To Reproduce:\nGo to the below GitHub URL and we can verify that secret_key_base is present.\nCode 113 Bytes\n1https://github.com/grab/blogs/blob/master/2017-01-29-deep-dive-into-database-timeouts-in-rails/config/secrets.yml\nMitigation:-\nCode 89 Bytes\n1https://medium.com/@thejasonfile/hide-your-api-keys-hide-your-skype-api-keys-884427746f9c\nImpact\nProper Impact is explained here:-\nhttps://stackoverflow.com/questions/44220691/rails-what-are-the-consequences-of-a-leaked-secret-key-base\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cleartext Storage of Sensitive Information"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1546952100,
+  "report_url": "https://hackerone.com/reports/456997",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Go to the GitHub URL: https://github.com/grab/blogs/blob/master/2017-01-29-deep-dive-into-database-timeouts-in-rails/config/secrets.yml"
+    ],
+    [
+      2,
+      "Verify that the `secret_key_base` is present in the file"
+    ]
+  ],
+  "vuln_description": "The vulnerability involves the exposure of the `secret_key_base` in a publicly accessible GitHub repository. This key is critical for securing sessions and other sensitive data in a Rails application. If leaked, it can lead to session hijacking, remote code execution, and other severe security breaches.",
+  "reason": "The discovery of this vulnerability is straightforward as it only requires accessing a public GitHub repository and checking for the presence of the `secret_key_base` in a configuration file. There are no complex interactions or multiple components involved in the discovery process.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

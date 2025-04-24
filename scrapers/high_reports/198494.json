@@ -1,0 +1,46 @@
+{
+    "reported_to": "Starbucks",
+    "reported_by": "kylecolson ",
+    "title": "Lack of Controls Allowing for Card and PIN Enumeration Leading to Fraud",
+    "content": "\nSummary:\nThe pages https://www.starbucks.com/account/card/addcard and https://www.starbucks.com/account/card/Balance do not properly enforce security controls to limit POST requests. This bug allows attackers to successfully hijack a loaded Starbucks card and transfer all the funds into their own account. Cards linked with auto-reload features could exponentially increase fraud.\nNOTE: You will need to pass primary authentication before testing these pages. I have set up a temporary account for this purpose.\nCard Enumeration:\nIn a POST request to the above https://www.starbucks.com/account/card/addcard URL, if an attacker sets the Register.MyCard attribute to \u201cFALSE\u201d they can enumerate the 16-digit Card Number without limits.\nAnother important note is all Starbucks locations have unactivated cards at their registers. It is highly possible for a threat actor to obtain a 16-digit card number from the next card in line, and sit on the account until it has been loaded up. Furthermore, in my research I've discovered each card only increments a singular digit in their 16-digit number. Because of this, a threat actor can easily discern which cards are about to be purchased, as well as which cards have been recently purchased.\n{F152532}\nPIN Enumeration:\nIn a POST request to the second https://www.starbucks.com/account/card/Balance URL, an attacker can check the PIN of a card they\u2019ve already added via the previous /addcard Card Enumeration method.\nIf an attacker already knows the 16-digit card number (via Starbucks stores), with the original POST request to the https://www.starbucks.com/account/card/addcard URL, if an attacker sets the Register.MyCard attribute to \u201cTRUE\u201d they can enumerate the 8-digit PIN number without limits.\nDue to this, an attacker is able to successfully test every PIN number against 16-digit card data.\n{F152533}\n{F152534}\nFraud/Risk:\nIf an attacker is able to successfully validate PIN and Card information, they now have full access to all funds in the account. At this point they are able to commit fraudulent purchases and even migrate funds off the account onto their own card. Cards linked with auto-reload features could exponentially increase fraud damages.\n{F152535}\nDocumentation:\nMy test card was used in this demonstration. On the attached image, you can see the card number ending in 4769 was successfully processed. In the second image, you can see the PIN correctly enumerating once the PIN ending in 89 was processed.\nRemediation:\nMy recommendation is to add velocity checks to both the /addcard and /Balance pages when attempting to add a Starbucks gift card. Additionally, CAPTCHA can be used as another authorization process.\nPlease let me know if you need additional information to help triage this bug.\nThanks!\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1498889700,
+    "report_url": "https://hackerone.com/reports/198494",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Access the Starbucks account by passing primary authentication."
+        ],
+        [
+            2,
+            "Send a POST request to https://www.starbucks.com/account/card/addcard with Register.MyCard set to 'FALSE' to enumerate a 16-digit card number."
+        ],
+        [
+            3,
+            "Send a POST request to https://www.starbucks.com/account/card/Balance to enumerate the 8-digit PIN for the card number obtained in step 2."
+        ],
+        [
+            4,
+            "Use the validated card and PIN to commit fraudulent purchases or transfer funds to another card."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows attackers to enumerate card numbers and PINs due to lack of rate limiting or CAPTCHA on Starbucks' card management endpoints. This enables unauthorized access to funds, especially on cards with auto-reload features.",
+    "reason": "While the attack involves multiple steps (card enumeration, PIN enumeration, and fund transfer), each step is straightforward and does not require complex interactions or novel logic. The enumeration techniques are common in web application testing.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

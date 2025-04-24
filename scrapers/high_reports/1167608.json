@@ -1,0 +1,38 @@
+{
+  "reported_to": "Homebrew",
+  "reported_by": "ryotak ",
+  "title": "Broken parsing of Git diff allows an attacker to inject arbitrary Ruby scripts to Casks on official taps",
+  "content": "\nDescription\nDue to improper parsing of Git diff in Homebrew/actions/review-cask-pr, it's possible to confuse parser to ignore additional lines.\nWhich leads injection of malicious Ruby scripts.\nRoot cause\nreview-cask-pr uses the git diff file to check if the pull request is \"simple\" enough to automatically merge it.\nTo parse the git diff file, it uses git_diff gem with some modifications.\nhttps://github.com/Homebrew/actions/blob/master/review-cask-pr/git_diff_extension.rb\nSince git_diff has a small bug that allows a crafted diff file to confuse additions as a a_path, it's possible to confuse review-cask-pr.\nhttps://github.com/anolson/git_diff/blob/21913c2a51661449a7250cc3a5ba5f5f4f128959/lib/git_diff/file.rb#L61-L62\nSteps to reproduce\nFork Homebrew/homebrew-cask.\nModify a cask file to add following lines:\nCode 169 Bytes\n1++ \"b/#{puts 'Going to report it - RyotaK (https://hackeorne.com/ryotak)';b = 1;Casks = 1;iterm2 = {};iterm2.define_singleton_method(:rb) do 1 end}\"\n2++ b/Casks/iterm2.rb\nOpen a pull request on Homebrew/homebrew-cask.\nBrewTestBot will approve these changes.\nhttps://github.com/Homebrew/homebrew-cask/pull/104191\nImpact\nInjected script will be evaluated once someone installed the cask, which may allows remote code execution.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "None"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1619018640,
+  "report_url": "https://hackerone.com/reports/1167608",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Fork Homebrew/homebrew-cask and modify a cask file to include malicious Ruby script lines."
+    ],
+    [
+      2,
+      "Open a pull request on Homebrew/homebrew-cask, which triggers BrewTestBot to approve the changes due to the parsing bug."
+    ]
+  ],
+  "vuln_description": "A vulnerability in the parsing of Git diff in Homebrew/actions/review-cask-pr allows an attacker to inject arbitrary Ruby scripts into Casks on official taps. This is due to a bug in the git_diff gem that misinterprets additions as a_path, bypassing security checks and enabling script injection.",
+  "reason": "The attack requires understanding the interaction between Git diff parsing, the specific bug in the git_diff gem, and the automated approval process of Homebrew. The attacker must craft a diff that exploits the parsing flaw to inject code, which involves subtle manipulation of the diff format to confuse the parser.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

@@ -1,0 +1,38 @@
+{
+  "reported_to": "Nextcloud",
+  "reported_by": "alacn1 ",
+  "title": "External storage app saves password for all users in the database",
+  "content": "\nExternal storage (files_external) app save passwords of all users to database table \"oc_credentials\" even when \"Log-in credentials, save in database\" option is not used.\nIt's a security risk that allow password extraction of all users.\nA local system admin that has access to database and nextcloud config file could decrypt any user password.\nSteps to reproduce\nEnable app \"External storage support\" (files_external).\nLogin to nextcloud.\nUser recoverable password will be saved to table \"oc_credentials\" at \"password::logincredentials/credentials\".\nExpected behaviour\nDon't save user password to table \"oc_credentials\" unless user has a mount with \"Log-in credentials, save in database\" option.\nActual behaviour\nPasswords of all users is saved to table \"oc_credentials\" when files_external app is enabled.\nTested with\nNextcloud 18.0.4 + External storage 1.9.0\nNextcloud 17.0.5 + External storage 1.8.0\nImpact\nA local system admin could recover any user password.\n\n",
+  "severity": [
+    7.9,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Storing Passwords in a Recoverable Format"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1614614460,
+  "report_url": "https://hackerone.com/reports/867164",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Enable the 'External storage support' (files_external) app in Nextcloud."
+    ],
+    [
+      2,
+      "Log in to Nextcloud and observe that user passwords are saved in the 'oc_credentials' table under 'password::logincredentials/credentials'."
+    ]
+  ],
+  "vuln_description": "The External storage app in Nextcloud saves passwords of all users to the database table 'oc_credentials' even when the 'Log-in credentials, save in database' option is not used. This allows a local system admin with database access to decrypt any user password.",
+  "reason": "The vulnerability involves a straightforward check of database entries after enabling a common feature (external storage). No complex interactions or novel logic are required to discover this issue.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

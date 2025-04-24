@@ -1,0 +1,48 @@
+{
+  "reported_to": "Nextcloud",
+  "reported_by": "alexanderhofstaetter ",
+  "title": "Acting under any different user via DB-stored credentials",
+  "content": "\nThe issue is related to all Nextcloud versions. It is not patched yet. All versions (18-20) seems to be vulnerable. The issue came up in the following environment:\nnextcloud docker image (20.0.2 and 20.0.3)\nLDAP authentication\nexternal SMB shares via DB stored credentials\nThe problem came up after several users could not access their mounted SMB shares. When I checked, what was going on, it seems that DB credentials are getting stored from the session (table oc_storages_credentials) to the DB. The problem is, that there is no check if the current user in the session is the same as the user for whom the credentials get stored.\nIt seems that the credentials saved in the corresponding table (oc_storages_credentials) are wrong and therefore all SMB shares are showing errors.\nWhen I initially add the external storage SMB mounts in the settings and then a user logs in the first time, the SMB shares work (with the correct login) which gets correctly saved in the DB.\nAfterwards I can find one single entry on the oc_storages_credentials-table\nHowever, when I (as an admin) navigate to: https://cloud.example.org/settings/users the table oc_storages_credentials gets (pre)populated with all the users (and some random credentials) - this also includes all users who weren\u00b4t logged-in yet. When the user logs in afterwards the credentials entry is already there and does not get updated.\nSteps to reproduce\nAdd external SMB mount with option \"credentials saved in database\"\nManually check the MYSQL table oc_storages_credentials - it should be empty\nAs an admin: navigate to (/settings/users)\nRecheck the MYSQL table oc_storages_credentials - there is an entry for every user now\nThe stored credentials in the DB are now the admin credentials\nuser can act as the admin user (their LDAP / AD password is stored in oc_storages_credentials for every user\nExpected behaviour\nDo not populate the table oc_storages_credentials on \"user list settings page\"\nIf the current user credentials does not match the ones in the DB -> update it\nActual behaviour\npassword::logincredentials/credentials entries are getting deployed initially from the admin user ...\nBugfix / Patch\nThere should be two files affected:\n/apps/files_external/lib/Lib/Auth/Password/LoginCredentials.php\n/apps/files_external/lib/Listener/StorePasswordListener.php\nIt looks like there is a form of wrong impersonation going on here. -> The git-Diff for a security conform bugfix is attached.\nServer configuration\nI am using this docker image (no modifications): https://github.com/nextcloud/docker/tree/master/.examples/dockerfiles/full/fpm-alpine\nOperating system: Docker on Ubuntu 20.04.1 LTS\nWeb server: nginx with php-fpm\nDatabase: mariadb 10.5 as docker container\nPHP version: 7php .4\nNextcloud version: 20.0.2\nUpdated from an older Nextcloud/ownCloud or fresh install: updated from nextcloud 18.0.11 -> 19.0 -> 20.0.3\nWhere did you install Nextcloud from:\nImpact\nActing as a different user (as admin credentials are stored for every user in the DB)\nget a normal user account and accessing SMB shares on the network with higher privileges as himself\ngetting access to internal ressources via external shared links\n\n",
+  "severity": [
+    8.7,
+    null
+  ],
+  "bounty": 250,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1614614520,
+  "report_url": "https://hackerone.com/reports/1061591",
+  "vuln_category": "WEB_APP",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "steps": [
+    [
+      1,
+      "Add external SMB mount with option 'credentials saved in database'"
+    ],
+    [
+      2,
+      "As an admin, navigate to /settings/users and observe the oc_storages_credentials table gets populated with admin credentials for all users"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an admin to inadvertently store their credentials for all users in the oc_storages_credentials table when accessing the user management page, enabling potential privilege escalation as users may access SMB shares with admin privileges.",
+  "reason": "The vulnerability involves understanding the interaction between the admin interface and the credential storage mechanism, but the steps to reproduce are straightforward once the behavior is observed.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "idor_detectable": true,
+    "authnz_byppass_detectable": true
+  }
+}

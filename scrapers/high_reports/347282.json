@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "xairy ",
+  "title": "Linux kernel: CVE-2017-6074: DCCP double-free vulnerability",
+  "content": "\nHi!\nCVE-2017-6074 [1] is a double-free vulnerability I found in the Linux kernel. It can be exploited to gain\nkernel code execution from an unprivileged processes. The kernel needs to be built with CONFIG_IP_DCCP for the vulnerability to be present. A lot of modern distributions enable this option by default.\nFixed on Feb 17, 2017 [2]. The oldest version that I checked is 2.6.18 (Sep 2006), which is vulnerable. However, the bug was introduced before that, probably in the first release with DCCP support (2.6.14, Oct 2005).\nI initially reported this vulnerability to security@kernel.org following the coordinated disclosure process. The timeline and more details about the vulnerability can be found in my announcement on oss-security [3]. A proof-of-concept exploit for the 4.4.0-62-generic #83-Ubuntu kernel can be found here [4, 5].\nThe reason I'm reporting this now is that I just saw a similar bug [6] in the Windows kernel reported to this program and that reminded me of a Sandbox Escape program that used to be on HackerOne. I thought it makes sense to see if IBB would come back to considering this kind of bugs eligible for a bounty.\nThanks!\n[1] https://nvd.nist.gov/vuln/detail/CVE-2017-6074\n[2] https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=5edabca9d4cff7f1f2b68f0bac55ef99d9798ba4\n[3] http://seclists.org/oss-sec/2017/q1/471\n[4] https://github.com/xairy/kernel-exploits/tree/master/CVE-2017-6074\n[5] http://seclists.org/oss-sec/2017/q1/503\n[6] https://hackerone.com/reports/48100\nImpact\nThis vulnerability allows a local attacker to elevate privileges to root on a machine with vulnerable Linux kernel version.\n\n",
+  "severity": [
+    7.8,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Double Free"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1566954420,
+  "report_url": "https://hackerone.com/reports/347282",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Ensure the Linux kernel is built with CONFIG_IP_DCCP enabled."
+    ],
+    [
+      2,
+      "Execute a crafted DCCP packet sequence to trigger a double-free vulnerability in the kernel."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a double-free issue in the Linux kernel's DCCP protocol implementation, which can be exploited by a local attacker to gain root privileges. The bug was introduced in the initial DCCP support release (2.6.14) and affects all versions up to the fix in February 2017.",
+  "reason": "The vulnerability requires understanding of the DCCP protocol implementation in the Linux kernel and the specific sequence of operations needed to trigger the double-free condition. While the exploit itself is straightforward once the vulnerability is known, discovering the flaw requires deep knowledge of kernel memory management and protocol implementation details.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": "48100"
+}

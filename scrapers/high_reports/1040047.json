@@ -1,0 +1,62 @@
+{
+    "reported_to": "Automattic",
+    "reported_by": "haqsek2 ",
+    "title": "Email Verification bypass on signup",
+    "content": "\nSummary:\nThis bug is related to wordpress.com. There is feature in wordpress.com which allow users to invite people. We have to enter email address to invite that particular person but the invite link and invite key is also available to the person who invited. This allow attackers to create the profile without having access to the email address and they can make account on behalf of any people who is not already signed up in wordpress.com\nPlatform(s) Affected:\nwordpress.com\npublic-api.wordpress.com\nSteps To Reproduce:\nThis issue can be reproduced by following these easy steps:\nLogin to your account on wordpress.com\nSetup burpsuite proxy with browser.\nSelect your site and navigate to manage>people\nEnter any email address which is not already registered in wordpress.com and invite\nOpen this url in browser: https://wordpress.com/people/invites/yoursite.wordpress.com [change yoursite.wordpress.com with your site]\nSee the burp suite proxy tab and find the GET request to this endpoint [https://public-api.wordpress.com/rest/v1.1/sites/siteId_here/invites?http_envelope=1&status=all&number=100][there will be a number instead of siteId_here]\nIn response of this GET request you will see JSON which will be consisting of the details about the invitations sent and there you will find \"invite_key\" and \"link\".\nCopy the link and open this in another browser.\nYou can create account on behalf of this email without having access to the email and email verification is bypassed :)\nSee the attached video for POC\nMitigation:\nThis is the pure violation of secure design principles, this can be mitigated by just removing the [invite_key] and [link] from the response in [https://public-api.wordpress.com/rest/v1.1/sites/siteId_here/invites?http_envelope=1&status=all&number=100]. Because this invite key and link is the property of the person being invited, showing these creds to other people will result this type of issue.\nImpact\nThis issue can be used to bypass email verification on signup. Attackers can create account on behalf on any person without having access to the email account. This issue is affecting integrity of the wordpress.com\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Violation of Secure Design Principles"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1607002980,
+    "report_url": "https://hackerone.com/reports/1040047",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "steps": [
+        [
+            1,
+            "Login to your account on wordpress.com"
+        ],
+        [
+            2,
+            "Set up Burp Suite proxy with your browser"
+        ],
+        [
+            3,
+            "Select your site and navigate to Manage > People"
+        ],
+        [
+            4,
+            "Enter any unregistered email address and send an invite"
+        ],
+        [
+            5,
+            "Visit https://wordpress.com/people/invites/yoursite.wordpress.com (replace with your site)"
+        ],
+        [
+            6,
+            "In Burp Suite, find the GET request to https://public-api.wordpress.com/rest/v1.1/sites/siteId_here/invites?http_envelope=1&status=all&number=100"
+        ],
+        [
+            7,
+            "Copy the 'invite_key' and 'link' from the JSON response"
+        ],
+        [
+            8,
+            "Open the link in another browser and create an account without email verification"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows attackers to bypass email verification during signup by exploiting exposed invite links and keys in WordPress.com's invitation system. An attacker can create accounts on behalf of any unregistered email address without access to the target email.",
+    "reason": "The attack involves multiple straightforward steps (proxy setup, API endpoint discovery, and link reuse) without requiring deep understanding of complex interactions or novel logic. The exposed invite data is directly visible in the API response.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

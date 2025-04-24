@@ -1,0 +1,50 @@
+{
+  "reported_to": "Automattic",
+  "reported_by": "foobar7 ",
+  "title": "WooCommerce: Persistent XSS via customer address (state/county)",
+  "content": "\nPersistent XSS via customer address (state/county)\nCVSS\nHigh 7.2 CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:N\nDescription\nThe current version (3.5.7) of the WooCommerce WordPress plugin echoes the state/county of a customer in the admin backend without encoding, leading to persistent XSS.\nFor a successful attack, an attacker needs a customer account, though it is to be expected that account creation is available for users in a considerable amount of setups.\nIf the victim is an administrator on a default WordPress setup, an attacker can exploit the issue to gain code execution on the server by eg sending a request to edit a WordPress plugin file.\nPOC\nSetup: Install the WooCommerce plugin & open registration / add a user (permissions do not matter, I used \"customer\").\nTo place the payload:\nLogin as a customer at http://192.168.0.101/wordpress/my-account/\nTo place a payload, either:\nadd an item to cart & proceed to checkout. Under \"Billing Details\", select UK as country and enter '\"><img src=x onerror=alert(1) x=y as County (note the missing > which is required as tags are filtered).\nAlternatively, simply change the address under account settings at http://192.168.0.101/wordpress/my-account/edit-address/.\nadd an item to cart & proceed to checkout. Under \"Billing Details\", select UK as country and enter '\"><img src=x onerror=alert(1) x=y as County (note the missing > which is required as tags are filtered).\nAlternatively, simply change the address under account settings at http://192.168.0.101/wordpress/my-account/edit-address/.\nTo trigger the payload:\nGo to http://192.168.0.101/wordpress/wp-admin/users.php and click on the customer, or directly visit http://192.168.0.101/wordpress/wp-admin/user-edit.php?user_id=4, where 4 is the customers ID.\nImpact\nWith a successful attack, an attacker can read data available to the attacked user or perform arbitrary request in the name of the attacked user.\nWith a default setup, an attacker can gain code execution on the server by eg editing a WordPress plugin file.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1558874100,
+  "report_url": "https://hackerone.com/reports/530499",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Install WooCommerce plugin (version 3.5.7) and enable user registration."
+    ],
+    [
+      2,
+      "Register as a customer and log in to the account."
+    ],
+    [
+      3,
+      "Navigate to checkout or edit address page and enter a malicious payload in the County/State field (e.g., '\"><img src=x onerror=alert(1) x=y')."
+    ],
+    [
+      4,
+      "As an admin, visit the user profile page in the WordPress admin panel to trigger the XSS payload."
+    ]
+  ],
+  "vuln_description": "The WooCommerce plugin (version 3.5.7) fails to properly sanitize the state/county field in customer addresses, allowing persistent XSS. An attacker with a customer account can inject malicious scripts that execute when an admin views the customer's profile in the backend.",
+  "reason": "The vulnerability involves a straightforward XSS injection in a user-input field, with no complex interactions or state manipulations required. The attack path is linear and follows common XSS exploitation patterns.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a persistent XSS via customer address in WooCommerce, which requires a customer account to exploit. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs within the same application context. Since this XSS vulnerability involves injecting malicious payloads into user-controllable input fields (state/county) that are then reflected in the admin backend without proper encoding, it doesn't directly involve crossing authorization boundaries by swapping sessions or resource IDs. Instead, it's a case of improper input sanitization leading to stored XSS.",
+    "is_detectable": false
+  }
+}

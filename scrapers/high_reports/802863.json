@@ -1,0 +1,42 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "bags ",
+  "title": "CVE-2017-13050: The RPKI-Router parser in tcpdump before 4.9.2 has a buffer over-read in print-rpki-rtr.c:rpki_rtr_pdu_print()",
+  "content": "\nHello,\nThe vulnerable code portion is linked below. The linked function is responsible for printing RPKI-Router packet payload information to the terminal (e.g., stdout)\nhttps://github.com/the-tcpdump-group/tcpdump/commit/83c64fce3a5226b080e535f5131a8a318f30e79b\nThe issue may be reproduced as follows\nCheck out vulnerable tcpdump commit (< 4.9.2) as follows\nCode 100 Bytes\n1$ git clone -b 289c672020280529fd382f3502efab7100d638ec https://github.com/the-tcpdump-group/tcpdump\nBuild it with afl and AddressSanitizer as follows (please install libpcap before this step)\nCode 37 Bytes\n1$ CC=afl-gcc\n2$ AFL_USE_ASAN=1 make -j\nRun tcpdump against linked payload (link: https://github.com/the-tcpdump-group/tcpdump/blob/83c64fce3a5226b080e535f5131a8a318f30e79b/tests/rpki-rtr-oob.pcap?raw=true)\nCode 2.98 KiB\n1$ tcpdump -nvr <payload>\n2reading from file /tmp/rpki-rtr-oob.pcap, link-type EN10MB (Ethernet)\n3=================================================================\n4==3569==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6070000000e2 at pc 0x562a16588231 bp 0x7ffc51f88550 sp 0x7ffc51f88540\n5READ of size 4 at 0x6070000000e2 thread T0\n6    #0 0x562a16588230 in EXTRACT_32BITS extract.h:190\n7    #1 0x562a16588230 in rpki_rtr_pdu_print print-rpki-rtr.c:243\n8    #2 0x562a16588230 in rpki_rtr_print print-rpki-rtr.c:355\n9    #3 0x562a165bfb52 in tcp_print print-tcp.c:725\n10    #4 0x562a1645f9e7 in ip_print_demux print-ip.c:396\n11    #5 0x562a1645f9e7 in ip_print print-ip.c:673\n12    #6 0x562a16413cef in ethertype_print print-ether.c:334\n13    #7 0x562a164167e1 in ether_print print-ether.c:237\n14    #8 0x562a164167e1 in ether_if_print print-ether.c:262\n15    #9 0x562a1637b01e in pretty_print_packet print.c:332\n16    #10 0x562a16353f8d in print_packet tcpdump.c:2590\n17    #11 0x562a16627168 in pcap_offline_read savefile.c:561\n18    #12 0x562a166160de in pcap_loop pcap.c:2737\n19    #13 0x562a1634794d in main tcpdump.c:2093\n20    #14 0x7f1aefe87b96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)\n21    #15 0x562a1634f969 in _start (/home/bhargava/work/github/tcpdump/tcpdump+0x17c969)\n22\n230x6070000000e2 is located 13 bytes to the right of 69-byte region [0x607000000090,0x6070000000d5)\n24allocated by thread T0 here:\n25    #0 0x7f1af054bb50 in __interceptor_malloc (/usr/lib/x86_64-linux-gnu/libasan.so.4+0xdeb50)\n26    #1 0x562a16627efa in pcap_check_header sf-pcap.c:404\n27\n28SUMMARY: AddressSanitizer: heap-buffer-overflow extract.h:190 in EXTRACT_32BITS\n29Shadow bytes around the buggy address:\n30  0x0c0e7fff7fc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n31  0x0c0e7fff7fd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n32  0x0c0e7fff7fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n33  0x0c0e7fff7ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n34  0x0c0e7fff8000: fa fa fa fa 00 00 00 00 00 00 00 00 00 fa fa fa\n35=>0x0c0e7fff8010: fa fa 00 00 00 00 00 00 00 00 05 fa[fa]fa fa fa\n36  0x0c0e7fff8020: fd fd fd fd fd fd fd fd fd fa fa fa fa fa fa fa\n37  0x0c0e7fff8030: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n38  0x0c0e7fff8040: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n39  0x0c0e7fff8050: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n40  0x0c0e7fff8060: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n41Shadow byte legend (one shadow byte represents 8 application bytes):\n42  Addressable:           00\n43  Partially addressable: 01 02 03 04 05 06 07 \n44  Heap left redzone:       fa\n45  Freed heap region:       fd\n46  Stack left redzone:      f1\n47  Stack mid redzone:       f2\n48  Stack right redzone:     f3\n49  Stack after return:      f5\n50  Stack use after scope:   f8\n51  Global redzone:          f9\n52  Global init order:       f6\n53  Poisoned by user:        f7\n54  Container overflow:      fc\n55  Array cookie:            ac\n56  Intra object redzone:    bb\n57  ASan internal:           fe\n58  Left alloca redzone:     ca\n59  Right alloca redzone:    cb\n60==3569==ABORTING\nIt is acknowledged here(link: https://github.com/the-tcpdump-group/tcpdump/commit/83c64fce3a5226b080e535f5131a8a318f30e79b) that I (Bhargava Shastry) am the original reporter of the issue.\nTo prove that this hackerone account belongs to me, I have hosted a file with the following message on my github page(link: https://bshastry.github.io/.well-known/hackerone.txt)\nCode 30 Bytes\n1hello @turtle_shell @hackerone\nIf you have any further queries, please let me know.\nTracked as CVE-2017-13050: https://nvd.nist.gov/vuln/detail/CVE-2017-13050\nImpact\nI believe that information disclosure is possible.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Buffer Over-read"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1629618960,
+  "report_url": "https://hackerone.com/reports/802863",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Clone the vulnerable version of tcpdump: git clone -b 289c672020280529fd382f3502efab7100d638ec https://github.com/the-tcpdump-group/tcpdump"
+    ],
+    [
+      2,
+      "Build tcpdump with AFL and AddressSanitizer: CC=afl-gcc AFL_USE_ASAN=1 make -j"
+    ],
+    [
+      3,
+      "Run tcpdump against the provided payload: tcpdump -nvr <payload>"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a buffer over-read in the RPKI-Router parser in tcpdump before 4.9.2, specifically in the function rpki_rtr_pdu_print() in print-rpki-rtr.c. This flaw allows an attacker to read beyond the bounds of an allocated buffer, potentially leading to information disclosure.",
+  "reason": "The vulnerability involves a straightforward buffer over-read in a specific function. The steps to reproduce are clear and involve standard testing practices (building with sanitizers and running against a crafted payload). The issue does not require complex interactions or understanding of multiple components.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

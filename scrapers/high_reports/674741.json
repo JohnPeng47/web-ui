@@ -1,0 +1,48 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "masonhck357 ",
+  "title": "Examples directory is PUBLIC on https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588mil, leading to multiple vulns",
+  "content": "\nDescription:\nHello,\nIn an effort to consolidate reporting. I have located 4 issues with having the Examples Directory open(my require just 1 solution to mitigate) The following URLs that show concern are the following:\nhttps://\u2588\u2588\u2588\u2588\u2588mil/examples/servlets/servlet/SessionExample <--Will lead to Session Manipulation and potential Account Takeover\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588mil/examples/servlets/servlet/RequestHeaderExample <---Internal IP disclosure\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588mil/examples/servlets/ <---Source Code Disclosure and an \"Execute\" option(did not press Execute button so I am not sure the impact of it.\nhttps://\u2588\u2588\u2588\u2588mil/examples/servlets/servlet/CookieExample <----Insecure Cookie Handling\nStep-by-step Reproduction Instructions\nPlease visit the above links\n\n\nSuggested Mitigation/Remediation Actions\nDisable public access to the examples directory as soon as possible!\nImpact\nOrdered by Highest Impact:\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588mil/examples/servlets/servlet/SessionExample <--Will lead to Session Manipulation and potential Account Takeover. Because the session is global this servlet poses a big security risk as an attacker can potentially become an administrator by manipulating its session.\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588mil/examples/servlets/servlet/CookieExample <----Insecure Cookie Handling\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588mil/examples/servlets/ <---Source Code Disclosure and an \"Execute\" option\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588mil/examples/servlets/servlet/RequestHeaderExample <---Internal IP disclosure\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1570749060,
+  "report_url": "https://hackerone.com/reports/674741",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to https://\u2588\u2588\u2588\u2588\u2588mil/examples/servlets/servlet/SessionExample"
+    ],
+    [
+      2,
+      "Observe the session manipulation capabilities and potential for account takeover"
+    ]
+  ],
+  "vuln_description": "The examples directory on the target website is publicly accessible, leading to multiple vulnerabilities including session manipulation, internal IP disclosure, source code disclosure, and insecure cookie handling. The most critical issue is the session manipulation vulnerability which could lead to account takeover due to global session handling.",
+  "reason": "The vulnerability involves accessing publicly available example servlets that demonstrate various functionalities, which are not intended for production use. The discovery requires no special knowledge or complex interactions, as the examples are directly accessible and their implications are straightforward.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true
+  }
+}

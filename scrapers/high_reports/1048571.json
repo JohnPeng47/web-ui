@@ -1,0 +1,50 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "skarsom ",
+    "title": "\u2588\u2588\u2588 on https://\u2588\u2588\u2588\u2588 enable \u2588\u2588\u2588 scraping, injection, stored XSS",
+    "content": "\nSummary:\nAn open \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 at the \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 system enables quick and easy scraping of \u2588\u2588\u2588 without authentication nor authorization.\nDescription:\nThe \u2588\u2588\u2588\u2588\u2588 includes an open set of \u2588\u2588\u2588\u2588\u2588\u2588endpoints at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588. Any individual can execute requests on these endpoints without authorization nor authentication. These include the ability to view \u2588\u2588\u2588\u2588\nSome of these endpoints are legitimately used in the \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 of the website, such as the one to \u2588\u2588\u2588\u2588\u2588\u2588\u2588.\nImpact\nAn external, unauthorized, and unauthenticated attacker can scrape data of \u2588\u2588\u2588\u2588\u2588 by date on the \u2588\u2588\u2588\u2588\u2588\u2588.\nAn external actor may also be able to perform injections against the database service through maliciously crafted attacks.\nAn external, unauthorized, and unauthenticated attacker can perform a stored XSS attack using on an \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\nStep-by-step Reproduction Instructions\nData Extraction:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588. Navigate to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\n\u2588\u2588\u2588\u2588. Navigate to the \"\u2588\u2588\u2588\u2588\u2588\u2588\" \u2588\u2588\u2588\u2588 (https://\u2588\u2588\u2588\u2588?\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588)\n3. Enter the year \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, the month \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, and the day \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, then press Invoke.\n4. Success (\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588).\n5. For further extraction, take one of the user IDs present in the JSON reply and paste it into the \u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588 (https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588?\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588).\n6. For further extraction, take one of the profile IDs present in the JSON reply and paste it into the \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588 (also set \"dbName\" to \"\u2588\u2588\u2588\") (https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588?\u2588\u2588\u2588\u2588\u2588\u2588\u2588).\nStored XSS/Information Modification:\n\u2588\u2588\u2588. Navigate to the \u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 (https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588?\u2588\u2588\u2588).\n\u2588\u2588\u2588\u2588\u2588\u2588. Parameters: dbName = \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, OUid = \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, lngDesc = \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, modDesc = \u2588\u2588\u2588\u2588\u2588\u2588\u2588, wrkPLid = \u2588\u2588\u2588\u2588\u2588\u2588\u2588, clngPLid = \u2588\u2588\u2588\u2588\u2588\u2588, prfDate = \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588:\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588:\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, timeString = Tue Dec \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25888:\u2588\u2588\u2588\u2588\u25889:56 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, prfLink = demofromskarsom, CData = <iframe onload=\"alert(\u2588\u2588\u2588\u2588\u2588\u2588)\" style=\"display:none\"></iframe>, sessionID = \u2588\u2588\u2588\u2588\u2588\u2588\n3. Click \"Invoke\".\n4. Navigate to the following page, replacing (GENSTRING) with the integer that was returned from invoking the \u2588\u2588\u2588\u2588\u2588 request: https://\u2588\u2588\u2588\u2588\u2588(GENSTRING)&B=\u2588\u2588\u2588\u2588\u2588\u2588\u2588&C=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588&D=demofromskarsom&view=true\n5. Success.\nSupporting Material\nNavigate to\u2588\u2588\u2588\u2588?A=\u2588\u2588\u25889\u2588\u2588\u2588\u2588\u258898&B=\u2588\u2588\u2588\u2588\u2588\u2588&C=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588&D=dodvdpdemo&view=true to see a stored XSS POC that I uploaded.\n#\u2588\u2588\u2588\n#\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n#\u2588\u2588\u2588\u2588\n#\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\nAll endpoints unused by the frontend UI (based on a cursory search, this appears to be all but \u2588\u2588\u2588Plink) should be removed or guarded by authorization checks.\nImpact\nThird-party actors can easily scrape language proficiency, testing, and student information through the ODA's debug UI and endpoints.\nThird-party actors may also be able to perform injections against the database service through maliciously crafted strings within the INSERT and UPDATE \u2588\u2588\u2588s on the WS endpoints (did not attempt to prevent damage).\nThird-party actors can further generate a page with a stored XSS attack within the \"\u2588\u2588\u2588\u2588\u2588\u2588\" of an inserted profile through\u2588\u2588\u2588\u2588\u2588.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Leftover Debug Code (Backdoor)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1620779100,
+    "report_url": "https://hackerone.com/reports/1048571",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "steps": [
+        [
+            1,
+            "Navigate to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 and access the '\u2588\u2588\u2588\u2588\u2588\u2588' section."
+        ],
+        [
+            2,
+            "Enter specific date parameters (year, month, day) and press 'Invoke' to extract data."
+        ],
+        [
+            3,
+            "Use extracted user IDs to query further endpoints for additional data."
+        ],
+        [
+            4,
+            "For stored XSS, navigate to a specific endpoint and inject malicious payload in parameters like 'CData'."
+        ],
+        [
+            5,
+            "Trigger the payload by accessing a generated URL with the injected content."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves multiple security issues including unauthorized data scraping, potential database injection, and stored XSS attacks through exposed endpoints that lack authentication and authorization checks. Attackers can extract sensitive information and execute malicious scripts without any credentials.",
+    "reason": "The attack involves multiple components (data extraction, injection, XSS) and requires understanding of the application's endpoint structure and data flow. However, the lack of authentication makes initial discovery straightforward, though combining these into a cohesive attack requires some context switching.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

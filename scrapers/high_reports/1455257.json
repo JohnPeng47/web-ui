@@ -1,0 +1,38 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "pirneci ",
+  "title": "CVE-2020-3452 on  https://\u2588\u2588\u2588\u2588\u2588/",
+  "content": "\nHello team,\nI hope you're doing well, healthy & wealthy.\nI found a CVE-2020-3452 path traversal and here is the explanation.\nA vulnerability in the web services interface of Cisco Adaptive Security Appliance (ASA) Software and Cisco Firepower Threat Defense (FTD) Software could allow an unauthenticated, remote attacker to conduct directory traversal attacks and read sensitive files on a targeted system. The vulnerability is due to a lack of proper input validation of URLs in HTTP requests processed by an affected device. An attacker could exploit this vulnerability by sending a crafted HTTP request containing directory traversal character sequences to an affected device. A successful exploit could allow the attacker to view arbitrary files within the web services file system on the targeted device. The web services file system is enabled when the affected device is configured with either WebVPN or AnyConnect features. This vulnerability cannot be used to obtain access to ASA or FTD system files or underlying operating system (OS) files.\nReferences\nhttps://twitter.com/aboul3la/status/1286012324722155525\nhttp://packetstormsecurity.com/files/158646/Cisco-ASA-FTD-Remote-File-Disclosure.html\nhttp://packetstormsecurity.com/files/158647/Cisco-Adaptive-Security-Appliance-Software-9.11-Local-File-Inclusion.html\nhttp://packetstormsecurity.com/files/159523/Cisco-ASA-FTD-9.6.4.42-Path-Traversal.html\nhttp://packetstormsecurity.com/files/160497/Cisco-ASA-9.14.1.10-FTD-6.6.0.1-Path-Traversal.html\nhttps://tools.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-asaftd-ro-path-KJuQhB86\nImpact\nA vulnerability in the web services interface of Cisco Adaptive Security Appliance (ASA) Software and Cisco Firepower Threat Defense (FTD) Software could allow an unauthenticated, remote attacker to conduct directory traversal attacks and read sensitive files on a targeted system. The vulnerability is due to a lack of proper input validation of URLs in HTTP requests processed by an affected device. An attacker could exploit this vulnerability by sending a crafted HTTP request containing directory traversal character sequences to an affected device. A successful exploit could allow the attacker to view arbitrary files within the web services file system on the targeted device. The web services file system is enabled when the affected device is configured with either WebVPN or AnyConnect features. This vulnerability cannot be used to obtain access to ASA or FTD system files or underlying operating system (OS) files.\nclassification:\ncvss-metrics: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N\ncvss-score: 7.50\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCisco Adaptive Security Appliance (ASA) Software and Cisco Firepower Threat Defense (FTD) Software\nCVE Numbers\nCVE-2020-3452\nSteps to Reproduce\nPlease do this GET request below.\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/+CSCOT+/translation-table?type=mst&textdomain=/%2bCSCOE%2b/portal_inc.lua&default-language&lang=../\nSecond attack type:\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588/+CSCOT+/oem-customization?app=AnyConnect&type=oem&platform=..&resource-type=..&name=%2bCSCOE%2b/portal_inc.lua\nYou can see the file can be downloaded.\nSuggested Mitigation/Remediation Actions\nPlease upgrade to the latest version of the software.\nBest regards.\n@pirneci\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1647644700,
+  "report_url": "https://hackerone.com/reports/1455257",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a GET request to the vulnerable endpoint: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/+CSCOT+/translation-table?type=mst&textdomain=/%2bCSCOE%2b/portal_inc.lua&default-language&lang=../"
+    ],
+    [
+      2,
+      "Alternatively, send a GET request to another vulnerable endpoint: https://\u2588\u2588\u2588\u2588\u2588\u2588/+CSCOT+/oem-customization?app=AnyConnect&type=oem&platform=..&resource-type=..&name=%2bCSCOE%2b/portal_inc.lua"
+    ]
+  ],
+  "vuln_description": "A path traversal vulnerability in Cisco ASA and FTD software allows an unauthenticated attacker to read sensitive files via crafted HTTP requests. The vulnerability arises due to improper input validation of URLs, enabling directory traversal attacks. The attack is limited to the web services file system and does not grant access to system or OS files.",
+  "reason": "The vulnerability involves a straightforward directory traversal attack with no complex interactions or state manipulations. The attack vectors are well-documented and require minimal context or novel logic to exploit.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

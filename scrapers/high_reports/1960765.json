@@ -1,0 +1,38 @@
+{
+    "reported_to": "Reddit",
+    "reported_by": "la_revoltage ",
+    "title": "Blind SSRF to internal services in matrix preview_link API",
+    "content": "\nSummary:\nReddit' new chat is based on Matrix software which has preview_link functionality which doesn't filter the URL before sending the request\nImpact:\nAttacker can enumerate services by grabbing og:title and port scanning, also possible RCE escalation (Asking for permission on this one)\nSteps To Reproduce:\nVisit the https://matrix.redditspace.com/_matrix/media/r0/preview_url/?url=*\nReplace * with http://\u2588\u2588\u2588\u2588\u2588\u2588 to get og:title \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nReplace * with http://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 to get og:title \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nReplace * with http://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588to get og:title \u2588\u2588\u2588\u2588\u2588\u2588\nReplace * with \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 to get og:title \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nNote: If the request is stuck and not responding in 2 seconds reload the page until it does\nPermit for escalation attempt?\nSince the \u2588\u2588\u2588 URL is accessible it may be possible to run \u2588\u2588\u2588:\nGET \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nThere are also possibilities to test \u2588\u2588\u2588\u2588\u2588\u2588, but I thought that it would be incorrect to do such activity without permission and as such report vulnerability in this state. I also therefore request a permission to try to escalate this to Critical\nImpact\nAttacker can enumerate services and launch attacks against them\n\n",
+    "severity": [
+        7.5,
+        null
+    ],
+    "bounty": 6000,
+    "weaknesses": [
+        "Server-Side Request Forgery (SSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1682538120,
+    "report_url": "https://hackerone.com/reports/1960765",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Visit https://matrix.redditspace.com/_matrix/media/r0/preview_url/?url=*"
+        ],
+        [
+            2,
+            "Replace * with internal URLs to fetch og:title or test for open ports"
+        ]
+    ],
+    "vuln_description": "Blind SSRF vulnerability in Matrix's preview_link API that allows attackers to enumerate internal services by fetching og:title metadata or performing port scanning. Potential for RCE escalation if vulnerable internal services are discovered.",
+    "reason": "The vulnerability involves a straightforward SSRF with predictable behavior (fetching og:title), but requires some trial-and-error to discover responsive internal endpoints. The potential RCE escalation would require additional discovery of vulnerable internal services.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

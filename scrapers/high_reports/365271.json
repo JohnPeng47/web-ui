@@ -1,0 +1,45 @@
+{
+  "reported_to": "Basecamp",
+  "reported_by": "gammarex ",
+  "title": "Remote code execution on Basecamp.com",
+  "content": "\nA critical flaw in Basecamp's profile image upload function leads to remote command execution. Images are converted on the server side, but not only image files but also PostScript/EPS files are accepted (if renamed to .gif). This is probably due to ImageMagick / GraphicsMagick being used for image conversion, which calls a PostScript interpreter (Ghostscript) if the input file starts with '%!'. The used Ghostscript version however has a security bug (CVE-2017-8291) leading to remote command execution.\n/Proof of concept/: Upload the attached rce.gif file as profile image (change the `ping -c1 attacker.com' to some other shell command).\n/Mitigation/: Upgrade Ghostscript; also, before processing uploaded images make sure they are real image files (e.g. based on magic header)\nImpact\nGain a remote shell; from here start exploitation/privilege escalation\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 5000,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1606432920,
+  "report_url": "https://hackerone.com/reports/365271",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Upload a specially crafted PostScript/EPS file renamed to .gif (e.g., rce.gif) as a profile image on Basecamp.com"
+    ],
+    [
+      2,
+      "The server processes the file using ImageMagick/GraphicsMagick, which invokes Ghostscript due to the '%!' header, exploiting CVE-2017-8291 to execute arbitrary commands"
+    ]
+  ],
+  "vuln_description": "A critical flaw in Basecamp's profile image upload function allows remote code execution due to improper handling of PostScript/EPS files disguised as GIFs. The server uses ImageMagick/GraphicsMagick, which invokes Ghostscript for processing, and the outdated Ghostscript version is vulnerable to CVE-2017-8291.",
+  "reason": "The vulnerability requires knowledge of multiple components (ImageMagick/Ghostscript interaction, file type confusion, and CVE-2017-8291) and involves a non-obvious interaction where a GIF file is processed as PostScript. However, the exploit is straightforward once these components are understood.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves remote code execution through image upload functionality, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, which does not apply to this RCE vulnerability.",
+    "is_detectable": false
+  }
+}

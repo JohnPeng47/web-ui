@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "hunt1 ",
+  "title": "Libuv: Improper Domain Lookup that potentially leads to SSRF attacks",
+  "content": "\nI recently encountered a challenge in a CTF competition that led me to discover a vulnerability within Node.js, present in all versions after v10. Upon further investigation and code debugging, it became apparent that the vulnerability originated from its direct dependency, libuv.\nI submitted a report to the Node.js team via HackerOne, and they subsequently connected me with the libuv team. This collaboration resulted in the identification and resolution of the vulnerability, now recorded as CVE-2024-24806.\nImpact\nThis vulnerability could allow an attacker to craft payloads that results in SSRF attacks and Internal API Access. Full explanation of vulnerability, PoC and sample scenarios are provided within the original report:\nhttps://github.com/libuv/libuv/security/advisories/GHSA-f74f-cvh7-c6q6\n\n",
+  "severity": [
+    7.3,
+    null
+  ],
+  "bounty": 4860,
+  "weaknesses": [
+    "Server-Side Request Forgery (SSRF)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1711767240,
+  "report_url": "https://hackerone.com/reports/2429894",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify a Node.js application using libuv for domain lookups (versions after v10)."
+    ],
+    [
+      2,
+      "Craft a malicious payload that manipulates the domain lookup process to redirect to an internal API or service."
+    ]
+  ],
+  "vuln_description": "The vulnerability in libuv (CVE-2024-24806) allows improper domain lookups that can be exploited to perform Server-Side Request Forgery (SSRF) attacks, potentially enabling access to internal APIs or services. This occurs due to a flaw in how libuv handles domain resolution, which can be manipulated to redirect requests to unintended internal endpoints.",
+  "reason": "The vulnerability involves understanding the domain lookup mechanism in libuv and how it can be manipulated to redirect requests. While the attack requires knowledge of libuv's internals, the manipulation itself is straightforward once the flaw is identified. The interaction between the crafted payload and the domain resolution process is subtle but not overly complex.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": true,
+  "other_report": null
+}

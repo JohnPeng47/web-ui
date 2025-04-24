@@ -1,0 +1,57 @@
+{
+  "reported_to": "Discourse",
+  "reported_by": "khizer47 ",
+  "title": "DOM Based XSS in Discourse Search",
+  "content": "\nSteps to Reproduce:\nLoad http://try.discourse.org 2.Now From Top Right Corner Click on Search Button\nEnter payload their\nPayload:\n@<script>prompt(1337)</script>gmail.com\n4: Now in new windows that opens click on advance search and The XSS will Occur :)\n5: Now copy the link and send to victim there the XSS will Occur To\nThanks\nKhizer Javed\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1484024880,
+  "report_url": "https://hackerone.com/reports/191890",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Load http://try.discourse.org"
+    ],
+    [
+      2,
+      "Click on the search button in the top right corner"
+    ],
+    [
+      3,
+      "Enter the payload: @<script>prompt(1337)</script>gmail.com"
+    ],
+    [
+      4,
+      "Click on 'advanced search' in the new window that opens to trigger the XSS"
+    ],
+    [
+      5,
+      "Copy the link and send it to a victim to trigger the XSS in their browser"
+    ]
+  ],
+  "vuln_description": "This is a DOM-based XSS vulnerability in Discourse's search functionality. By injecting a malicious script into the search input, an attacker can execute arbitrary JavaScript in the context of the victim's browser session when they interact with the advanced search feature.",
+  "reason": "The vulnerability involves a straightforward injection of a script payload into a search input field, which is a common and well-documented attack vector. The steps to reproduce are simple and do not require deep understanding of the application's internal state or complex interactions between components.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The DOM Based XSS vulnerability involves injecting a script payload into a search field, which is then executed when the search results are rendered. This does not involve authentication or authorization checks, nor does it involve swapping user sessions or resource IDs. The vulnerability is purely client-side and relies on improper input sanitization in the DOM rendering process.",
+    "is_detectable": false
+  }
+}

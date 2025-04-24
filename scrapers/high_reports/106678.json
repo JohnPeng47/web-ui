@@ -1,0 +1,42 @@
+{
+  "reported_to": "Informatica",
+  "reported_by": "robd4k ",
+  "title": "[now.informatica.com] Reflective XSS",
+  "content": "\nXSS vulnerability lies on http://now.informatica.com/launch-next-bigdata-registration-inxpo.html?Source=homepage\nPOC\nSign up for big data management Virtual launch event\non parameter company_name inject '\"><img src=x onerror=alert(1)>\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1481296200,
+  "report_url": "https://hackerone.com/reports/106678",
+  "vuln_category": "WEB_APP",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "steps": [
+    [
+      1,
+      "Navigate to http://now.informatica.com/launch-next-bigdata-registration-inxpo.html?Source=homepage"
+    ],
+    [
+      2,
+      "In the 'company_name' parameter, inject the payload: '\"><img src=x onerror=alert(1)>'"
+    ]
+  ],
+  "vuln_description": "This is a Reflective Cross-Site Scripting (XSS) vulnerability found on the Informatica website. The vulnerability allows an attacker to inject arbitrary JavaScript code via the 'company_name' parameter, which is then executed in the context of the victim's browser when the page is loaded.",
+  "reason": "The vulnerability is straightforward to discover as it involves a simple injection into a URL parameter without any need for complex interactions or state manipulation. The payload is a standard XSS test string, and the parameter is directly reflected in the response.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves injecting malicious scripts into a parameter (company_name) in a web form, which is a client-side issue and not related to authentication or authorization (AuthN/AuthZ). The proposed methodologies focus on testing AuthN/AuthZ boundaries by manipulating user sessions, actions, and resource IDs, which does not apply to detecting XSS vulnerabilities.",
+    "is_detectable": false
+  }
+}

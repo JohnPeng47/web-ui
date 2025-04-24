@@ -1,0 +1,50 @@
+{
+    "reported_to": "X (Formerly Twitter)",
+    "reported_by": "suyog ",
+    "title": "Access MoPub Reports Data even after Company removed you from their MoPub Account.",
+    "content": "\nDescription + Attacking approach\nAPI Workflow :\nThe MoPub Reporting API supports two separate CSV outputs where publishers can retrieve inventory or campaign performance data.\nPublishers can retrieve daily reports via making a GET request using the request parameters.\nThis URL will return a 302 redirect response. The link to download the report will be returned in the response location header.\n\nHow you grab Report data even after company removed you\nIf Publisher/Company invite you for their MoPub Account with any permissions & Roles.\n(\"administrators or Members\" - it doesn't matter, which permission company gives you while invitation)\nAfter accept the invitation you have access to make all changes to the company account.\n\nAttacking approach start from here\nIn order to retrieve data, the API must first be enabled for company account.\nSo, you can Enable data access through API (just click on checkbox in the Reports page of the MoPub UI.) or it might be already enabled by publisher.\nNote down the \"Reporting API access details\". [i.e. API key, Inventory report ID, Campaign report ID]\nAlso Note the Report ID of each MoPub Report present inside the Company Account.\n!!!\nNow, the publisher/company doesn't want you with their MoPub account and they removed you from their Manage User settings.\nBut they forgot to Reset API key.\nNow, you don't have any access of company account.\nNOTE! You have the \"Reporting API access details (which you noted)\".\n\nAccess the Reporting API :\nGET request using the request parameters.\n[report_key=[individual_report_id ; inventory_report_id ; campaign_report_id]\napi_key=[API_KEY]\ndate=Date of the report. Format YYYY-MM-DD]\nhttps://app.mopub.com/reports/custom/api/download_report?report_key=[REP_KEY]&api_key=[API_KEY]&date=[YYYY-MM-DD]\nSample Request:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\nRemediation :\nAPI key must be auto-reset after the user removed from company.\n(for 2nd condition in impact) Once the Data access is disabled, user should not be able to access reports data via API.\n.\nThank you : )\nImpact\nAttacker(removed user) able to access Organization Current as well as in Future created MoPub reports in 2 conditions :\nIf API key is not reset and \"data access through API\" checkbox is enabled\nIf API key is not reset and \"data access through API\" checkbox is disabled.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1572995280,
+    "report_url": "https://hackerone.com/reports/399174",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Get invited to a company's MoPub account with any role (administrator or member)."
+        ],
+        [
+            2,
+            "Enable API access (or note if already enabled) and record the Reporting API access details (API key, Inventory report ID, Campaign report ID)."
+        ],
+        [
+            3,
+            "Note the Report ID of each MoPub Report in the company account."
+        ],
+        [
+            4,
+            "Wait until the company removes you from their account but does not reset the API key."
+        ],
+        [
+            5,
+            "Use the previously recorded API key and report IDs to make GET requests to the MoPub Reporting API to access reports."
+        ]
+    ],
+    "vuln_description": "This vulnerability allows a removed user to continue accessing a company's MoPub reports via the Reporting API if the API key is not reset upon user removal. The attacker can access both current and future reports if the API key remains unchanged and API access is enabled or was previously enabled.",
+    "reason": "The attack involves understanding the MoPub API workflow, noting API keys and report IDs, and exploiting the lack of API key reset upon user removal. While the steps are straightforward, the vulnerability relies on the non-obvious oversight of not resetting API keys when users are removed.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

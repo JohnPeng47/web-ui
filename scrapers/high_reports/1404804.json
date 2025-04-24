@@ -1,0 +1,61 @@
+{
+  "reported_to": "Judge.me ",
+  "reported_by": "caue ",
+  "title": "Email templates XSS by filterXSS bypass",
+  "content": "\nSummary:\njs-xss is used to prevent XSS on email templates previews but the custom onIgnoreTag function can be used to bypass this filter. This leads to a Self-XSS scenario that can be used to achieve Account Takeover in 1-click.\nCode 112 Bytes\n1onIgnoreTag: function (e, t) {\n2   return \"!--[if\" === e || \"![endif]--\" === e || \"<!-->\" === t ? t : void 0; \n3},\nXSS\nThe way how js-xss parse tags starting with <![ differ from how browser parse it, so it's possible to abuse this in this way:\nCode 77 Bytes\n1<![endif]-- onerror=\"<![endif]-->\" onload=\"<img src=1 onerror='alert(1)' />\">\nSending this as the HTML email template will trigger an XSS when the email is previewed. Since email templates are private and only the owner of the template can preview it, this can be considered a Self-XSS. But there is a way to do another user preview it, leading to an account takeover in 1-click.\nWe can use HMAC authentication feature to force another user login in our account and preview the malicious email:\nCode 119 Bytes\n1https://www.judge.me/shop/emails/2243518/edit?no_iframe=1&shop_domain=wordpress.caueo.me&platform=woocommerce&hmac=\u2588\u2588\u2588\u2588\nThis URL authenticates as admin on wordpress.caueo.me domain, where the malicious email will be. The HMAC hash is created on this way (taken from wordpress plugin):\nCode 109 Bytes\n1$hmac       = hash_hmac( 'sha256', \"no_iframe=1&platform=woocommerce&shop_domain={$domain}\", $token, false );\nHaving this XSS with the victim logged in my account is possible to leak HTML content of a page that was loaded with victim's account cookie:\nLoad an iframe with the victim's page (HTML content to leak) - Authenticated as victim\nLoad another iframe with the XSS (Use HMAC authentication) - Authenticated as me\nWe can use the XSS to read parent.frames[0] HTML content since it is same-origin\nCSP bypass\nAt a first sight we can't load an iframe to victim's page, since it has a CSP that whitelists iframe origins:\nCode 136 Bytes\n1frame-ancestors https://wordpress.caueo.me http://wordpress.caueo.me wordpress.caueo.me https://woocommerce-adapter.judge.me/ *.judge.me\nTo bypass it we can use the XSS to load the iframes, but we need to do it on another subdomain, because to trigger this XSS is needed to login in my account and then it would not be possible to load the victim's page authenticated as victim's account later. So we trigger the XSS on www.judge.me subdomain.\nLimitation to 0-click account takeover\nAt this point it is already possible to read HTML content of almost any page authenticated as victim. To achieve account takeover we only need to get the private API token from victim because it is used as the key of HMAC authentication.\nThe problem is that the endpoint that retrieves the API private token checks if the Referer header starts with https://judge.me/settings, so is not possible to load this endpoint in an iframe.\nClickjacking\nWe can load an iframe to https://judge.me/settings where has a button that retrieves the API token from the endpoint successfully. So it is possible to perform a clickjacking to that button, and if the victim clicks on it, we can get the API private token.\nPoC\nI made a PoC on how is possible to perform this account takeover with user interaction and leak some stuffs without user interaction.\nPoC\nIn this PoC I leaked FreshChat token without clickjacking, so we can impersonate another user in support chat without needing a user click.\nImpact\nShop account takeover (user interaction)\nImpersonation on support chat\nPrivate content leak\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": 1250,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1653479100,
+  "report_url": "https://hackerone.com/reports/1404804",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify the XSS bypass in the custom `onIgnoreTag` function of js-xss used in email templates preview."
+    ],
+    [
+      2,
+      "Craft a malicious HTML email template using the bypass: `<![endif]-- onerror=\"<![endif]-->\" onload=\"<img src=1 onerror='alert(1)' />\">`"
+    ],
+    [
+      3,
+      "Use HMAC authentication to force another user to log into your account and preview the malicious email."
+    ],
+    [
+      4,
+      "Load an iframe with the victim's page (authenticated as victim) and another iframe with the XSS (authenticated as you)."
+    ],
+    [
+      5,
+      "Use the XSS to read `parent.frames[0]` HTML content, bypassing CSP by triggering the XSS on `www.judge.me` subdomain."
+    ],
+    [
+      6,
+      "Perform clickjacking on `https://judge.me/settings` to retrieve the victim's API private token if user interaction is needed."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves bypassing XSS filters in email templates using a custom `onIgnoreTag` function, leading to a Self-XSS that can be escalated to account takeover via HMAC authentication and CSP bypass. The attack allows reading HTML content from victim's pages and potentially stealing API tokens through clickjacking.",
+  "reason": "This vulnerability requires understanding multiple components: XSS filter bypass, HMAC authentication, CSP bypass, and clickjacking. The interactions between these components are subtle and non-obvious, especially the manipulation of application states across different authentication contexts and subdomains.",
+  "new_complexity": "VERY_HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a bypass of the XSS filter in email templates, which is a client-side issue, and leverages HMAC authentication to force another user to preview the malicious email. The methodology described focuses on server-side authorization and authentication checks (IDOR and AuthN/AuthZ bypass) by swapping user sessions and resource IDs. Since this vulnerability relies on client-side XSS and a specific HMAC authentication flow that is not covered by the server-side session/resource swapping methodology, it would not be detectable using the proposed approach.",
+    "is_detectable": false
+  }
+}

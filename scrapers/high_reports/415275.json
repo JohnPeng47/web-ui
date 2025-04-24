@@ -1,0 +1,38 @@
+{
+  "reported_to": "h1-5411-CTF",
+  "reported_by": "den1al ",
+  "title": "CTF Writeup flag{cha1n1ng_bugs_f0r_fun_4nd_pr0f1t?_or_rep0rt_an_LF1}",
+  "content": "\nWe have attached the writeup, the CTF was solved by me and Chapuka.\nWe would like to publish our writeup for the CTF in our blog, when can we do that?\nIt was a great CTF, it's a shame we are not @Buenos Aires right now :/\nImpact\n.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Deserialization of Untrusted Data"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1542834060,
+  "report_url": "https://hackerone.com/reports/415275",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Access the CTF writeup containing the flag: flag{cha1n1ng_bugs_f0r_fun_4nd_pr0f1t?_or_rep0rt_an_LF1}"
+    ],
+    [
+      2,
+      "Identify and extract the flag from the writeup description."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves the exposure of a sensitive flag within a CTF writeup, which could potentially be exploited if the writeup is published without proper redaction.",
+  "reason": "The discovery difficulty is low because the flag is directly visible in the writeup description without any obfuscation or complex interaction required to uncover it.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": true,
+  "other_report": null
+}

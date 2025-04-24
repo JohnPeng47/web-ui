@@ -1,0 +1,48 @@
+{
+  "reported_to": "Rocket.Chat",
+  "reported_by": "fabianfreyer ",
+  "title": "SAML authentication bypass through unauthenticated `addSamlProvider` Meteor Call",
+  "content": "\nSummary: Rocket.Chat exposes an unauthenticated Meteor method addSamlProvider, which allows disabling SAML signature verification.\nDescription:\nThe addSamlProvider Meteor method sets a number of settings, among them a boolean flag that defaults to false:\nCode 194 Bytes\n1export const addSamlService = function(name: string): void {\n2\tsettings.add(`SAML_Custom_${ name }`, false, {\n3\t\ttype: 'boolean',\n4\t\tgroup: 'SAML',\n5\t\ti18nLabel: 'Accounts_OAuth_Custom_Enable',\n6\t});\nThe provider name is entirely user-controlled in this case.\nSecondly, if a SAML authentication provider does not have a certificate set, or the setting is falsy, no validation is performed:\nCode 150 Bytes\n1private verifySignatures(response: Element, assertionData: ISAMLAssertion, xml: string): void {\n2\tif (!this.serviceProviderOptions.cert) {\n3\t\treturn;\n4\t}\nReleases Affected:\nall versions including meteor-accounts-saml, i.e. 0.8.0 and later.\nSteps To Reproduce (from initial installation to vulnerability):\nOn the login page of a Rocket.Chat instance supporting SAML authentication using a provider named Default (this is the default), run the following Meteor call:\nCode 45 Bytes\n1Meteor.call(\"addSamlService\", \"Default_cert\")\nThen log in using an arbitrarily faked SAML response.\nSuggested mitigation\nRemove the addSamlProvider Meteor method. All callers of the underlying function are server-side, therefore it needs not be exposed to the client.\nImpact\nAn unauthenticated attacker can disable SAML certificate validation on an instance with SAML authentication enabled, and then log in as an arbitrary user with administrative privileges.\n\n",
+  "severity": [
+    10.0,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1610138580,
+  "report_url": "https://hackerone.com/reports/1049375",
+  "vuln_category": "WEB_APP",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "steps": [
+    [
+      1,
+      "On the login page of a Rocket.Chat instance supporting SAML authentication, run the Meteor call: `Meteor.call(\"addSamlService\", \"Default_cert\")`"
+    ],
+    [
+      2,
+      "Log in using an arbitrarily faked SAML response to bypass authentication."
+    ]
+  ],
+  "vuln_description": "Rocket.Chat exposes an unauthenticated Meteor method `addSamlProvider` that allows disabling SAML signature verification. By manipulating this method, an attacker can disable certificate validation and log in as any user, including administrators.",
+  "reason": "The vulnerability involves understanding the SAML authentication flow and identifying an unauthenticated Meteor method that can be exploited to disable security checks. The interaction between the method call and the SAML validation logic is non-obvious but does not require complex state manipulation or novel logic.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true
+  }
+}

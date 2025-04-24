@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "alyssa_herrera ",
+    "title": "PII leakage due to scrceenshot of health records",
+    "content": "\nSummary:\nDocument shows a screenshot of a medical record for a soldier\nDescription:\nOne of the slides describes the CIV# and PAD DSN# along with some information relating to the soldier such as their name, the information appears to be old but could be still be an issue if they're in service\n## Impact\nHigh? maybe critical? Unsure on impact\n## Step-by-step Reproduction Instructions\nCheck slide 13 specifically but there's other slides that are suspect too\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/wp-content/uploads/2018/12/HR_TECH_WOBC_Perform_eMILPO_Functions_eMILPO_Brief.pptx\nProduct, Version, and Configuration (If applicable)\nN/A\n## Suggested Mitigation/Remediation Actions\nPurge Doc\nImpact\nAn attacker could assume soldier identities and learn more about possible health information related to them\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1575334860,
+    "report_url": "https://hackerone.com/reports/693933",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Access the provided URL: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/wp-content/uploads/2018/12/HR_TECH_WOBC_Perform_eMILPO_Functions_eMILPO_Brief.pptx"
+        ],
+        [
+            2,
+            "Navigate to slide 13 (and potentially other slides) to view the screenshot of the medical record containing PII (CIV#, PAD DSN#, soldier's name, etc.)"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the exposure of Personally Identifiable Information (PII) and sensitive health records of a soldier through a screenshot embedded in a publicly accessible PowerPoint presentation. The leaked data could potentially be used for identity theft or to gather sensitive health information about the soldier.",
+    "reason": "The vulnerability is straightforward to discover as it involves accessing a publicly available document and identifying exposed PII within its contents. There are no complex interactions, application states, or novel logic involved in the discovery process.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

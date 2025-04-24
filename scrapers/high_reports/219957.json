@@ -1,0 +1,45 @@
+{
+  "reported_to": "Rocket.Chat",
+  "reported_by": "gronke ",
+  "title": "XSS via /api/v1/chat.postMessage ",
+  "content": "\nNOTE! Thanks for submitting a report! Please replace all the [square] sections below with the pertinent details. Remember, the more detail you provide, the easier it is for us to verify and then potentially issue a bounty, so be sure to take your time filling out the report!\nSummary: An attacker can craft a custom message using the REST API that, once seen by the observer, executes arbitrary code in the context of the client user.\nDescription: According to the API documentation chat messages can have attachments. These attachments then can have fields which contain a title and subtitle for the attachment. When the attachment has an image_url assigned, the first field's value can be used to inject HTML tags. For example <img onload=\"\"> can be used to execute arbitrary code. < must be the leading character of the field's value property.\nReleases Affected:\nClient App (OSX)\nFirefox 48 (Debian)\nFirefox 52 (OSX)\nChrome 58 (OSX)\nSteps To Reproduce (from initial installation to vulnerability):\nCreate a Channel or get obtain a RoomId of a private conversation\nLogin to the Rest API\nSend crafted message\nSupporting Material/References:\nCode 466 Bytes\n1# Login to get Auth Token and User Id\n2curl http://127.0.0.1:3000/api/v1/login -d \"username=<USER_NAME>&password=<PASSWORD>\"\n3\n4# Send crafted message\n5curl -H \"X-Auth-Token: <USER_TOKEN>\" -H \"X-User-Id: <USER_ID>\" http://127.0.0.1:3000/api/v1/chat.postMessage -d \"channel=<CHANNEL_NAME>&attachments[0][image_url]=/assets/logo&attachments[0][fields][0][title]=&attachments[0][fields][0][value]=<img src=/assets/logo width=1 height=1 onload=alert('XSS4') />You're Pwned!\"\nSuggested mitigation\nEncode all user inputs to HTML entities\n\n",
+  "severity": [
+    9.9,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1723341660,
+  "report_url": "https://hackerone.com/reports/219957",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Login to the REST API to obtain an authentication token and user ID."
+    ],
+    [
+      2,
+      "Send a crafted message using the chat.postMessage API endpoint with malicious HTML in the attachment field value."
+    ]
+  ],
+  "vuln_description": "An attacker can craft a custom message with an attachment containing malicious HTML in the field value, which executes arbitrary JavaScript code in the context of the client user when viewed.",
+  "reason": "The vulnerability involves understanding the API's handling of message attachments and the specific condition where HTML injection is possible (when the field value starts with '<'). However, the attack is straightforward once the API's behavior is known.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves injecting malicious HTML/JavaScript via API parameters, which is not directly related to authentication or authorization boundaries. The proposed methodologies focus on testing access control (AuthN/AuthZ) and IDOR vulnerabilities by swapping user sessions or resource IDs, not on input validation or sanitization issues like XSS.",
+    "is_detectable": false
+  }
+}

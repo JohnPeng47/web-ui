@@ -1,0 +1,47 @@
+{
+  "reported_to": "Acronis",
+  "reported_by": "kindone ",
+  "title": " Potential XSS Vulnerability in Acronis Login Callback URL",
+  "content": "\nSummary\nThe login callback URL, https://learn.acronis.com/portal/, is vulnerable to Cross-Site Scripting (XSS) attacks. When a user logs in and is redirected to this URL, the redirectUrl parameter is not properly sanitized, allowing an attacker to inject arbitrary JavaScript code. This code could be used to steal the user's session cookie, perform phishing attacks, or deface the website.\nSteps To Reproduce\nI was able to exploit this vulnerability by crafting a URL that included malicious JavaScript code in the redirectUrl parameter. When a user clicks on this URL and logs in, the injected code is executed in the user's browser.\nFor example, the following URL would display an alert containing the website domain: https://learn.acronis.com/portal/login-callback?redirectUrl=javascript:alert(document.domain)\nAn attacker could replace the alert with malicious code that steals the user's session cookie or redirects the user to a phishing website.\n<image_0>\nImpact\nThis vulnerability could allow an attacker to:\nSteal user session cookies\nPerform phishing attacks\nDeface the website\nTake control of user accounts\n\n",
+  "severity": [
+    7.3,
+    null
+  ],
+  "bounty": 100,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/zapjwv5n5fn039cpafplc7l6ggw0?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_2024-07-18_21_19_56.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_2024-07-18_21_19_56.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQU5LA7DQI%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T204526Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQCc9YRXRTUx7Idj8qb1jMs8QfGH8fy%2Fdyzg5FiBsjhXcwIhAKoWaqUpLoKkj2Q%2FKa8PGA5BO4fH3QsXEC83tqvrkQarKroFCPP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQAxoMMDEzNjE5Mjc0ODQ5IgzOHB4MdDjRzMCG6vIqjgW2GK%2FCSrsbka9rau%2B54wjD1LthKu7b7GofM5pKLSqbaiVagCLur49Dv%2BvNq0a9o9UIDTTwM03gNZhtnaWqyehDfLh0XbcKXSfCmg9%2B0coUBWlEAFCEbWPghkXZZFPfpGmI36BD%2FjHP1kZ6XuN5J8aWdXRhMK4NyvjK%2Fm7%2BzkFEBintTo%2FNphm6eqxqOzYNEe1QvrZ03iBYRZEIXBoXfuIHSJIih81fI92B%2FB2ZnDOfTzAbI083G9czb06XbwwFqp2P8OOh2YJc3k10ECUrlsBo1dkoBH3h9qC%2FcEpsrPtRwVCPRmG4J3wneQmewR%2FrzULqW3CbI29V89VlUPpQl5UML%2FDHhlou5IUAqMn0Liufkd60KRdJS%2Bahn4dhPHN3oJtQj6O0A%2F7A3MOhPz%2ByCdoeHs3VNQo3rVrTJGHxF35LzmrYVysN6qSNkpCpQsJyuyUBTm2xoF%2FXjDlQPo1mH%2FxOcFNQPJu02iJHx%2FPZjj%2FW2II%2BqoE%2FiHgiwXE1nVgOiSaKfG9HtMpzTZ23EQRdAud7Q13KrEcI%2BNjIZghSp8sYXBgSSRg5aobdzGtLGobJ4xeF0dp%2FMvmi1mzCcxLR3yWX2uiiYQE57n9eeNqRoeKfh57x0TcJuf0TfcXZTbN33tGcZ1b8qoWpYfe4fz8bouYBFBD6EIXv49hmHrMktYgpIUaVFxIeiGL3DfEFbMoVYZb0HLi24dFvH78MZfCV5pMBxZk5dHz4fRO7qVHEutQTOCKUqiGEhknbdTuU7otiJhFyeimoJgo1Sa8NsTXWvCY5CUX5N4wTM5jPdHOI3jBbOHgWBC4A6MnZV90bLHNcX0ZWml0ZNSTZO3CU3U2ZrP5r%2FktibBLhpPyUlhRuvV0wurqGvwY6sAGXzAf33n8WVCnRFn68JktYUcbOaeC2aVHjNhAbYa%2B1YsEqAkpoz2gIX5M3wZu5iJ%2F86GPsW3o3PSVErs%2BtQrmSkl3cSYZc%2BJWcvaYaGTirkMGg6Pr94SkL0OUDuUbCiqLqicvXacfZyfn0Rem0cZtH%2FurPe1A%2Fk078EVQv%2FaaAEAfc%2B6VVPBs%2BODhaqlSAh%2FSQmiTy%2Fq4SshBRcgFaFqiuGSxUgqyqt8gGCu0Uqgc4IQ%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=752a1697ae1251570c1c0d70c41ae5fc2673302ee3179bbd69a220c1bafd0154"
+  },
+  "disclosed_date": 1730902860,
+  "report_url": "https://hackerone.com/reports/2611305",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Craft a URL with a malicious JavaScript payload in the redirectUrl parameter, e.g., https://learn.acronis.com/portal/login-callback?redirectUrl=javascript:alert(document.domain)"
+    ],
+    [
+      2,
+      "Have a victim click the crafted URL and log in to trigger the XSS payload"
+    ]
+  ],
+  "vuln_description": "The login callback URL is vulnerable to Cross-Site Scripting (XSS) attacks due to improper sanitization of the redirectUrl parameter, allowing arbitrary JavaScript execution in the victim's browser upon login.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common XSS vector (URL parameter injection) with no complex interactions or state manipulation required. The attack follows a predictable pattern of URL crafting and victim interaction.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves injecting malicious JavaScript via the redirectUrl parameter, which is a client-side issue rather than an authentication or authorization boundary crossing. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, not on detecting unsanitized input leading to XSS.",
+    "is_detectable": false
+  }
+}

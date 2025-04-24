@@ -1,0 +1,42 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "orange ",
+  "title": "important: Apache HTTP Server on WIndows UNC SSRF (CVE-2024-38472)",
+  "content": "\nI reported this vulnerability through the official Apache HTTP Server security email on April 1, 2024, and received a fix along with a CVE number on July 1, 2024. You can check detailed information from there:\nhttps://httpd.apache.org/security/vulnerabilities_24.html\nImpact\nSSRF in Apache HTTP Server on Windows allows to potentially leak NTML hashes to a malicious server via SSRF and malicious requests or content\nUsers are recommended to upgrade to version 2.4.60 which fixes this issue. Note: Existing configurations that access UNC paths will have to configure new directive \"UNCList\" to allow access during request processing.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 4920,
+  "weaknesses": [
+    "Server-Side Request Forgery (SSRF)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1720895760,
+  "report_url": "https://hackerone.com/reports/2585385",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Set up a malicious server capable of capturing NTLM hashes."
+    ],
+    [
+      2,
+      "Configure the Apache HTTP Server on Windows to access a UNC path pointing to the malicious server."
+    ],
+    [
+      3,
+      "Trigger a request to the Apache server that forces it to access the UNC path, leaking NTLM hashes to the malicious server."
+    ]
+  ],
+  "vuln_description": "The vulnerability is an SSRF (Server-Side Request Forgery) in Apache HTTP Server on Windows that allows leaking NTLM hashes to a malicious server via crafted requests or content. This occurs when the server is configured to access UNC paths, which can be manipulated to point to an attacker-controlled server.",
+  "reason": "The vulnerability involves understanding how UNC paths work in Windows and how Apache HTTP Server processes requests to these paths. The interaction between the server's request processing and Windows' NTLM authentication mechanism is subtle but not overly complex. The attack requires setting up a malicious server and crafting specific requests, but the logic is not novel and is somewhat common in SSRF scenarios.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

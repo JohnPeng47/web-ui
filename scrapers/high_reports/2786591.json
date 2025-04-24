@@ -1,0 +1,40 @@
+{
+  "reported_to": "WordPress",
+  "reported_by": "wshadow ",
+  "title": "Unauthenticated WordPress Database Repair DoS",
+  "content": "\nSummary:\nThe WordPress Database Repair feature, accessible via the /wp-admin/maint/repair.php endpoint, is vulnerable due to improper access control and insecure design. When WP_ALLOW_REPAIR is set to true in the wp-config.php file, the repair page becomes publicly accessible without requiring any authentication. This vulnerability arises from two main issues: the absence of authentication for accessing the repair endpoint and the insecure nature of the WordPress repair feature, which lacks any limits or restrictions on access frequency or user verification. Consequently, an attacker can repeatedly trigger resource-intensive database repair operations, overwhelming server resources and resulting in a Denial of Service (DoS) condition.\nThis vulnerability can be categorized under these two CWE's as it fails to impose necessary restrictions on who can access this critical functionality.\nCWE-306: Missing Authentication for Critical Function\nCWE-400: Uncontrolled Resource Consumption\nPlatform(s) Affected:\nWordpress Core <6.6\nhttps://core.svn.wordpress.org/branches/6.6/\nSteps To Reproduce:\ndefine('WP_ALLOW_REPAIR', true);\nAccess the database repair endpoint directly by visiting the URL: http://target-site.com/wp-admin/maint/repair.php.\nNote that the page allows access without authentication. Select either the \"Repair Database\" or \"Repair and Optimize Database\" button.\nwhile true; do curl -X GET \"http://target-site.com/wp-admin/maint/repair.php?repair=1\"; sleep 1; done\nwhile true; do curl -X GET \"http://target-site.com/wp-admin/maint/repair.php?repair=1\"; sleep 1; done\nTo be more practical, I have weaponized it with a simple python script that can bring the site down for as long as the attacker desires. The script is hosted at https://raw.githubusercontent.com/smaranchand/wreckair-db/refs/heads/main/wreckair-db.py?token=GHSAT0AAAAAACZBPSANBXQSCUVHV6JYC2LUZYQVXVQ\nNote: Let me know if it is not accessible.\nObserve that the repeated requests will eventually exhaust server resources, causing the site to become unresponsive, results in a Denial of Service (DoS) condition, impacting the availability of the target WordPress site.\nSupporting Material/References:\n<image_0>\nImpact\nThe impact of this vulnerability is severe, as it allows an unauthenticated attacker to make the target WordPress site unresponsive through repeated use of the database repair functionality. This Denial of Service (DoS) condition disrupts the availability of the website, rendering it inaccessible to legitimate users. The lack of authentication and rate limiting on a critical function makes it easy for attackers to exploit, resulting in significant downtime, potential loss of business, and damage to the reputation of the affected website. Additionally, this vulnerability has been active for a long time, going unreported and unnoticed, making it a persistent threat to WordPress installations that enable the repair feature without proper security measures.\nMitigations\nTo mitigate this vulnerability, the following actions are recommended:\nRequire Authentication: WordPress should require authentication for accessing the /wp-admin/maint/repair.php endpoint, even when WP_ALLOW_REPAIR is set to true. This would ensure that only authorized users can initiate database repair operations.\nRestrict Access: Implement IP-based access control to limit access to the repair page only to trusted IP addresses. This would prevent unauthorized users from accessing the endpoint.\nUse a One-Time Token Mechanism: Introduce a secure one-time token mechanism to allow temporary access to the repair page. This token should expire after a short period, reducing the risk of exploitation.\nRate Limiting: Apply rate limiting to the /wp-admin/maint/repair.php endpoint to restrict how frequently repair requests can be made. This will help mitigate the risk of resource exhaustion through repeated requests.\nBy implementing these mitigations, the risk associated with this vulnerability can be significantly reduced, ensuring that the database repair functionality is only used by authorized personnel and cannot be abused to create a DoS condition.\n\n",
+  "severity": [
+    8.0,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Uncontrolled Resource Consumption"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/rhm0crkca3fjbejorqbdkaoleq6u?response-content-disposition=attachment%3B%20filename%3D%22Screen_Shot_2024-10-17_at_11.01.30_AM.png%22%3B%20filename%2A%3DUTF-8%27%27Screen_Shot_2024-10-17_at_11.01.30_AM.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQXSYNEIXS%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T205010Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCID34EjFczoP1AjX9wTcrwX01Xh5LYwoYOnMQLlFVYWIdAiBbpQJSkWEQhhnP3zcCVWrbrTi80fcQqNnBE8AA5rSIESq7BQjz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMcwXVHg4YyWhz8TFvKo8FtD4c5BjMeV125K1w41MsQxaE1Z5piY%2BWYCLuJ8C9JHEMnMYc3et02nod3A%2BV%2FBSXZdbnE5ZvakUuemlcfJMPCy0qgJgN3skRaRmIN1j10kqsgeZd0Yn4nNcUA2cSIjqArKICHRDMnNN6bE5GQvWFLG3FZC%2FlFNUfhfQjqs08gAkby3R4JiEzxQqu5K%2B1vft1i8pQKsRwVopPhvRiib7qlOtVmRTavaSuxo%2Fkk1ZufJPA0TJoaUbc0GnZQKEQFeh2VovdSQ4Kam2yPUX8bZMHUWdcZiy%2BDvomf%2BnHVVkH2Lxr0y35m6siQOhGyu%2Fh%2BdOGGWcUqKa9Q%2B4NGLChKi98JfXJsEEDN7uyg%2FF1ZooLggIR3erogeGigVX2On22hhXFTBl0%2FgPm0i9WzK2NkZUOaN%2FG%2FODK1pLJrTj7lQDO0pbGEzWGtCxE0NnVUizsZ3d43936aiXwE0DBS00hgTuOs1ueqt%2FiZTip0cRns7WVtQyGRvCrldyrIubIKnRXPrMxGTYM2kezEn1UFC6Xd8YYWXzZeb%2FoodNtNHg7Ej%2BbuAhVCx7lDf8gLQiBZeriKB0ozSTuH8%2FndYVkG7YnrkDnjqmwf8lEDBHlVcZQURxTD4Ga%2BBpMZlcwjtoZmxL6tgFhRgbIqRzV42DjMCvOXRPiT9tMqR%2BYFAnJMshgnQPmPCdJxnmFaHOUEvTqJGZcta73Wu6OL3S8Bq9qmdbNTNWcVGCIuad53Hdwy70ISiTxN47Gyna1m4smeriDZN%2B%2FdqrD%2FFCfKhzWIY7XidizbSbUT%2B43QALV2taxtJOXsp1gC7oxOM%2FuxqZizYF3buHt9JgpoEsIfPsaKDzMdxUGIhJFiUICpXbmWigsg4j%2FwFoSJDCPuoa%2FBjqyAS78m2TJbVWqb8BNA%2F73N%2FLA63wIYtada0tGJZOhUibVMnsoUL1s6ymAhEPtcjyeVzTXVNSB0J3%2BiIIEahreNu5Cj8GeEwW1jfNps%2BL3Fp2E%2Bh%2FFoRQCh0J%2FjnTQ%2FpOunsHejVL1BL0uGcuniNEYPtmoBs2jlO%2FU6SplGcVe2tKr%2BVg12L5eAMdUMEkSIlphDSSfMKrC6teFB%2F1%2FzdPIgIijpFXu6ca%2F80iTNr3GVaFgiIM%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=fca152b5e57690bc1c2b767f43d7b790f68e865fee765651959c9cb6223b3a52"
+  },
+  "disclosed_date": 1729270860,
+  "report_url": "https://hackerone.com/reports/2786591",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Set WP_ALLOW_REPAIR to true in wp-config.php: define('WP_ALLOW_REPAIR', true);"
+    ],
+    [
+      2,
+      "Access the database repair endpoint without authentication: http://target-site.com/wp-admin/maint/repair.php"
+    ]
+  ],
+  "vuln_description": "The WordPress Database Repair feature is accessible without authentication when WP_ALLOW_REPAIR is enabled, allowing unauthenticated attackers to trigger resource-intensive database repairs, leading to a Denial of Service (DoS) condition.",
+  "reason": "The vulnerability is straightforward to discover as it involves a direct access to an endpoint without any authentication checks. The conditions for exploitation are simple and do not require complex interactions or state manipulations.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

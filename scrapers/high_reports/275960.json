@@ -1,0 +1,38 @@
+{
+    "reported_to": "Tor",
+    "reported_by": "soulhunter ",
+    "title": "Address Bar Spoofing on TOR Browser",
+    "content": "\nHi TOR team,\nI would like to report a security bug in your browser:\nStep 1: Goto http://www.\u0578okia.com/(http://jsbin.com/wuyikedaxi/1/edit?html,output)\nStep 2: Observe that address bar points to http://www.\u0578okia.com/ which actually to be pointing to http://xn--okia-zgf.com, however browser displays www.\u0578okia.com/\nActual results:\nAddress bar points to a spoofed domain http://www.\u0578okia.com/. Address bar fails to parse character \"\u0578\"(U+0578 Armenian Small Letter). Several other characters from Armenian family lead to the same effect.\nExpected results:\nTORbrowser should have resolved the domain to real http://xn--okia-zgf.com. On chrome, internet explorer and firefox it resolves to xn--okia-zgf.com.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Phishing"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1672666980,
+    "report_url": "https://hackerone.com/reports/275960",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to http://www.\u0578okia.com/(http://jsbin.com/wuyikedaxi/1/edit?html,output) in TOR Browser"
+        ],
+        [
+            2,
+            "Observe the address bar shows http://www.\u0578okia.com/ instead of the actual domain http://xn--okia-zgf.com"
+        ]
+    ],
+    "vuln_description": "The TOR Browser fails to correctly parse and display the Unicode character '\u0578' (U+0578 Armenian Small Letter) in the URL, leading to address bar spoofing where the displayed domain does not match the actual resolved domain (IDN homograph attack).",
+    "reason": "The vulnerability relies on knowledge of Unicode homograph characters and their handling in IDN domains, but does not involve complex interactions or state manipulation. The attack is straightforward once the tester knows which Unicode characters trigger the issue.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

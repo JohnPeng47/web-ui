@@ -1,0 +1,38 @@
+{
+    "reported_to": "CodeIgniter",
+    "reported_by": "hackerneo ",
+    "title": "If the developer forgets to remove the built in controller welcome.php it helps the attacker to identify that the site is built with Codeigniter",
+    "content": "\nThe attacker can check the website's backend technology simply by typing site_name/index.php/welcome/index it will display the codeigniter welcome page if the developer dosen't removed the built in controller and view welcome.php and welcome_message.php i attaching a screenshot below as a proof of concept\n\n",
+    "severity": [
+        8.4,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Exposure Through Directory Listing"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1508308500,
+    "report_url": "https://hackerone.com/reports/278225",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the target website by entering the URL in a web browser."
+        ],
+        [
+            2,
+            "Append '/index.php/welcome/index' to the website URL and access it (e.g., site_name/index.php/welcome/index)."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves an information disclosure issue where the default CodeIgniter welcome page is accessible if the developer fails to remove it. This allows an attacker to identify that the website is built using the CodeIgniter framework, potentially aiding further exploitation.",
+    "reason": "The attack is straightforward and involves only a single step of accessing a known default path. There are no complex interactions or state manipulations required, and the logic is common knowledge among attackers familiar with CodeIgniter.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

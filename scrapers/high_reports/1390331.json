@@ -1,0 +1,42 @@
+{
+  "reported_to": "Nextcloud",
+  "reported_by": "nickvergessen ",
+  "title": "SQL injextion via vulnerable doctrine/dbal version",
+  "content": "\nSummary:\nSQL injection via limit parameter on user facing APIs\nSteps To Reproduce:\nRun security scanner:\nREPORT /remote.php/dav/comments/files/1985\nXML input oc:filter-comments.oc:limit#text was set to 1'\"\nYou have an error in your SQL syntax\nSupporting Material/References:\nFor more details see:\nhttps://github.com/nextcloud-gmbh/h1/issues/197\nImpact\nFull flexed SQL injection via user provided input\n\n",
+  "severity": [
+    8.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1652292480,
+  "report_url": "https://hackerone.com/reports/1390331",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Run security scanner on the target endpoint: /remote.php/dav/comments/files/1985"
+    ],
+    [
+      2,
+      "Inject SQL payload into the 'oc:filter-comments.oc:limit#text' parameter with value: 1'\""
+    ]
+  ],
+  "vuln_description": "SQL injection via vulnerable doctrine/dbal version in the limit parameter on user-facing APIs, allowing full SQL injection via user-provided input.",
+  "reason": "The vulnerability involves a straightforward SQL injection in a user-facing parameter, which is a common and well-documented attack vector. The discovery does not require complex interactions or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "197",
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability involves direct manipulation of SQL queries via user input (limit parameter), which is a different class of vulnerability from the authN/authZ bypass or IDOR vulnerabilities described in the methodology. The methodology focuses on testing authorization boundaries by swapping user sessions and resource IDs, not on detecting SQL injection through input manipulation.",
+    "is_detectable": false
+  }
+}

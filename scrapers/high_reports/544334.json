@@ -1,0 +1,52 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "sp1d3rs ",
+    "title": "[Critical] Possibility to takeover any user account #2 without interaction on the https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+    "content": "\nDescription\nHello. This time I discovered a way to tekeover any user's account via unsafe password reset.\nThis time it's much easier than #1 way in the #543678 report.\nWhen users requests the password reset, the next link is come to the email:\nCode 56 Bytes\n1https://\u2588\u2588\u2588\u2588\u2588/resetpassword.aspx?ru=[user_id]&op=[token]\nThe [user_id] is numeric, always same for same emaill, and incremental for every new user.\nThe [token] parameter is random and used to protect the link from hijacking.\nBut, I discovered that Reset password endpoint accepts empty token!\nSo all the attacker needs, it's to initiate password reset for the victim's email, and request the\nCode 54 Bytes\n1https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/resetpassword.aspx?ru=[user_id]&op=\nSince [user_id] is numeric and static for same account, it can be easily guessed by the attacker.\nPOC\n1) Go to the https://\u2588\u2588\u2588\u2588\u2588/ForgotPassword.aspx\n2) Initiate reset password for the \u2588\u2588\u2588\u2588\u2588\u2588 (it's my test account)\n3) Use this link:\nCode 42 Bytes\n1https://\u2588\u2588\u2588/resetpassword.aspx?ru=7655&op=\nwhere 7655 - it's my user numeric ID (as we know, it's incremental, and be easily guessed for other accounts).\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n4) Set the new password and confirm it. You can set something as 111111111aA!!!! to pass the password requirements.\n5) You will be logged into my organization as admin.\nSuggested fix\nFix the op tooken validation - it should be checked properly.\nImpact\nSeverity: Critical\nImmediate account Individual/Cprporate account takeover via password reset. Attacker needs to know only email.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Privilege Escalation"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1570216560,
+    "report_url": "https://hackerone.com/reports/544334",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to the password reset page (https://\u2588\u2588\u2588\u2588\u2588/ForgotPassword.aspx) and initiate a password reset for the target email."
+        ],
+        [
+            2,
+            "Construct the reset password URL without the token parameter: https://\u2588\u2588\u2588/resetpassword.aspx?ru=[user_id]&op= where [user_id] is the numeric ID of the target user (can be guessed as it is incremental)."
+        ],
+        [
+            3,
+            "Access the constructed URL, set a new password, and gain access to the victim's account."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to take over any user's account by exploiting an unsafe password reset mechanism. The reset password endpoint accepts an empty token parameter, making it possible to bypass the token validation. By guessing the incremental user ID, an attacker can reset the password of any account without needing the valid token.",
+    "reason": "The vulnerability is straightforward to discover as it involves a simple manipulation of the password reset URL by omitting the token parameter. The incremental nature of the user ID makes it easy to guess, and the lack of token validation is a common oversight in password reset implementations.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "#543678",
+    "idor_detectable": true,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": true
+    }
+}

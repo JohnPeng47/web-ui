@@ -1,0 +1,51 @@
+{
+  "reported_to": "Lab45",
+  "reported_by": "meryem0x ",
+  "title": "Stored XSS on https://apps.topcoder.com/wiki/pages/editpage.action",
+  "content": "\nSummary:\nHi :) There is a stored XSS on wiki pages and it executes when editing page.\nSteps To Reproduce:\nAfter I submitted #867125, i realized that the vote macro causes stored XSS on wiki edit page.\nA user can edit wiki pages on https://apps.topcoder.com/wiki/pages/editpage.action?pageId=. Users can insert macros to pages. Vote macro is vulnerable to XSS.\nGo to a wiki page, edit it and type\nCode 107 Bytes\n1{vote:What is your favorite vulnerability?}\n2RCE\n3SSRF\n4XSS\"><img src=X onerror=alert(document.domain)>\n5{vote}\nand save it. When an other user edit this page, XSS will execute.\n<image_0>\nNote: This only works to signed-in users. Because unauthorized users cannot edit pages. I think there is a mistake on https://apps.topcoder.com/wiki/login.action now. If you encounter an error, you can login on main site (https://accounts.topcoder.com/member) then try.\nImpact\nXSS can use to steal cookies or to run arbitrary code on victim's browser.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/jFXGdF3SqS7fWLBERNEvWC4s?response-content-disposition=attachment%3B%20filename%3D%222020-05-06_15-09-02_ekran_g_r_nt_s_.png%22%3B%20filename%2A%3DUTF-8%27%272020-05-06_15-09-02_ekran_g_r_nt_s_.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ6H5VU6N2%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T004752Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIGAKFOh1FHbJaZY1RxuAGSrHEXBRmkDCGZ1Mvr6vv70SAiBit3uFFRFC8N%2FDz6SxXhFvFOwfnXfsSN2AgvhauGjpEiqxBQggEAMaDDAxMzYxOTI3NDg0OSIMg4eaX2DrHVjEuzHnKo4FlkbM7r1JjiznnwEghk6FJE4NI7YBc9yN0RGL1JEFvfc9U7vG827%2Bt0Fs6Al7%2FMfHEj8nQnLqV2l7b7Q8yvmtNWB8k%2B6JkqNPEWbGMEPbiz3QsPYoK%2BYS8RKrlNxLeZZJq6OX%2F%2FtOFSDB80ql1RsXmZjhW34yzjjulFK4%2BjDWjAJqNT9zaFM%2Fe6fF44zAB98nVb40nYTfYRKwiqqBhM2FaFd21wbLSH%2B5890poLP4NptchbsdjlmAP%2BGQgDaBuFDluSIokXptHgLyhQEWYanM2KzJJR83d5YguVnvXtdreqyvJAxESU8pavqE16RUzmNNFv8Gpkjpo6eUXvKcUIE9KFs6ZhgTUETL6uZv%2FHUzaXyZr%2B0UDjIkATMZjE4PWb5mjQOB%2B%2FQE%2Fobhz3tCJutmvbToNQq2GKsruO2aUWdqMVSaTB0%2BXJklJ22D5Ja1IIelqFLADDbgoSio%2FvFJjm4pNeZd3cyQ8IZ5wqmmN1Dsa9bBYuHL3PU9bkB7p%2BuNIryUSXN9DSAKD5VqNyIAqR9DziM0RNWA2xeH%2BrYlSp8ea89rlib5U324Q%2BwPRIrkHavRPXZVIUyda4caupKS%2FacMMfLiW1pcuakVQak5tM7UrE1QIRAsGw%2FVgS%2FAu%2BD6OoRwBbW0YpbyIsS3k0XHi2cBP8vtavQn5Zb0EZcT4MFwff2O%2F99ei4Lr9W%2FTddXwORp%2BRIenIiwxanbGAxFBDQX1oG8IuVZ1sn8XEhIME82E6XqTy1Tbd32NdknhR5J1mfoj%2BW2ppPrg1nf2JCGKaMIj5AuH4jvC7L3uJ0DQoIeOhSaILFTRDN7H%2FxL%2BPP4M7EEWNucJLinunqF3n7WmuyJ%2BkdQF%2Bl3Jg%2FGmmZjRklXpMNzZjL8GOrIBS7JFCC2tMlRSokp%2F6xDb3MimfciEEcf7wK1jFXL%2FAK2kTaXdbntCllkoflZgs3z2Lje3NRdOPPv6AIo%2BwBrgik5bwXlJc4mm4YQlor3Hj5%2Fh8tFxmnjQ3GoWjpQjLd9P0yJ%2FWSL9qNG5Eo8tthQl%2B42EesTkWV1aKatrnJR07unu0BI7nAY2sRRdBACw5AX4TWjNv6YyggBduMV5M%2FeaY9WkSXnJt1EJEoC%2FhdvgsYBzYg%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=c3a69a16d61dae0a5b23a6fb2e0881960176b0374844be75406adbc0ab9522eb"
+  },
+  "disclosed_date": 1589305020,
+  "report_url": "https://hackerone.com/reports/867133",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to a wiki page on https://apps.topcoder.com/wiki/pages/editpage.action?pageId="
+    ],
+    [
+      2,
+      "Insert the following vote macro with XSS payload:\n{vote:What is your favorite vulnerability?}\nRCE\nSSRF\nXSS\"><img src=X onerror=alert(document.domain)>\n{vote}"
+    ],
+    [
+      3,
+      "Save the page. The XSS will execute when another user edits this page."
+    ]
+  ],
+  "vuln_description": "A stored XSS vulnerability exists in the vote macro functionality of the Topcoder wiki. When a malicious vote macro containing an XSS payload is saved to a wiki page, the payload executes when another user edits the page. This allows attackers to execute arbitrary JavaScript in the context of the victim's session.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common XSS pattern in a macro system. The only complexity comes from needing to know that the vote macro exists and that it doesn't properly sanitize input. The attack doesn't require multiple components, complex state manipulation, or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "867125",
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a stored XSS that executes when editing a wiki page, which is an action within the same application context. The methodology involves testing actions with different user sessions and resource IDs, which would include editing pages with malicious content that triggers XSS when another user edits the same page.",
+    "is_detectable": true
+  }
+}

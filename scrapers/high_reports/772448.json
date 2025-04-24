@@ -1,0 +1,47 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "mik317 ",
+  "title": "[blamer] RCE via insecure command formatting",
+  "content": "\nI would like to report a RCE issue in the blamer module.\nIt allows to execute arbitrary commands remotely inside the victim's PC\nModule\nmodule name: blamer\nversion: 0.1.13\nnpm page: https://www.npmjs.com/package/blamer\nModule Description\nBlamer is a tool for get information about author of code from version control system. Supports git and subversion.\nModule Stats\n[~1800] downloads in the last day\n[12,910] downloads in the last week\n[~52k] downloads in the last month\nVulnerability Description\nThe issue occurs because a user input is formatted inside a command that will be executed without any check. The issue arises here: https://github.com/kucherenko/blamer/blob/master/src/vcs/git.js#L24\nSteps To Reproduce:\nCreate the following PoC file:\nCode 128 Bytes\n1// poc.js\n2var Blamer = require('blamer');\n3var blamer = new Blamer('git');\n4blamer.blameByFile('poc.js', 'test; touch HACKED;#');\n5\nCheck there aren't files called HACKED\nExecute the following commands in another terminal:\nCode 65 Bytes\n1npm i blamer # Install affected module\n2node poc.js #  Run the PoC\n<image_0>\nPatch\nDon't format commands using insecure user's inputs :)\nSupporting Material/References:\n[OPERATING SYSTEM VERSION]: Kali Linux\n\n\nWrap up\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nImpact\nRCE via command formatting on blamer\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/XDKwGGm7D9dc14pYKBfvAAkA?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_from_2020-01-11_23-50-17.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_from_2020-01-11_23-50-17.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYTA2PCB7%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T012427Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCKX632%2Fp25g5R%2FtwWWb8kPMBxK1ddX%2F%2BdSJD4%2Bs0wSPQIgKa%2BtmeMp8IKjDURUG15YU6FdRwqLvosUlGcJxiiR1IQqsgUIIBADGgwwMTM2MTkyNzQ4NDkiDIIgY4gsJwKHjc2rHiqPBQgGjxYmWhuEH9NVvonJoOmJFca3x7by%2F%2FngcoSUkLq5g923AjuGAZc8BVtu52fb4TBS1Zu8Cd%2Bh0DIEqwVraNkwmb2NgcJLsp%2FJxknz2eY50Py%2FyV21HFlstZwtnR%2F2jpJa6B6HIqnciMWzNhBBaQi4Cl7RizuoGHDwf86U6kyWccBCVl97I1NGlCEv7Vga1bZcKy0VWQZXVs5ZX6xvvvOiZ6qNavAA0Ecvb33k9L2X7MPPN32xSPtJB2M1mRRocXBvwTivpBZyuDfPnUGBL1o1VM0Uc8xX%2BFR%2BK%2BO7osgup5TKwH%2FF8RjmP3T3z1h56B1KSoD3awEJXSUR7UWOXzvXcx68dtpp1Yb%2BpcR%2BODxVsDqidhR5R0%2FIoYGmzEJOOHL%2BJ27U%2BiRQOEiDr7RZPwl2xUrOmyWyVYr%2BaSCZ%2FgnnePhbRJxF1O%2BrKnD%2Fy2%2BpTpdeGAFp%2BNkRwGfQ88RAgTyUtTKl12G8gB%2BnxzL74ol3CxFMGLxTfV%2FoJJimjfrus%2BwWfF7ynH9xxdAPWZwMtYbdoYKZFvFVC%2FJbJWW3NH6lBoFXYLC1ujGgPCOeYmjRHtiJiBKm9xbtOym0%2BQn6VKfYogabJCusRZ8iwhE5mXdDddVOoW5304ISWqnJBYGjYgFxIkBEb46jzmljgrk4wzCIG%2FNPH%2BqwnlN84y4cii3JjMutJbsWfeg4K%2FfHzppSsQIYCHiZ29%2BOfl2BNNwr7P8GfofLoKLYRNy2sh3Mw0FdCVytZsecE9O1ohidk6KJuHk9imrtoZn24HESoHQJkO1uNGccy%2FxwsFRA6Dzw9DeRCWafzN%2FD5QK84qTkms8ALE6R3Dk%2B4CanKe%2Fog0sKpwRgEl2kusBDC1QO9L2F9u4wzOaMvwY6sQEIDVL2HhLMZMfDsNZl2RS%2BJvygnQe3JL2i9yeh6o7XwqWpJCWGSq1fgLGhWqQfOYxKJlTyV9HemQ112%2BccScB9%2BNNrgSITKmoxhWDaGSPefsjL%2F6cfBpgA6gW46ymzipm%2BxQ%2FxfeQYjEw7Rjwc5yi3eDJHe7BVeeNnyVVA9AvX%2BGjS%2Bzq8zyQZ1LxZDbP0eXhj0mFOJZHo4bxKEiSdoJzRqn6SCcH3KSFc2AJ%2BoZbPZk8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=1b118a00975c7dd626c901db8f44f93a56f0f5b884a9bc48278015f5445eba24"
+  },
+  "disclosed_date": 1583847480,
+  "report_url": "https://hackerone.com/reports/772448",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install the affected module: npm i blamer"
+    ],
+    [
+      2,
+      "Run the PoC file: node poc.js (where poc.js contains the malicious input)"
+    ]
+  ],
+  "vuln_description": "The blamer module is vulnerable to Remote Code Execution (RCE) due to insecure command formatting. User input is directly formatted into a command that is executed without proper sanitization, allowing an attacker to execute arbitrary commands on the victim's system.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common pattern of insecure command formatting. The attacker only needs to identify the point where user input is incorporated into a command and test for command injection. The interaction is obvious and does not require complex state manipulation or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection via user input in the blamer module, which is not related to authentication or authorization boundaries. The proposed methodologies focus on AuthN/AuthZ and IDOR vulnerabilities, which are not applicable to this RCE issue.",
+    "is_detectable": false
+  }
+}

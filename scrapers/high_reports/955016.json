@@ -1,0 +1,45 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "ajxchapman ",
+  "title": "GitLab-Runner on Windows `DOCKER_AUTH_CONFIG` container host Command Injection",
+  "content": "\nSummary\nGitLab-Runner, when running on Windows with a docker executor, is vulnerable to Command Injection via the DOCKER_AUTH_CONFIG build variable. Injected commands are executed on the container host, not within a Docker container, as such could compromise all future builds which are executed by the runner.\nDetails\nWhen using a docker executor, the DOCKER_AUTH_CONFIG build variable is processed as a JSON docker config file. One of the possible config values, credHelpers, specifies a hash of repository keys to docker Credential Helper application values.\nCode 66 Bytes\n1{\n2  \"credHelpers\" : {\n3    \"repo.example.com\" : \"application\"\n4  }\n5}\nWhen gitlab-runner attempts to create an image, each key value pair in the credHelpers hash is processed, and the corresponding Credential Helper application is executed by gitlab-runner in order to obtain credentials for the repository. This execution occurs on the docker container host, gitlab-runner directly execs the Credential Helper to receive it's output.\nDocker Credential Helpers, as processed by the github.com/docker/cli/cli/config/credentials/native_store.go:NewNativeStore function are prepended with the string docker-credential- before execution:\nCode 384 Bytes\n1// github.com/docker/cli/cli/config/credentials/native_store.go\n2const (\n3\tremoteCredentialsPrefix = \"docker-credential-\"\n4\ttokenUsername           = \"<token>\"\n5)\n6\n7...\n8\n9func NewNativeStore(file store, helperSuffix string) Store {\n10\tname := remoteCredentialsPrefix + helperSuffix\n11\treturn &nativeStore{\n12\t\tprogramFunc: client.NewShellProgramFunc(name),\n13\t\tfileStore:   NewFileStore(file),\n14\t}\n15}\nThis is sufficient to prevent command injection on *nix based systems, however Windows based systems can exploit path traversal to execute arbitrary programs as Credential Helpers. E.G. a credHelper of {\"helper\" : :/../../../../../../../../Windows/System32/calc.exe\"} would result in the application docker-credential-/../../../../../../../../Windows/System32/calc.exe being executed, which on a Windows system would resolve to C:/Windows/System32/calc.exe. This only affects Windows based systems, as Windows does not verify path directories exist during path normalization. In this case, Windows does not check the directory docker-credential- exists as it is normalized out due to the path traversal characters following it.\nThe Credential Helper execution is ultimately called in the gitlab-runner code by gitlab.com/gitlab-org/gitlab-runner/helpers/docker/auth/auth.go:readConfigsFromCredentialsHelper calling the github.com/docker/cli/cli/config/credentials/native_store.go:Get docker API method:\nCode 378 Bytes\n1// gitlab.com/gitlab-org/gitlab-runner/helpers/docker/auth/auth.go\n2func readConfigsFromCredentialsHelper(config *configfile.ConfigFile) (map[string]types.AuthConfig, error) {\n3\thelpersAuths := make(map[string]types.AuthConfig)\n4\n5\tfor registry, helper := range config.CredentialHelpers {\n6\t\tstore := credentials.NewNativeStore(config, helper)\n7\n8\t\tnewAuths, err := store.Get(registry)\nThe issue exists as the gitlab-runner code does not check for path traversals in Credential Helper values before passing them to the docker API.\nIn it's simplest form, this issue can be exploited to execute any program that exists on the system running gitlab-runner with uncontrolled arguments. However, arbitrary programs can be executed by setting up a service which downloads an executable payload to the C:\\Builds volume mounted directory, and setting the full path to the volume mounted directory as the credHelper value, e.g.:\nCode 174 Bytes\n1{\n2  \"helper\" : \"/../../../../../../../../ProgramData/docker/volumes/runner-aapjznsw-project-20444930-concurrent-0-cache-cde2929a41401004cf47d36bdb2eb380/_data/testfile.exe\"\n3}\nThis works as the following three conditions are met:\nThe source of the volume mounted build directory is predictable per build\nThe DOCKER_AUTH_CONFIG is processed once for each created container\nThe build container is created after all service containers have been started.\nSteps to reproduce\nRegister and run a runner on a Windows system with a docker executor and a tag of windows-docker-runner.\nCreate a Build with the following .gitlab-ci.yml:\nCode 263 Bytes\n1services:\n2  - alpasdfasdfasdfasdfasdfidne:3.5\n3variables:\n4  DOCKER_AUTH_CONFIG: \"{\\\"credHelpers\\\" : {\\\"repo.example.com\\\" : \\\"/../../../../../../../../Windows/System32/calc.exe\\\"}}\"\n5\n6build1:\n7  tags:\n8    - windows-docker-runner\n9  stage: build\n10  script:\n11    - whoami\nWhen gitlab-runner picks up the build it will process the DOCKER_AUTH_CONFIG json and launch the CredentialHelper specified, in this case calc.exe.\nConfirmed vulnerable version configurations are:\ngitlab-runner 13.2.2 on Windows 10 with Docker Toolbox (docker runner)\ngitlab-runner 13.2.2 on Windows 2019 with Docker Enterprise (docker-windows runner)\nImpact\nExploitation of this issue could compromise the underlying system on which gitlab-runner runs, exposing source code, build artifacts and other sensitive data to a malicious user.\nWhat is the current bug behavior?\ngitlab-runner passes unsanitized JSON values from the DOCKER_AUTH_CONFIG build variable to the github.com/docker/cli/cli/config/credentials/native_store.go:NewNativeStore docker API function, which may result in command injection on Windows systems.\nWhat is the expected correct behavior?\nJSON supplied via the DOCKER_AUTH_CONFIG build variable should be processed to ensure it does not contain malicious content.\nRelevant logs and/or screenshots\nOutput of checks\ngitlab-runner --version\nCode 172 Bytes\n1Version:      13.2.2\n2Git revision: a998cacd\n3Git branch:   refs/pipelines/172580057\n4GO version:   go1.13.8\n5Built:        2020-07-30T14:52:23+0000\n6OS/Arch:      windows/amd64\nconfig.toml\nCode 541 Bytes\n1concurrent = 1\n2check_interval = 0\n3\n4[session_server]\n5  session_timeout = 1800\n6\n7[[runners]]\n8  name = \"windows\"\n9  url = \"https://gitlab.com\"\n10  token = \"\u2588\u2588\u2588\u2588\u2588\"\n11  executor = \"docker-windows\"\n12  [runners.custom_build_dir]\n13  [runners.cache]\n14    [runners.cache.s3]\n15    [runners.cache.gcs]\n16  [runners.docker]\n17    tls_verify = false\n18    image = \"mcr.microsoft.com/windows/servercore:1809\"\n19    privileged = false\n20    disable_entrypoint_overwrite = false\n21    oom_kill_disable = false\n22    disable_cache = false\n23    volumes = [\"c:\\\\cache\"]\n24    shm_size = 0\nImpact\nExploitation of this issue could compromise the underlying system on which gitlab-runner runs, exposing source code, build artifacts and other sensitive data to a malicious user.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 1000,
+  "weaknesses": [
+    "OS Command Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1604496900,
+  "report_url": "https://hackerone.com/reports/955016",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Register and run a GitLab Runner on a Windows system with a docker executor and a specific tag (e.g., windows-docker-runner)."
+    ],
+    [
+      2,
+      "Create a Build with a .gitlab-ci.yml file containing a malicious DOCKER_AUTH_CONFIG variable that specifies a path traversal to an executable (e.g., calc.exe)."
+    ]
+  ],
+  "vuln_description": "GitLab-Runner on Windows is vulnerable to Command Injection via the DOCKER_AUTH_CONFIG build variable. This allows an attacker to execute arbitrary commands on the container host by exploiting path traversal in the Credential Helper values, which are processed unsanitized.",
+  "reason": "The vulnerability involves understanding the interaction between GitLab-Runner's handling of the DOCKER_AUTH_CONFIG variable and Windows' path normalization behavior. The attack requires knowledge of how Credential Helpers are executed and how path traversal can bypass intended security checks on Windows systems.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection via the DOCKER_AUTH_CONFIG build variable in GitLab-Runner on Windows, which is not directly related to the authentication or authorization bypass methodologies described. The methodologies focus on testing access control between user sessions and resources within the same application, whereas this vulnerability exploits a command injection flaw in the handling of a specific environment variable during the build process.",
+    "is_detectable": false
+  }
+}

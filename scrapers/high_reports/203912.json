@@ -1,0 +1,61 @@
+{
+  "reported_to": "Informatica",
+  "reported_by": "fillawful ",
+  "title": "Stored XSS via Discussion Title and Send as Email attribute in [marketplace.informatica.com]",
+  "content": "\nPOC\nUnder \"Your Stuff\" choose to \"Create a Discussion/Ask a question\"\nChoose a space to submit your discussion/question. Any space will do.\nTitle your discussion with the payload \"><img src=x onerror=alert(1)>\nChoose \"Post message\" to publish.\nView the message as any user. Under \"Actions\" choose to \"Send as Email\"\nObserve XSS poc alert box\"\nPlease let me know if you have any questions.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1491669540,
+  "report_url": "https://hackerone.com/reports/203912",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Under 'Your Stuff', choose 'Create a Discussion/Ask a question'"
+    ],
+    [
+      2,
+      "Choose a space to submit your discussion/question. Any space will do."
+    ],
+    [
+      3,
+      "Title your discussion with the payload: '><img src=x onerror=alert(1)>'"
+    ],
+    [
+      4,
+      "Choose 'Post message' to publish."
+    ],
+    [
+      5,
+      "View the message as any user. Under 'Actions', choose 'Send as Email'"
+    ],
+    [
+      6,
+      "Observe XSS poc alert box"
+    ]
+  ],
+  "vuln_description": "This vulnerability is a Stored Cross-Site Scripting (XSS) issue in the discussion title and 'Send as Email' feature of marketplace.informatica.com. An attacker can inject malicious JavaScript code into the discussion title, which is then executed when another user views the discussion and chooses to send it as an email.",
+  "reason": "The vulnerability involves a straightforward injection of a common XSS payload into a user-input field (discussion title), which is then rendered unsanitized in another context (email). The steps are linear and do not require complex interactions or state manipulation.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a stored XSS via discussion title and email attribute, which is a client-side issue rather than an authentication or authorization boundary crossing. The proposed methodologies focus on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, not detecting XSS vulnerabilities.",
+    "is_detectable": false
+  }
+}

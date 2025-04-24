@@ -1,0 +1,38 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "berserkbd47 ",
+  "title": "Critical sensitive information Disclosure. [HtUS]",
+  "content": "\n(Database user,Database password,Database name)\non https://\u2588\u2588\u2588\u2588\u2588\u2588.edu/\nI got sensitive information:\nview-source:https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.edu/database.php.orig\nDatabase information (Database user,Database password,Database name)\n$hostname = '\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.edu';\n$db = '\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588';\n$username = '\u2588\u2588\u2588\u2588_user';\n$password = '\u2588\u2588\u2588\u2588';\nImpact\nBug impact:\nSensitive information disclosed and possible for an attacker can access into the system.\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Information Disclosure"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1673651100,
+  "report_url": "https://hackerone.com/reports/1626236",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to the URL: https://\u2588\u2588\u2588\u2588\u2588\u2588.edu/"
+    ],
+    [
+      2,
+      "View the source code of the page or directly access: view-source:https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.edu/database.php.orig"
+    ]
+  ],
+  "vuln_description": "The vulnerability involves the disclosure of sensitive database credentials (username, password, database name) in a publicly accessible file (database.php.orig) on the web server. This allows any attacker to potentially access the database and manipulate or extract sensitive data.",
+  "reason": "The vulnerability was discovered by simply viewing the source code or accessing a file with a common backup extension (.orig). No complex interactions or multi-step attacks were required. The file was directly accessible without any authentication or special knowledge.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

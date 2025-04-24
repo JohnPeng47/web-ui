@@ -1,0 +1,45 @@
+{
+  "reported_to": "Discourse",
+  "reported_by": "alberto__segura ",
+  "title": "XSS Vulnerability on Image link parser",
+  "content": "\nI found a XSS (Cross-Site Scripting) vulnerability, and it is present in the markdown parser when it tries to parse an image URL.\nTo reproduce the vulnerability you need to add a fake image url like:\nhttp://host/path/to/image'onerror=alert(1);//.png\nAs you can see, we have an invalid image URL which finish with an image extension (PNG). By putting the ' we are able to break the \"img\" tag in which the image url is included by the parser and add custom code, allowing us to run Javascript code. A malicious user could use the $.getScript function to load a malicious script.\nIf you need more information about the vulnerability, please, feel free to reply.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 256,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1484060460,
+  "report_url": "https://hackerone.com/reports/191909",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create a markdown content with an image URL that includes an XSS payload, e.g., http://host/path/to/image'onerror=alert(1);//.png"
+    ],
+    [
+      2,
+      "Submit or render the markdown content in the vulnerable application"
+    ]
+  ],
+  "vuln_description": "The vulnerability is an XSS (Cross-Site Scripting) issue in the markdown parser when processing image URLs. By crafting a malicious image URL with an XSS payload, an attacker can break out of the 'img' tag and execute arbitrary JavaScript code.",
+  "reason": "The attack is straightforward and involves a single component (the image URL in markdown). The interaction is obvious (breaking out of the 'img' tag with a quote), and the logic is commonly seen in XSS vulnerabilities.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves injecting malicious scripts via image URLs, which is unrelated to authentication or authorization checks. The proposed methodologies focus on AuthN/AuthZ bypasses and IDOR vulnerabilities by testing session, action, and resource_id combinations, not input validation or script injection.",
+    "is_detectable": false
+  }
+}

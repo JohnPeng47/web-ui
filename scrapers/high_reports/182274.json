@@ -1,0 +1,42 @@
+{
+  "reported_to": "shopify-scripts",
+  "reported_by": "raydot ",
+  "title": "Null pointer dereference due to TOCTTOU bug in mrb_time_initialize",
+  "content": "\nmrb_time_initialize sets the data pointer to NULL before parsing function arguments. Parsing function arguments can call out to ruby code to call methods to do type coercion. If the type coercion method tries to access the time object it will dereference a NULL pointer.\nThe following snippet results in a native crash under mruby-engine:\nCode 86 Bytes\n1$x = Time.new\n2class Tmp\n3    def to_i\n4        $x.mday\n5    end\n6end\n7$x.initialize Tmp.new\nAttached is a patch to mruby to fix this issue.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Uncontrolled Resource Consumption"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1484528160,
+  "report_url": "https://hackerone.com/reports/182274",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create a Time object and store it in a global variable $x"
+    ],
+    [
+      2,
+      "Define a class Tmp with a to_i method that accesses $x.mday"
+    ],
+    [
+      3,
+      "Call $x.initialize with an instance of Tmp, triggering the NULL pointer dereference"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a NULL pointer dereference in mrb_time_initialize due to a Time-of-Check to Time-of-Use (TOCTTOU) bug. The function sets the data pointer to NULL before parsing arguments, which can involve calling Ruby code for type coercion. If the coercion method accesses the time object, it dereferences the NULL pointer, causing a crash.",
+  "reason": "The vulnerability requires understanding the initialization sequence of Time objects and how type coercion can interact with partially initialized objects. The attacker needs to recognize that setting the pointer to NULL before argument parsing creates a dangerous window where Ruby code execution can trigger the dereference.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

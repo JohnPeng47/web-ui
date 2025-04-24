@@ -1,0 +1,50 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "aliyugombe ",
+    "title": "Remote code execution due to unvalidated file upload",
+    "content": "\nSummary:\nHello\nI found a critical vunerability in one of your site, where user can upload any file type as a profile picture (including php file)\nSteps To Reproduce:\nVisit https://careers.mtn.cm and register as a user.\nAfter successful registration, login and update your data.\nWhen uploading profile photo, select any file type.\nWhen its updated, view the source code of the page, you will see your file with complete path.\nCopy the file path and paste into your browser.\nBoom your file will be executed\nSupporting Material/References:\nHere i upload non-harmful file as a poc\nCode 72 Bytes\n1<?php\n2echo \"proof of concept (PoC) by aliyugombe@wearehackerone.com\";\n3?>\nhttps://careers.mtn.cm/en/user/images/users/-13-04-2021-20-15-16-payload.php\nImpact\nAttacker can upload malicious file and inject to your server or deface the entire website since its possible to upload php file and gain access to direct file path.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Input Validation"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1662067740,
+    "report_url": "https://hackerone.com/reports/1164452",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Visit https://careers.mtn.cm and register as a user."
+        ],
+        [
+            2,
+            "After successful registration, login and update your data."
+        ],
+        [
+            3,
+            "When uploading profile photo, select any file type (e.g., a PHP file)."
+        ],
+        [
+            4,
+            "After updating, view the source code of the page to find the file path."
+        ],
+        [
+            5,
+            "Copy the file path and paste it into your browser to execute the uploaded file."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to upload arbitrary files, including PHP files, as a profile picture. This can lead to remote code execution (RCE) on the server, enabling the attacker to execute malicious code, deface the website, or gain unauthorized access to the server.",
+    "reason": "The attack is straightforward and does not involve multiple components, complex application states, or subtle interactions. The vulnerability is a classic example of unvalidated file upload, a well-known issue in web applications.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

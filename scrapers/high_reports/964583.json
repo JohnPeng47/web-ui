@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "karas ",
+  "title": "CVE-2017-13041 The ICMPv6 parser in tcpdump before 4.9.2 has a buffer over-read in print-icmp6.c:icmp6_nodeinfo_print().",
+  "content": "\nDescription:\nVersions of tcpdump before 4.9.2 are vulnerable to a buffer over-read in print-icmp6.c. This vulnerability was disclosed to the tcpdump maintainers and was recently patched in version 4.9.2 and disclosed as (CVE-2017-13041).\nPatch: https://github.com/the-tcpdump-group/tcpdump/commit/f4b9e24c7384d882a7f434cc7413925bf871d63e\nThis vulnerability can be exploited in two ways. The first is to produce a .pcap file with crafted packet(s) for the protocol(s) concerned and make the target system try to decode the file using tcpdump. The second is to send specially crafted packet(s) to the network segment where the target system is running a tcpdump process that is decoding a live packet capture. In the latter case it depends on the specific network protocol if the crafted packet(s) may be sent from the local segment only or from a remote Internet host.\nImpact\nIf the affected program is running with special privileges, or accepts data from untrusted network hosts (e.g. a webserver) then the bug is a potential security vulnerability. If the heap buffer is filled with data supplied from an untrusted user then that user can corrupt the memory in such a way as to inject executable code into the running program and take control of the process. This is one of the oldest and more reliable methods for attackers to gain unauthorized access to a computer.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 500,
+  "weaknesses": [
+    "Buffer Over-read"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1625875920,
+  "report_url": "https://hackerone.com/reports/964583",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create a .pcap file with crafted ICMPv6 packets that trigger the buffer over-read in tcpdump's ICMPv6 parser."
+    ],
+    [
+      2,
+      "Run tcpdump (version before 4.9.2) on the target system to decode the crafted .pcap file or capture live traffic containing the malicious packets."
+    ]
+  ],
+  "vuln_description": "The ICMPv6 parser in tcpdump before 4.9.2 has a buffer over-read in print-icmp6.c:icmp6_nodeinfo_print(). This vulnerability can be exploited by crafting malicious ICMPv6 packets that cause tcpdump to read beyond the bounds of a buffer, potentially leading to arbitrary code execution if the program is running with special privileges.",
+  "reason": "The vulnerability involves understanding the ICMPv6 protocol and how tcpdump parses it, but the attack itself is straightforward once the malicious packets are crafted. There are no complex interactions or states to manipulate, and the logic is not novel.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

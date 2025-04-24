@@ -1,0 +1,50 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "x3ph_ ",
+    "title": "hardcoded password stored in javascript of https://\u2588\u2588\u2588\u2588.mil",
+    "content": "\nSummary:\nI have discovered a cleartext password stored within a javascript. This password allows me to authentication to https://\u2588\u2588\u2588\u2588\u2588.mil.\nDescription:\nI have discovered a cleartext password stored within a javascript. This password allows me to authentication to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil.\nTo confirm this vulnerability we will first navigate to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil, you are now prompted to type a password. We will provide an incorrect password such as 'Password'.\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\nWe can confirm the password is invalid. However, reviewing the javascript data for '\u2588\u2588\u2588\u2588\u2588\u2588.chunk.js' we can confirm the authentication is validated based on a hardcoded password '\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588!'.\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nWe can now confirm if we can access the staging web app using hardcoded password.\n\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nBy knowing the password, it is possible to understand your password policy and structure which will encourage bruteforcing and password spray attacks in your environment.\nStep-by-step Reproduction Instructions\nNavigate to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil.\nOpen your browser debugger by pressing F12.\nClick on Network and refresh the page.\nOpen the javascript '\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.chunk.js' and look for where the password is stored. You will see \"(n=prompt(\"Enter Password\",\"Password\"),o=\"\u2588\u2588\u2588\u2588\u2588\u2588;\" copy the password.\nNow close out your browser debugger and refresh the page and type the password in.\nYou now have access to \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil\nSuggested Mitigation/Remediation Actions\nIf this staging web application needs to be password protected, you can refer to the following AWS documentation on how to properly setup basic authentication https://docs.aws.amazon.com/speke/latest/documentation/authentication.html.\nResources:\nhttps://owasp.org/www-community/vulnerabilities/Use_of_hard-coded_password\nImpact\nBy knowing the password, it is possible to understand your password policy and structure which will encourage bruteforcing and password spray attacks in your environment.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Use of Hard-coded Password"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1604371440,
+    "report_url": "https://hackerone.com/reports/991718",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the target website https://\u2588\u2588\u2588\u2588.mil"
+        ],
+        [
+            2,
+            "Open browser developer tools (F12) and inspect the Network tab"
+        ],
+        [
+            3,
+            "Refresh the page and locate the JavaScript file '\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.chunk.js'"
+        ],
+        [
+            4,
+            "Search the JavaScript file for the hardcoded password (visible in cleartext)"
+        ],
+        [
+            5,
+            "Use the discovered password to authenticate to the website"
+        ]
+    ],
+    "vuln_description": "A hardcoded password is stored in cleartext within a JavaScript file, allowing unauthorized access to a protected .mil domain website.",
+    "reason": "The vulnerability requires only basic web inspection techniques (viewing source code and network traffic) with no complex interactions or state manipulation. The hardcoded credential is directly visible without any obfuscation or advanced analysis.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

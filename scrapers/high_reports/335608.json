@@ -1,0 +1,38 @@
+{
+  "reported_to": "Node.js",
+  "reported_by": "jasnell ",
+  "title": "Denial of Service: nghttp2 use of uninitialized pointer",
+  "content": "\nWhile investigating https://hackerone.com/reports/335533 and while following the same reproduction steps, I uncovered a bug in nghttp2 that causes use of an uninitialized pointer for an altsvc frameresulting in crash. The error can be easily triggered by a remote attacker by sending malformed ALTSVC and GOAWAY frames to the server, or by a malicious server sending same to the client. For Node.js, the result is a crashed process. The report has been submitted to the nghttp2 author who is working on a fix and is working on a fixed release.\nImpact\nCrashing the Node.js process causing a Denial of Service\n\n",
+  "severity": [
+    9.3,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "NULL Pointer Dereference"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1581655620,
+  "report_url": "https://hackerone.com/reports/335608",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Send a malformed ALTSVC frame to the target server or client."
+    ],
+    [
+      2,
+      "Follow up with a GOAWAY frame to trigger the uninitialized pointer usage."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves a use of an uninitialized pointer in nghttp2 when processing ALTSVC and GOAWAY frames, leading to a crash. This can be exploited by a remote attacker to cause a Denial of Service (DoS) by sending specially crafted frames to either a server or a client.",
+  "reason": "The attack requires sending two specific types of malformed frames in sequence, which is a straightforward process once the vulnerability is known. The interaction between the frames is not overly complex, and the vulnerability does not involve manipulating complex application states or novel logic.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "335533"
+}

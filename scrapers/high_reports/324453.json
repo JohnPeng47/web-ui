@@ -1,0 +1,49 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "chalker ",
+  "title": "`command-exists` concatenates unsanitized input into exec()/execSync() commands",
+  "content": "\nI would like to report command injection in command-exists.\nIt allows to inject and execute arbitrary shell commands while trying to determine if a crafted command exists.\nModule\nmodule name: command-exists\nversion: 1.2.2\nnpm page: https://www.npmjs.com/package/command-exists\nModule Description\nnode module to check if a command-line command exists\nModule Stats\n5 480 downloads in the last day\n74 405 downloads in the last week\n294 869 downloads in the last month\nVulnerability\nVulnerability Description\ncommandName argument is not properly escaped before being concatenated into the command that is passed to exec()/execSync().\nSee https://github.com/mathisonian/command-exists/blob/v1.2.2/lib/command-exists.js#L49-L94\nSteps To Reproduce:\nCode 129 Bytes\n1const commandExists = require('command-exists');\n2commandExists.sync('ls; touch /tmp/foo0');\n3commandExists('ls; touch /tmp/foo1');\nObserve /tmp/foo0 and /tmp/foo1 being created.\nSupporting Material/References:\nArch Linux current\nNode.js 9.7.1\nnpm 5.7.1\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nFor setups where unsanitized user input could end up in command-exists argument, users would be able to execute arbitrary shell commands.\n\n",
+  "severity": [
+    10.0,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1526083560,
+  "report_url": "https://hackerone.com/reports/324453",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "const commandExists = require('command-exists');"
+    ],
+    [
+      2,
+      "commandExists.sync('ls; touch /tmp/foo0');"
+    ],
+    [
+      3,
+      "commandExists('ls; touch /tmp/foo1');"
+    ]
+  ],
+  "vuln_description": "The `command-exists` module concatenates unsanitized input into `exec()`/`execSync()` commands, allowing command injection. An attacker can execute arbitrary shell commands by crafting a malicious command name.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common pattern of unsanitized input being passed to shell commands. The attack does not require multiple components, complex state manipulation, or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection in the 'command-exists' module where unsanitized user input is concatenated into shell commands. This is not an authentication or authorization (AuthN/AuthZ) issue, but rather a command injection vulnerability. The proposed methodologies focus on AuthN/AuthZ bypasses and IDOR vulnerabilities, which are not applicable here.",
+    "is_detectable": false
+  }
+}

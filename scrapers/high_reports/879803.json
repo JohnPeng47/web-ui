@@ -1,0 +1,46 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "njgadhiya ",
+  "title": "Bypass of SSRF Vulnerability",
+  "content": "\nBypass of SSRF report https://hackerone.com/reports/793704\nFix applied after reporting the actual report did not prevent from SSRF issue.\nhttps://github.com/TryGhost/Ghost/commit/47739396705519a36018686894d1373e9eb92216#diff-3aa52b4b8c6e0fb8422de65648e35887R101\nThe function fetchOembedData() only validates, IPv4, IPv6 and localhost:\nif (!HTTP_REGEX.test(protocol) || hostname === 'localhost' || IPV4_REGEX.test(hostname) || IPV6_REGEX.test(hostname))\nHowever, it is possible that an attacker would be able to bypass localhost validations with following domains or such:\nhttp://spoofed.burpcollaborator.net\nhttp://localtest.me\nhttp://customer1.app.localhost.my.company.127.0.0.1.nip.io\nhttp://mail.ebc.apple.com redirect to 127.0.0.6 == localhost\nhttp://bugbounty.dod.network redirect to 127.0.0.2 == localhost\nRecommendation\nIn order to fix, this vulnerability all the URL provided with \"/ghost/api/v3/admin/oembed/?url=http://169.254.169.254/metadata/v1.json&type=embed\" and URLs getting as a response should be resolved and it should again pass through the filters added to above functions.\nImpact\nAn attacker with publisher role (editor, author, contributor, administrator) in a blog may be able to leverage this to make arbitrary GET requests in a Ghost Blog instance's to internal external network.\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Server-Side Request Forgery (SSRF)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1624883640,
+  "report_url": "https://hackerone.com/reports/879803",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify a Ghost Blog instance with a vulnerable version where you have publisher role access (editor, author, contributor, administrator)."
+    ],
+    [
+      2,
+      "Craft a malicious URL that bypasses the SSRF filters by using domains that resolve to localhost (e.g., http://localtest.me, http://customer1.app.localhost.my.company.127.0.0.1.nip.io)."
+    ],
+    [
+      3,
+      "Submit the crafted URL to the Ghost Blog's oEmbed endpoint: /ghost/api/v3/admin/oembed/?url=http://malicious-url&type=embed."
+    ],
+    [
+      4,
+      "Observe the response to confirm the SSRF vulnerability by accessing internal or external network resources."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker with publisher role access in a Ghost Blog instance to bypass SSRF protections by using specially crafted domains that resolve to localhost or internal IP addresses. The existing validation checks for IPv4, IPv6, and 'localhost' but fails to account for domains that resolve to these addresses, enabling arbitrary GET requests to internal or external networks.",
+  "reason": "The attack involves understanding SSRF vulnerabilities and knowing specific domains that can bypass localhost validation. However, the steps to exploit are straightforward once the bypass domains are identified, and the interaction between the components is not overly complex.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

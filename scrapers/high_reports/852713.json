@@ -1,0 +1,38 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "r00tpgp ",
+  "title": "Previously Compromised PulseSSL VPN Hosts",
+  "content": "\nHi again!!\nBack in 2019, I had reported that a pulseSSL VPN server owned by US DoD can be compromised by a publicly available exploit. The report is #681249. As a result, the userid and passwd db was also compromised. I found that at least 1 userid and password combination from that compromised db can still be used.\nPoC\nHere is a screenshot of me accessing a US DoD owned website using a compromised credentials found back in 2019. I am still able to login to https://\u2588\u2588\u2588\u2588/dana-na/auth/url_46/welcome.cgi with:\nl: \u2588\u2588\u2588\np: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nHere is the creds from Sep, 2019.\n\u2588\u2588\u2588\u2588\u2588\nImpact\nIt is widely reported in the media that blackhat hackers around the world are still hacking fully patched PulseSSL VPN hosts because owners did not change the passwords that was compromised back in 2019. The articles that I am referring to is at :\nhttps://www.us-cert.gov/ncas/alerts/aa20-107a\nhttps://thehackernews.com/2020/04/pulse-secure-vpn-vulnerability.html\nFix\nOther than patching, it is strongly advisable that the impacted organization \u2588\u2588\u2588 reset all passwords immediately.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Insecure Storage of Sensitive Information"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1590603900,
+  "report_url": "https://hackerone.com/reports/852713",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify a previously compromised PulseSSL VPN server using publicly available exploits (as reported in 2019)."
+    ],
+    [
+      2,
+      "Use the compromised credentials (username and password) from the 2019 breach to log in to the VPN server at the provided URL: https://\u2588\u2588\u2588\u2588/dana-na/auth/url_46/welcome.cgi."
+    ]
+  ],
+  "vuln_description": "This vulnerability involves the continued use of compromised credentials from a 2019 breach of a PulseSSL VPN server. Despite the breach being known and patched, the credentials were not reset, allowing unauthorized access to the VPN server.",
+  "reason": "The attack is straightforward, involving only the use of known compromised credentials without any need for complex interactions or novel logic. The difficulty lies in obtaining the credentials, which were already publicly available due to the previous breach.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": "681249"
+}

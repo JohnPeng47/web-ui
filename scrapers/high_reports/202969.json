@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "geeknik ",
+  "title": "CVE-2017-5482 The Q.933 parser in tcpdump before 4.9.0 has a buffer overflow in print-fr.c:q933_print().",
+  "content": "\nReported to the project maintainers in 2016. Regardless of CVE-2016-8575 q933_print()\nstill could overread the buffer trying to parse a short packet. Fixed by https://github.com/the-tcpdump-group/tcpdump/commit/c39c1d99ac3b6d5d9519b39da6717180651650d3.\n\n",
+  "severity": [
+    7.3,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Memory Corruption - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1570581060,
+  "report_url": "https://hackerone.com/reports/202969",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Capture a short packet that triggers the Q.933 parser in tcpdump."
+    ],
+    [
+      2,
+      "Run tcpdump with the captured packet to observe the buffer overflow in q933_print()."
+    ]
+  ],
+  "vuln_description": "The Q.933 parser in tcpdump before 4.9.0 has a buffer overflow in print-fr.c:q933_print(). This vulnerability allows an attacker to overread the buffer when parsing a short packet, potentially leading to arbitrary code execution or a denial of service.",
+  "reason": "The vulnerability involves a straightforward buffer overflow in a specific parser function. The discovery requires knowledge of the Q.933 protocol and the ability to craft or capture a short packet, but does not involve complex interactions or multiple components.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

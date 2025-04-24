@@ -1,0 +1,45 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "phillycheeze ",
+  "title": "XSS (Persistent) - Selecting role(s) for protected branches",
+  "content": "\nSummary:\nWhen using the dropdown that selects the groups or users that are allowed to push or merge to a protected branch within a project, it is possible to trigger a XSS with a malicious user name string.\nDescription:\nThis vulnerability is similar to the recently announced CVE-2018-10379. The username input string where an attacker is able to inject a payload is in the same location, but the XSS that renders is in a different location. Since the remediation needs to be applied at the presentation layer, this is indeed a separate vulnerability and needs to be fixed separately (although Gitlab could start whitelisting characters allowed in usernames, similar to how Gitlab whitelists characters for Group or Project names).\nThe steps to reproduce are fairly simple but there are some restrictions:\nOnly members of a project with Master access are able to become victims of the XSS\nOnly groups/members with a subscription level of Starter or higher are able to perform the XSS, since this requires the ability to restrict merge/push permissions of a branch to a specific user. This is a premium feature only allowed at Starter or higher. (https://gitlab.com/help/user/project/protected_branches#restricting-push-and-merge-access-to-certain-users-starter)\nSteps To Reproduce:\nSet your own username as \"<img src=x onerror=alert(document.domain)> foo / bar\"\nMake yourself have at least Master access to a project\nIn this project, ensure at least one branch is in the project and that branch is a \"Protected Branch\"\nUnder Project Settings -> Repository -> Protected Branches, select the dropdown under the \"Ability to Merge\" section\nNotice that the onerror attribute from the username renders.\nSupporting Material/References:\nMore information can be provided upon request.\nYou'll notice the payload above is the same as the payload used in a test file (inside the ce source code repo) for the CVE I attached. I only found this vulnerability since I was testing the previous CVE on our own internal instance of Gitlab, left my username saved as that malicious string, and later found the alert() dialog popup in another area of the site even after patching to 10.7.2.\nSuggested Remediation\nI believe this is the offending Line: https://gitlab.com/gitlab-org/gitlab-ee/blob/master/ee/app/assets/javascripts/projects/settings/access_dropdown.js#L461\n^There could also be other XSS vulnerabilities in this JS file. Everywhere else in the app uses the underscore method _.escape()to escape user input, but this file doesn't.\nImpact\nThe security impact is the same as any typical persistent xss.\nThe hacker selected the Cross-site Scripting (XSS) - Stored weakness. This vulnerability type requires contextual information from the hacker. They provided the following answers:\nURL\nhttps://gitlab.com/group/project/settings/repository\nVerified\nYes\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1531775820,
+  "report_url": "https://hackerone.com/reports/346111",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Set your username to a malicious string: `<img src=x onerror=alert(document.domain)> foo / bar`"
+    ],
+    [
+      2,
+      "Navigate to Project Settings -> Repository -> Protected Branches and select the dropdown under 'Ability to Merge' section"
+    ]
+  ],
+  "vuln_description": "A persistent XSS vulnerability exists in GitLab's protected branch settings where a malicious username can trigger JavaScript execution when viewed in the merge permissions dropdown. The attack requires the victim to have Master access and the attacker to have Starter or higher subscription level.",
+  "reason": "The vulnerability requires specific conditions (Master access, Starter subscription) and involves manipulating a username field to inject XSS payloads, but the attack vector is straightforward once these conditions are met. The interaction between the username field and the protected branch settings dropdown is non-obvious but not highly complex.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves user input (username) that is not properly sanitized before being rendered in the UI. The methodology described focuses on authentication and authorization boundaries (AuthN/AuthZ) by testing different user sessions and resource IDs. However, the XSS vulnerability is a client-side rendering issue that does not involve crossing authorization boundaries or manipulating resource IDs. Therefore, the described methodology would not detect this XSS vulnerability.",
+    "is_detectable": false
+  }
+}

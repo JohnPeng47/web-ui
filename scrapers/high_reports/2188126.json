@@ -1,0 +1,48 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "mattaustin ",
+  "title": "Permissions policies can be bypassed via Module._load and require.extensions (High) (CVE-2023-30587)",
+  "content": "\nhttps://hackerone.com/reports/1960870\nThe use of Module._load() and require.extensions[\".js\"] can bypass the policy mechanism and require modules outside of the policy.json definition for a given module.\nThis vulnerability affects all users using the experimental policy mechanism in all active release lines: 16.x, 18.x and, 20.x.\nImpact\nPermission policies limit a project to a specific set of authorized node js built-in modules. For example a project could attempt to limit the use of child_process which could be bypassed leading to remote code execution.\n\n",
+  "severity": [
+    7.7,
+    null
+  ],
+  "bounty": 1165,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1701376560,
+  "report_url": "https://hackerone.com/reports/2188126",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify a Node.js application using the experimental policy mechanism (policy.json) to restrict module access."
+    ],
+    [
+      2,
+      "Use Module._load() or require.extensions[\".js\"] to bypass the policy restrictions and require unauthorized modules (e.g., child_process for RCE)."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows bypassing Node.js's experimental policy mechanism (policy.json) by using Module._load() or require.extensions[\".js\"], enabling the loading of unauthorized modules (e.g., child_process for RCE). This affects Node.js versions 16.x, 18.x, and 20.x.",
+  "reason": "The vulnerability involves understanding Node.js's internal module loading mechanisms (Module._load and require.extensions) and their interaction with the experimental policy feature. While the bypass is straightforward once identified, discovering it requires knowledge of Node.js internals and the policy mechanism's limitations.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "idor_detectable": false,
+    "authnz_byppass_detectable": false
+  }
+}

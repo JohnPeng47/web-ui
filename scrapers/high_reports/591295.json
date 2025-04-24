@@ -1,0 +1,57 @@
+{
+  "reported_to": "X (Formerly Twitter)",
+  "reported_by": "orange ",
+  "title": "Potential pre-auth RCE on Twitter VPN",
+  "content": "\nHi, we(Orange Tsai and Meh Chang) are the security research team from DEVCORE. Recently, we are doing a research about SSL VPN security, and found several critical vulnerabilities on Pulse Secure SSL VPN! We have reported to vendor and patches have been released on 2019/4/25. Since that, we keep monitoring numerous large corporations using Pulse Secure and we noticed that Twitter haven't patched the SSL VPN server over one month!\nThese vulnerabilities include a pre-auth file reading(CVSS 10) and a post-auth(admin) command injection(CVSS 8.0) which can be chained into a pre-auth RCE! Here are all vulnerabilities we found:\nCVE-2019-11510 - Pre-auth Arbitrary File Reading\nCVE-2019-11542 - Post-auth Stack Buffer Overflow\nCVE-2019-11539 - Post-auth Command Injection\nCVE-2019-11538 - Post-auth Arbitrary File Reading\nCVE-2019-11508 - Post-auth Arbitrary File Writing\nCVE-2019-11540 - Post-auth Session Hijacking\nOur Steps\nFirst, we download following files with CVE-2019-11510:\n/etc/passwd\n/etc/hosts\n/data/runtime/mtmp/system\n/data/runtime/mtmp/lmdb/dataa/data.mdb\n/data/runtime/mtmp/lmdb/dataa/lock.mdb\n/data/runtime/mtmp/lmdb/randomVal/data.mdb\n/data/runtime/mtmp/lmdb/randomVal/lock.mdb\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nThe VPN user and hashed passwords are stored in the file mtmp/system. However, Pulse Secure caches the plain-text password in the dataa/data.mdb once the user log-in. Here, we just grep part of username/plain-text-password for proofs and further actions.\nP.S. we mask the password field for security concerns, and we can send to you if you provide your PGP key.\nCode 89 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 / \u2588\u2588\u2588\u2588\n2\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 / \u2588\u2588\u2588\u2588\u2588\u2588\n3\u2588\u2588\u2588\u2588\u2588 / \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n4\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 / \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n5\u2588\u2588\u2588 / \u2588\u2588\u2588\u2588\u2588\u2588\nOnce we log into the SSL VPN, we found the server has enabled the Two-Factor Authentication. Here, we listed two methods to bypass the 2FA:\n\u2588\u2588\u2588\u2588\n# secret-key = \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\nThe Pulse Secure stores the user session in the randomVal/data.mdb. Without Roaming Session option enabled, we can reuse the session and log into your SSL VPN!\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nThe next, in order to trigger the command injection(CVE-2019-11542). We leverage the web proxy function to access the admin interface with following URL:\nCode 16 Bytes\n1https://0/admin/\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nWe are now trying to crack the admin hash by GPU. It seems takes a long time, but once we cracked, we can achieve RCE absolutely. Actually, we can simply wait for the admin login and obtain the plain-text password directly!\nCode 15 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n2\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAnyway, we decided to report to you first, because it's lethal and critical. If you want, we can provide the RCE PoC in admin interface in order to proof the potential risk!\nImpact:\nAccess Intranet(we have accessed the \u2588\u2588\u2588\u2588\u2588\u2588\u2588 for proof) \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nPlenty of staff plain-text passwords\nInternal server and passwords(such as the LDAP)\nAttack back all VPN clients(we will detail the step in Black Hat USA 2019)\nPrivate keys\nSensitive cookies in Web VPN(such as okta, salesforce, box.com and google)\nSupporting Material/References:\nWe attached screenshots to proof our actions. For security concern, we didn't attach the mtmp/system and the dataa/data.mdb. If you want, we can send to you with your PGP key encrypted!\nRecommend Solution\nThe only and simplest way to solve this problem is to upgrade your SSL VPN to the latest version!\nImpact\nAccess Intranet(we have accessed the \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 for proof) \u2588\u2588\u2588\u2588\nPlenty of staff plain-text passwords\nInternal server and passwords(such as the LDAP)\nAttack back all VPN clients(we will detail the step in Black Hat USA 2019)\nPrivate keys\nSensitive cookies in Web VPN(such as okta, salesforce, box.com and google)\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 20160,
+  "weaknesses": [
+    "OS Command Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1565463960,
+  "report_url": "https://hackerone.com/reports/591295",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Exploit CVE-2019-11510 to download critical files including /etc/passwd, /etc/hosts, and database files from the Pulse Secure VPN server."
+    ],
+    [
+      2,
+      "Extract plain-text passwords from the cached data in dataa/data.mdb to gain VPN access."
+    ],
+    [
+      3,
+      "Bypass Two-Factor Authentication by reusing session data from randomVal/data.mdb or manipulating the secret-key."
+    ],
+    [
+      4,
+      "Access the admin interface via the web proxy function at https://0/admin/ to exploit post-auth vulnerabilities."
+    ],
+    [
+      5,
+      "Chain CVE-2019-11542 (command injection) with other vulnerabilities to achieve pre-auth RCE."
+    ]
+  ],
+  "vuln_description": "This vulnerability involves a chain of exploits in Pulse Secure SSL VPN, starting with a pre-auth arbitrary file read (CVE-2019-11510) to extract sensitive data, bypassing 2FA, and culminating in a post-auth command injection (CVE-2019-11542) to achieve remote code execution. The attack leverages multiple CVEs and requires intricate steps to manipulate the VPN's state and data.",
+  "reason": "The attack involves multiple complex components including file reading, session hijacking, 2FA bypass, and command injection. It requires deep understanding of the VPN's architecture, subtle interactions between vulnerabilities, and manipulation of complex application states to chain exploits effectively.",
+  "new_complexity": "VERY_HIGH",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves pre-auth file reading and post-auth command injection on a VPN server, which are not directly related to the IDOR or AuthN/AuthZ bypass methodologies described. The detection methods focus on swapping user sessions and resource IDs within the same application, whereas this report involves exploiting specific vulnerabilities in the VPN server's software.",
+    "is_detectable": false
+  }
+}

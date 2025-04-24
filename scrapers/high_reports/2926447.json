@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "entropydrifter777 ",
+    "title": "Public google drive link Exposes Military Orders Containing PII (Name, SSN etc..) and Operational Details",
+    "content": "\nDescription:\nI found google drive link https://drive.google.com/drive/folders/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.aspx?Mode=ReadOnly&Id=90dd0d3b-0ed1-e76b-128f-11ebc799ba55 contains pdfs at '/\u2588\u2588\u2588\u2588 Internal/Orders' that discloses the following PII:\nFull Name: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSocial Security Number (SSN): \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nHome Address: \u2588\u2588\u2588\u2588, \u2588\u2588\u2588\u2588\u2588\u2588\nMarital Status: Married, 3 dependents (M03 in January 2021 orders; S00 in earlier orders)\nSecurity Clearance Level: \u2588\u2588\u2588\nHow to reproduce\nNavigate to https://\u2588\u2588\u2588\u2588\u2588\u2588.aspx?Mode=ReadOnly&Id=90dd0d3b-0ed1-e76b-128f-11ebc799ba55.\nBelow the page you will find https://drive.google.com/drive/folders/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\nGo to https://drive.google.com/drive/folders/\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\nOpen folder named \u2588\u2588\u2588\u2588\u2588\u2588\u2588 Internal. 5.Navigate to folder named Orders.\nYou will find the pdfs that discloses PII data as shown below in screen shots.\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nPrivacy Violation: Exposes PII of personnel, violating privacy laws such as the U.S. Privacy Act of 1974.\nIdentity Theft and Fraud: Information like SSNs and home addresses can be used for malicious purposes.\nSystem Host(s)\nwww.yellowribbon.mil\nAffected Product(s) and Version(s)\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.aspx?Mode=ReadOnly&Id=90dd0d3b-0ed1-e76b-128f-11ebc799ba55\nCVE Numbers\nSteps to Reproduce\nNavigate to https://\u2588\u2588\u2588\u2588\u2588\u2588.aspx?Mode=ReadOnly&Id=90dd0d3b-0ed1-e76b-128f-11ebc799ba55.\nBelow the page you will find https://drive.google.com/drive/folders/\u2588\u2588\u2588\u2588\u2588.\nGo to https://drive.google.com/drive/folders/\u2588\u2588\u2588.\nOpen folder named \u2588\u2588\u2588 Internal. 5.Navigate to folder named Orders.\nYou will find the pdfs that discloses PII data as shown below in screen shots.\n\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\nRemove the folder or make it private at least\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1737748200,
+    "report_url": "https://hackerone.com/reports/2926447",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the provided URL containing the Google Drive link."
+        ],
+        [
+            2,
+            "Access the 'Orders' folder within the 'Internal' directory to view the PDFs containing PII."
+        ]
+    ],
+    "vuln_description": "A publicly accessible Google Drive link exposes military orders containing Personally Identifiable Information (PII) such as full names, Social Security Numbers (SSNs), home addresses, and operational details. This constitutes a privacy violation and poses risks of identity theft and fraud.",
+    "reason": "The vulnerability involves straightforward access to a publicly shared Google Drive link without any need for authentication or complex interactions between components. The discovery primarily requires navigating to the provided URL and accessing the specified folders.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,38 @@
+{
+  "reported_to": "Mapbox",
+  "reported_by": "geeknik ",
+  "title": "null pointer dereference and segfault in tile-count-merge",
+  "content": "\nThis crash was triggered with 642f773 while fuzzing tile-count-merge with AFL on Debian 8 x64.\n./tile-count-merge -o /dev/null test000\nCode 1.50 KiB\n1ASAN:SIGSEGV\n2=================================================================\n3==10201==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x00000048d0af bp 0x7ffd8644b6a0 sp 0x7ffd8644ae30 T0)\n4    #0 0x48d0ae in __interceptor_memcmp (/root/tile-count/tile-count-merge+0x48d0ae)\n5    #1 0x4dc6c9 in finder::operator<(finder const&) const /root/tile-count/merge.cpp:115:10\n6    #2 0x4dc6c9 in bool __gnu_cxx::__ops::_Iter_less_val::operator()<finder*, finder const>(finder*, finder const&) const /usr/bin/../lib/gcc/x86_64-linux-gnu/4.9/../../../../include/c++/4.9/bits/predefined_ops.h:54\n7    #3 0x4dc6c9 in finder* std::__lower_bound<finder*, finder, __gnu_cxx::__ops::_Iter_less_val>(finder*, finder*, finder const&, __gnu_cxx::__ops::_Iter_less_val) /usr/bin/../lib/gcc/x86_64-linux-gnu/4.9/../../../../include/c++/4.9/bits/stl_algobase.h:965\n8    #4 0x4ca6e0 in finder* std::lower_bound<finder*, finder>(finder*, finder*, finder const&) /usr/bin/../lib/gcc/x86_64-linux-gnu/4.9/../../../../include/c++/4.9/bits/stl_algobase.h:999:14\n9    #5 0x4ca6e0 in do_merge(merge*, unsigned long, int, int, long long, int, bool, unsigned long) /root/tile-count/merge.cpp:213\n10    #6 0x4c38e4 in main /root/tile-count/mergetool.cpp:105:2\n11    #7 0x7fba250bcb44 in __libc_start_main /build/glibc-qK83Be/glibc-2.19/csu/libc-start.c:287\n12    #8 0x4c248c in _start (/root/tile-count/tile-count-merge+0x4c248c)\n13\n14AddressSanitizer can not provide additional info.\n15SUMMARY: AddressSanitizer: SEGV ??:0 __interceptor_memcmp\n16==10201==ABORTING\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "NULL Pointer Dereference"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1499801760,
+  "report_url": "https://hackerone.com/reports/245221",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Run the tile-count-merge tool with the command: ./tile-count-merge -o /dev/null test000"
+    ],
+    [
+      2,
+      "Observe the crash due to a null pointer dereference leading to a segmentation fault"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a null pointer dereference in the tile-count-merge tool, which leads to a segmentation fault when processing input. The crash occurs during a memcmp operation in the finder::operator< function, indicating that the tool attempts to compare memory at a null address.",
+  "reason": "The vulnerability is straightforward to discover as it involves a direct null pointer dereference, which is a common type of bug. The fuzzer likely stumbled upon this by providing malformed input that the tool did not handle properly. There are no complex interactions or states involved; the issue is localized to a single function call.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

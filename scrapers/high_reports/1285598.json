@@ -1,0 +1,51 @@
+{
+  "reported_to": "Reddit",
+  "reported_by": "gaurav-bhatia ",
+  "title": "s3 bucket takeover presented in https://github.com/reddit/rpan-studio/blob/e1782332c75ecb2f774343258ff509788feab7ce/CI/full-build-macos.sh",
+  "content": "\nHey team,\nSummary:\n<image_0>\nSteps To Reproduce:\nCreate a s3 bucket with name obs-nightly and us west 2 region\nUpload files with the name same as given in the code (e.g. cefbinary${1}_macosx64.tar.bz2)\nMake the settings and change it as a static website\nYou have successfully taken the s3 bucket and now when any user runs the code the url with s3 get executed and an attacker can spread dangerous malware.\nPOC:\n<image_1>\n<image_2>\n<image_3>\nRemediaton\nYou should remove the unclaimed s3 bucket as soon as possible from both the codes as it possess a critical risk\nImpact\nAn attacker can takeover the s3 bucket and can host his malicious content with the name (cefbinary${1}_macosx64.tar.bz2) as presented in the code and can spread ransomware and many malicious files. This bug has a critical impact because the code of the tool that many people uses, contains unclaimed s3 bucket.\nRegards,\nGaurav Bhatia\n\n",
+  "severity": [
+    8.2,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Business Logic Errors"
+  ],
+  "screenshots": {
+    "image_0": "I have found that in the code of full-build-macos.sh in rpanstudio on github(https://github.com/reddit/rpan-studio/blob/e1782332c75ecb2f774343258ff509788feab7ce/CI/install-dependencies-osx.sh) contains a s3 bucket which was unclaimed i.e (https://obs-nightly.s3-us-west-2.amazonaws.com)",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/otbz9l9x7un8d3cfct09c6efp0c7?response-content-disposition=attachment%3B%20filename%3D%22reddits3poc1.JPG%22%3B%20filename%2A%3DUTF-8%27%27reddits3poc1.JPG&response-content-type=image%2Fjpeg&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQZEEJQHKN%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T172623Z&X-Amz-Expires=1539&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIC8HlnhEwhQNhRu1AM5s%2B7GXwfWKr0uoHiDYlcFwWDQRAiEAt%2BKATsYckGGm2%2BONRBlOJu8TCxRg0gbGM53noirddXYqsgUIFRADGgwwMTM2MTkyNzQ4NDkiDHwMjeVWgu8rHwt7AiqPBUZUpj%2FQpz2nwZ%2FvIDPy%2FxMD%2FbNZf5M6NTj5a1JrRN%2B5DvZdQw5Gv%2FGf5w2vZ45yX7IiotDPvUaRnUP7pIo2gDZNZnVZ83oBBeMQADjWXtEHDZy8IkADxrIfQEnuR%2BXItbgkOsTwG4nAF%2Fm7TEBlfbVd6B%2FCLgLnKYbafZFewMI56yHDQ0O%2FTV7qXT2l91vkipBFoeY4pJh75g1F8FN071plPtiRDs1GJrd2H8Uw0CCNyVHR0QXW3uQelNZYVEpz%2FsUL6zcUTe3oXVs9pkCM8dXWkYqQu98XL3qCEdCikb1O3cIlBPtOTmdVTX3qUFB4ff%2F4r78QBZ%2Bs0%2BPks0XkIIRyLrEMPjOXl%2BN81a%2F%2B%2BF%2Boy9AlbQH2IaT69eYzxM35a7YD8d0Hgnd936VQgP1%2BAEfxcMwuu2V%2Ba9zrSHxOyZ3cbXvsbydEozxHjBnbs%2F1Qp8q%2By5Cs0s%2FyNWyvsAauSIYn%2F7Lc5ASl%2BZEEMzAlbmpGa3AOBzlK7EqkC4hvNEc1aJ%2BFHpWtPDPYBS3sLKf1X5ZKCS2L7YwsVzNUxhkl5LmiUxJR%2BVCc3il6TGX56d7pTJo8udKnhvJ8FQd5ndvFGhdPf6JKkWZsQCvrIWuP1lWcz2KD8qQj3pXI0zLgW76VH14ixpjpqS3Moc6ffhMjoYkk%2B9dev%2FVbRFq9BBxGwLRx5bpl6igTA9VE0eU2CnRWoSeV1mIQFSLiEAX2HRNa7oknkRnYlcM%2Fldd9Hy%2FAf%2FsX36UGLZafL08gUKnV%2BCLzwH06trspePLLBEAPeW7fWLCbz0XBbeMxosmNaIAMNSHUslweLST92fyiJJeJ8wnVizfGg%2FD3X%2FAexuM8jkHgcvbS1A%2FU4LXVCeICqJUefUMwhamKvwY6sQG2%2BGi36QORdKgkkGZDcr1U5fILr%2F9WLcPSFH1h1NQGubbVf8RdwcR4gp37GpdhT1r7bj1y3Knl9BJhGS6ewkQuMQVIwWRMpfY5JeWRN97gwlX%2F%2Bh%2Fq3Rbj%2BdDggvsLdR2WN35Pms6eTrbTNT1%2FEgYACcjp6M%2BDAgJimSX27fZWF%2B1fgAHpLOpjEwaa0t1RIo7MASuOpgc2sxEFDkvt3RWcwU4WK2vhMX87YDcrt1NfFbk%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=d8d8755f769e088ea92eaee26ff9cfccc00bafdc1319f5e291c909b7727f3056",
+    "image_2": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/n5078os5pdkvvspf0pa7u8i0jduq?response-content-disposition=attachment%3B%20filename%3D%22reddits3poc3.JPG%22%3B%20filename%2A%3DUTF-8%27%27reddits3poc3.JPG&response-content-type=image%2Fjpeg&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQZEEJQHKN%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T172623Z&X-Amz-Expires=1539&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIC8HlnhEwhQNhRu1AM5s%2B7GXwfWKr0uoHiDYlcFwWDQRAiEAt%2BKATsYckGGm2%2BONRBlOJu8TCxRg0gbGM53noirddXYqsgUIFRADGgwwMTM2MTkyNzQ4NDkiDHwMjeVWgu8rHwt7AiqPBUZUpj%2FQpz2nwZ%2FvIDPy%2FxMD%2FbNZf5M6NTj5a1JrRN%2B5DvZdQw5Gv%2FGf5w2vZ45yX7IiotDPvUaRnUP7pIo2gDZNZnVZ83oBBeMQADjWXtEHDZy8IkADxrIfQEnuR%2BXItbgkOsTwG4nAF%2Fm7TEBlfbVd6B%2FCLgLnKYbafZFewMI56yHDQ0O%2FTV7qXT2l91vkipBFoeY4pJh75g1F8FN071plPtiRDs1GJrd2H8Uw0CCNyVHR0QXW3uQelNZYVEpz%2FsUL6zcUTe3oXVs9pkCM8dXWkYqQu98XL3qCEdCikb1O3cIlBPtOTmdVTX3qUFB4ff%2F4r78QBZ%2Bs0%2BPks0XkIIRyLrEMPjOXl%2BN81a%2F%2B%2BF%2Boy9AlbQH2IaT69eYzxM35a7YD8d0Hgnd936VQgP1%2BAEfxcMwuu2V%2Ba9zrSHxOyZ3cbXvsbydEozxHjBnbs%2F1Qp8q%2By5Cs0s%2FyNWyvsAauSIYn%2F7Lc5ASl%2BZEEMzAlbmpGa3AOBzlK7EqkC4hvNEc1aJ%2BFHpWtPDPYBS3sLKf1X5ZKCS2L7YwsVzNUxhkl5LmiUxJR%2BVCc3il6TGX56d7pTJo8udKnhvJ8FQd5ndvFGhdPf6JKkWZsQCvrIWuP1lWcz2KD8qQj3pXI0zLgW76VH14ixpjpqS3Moc6ffhMjoYkk%2B9dev%2FVbRFq9BBxGwLRx5bpl6igTA9VE0eU2CnRWoSeV1mIQFSLiEAX2HRNa7oknkRnYlcM%2Fldd9Hy%2FAf%2FsX36UGLZafL08gUKnV%2BCLzwH06trspePLLBEAPeW7fWLCbz0XBbeMxosmNaIAMNSHUslweLST92fyiJJeJ8wnVizfGg%2FD3X%2FAexuM8jkHgcvbS1A%2FU4LXVCeICqJUefUMwhamKvwY6sQG2%2BGi36QORdKgkkGZDcr1U5fILr%2F9WLcPSFH1h1NQGubbVf8RdwcR4gp37GpdhT1r7bj1y3Knl9BJhGS6ewkQuMQVIwWRMpfY5JeWRN97gwlX%2F%2Bh%2Fq3Rbj%2BdDggvsLdR2WN35Pms6eTrbTNT1%2FEgYACcjp6M%2BDAgJimSX27fZWF%2B1fgAHpLOpjEwaa0t1RIo7MASuOpgc2sxEFDkvt3RWcwU4WK2vhMX87YDcrt1NfFbk%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=8224268fabb55425ea0c979bda7d1353e8ce78cfe8d830b44088c55044b3f082",
+    "image_3": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/kxpuo1jw70f4o0k5odb7kurgbkg3?response-content-disposition=attachment%3B%20filename%3D%22reddits3poc2.JPG%22%3B%20filename%2A%3DUTF-8%27%27reddits3poc2.JPG&response-content-type=image%2Fjpeg&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQZEEJQHKN%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T172623Z&X-Amz-Expires=1539&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIC8HlnhEwhQNhRu1AM5s%2B7GXwfWKr0uoHiDYlcFwWDQRAiEAt%2BKATsYckGGm2%2BONRBlOJu8TCxRg0gbGM53noirddXYqsgUIFRADGgwwMTM2MTkyNzQ4NDkiDHwMjeVWgu8rHwt7AiqPBUZUpj%2FQpz2nwZ%2FvIDPy%2FxMD%2FbNZf5M6NTj5a1JrRN%2B5DvZdQw5Gv%2FGf5w2vZ45yX7IiotDPvUaRnUP7pIo2gDZNZnVZ83oBBeMQADjWXtEHDZy8IkADxrIfQEnuR%2BXItbgkOsTwG4nAF%2Fm7TEBlfbVd6B%2FCLgLnKYbafZFewMI56yHDQ0O%2FTV7qXT2l91vkipBFoeY4pJh75g1F8FN071plPtiRDs1GJrd2H8Uw0CCNyVHR0QXW3uQelNZYVEpz%2FsUL6zcUTe3oXVs9pkCM8dXWkYqQu98XL3qCEdCikb1O3cIlBPtOTmdVTX3qUFB4ff%2F4r78QBZ%2Bs0%2BPks0XkIIRyLrEMPjOXl%2BN81a%2F%2B%2BF%2Boy9AlbQH2IaT69eYzxM35a7YD8d0Hgnd936VQgP1%2BAEfxcMwuu2V%2Ba9zrSHxOyZ3cbXvsbydEozxHjBnbs%2F1Qp8q%2By5Cs0s%2FyNWyvsAauSIYn%2F7Lc5ASl%2BZEEMzAlbmpGa3AOBzlK7EqkC4hvNEc1aJ%2BFHpWtPDPYBS3sLKf1X5ZKCS2L7YwsVzNUxhkl5LmiUxJR%2BVCc3il6TGX56d7pTJo8udKnhvJ8FQd5ndvFGhdPf6JKkWZsQCvrIWuP1lWcz2KD8qQj3pXI0zLgW76VH14ixpjpqS3Moc6ffhMjoYkk%2B9dev%2FVbRFq9BBxGwLRx5bpl6igTA9VE0eU2CnRWoSeV1mIQFSLiEAX2HRNa7oknkRnYlcM%2Fldd9Hy%2FAf%2FsX36UGLZafL08gUKnV%2BCLzwH06trspePLLBEAPeW7fWLCbz0XBbeMxosmNaIAMNSHUslweLST92fyiJJeJ8wnVizfGg%2FD3X%2FAexuM8jkHgcvbS1A%2FU4LXVCeICqJUefUMwhamKvwY6sQG2%2BGi36QORdKgkkGZDcr1U5fILr%2F9WLcPSFH1h1NQGubbVf8RdwcR4gp37GpdhT1r7bj1y3Knl9BJhGS6ewkQuMQVIwWRMpfY5JeWRN97gwlX%2F%2Bh%2Fq3Rbj%2BdDggvsLdR2WN35Pms6eTrbTNT1%2FEgYACcjp6M%2BDAgJimSX27fZWF%2B1fgAHpLOpjEwaa0t1RIo7MASuOpgc2sxEFDkvt3RWcwU4WK2vhMX87YDcrt1NfFbk%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=a321b1acc7078b7dda9a32bdc209fd782db566e89aa86b73f1bc15760e772a64"
+  },
+  "disclosed_date": 1634860080,
+  "report_url": "https://hackerone.com/reports/1285598",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create an S3 bucket named 'obs-nightly' in the 'us-west-2' region."
+    ],
+    [
+      2,
+      "Upload a file with the name 'cefbinary${1}_macosx64.tar.bz2' to the bucket."
+    ],
+    [
+      3,
+      "Configure the bucket as a static website."
+    ],
+    [
+      4,
+      "When users run the code, their requests will be directed to the attacker-controlled S3 bucket, potentially executing malicious content."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves an unclaimed S3 bucket ('obs-nightly') in the codebase. An attacker can take over this bucket by creating it and uploading malicious files with names matching those referenced in the code. This allows the attacker to serve harmful content (e.g., malware or ransomware) to users executing the code, as the code fetches resources from the unclaimed bucket.",
+  "reason": "The attack is straightforward and involves minimal components: creating an S3 bucket, uploading a file with a predictable name, and configuring the bucket. There are no complex interactions or novel logic required. The vulnerability is easily discoverable by inspecting the code for hardcoded S3 bucket references.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

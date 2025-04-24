@@ -1,0 +1,42 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "cablej_dds ",
+    "title": "\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 - Insecure download cookie generation allows bypass of CAC authentication, access to deleted and locked files",
+    "content": "\nSummary:\nTo download a file, \u2588\u2588\u2588\u2588 directs users to /\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Download.aspx and sets a cookie authenticating the download. The cookie looks like this:\nCode 41 Bytes\n1pickup=Subject=&PackageID=MTU4NDgzMTU=\u2588\u2588\u2588\nIf an attacker can generate this cookie, this allows downloading a file. As it turns out, the generation of the cookie is fairly straightforward and requires no server-side key, only a file ID and its associated password. The components are:\nThe file ID, base 64 encoded, followed by a dash\nThe SHA512 hash of the plaintext file ID, base 64 encoded\nThe secret key of the package (as sent in the email), base 64 encoded, followed by a dash\nThe SHA2512 hash of the secret key, base 64 encoded\nBy generating a cookie using this format, an attacker can accomplish the following:\nBypass CAC-enforced files.\nBypass deleted files (tested when a user deletes their package). Untested if this allows accessing historical files.\nBypass \"locked\" files that have already been downloaded.\nFor instance, after attempting to download a deleted package on \u2588\u2588\u2588\u2588\u2588, \u2588\u2588\u2588\u2588\u2588 displays the following error:\nThe package Is no longer available For download. The file(s) has been permanently deleted from \u2588\u2588\u2588\u2588\u2588\u2588\u2588. You will have To contact the sender And ask them To upload the file(s) again.\nHowever, this is not true. By making a crafted request to /\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Download.aspx given the above cookies, a user can still download deleted files. This may also apply to past files, meaning that all previous uploaded files may not be deleted. I will test this when files I have submitted expire.\nImpact\nSignificant bypasses to \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 security controls, including:\nBypass CAC protections\nDownload files that \u2588\u2588\u2588 says have been deleted from the file system\nDownload locked files that have already been downloaded\nIt is unclear at the moment if this also applies to files that have expired after a set period of time. I will retest when files I have uploaded have expired.\nStep-by-step Reproduction Instructions\nVisit https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588/pickupfiles.aspx?id=15849581, a file I uploaded and deleted.\nTry the password \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588. Observe that an error is displayed that the file is deleted.\nAs described above, generate the following cookie, based on the file ID and password.\nCode 47 Bytes\n1pickup=Subject=&PackageID=MTU4NDk1ODE=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nMake the following GET request with the cookie:\nCode 508 Bytes\n1GET /\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Download.aspx?PackageID=15849581&FileName=dog.jpg HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3Connection: close\n4Upgrade-Insecure-Requests: 1\n5User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36\n6Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8\n7Referer: https://\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/pickupfiles.aspx?id=15849581\n8Accept-Language: en-US,en;q=0.9\n9Cookie:  pickup=Subject=&PackageID=MTU4NDk1ODE=\u2588\u2588\u2588\u2588\n10\nObserve that the file is returned, demonstrating that it has not been deleted.\nThis also has been tested with CAC-enforced files and files that are \"locked\" due to already having been downloaded.\nImpact\n.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cryptographic Issues - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1589230020,
+    "report_url": "https://hackerone.com/reports/496326",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Visit a deleted file URL (e.g., https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588/pickupfiles.aspx?id=15849581) and observe the deletion error message"
+        ],
+        [
+            2,
+            "Generate a crafted cookie using the file ID and password in the format: pickup=Subject=&PackageID=<base64_encoded_file_id>-<base64_encoded_SHA512_of_file_id>-<base64_encoded_secret_key>-<base64_encoded_SHA512_of_secret_key>"
+        ],
+        [
+            3,
+            "Send a GET request to /\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Download.aspx with the crafted cookie to download the supposedly deleted file"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows attackers to bypass CAC authentication, access deleted files, and download locked files by generating a specific cookie format without server-side validation. The cookie construction relies on predictable components (file ID and password) and lacks proper security checks.",
+    "reason": "The attack involves understanding the cookie structure, which is non-trivial but not overly complex. The components (file ID, password, hashing, and base64 encoding) are straightforward once identified. The main challenge is reverse-engineering the cookie format, but the logic is not novel or deeply hidden.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

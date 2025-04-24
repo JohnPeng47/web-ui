@@ -1,0 +1,45 @@
+{
+  "reported_to": "Kubernetes",
+  "reported_by": "jkroepke ",
+  "title": "Code inject via nginx.ingress.kubernetes.io/permanent-redirect annotation",
+  "content": "\nReport Submission Form\nSummary:\nThe value of the nginx.ingress.kubernetes.io/permanent-redirect annotation will be not sanitized and passed into the nginx configuration. This leads into a code inject from any user that is allowed to create ingress objects.\nKubernetes Version:\nv1.26.3 (minikube)\nComponent Version:\nCode 358 Bytes\n1-------------------------------------------------------------------------------\n2NGINX Ingress controller\n3  Release:       v1.8.0\n4  Build:         35f5082ee7f211555aaff431d7c4423c17f8ce9e\n5  Repository:    https://github.com/kubernetes/ingress-nginx\n6  nginx version: nginx/1.21.6\n7\n8-------------------------------------------------------------------------------\nSteps To Reproduce:\nhelm upgrade -i ingress-nginx ingress-nginx/ingress-nginx -f values.yaml # values.yaml is attached\nk apply -f ingress.yaml #ingress.yaml is attached\nOptional: If ingress-nginx is not exposed, run kubectl port-forward deploy/ingress-nginx-controller 8080:80 and continue step 4 in a separate shell.\ncurl -v --resolve \"kubernetes.api:8080:127.0.0.1\" http://kubernetes.api:8080/api/v1/namespaces/kube-system/secrets/\nSupporting Material/References:\nvalues.yaml - Used in step 1\ningress.yaml - Used in step 2\nImpact\nAll users with access to create or update ingress objects, are able to running commands on ingress-nginx-controller pod. Since the token of the ServiceAccount is mounted on filesystem, a user can call the Kubernetes API and fetch all secrets or config maps from the cluster. Additionally, the user can read or write files to the filesystem.\n\n",
+  "severity": [
+    7.6,
+    null
+  ],
+  "bounty": 2500,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1698288360,
+  "report_url": "https://hackerone.com/reports/2039464",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install NGINX Ingress controller using Helm with the provided values.yaml"
+    ],
+    [
+      2,
+      "Apply the ingress.yaml file containing the malicious nginx.ingress.kubernetes.io/permanent-redirect annotation"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows code injection via the nginx.ingress.kubernetes.io/permanent-redirect annotation in Kubernetes Ingress objects. The annotation value is not sanitized before being passed to the NGINX configuration, enabling attackers with ingress creation/update permissions to execute commands on the ingress-nginx-controller pod. This can lead to Kubernetes API access via the mounted ServiceAccount token and potential cluster-wide secret exfiltration.",
+  "reason": "The vulnerability requires understanding of Kubernetes Ingress annotations and NGINX configuration, but the attack path is relatively straightforward once the unsanitized annotation behavior is discovered. The components involved (Ingress controller, NGINX config) are common and well-documented.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves injecting code via an nginx ingress annotation, which is a configuration-level issue rather than an authentication or authorization boundary crossing within the application's user sessions and resources. The proposed methodologies focus on testing user sessions and resource access patterns within an application, not on Kubernetes ingress configuration vulnerabilities.",
+    "is_detectable": false
+  }
+}

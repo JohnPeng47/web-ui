@@ -1,0 +1,45 @@
+{
+  "reported_to": "Ruby on Rails",
+  "reported_by": "einstein_ ",
+  "title": "JSON keys are not properly escaped",
+  "content": "\nRails does not escape hash keys properly in to_json when generating json.\nValues are escaped as expected\nCode 68 Bytes\n1irb(main):001:0> {\"a\"=>\"<>\"}.to_json\n2=> \"{\\\"a\\\":\\\"\\\\u003c\\\\u003e\\\"}\"\nHowever keys are not:\nCode 56 Bytes\n1irb(main):002:0> {\"<>\"=>\"a\"}.to_json\n2=> \"{\\\"<>\\\":\\\"a\\\"}\"\nThis is because the json gem calls .to_s on the keys here which transforms the EscapedString back into a simple String so it doesn't go through the escaping process that values go through here.\nSecurity consideration: this issue is a vector for XSS when an arbitrary value is used as a key and reflected in a javascript tag. Consider this piece of code:\nCode 43 Bytes\n1javascript_tag \"var json=#{params.to_json}\"\nWhen params is something like {\"</script><script>alert(1)//\"=>\"xss\"} then <> are not escaped as they should and the javascript tag looks like this:\nCode 83 Bytes\n1<script>\n2//<![CDATA[\n3var json={\"</script><script>alert(1)//\":\"xss\"}\n4//]]>\n5</script>\nThe </script> inside the json object will terminate the opening script tag because it has precedence over everything else, and alert(1) is executed.\nI believe this issue also applies to 4.2-stable and master.\nNote that I opened a PR for a related issue in the json gem (https://github.com/flori/json/pull/235) which occurs when ActiveSupport.escape_html_entities_in_json = false because the forward slash is never escaped (neither in rails nor in the json gem). It might be worth fixing this in rails as well.\n\n",
+  "severity": [
+    7.2,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1434497880,
+  "report_url": "https://hackerone.com/reports/47280",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create a JSON object with a key that contains HTML special characters (e.g., {\"</script><script>alert(1)//\"=>\"xss\"})"
+    ],
+    [
+      2,
+      "Pass this object to Rails' to_json method and observe the output (e.g., javascript_tag \"var json=#{params.to_json}\")"
+    ]
+  ],
+  "vuln_description": "Rails does not properly escape HTML special characters in JSON keys when generating JSON output, which can lead to XSS vulnerabilities when the JSON is embedded in a JavaScript context. This allows an attacker to inject malicious scripts that execute in the context of the victim's browser.",
+  "reason": "The vulnerability involves understanding JSON serialization behavior in Rails and recognizing that keys are not escaped while values are. The attack requires knowledge of how script tags can be broken out of in HTML/JS contexts, but the core issue is relatively straightforward once the JSON serialization behavior is known.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves JSON key escaping in Rails, which is a specific implementation detail and not directly related to authentication or authorization boundaries. The proposed methodologies focus on testing access control by swapping user sessions and resource IDs, not on detecting improper escaping in JSON serialization.",
+    "is_detectable": false
+  }
+}

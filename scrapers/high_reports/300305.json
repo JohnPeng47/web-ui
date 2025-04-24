@@ -1,0 +1,66 @@
+{
+    "reported_to": "Shopify",
+    "reported_by": "cache-money ",
+    "title": "Ability to bypass partner email confirmation to take over any store given an employee email",
+    "content": "\nI told Pete I would take a look at Spotify, hi Pete.\nSummary\nIt's possible to take over any store account through partners given an employee email address. This is possible because I found a way to confirm arbitrary emails. I don't know the Shopify ecosystem well enough to know the other ramifications of such a bug.\nOn #270981 you wrote:\nThe intention was that, when a partner already had a valid user account on the store, their collaborator account request could be accepted automatically, with the user account converted into a collaborator account.\nI tested that functionality and confirmed how it works. I realized that if you can somehow create a partner account with a business email that matched that of an employee, you would be able to take over their employee account, then convert it to a collaborator. The problem is that business accounts need emails to be validated, but this can be bypassed with a race condition.\nThe bug works by hitting the email validation endpoint for an email you own, at the same time as changing your email to a victim's. It might take a few tries, but eventually your email will be changed and be validated due to not (properly) using a DB transaction.\nSteps to reproduce\nCreate a store account and invite an employee.\nAccept the employee invite (maybe not necessary I didn't test).\nLogin to or create a partner account as the attacker.\nGo to your partner settings page https://partners.shopify.com/[ID]/settings and change your email to something you own.\nCheck your email and grab the confirmation link, but don't visit it yet.\nGo back to your partner account and change your email to that of the store employee from step 2, but intercept the request to not let it through yet.\nNow the tricky part. The \"change email\" takes anywhere from 1,100 - 2,500 ms to load so you need to take that into account. But let the request go through, wait for some milliseconds, then in another tab visit that email confirmation link from step 5.\nIf done correctly you will now have confirmed an email you do not own.\nVisit https://partners.shopify.com/[ID]/managed_stores, add the store, and you now have access.\nAs proof, look at the email for partner account 698396. It will be confirmed cache@hackerone.com, which I obviously would never be able to validate otherwise.\nThanks,\n-- Tanner\nImpact\nAbility to take over stores, and possibly perform any other action that relies on a validated email as a security measure.\n\n",
+    "severity": [
+        10.0,
+        null
+    ],
+    "bounty": 15250,
+    "weaknesses": [
+        "Time-of-check Time-of-use (TOCTOU) Race Condition"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1518028080,
+    "report_url": "https://hackerone.com/reports/300305",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create a store account and invite an employee."
+        ],
+        [
+            2,
+            "Accept the employee invite (optional)."
+        ],
+        [
+            3,
+            "Login to or create a partner account as the attacker."
+        ],
+        [
+            4,
+            "Go to partner settings and change your email to something you own."
+        ],
+        [
+            5,
+            "Grab the confirmation link but don't visit it yet."
+        ],
+        [
+            6,
+            "Change your email to the victim's email, intercepting the request."
+        ],
+        [
+            7,
+            "Let the request go through, wait, then visit the confirmation link in another tab."
+        ],
+        [
+            8,
+            "If successful, the victim's email is now confirmed under your control."
+        ],
+        [
+            9,
+            "Add the store to your managed stores to gain access."
+        ]
+    ],
+    "vuln_description": "This vulnerability allows an attacker to bypass email confirmation for a partner account by exploiting a race condition during email change and confirmation. By changing the email to a victim's email and quickly confirming an email they control, the attacker can take over the victim's account and gain access to their store.",
+    "reason": "The attack involves multiple components: email change, confirmation, and race condition exploitation. It requires precise timing and understanding of the application's state during the email change process. The interaction between these components is subtle and non-obvious, making the discovery difficult.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "270981"
+}

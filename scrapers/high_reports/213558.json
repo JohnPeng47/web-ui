@@ -1,0 +1,62 @@
+{
+    "reported_to": "Discourse",
+    "reported_by": "ziot ",
+    "title": "Arbitrary Local-File Read from Admin - Restore From Backup due to Symlinks",
+    "content": "\nAs an Admin user on Discourse there is a feature to create, upload, and restore backups. Generating a backup creates a tar file consisting of the database as a SQL file and uploaded files from /public/upload/*. Having the ability to upload these tar files and restore from them, you can add any file that you wish.\nManually modifying the tar archive and adding a symlink, you are able to read any arbitrary file that the user has permission to including files outside of the Discourse application directory.\nSteps\nLoad http://try.discourse.org\nLogin as an Admin user.\nGo to the Backups page:\nhttp://try.discourse.org/admin/backups/\nCreate a new backup including files.\nExtract the backup files to a folder on your server.\nCreate a symlink to /etc/passwd In the /uploads/ folder of the backup, e.g. /uploads/default/original/1X/[file].jpg.\nexample: ln -s /etc/passwd /home/symlink/files/uploads/default/original/1X/7ad2e8f5fe02890f20503044b604e29e6f3718fd.png\nCreate a .tar.gz from the extracted files.\nUpload the newly crafted tar to the server.\nEnable Restore from Backups in settings if it's not enabled.\nRestore from the backup that uploaded.\nGo to the uploaded file in your browser after it uploads, e.g.\nhttp://try.discourse.org/uploads/default/original/1X/[file].jpg\n---> You were able to read file contents of /etc/passwd due to the symlink being extracted from the tar.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 512,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1494725100,
+    "report_url": "https://hackerone.com/reports/213558",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Login as an Admin user on Discourse."
+        ],
+        [
+            2,
+            "Navigate to the Backups page and create a new backup including files."
+        ],
+        [
+            3,
+            "Extract the backup files to a folder on your server."
+        ],
+        [
+            4,
+            "Create a symlink to a sensitive file (e.g., /etc/passwd) in the /uploads/ folder of the backup."
+        ],
+        [
+            5,
+            "Create a .tar.gz from the modified backup files."
+        ],
+        [
+            6,
+            "Upload the crafted .tar.gz file to the server."
+        ],
+        [
+            7,
+            "Restore from the uploaded backup."
+        ],
+        [
+            8,
+            "Access the symlinked file via the web interface to read its contents."
+        ]
+    ],
+    "vuln_description": "This vulnerability allows an admin user to read arbitrary files on the server by exploiting symlinks in backup files. By crafting a backup file with a symlink to a sensitive file (e.g., /etc/passwd), the attacker can restore the backup and access the symlinked file through the web interface.",
+    "reason": "The attack involves multiple steps, including creating a backup, modifying it with a symlink, and restoring it. However, the interaction between these components is straightforward, and the logic of exploiting symlinks in backups is not novel.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,38 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "cris_semmle ",
+    "title": "Prototype Pollution Vulnerability in noble Package",
+    "content": "\nI would like to report prototype pollution vulnerability in noble.\nIt allows attackers to pollute the Object.prototype object of an application running noble, possibly through Bluetooth.\nModule\nmodule name: noble\nversion: 1.9.1\nnpm page: https://www.npmjs.com/package/noble\nModule Description\nA Node.js BLE (Bluetooth Low Energy) central module.\nWant to implement a peripheral? Checkout bleno\nNote: macOS / Mac OS X, Linux, FreeBSD and Windows are currently the only supported OSes. Other platforms may be developed later on.\nModule Stats\n2,270 downloads in the last week\nVulnerability\nVulnerability Description\nAn attacker can inject arbitrary properties on Object.prototype using one of the methods exposed by this module. Moreover, there is strong evidence (parameter names) to believe that these values can be controlled remotely by the attacker, through Bluetooth.\nSteps To Reproduce:\nFor now, I only have a local payload, but it seems to me that both the peripheralUuid and serviceUuids, expected by the onServicesDiscover are specified in the Bluetooth standard, thus it may come from another device advertising itself over Bluetooth. However, this scenario needs to be investigated further.\nCode 169 Bytes\n1var noble = require('noble');\n2//noble.emit(\"servicesDiscover\");\n3console.log({}.x);\n4try {\n5    noble.onServicesDiscover(\"__proto__\", \"x\");\n6} catch(e) {}\n7console.log({}.x);\nPatch\nN/A validate the property name or initialize the target object using Object.create(null).\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nIf the attack can indeed by deployed using Bluetooth, this issue is serious, allowing the attacker to inject arbitrary properties from a remote device.\n\n",
+    "severity": [
+        8.6,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1624883880,
+    "report_url": "https://hackerone.com/reports/390857",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "IOT",
+    "steps": [
+        [
+            1,
+            "Require the noble package and check if Object.prototype is polluted by checking an arbitrary property (e.g., {}.x)."
+        ],
+        [
+            2,
+            "Call the vulnerable method noble.onServicesDiscover(\"__proto__\", \"x\") to pollute the Object.prototype."
+        ]
+    ],
+    "vuln_description": "The vulnerability is a prototype pollution in the noble package, where an attacker can inject arbitrary properties into Object.prototype through the onServicesDiscover method. This could potentially be exploited remotely via Bluetooth if the method parameters can be controlled by an attacker.",
+    "reason": "The vulnerability involves understanding prototype pollution and identifying a method that does not properly validate its inputs. The attack is straightforward once the vulnerable method is identified, but discovering it requires knowledge of prototype pollution and how the noble package handles Bluetooth data.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

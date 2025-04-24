@@ -1,0 +1,42 @@
+{
+  "reported_to": "OWOX, Inc.",
+  "reported_by": "imthehackerlor ",
+  "title": "Reflected XSS ",
+  "content": "\nHi team,\nI have found an XSS at https://bi.owox.com/ui/6177527534dc114eb07fa829e4ce4d28/dashboard/?trial=activated\nBecause the input is not properly filtered, resulting in XSS being executed\nVulnerable area:\n6177527534dc114eb07fa829e4ce4d28\nThe URL will now be: https://bi.owox.com/ui/6177527534dc114eb07fa829e4ce4d28%3Cimg%20src=xss%20onerror=prompt('XSS')%3E/dashboard/?trial=activated\nPoC\n1, go to https://bi.owox.com/ui/6177527534dc114eb07fa829e4ce4d28%3Cimg%20src=xss%20onerror=prompt('XSS')%3E/dashboard/?trial=activated\n2, Log in and XSS will execute\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nTested browser\nFirefox\nChrome\nImpact\nThis vulnerability is aimed at all victims and they do not need to be involved in the Project. Just paste this URL and login, XSS will automatically execute.\nTherefore, it will have a high impact, because before XSS is executed, the application will ask the user to login.\nThe attacker can execute JS code. \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nDocuments related to Impact\nhttps://portswigger.net/web-security/cross-site-scripting/reflected\nhttps://portswigger.net/web-security/cross-site-scripting/exploiting\nRecommendation\nRevisit the entire application and validate the user input at server side.\nSanitize the data collected from input fields before further processing.\nFilter out special and meta-characters from user input.\nBest regards,\n@dat\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Reflected"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1575923040,
+  "report_url": "https://hackerone.com/reports/732987",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Go to https://bi.owox.com/ui/6177527534dc114eb07fa829e4ce4d28%3Cimg%20src=xss%20onerror=prompt('XSS')%3E/dashboard/?trial=activated"
+    ],
+    [
+      2,
+      "Log in and XSS will execute"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a reflected Cross-Site Scripting (XSS) issue where user input in the URL is not properly sanitized, allowing JavaScript code execution when the victim logs in.",
+  "reason": "The attack is straightforward and does not involve multiple components, complex states, or novel logic. It simply requires injecting a malicious payload into the URL parameter, which is a common and well-documented XSS vector.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves improper input sanitization in the URL path, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing (user_session, action, resource_id) tuples for authN/authZ issues, not input validation vulnerabilities like XSS.",
+    "is_detectable": false
+  }
+}

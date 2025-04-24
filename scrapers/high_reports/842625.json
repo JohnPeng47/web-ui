@@ -1,0 +1,72 @@
+{
+    "reported_to": "Rocket.Chat",
+    "reported_by": "elfiman ",
+    "title": "account takeover on 3.0.1 version",
+    "content": "\nI find user reset password hash info and other security info on \"/api/v1/users.info\"\n\nnote : I login on rocketchat with ldap account (my role : user)\n\nnote: in request \"https://target/api/v1/users.info?username=[x]\" you should change usrname to userId\n1- please login with user ldap account (role user)\n\n2- send a request to\u00a0https://target/api/v1/users.list\u00a0and copy _id value\n\n3- send a request to\u00a0https://target/api/v1/users.info?userId=[userId]\u00a0and copy email value (in response you can see important security information )\n\n4- logout and click \"forget your password\" link on\u00a0https://target/home\u00a0and send an email to above email address that you copied\n\n4- login with Your account and send a request to\u00a0https://target/api/v1/users.list\u00a0and search the same email in response and copy _id value\n\n5- send a request to\u00a0https://target/api/v1/users.info?userId=[userId]\u00a0and copy reset hash value\n\n6- logout your account and send a request to\u00a0https://target/reset-password/[reset_hash]\n\n7- set new password\n\n8- login and enjoy\nImpact\naccount takeover\n\n",
+    "severity": [
+        9.9,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Insecure Direct Object Reference (IDOR)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1592162520,
+    "report_url": "https://hackerone.com/reports/842625",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Login with a user LDAP account (role: user)"
+        ],
+        [
+            2,
+            "Send a request to https://target/api/v1/users.list and copy the _id value"
+        ],
+        [
+            3,
+            "Send a request to https://target/api/v1/users.info?userId=[userId] and copy the email value"
+        ],
+        [
+            4,
+            "Logout and click 'forget your password' link on https://target/home and send an email to the copied email address"
+        ],
+        [
+            5,
+            "Login with your account and send a request to https://target/api/v1/users.list to search for the same email and copy the _id value"
+        ],
+        [
+            6,
+            "Send a request to https://target/api/v1/users.info?userId=[userId] and copy the reset hash value"
+        ],
+        [
+            7,
+            "Logout and send a request to https://target/reset-password/[reset_hash]"
+        ],
+        [
+            8,
+            "Set a new password and login to take over the account"
+        ]
+    ],
+    "vuln_description": "This vulnerability allows an attacker to perform an account takeover by exploiting the exposure of sensitive security information (such as password reset hashes) in the API response of Rocket.Chat's /api/v1/users.info endpoint. By leveraging this information, an attacker can reset the password of any user and gain unauthorized access to their account.",
+    "reason": "The attack involves multiple steps, including manipulating API endpoints to extract sensitive information and using it to reset passwords. However, the steps are straightforward and do not require deep understanding of complex interactions or novel logic. The vulnerability stems from improper exposure of security-sensitive data in API responses, which is a common oversight.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": true,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": true
+    }
+}

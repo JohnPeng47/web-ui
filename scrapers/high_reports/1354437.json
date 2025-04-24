@@ -1,0 +1,38 @@
+{
+    "reported_to": "UPchieve",
+    "reported_by": "13- ",
+    "title": "Password reset token leakage",
+    "content": "\nReset Password link : http://hackers.upchieve.org/setpassword?token=a3c448b1eb9b982f93ec39a7181ec1a2\n1.Open Password reset page from email.\n2.Intercept the request(I have used burp suite)\n3.You can see the link for reset password in below requests\nPOST /j/collect?v=1&_v=j93&a=1038273919&t=pageview&_s=1&dl=https%3A%2F%2Fhackers.upchieve.org%2Fsetpassword%3Ftoken%3Da3c448b1eb9b982f93ec39a7181ec1a2&dp=%2Fsetpassword&ul=en-us&de=UTF-8&dt=UPchieve&sd=24-bit&sr=1366x768&vp=1366x657&je=0&_u=wCCAAUABAAAAAC~&jid=185704536&gjid=1537782490&cid=83313712.1632910097&tid=UA-133171872-1&_gid=1095396647.1632910097&_r=1>m=2ou9r0&z=1390812166 HTTP/2\nHost: www.google-analytics.com\nContent-Length: 0\nSec-Ch-Ua: \"Chromium\";v=\"93\", \" Not;A Brand\";v=\"99\"\nSec-Ch-Ua-Mobile: ?0\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36\nSec-Ch-Ua-Platform: \"Windows\"\nContent-Type: text/plain\nAccept: /\nOrigin: https://hackers.upchieve.org\nSec-Fetch-Site: cross-site\nSec-Fetch-Mode: cors\nSec-Fetch-Dest: empty\nAccept-Encoding: gzip, deflate\nAccept-Language: en-US,en;q=0.9\nPOC video : recording-1632911031270.webm\n@thug645\nImpact\nMisconfiguration\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Misconfiguration"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1648331940,
+    "report_url": "https://hackerone.com/reports/1354437",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Open the password reset page from the email."
+        ],
+        [
+            2,
+            "Intercept the request using a tool like Burp Suite to observe the password reset link in the request."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the leakage of a password reset token through a request intercepted by a tool like Burp Suite. The token is exposed in a POST request to Google Analytics, which could allow an attacker to reset the user's password without authorization.",
+    "reason": "The attack is straightforward and involves a single component (intercepting the request) without any complex interactions or state manipulations. The exposure of the token in a request to a third-party service is a common misconfiguration.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

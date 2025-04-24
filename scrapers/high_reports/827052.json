@@ -1,0 +1,38 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "vakzz ",
+  "title": "Arbitrary file read via the UploadsRewriter when moving and issue",
+  "content": "\nSummary\nThe UploadsRewriter does not validate the file name, allowing arbitrary files to be copied via directory traversal when moving an issue to a new project.\nThe pattern used to look for references is :\nCode 91 Bytes\n1  MARKDOWN_PATTERN = %r{\\!?\\[.*?\\]\\(/uploads/(?<secret>[0-9a-f]{32})/(?<file>.*?)\\)}.freeze\nThis is used by the UploadsRewriter when copying an issue to also copy across the files:\nCode 474 Bytes\n1   @text.gsub(@pattern) do |markdown|\n2          file = find_file(@source_project, $~[:secret], $~[:file])\n3          break markdown unless file.try(:exists?)\n4\n5          klass = target_parent.is_a?(Namespace) ? NamespaceFileUploader : FileUploader\n6          moved = klass.copy_to(file, target_parent)\n7...\n8   def find_file(project, secret, file)\n9        uploader = FileUploader.new(project, secret: secret)\n10        uploader.retrieve_from_store!(file)\n11        uploader\n12      end\nAs there is no restriction on what file can be, path traversal can be used to copy any file.\nSteps to reproduce\nCreate two projects\n![a](/uploads/11111111111111111111111111111111/../../../../../../../../../../../../../../etc/passwd)\nCode 494 Bytes\n11. Move the issue to  the second project\n21. The file will have been copied to the project\n3\n4### Impact\n5\n6Allows an attacker to read arbitrary files on the server, including tokens, private data, configs, etc\n7\n8### What is the current *bug* behavior?\n9\n10The file name and path are not checked when copying an issue between projects\n11\n12### What is the expected *correct* behavior?\n13\n14The file or path should be validated before copying files.\n15\n16### Output of checks\n17#### Results of GitLab environment info\n18\nSystem information\nSystem: Ubuntu 18.04\nProxy: no\nCurrent User: git\nUsing RVM: no\nRuby Version: 2.6.5p114\nGem Version: 2.7.10\nBundler Version:1.17.3\nRake Version: 12.3.3\nRedis Version: 5.0.7\nGit Version: 2.24.1\nSidekiq Version:5.2.7\nGo Version: unknown\nGitLab information\nVersion: 12.8.7-ee\nRevision: 2643fd87200\nDirectory: /opt/gitlab/embedded/service/gitlab-rails\nDB Adapter: PostgreSQL\nDB Version: 10.12\nURL: http://gitlab-vm.local\nHTTP Clone URL: http://gitlab-vm.local/some-group/some-project.git\nSSH Clone URL: git@gitlab-vm.local:some-group/some-project.git\nElasticsearch: no\nGeo: no\nUsing LDAP: no\nUsing Omniauth: yes\nOmniauth Providers:\nGitLab Shell\nVersion: 11.0.0\nRepository storage paths:\ndefault: /var/opt/gitlab/git-data/repositories GitLab Shell path: /opt/gitlab/embedded/service/gitlab-shell Git: /opt/gitlab/embedded/bin/git\nCode 114 Bytes\n1\n2## Impact\n3\n4Allows an attacker to read arbitrary files on the server, including tokens, private data, configs, etc\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 20000,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1588018500,
+  "report_url": "https://hackerone.com/reports/827052",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create two projects"
+    ],
+    [
+      2,
+      "Move an issue with a malicious file reference (e.g., `![a](/uploads/11111111111111111111111111111111/../../../../../../../../../../../../../../etc/passwd)`) from one project to another"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows arbitrary file read via directory traversal in the UploadsRewriter when moving an issue between projects. The system fails to validate file paths, enabling attackers to copy sensitive system files (e.g., /etc/passwd) by crafting malicious Markdown references.",
+  "reason": "The attack involves a straightforward directory traversal technique in a common feature (issue migration). No complex interactions or state manipulations are required\u2014just knowledge of path traversal and the uploads functionality.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

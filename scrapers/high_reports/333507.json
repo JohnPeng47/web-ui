@@ -1,0 +1,46 @@
+{
+  "reported_to": "Discourse",
+  "reported_by": "luigigubello ",
+  "title": "Stored XSS in \"post last edited\" option",
+  "content": "\nThere are two users: Attacker and Victim.\nAttacker starts a private talk via private message with the Victim.\nAttacker send a message to Victim, then he edits it or deletes it.\nVictim sees the yellow pencil, symbol of the edit.\nVictim clicks on yellow pencil to see the edit and the XSS runs.\nOther info: the XSS also runs on topic (video PoC #2). You can find my XSS message on this URL:\nhttps://try.discourse.org/t/recommended-reading-for-community-and-foss-enthusiasts/278\nIt is very dangerous because it can hit many users at the same time.\nImpact\nXSS can use to steal cookies, password or to run arbitrary code on victim's browser\nThe hacker selected the Cross-site Scripting (XSS) - Stored weakness. This vulnerability type requires contextual information from the hacker. They provided the following answers:\nURL\nhttps://try.discourse.org/t/recommended-reading-for-community-and-foss-enthusiasts/278\nVerified\nYes\n\n",
+  "severity": [
+    8.2,
+    null
+  ],
+  "bounty": 256,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1531166640,
+  "report_url": "https://hackerone.com/reports/333507",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Attacker initiates a private conversation with Victim via private message"
+    ],
+    [
+      2,
+      "Attacker sends a message, edits or deletes it, causing the Victim to see the edit indicator (yellow pencil)"
+    ],
+    [
+      3,
+      "Victim clicks on the yellow pencil to view the edit, triggering the XSS payload"
+    ]
+  ],
+  "vuln_description": "A stored Cross-Site Scripting (XSS) vulnerability exists in the 'post last edited' feature of the platform. When an attacker edits or deletes a message in a private conversation, the Victim sees an edit indicator. Clicking this indicator executes the attacker's malicious JavaScript payload, which can lead to cookie theft, password theft, or arbitrary code execution in the Victim's browser.",
+  "reason": "The vulnerability involves multiple components (private messaging, edit tracking, and XSS execution) and requires the attacker to understand how the edit indicator triggers the XSS payload. However, the interaction between these components is relatively straightforward once the edit mechanism is understood.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The stored XSS vulnerability involves an attacker manipulating content that is then viewed by a victim, triggering the XSS. This does not directly involve authentication or authorization bypass, nor does it involve IDOR. The methodology described focuses on testing authentication and authorization boundaries by swapping user sessions and resource IDs, which is not applicable to this XSS scenario.",
+    "is_detectable": false
+  }
+}

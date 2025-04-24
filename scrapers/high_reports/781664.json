@@ -1,0 +1,32 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "gabriel-kimiaie ",
+  "title": "Several simple remote code execution in pdf-image",
+  "content": "\nI would like to report \"A simple remote code execution\" in \"pdf-image\".\nIt allows \"a remote attacker to execute arbitrary code when several functions of the PDFImage class are called and the class loaded from user-input value\".\nModule\nmodule name: pdf-image\nversion: latest\nnpm page: https://www.npmjs.com/package/pdf-image\nModule Description\nProvides an interface to convert PDF's pages to png files in Node.js by using ImageMagick.\nModule Stats\n[1] weekly downloads: 8,691\nVulnerability\nVulnerability Description\nHello there ! I understand this bug isn't eligible for a bounty. I am reporting it either way. I've found several code execution in the pdf-image class, I tested one of them. They are simple and of course come from the child_process.exec call with lack of escaping. I tested one of them.\nSteps To Reproduce:\nvar PDFImage = require(\"pdf-image\").PDFImage;\nvar pdfImage = new PDFImage('\"; sleep 500 #\"');\npdfImage.getInfo();\nYou can also exploit the vulnerability by submitting backticks (example payload: ls;sleep 5 which will be executed even though you're double-quoting the input.\nPatch\nYou can take example on your command-exists npm class:\nvar isUsingWindows = process.platform == 'win32'\nvar cleanInput = function(s) {\nif (/[^A-Za-z0-9_\\/:=-]/.test(s)) {\ns = \"'\"+s.replace(/'/g,\"'\\''\")+\"'\";\ns = s.replace(/^(?:'')+/g, '') // unduplicate single-quote at the beginning\n.replace(/\\'''/g, \"\\'\" ); // remove non-escaped single-quote if there are enclosed between 2 escaped\n}\nreturn s;\n}\nif (isUsingWindows) {\ncleanInput = function(s) {\nvar isPathName = /[\\]/.test(s);\nif (isPathName) {\nvar dirname = '\"' + path.dirname(s) + '\"';\nvar basename = '\"' + path.basename(s) + '\"';\nreturn dirname + ':' + basename;\n}\nreturn '\"' + s + '\"';\n}\n}\n## Supporting Material/References:\nhttps://github.com/mooz/node-pdf-image/blob/master/index.js#L27\nLinux / centOS\nv6.17.1\n3.10.10\nN/A\nOwn sample script\nWrap up\nSelect Y or N for the following statements:\nI contacted the maintainer to let them know: [Y/N] N\nI opened an issue in the related repository: [Y/N] N\nThanks!\nImpact\nBad code relying on that class can feel foul to RCE.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1582549200,
+  "report_url": "https://hackerone.com/reports/781664",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection via user-controlled input in the pdf-image module, which is not related to authentication or authorization bypasses. The proposed methodologies focus on AuthN/AuthZ and IDOR vulnerabilities, which are not applicable here.",
+    "is_detectable": false
+  }
+}

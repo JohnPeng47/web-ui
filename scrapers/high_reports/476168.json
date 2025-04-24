@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "haquaman ",
+  "title": "Heap overflow in utf32be_mbc_to_code",
+  "content": "\nhttps://bugs.php.net/bug.php?id=77418\nBuffer overflow in mbc_to_code functions for UTF32BE, UTF32LE, UTF16BE, and UTF16LE due to incorrect length assumptions of a buffer. Provided a patch that was adapted to check the length of the buffer prior to using it.\nImpact\nMemory leakage and/or corruption\n\n",
+  "severity": [
+    9.8,
+    null
+  ],
+  "bounty": 1500,
+  "weaknesses": [
+    "Heap Overflow"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1604904480,
+  "report_url": "https://hackerone.com/reports/476168",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify the vulnerable functions in PHP's UTF32BE, UTF32LE, UTF16BE, and UTF16LE encoding handling."
+    ],
+    [
+      2,
+      "Craft input data that triggers a buffer overflow by exceeding the expected buffer length in the mbc_to_code functions."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves a buffer overflow in PHP's mbc_to_code functions for UTF32BE, UTF32LE, UTF16BE, and UTF16LE encodings due to incorrect buffer length assumptions. This can lead to memory leakage and/or corruption when processing specially crafted input data.",
+  "reason": "This vulnerability is relatively straightforward to discover as it involves a classic buffer overflow scenario in well-defined encoding functions. The main challenge is understanding the specific encoding handling in PHP, but the overflow mechanism itself is a common vulnerability pattern.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

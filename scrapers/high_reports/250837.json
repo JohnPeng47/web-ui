@@ -1,0 +1,53 @@
+{
+  "reported_to": "WordPress",
+  "reported_by": "morningstar ",
+  "title": "Stored xss via template injection",
+  "content": "\nHello Sir , I found Stored XSS in https://mercantile.wordpress.org/\nPOC is attached .\nSteps to reproduce:\n1.Login to your account.\n2. Go to https://mercantile.wordpress.org/my-account/edit-address/ & fill details , press save & intercept this request in burp suit.\n3.change name to {{constructor.constructor('alert(1)')()}} & forward request. as shown in screenshot.\nXss will popup when you visit your account page.\nAlthough its self XSS. but following attack scenario makes it useful.\nAnyone can make account on https://mercantile.wordpress.org/ using someone else email id, Its not verifying whether its your email id or not. Lets consider \"A\" makes account with \"B\" persons email & by using this technique store XSS payload in its account. After that \"B\" wants account on mercantile.wordpress.org with same email. so rather creating account with new email, \"B\" person just do forget password & recover & recover his account. but xss payload is still there in his account so attacker \"A\" can access victim \"B\" account anytime.\nOne more thing, even after changing name with https://mercantile.wordpress.org/my-account/edit-account/ setting payload is not removed its still there. so its make attack more sophisticated.\nThanks & Regards,\nAkshay\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1513017360,
+  "report_url": "https://hackerone.com/reports/250837",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Login to your account on https://mercantile.wordpress.org/"
+    ],
+    [
+      2,
+      "Go to https://mercantile.wordpress.org/my-account/edit-address/ and fill in details, then intercept the request using Burp Suite"
+    ],
+    [
+      3,
+      "Modify the name field to {{constructor.constructor('alert(1)')()}} and forward the request"
+    ],
+    [
+      4,
+      "Visit your account page to trigger the XSS payload"
+    ]
+  ],
+  "vuln_description": "This is a Stored XSS vulnerability via template injection on mercantile.wordpress.org. An attacker can inject malicious JavaScript code into the name field during account editing, which is then executed when the victim views their account page. The attack is compounded by the ability to create accounts with unverified email addresses, allowing an attacker to pre-load an XSS payload into a victim's account before they claim it.",
+  "reason": "The vulnerability involves understanding template injection and XSS, but the steps to exploit it are straightforward once the injection point is identified. The attack scenario adds some complexity by leveraging account creation and recovery flows, but the core vulnerability discovery is not highly complex.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves template injection leading to stored XSS, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, which does not apply to detecting XSS vulnerabilities.",
+    "is_detectable": false
+  }
+}

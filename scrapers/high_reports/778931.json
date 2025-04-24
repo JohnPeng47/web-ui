@@ -1,0 +1,46 @@
+{
+  "reported_to": "Ruby",
+  "reported_by": "thevillagehack3r ",
+  "title": "Source code disclosed via S3 Bucket",
+  "content": "\nSummary\n<image_0>\nSteps to Reproduce\n<image_1>\nCan also able to access aws-cli through aws s3 ls s3://rubyci\n<image_2>\nscroll down and a line shown which directs to source code directory link http://svn.ruby-lang.org/repos/ruby/branches/ that is a initial directory for all source codes\nI can check and view each and every source codes of all ruby versions\nPOC\nVideo\nImpact\nThe attacker can able to read any aws authorized object and use those informations to do potential attacks\nThe source codes having some sensitive informations so the attacker can do impact to ruby codes that may cause major attack on users.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Information Exposure Through Directory Listing"
+  ],
+  "screenshots": {
+    "image_0": "The Ruby having an Amazon S3 bucked named http://rubyci.s3.amazonaws.com/ which lists some of their log files. Those logs having some informations to check the source code server side directories.",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/4YEUFFgngDYjSCygmmuaCQA8?response-content-disposition=attachment%3B%20filename%3D%221.png%22%3B%20filename%2A%3DUTF-8%27%271.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ5SJFFD5D%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T014134Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCk0LsqGROiWxyGgjK7lBBV3X20vqng%2BHb7t%2BbqaBoxDQIgOsjv5vZ67kVjqGQkh5vdNkfbL0ROL1X36MoZFBkMULcqsgUIIBADGgwwMTM2MTkyNzQ4NDkiDO0tVgatLOOxEDw5WSqPBf4Nj%2BAtsuavAQWelxJCNW72HrBA%2FtoJYgivWsBu9QYSuDg1ERA0RbU8yz2grrf8xjWs89ZZ56TT%2FMA%2BBBZrz2XL6RAUmfrb1oSzobcyqE4Yj3W4HitL67uqXtjaE2phUwGxADlT6YIZH8YpHScobFnOMqdlQ6rokXMZorRaSIQV2CyWepQ44DK30sHCgmGo2JocY9VIq3ug3qwW4JOvwREJsV8DKOFE%2B5bGNVzXnLcxzzdZ2NefuoK1UvjLwWMMzKBWYhV88TZRaez%2FhQBqeYRxAPO5GW8T1KspOL%2FDsNPNqLK9pAtMooQCUJXQi5tS5hX2EQX%2BqymjgeoK8sfCvxflXOMAM9BSOI0vkYgMJsnNFLGCYUgO14ARxBXeFk8L9Bsiu9DVdcQn19rQaSFqT1bXrltmqDWusxWg6R2cwdyy9KxmydJumU2v43p4ku8OS0onXf%2FkAn5WKX2we2D6RwkjZrfDFxJb9gWX5pfgnXyV853Itgx5Od1ly08wgbqcYo%2BjRUjDcZeJNMc81aK7raJondTPrgwT8zSKmUd%2BkuOH3pj%2FHV4Eh3TA6l8BrviUFxe7JPR544dog2avTkOXcQ0znZDsW63rez2ijpSB66cBN4RXU7J6jT2tdDUOZh9E%2Fru63zttefBBsMjQj3%2FJ1L6guXdyoJNO3fSjyrgfSg9nfYrfbGl1yp8FEoCSeUP2nL6s9IbP88JTKCdkXAN2gAwx60nbdSsJH8FXiBZzNzbbMuztj1Cg2X78q0sg9wzNhkjsvt6Hp0I1c9Rx2GiaXUC462mBULPRbVUKswDi7e7vLpPPr2XIH4%2F%2BUBtcpweBOZfjxxKJuOAKfUBCdj3RNj%2BDNFnupenA3%2FTm0eKACz0wrt6MvwY6sQHaR6Yp96XqYLPsfyViQi4tLkBuGiKPP2zO7cM4rJxIcnFbOlrabWMQMcxue0QgQDz%2Bs6oRe97NLb3nQhn1mi8vd4YpgICfU6EsyFSWTV3n6dlFj3k1ail5Ia1wobXy74e909KhgWLtG7Lr9DuSPp8YLfWik8t4FCo3p2iWFEjw1%2BmT4Tb0il2HwA%2BFkr9LgpIZG2r7smhUMAjcoWW%2BUTDLjmWkAHrJEw6hsNPoEx5rVZs%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=784ce6bbac5a7418b3f2493e9f3e8534aadf04db13993b9aab0546ac8cfe1e58",
+    "image_2": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/1jMxH5Ws1esaQ7bbvCCwq4QU?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_from_2020-01-21_15-02-42.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_from_2020-01-21_15-02-42.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ5SJFFD5D%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T014134Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCk0LsqGROiWxyGgjK7lBBV3X20vqng%2BHb7t%2BbqaBoxDQIgOsjv5vZ67kVjqGQkh5vdNkfbL0ROL1X36MoZFBkMULcqsgUIIBADGgwwMTM2MTkyNzQ4NDkiDO0tVgatLOOxEDw5WSqPBf4Nj%2BAtsuavAQWelxJCNW72HrBA%2FtoJYgivWsBu9QYSuDg1ERA0RbU8yz2grrf8xjWs89ZZ56TT%2FMA%2BBBZrz2XL6RAUmfrb1oSzobcyqE4Yj3W4HitL67uqXtjaE2phUwGxADlT6YIZH8YpHScobFnOMqdlQ6rokXMZorRaSIQV2CyWepQ44DK30sHCgmGo2JocY9VIq3ug3qwW4JOvwREJsV8DKOFE%2B5bGNVzXnLcxzzdZ2NefuoK1UvjLwWMMzKBWYhV88TZRaez%2FhQBqeYRxAPO5GW8T1KspOL%2FDsNPNqLK9pAtMooQCUJXQi5tS5hX2EQX%2BqymjgeoK8sfCvxflXOMAM9BSOI0vkYgMJsnNFLGCYUgO14ARxBXeFk8L9Bsiu9DVdcQn19rQaSFqT1bXrltmqDWusxWg6R2cwdyy9KxmydJumU2v43p4ku8OS0onXf%2FkAn5WKX2we2D6RwkjZrfDFxJb9gWX5pfgnXyV853Itgx5Od1ly08wgbqcYo%2BjRUjDcZeJNMc81aK7raJondTPrgwT8zSKmUd%2BkuOH3pj%2FHV4Eh3TA6l8BrviUFxe7JPR544dog2avTkOXcQ0znZDsW63rez2ijpSB66cBN4RXU7J6jT2tdDUOZh9E%2Fru63zttefBBsMjQj3%2FJ1L6guXdyoJNO3fSjyrgfSg9nfYrfbGl1yp8FEoCSeUP2nL6s9IbP88JTKCdkXAN2gAwx60nbdSsJH8FXiBZzNzbbMuztj1Cg2X78q0sg9wzNhkjsvt6Hp0I1c9Rx2GiaXUC462mBULPRbVUKswDi7e7vLpPPr2XIH4%2F%2BUBtcpweBOZfjxxKJuOAKfUBCdj3RNj%2BDNFnupenA3%2FTm0eKACz0wrt6MvwY6sQHaR6Yp96XqYLPsfyViQi4tLkBuGiKPP2zO7cM4rJxIcnFbOlrabWMQMcxue0QgQDz%2Bs6oRe97NLb3nQhn1mi8vd4YpgICfU6EsyFSWTV3n6dlFj3k1ail5Ia1wobXy74e909KhgWLtG7Lr9DuSPp8YLfWik8t4FCo3p2iWFEjw1%2BmT4Tb0il2HwA%2BFkr9LgpIZG2r7smhUMAjcoWW%2BUTDLjmWkAHrJEw6hsNPoEx5rVZs%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=a53fe6c6acced0cc100c13fb251f329a3e48e949fab17db9eb792caf8984d8f3"
+  },
+  "disclosed_date": 1581571020,
+  "report_url": "https://hackerone.com/reports/778931",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Access the publicly exposed S3 bucket using the AWS CLI command: `aws s3 ls s3://rubyci`"
+    ],
+    [
+      2,
+      "Navigate through the bucket contents to find the source code directory link: http://svn.ruby-lang.org/repos/ruby/branches/"
+    ],
+    [
+      3,
+      "Browse and view the source code files for various Ruby versions, potentially accessing sensitive information"
+    ]
+  ],
+  "vuln_description": "An S3 bucket containing Ruby source code was misconfigured to allow public access. This exposes sensitive source code and potentially other AWS-authorized objects, which could be leveraged for further attacks.",
+  "reason": "The vulnerability involves a straightforward misconfiguration (publicly accessible S3 bucket) with no complex interactions or state manipulations required. The discovery primarily involves basic AWS CLI commands or manual browsing.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

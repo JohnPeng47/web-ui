@@ -1,0 +1,38 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "danny_grander ",
+  "title": "Arbitrary File Write through archive extraction",
+  "content": "\nI would like to report arbitrary file write vulnerability in adm-zip module\nIt allows attackers to write arbitrary files when a malicious archive is extracted.\nMore info here:\nhttps://snyk.io/research/zip-slip-vulnerability\nhttps://github.com/snyk/zip-slip-vulnerability#affected-libraries\nModule\nmodule name: unzipper\nversion: <0.8.13\nnpm page: https://www.npmjs.com/package/unzipper\nModule Description\nThis is a fork of node-unzip which has not been maintained in a while. This fork addresses the following issues:\nfinish/close events are not always triggered, particular when the input stream is slower than the receivers\nAny files are buffered into memory before passing on to entry\nModule Stats\n80k downloads in the last week\nVulnerability\nVulnerability Description\nThe vulnerability is a form of directory traversal that can be exploited by extracting files from an archive. The premise of the directory traversal vulnerability is that an attacker can gain access to parts of the file system outside of the target folder in which they should reside. The attacker can then overwrite executable files and either invoke them remotely or wait for the system or user to call them, thus achieving remote command execution on the victim\u2019s machine. The vulnerability can also cause damage by overwriting configuration files or other sensitive resources, and can be exploited on both client (user) machines and servers.\nMore info here:\nhttps://snyk.io/research/zip-slip-vulnerability\nhttps://github.com/snyk/zip-slip-vulnerability\nSteps To Reproduce:\nSample files can be found here: https://github.com/snyk/zip-slip-vulnerability/tree/master/archives\nPatch\nVulnerability is already fixed in ver 0.8.13\nWe opened a fix PR on 16th of April, https://github.com/ZJONSSON/node-unzipper/pull/59\nCVE id for the vuln was assigned: CVE-2018-1002203\nSupporting Material/References:\nThere are multiple libraries affected, across different ecosystems.\nFull list here: https://github.com/snyk/zip-slip-vulnerability#affected-libraries\nhttps://snyk.io/research/zip-slip-vulnerability\nhttps://github.com/snyk/zip-slip-vulnerability\nWrap up\nI contacted the maintainer to let them know: Y, and helped fix the issue\nI opened an issue in the related repository: N\nImpact\nArbitrary file write\n\n",
+  "severity": [
+    8.2,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1534099800,
+  "report_url": "https://hackerone.com/reports/362119",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create a malicious ZIP archive containing files with paths that traverse directories (e.g., '../../evil.js')"
+    ],
+    [
+      2,
+      "Extract the malicious archive using unzipper (<0.8.13) to trigger arbitrary file writes"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a directory traversal issue in the unzipper npm module (<0.8.13) that allows attackers to write arbitrary files when extracting a malicious archive. This can lead to remote code execution by overwriting executable files or configuration files.",
+  "reason": "This vulnerability is straightforward to exploit once the concept of directory traversal in ZIP files is understood. The attack involves a single component (the ZIP extraction process) and follows a well-known pattern (Zip Slip) that has been documented across multiple ecosystems.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

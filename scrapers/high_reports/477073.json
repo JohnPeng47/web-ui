@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "guido ",
+  "title": "ZeroMQ libzmq remote code execution",
+  "content": "\nBug report and exploit: https://github.com/zeromq/libzmq/issues/3351\nFix by me: https://github.com/zeromq/libzmq/pull/3353\nMy motive for full disclosure is as follows:\nCode 456 Bytes\n1Is it true that it is not safe to use ZeroMQ over the internet because it will crash?\n2\n3Earlier versions of the ZeroMQ library (before 2.1) were not very resilient against \"fuzzing\" attacks. A malformed packet or garbage data could cause an old version of the library to assert and exit. Since the release of 2.1, all reported cases of assertions caused by bad data have been fixed. If your testing uncovers a problem in this area, please file a bug report.\nSource: http://zeromq.org/area:faq\nThe issue reporting page (http://zeromq.org/docs:issue-tracking) instructs to open a Github issue, with no special procedure for security issues, so I went ahead and did just that.\nlibzmq appears to be widely used and has wrapper implementations for Go, Python, Java, Node.js, etc.\nImpact\nRunning arbitrary code on the victim's system.\n\n",
+  "severity": [
+    8.8,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Memory Corruption - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1568335440,
+  "report_url": "https://hackerone.com/reports/477073",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify a vulnerable version of ZeroMQ (libzmq) that is exposed over the internet."
+    ],
+    [
+      2,
+      "Send a specially crafted malformed packet or garbage data to the ZeroMQ endpoint to trigger the vulnerability."
+    ]
+  ],
+  "vuln_description": "The vulnerability in ZeroMQ (libzmq) allows for remote code execution due to improper handling of malformed packets or garbage data. This can lead to arbitrary code execution on the victim's system if exploited successfully.",
+  "reason": "The vulnerability involves sending malformed data to a ZeroMQ endpoint, which is a straightforward attack vector. The complexity lies in crafting the malicious payload, but the overall attack does not involve multiple components or complex interactions.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

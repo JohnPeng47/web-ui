@@ -1,0 +1,38 @@
+{
+    "reported_to": "CS Money",
+    "reported_by": "ahmd_halabi ",
+    "title": "Manipulate Uneditable Messages in Support",
+    "content": "\nSummary:\nHello,\nThe support section has a validation on all the posted messages where it doesn't allow you to edit your messages after some minutes from posting them.\nI was able to bypass this protection and edit successfully the previous messages that can't be edited.\nAfter further investigation, I found that whenever you create/send a message, there is a date value made of numbers generated in the response which indicates the timestamp or the date that the message was created.\nAnd when you edit that message, the same value is used as a date parameter in the edit request.\nThe bug is that the date parameter is still active for the unedited messages, so when you perform an editable request having the old unedited message's date value as a date parameter, the request will be successful and the new edit text will be successfully applied.\nSteps To Reproduce:\nSo first you need to identify the message initial date, send a message in the support section, intercept its request and see the response containing the target date.\nCode 403 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n2Host: support.cs.money\n3\n4{\"user_steamid\":\"id-number\",\"text\":\"test\",\"settings\":{\"skin_exterior\":0,\"eco\":0,\"unavailable\":1,\"hints_in_trade\":1,\"lock_skin\":0,\"popup_skin\":1,\"reserved_skin\":1,\"save_filter\":0,\"virtual_trade\":0,\"skins_ticker\":1,\"beautiful_pics\":1,\"skins_float\":0,\"rarity\":0,\"collection\":0,\"conveyor\":1,\"block_red_points\":0,\"sourcePay\":\"scrill\"},\"bot_mode\":\"trade\",\"user_mode\":\"trade\"}\n\u2588\u2588\u2588\u2588\u2588\u2588\n'2. Say that you no longer are able to edit the above message created by you. So now create another message. Click edit, send the message and intercept its request.\n'3. Add the date value from the step 1 response in the date value, and add the new message content in the new_message value.\nCode 123 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n2Host: support.cs.money\n3\n4{\"date\":\"date-value\",\"new_message\":\"Hackerone edited message changed successfully === bug\"}\n'4. Forward the request and see the response code id 200 OK, Reload the page and see that the message is edited successfully.\nSupporting Material/References:\nPlease see the video below where I explained the bug step-by-step.\n\u2588\u2588\u2588\u2588\u2588\nImpact\nUsers are able to edit their old messages that are not supposed to be editable anymore. This can lead to serious issues because they are being edited on the server too.\nAlso this is a bypass for the application validation and violation of its protection.\nI think this can lead to serious problems if malicious users edit the messages to bad or harmful content.\nBest Regards.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1603841280,
+    "report_url": "https://hackerone.com/reports/995969",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Send a message in the support section and intercept the response to note the 'date' value"
+        ],
+        [
+            2,
+            "Create another message, intercept the edit request, and replace the 'date' parameter with the previously noted value to edit the old message"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows users to bypass the message editing restriction in the support section by manipulating the 'date' parameter in edit requests, enabling them to edit messages that should no longer be editable.",
+    "reason": "The attack involves understanding the role of the 'date' parameter in message editing and manipulating it to bypass time-based restrictions. While the steps are straightforward, recognizing the significance of the 'date' parameter requires some insight into the application's logic.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

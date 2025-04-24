@@ -1,0 +1,38 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "alyssa_herrera ",
+  "title": "SSRF on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 Allowing internal server data access",
+  "content": "\nSummary:\nAn end point on \u2588\u2588\u2588\u2588\u2588\u2588 allows an internal access to the network thus revealing sensitive data and allowing internal tunneling\nDescription:\nOAuth Plugin allows you to provide a url that gives a snap shot of the web page. We can pass internal URLS and conduct SSRF.\n## Impact\nCritical\n## Step-by-step Reproduction Instructions\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/plugins/servlet/oauth/users/icon-uri?consumerUri=http://169.254.169.254/latest/meta-data/hostname\nWe can see the follow data\nip-172-31-12-254.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.compute.internal\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/plugins/servlet/oauth/users/icon-uri?consumerUri=http://169.254.169.254/latest/meta-data/public-ipv4\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nProduct, Version, and Configuration (If applicable)\nJira\n## Suggested Mitigation/Remediation Actions\nUpdate to recent version\nImpact\nAn attacker can tunnel into internal networks and access sensitive internal data such as AWS meta data information.\nThe hacker selected the Server-Side Request Forgery (SSRF) weakness. This vulnerability type requires contextual information from the hacker. They provided the following answers:\nCan internal services be reached bypassing network access control?\nYes\nWhat internal services were accessible?\nAWS Bucket Meta data\nSecurity Impact\nCVE-2017-9506 - The IconUriServlet of the Atlassian OAuth Plugin from version 1.3.0 before version 1.9.12 and from version 2.0.0 before version 2.0.4 allows remote attackers to access the content of internal network resources and/or perform an XSS attack via Server Side Request Forgery (SSRF).\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Information Disclosure"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1570575240,
+  "report_url": "https://hackerone.com/reports/326040",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to the OAuth plugin endpoint: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/plugins/servlet/oauth/users/icon-uri"
+    ],
+    [
+      2,
+      "Modify the consumerUri parameter to point to an internal AWS metadata URL: http://169.254.169.254/latest/meta-data/hostname"
+    ]
+  ],
+  "vuln_description": "The OAuth Plugin in Jira allows Server-Side Request Forgery (SSRF) by accepting arbitrary URLs in the consumerUri parameter. This enables attackers to access internal network resources, such as AWS metadata, bypassing network access controls.",
+  "reason": "The vulnerability is straightforward to exploit once the endpoint is identified, as it only requires modifying a single parameter to an internal URL. The interaction is simple and does not involve complex application states or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

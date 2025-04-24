@@ -1,0 +1,50 @@
+{
+    "reported_to": "Palo Alto Software",
+    "reported_by": "zer0code ",
+    "title": "weak protection against brute-forcing on login api leads to account takeover ",
+    "content": "\nSummary:\nWeak protection against brute-forcing on login API: https://api.outpost.co/api/v1/login leads to account takeover on https://www.teamoutpost.com/\n## Steps To Reproduce:\nSign in on https://www.teamoutpost.com/ \u2588\u2588\u2588\nredirect to https://app.outpost.co/sign-in to login \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\ntest any login credentials and review the request to https://api.outpost.co/api/v1/login \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nNotice the difference between the wrong user \"Username does not exist\" and wrong password \" Password does not match username\" \u2588\u2588\u2588\u2588\nfirst we need to brute-force on username to get some valid usernames \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nWe can grep on \"Username does not exist\" \u2588\u2588\u2588\u2588\u2588\u2588\nHere is valid usernames without \"Username does not exist\" \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nNotice the API doesn't block me for many requests even I reached more than 33K request and continue \u2588\u2588\u2588\u2588\nafter we exported a list of valid usernames we can brute-force for password fore every username on the list \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nI imported valid usernames as 1st payload \u2588\u2588\u2588\u2588\u2588\u2588\nfor 2nd payload I can use a passwords list but I tried the simplest password that user can register with \" 9 characters long \" \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nwe got some credentials even with ADMIN role \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\naccount takeover\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Restriction of Authentication Attempts"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1661811780,
+    "report_url": "https://hackerone.com/reports/766875",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Sign in on https://www.teamoutpost.com/ and observe the redirect to https://app.outpost.co/sign-in"
+        ],
+        [
+            2,
+            "Test login credentials and review the request to https://api.outpost.co/api/v1/login to notice the difference between 'Username does not exist' and 'Password does not match username' responses"
+        ],
+        [
+            3,
+            "Brute-force usernames by checking for the absence of 'Username does not exist' response to gather valid usernames"
+        ],
+        [
+            4,
+            "Brute-force passwords for the valid usernames using a simple password list or common passwords (e.g., '9 characters long')"
+        ],
+        [
+            5,
+            "Successfully obtain valid credentials, including those with ADMIN role"
+        ]
+    ],
+    "vuln_description": "Weak protection against brute-forcing on the login API allows attackers to enumerate valid usernames and then brute-force passwords, leading to account takeover.",
+    "reason": "The attack involves straightforward steps of enumerating usernames and brute-forcing passwords without any rate limiting or account lockout mechanisms. The interaction between components is simple, and the logic is common in brute-force attacks.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

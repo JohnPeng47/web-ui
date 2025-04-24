@@ -1,0 +1,64 @@
+{
+    "reported_to": "GitLab",
+    "reported_by": "jobert ",
+    "title": "Ability to access all user authentication tokens, leads to RCE",
+    "content": "\nVulnerability details\nThe project export feature serializes the user objects of team members and stores it in the project.json file. This object contains the authentication_token for every user, meaning that an attacker can simply go ahead and create a project on GitLab.com, add one of the admins of GitLab.com, create an export, and obtain the authentication token for that user.\nProof of concept\nFollow these steps to reproduce the issue:\ncreate a test account on a GitLab instance and create a temporary repository\ninvite an admin of the GitLab instance as a team member to the repository\ngo to the repository settings and create an export\nwait a few minutes until you received the export email\nnow go to http://gitlab-instance/account/repo/download_export\nunzip the downloaded file and examine projects.json - the project_members will contain the user object that contains the authentication_token\nHere's the first few bytes of rspeicher (sorry Robert) his authentication token on GitLab.com: ZyhqJr4XJZ.... Someone could get access to GitLab's admin panel by extracting the token of an admin and go to https://gitlab.com/admin/users?authentication_token=<token>. From what I've seen on my own GitLab instance, this leads to RCE and gives me access to all code in private repositories. Let me know if you need more information!\n\n",
+    "severity": [
+        9.9,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Privilege Escalation"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1478226480,
+    "report_url": "https://hackerone.com/reports/158330",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "create a test account on a GitLab instance and create a temporary repository"
+        ],
+        [
+            2,
+            "invite an admin of the GitLab instance as a team member to the repository"
+        ],
+        [
+            3,
+            "go to the repository settings and create an export"
+        ],
+        [
+            4,
+            "wait a few minutes until you received the export email"
+        ],
+        [
+            5,
+            "now go to http://gitlab-instance/account/repo/download_export"
+        ],
+        [
+            6,
+            "unzip the downloaded file and examine projects.json - the project_members will contain the user object that contains the authentication_token"
+        ]
+    ],
+    "vuln_description": "The project export feature serializes the user objects of team members and stores it in the project.json file, including the authentication_token for every user. An attacker can create a project, add an admin, export the project, and obtain the admin's authentication token, leading to potential RCE and access to private repositories.",
+    "reason": "The attack involves multiple steps but follows a logical sequence of actions that are not overly complex or subtle. The vulnerability arises from a straightforward oversight in the export feature's handling of sensitive data.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

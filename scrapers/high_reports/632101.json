@@ -1,0 +1,46 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "mclaren650sspider ",
+  "title": "Server Side Request Forgery mitigation bypass",
+  "content": "\nSummary\nThis vulnerability allows attacker to send arbitrary requests to local network which hosts GitLab and read the response. This is possible due to flawed DNS rebinding protection.\nThe attack is possible due to flaw here: https://gitlab.com/gitlab-org/gitlab-ce/blob/108c3cf16bed5733ffae086fb62c226961356560/lib/gitlab/url_blocker.rb#L59\nThe validate function performs DNS lookup to check whether the IP address of a domain belongs to the local network. If the IP address belongs to the local network, the validate function raises an error and no HTTP request is sent. Furthermore, validate returns URI as well as the IP address of the domain to protect against DNS rebinding attacks.\nHowever, if validate encounters an error while resolving the domain (for example, the domain does not resolve), the DNS rebinding protection is not applied.\nSteps to reproduce\nCreate a webhook for a repository on GitLab.com. Use the URL http://990.hacker1.xyz. It may return error but let's ignore it now.\nWait about 10 seconds and test webhook by clicking on \"Test\" and \"Push events\".\nAfter the hook has executed, you should see content of http://169.254.169.254 returned.\nWait about 15 seconds between testing attempts, otherwise it may not work due to DNS caching.\nThe code for proof-of-concept DNS server which hosts hacker1.xyz is attached. The PoC uses a chain of CNAME records to prevent caching.\nWhat is the current bug behavior?\nThe outgoing HTTP requests from webhooks can be sent to the internal network.\nWhat is the expected correct behavior?\nIt is expected that HTTP requests cannot be sent to the internal network.\nRelevant logs and/or screenshots\nScreen_Shot_2019-06-29_at_15.36.41.png (F519096)\nContent of http://169.254.169.254\nScreen_Shot_2019-06-29_at_15.37.14.png (F519095)\nContent of http://127.0.0.1\nOutput of checks\nThis bug happens on GitLab.com\nImpact\nAttacker can use SSRF to access sensitive information on the internal network. Furthermore, SSRF in Google Cloud can be leveraged to Remote Code Execution depending on the setup. Publicly disclosed $25,000 #341876 describes a way to gain root access to Google Cloud server via a SSRF vulnerability.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Server-Side Request Forgery (SSRF)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1587226620,
+  "report_url": "https://hackerone.com/reports/632101",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create a webhook for a repository on GitLab.com using the URL http://990.hacker1.xyz"
+    ],
+    [
+      2,
+      "Wait about 10 seconds and test the webhook by clicking on 'Test' and 'Push events'"
+    ],
+    [
+      3,
+      "After the hook has executed, observe the content of http://169.254.169.254 returned"
+    ],
+    [
+      4,
+      "Wait about 15 seconds between testing attempts to avoid DNS caching issues"
+    ]
+  ],
+  "vuln_description": "This vulnerability allows an attacker to bypass DNS rebinding protection in GitLab, enabling Server Side Request Forgery (SSRF) attacks that can access internal network resources. The flaw occurs when the DNS resolution fails, causing the system to skip IP address validation checks.",
+  "reason": "The attack requires understanding of DNS rebinding, setting up a custom DNS server with specific CNAME chains to bypass caching, and timing the attack correctly to exploit the validation bypass. The interaction between DNS resolution failure and the skipped validation is subtle and not immediately obvious.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "341876"
+}

@@ -1,0 +1,46 @@
+{
+    "reported_to": "Nextcloud",
+    "reported_by": "cloudyvirus ",
+    "title": "Email Spoofing Vulnerability from nextcloud.",
+    "content": "\nHi nextcloud,\nHere is Shaifullah Shaon (Black_EyE), An Ethical Hacker.\na white hat cyber security researcher from Bangladesh reporting a serious\n[3'rd ranking in OWASP] security vulnerability on your system.\nThere is an Email Spoofing Vulnerability from nextcloud.\nSteps to reproduce:\n1) Go to http://emkei.cz/\n2) Fill \"From Email\" field to support@nextcloud.com or any other nextcloud email.\n3) Fill the victim's address (your address) to \"TO\" field and fill in other details as you wish.\nYou will receive email from nextcloud Support Team.\nRecheck it,\nReference:\nhttps://hackerone.com/reports/575\nhttps://hackerone.com/reports/182467\nThank you for time and consideration you provided for reading my report.\nNote: If you don't find it in your inbox, see spam folder. If the victim is using\nGmail account it might be in spam folder. In other mailing service like nextcloud it is\ndirectly recieved in inbox.\nProof as Video Concept (unlisted): https://youtu.be/yPAcyydlaMg\nNB: If you Informative it, Then Want to told you that, Today or tomorrow Wannacry Ransomware are shared by email spoofing. Remember it.\nYour sincerely,\nShaifullah Shaon\nshaon.durjoy@gmail.com\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1495122540,
+    "report_url": "https://hackerone.com/reports/229599",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to http://emkei.cz/"
+        ],
+        [
+            2,
+            "Fill 'From Email' field with support@nextcloud.com or any other nextcloud email."
+        ],
+        [
+            3,
+            "Fill the victim's address in the 'TO' field and other details as desired."
+        ],
+        [
+            4,
+            "Send the email and check the victim's inbox (including spam folder)."
+        ]
+    ],
+    "vuln_description": "This vulnerability allows an attacker to spoof emails from Nextcloud's domain (e.g., support@nextcloud.com) using a third-party service (emkei.cz). The spoofed email appears legitimate to the recipient, potentially enabling phishing or social engineering attacks.",
+    "reason": "The vulnerability is straightforward to exploit using publicly available email spoofing tools, requiring no deep understanding of Nextcloud's internal systems or complex interactions. The attack relies on basic email protocol weaknesses (lack of proper SPF/DKIM/DMARC enforcement) rather than novel or intricate logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "182467"
+}

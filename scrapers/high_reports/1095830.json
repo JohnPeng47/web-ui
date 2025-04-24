@@ -1,0 +1,42 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "mit0z ",
+    "title": "CRXDE Lite/CRX is on \u2588\u2588\u2588\u2588\u2588\u2588 exposed that leads to PII disclosure",
+    "content": "\nhi team ,\ni found that aem is running on\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 and CRXDE Lite/CRX is exposed to unauthenticated user that can lead to information disclosure\nPOC\n1-visit https://\u2588\u2588\u2588\u2588\u2588\u2588//\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n2-go to query and search for admin then execute\n3-go to this endpoint to retrieve the information\nCode 30 Bytes\n1https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588//\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\n[+]Request\nCode 646 Bytes\n1GET //\u2588\u2588\u2588/\u2588\u2588\u2588 HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\n3Connection: close\n4sec-ch-ua: \"Chromium\";v=\"88\", \"Google Chrome\";v=\"88\", \";Not A Brand\";v=\"99\"\n5sec-ch-ua-mobile: ?0\n6Upgrade-Insecure-Requests: 1\n7User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36\n8Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\n9Sec-Fetch-Site: none\n10Sec-Fetch-Mode: navigate\n11Sec-Fetch-User: ?1\n12Sec-Fetch-Dest: document\n13Accept-Encoding: gzip, deflate\n14Accept-Language: en-US,en-XA;q=0.9,en;q=0.8\n15Cookie: oauth-configid=\u2588\u2588\u2588\u2588\u2588\u2588\n16\n17\n[+]Response\nCode 416 Bytes\n1HTTP/1.1 200 OK\n2Date: Thu, 04 Feb 2021 22:23:42 GMT\n3X-Content-Type-Options: nosniff\n4X-Frame-Options: SAMEORIGIN\n5Content-Type: application/json;charset=utf-8\n6Content-Length: 1789\n7Connection: close\n8Set-Cookie: \u2588\u2588\u2588\u2588\u2588\u2588\u2588; path=/; Httponly; Secure\n9Strict-Transport-Security: max-age=31536000; includeSubDomains\n10Set-Cookie: f5avraaaaaaaaaaaaaaaa_session_=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588; HttpOnly; secure\n11Set-Cookie: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588; Path=/\n12\n13\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n14\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nPII exposure\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\n1-visit https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588//\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n2-go to query and search for admin then execute\n3-go to this endpoint to retrieve the information\nCode 27 Bytes\n1https://\u2588\u2588\u2588\u2588\u2588//\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1615513740,
+    "report_url": "https://hackerone.com/reports/1095830",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "steps": [
+        [
+            1,
+            "Visit the exposed CRXDE Lite/CRX endpoint at the given URL"
+        ],
+        [
+            2,
+            "Use the query feature to search for 'admin' and execute the query"
+        ],
+        [
+            3,
+            "Access the specified endpoint to retrieve sensitive PII data"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves an exposed CRXDE Lite/CRX interface that allows unauthenticated users to query and retrieve sensitive Personally Identifiable Information (PII) from the system.",
+    "reason": "The attack is straightforward, involving direct access to an exposed administrative interface and executing a simple query. There are no complex interactions or state manipulations required.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

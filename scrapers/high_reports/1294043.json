@@ -1,0 +1,38 @@
+{
+  "reported_to": "Sifchain",
+  "reported_by": "escanor56 ",
+  "title": "SSH server due to Improper Signature Verification",
+  "content": "\nI found that you are using golang.org/x/crypto@v0.0.0-20201016220609-9e8e0b390897 which has a vulnerability that was fixed in this version\ngolang.org/x/crypto@0.0.0-20201203163018-be400aefbc4c but that vulnerability is:\ngolang.org/x/crypto/ssh is an SSH client and server\nVersion v0.0.0-20200220183623-bac4c82f6975 of golang.org/x/crypto fixes a vulnerability in the golang.org/x/crypto/ssh package which allowed peers to cause a panic in SSH servers that accept public keys and in any SSH client.\nYou can check all of the info here with this CVE: CVE-2020-9283.\nImpact\nAn attacker can craft an ssh-ed25519 or sk-ssh-...@openssh.com public key, such that the library will panic when trying to verify a signature with it. Clients can deliver such a public key and signature to any golang.org/x/crypto/ssh server with a PublicKeyCallback, and servers can deliver them to any golang.org/x/crypto/ssh client.\n\n",
+  "severity": [
+    7.0,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "None"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1630348500,
+  "report_url": "https://hackerone.com/reports/1294043",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify a target system using golang.org/x/crypto/ssh package with a version prior to v0.0.0-20201203163018-be400aefbc4c."
+    ],
+    [
+      2,
+      "Craft a malicious ssh-ed25519 or sk-ssh-...@openssh.com public key and attempt to authenticate or verify a signature with the target SSH server or client."
+    ]
+  ],
+  "vuln_description": "The vulnerability in golang.org/x/crypto/ssh allows an attacker to cause a panic in SSH servers or clients by providing a specially crafted public key. This affects systems using versions before v0.0.0-20201203163018-be400aefbc4c, where improper signature verification can be exploited to crash the service.",
+  "reason": "The attack involves crafting a specific type of public key, which requires knowledge of the SSH protocol and the specific flaw in the signature verification process. However, once the flaw is known, the steps to exploit it are straightforward and do not involve complex interactions or state manipulations.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

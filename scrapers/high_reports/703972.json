@@ -1,0 +1,46 @@
+{
+    "reported_to": "pixiv",
+    "reported_by": "pdaa ",
+    "title": "Reset any password",
+    "content": "\nSummary:\nWhen I try to reset the password, the verification code of the mailbox is 6 digits, and there is no limit on the number of submissions, so I can reset the password of any user.\nSteps To Reproduce:\n<image_0>\n<image_1>\n2.After trying, I found that there was no such submission restriction when the password was reset in the third step.\nRepeat the above steps, the only difference is that you need to enter the correct verification code.\n<image_2>\nI wrote a python script to verify the vulnerability, you only need to enter the following parameters to verify the vulnerability.\nparameter\uff1att code_id code phpsession\nSupporting Material/References:\nnone\n[attachment / reference]\nImpact\nReset any user's password\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 1000,
+    "weaknesses": [
+        "Weak Password Recovery Mechanism for Forgotten Password"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/qsDcWDETvM85RugcAHTbk3YT?response-content-disposition=attachment%3B%20filename%3D%220.png%22%3B%20filename%2A%3DUTF-8%27%270.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYX6CAI6B%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T202812Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIC3rqG9bD1Zy3xLlTYCOFxJzwPkiWsSkXk%2BQlk30i%2BGDAiBmZckWri5x9ngqOZwYSMU%2B3XlahNKiKhBIMC%2B0XiaUBSqyBQgdEAMaDDAxMzYxOTI3NDg0OSIMU9OiiOXLMy7%2FxdQpKo8FBXWprYimxx40yTQmKlw017njbinkvT0qCe0RH5gOkd%2FnAqCX5FrBt%2FNup71oQhbg%2F2W%2B371wfQMnUs6vkLilWFz5USPZfHZ8uN2ejniSU18%2BvNWoDjuyCGs9ULwk79rMHHDGym0gayYYBNnnz1CZfwyX%2FEaX75XHqCouWEPwp1ALbslA8c8Z6vCD6jWMiL1sUnAhB6HzMehdhZ3k0mlA9lnE4ZoRJ6GQWgMrTIU6tKxlwhCT8PggbDy2AjJjXCHWfGP%2FICj4udGd1XQmuzqzKlHfI2t%2Fk9q%2FNTik0hxk8vywUNCsDYlf1HoxA3futcZvyI2sMDu813qpA9HruSMhEBEK7x3jF2i6JfP8y%2B1rxD2ndfGqtipweJBNfi%2FX%2BvS9OqBGuyNOxgTj1YHr5TV08TmCGK6TUQoLWE53nHxd9F%2FlOKCHkoEG9YeP2so9Q1yWE0BIrhGkPEWj7c7vC07wG5SaBi9d7cwIOLDGU6i%2FCBizjwcqgAM2J%2BKy3QMHDbxwq8TcLQM8cb%2FufeqJKUVeocEoOu%2FFWHiEmsJfwjMZST%2F74EBNdiOxU0tS1ByoET8aF19YzbBg%2BGrQHhpRBwCF%2Ba8PcC%2FFQicqn5dHlupAzxvfjhVf0N2InxyIwdnwvuIRxrHEQBveM4HxX6K5PDCFmS00Zzg3OBs4Lq6kbFM7ijPmF2PtbTuIEjJFircHY%2BEVqKiu8z2zYmbQLO8TTwxTZsx56H77UVLzEGsTCDPrCpCz4nu6avs%2Fb%2FnLlFG3OLXu5zLfauTh%2B3YagiiAYFN0uyOPIZO9s%2FWMlwkPB5cYTsP6MHTdsmGCYze%2FHgUKmCBDucvtIBXKtwqhzYV6W6aYWB%2BuoVPSqvITvRJpFXU4jTD8loy%2FBjqyAQj2K8gc0JZ%2FkgBXJTxJf3pd0OyonHxiesmaOu0kzVrq3YI9mAR37%2BaSPBlffKPOJ5ioL57qyT99SPSm2Ih3Ue2Ev%2FR%2FkeVCQiJP8laiASadItkvQT4yzh9hg1NYNiG38DfywdfSM3Etww5A5uJ0lA0k06cSTg1JovrDckXVt3kJZUcSt7oo5RO28mW%2B6ng94EvpY8OO%2BbQ8pTlJdGHsQSDVtTnrhaJJ3NPlXHhSN3fNLq4%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=c44e40ecee4a587d96331bbb5fc56554d611f40744af1c2d076dc35b6945804a",
+        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/ydGGrCRrzbrrspH3B4Nn1TtP?response-content-disposition=attachment%3B%20filename%3D%222.png%22%3B%20filename%2A%3DUTF-8%27%272.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYX6CAI6B%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T202812Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIC3rqG9bD1Zy3xLlTYCOFxJzwPkiWsSkXk%2BQlk30i%2BGDAiBmZckWri5x9ngqOZwYSMU%2B3XlahNKiKhBIMC%2B0XiaUBSqyBQgdEAMaDDAxMzYxOTI3NDg0OSIMU9OiiOXLMy7%2FxdQpKo8FBXWprYimxx40yTQmKlw017njbinkvT0qCe0RH5gOkd%2FnAqCX5FrBt%2FNup71oQhbg%2F2W%2B371wfQMnUs6vkLilWFz5USPZfHZ8uN2ejniSU18%2BvNWoDjuyCGs9ULwk79rMHHDGym0gayYYBNnnz1CZfwyX%2FEaX75XHqCouWEPwp1ALbslA8c8Z6vCD6jWMiL1sUnAhB6HzMehdhZ3k0mlA9lnE4ZoRJ6GQWgMrTIU6tKxlwhCT8PggbDy2AjJjXCHWfGP%2FICj4udGd1XQmuzqzKlHfI2t%2Fk9q%2FNTik0hxk8vywUNCsDYlf1HoxA3futcZvyI2sMDu813qpA9HruSMhEBEK7x3jF2i6JfP8y%2B1rxD2ndfGqtipweJBNfi%2FX%2BvS9OqBGuyNOxgTj1YHr5TV08TmCGK6TUQoLWE53nHxd9F%2FlOKCHkoEG9YeP2so9Q1yWE0BIrhGkPEWj7c7vC07wG5SaBi9d7cwIOLDGU6i%2FCBizjwcqgAM2J%2BKy3QMHDbxwq8TcLQM8cb%2FufeqJKUVeocEoOu%2FFWHiEmsJfwjMZST%2F74EBNdiOxU0tS1ByoET8aF19YzbBg%2BGrQHhpRBwCF%2Ba8PcC%2FFQicqn5dHlupAzxvfjhVf0N2InxyIwdnwvuIRxrHEQBveM4HxX6K5PDCFmS00Zzg3OBs4Lq6kbFM7ijPmF2PtbTuIEjJFircHY%2BEVqKiu8z2zYmbQLO8TTwxTZsx56H77UVLzEGsTCDPrCpCz4nu6avs%2Fb%2FnLlFG3OLXu5zLfauTh%2B3YagiiAYFN0uyOPIZO9s%2FWMlwkPB5cYTsP6MHTdsmGCYze%2FHgUKmCBDucvtIBXKtwqhzYV6W6aYWB%2BuoVPSqvITvRJpFXU4jTD8loy%2FBjqyAQj2K8gc0JZ%2FkgBXJTxJf3pd0OyonHxiesmaOu0kzVrq3YI9mAR37%2BaSPBlffKPOJ5ioL57qyT99SPSm2Ih3Ue2Ev%2FR%2FkeVCQiJP8laiASadItkvQT4yzh9hg1NYNiG38DfywdfSM3Etww5A5uJ0lA0k06cSTg1JovrDckXVt3kJZUcSt7oo5RO28mW%2B6ng94EvpY8OO%2BbQ8pTlJdGHsQSDVtTnrhaJJ3NPlXHhSN3fNLq4%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=93eab47c9692c491b0eae7607e426311aa749182a6bce5b475be0fdb60ffe2e4",
+        "image_2": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/WSfC4A5CRPfBtzCdZiXWirLM?response-content-disposition=attachment%3B%20filename%3D%223.png%22%3B%20filename%2A%3DUTF-8%27%273.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYX6CAI6B%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T202812Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIC3rqG9bD1Zy3xLlTYCOFxJzwPkiWsSkXk%2BQlk30i%2BGDAiBmZckWri5x9ngqOZwYSMU%2B3XlahNKiKhBIMC%2B0XiaUBSqyBQgdEAMaDDAxMzYxOTI3NDg0OSIMU9OiiOXLMy7%2FxdQpKo8FBXWprYimxx40yTQmKlw017njbinkvT0qCe0RH5gOkd%2FnAqCX5FrBt%2FNup71oQhbg%2F2W%2B371wfQMnUs6vkLilWFz5USPZfHZ8uN2ejniSU18%2BvNWoDjuyCGs9ULwk79rMHHDGym0gayYYBNnnz1CZfwyX%2FEaX75XHqCouWEPwp1ALbslA8c8Z6vCD6jWMiL1sUnAhB6HzMehdhZ3k0mlA9lnE4ZoRJ6GQWgMrTIU6tKxlwhCT8PggbDy2AjJjXCHWfGP%2FICj4udGd1XQmuzqzKlHfI2t%2Fk9q%2FNTik0hxk8vywUNCsDYlf1HoxA3futcZvyI2sMDu813qpA9HruSMhEBEK7x3jF2i6JfP8y%2B1rxD2ndfGqtipweJBNfi%2FX%2BvS9OqBGuyNOxgTj1YHr5TV08TmCGK6TUQoLWE53nHxd9F%2FlOKCHkoEG9YeP2so9Q1yWE0BIrhGkPEWj7c7vC07wG5SaBi9d7cwIOLDGU6i%2FCBizjwcqgAM2J%2BKy3QMHDbxwq8TcLQM8cb%2FufeqJKUVeocEoOu%2FFWHiEmsJfwjMZST%2F74EBNdiOxU0tS1ByoET8aF19YzbBg%2BGrQHhpRBwCF%2Ba8PcC%2FFQicqn5dHlupAzxvfjhVf0N2InxyIwdnwvuIRxrHEQBveM4HxX6K5PDCFmS00Zzg3OBs4Lq6kbFM7ijPmF2PtbTuIEjJFircHY%2BEVqKiu8z2zYmbQLO8TTwxTZsx56H77UVLzEGsTCDPrCpCz4nu6avs%2Fb%2FnLlFG3OLXu5zLfauTh%2B3YagiiAYFN0uyOPIZO9s%2FWMlwkPB5cYTsP6MHTdsmGCYze%2FHgUKmCBDucvtIBXKtwqhzYV6W6aYWB%2BuoVPSqvITvRJpFXU4jTD8loy%2FBjqyAQj2K8gc0JZ%2FkgBXJTxJf3pd0OyonHxiesmaOu0kzVrq3YI9mAR37%2BaSPBlffKPOJ5ioL57qyT99SPSm2Ih3Ue2Ev%2FR%2FkeVCQiJP8laiASadItkvQT4yzh9hg1NYNiG38DfywdfSM3Etww5A5uJ0lA0k06cSTg1JovrDckXVt3kJZUcSt7oo5RO28mW%2B6ng94EvpY8OO%2BbQ8pTlJdGHsQSDVtTnrhaJJ3NPlXHhSN3fNLq4%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=b05b37a569b2256523c53d7e6f9b1732c98ed72019146000b9c86400b85d18bc"
+    },
+    "disclosed_date": 1617170280,
+    "report_url": "https://hackerone.com/reports/703972",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Attempt to reset a user's password by entering an email address and requesting a verification code."
+        ],
+        [
+            2,
+            "Observe that the verification code is 6 digits and there is no limit on the number of submission attempts."
+        ],
+        [
+            3,
+            "Use a script to brute-force the 6-digit verification code to reset the password for any user."
+        ]
+    ],
+    "vuln_description": "The password reset functionality lacks rate limiting on verification code submissions, allowing an attacker to brute-force the 6-digit code and reset any user's password.",
+    "reason": "The vulnerability is straightforward to exploit as it only requires brute-forcing a 6-digit code with no submission limits, which is a common and well-known attack vector.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

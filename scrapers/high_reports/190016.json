@@ -1,0 +1,44 @@
+{
+  "reported_to": "Informatica",
+  "reported_by": "s_p_q_r ",
+  "title": "[network.informatica.com] The login form XSS via the referer value",
+  "content": "\nThe referer parameter value https://network.informatica.com/login!input.jspa?referer=%ref% is inserted into the Javascript code\nCode 128 Bytes\n1if (pageURL.indexOf(\"login!input.jspa?referer=\") > -1 || pageURL.indexOf(\"login.jspa?referer=\") > -1) {\n2\tfinalPageURL='%ref%';\n3}\nand used in further redirection without validation:\nCode 279 Bytes\n1InfaAutoLogin.authenticateUser(response.id, finalPageURL, {\n2\tcallback:function(responseMap) {\n3\t\tif(responseMap['status'] === 'success') {\n4\t\t\tdocument.location = responseMap['location'];\n5\t\t}\n6\t\telse {\n7\t\t\tsessionStorage.setItem('autoLoginType', responseMap['statusMsg']);\n8\t\t}\n9\t}\n10});\nThis means an attacker can put JS links there, which will cause script execution in the victim's browser:\nLog into your Informatica Network account\nGo to https://network.informatica.com/login!input.jspa?referer=javascript:alert(document.domain)\n<image_0>\nTested with latest Firefox and Chrome.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/142/238/8976b0c8f984cc9212f52cb19a6f94a02822ab90/inf_nw_xss.png?response-content-disposition=attachment%3B%20filename%3D%22inf_nw_xss.png%22%3B%20filename%2A%3DUTF-8%27%27inf_nw_xss.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQVEP425OI%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T215418Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMn%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCM%2BstUzpO3%2BwHWqME7R0RgaSnbMmx4XDLnJPj6yqnZEQIgZH6a0gM9JNLqF98fNlGTF5udtNOddAGmoKztGcN%2FSxUqsQUIMhADGgwwMTM2MTkyNzQ4NDkiDJEb7f8xMPYwAHyOWSqOBQ01q3qDHypWjv22k%2B5MuOiOy9IWTvFJ0dxWV7T6uUm7Tvv%2B9u%2FepGtc%2FI70kkwpoz53YvmXecCYI9PU3qEgw05hFOGC%2BGb5OmEQWvi6QGxhef8as%2B7uifw0ybrR%2Bmo8rUKHddakZRdct6KLCYoZfPUIMPnGTS60P8HbNmKffl1yVpLlr%2BzhzOdsvgyejQMqCi125fUmNHH19N0l0rWtZ36lxUlY%2BiS3di6hiVmTE2BHSLh%2BWX1KyDJ5VZANiAVoG78NfG6KXzwaiifq3W4tLvh34TJuoDQHt5eUorFy3V2Bk0C84B8%2BdFkPJWi2FmdQGT0zMLo7LvceGAU5xj9vmD4jj5cmdy9jSC1tMYHJQESDIahceIMbRXIpMxCTCFbp5Z0NlRsyhIOKBMdvyLEXW3JXbPraBije%2FSi9SkBN7Ppta1K5sxt0pVKzZvyHxD%2FXOa2B5UtqKlR8BLoRmJlOc5mrBw9xGIQWUBis0LbupXvmq0a4z6irSO76QPSLL0IDAgfn2EfCBVX08GvNVlr9gDnmvMJfdmERGxQD59rlWF9pEe3tpYZy00hv2Fc9gl4ozamvsMb4QyzVTP2Lo%2FgZP3lkB1QUjytA4%2FAgNCh%2BLq%2FDpP9h9F%2BIOk1Chs3toxuOtaStxtmH3O4kI3hqYbNMHY2%2FWyIOO%2F2fncp%2BXFzVc5FB%2BGLX%2FN8Ib0%2ByynPV52YTycs1rO%2FbT%2F5Z0tCIDus4nnwYYGJAs18APR5l1nnwXL%2FqDzUV%2BXw7vR692E9G%2F4aB6%2BbDGutv5NwgrrugW2qxmO2zf3mFBdieOEL9EidEY1qGtK6ATkcsKkDRNHipZMsEX4rBPzvnyaS%2BFSXWqxSJPbzRILCb45c5wWIXXscvXTCO7JC%2FBjqxAf0RRDW1N%2FrCzX%2B9JS7j1ZfarA8FzbFdep55EuXE3Jmrq78cdv%2BGlBQpHfsE7WsuSoNdmO1N%2B%2FEQSmfs08RQO5PcoZOi42jNwWdEQ7s7lCgspHzrIV0uoCF%2Bsc8uwgsmsNo4lp5adFWc%2BhD8a1dDXNZ%2FuOcoQeJsjkfTA%2BkWpZURMVRXTy1pdMSRf5sIeafVRgUZyfjz27XqFjMVgcSC5LEvCkMD1Guq%2BVR1XTxglgU3TQ%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=cf611c4dc4c14a95ccdfe58a6b90f9fa33a1ca53b881aaed5e88e26188a22aed"
+  },
+  "disclosed_date": 1495440480,
+  "report_url": "https://hackerone.com/reports/190016",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to https://network.informatica.com/login!input.jspa?referer=javascript:alert(document.domain)"
+    ],
+    [
+      2,
+      "Observe the JavaScript execution in the victim's browser"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a reflected Cross-Site Scripting (XSS) via the referer parameter in the login form of network.informatica.com. The referer value is inserted into JavaScript code without proper validation, allowing an attacker to inject malicious JavaScript that will be executed in the victim's browser when they visit a specially crafted URL.",
+  "reason": "This vulnerability is straightforward to discover as it involves a common XSS pattern where user input is directly inserted into JavaScript code without sanitization. The attack does not require multiple components, complex state manipulation, or novel logic. The interaction is obvious once the referer parameter is identified as being used in JavaScript code.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an XSS attack via the referer parameter in the login form, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing authentication and authorization boundaries by swapping user sessions and resource IDs, not on detecting XSS vulnerabilities.",
+    "is_detectable": false
+  }
+}

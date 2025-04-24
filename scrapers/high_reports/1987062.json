@@ -1,0 +1,38 @@
+{
+  "reported_to": "Nextcloud",
+  "reported_by": "rullzer ",
+  "title": "Password reset endpoint is not brute force protected",
+  "content": "\nOversight of https://github.com/nextcloud/security-advisories/security/advisories/GHSA-v243-x6jc-42mp (https://hackerone.com/reports/1841665, but I can't judge the content there as it is not yet public).\nIn any case. The whole lostpassword flow is now annotated with bruteforce protection. Except the endpoint that actually matters. https://github.com/nextcloud/server/blob/master/core/Controller/LostController.php#L226-L229\nAn attacker can still happily try to brute force the token. Without getting throttled.\nImpact\nThe lostpassword flow is without actual bruteforce protection.\n\n",
+  "severity": [
+    8.7,
+    null
+  ],
+  "bounty": 500,
+  "weaknesses": [
+    "Improper Restriction of Authentication Attempts"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1689934440,
+  "report_url": "https://hackerone.com/reports/1987062",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify the password reset endpoint in Nextcloud's LostController.php (lines 226-229)."
+    ],
+    [
+      2,
+      "Attempt to brute force the password reset token by sending multiple requests to the endpoint."
+    ]
+  ],
+  "vuln_description": "The password reset endpoint in Nextcloud's LostController.php lacks brute force protection, allowing an attacker to repeatedly attempt to guess the reset token without being throttled.",
+  "reason": "The vulnerability is straightforward to discover as it involves a single endpoint with missing brute force protection, a common security feature. The tester only needed to identify the endpoint and verify the absence of rate limiting.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "1841665"
+}

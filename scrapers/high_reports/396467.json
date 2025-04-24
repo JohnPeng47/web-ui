@@ -1,0 +1,38 @@
+{
+    "reported_to": "Snapchat",
+    "reported_by": "th3g3nt3lman ",
+    "title": "Github Token Leaked publicly for https://github.sc-corp.net",
+    "content": "\nDescription :\nGitHub is a truly awesome service but it is unwise to put any sensitive data in code that is hosted on GitHub and similar services as i was able to find github token indexed 7 hours Ago by user \u2588\u2588\u2588\u2588\u2588\u2588 - Software Engineer - Snap Inc\nIssue & POC :\nYou can find the leak in this link :\nhttps://github.com/\u2588\u2588\u2588\u2588\u2588/leetcode/blob/0eec6434940a01e490d5eecea9baf4778836c54e/TopicMatch.py\nCode 611 Bytes\n1\n2import os\n3import requests\n4import sys\n5pull_number = 76793\n6pull_url = \"https://github.sc-corp.net/api/v3/repos/Snapchat/android/pulls/\" + str(pull_number)\n7payload = {}\n8payload[\"Authorization\"] = \"token \" + \"9db9ca3440e535d90408a32a9c03d415979da910\"\n9print payload\n10r = requests.get(pull_url,\n11\n12```\n13\n14## Impact\n15\n16I didn't try anything with the token, and dont know what access it has, and i know that in order to login to https://github.sc-corp.net you need to have an email @snap but still i though it would be a good idea to share this finding with you in case it can be used in a way that i dont know.\n17\n18Best Regards\n\n",
+    "severity": [
+        9.8,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cleartext Storage of Sensitive Information"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1539017820,
+    "report_url": "https://hackerone.com/reports/396467",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Search for publicly accessible GitHub repositories or code snippets that may contain sensitive tokens."
+        ],
+        [
+            2,
+            "Identify and verify the leaked token in the code, such as the GitHub token found in the file TopicMatch.py."
+        ]
+    ],
+    "vuln_description": "A GitHub token was leaked publicly in a code repository, which could potentially be used to gain unauthorized access to GitHub resources. The token was found in a Python script hosted on GitHub, exposing sensitive credentials.",
+    "reason": "The vulnerability was discovered through simple search and inspection of publicly available code, without requiring complex interactions or manipulation of application states. The discovery process was straightforward and did not involve novel or non-obvious logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

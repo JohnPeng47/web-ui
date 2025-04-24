@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "geeknik ",
+  "title": "CVE-2017-13008 The IEEE 802.11 parser in tcpdump before 4.9.2 has a buffer over-read in print-802_11.c:parse_elements().",
+  "content": "\nReported to the devs on 6 March 2017.\nTcpdump 4.9.2 released on 8 September 2017.\nPatch: https://github.com/the-tcpdump-group/tcpdump/commit/5edf405d7ed9fc92f4f43e8a3d44baa4c6387562\nThe IEEE 802.11 parser in tcpdump before 4.9.2 has a buffer over-read in print-802_11.c:parse_elements().\nCode 1.68 KiB\n1./tcpdump -n -r test000\n2\n3==4043==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60700000dff7 at pc 0x00000048f0e0 bp 0x7ffe26d60590 sp 0x7ffe26d5fd50\n4READ of size 1 at 0x60700000dff7 thread T0\n5    #0 0x48f0df in __asan_memcpy (/root/tcpdump/tcpdump+0x48f0df)\n6    #1 0x4eb08b in parse_elements /root/tcpdump/./print-802_11.c:1192:4\n7    #2 0x4e2fce in handle_beacon /root/tcpdump/./print-802_11.c:1252:8\n8    #3 0x4e2fce in mgmt_body_print /root/tcpdump/./print-802_11.c:1654\n9    #4 0x4e2fce in ieee802_11_print /root/tcpdump/./print-802_11.c:2098\n10    #5 0x4e9142 in ieee802_11_radio_print /root/tcpdump/./print-802_11.c:3269:15\n11    #6 0x4e9142 in ieee802_11_radio_if_print /root/tcpdump/./print-802_11.c:3364\n12    #7 0x4de2e9 in pretty_print_packet /root/tcpdump/./print.c:339:18\n13    #8 0x4cc5fb in print_packet /root/tcpdump/./tcpdump.c:2556:2\n14    #9 0x773e10 in pcap_offline_read /root/libpcap/./savefile.c:527:4\n15    #10 0x6a258c in pcap_loop /root/libpcap/./pcap.c:1657:8\n16    #11 0x4c8a6e in main /root/tcpdump/./tcpdump.c:2059:12\n17    #12 0x7f1166aa9b44 in __libc_start_main /build/glibc-qK83Be/glibc-2.19/csu/libc-start.c:287\n18    #13 0x4c3ccc in _start (/root/tcpdump/tcpdump+0x4c3ccc)\n19\n200x60700000dff7 is located 0 bytes to the right of 71-byte region [0x60700000dfb0,0x60700000dff7)\n21allocated by thread T0 here:\n22    #0 0x4a664b in __interceptor_malloc (/root/tcpdump/tcpdump+0x4a664b)\n23    #1 0x775763 in pcap_check_header /root/libpcap/./sf-pcap.c:401:14\n24    #2 0x773472 in pcap_fopen_offline_with_tstamp_precision /root/libpcap/./savefile.c:400:7\n25    #3 0x773204 in pcap_open_offline_with_tstamp_precision /root/libpcap/./savefile.c:307:6\n26\n27SUMMARY: AddressSanitizer: heap-buffer-overflow ??:0 __asan_memcpy\n\n",
+  "severity": [
+    7.3,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Buffer Over-read"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1570581120,
+  "report_url": "https://hackerone.com/reports/268805",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "./tcpdump -n -r test000"
+    ],
+    [
+      2,
+      "Observe the heap-buffer-overflow error in AddressSanitizer output"
+    ]
+  ],
+  "vuln_description": "The IEEE 802.11 parser in tcpdump before 4.9.2 has a buffer over-read in print-802_11.c:parse_elements(). This vulnerability occurs when processing specially crafted IEEE 802.11 packets, leading to a heap buffer overflow that can be detected by AddressSanitizer.",
+  "reason": "This vulnerability requires understanding of IEEE 802.11 packet structure and the tcpdump parsing logic, but the reproduction steps are straightforward once the malformed packet is created. The vulnerability doesn't involve complex state manipulation or novel logic.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

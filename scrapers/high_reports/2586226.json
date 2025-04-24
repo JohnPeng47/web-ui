@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "devme4f ",
+  "title": "CVE-2024-34750 Apache Tomcat DoS vulnerability in HTTP/2 connector",
+  "content": "\nHello IBB team, i would like to submit a report about Apache Tomcat DoS vulnerability that i have reported to the Tomcat team, which was assigned to CVE-2024-34750 and disclosed yesterday.\nDetails:\nWhen processing an HTTP/2 stream, Tomcat did not handle some cases of excessive HTTP headers correctly. This led to a miscounting of active HTTP/2 streams which in turn led to the use of an incorrect infinite timeout which allowed connections to remain open which should have been closed.\nHere is the email thread that i contacted the security team:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nSince HTTP/2 connections are left open indefinitely, depending on configuration the DoS is caused either by the server running out of memory or by the open connections reaching maxConnections.\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": 4920,
+  "weaknesses": [
+    "Uncontrolled Resource Consumption"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1720163520,
+  "report_url": "https://hackerone.com/reports/2586226",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Send multiple HTTP/2 requests with excessive headers to the Apache Tomcat server."
+    ],
+    [
+      2,
+      "Observe that the connections remain open indefinitely, potentially leading to a DoS condition due to resource exhaustion."
+    ]
+  ],
+  "vuln_description": "When processing an HTTP/2 stream, Apache Tomcat did not handle some cases of excessive HTTP headers correctly. This led to a miscounting of active HTTP/2 streams, which in turn caused the use of an incorrect infinite timeout, allowing connections to remain open when they should have been closed. Depending on the server configuration, this could lead to a DoS condition either by exhausting memory or by reaching the maximum allowed connections.",
+  "reason": "The vulnerability involves understanding HTTP/2 stream processing and timeout mechanisms in Tomcat, but the attack itself is straightforward once the conditions for triggering the miscounting are known. It does not require complex state manipulation or novel logic.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

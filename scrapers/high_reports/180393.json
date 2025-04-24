@@ -1,0 +1,38 @@
+{
+    "reported_to": "Paragon Initiative Enterprises",
+    "reported_by": "kholy ",
+    "title": "Subdomain Takeover",
+    "content": "\nHello,\nYour Subdomain engineering.github.com/paragonie is Pointing to Tumblr.com\nYou should immediately remove the DNS-entry for engineering.zomato.com is Pointing to Tumblr.com.. Any One Can Claim That Domain , Please Read The Advisory Below.\nRemediation\nPlease make sure you're always going through your DNS-entries so no subdomains are pointing to external services you do not use.\nWe've written an advisory about this at Detectify:\nhttp://blog.detectify.com/post/100600514143/hostile-subdomain-takeover-using-heroku-github-desk\nWhere you can read more about this sort of attack.\nI Have Done NSLookup For POC :-\nnslookup github.com/paragonie\nServer: 192.168.188.1\nAddress: 192.168.188.2#53\nNon-authoritative answer:\nengineering.zomato.com canonical name = domains.tumblr.com.\nName: domains.tumblr.com\nAddress: 66.6.42.22\nName: domains.tumblr.com\nAddress: 66.6.43.22\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1493978580,
+    "report_url": "https://hackerone.com/reports/180393",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Perform an NSLOOKUP on the subdomain engineering.github.com/paragonie to verify it points to Tumblr.com"
+        ],
+        [
+            2,
+            "Check if the DNS entry for engineering.zomato.com is also pointing to Tumblr.com, indicating a potential subdomain takeover"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves a subdomain takeover where engineering.github.com/paragonie and engineering.zomato.com are pointing to Tumblr.com. This misconfiguration allows an attacker to claim the subdomain if the DNS entry is not properly managed, leading to potential security risks such as phishing or malware distribution.",
+    "reason": "The discovery of this vulnerability is straightforward as it only requires checking DNS records and recognizing that they point to an external service (Tumblr.com) that can be claimed by an attacker. There are no complex interactions or novel logic involved.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

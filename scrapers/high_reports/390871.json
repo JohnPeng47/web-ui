@@ -1,0 +1,45 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "cris_semmle ",
+  "title": "Command Injection Vulnerability in win-fork/win-spawn Packages",
+  "content": "\nI would like to report a command injection vulnerability in win-fork and win-spawn packages.\nIt allows an attacker to inject multiple commands in exec-like manner.\nModule\nmodule name: win-spawn\nversion: 2.0.0\nnpm page: https://www.npmjs.com/package/win-spawn\nnpm page: https://www.npmjs.com/package/win-fork\nModule Description\nSpawn for node.js but in a way that works regardless of which OS you're using. Use this if you want to use spawn with a JavaScript file. It works by explicitly invoking node on windows. It also shims support for environment variable setting by attempting to parse the command with a regex. Since all modification is wrapped in if (os === 'Windows_NT') it can be safely used on non-windows systems and will not break anything.\nModule Stats\n21,929+36,468 downloads in the last week\nVulnerability\nVulnerability Description\nEven though this module is advertised to work like spawn, on windows, it works like exec.\nSteps To Reproduce:\nTo check the params passed to cmd.exe:\nCode 233 Bytes\n1var os = require('os').type = function() {return \"Windows_NT\"};\n2require(\"child_process\").spawn = function(a, b) { console.log(a); console.log(b)};\n3var spawn = require(\"win-fork\");\n4spawn('dir C:// && date /T', [], {stdio: 'inherit'});\nIt effectively runs \"cmd /c 'dir C:// && date /T'\" which allow the attacker to run both the commands. Moreover, I believe parameters to win-spawn/win-fork may also be used for injection, but I did not investigate this further.\nPatch\nN/A at a minimum, document this behaviour in the package's documentation.\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nThis issue is more a documentation/API issue. The package should state clearly what it does and alert its dependents that on windows, the parameters should be treated as parameters to exec.\n\n",
+  "severity": [
+    8.4,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1533920880,
+  "report_url": "https://hackerone.com/reports/390871",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Override the OS type to simulate Windows environment: `require('os').type = function() {return \"Windows_NT\"};`"
+    ],
+    [
+      2,
+      "Call win-fork with a command that includes command injection: `spawn('dir C:// && date /T', [], {stdio: 'inherit'});`"
+    ]
+  ],
+  "vuln_description": "The win-spawn and win-fork packages on Windows execute commands in a way that allows command injection, similar to exec rather than spawn, enabling attackers to run arbitrary commands by injecting them into the command string.",
+  "reason": "The vulnerability is straightforward to discover as it involves basic command injection in a well-known execution context (cmd.exe). The tester only needed to understand how the package processes commands on Windows and simulate the environment to observe the behavior.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection in the win-fork/win-spawn packages, which is not related to authentication or authorization (AuthN/AuthZ) issues. The proposed methodologies focus on detecting IDOR and AuthN/AuthZ bypass vulnerabilities by analyzing user sessions, actions, and resource IDs within the same application context. Since the reported vulnerability is about command injection in a Node.js package and does not involve user sessions or resource access control, it falls outside the scope of the described detection methodologies.",
+    "is_detectable": false
+  }
+}

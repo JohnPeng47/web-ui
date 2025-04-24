@@ -1,0 +1,45 @@
+{
+  "reported_to": "Hyperledger",
+  "reported_by": "bhaskar_ram ",
+  "title": "fix(cmd-socketio-server): mitigate cross site scripting attack #2068",
+  "content": "\nPlease refer this fix and approve Bounty.\nSee this In Github Security Fix\n@ryjones\n(https://github.com/hyperledger/cactus/pull/2068#issuecomment-1186157206)\nImpact\nfix(cmd-socketio-server): mitigate cross site scripting attack\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 100,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Reflected"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1658450220,
+  "report_url": "https://hackerone.com/reports/1638984",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify a vulnerable endpoint in the cmd-socketio-server that does not properly sanitize user input."
+    ],
+    [
+      2,
+      "Craft a malicious payload containing JavaScript code and submit it to the vulnerable endpoint."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a cross-site scripting (XSS) attack in the cmd-socketio-server, where user input is not properly sanitized, allowing an attacker to inject malicious JavaScript code that can be executed in the context of other users' sessions.",
+  "reason": "The vulnerability involves a single component (the cmd-socketio-server) and a well-known attack vector (XSS). The discovery requires basic understanding of XSS and testing for input sanitization, which is a common practice in security testing.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The report describes a cross-site scripting (XSS) attack mitigation, which is unrelated to authentication or authorization (AuthN/AuthZ) vulnerabilities. The proposed methodologies focus on detecting IDOR and AuthN/AuthZ bypass vulnerabilities by testing user sessions and resource access patterns. Since XSS is a client-side injection attack and not an AuthN/AuthZ issue, it falls outside the scope of these methodologies.",
+    "is_detectable": false
+  }
+}

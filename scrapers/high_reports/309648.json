@@ -1,0 +1,47 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "bl4de ",
+  "title": "[simplehttpserver] Stored XSS in file names leads to malicious JavaScript code execution when directory listing is output in HTML",
+  "content": "\nHi Guys,\nsimplehttpserver allows to embed HTML in file names, which (in certain conditions) might lead to execute malicious JavaScript.\nModule:\n'simpehttpserver' is simple imitiation of python's SimpleHTTPServer and intended for testing, development and debugging purposes\nhttps://www.npmjs.com/package/simpehttpserver\nDescription\nThis issue is another example of lack of output sanitization.\nHere's source code, which allows to embed HTML in file name and run attack presented in PoC section (./node_modules/simplehttpserver/simplehttpserver.js, lines 106-117):\nCode 452 Bytes\n1\n2    // Check for each file if it's a directory or a file\n3    var q = async.queue(function(item, cb) {\n4        fs.stat(path.join(pathname, item), function(err, stat) {\n5           if ( !stat ) cb();\n6           if ( stat.isDirectory() ) {\n7               ulist.push('<li><a href=\"'+item+'/\">'+item+'/</a></li>')\n8           } else {\n9               ulist.push('<li><a href=\"'+item+'\">'+item+'</a></li>')\n10           }\n11            cb();\n12        });\n13    }, 4);\nAs you can see, item is output directly into HTML without any sanitization.\nPoC - Steps To Reproduce:\nIn the directory which will be served via simple-server, create file with following name:\nCode 34 Bytes\n1javascript:alert('You are pwned!')\nRun simplehttpserver in directory with file with changed filename:\nCode 126 Bytes\n1$ ./node_modules/simplehttpserver/cli.js\n2Listening 0.0.0.0:8000 web root dir /Users/bl4de/playground/node_bugbounty_playground\nand open http://127.0.0.1:8000 in the browser.\nTry to open file with name javascript:alert('You are pwned!') by clicking it.\n<image_0>\nSupporting Material/References:\nConfiguration I've used to find this vulnerability:\nmacOS HighSierra 10.13.3\nnode 8.9.3\nnpm 5.5.1\ncurl 7.54.0\nWrap up\nI hope this report will help to keep Node ecosystem more safe. If you have any questions about any details of this finding, please let me know in comment.\nThank you\nRegards,\nRafal 'bl4de' Janicki\nImpact:\nThis vulnerability can be used to eg. download malware via \"drive-by-download\" attacks. Also, as described in other modules I've reported similar vulnerabilty, an iframe with malicious JS file loaded from external resource can be executed.\nImpact\nThis vulnerability can be used to eg. download malware via \"drive-by-download\" attacks. Also, as described in other modules where I've reported similar vulnerabilty, an iframe with malicious JS file loaded from external resource can be executed.\n\n",
+  "severity": [
+    9.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/257/774/765865c330ab81a7d1795a9e9b3713633c653a79/1.png?response-content-disposition=attachment%3B%20filename%3D%221.png%22%3B%20filename%2A%3DUTF-8%27%271.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQZ4W5YEBW%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T175110Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMn%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCICvZ%2Ffic%2BKJraC1kz9f7tRwav%2BFfnCwBJlOPORS93QY8AiBwfFXLK91b76PRFuf9c1%2Fnpe2uhaCjkq9o%2B9vxrP2xFyqyBQgyEAMaDDAxMzYxOTI3NDg0OSIMNp%2BNYkioMsnHJUcYKo8FnUDLKxXFuoEToltOI%2FD4avO2d2lUOWGc9STUQV3ASqOa92EFd8nvq6XfuoZeHQQZpQP%2BqrkWd0m3Iiv6feR8LZnavV0NVvPG1R%2BAG%2BcTYdWOcTWM2D4%2FY8gra6KUMWCwMYiD2CVfI6TEivJlIc6nW0TuRLp8m4hhk08GhGZOajGMtcyiWPwdDZlSHC%2BLwxZft89gms%2B8hlvBu3DZBcy4AgRj26UJ5oeGA0uvddWSsVaXS4QQziwzJUL4ZJVHJ7c8BV9GHHrZMUUWsc8Xdz5fCX8pbfkLWYHWX1YR9gzcmiil4%2FBKvmogdq6rHBSHijToDITElFiP3BzMtx9nkXMy5ONwNLgudrd7TVsnwRryxL1ZDv%2Bp%2F4ALJvl5ZM%2FjNfSssQpEyP0JpvuhxmA20KcHbu%2B0IkMYYcq8hJyqkj2Ry6I30DmSq8pd07mywg06%2F1EBEFqLPUGPZDhQ2BytzHqBG%2BP0FWgD%2FdxLCZD8IyRkSFgRFE2pjtp%2Binrw8iSbIbAObUwqUIHZmcW6iIBGbcMJ1v0XvskRNuyUDU%2BKg12cJLSyH%2FCQ25rjQcvHPZF%2F4wPXOQPgnyzkEwHJIm55LygGPqokXYzlFh%2B%2BEoP18I2NImqQIBLGgR6daa6SeGT8UwINq1oHzEfztfx8ht4TuSICMOsatQPrsia0nWugtfeVYFLhoyQetU4sCWP87vJY2gs4urx58HhswWsLh7lYT%2BWaRfznyXenWJC1shH7ihfEdUp%2BDnEPgHl05TpWBNQ7PDv5DhKdwJ74WEj6ZiyuvpdOMqX7E%2BsLEc5g9h0wWUnXWyB1UKf0GfEyjy6nDsQYjqcYPun4PNfm37TUBsFPYFuV4MijbDUTgsQLURQrOwL6WzCy15C%2FBjqyAdBr3S28w%2Bo00FbUyjxq27ZvYBsI89rHLKW786niN6lUFHLJUIaUpHpTb%2BkItosmPVhUNq71s6ztM9qxABK8jBOdnK6pry8PEEbKCtsQjjJsEh8zQ6fW1ipYM%2BEHBOjMwJOHhk6ZkZ8WAwWg%2BztgrQQhwk0zxzzN5o7X39RzA8z6iinj2gPJ7dNxgDeSUAeaBIc2kV5CizQu0mm6bdh1A3xIMN5IyaLEHWxPy3R56vFM940%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=14d793653cbc275d5fd709b53376146b52a20e4550de8ccc860ac1806bd90069"
+  },
+  "disclosed_date": 1519699440,
+  "report_url": "https://hackerone.com/reports/309648",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create a file with a name containing malicious JavaScript code (e.g., 'javascript:alert(\"You are pwned!\")' in the directory served by simplehttpserver."
+    ],
+    [
+      2,
+      "Run simplehttpserver in the directory and access the served page via a browser. Clicking the malicious file name will execute the JavaScript code."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a stored Cross-Site Scripting (XSS) in the simplehttpserver module, where file names are directly embedded into HTML without sanitization. This allows an attacker to execute arbitrary JavaScript code when a user clicks on a maliciously named file in the directory listing.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common XSS pattern where user input (file names) is directly embedded into HTML without sanitization. The attack does not require complex interactions or understanding of multiple components.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves stored XSS in file names when directory listing is output in HTML, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, which does not apply to this XSS vulnerability.",
+    "is_detectable": false
+  }
+}

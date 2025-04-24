@@ -1,0 +1,46 @@
+{
+    "reported_to": "Internet Bug Bounty",
+    "reported_by": "albinowax ",
+    "title": "Pause-based desync in Apache HTTPD",
+    "content": "\nApache was vulnerable to a pause-based desync. This vulnerability is described in detail in my whitepaper here: https://portswigger.net/research/browser-powered-desync-attacks#pause\nImpact\nThis enables server-side HTTP Request Smuggling when Apache is deployed as a back-end server, and it also enables MITM attackers to inject arbitrary JavaScript in spite of TLS.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 4000,
+    "weaknesses": [
+        "HTTP Request Smuggling"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1661425320,
+    "report_url": "https://hackerone.com/reports/1667974",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify a vulnerable Apache HTTPD server configured as a back-end server."
+        ],
+        [
+            2,
+            "Craft a malicious HTTP request that includes a pause-based desync technique to manipulate the server's request processing."
+        ],
+        [
+            3,
+            "Send the crafted request to the server to trigger the desync condition."
+        ],
+        [
+            4,
+            "Observe the server's response to confirm the desync and potential request smuggling or JavaScript injection."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves a pause-based desync in Apache HTTPD, which can lead to server-side HTTP Request Smuggling when Apache is deployed as a back-end server. Additionally, MITM attackers can exploit this to inject arbitrary JavaScript despite TLS protections.",
+    "reason": "This vulnerability requires understanding of HTTP protocol intricacies, server request processing, and the specific desync technique. The attack involves manipulating the timing of requests to exploit the server's handling of paused connections, which is a subtle and non-obvious interaction. The logic behind pause-based desync is novel and not commonly found in other applications.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

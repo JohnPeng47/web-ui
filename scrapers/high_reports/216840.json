@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "theyarestone ",
+  "title": "OCSP Status Request extension unbounded memory growth (CVE-2016-6304)",
+  "content": "\nA malicious client can send an excessively large OCSP Status Request extension.\nIf that client continually requests renegotiation, sending a large OCSP Status\nRequest extension each time, then there will be unbounded memory growth on the\nserver. This will eventually lead to a Denial Of Service attack through memory\nexhaustion. Servers with a default configuration are vulnerable even if they do\nnot support OCSP. Builds using the \"no-ocsp\" build time option are not affected.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Uncontrolled Resource Consumption"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1491973080,
+  "report_url": "https://hackerone.com/reports/216840",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "A malicious client sends an excessively large OCSP Status Request extension during TLS handshake."
+    ],
+    [
+      2,
+      "The client repeatedly requests renegotiation, sending the large OCSP Status Request extension each time."
+    ]
+  ],
+  "vuln_description": "A malicious client can cause unbounded memory growth on the server by repeatedly sending large OCSP Status Request extensions during TLS renegotiation, leading to a Denial of Service attack through memory exhaustion. This affects servers even with default configurations that don't support OCSP.",
+  "reason": "The vulnerability requires understanding of TLS renegotiation and OCSP extensions, but the attack itself is straightforward once these components are known. The interaction between repeated renegotiation and memory allocation is the key subtle point.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

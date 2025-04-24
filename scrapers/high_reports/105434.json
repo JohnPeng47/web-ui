@@ -1,0 +1,38 @@
+{
+    "reported_to": "Informatica",
+    "reported_by": "yarbabin ",
+    "title": "[rev-app.informatica.com] - XXE",
+    "content": "\nOpen file xxe.xlsx like zip-archive\nRead file xxe.xlsx\\xl\\worksheets\\sheet1.xml\nIn file I wrote XXE payload:\nThen, i went to https://rev-app.informatica.com and made new project and imported my XLSX-file\nWhen it was impoted i see /etc/passwd file:\nroot\u274c0:0:root:/root:/bin/bash\nbin\u274c1:1:bin:/bin:/sbin/nologin\ndaemon\u274c2:2:daemon:/sbin:/sbin/nologin\nadm\u274c3:4:adm:/var/adm:/sbin/nologin\nlp\u274c4:7:lp:/var/spool/lpd:/sbin/nologin\nsync\u274c5:0:sync:/sbin:/bin/sync\nshutdown\u274c6:0:shutdown:/sbin:/sbin/shutdown\nhalt\u274c7:0:halt:/sbin:/sbin/halt\nmail\u274c8:12:mail:/var/spool/mail:/sbin/nologin\nuucp\u274c10:14:uucp:/var/spool/uucp:/sbin/nologin\noperator\u274c11:0:operator:/root:/sbin/nologin\ngames\u274c12:100:games:/usr/games:/sbin/nologin\ngopher\u274c13:30:gopher:/var/gopher:/sbin/nologin\nftp\u274c14:50:FTP User:/var/ftp:/sbin/nologin\nnobody\u274c99:99:Nobody:/:/sbin/nologin\ndbus\u274c81:81:System message bus:/:/sbin/nologin\nvcsa\u274c69:69:virtual console memory owner:/dev:/sbin/nologin\nabrt\u274c173:173::/etc/abrt:/sbin/nologin\nhaldaemon\u274c68:68:HAL daemon:/:/sbin/nologin\nntp\u274c38:38::/etc/ntp:/sbin/nologin\nsaslauth\u274c499:76:Saslauthd user:/var/empty/saslauth:/sbin/nologin\npostfix\u274c89:89::/var/spool/postfix:/sbin/nologin\nsshd\u274c74:74:Privilege-separated SSH:/var/empty/sshd:/sbin/nologin\noprofile\u274c16:16:Special user account to be used by OProfile:/home/oprofile:/sbin/nologin\nec2-user\u274c500:500::/home/ec2-user:/bin/bash\nscom\u274c501:501::/home/scom:/bin/bash\nnscd\u274c28:28:NSCD Daemon:/:/sbin/nologin\nnslcd\u274c65:55:LDAP Client User:/:/sbin/nologin\ndataprep\u274c504:505::/home2/dataprep:/bin/bash\nzabbix\u274c498:506::/home/zabbix:/bin/bash\nVideo (private): https://youtu.be/612SgFdOrB0\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Uncontrolled Resource Consumption"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1470166200,
+    "report_url": "https://hackerone.com/reports/105434",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "steps": [
+        [
+            1,
+            "Open the file 'xxe.xlsx' as a zip archive and modify 'xl/worksheets/sheet1.xml' to include an XXE payload."
+        ],
+        [
+            2,
+            "Upload the modified XLSX file to https://rev-app.informatica.com by creating a new project and importing the file."
+        ]
+    ],
+    "vuln_description": "The vulnerability is an XML External Entity (XXE) injection in the rev-app.informatica.com application. By crafting a malicious XLSX file with an XXE payload, an attacker can read sensitive files from the server, such as '/etc/passwd', when the file is processed by the application.",
+    "reason": "The attack involves a straightforward XXE payload embedded in a common file format (XLSX). The steps to reproduce are simple and do not require complex interactions or state manipulation. XXE vulnerabilities are well-known and commonly tested for in security assessments.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

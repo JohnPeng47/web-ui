@@ -1,0 +1,52 @@
+{
+    "reported_to": "X (Formerly Twitter)",
+    "reported_by": "indoappsec ",
+    "title": "Urgent : Unauthorised Access to Media content of all Direct messages and protected tweets(Indirect object reference)",
+    "content": "\nHi Team,\nYou can tweet from your ad account while creating a campaign.When you add a media content from your computer and upload it there is a Json request which gives you the link of your media(Photos) to preview before Tweeting.This link is Vulnerable to IDOR Attack and it leads to disclose all the media content of twitter.I have checked and verified that it discloses the media content of any user's Direct messages and also protected tweets.\nVulnerable HTTP request :\nGET /mediaid_to_cdn_url.json?media_id=[Media_id]&=1447455982153 HTTP/1.1\nHost: ads.twitter.com\nUser-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:37.0) Gecko/20100101 Firefox/37.0\nAccept: /\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate\nX-Requested-With: XMLHttpRequest\nReferer: https://ads.twitter.com/accounts/18ce53x5krr/campaigns/5936943/copy?campaign_type=followers&promoted_account=true&source=campaign_dashboard\nCookie: [Cookie_values]\nConnection: keep-alive\nHere Media_id is vulnerable to IDOR attack and it leads to give you the exact link of the Media content(Photos).\nFor more Information I am providing Video POC :\nLink : https://youtu.be/GMZgEqej61M\nThis is a critical issue ,Kindly Fix it in priority.\nBest Regards !\nVijay Kumar\n\n\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Authentication - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1521688140,
+    "report_url": "https://hackerone.com/reports/99600",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Log in to Twitter Ads account and navigate to campaign creation page."
+        ],
+        [
+            2,
+            "Upload a media file (photo) and observe the JSON request that generates a preview link for the media."
+        ],
+        [
+            3,
+            "Manipulate the 'media_id' parameter in the GET request to access media content from other users' direct messages or protected tweets."
+        ]
+    ],
+    "vuln_description": "The vulnerability is an Insecure Direct Object Reference (IDOR) in Twitter's media handling system, where manipulating the 'media_id' parameter in a JSON request allows unauthorized access to media content from any user's direct messages or protected tweets.",
+    "reason": "The vulnerability involves a straightforward manipulation of a single parameter (media_id) in a predictable endpoint. The attack does not require understanding of complex application states or novel logic, making it relatively easy to discover once the endpoint is identified.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": true,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": false
+    }
+}

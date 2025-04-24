@@ -1,0 +1,64 @@
+{
+    "reported_to": "U.S. General Services Administration",
+    "reported_by": "imthatt ",
+    "title": "IDOR at https://demo.sftool.gov/TwsHome/ScorecardManage/ via scorecard name",
+    "content": "\nHi Team,\nI have found a broken access control vulnerability on https://demo.sftool.gov/ under your /tws directory.\nI made two accounts.\nOne account i browsed to /tws and created a new scorecard. Here i can submit all information I need. The scorecard name is in the end of the URL https://demo.sftool.gov/TwsHome/ScorecardManage/testdsfdfsf\nI logged out this account\nI logged into attacker account. I browse to https://demo.sftool.gov/TwsHome/ScorecardManage/testdsfdfsf (the last part is the name of the other accounts score card). I can now view the scorecard and even edit the score card from the attackers account. I can add accounts to read only and edit permissions on the score card and change information as-well as download the score card.\nLog back into the victim account and the scorecard information has been changed, downloaded and attacker has assigned permissions.\nWe can brute force scorecard names but i am not doing this as the above on my accounts already shows the issue.\nMany thanks\nHolla\nImpact\nAn attacker can read, edit and download and assign permissions to another users scorecard.\n\n",
+    "severity": [
+        8.1,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1647548580,
+    "report_url": "https://hackerone.com/reports/1472721",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create two accounts (victim and attacker) on https://demo.sftool.gov/."
+        ],
+        [
+            2,
+            "Log in as the victim account, navigate to /tws, and create a new scorecard. Note the scorecard name in the URL (e.g., https://demo.sftool.gov/TwsHome/ScorecardManage/testdsfdfsf)."
+        ],
+        [
+            3,
+            "Log out of the victim account and log in as the attacker account."
+        ],
+        [
+            4,
+            "Access the victim's scorecard by browsing to the URL noted in step 2 (e.g., https://demo.sftool.gov/TwsHome/ScorecardManage/testdsfdfsf)."
+        ],
+        [
+            5,
+            "Observe that the attacker can view, edit, download, and assign permissions to the victim's scorecard."
+        ],
+        [
+            6,
+            "Log back into the victim account and verify that the scorecard has been modified by the attacker."
+        ]
+    ],
+    "vuln_description": "This is an Insecure Direct Object Reference (IDOR) vulnerability that allows an attacker to access, modify, download, and manage permissions of another user's scorecard by simply knowing or guessing the scorecard name in the URL. The application fails to enforce proper access controls, enabling unauthorized actions on sensitive data.",
+    "reason": "The vulnerability is straightforward to discover as it involves basic enumeration of URLs and does not require complex interactions or state manipulation. The attack relies on predictable object references (scorecard names) and lacks any access control checks, making it easy to exploit once the pattern is identified.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": true,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": false
+    }
+}

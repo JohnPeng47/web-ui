@@ -1,0 +1,40 @@
+{
+    "reported_to": "GitLab",
+    "reported_by": "ngalog ",
+    "title": "Bypass of GitLab CI runner slash fix in YAML validation",
+    "content": "\nHi Gitlab Security,\nI notice the bug #301432 that Jobert reported earlier is could be bypassed by setting variable in environment.\nThe reason is that the fix in place preventing url normalization is performed by doing the YAML validation, however this could be bypassed by setting the environment variable in https://gitlab.com/{project_id}/settings/ci_cd\nBy setting the key ONE and variable value to ../1/key, it is possible to replicate what jobert did in #301432.\nAnd in .gitlab-ci.yml\nCode 137 Bytes\n1a:\n2  script:\n3  - echo \"script\"\n4  - echo \"a\"\n5  cache:\n6    key: \"$ONE\"\n7    policy: pull #or push if you like to poison\n8    paths:\n9      - .\nThen make any change to .gitlab-ci.yml will trigger the bug once again.\n<image_0>\nImpact\nQuoting from #301432\nCode 253 Bytes\n1Depending on the files that are cached, this may allow an attacker to run arbitrary code on a victim's Docker instance running a CI run. This may expose confidential data, inject artifacts in a build pipeline to ship additional code, among other things.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Input Validation"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/345/819/31a4e9638fc63f09b77dddc8fa6e8d53e5d3af3e/download.png?response-content-disposition=attachment%3B%20filename%3D%22download.png%22%3B%20filename%2A%3DUTF-8%27%27download.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ5WYD3AC3%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T044008Z&X-Amz-Expires=1587&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQD6NP%2FABKgzxmoCcv9sJsI3Et2vkO93301U%2B%2FGtCk9ibQIhAP9zVYFNBTDT7Q1KXlEfz2NCIrWAe5c%2FXVNd0oWdr0PiKrEFCCAQAxoMMDEzNjE5Mjc0ODQ5IgylqlOE8vRpauItn8QqjgW0z%2Fls4%2BcbslpHRjfx3lN0Bpjq3it15r5a7xtKrpdTngvGZBGnkPfr1ChLNsa222HwEYECGpLisEG4BrlRpIgwcdHZHg7KoRhUz69jFx202%2FfAWi2%2FtTmlOK423VacHuHFYR9AIyBMmIrRDqJL9iXC2oNOLAgruVlOkQFU2W8AKErET%2BKdb0V%2F4Uq25HNe6FPOk0JtWSxlKoMRpKB0W2mHewzPXXOzSn64EE7HAzZOWAtm38aRloZaZXE5EKYwp3pwvFNCnITM7S7QSzgMwjFE2cc9Fv2ipL1Zot6BUlRzjV%2FsB36EokF%2FtPIZYCYFZJs6o4Y1QptgKJbeInUBBD3ZttV1TCvLPPYqBbzQ19WY%2FcyauMrBTXYMiPIxPsnee50gAPf2rQ7S9vMfuT89J6LN%2F20V%2BbGKsCfyajYY8H1XoQbGBFz7YCJ9uMhOLUqYE4Zdkh2LsTCmslIBQgiXfFixaJx4l3BxZ5nzhfkOBe5M3fbv9PO7VngkiXZXP6o3rUXohShAsjU2uyWY2iN%2BhHVsGvMYOSmEFF6Ibe7lFbz5naf6IVafaXAjMqJCXoZpB1WLgR0V4dRZ0erKqrklT3cdEOBqUa7XsR5Mab7440kKHRcmu0Vyls9QnrEC%2F18OqPTjvkbo%2Bshdy9lZf%2FZ5qlTAibyYsXEW%2BEkAljoGc8dnkc%2BB%2FYkRxo6E6aU6FPgQ8bsJvgsUyTsqxwfHQJ2OcLh5LXfd4kJfE75ep%2BhU9VR6NYMTX5ivvXgyCuXVdAUMupcWtSGthfBBDcciXJHlrDekXEBXUaX%2BG1%2F%2FjZn4qLnApD7Zuuw%2F%2Bo5MQQGadR2%2BCeqNd1J9hU8jo6V3LHSLBmkr90Vn9DfpRVCEgpZeJQMwy%2BeMvwY6sAHcjw%2Bim5kWozWxabVY77DysEWqSMkpWp%2BUOu%2FPSFXM7HbHrFNR%2FssIFg8oP8ROM0P11G%2BVgVN6ADljZqk9t8vXkGo5FmvKB0Gg%2BWKG8vl1XdWXxOay724qlcnDtcHgQi27sUZ2TPoQ%2BONtmFmbQULynP5vjSM%2BGaUwudRSJTE2XfGCbgPKCjjsz1WdnNvN%2FFu3GZSJ1Ozlf7yWNcQ2oReI2GtE8mK6yhD05obRLTbdyA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=8dfbd3e5cb166867642de479b53a763e17c3e1486efd246353b9088d7c233c5f"
+    },
+    "disclosed_date": 1554885180,
+    "report_url": "https://hackerone.com/reports/409395",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Set the environment variable 'ONE' to '../1/key' in the project's CI/CD settings"
+        ],
+        [
+            2,
+            "Configure the .gitlab-ci.yml file to use the variable '$ONE' as the cache key and trigger a CI run"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows bypassing GitLab's URL normalization fix in YAML validation by setting an environment variable that contains a path traversal sequence. This can lead to arbitrary code execution on a victim's Docker instance during a CI run, potentially exposing confidential data or injecting malicious artifacts into the build pipeline.",
+    "reason": "The attack involves understanding the interaction between environment variables and YAML validation in GitLab CI, as well as the specific syntax required to bypass the fix. The attacker needs to know how to manipulate the cache key through environment variables and the implications of doing so in the context of CI runs.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "301432"
+}

@@ -1,0 +1,46 @@
+{
+  "reported_to": "Infogram",
+  "reported_by": "mksecurity ",
+  "title": "Report Design Critical Stored DOM XSS Vulnerability ",
+  "content": "\nHi Team,\nAnother XSS vulnerability in report designer but this one is critical.\nProblem Point\nReport's Overview Table\nReport Creation Url\nhttps://infogram.com/app/#edit/e7b161f1-f708-48e5-bab7-de9887ae202a\nSample Data\n<a href=\"\" onmouseover=\"javascript:alert('HackerOne MkSecurity Dom XSS');\">Click for Detail</a>\nSample URL\nhttps://infogram.com/report-classic-1g57pr0g3xdvp01\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1512755340,
+  "report_url": "https://hackerone.com/reports/282909",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to the report creation URL: https://infogram.com/app/#edit/e7b161f1-f708-48e5-bab7-de9887ae202a"
+    ],
+    [
+      2,
+      "Insert the sample data into the report's overview table: <a href=\"\" onmouseover=\"javascript:alert('HackerOne MkSecurity Dom XSS');\">Click for Detail</a>"
+    ],
+    [
+      3,
+      "Access the sample URL to trigger the XSS: https://infogram.com/report-classic-1g57pr0g3xdvp01"
+    ]
+  ],
+  "vuln_description": "This is a critical Stored DOM XSS vulnerability in the report designer. An attacker can inject malicious JavaScript code into the report's overview table, which is then executed when the report is viewed by another user.",
+  "reason": "The vulnerability involves a straightforward injection of malicious HTML/JavaScript into a field that is rendered without proper sanitization. The attack does not require complex interactions or manipulation of application states.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a stored DOM XSS in the report designer, which is a client-side issue rather than an authentication or authorization flaw. The proposed methodologies focus on testing authentication and authorization boundaries by swapping user sessions and resource IDs, which does not apply to detecting XSS vulnerabilities.",
+    "is_detectable": false
+  }
+}

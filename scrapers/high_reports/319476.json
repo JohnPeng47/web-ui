@@ -1,0 +1,32 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "chalker ",
+  "title": "`whereis` concatenates unsanitized input into exec() command",
+  "content": "\nI would like to report command injection in whereis\nIt allows to inject arbitrary shell commands by trying to locate crafted filenames.\nModule\nmodule name: whereis\nversion: 0.4.0\nnpm page: https://www.npmjs.com/package/whereis\nModule Description\nSimply get the first path to a bin on any system.\nModule Stats\nStats\n101 downloads in the last day\n5 403 downloads in the last week\n18 945 downloads in the last month\n~227 340 estimated downloads per year [JUST FOR REFERENCE, ~DOWNLOADS PER MONTH*12]\nVulnerability\nVulnerability Description\nFile name argument is not properly escaped before being concatenated into the command that is passed to exec().\nSee lines https://github.com/vvo/node-whereis/blob/master/index.js#L4-L12\nSteps To Reproduce:\nCode 138 Bytes\n1var whereis = require('whereis');\n2var filename = 'wget; touch /tmp/tada';\n3whereis(filename, function(err, path) {\n4  console.log(path);\n5});\nObserve file /tmp/tada created.\nSupporting Material/References:\nArch Linux Current\nNode.js 9.5.0\nnpm 5.6.0\nbash 4.4.012\nWrap up\nI contacted the maintainer to let him know: N\nI opened an issue in the related repository: N\nImpact\nFor setups where unsanitized user input could end up in whereis argument, users would be able to execute arbitrary shell commands.\n\n",
+  "severity": [
+    9.9,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1522232220,
+  "report_url": "https://hackerone.com/reports/319476",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "CODE",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection through unsanitized input in the `whereis` npm package, which is not related to authentication or authorization (AuthN/AuthZ) boundaries. The proposed methodologies focus on detecting AuthN/AuthZ bypasses and IDOR vulnerabilities by testing user sessions and resource access across the same application, which does not apply to this command injection vulnerability.",
+    "is_detectable": false
+  }
+}

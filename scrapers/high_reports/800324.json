@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "bags ",
+  "title": "Several protocol parsers in before 4.9.2 could cause a buffer overflow in util-print.c:bittok2str_internal()",
+  "content": "\nLength of a local buffer used to parse network packets was not validated against actual payload size leading to a classic buffer overflow.\nP.S. I was not aware of this bounty program at the time of reporting. Is this report in scope? I have a few more reports that were originally sent to the tcpdump security mailing list, I could file a report for each of them here if that qualifies. I may have also helped fix some issues in 4.9.3 as well.\nImpact\nI believe remote DoS is possible. Remote code execution remains a possibility but I have not checked this myself.\n\n",
+  "severity": [
+    9.8,
+    null
+  ],
+  "bounty": 250,
+  "weaknesses": [
+    "Classic Buffer Overflow"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1629618600,
+  "report_url": "https://hackerone.com/reports/800324",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "HIGH",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify the protocol parsers in tcpdump before version 4.9.2 that are vulnerable to buffer overflow."
+    ],
+    [
+      2,
+      "Craft a network packet with a payload size larger than the local buffer in util-print.c:bittok2str_internal() to trigger the overflow."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a buffer overflow in tcpdump's util-print.c:bittok2str_internal() function due to insufficient validation of payload size against the local buffer length. This could potentially lead to remote Denial of Service (DoS) or remote code execution.",
+  "reason": "The vulnerability involves a straightforward buffer overflow due to lack of bounds checking, which is a common and well-understood issue in C programming. The discovery does not require complex interactions or novel logic, making it relatively easy to identify with basic testing or code review.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

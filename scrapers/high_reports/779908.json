@@ -1,0 +1,57 @@
+{
+  "reported_to": "Lab45",
+  "reported_by": "sodium_ ",
+  "title": "Stored-Xss at connect.topcoder.com/projects/ affected on project chat members",
+  "content": "\nHi team ,\nI'm sorry for my bad report and english ,\nbut i wish you understand the impact of that bug here , if it well performed the sers may lose their access to their sso accounts\nSummary:\nWhile a developer at connect.topcoder.com can manage a messages about his/her project with someonelse ,\nThis conversation was not fully protected from XSS , if some user join in the same chat he'd be affected by that xss and his SSO account possibly will be token over\nSteps To Reproduce:\nAfter you register to topcoder.com go to connect.topcoder.com and sign on with your sso account ,\nAfter that Go to https://connect.topcoder.com/new-project/ and add new project\nNOTE : The discussion will not be accessible publicult efore the administratirs manages it , So after the adiministrators accept it the bug will be accessible publiculy \u2588\u2588\u2588\u2588\u2588\nGO TO https://connect.topcoder.com/projects/<your_project_id>/messages\nAdd message with random title and this <script>alert()</script> as content , then submit\nYou'll get a fully JS code injected\nIf an attacker inject a Javascript code that steal cookies/csrf-token... he'll be able to fully access to the victim account\nSupporting Material/References:\nTested on\nChrome Browser .\nWindows 7_64x Note : That bug is affect to every machine/browser\nImpact\nXss\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1600818060,
+  "report_url": "https://hackerone.com/reports/779908",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Register on topcoder.com and log in to connect.topcoder.com using your SSO account."
+    ],
+    [
+      2,
+      "Create a new project at https://connect.topcoder.com/new-project/ and wait for administrator approval."
+    ],
+    [
+      3,
+      "Navigate to the project's messages section: https://connect.topcoder.com/projects/<your_project_id>/messages."
+    ],
+    [
+      4,
+      "Post a message with a random title and the content: <script>alert()</script>."
+    ],
+    [
+      5,
+      "Observe that the JavaScript code executes when another user views the message."
+    ]
+  ],
+  "vuln_description": "A stored XSS vulnerability exists in the project chat feature of connect.topcoder.com. An attacker can inject malicious JavaScript code into a project message, which will execute when other users view the message. This could lead to session hijacking or account takeover if the malicious script steals cookies or CSRF tokens.",
+  "reason": "The vulnerability is straightforward to discover as it involves a basic XSS payload in a text input field. The attack does not require complex interactions between components or manipulation of application states. The XSS vulnerability is a common issue and the payload used is standard for testing such vulnerabilities.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves injecting malicious JavaScript into a chat message, which is then executed when another user views the chat. This is a client-side vulnerability and does not directly involve authentication or authorization bypass through session or resource manipulation. The methodology described focuses on testing AuthN/AuthZ boundaries by manipulating user sessions and resource IDs, which is not applicable to this XSS vulnerability.",
+    "is_detectable": false
+  }
+}

@@ -1,0 +1,48 @@
+{
+    "reported_to": "Starbucks",
+    "reported_by": "0xpatrik ",
+    "title": "Subdomain takeover on wfmnarptpc.starbucks.com",
+    "content": "\nHello,\nthis is pretty serious security issue in some context, so please act as fast as possible.\nOverview:\nOne of the starbucks.com subdomains is pointing to Azure, which has unclaimed CNAME record. ANYONE is able to own starbucks.com subdomain at the moment.\nThis vulnerability is called subdomain takeover. You can read more about it here:\nhttps://0xpatrik.com/subdomain-takeover-basics/\nDetails:\nwfmnarptpc.starbucks.com has CNAME to s00149tmppcrpt.trafficmanager.net. However, s00149tmppcrpt.trafficmanager.net is not registered in Azure cloud anymore and thus can be registered by anyone. After registering the TrafficManager Profile in Azure portal, the person doing so has full control over content on wfmnarptpc.starbucks.com.\nPoC:\nhttp://wfmnarptpc.starbucks.com/poc.html\nMitigation:\nRemove the CNAME record from starbucks.com DNS zone completely.\nClaim it back in Azure portal after I release it\nRegards,\nPatrik Hudak\nImpact\nSubdomain takeover is abused for several purposes:\nMalware distribution\nPhishing / Spear phishing\nXSS\nAuthentication bypass\n...\nList goes on and on. Since some certificate authorities (Let's Encrypt) require only domain verification, SSL certificate can be easily generated.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Privilege Escalation"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1533863340,
+    "report_url": "https://hackerone.com/reports/388622",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify the subdomain wfmnarptpc.starbucks.com and check its DNS records to find the CNAME pointing to s00149tmppcrpt.trafficmanager.net."
+        ],
+        [
+            2,
+            "Verify that s00149tmppcrpt.trafficmanager.net is unclaimed in Azure by attempting to register it in the Azure portal."
+        ]
+    ],
+    "vuln_description": "The subdomain wfmnarptpc.starbucks.com has a CNAME record pointing to an unclaimed Azure Traffic Manager profile (s00149tmppcrpt.trafficmanager.net). This allows anyone to register the Traffic Manager profile in Azure and take control of the subdomain, leading to potential misuse such as malware distribution, phishing, or other malicious activities.",
+    "reason": "The vulnerability involves a straightforward process of identifying an unclaimed CNAME record and registering it in a cloud service. The steps are simple and do not require deep understanding of complex interactions or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": true,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": false
+    }
+}

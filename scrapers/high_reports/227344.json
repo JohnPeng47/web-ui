@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "hxd ",
+  "title": "CVE-2017-8798 - miniupnp getHTTPResponse chunked encoding integer signedness error",
+  "content": "\nInteger signedness error in miniupnpc [1] allows remote attackers to cause a denial of service condition (access violation and heap corruption) via specially crafted HTTP response\nAn integer signedness error was found in miniupnp's miniwget allowing\nan unauthenticated remote entity typically located on the\nlocal network segment to trigger a heap corruption or an access violation\nin miniupnp's http response parser when processing a specially crafted\nchunked-encoded response to a request for the xml root description url.\naffects\nall versions >= v1.4.20101221 (released 21/12/2010; ~6 years ago)\nall configurations as its a core part of the library\nimpact\nDoS (access violation due to buffer overread memcpy)\nHeap Overwrite (pot. race RCE in multithreaded envs)\nrequirements\nno user interaction, unauth, low complexity\nno user interaction, unauth, low complexity\nhow widespread is this software?\nminiupnpc is compiled into a wide range of network applications and embedded device firmware.\nblockchain clients: bitcoind and almost all forks, CPP ethereum, ...\np2p filesharing applications: qBittorrent, Transmission, ...\nnetwork device firmware: dlink, linksys, probably synology or anything that allows IGD management / portforwarding\nnumerous hits for miniwget on google or github. closed source obviously not included but its likely to find this lib packed with embedded devices.\ndisclosure\nprovided detailed description, PoC and patch\nstatus: fixed; within 8 days.\nThe vulnerable component is a HTTP file download method called\nminiwget (precisely getHTTPResponse) that fails to properly handle\ninvalid chunked-encoded HTTP responses. The root cause is a bounds check\nthat mistakenly casts an unsigned attacker-provided chunksize to signed\nint leading to an incorrect decision on the destination heap buffer size\nwhen copying data from the server response to an internal buffer. The\nattacker controls both the size of the internal buffer as well as the\nnumber of bytes to copy. In order for this attack to succeed, the number\nof bytes to copy must be negative.\nattacker controls:\nint content_length\nunsigned int chunksize\nbytestocopy if (int) chunksize is negative (or at least < n-i ~ 1900 bytes)\nlength of content_buf if bytestocopy is negative\nIn the end, the attacker has almost full control of the following two methods\nrealloc(content_buf, content_length)\nmemcpy(content_buf+x, http_response, chunksize)\naffected methods (almost all exposed API):\nbasically all miniwget* and UPNP_* methods.\ngetHTTPResponse (vulnerable)\nminiwget3\nminiwget2\nminiwget\nminiwget_getaddr\nUPNP_GetIGDFromUrl\nUPNP_GetValidIGD\nUPnP_selectigd\nUPNP_Get*\nUPNP_Check*\nUPNP_Delete*\nUPNP_Update*\nUPNP_Add*\nminiwget3\nminiwget2\nminiwget\nminiwget_getaddr\nUPNP_GetIGDFromUrl\nUPNP_GetValidIGD\nUPnP_selectigd\nUPNP_Get*\nUPNP_Check*\nUPNP_Delete*\nUPNP_Update*\nUPNP_Add*\nThis vulnerability is easily exploitable with an attacker being on the same network segment/multicast domain by answering SSDP discovery requests (1) (or sending notification requests) providing an URL to the attacker controlled webserver. Answering this request (2) makes upnp clients download a description file from that webserver (3)(4) in order to learn more about the capabilities of the Internet Gateway Device (IGD). By providing a negative chunk length in the chunked-encoded answer (4) to this request the malicious webserver triggers the vulnerability. This way one malicous client could exploit all other clients in the same multicast domain. (Funny sidenote: I had to implement a target ip filter otherwise the PoC would attract devices like a magnet and crash all of them)\nCode 821 Bytes\n1      client (miniupnpc)                         server (poc.py)\n2          |                                         |\n3          |                                         |\n4          | SSDP:  Discovery - M-SEARCH             |\n5      1.  | --------------------------------------> |\n6          |                                         |\n7          | SSDP:  Reply - Location Header          |\n8      2.  | <-------------------------------------- |\n9          |                                         |\n10          | SCPD:  GET (Location Header/xxxx.xml)   |\n11      3.  | --------------------------------------> |\n12          |                                         |\n13          | SCPD:  HTTP chunked-encoded reply       |\n14      4.  | <-------------------------------------- |\n15          |                                         |\n16\nNote: the vulnerability is basically not bound to the adjacent network since miniwget could also be used to download arbitrary files on the internet. This is just the most common/typical vector, otherwise the CVSS score would be higher.\nDisclosure\ncoordinated disclosure and reported to the miniupnp project owner, provided detailed vulnerability analysis, a one-click exploit all PoC and a minimal patch. The patch was accepted with minor changes. Fixed within a few days of first contact (May 1st ->May 9th).\ndetails and the actual research material that was securely shared with the miniupnp project is going to be be pushed to the following github repository once vendors picked up the changes: https://github.com/tintinweb/pub/tree/master/pocs/cve-2017-8798\nVendor response [2] and Patch [3]\n\u2764 Thanks to miniupnp for treating this with priority.\n[1] http://miniupnp.free.fr\n[2] http://miniupnp.free.fr/files/changelog.php?file=miniupnpc-2.0.20170509.tar.gz\n[3] https://github.com/miniupnp/miniupnp/commit/f0f1f4b22d6a98536377a1bb07e7c20e4703d229\n\n",
+  "severity": [
+    7.1,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Integer Overflow"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1573620480,
+  "report_url": "https://hackerone.com/reports/227344",
+  "is_multi_component": true,
+  "complexity": "LOW",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Send a specially crafted SSDP discovery request (M-SEARCH) to the network to identify vulnerable devices."
+    ],
+    [
+      2,
+      "When a vulnerable device responds with a Location header pointing to an XML description file, serve a malicious HTTP response with a negative chunk size in the chunked-encoded reply."
+    ]
+  ],
+  "vuln_description": "An integer signedness error in miniupnpc's miniwget function allows remote attackers to cause a denial of service (access violation and heap corruption) via a specially crafted HTTP response with a negative chunk size in chunked-encoded data. This can lead to heap overwrite and potential remote code execution in multithreaded environments.",
+  "reason": "The vulnerability involves understanding the chunked-encoding mechanism in HTTP responses and the subtle integer signedness error in the bounds check. While the attack requires crafting a specific HTTP response, the core issue (integer signedness) is a well-known class of vulnerability, making the discovery process more straightforward for experienced testers.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

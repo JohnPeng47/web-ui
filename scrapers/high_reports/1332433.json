@@ -1,0 +1,44 @@
+{
+  "reported_to": "Nextcloud",
+  "reported_by": "0x0luke ",
+  "title": "RCE on 17 different Docker containers on your network",
+  "content": "\nSummary:\nI was able to get RCE on 17 different docker containers, ranging from postgres and some prod enviroments\nSteps To Reproduce:\nI found that there was a unconfigured portainer.io service running on http://spreed-demo.nextcloud.com:9000\nI created an administrator account with the login creds admin:password (please change these credentials!!!)\nThe site redirected me to the portainer backend, which displayed the docker containers running on the box, see first screen shot\nI was able to fully interact with the docker containers running, the site also allows me to execute arbitrary bash commands on the boxes, See second screenshot\nOther info that was disclosed to me from the panel:\nInternal IP addresses,\nDocker disk volumes\nDocker images,\nThe docker stacks\nSupporting Material/References:\n<image_0>\nImpact\nAn attacker can directly take over each docker container on this system to deploy his own malware, run DDoS attacks etc from inside Nextclouds services.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/hw6mgt8mo7lbywj1f12drnvuebto?response-content-disposition=attachment%3B%20filename%3D%22RCE.PNG%22%3B%20filename%2A%3DUTF-8%27%27RCE.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQUXLXPBHS%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T172828Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQCABXwgcuREPIULGkxhEu1cEA4Ax5NxWqQYfa3keqYbzQIhAKsbQoY2WhlhcQo9gEP%2Fi6AEq0GjYJ%2BKjRvC850IT9ApKrEFCBoQAxoMMDEzNjE5Mjc0ODQ5Igyi5CBvK6B%2FK7rdTRAqjgWOOATzU8ECUyszHcirgLc6231QXk%2Ftg75iIzEsNjWXvn8J2ysZZcMU5dTVbQw8MJqbAcpY3Pe09UoDEc9is7TWIri%2F3hXgLvZRYgbr9xWHu8fALOYheYuIywc4jubKyhtbyLG78cn1s7CMqfalmyniCOT%2FLn3eoRBkvr1E9T1rD6yibLP4jJedFxxCyAZ4JuUyU1OMgW%2BJIamuxW45zryJJYUsk5UD9KVAguw6dGhoBxAV5%2B0POvJwkPcVMu25zywViFM4%2BMJHOOsf000tc7gB%2FLbNAwR2xof6%2B2dB5mXb3KS1bLVKh%2BynrANJvfXxYixZWQwTPv1VAtuIgBXjeGsKvpRRLrYec%2BPRJSiw%2BI4sZfi%2Bk35ZeuNDV0tYrkUvZmCFCimQ4Y6Mq61q30KLMQlWglA%2F9eVU4MYJibDJctPTdFuw0efWFH%2BzOaQsgJUKcC4dV1QCRR65JF%2BaM1H%2BKS9LOxBTYta5eAiI9xLngqXp0J8LrnhWaDP3xU4o0U4bVBTPrJfjudBeTlS8KikRcdpzfta4jXsM0LioHbjpfFbCFzNHN668c1YK2ljD%2FBhGSNc9YyvI7GsrS8kEOszV32id8TSmOuEWzRs4%2Fet%2BXy8908lMGHEbav%2BfxZmNEJboe867xCCAzBPnDwhofyuu%2FOOinq1dprWTxagdTmxrQ4wXo7s%2FJ42JcFHgBd9aNNNn9NpYn3vg9QRH8Jj9aFK2BQiDhyaqkxEiavQjAyK%2FdBnDdxIhzccv4MEWI8UZB147K6kPitIhPPBSQPNUfvsAiFon3x8n6YcND9u5nVYg9%2Bhu%2Bksjnaai0RSJWWiicihDs5PCYh0114n0fC%2FdeZCoF0%2BSddqipQZ3FfSXpP5HhL8w2bSLvwY6sAGssUrQOw8zYicUi1EA%2FDNZoL%2Bi6INKa2%2FExgGo39LYTG7qhPOOWP17DRxBu5bhhOChOErqD8FK2%2FbXVvL74oc2nVOD2ipBLgQpO7FhbpDBc1tdPXFwnQYQSPBhuC1LJ%2BfHzXhq5i%2F2gJ40uGH39K6MvkrLdG72w1cQxdjumPz2GvW5DiZ9kvc4r6MWFrvYrzjOIfW6dvui5Yo1VzPbpjFfG29mHInGTp13I2cQILjVPQ%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=17c7c7dcd7939567abb524aa00f1d49dd202e067a4a4005859118e3189b555a5"
+  },
+  "disclosed_date": 1634756820,
+  "report_url": "https://hackerone.com/reports/1332433",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Discover an unconfigured Portainer service running on http://spreed-demo.nextcloud.com:9000"
+    ],
+    [
+      2,
+      "Create an administrator account with default credentials (admin:password) and gain access to the Portainer backend"
+    ]
+  ],
+  "vuln_description": "The vulnerability involves gaining Remote Code Execution (RCE) on 17 different Docker containers due to an unconfigured Portainer service with default credentials. This allows an attacker to interact with and execute arbitrary commands on the containers, potentially leading to full system compromise.",
+  "reason": "The attack is straightforward once the Portainer service is discovered, as it involves using default credentials and does not require complex interactions or state manipulations. The discovery of the Portainer service might be the only non-trivial part, but it is a common misconfiguration.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an unconfigured Portainer service with default credentials, which is not directly related to the IDOR or AuthN/AuthZ bypass methodologies described. The methodologies focus on testing authorization boundaries within the same application by swapping user sessions or resource IDs, whereas this issue is about misconfigured services and default credentials.",
+    "is_detectable": false
+  }
+}

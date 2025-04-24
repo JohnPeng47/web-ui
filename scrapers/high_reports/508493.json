@@ -1,0 +1,52 @@
+{
+  "reported_to": "Nextcloud",
+  "reported_by": "leonklingele ",
+  "title": "Group admins can remove arbitrary data from \"data\" directory (including admin data)",
+  "content": "\nSteps to reproduce:\nCreate a new user and make him an admin of an arbitrary group\nLog in as this new user\nCreate a new user \"filesexternal\", \"appdata{random-data}\", ..\nDelete this user\nResult: The data/files_external / data/appdata{..} folder is removed.\nSolution: Prevent creation of users if data/{new-user-uid} is either\na file or a folder. In addition, prevent deletion of users where the\nuser data directory (data/{user}) contains other files and folders\nthan \"files\" (where the user data is stored).\nImpact\nGroup admin can remove arbitrary data from \"data\" directory\n\n",
+  "severity": [
+    8.4,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Privilege Escalation"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1565637300,
+  "report_url": "https://hackerone.com/reports/508493",
+  "is_multi_component": false,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create a new user and make them an admin of an arbitrary group"
+    ],
+    [
+      2,
+      "Log in as this new user and create directories like 'filesexternal', 'appdata{random-data}', etc."
+    ],
+    [
+      3,
+      "Delete the user, which results in the removal of the associated data directories"
+    ]
+  ],
+  "vuln_description": "Group admins can remove arbitrary data from the 'data' directory, including admin data, by creating and then deleting users with specific directory names.",
+  "reason": "The vulnerability involves understanding the directory structure and user deletion process, but the steps are straightforward once the directory naming convention is known.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true
+  }
+}

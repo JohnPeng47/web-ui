@@ -1,0 +1,42 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "bags ",
+  "title": " The VTP parser in tcpdump before 4.9.2 has a buffer over-read in print-vtp.c:vtp_print()",
+  "content": "\nHello,\nThe vulnerable code portion is linked below. The linked function is responsible for printing VTP packet payload information to the terminal (e.g., stdout)\nhttps://github.com/the-tcpdump-group/tcpdump/commit/ae83295915d08a854de27a88efac5dd7353e6d3f#diff-8c6895b252e6da31d60a7866973d5787L262-L268\nThe issue may be reproduced as follows\nCheck out vulnerable tcpdump commit (< 4.9.2) as follows\nCode 230 Bytes\n1$ git clone -b e0d8ee571438c755ff988f70886f8c4f5e9a8434 https://github.com/the-tcpdump-group/tcpdump\n2Build it with afl and AddressSanitizer as follows (please install libpcap before this step)\n3$ CC=afl-gcc\n4$ AFL_USE_ASAN=1 make -j\nRun tcpdump against linked payload (link: https://github.com/the-tcpdump-group/tcpdump/blob/ae83295915d08a854de27a88efac5dd7353e6d3f/tests/vtp_asan-3.pcap?raw=true)\nCode 2.73 KiB\n1$ tcpdump -nvr <payload>\n2reading from file /tmp/vtp_asan-3.pcap, link-type MFR (FRF.16 Frame Relay)\n3=================================================================\n4==3747==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x61200000015c at pc 0x562e64fcc5d2 bp 0x7ffdd3033300 sp 0x7ffdd30332f0\n5READ of size 1 at 0x61200000015c thread T0\n6    #0 0x562e64fcc5d1 in fn_printzp util-print.c:217\n7    #1 0x562e64fb757e in vtp_print print-vtp.c:262\n8    #2 0x562e64ea3aae in snap_print print-llc.c:493\n9    #3 0x562e64e0cba5 in fr_print print-fr.c:336\n10    #4 0x562e64e0dc9e in mfr_print print-fr.c:563\n11    #5 0x562e64d57e1e in pretty_print_packet print.c:332\n12    #6 0x562e64d30d8d in print_packet tcpdump.c:2590\n13    #7 0x562e65003a78 in pcap_offline_read savefile.c:561\n14    #8 0x562e64ff29ee in pcap_loop pcap.c:2737\n15    #9 0x562e64d2474d in main tcpdump.c:2093\n16    #10 0x7f9726cb6b96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)\n17    #11 0x562e64d2c769 in _start (/home/bhargava/work/github/tcpdump/tcpdump+0x17b769)\n18\n190x61200000015c is located 0 bytes to the right of 284-byte region [0x612000000040,0x61200000015c)\n20allocated by thread T0 here:\n21    #0 0x7f972737ab50 in __interceptor_malloc (/usr/lib/x86_64-linux-gnu/libasan.so.4+0xdeb50)\n22    #1 0x562e6500480a in pcap_check_header sf-pcap.c:404\n23\n24SUMMARY: AddressSanitizer: heap-buffer-overflow util-print.c:217 in fn_printzp\n25Shadow bytes around the buggy address:\n26  0x0c247fff7fd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n27  0x0c247fff7fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n28  0x0c247fff7ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n29  0x0c247fff8000: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00\n30  0x0c247fff8010: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n31=>0x0c247fff8020: 00 00 00 00 00 00 00 00 00 00 00[04]fa fa fa fa\n32  0x0c247fff8030: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n33  0x0c247fff8040: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n34  0x0c247fff8050: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n35  0x0c247fff8060: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n36  0x0c247fff8070: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n37Shadow byte legend (one shadow byte represents 8 application bytes):\n38  Addressable:           00\n39  Partially addressable: 01 02 03 04 05 06 07 \n40  Heap left redzone:       fa\n41  Freed heap region:       fd\n42  Stack left redzone:      f1\n43  Stack mid redzone:       f2\n44  Stack right redzone:     f3\n45  Stack after return:      f5\n46  Stack use after scope:   f8\n47  Global redzone:          f9\n48  Global init order:       f6\n49  Poisoned by user:        f7\n50  Container overflow:      fc\n51  Array cookie:            ac\n52  Intra object redzone:    bb\n53  ASan internal:           fe\n54  Left alloca redzone:     ca\n55  Right alloca redzone:    cb\n56==3747==ABORTING\nIt is acknowledged here(link: https://github.com/the-tcpdump-group/tcpdump/commit/ae83295915d08a854de27a88efac5dd7353e6d3f) that I (Bhargava Shastry) am the original reporter of the issue.\nTo prove that this hackerone account belongs to me, I have hosted a file with the following message on my github page(link: https://bshastry.github.io/.well-known/hackerone.txt)\nhello @turtle_shell @hackerone\nIf you have any further queries, please let me know.\nImpact\nI believe that information disclosure is possible.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Buffer Over-read"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1629618960,
+  "report_url": "https://hackerone.com/reports/802846",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Check out vulnerable tcpdump commit (< 4.9.2) using: git clone -b e0d8ee571438c755ff988f70886f8c4f5e9a8434 https://github.com/the-tcpdump-group/tcpdump"
+    ],
+    [
+      2,
+      "Build it with afl and AddressSanitizer: CC=afl-gcc AFL_USE_ASAN=1 make -j"
+    ],
+    [
+      3,
+      "Run tcpdump against the provided payload: tcpdump -nvr <payload>"
+    ]
+  ],
+  "vuln_description": "The VTP parser in tcpdump before 4.9.2 has a buffer over-read in print-vtp.c:vtp_print(). This vulnerability allows an attacker to cause a heap-buffer overflow when processing specially crafted VTP packets, potentially leading to information disclosure.",
+  "reason": "The vulnerability involves a straightforward buffer over-read in a specific parsing function. While it requires understanding of network protocols and packet parsing, the flaw itself is a classic memory safety issue without complex interactions or state manipulation.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

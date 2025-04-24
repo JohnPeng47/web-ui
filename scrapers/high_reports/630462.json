@@ -1,0 +1,46 @@
+{
+  "reported_to": "PuTTY (European Commission - DIGIT)",
+  "reported_by": "hey2baby ",
+  "title": "Heap overflow happen when receiving short length key from ssh server using ssh protocol 1",
+  "content": "\nSummary:\nThere's no check in ssh1_login_process_queue function when read servkey and hostkey length from packet which may cause heap overflow.\nRemote code execution may be possible.\nSteps To Reproduce:\nTo test this issue, I downloaded openssl6.8 to compile to craft packets, using below command to download openssl6.8p1 source code\n# wget https://openbsd.hk/pub/OpenBSD/OpenSSH/portable/openssh-6.8p1.tar.gz\n\nAfter download openssl6.8p1 source code, patch ssh-keygen.c and sshd.c according with ssh-keygen.c.diff and sshd.c.diff attached accordingly.\nCompile patched openssl6.8p1 to get sshd which used to act as ssh1 server and ssh-keygen to get host key file, using command like below\n# ./ssh-keygen -t rsa1 -b 248 -f /tmp/ssh_host_rsa1_key\n# /root/openssh-6.8p1/sshd -p 39000 -D -E aaaa -f sshd_config -b 248\nsshd_config file should add protocol 1 support and specify host key file path.\nDownload latest putty source code and compile it using address sanitize flag like below:\n# ./configure CFLAGS=\"-g -O0 -fsanitize=address\" CPPFLAGS=\"-g -O0 -fsanitize=address\" LDFLGAGS=\"-fsanitize=address\"\nAfter above 4 steps, start plink to connect like below\n# ./plink -1 -P 39000 root@localhost\nAfter execution, you will see heap overflow happen immediately like below\n===============================================================\n==24509 ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60060003b96f at pc 0x45c488 bp 0x7ffc93bd3550 sp 0x7ffc93bd3548\nWRITE of size 1 at 0x60060003b96f thread T0\n#0 0x45c487 (/root/putty-0.71/plink+0x45c487)\n#1 0x4ceb78 (/root/putty-0.71/plink+0x4ceb78)\n#2 0x4d23a6 (/root/putty-0.71/plink+0x4d23a6)\n#3 0x4051d5 (/root/putty-0.71/plink+0x4051d5)\n#4 0x40562e (/root/putty-0.71/plink+0x40562e)\n#5 0x53d25a (/root/putty-0.71/plink+0x53d25a)\n#6 0x7f402cfe0c04 (/usr/lib64/libc-2.17.so+0x21c04)\n#7 0x4037f8 (/root/putty-0.71/plink+0x4037f8)\n0x60060003b96f is located 0 bytes to the right of 31-byte region [0x60060003b950,0x60060003b96f)\nallocated by thread T0 here:\n#0 0x7f402d59b4ba (/usr/lib64/libasan.so.0+0x154ba)\n#1 0x4218b1 (/root/putty-0.71/plink+0x4218b1)\n#2 0x45bf1d (/root/putty-0.71/plink+0x45bf1d)\n#3 0x4ceb78 (/root/putty-0.71/plink+0x4ceb78)\n#4 0x4d23a6 (/root/putty-0.71/plink+0x4d23a6)\n#5 0x4051d5 (/root/putty-0.71/plink+0x4051d5)\n#6 0x40562e (/root/putty-0.71/plink+0x40562e)\n#7 0x53d25a (/root/putty-0.71/plink+0x53d25a)\n#8 0x7f402cfe0c04 (/usr/lib64/libc-2.17.so+0x21c04)\nShadow bytes around the buggy address:\n0x0c013ffff6d0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n0x0c013ffff6e0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n0x0c013ffff6f0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n0x0c013ffff700: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n0x0c013ffff710: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n=>0x0c013ffff720: fa fa fa fa fd fd fd fa fa fa 00 00 00[07]fa fa\n0x0c013ffff730: 00 00 00 fa fa fa 00 00 00 fa fa fa 00 00 00 fa\n0x0c013ffff740: fa fa 00 00 00 fa fa fa fd fd fd fa fa fa 00 00\n0x0c013ffff750: 00 fa fa fa fd fd fd fa fa fa fd fd fd fa fa fa\n0x0c013ffff760: 00 00 00 00 fa fa 00 00 00 fa fa fa 00 00 00 fa\n0x0c013ffff770: fa fa 00 00 00 fa fa fa 00 00 00 fa fa fa 00 00\nShadow byte legend (one shadow byte represents 8 application bytes):\nAddressable: 00\nPartially addressable: 01 02 03 04 05 06 07\nHeap left redzone: fa\nHeap righ redzone: fb\nFreed Heap region: fd\nStack left redzone: f1\nStack mid redzone: f2\nStack right redzone: f3\nStack partial redzone: f4\nStack after return: f5\nStack use after scope: f8\nGlobal redzone: f9\nGlobal init order: f6\nPoisoned by user: f7\nASan internal: fe\n24509 ABORTING\n[attachment / reference] attachments contain sshd.c.diff, ssh-keygen.c.diff and sshd_config\nImpact\nputty client crash or even remote code execution\n\n",
+  "severity": [
+    8.2,
+    null
+  ],
+  "bounty": 3646,
+  "weaknesses": [
+    "Heap Overflow"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1568978340,
+  "report_url": "https://hackerone.com/reports/630462",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Download OpenSSH 6.8p1 source code and patch ssh-keygen.c and sshd.c"
+    ],
+    [
+      2,
+      "Compile the patched OpenSSH to create a vulnerable SSH server and generate host keys"
+    ],
+    [
+      3,
+      "Compile PuTTY with address sanitizer flags for detection"
+    ],
+    [
+      4,
+      "Connect to the vulnerable SSH server using plink with SSH protocol 1 to trigger the overflow"
+    ]
+  ],
+  "vuln_description": "A heap overflow vulnerability exists in the SSH1 protocol implementation when processing server and host key lengths without proper validation. This can be exploited by a malicious SSH server sending specially crafted key lengths, potentially leading to remote code execution.",
+  "reason": "The vulnerability requires setting up a custom vulnerable SSH server with specific configurations and compiling client software with instrumentation to detect the overflow. While the core issue is straightforward (missing length checks), the reproduction requires multiple coordinated components.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

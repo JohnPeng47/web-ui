@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "hkratz ",
+  "title": "Time-of-check to time-of-use vulnerability in the std::fs::remove_dir_all() function of the Rust standard library",
+  "content": "\nThe implementation of std::fs::remove_dir_all() in the Rust standard library is vulnerable to a time-of-check to time-of-use link replacement attack. This applies to all versions of Rust before 1.58.1.\nVulnerability details\nThe documentation of std::fs::remove_dir_all() guarantees that the function does not follow symbolic links:\nRemoves a directory at this path, after removing all its contents. Use carefully!\nThis function does not follow symbolic links and it will simply remove the symbolic link itself.\nThe vulnerable implementation for Windows is in library/std/src/sys/windows/fs.rs. For other platforms it is in library/std/src/sys_common/fs.rs. Both use a remove_dir_all_recursive() helper function which does the actual recursion and deletion. It opens directory by the given path and iterates the directory entries. For each directory entry it checks if the entry is a directory and recurses into it if it is. If it is not it is deleted using std::fs::remove_file(). On the way back up the now empty directories are deleted using std::fs::remove_dir()\nThere are two problems with this implementation if the attacker has write access to a directory which is being deleted by the privileged process:\nThe type of a directory entry is checked and it is being recursed into if it is a directory. There is a short time window between the check and the opening of the subdirectory which an attacker can exploit by replacing the subdirectory with symlink causing the symlink to be followed.\nThe path given to std::fs::remove_dir_all() is extended with subentry paths which are then used to process subdirectories and delete directory entries. Paths are resolved by the operating system each time they are passed to a system call. If the attacker can replace a descendent directory of the directory passed to remove_dir_all() while a subdirectory of it is being processed with a symlink he can cause that symlink to be followed in subsequent filesystem operations.\nA proof-of-concept code demonstrating the vulnerability is attached.\nMitigation\nUpdate to Rust 1.58.1 or later which includes a fixed implementation for all supported platforms except for macOS before version 10.10 and REDOX.\nDon't use the vulnerable std::fs::remove_dir_all() in a privileged process or any other security-senstitive context.\nMake sure that std::fs::remove_dir_all() is only used on directories not accessible to processes from other security contexts.\nImpact\nIf the attacker has write access to a directory which is being deleted by the privileged process using remove_dir_all() he can trick the process to delete any sensitive files or directory subtrees that the privileged process can.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 4000,
+  "weaknesses": [
+    "Time-of-check Time-of-use (TOCTOU) Race Condition"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1648159740,
+  "report_url": "https://hackerone.com/reports/1520931",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify a directory that a privileged process will delete using std::fs::remove_dir_all() and ensure you have write access to it."
+    ],
+    [
+      2,
+      "During the deletion process, quickly replace a subdirectory with a symbolic link to a sensitive location before the function processes it."
+    ]
+  ],
+  "vuln_description": "The std::fs::remove_dir_all() function in Rust is vulnerable to a time-of-check to time-of-use (TOCTOU) attack, where an attacker can replace a subdirectory with a symbolic link during the deletion process, causing the function to follow the link and delete files or directories outside the intended scope.",
+  "reason": "This vulnerability requires precise timing to exploit and an understanding of how the function processes directories and symbolic links. The attacker must also have write access to the directory being deleted. The interaction between the directory check and the subsequent file operation is subtle and non-obvious.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

@@ -1,0 +1,49 @@
+{
+  "reported_to": "WordPress",
+  "reported_by": "simonscannell ",
+  "title": "Potential unprivileged Stored XSS through wp_targeted_link_rel",
+  "content": "\nThe user description is vulnerable to a Stored XSS via an attribute injection. At fault is the wp_targeted_link_rel() filter that parses attributes regardless of their position.\nCode 299 Bytes\n1function wp_targeted_link_rel( $text ) {\n2\t// Don't run (more expensive) regex if no links with targets.\n3\tif ( stripos( $text, 'target' ) !== false && stripos( $text, '<a ' ) !== false ) {\n4\t\t$text = preg_replace_callback( '|<a\\s([^>]*target\\s*=[^>]*)>|i', 'wp_targeted_link_rel_callback', $text );\n5\t}\nIt essentially just parses the attribute string of all <a> tags and passes them to the preg replace callback.\nCode 501 Bytes\n1function wp_targeted_link_rel_callback( $matches ) {\n2\t$link_html = $matches[1];\n3\t$rel_match = array();\n4...\n5// Value with delimiters, spaces around are optional.\n6\t$attr_regex = '|rel\\s*=\\s*?(\\\\\\\\{0,1}[\"\\'])(.*?)\\\\1|i';\n7\tpreg_match( $attr_regex, $link_html, $rel_match );\n8\n9\tif ( empty( $rel_match[0] ) ) {\n10\t\t// No delimiters, try with a single value and spaces, because `rel =  va\"lue` is totally fine...\n11\t\t$attr_regex = '|rel\\s*=(\\s*)([^\\s]*)|i';\n12\t\tpreg_match( $attr_regex, $link_html, $rel_match );\n13\t}\nAs can be seen it then uses a regex to parse the rel attribute, its value and its delimeter from the string.\nIf the rel attribute is found, the following happens:\nCode 455 Bytes\n1\n2\tif ( ! empty( $rel_match[0] ) ) {\n3\t\t$parts     = preg_split( '|\\s+|', strtolower( $rel_match[2] ) );\n4\t\t$parts     = array_map( 'esc_attr', $parts );\n5\t\t$needed    = explode( ' ', $rel );\n6\t\t$parts     = array_unique( array_merge( $parts, $needed ) );\n7\t\t$delimiter = trim( $rel_match[1] ) ? $rel_match[1] : '\"';\n8\t\t$rel       = 'rel=' . $delimiter . trim( implode( ' ', $parts ) ) . $delimiter;\n9\t\t$link_html = str_replace( $rel_match[0], $rel, $link_html );\nAs you can see the value of the rel attribute is splitted by whitespaces and each part is then escaped. The targeted rel value is then added to the alread existing ones and put back together.\nMost importantly, are the following line:\nCode 204 Bytes\n1\t\t$delimiter = trim( $rel_match[1] ) ? $rel_match[1] : '\"';\n2\t\t$rel       = 'rel=' . $delimiter . trim( implode( ' ', $parts ) ) . $delimiter;\n3\t\t$link_html = str_replace( $rel_match[0], $rel, $link_html );\nif the delimeter is empty (e.g. when rel=abc has no quotes), the delimer becomes \". The original rel attribute is then replaced with the new one.\nThis is a problem since the following payload:\n<a title=\" target='xyz' rel=abc \">PoC</a>\nwould turn into\n<a title=\" target='xyz' rel=\"abc\" \">PoC</a> Note that an additional \" has been injected and the title attribute has been escaped.\nThis is because the regex to match the rel attribute ignores the position of the rel attribute within the attribute string. The above payload shows how the rel attribute is placed within a double quoted attribute. Since no delimeter is set, the delimer becomes a double quote and when the rel attribute is inserted back into the string, the double quote is injected.\nI recommend using something like parse_shortcode_atts() as in wp_rel_nofollow() to prevent this from happening.\nBy abusing the attribute injection, it is easily possible to create a Stored XSS payload.\nTge wp_targeted_link_rel() filter is not only called on the user description, however, this is where it becomes exploitable. This is because this vulnerable filter is added before the kses filters are added, which means that the injected attribute would be caught by wp_post_kses(). The user description is the only exception where the kses filters are called before wp_targeted_link_rel() is called.\n<a href=\"#\" title=\" target='abc' rel= onmouseover=alert(/XSS/) \">This is a PoC for a Stored XSS</a>\nProof of Concept\nThe following will demonstrate how a normal forum user can achieve stored XSS on their profile page in BuddyPress\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nThis works if the Bio of forum users is displayed in their profile page. Log in as an administrator and go to Appearence -> Customize and then BuddyPress Nouveu -> Member front page and make sure that displaying the user bio is enabled\nCreate a normal forum user account\nLogin and edit your profile. Paste\n<a href=\"#\" title=\" target='abc' rel= onmouseover=alert(/XSS/) \">This is a PoC for a Stored XSS</a> as your user description\nvisit your profil and hover over the link.\nImpact\nThe Impact of this can vary from site to site. I have shown how this can be exploited in BuddyPress as a mere, normal forum user. Since you can also inject a style attribute and make the link span over the entire page, one can turn this into a wormable Stored XSS in BuddyPress.\nBasically every plugin or forum is affected that displays the user description.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1578517920,
+  "report_url": "https://hackerone.com/reports/509930",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Log in as an administrator and enable the display of user bio in BuddyPress settings (Appearance -> Customize -> BuddyPress Nouveau -> Member front page)."
+    ],
+    [
+      2,
+      "Create a normal forum user account, log in, and edit the profile to insert the XSS payload: `<a href=\"#\" title=\" target='abc' rel= onmouseover=alert(/XSS/) \">This is a PoC for a Stored XSS</a>` as the user description."
+    ],
+    [
+      3,
+      "Visit the user profile page and hover over the link to trigger the XSS."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Stored XSS via attribute injection in the `wp_targeted_link_rel()` function in WordPress. This function improperly handles the `rel` attribute in anchor tags, allowing an attacker to inject malicious attributes that can execute arbitrary JavaScript when processed. The issue arises because the function does not properly account for the position of the `rel` attribute within other quoted attributes, leading to attribute escaping and injection.",
+  "reason": "The vulnerability involves understanding the interaction between the `wp_targeted_link_rel()` function and how it processes HTML attributes, particularly the `rel` attribute within quoted attributes. The attacker must craft a payload that exploits the function's regex parsing to inject malicious attributes. This requires knowledge of HTML attribute parsing and the specific behavior of the WordPress function.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves attribute injection in the user description field, which is processed by the wp_targeted_link_rel() filter before kses filters. This allows for stored XSS by injecting malicious attributes. The methodology described focuses on testing authentication and authorization boundaries by swapping user sessions and resource IDs, but does not specifically address parsing and filtering of user input for XSS vulnerabilities.",
+    "is_detectable": false
+  }
+}

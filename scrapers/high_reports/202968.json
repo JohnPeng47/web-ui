@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "geeknik ",
+  "title": "CVE-2017-5342 In tcpdump before 4.9.0 a bug in multiple protocol parsers could cause a buffer overflow in print-ether.c:ether_print()",
+  "content": "\nReported to the project maintainers in 2016. gre_print_0() and the functions modelled after it passed the value of \"length\" instead of the value of \"caplen\", this could make ether_print() access beyond the memory allocated for the captured packet. Fixed by https://github.com/the-tcpdump-group/tcpdump/commit/0db4dcafe5ae38201d3869c96a96cb714d82ff35.\n\n",
+  "severity": [
+    7.3,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Memory Corruption - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1570581060,
+  "report_url": "https://hackerone.com/reports/202968",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Run tcpdump version before 4.9.0 to capture network packets."
+    ],
+    [
+      2,
+      "Analyze the captured packets using the faulty protocol parsers to trigger the buffer overflow in print-ether.c:ether_print()."
+    ]
+  ],
+  "vuln_description": "In tcpdump before 4.9.0, a bug in multiple protocol parsers could cause a buffer overflow in print-ether.c:ether_print(). The issue arises because gre_print_0() and similar functions incorrectly pass the value of 'length' instead of 'caplen', potentially causing ether_print() to access memory beyond the allocated space for the captured packet.",
+  "reason": "The vulnerability involves a straightforward memory handling error in packet parsing, which is a common issue in network utilities. The discovery requires understanding packet capture and parsing but does not involve complex interactions or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

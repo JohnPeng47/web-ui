@@ -1,0 +1,38 @@
+{
+  "reported_to": "Node.js",
+  "reported_by": "amitklein ",
+  "title": "HTTP Request Smuggling due to CR-to-Hyphen conversion",
+  "content": "\nNOTE! Thanks for submitting a report! Please replace all the [square] sections below with the pertinent details. Remember, the more detail you provide, the easier it is for us to triage and respond quickly, so be sure to take your time filling out the report!\nSummary: [add summary of the vulnerability]\nApparently, node.js converts CR in HTTP request headers to hyphen before parsing. This can lead to HTTP Request Smuggling as it is a non-standard interpretation of the header.\nDescription: [add more details about this vulnerability]\nConsider an HTTP request with Content[CR]Length header . Suppose a proxy in front of node.js ignores the Content[CR]Length header (and therefore assumes a 0-length body). node, on the other hand, converts the CR to a hyphen and uses the value of the (newly formed...) Content-Length header. HTTP Request Smuggling ensues.\nSteps To Reproduce:\nThis is the HTTP stream that demonstrates the vulnerability:\nGET / HTTP/1.1\nHost: www.example.com\nContent[CR]Length: 42\nConnection: Keep-Alive\nGET /proxy_sees_this HTTP/1.1\nSomething: GET /node_sees_this HTTP/1.1\nHost: www.example.com\nA proxy server that ignores the invalid Content[CR]Length header will assume that the body length is 0 (since there's no body length indication), and will thus transmit the stream up to (but not including) the GET /proxy_sees_this. It will wait for node to respond (which interestingly does happen, even though node.js does expect the body - perhaps on GET requests, the URL is invoked regardless of the body?), then the proxy forwards the second request (from its perspective) - the GET /proxy_sees_this. Node then silently discards the expected 42 bytes of the body of the first request, and thus starts parsing the 2nd request from GET /node_sees_this.\nHTTP Request Smuggling ensues.\n[Also, if you were able to find the piece of code responsible for this issue, please add a link to it in the source repository.]\nImpact: [add why this issue matters]\nHTTP Request Smuggling can lead to web cache poisoning, session hijacking, cross site scripting, etc.\nSupporting Material/References:\nList any additional material (e.g. screenshots, logs, references, commits, code examples, etc.).\nImpact\nHTTP Request Smuggling can lead to web cache poisoning, session hijacking, cross site scripting, etc.\n\n",
+  "severity": [
+    8.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "HTTP Request Smuggling"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1602976500,
+  "report_url": "https://hackerone.com/reports/922597",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Send an HTTP request with a Content[CR]Length header to a Node.js server behind a proxy."
+    ],
+    [
+      2,
+      "Observe that the proxy ignores the Content[CR]Length header while Node.js converts it to Content-Length, leading to request smuggling."
+    ]
+  ],
+  "vuln_description": "Node.js converts CR in HTTP request headers to hyphen before parsing, which can lead to HTTP Request Smuggling when a proxy interprets the header differently.",
+  "reason": "The vulnerability involves understanding how Node.js and a proxy server interpret HTTP headers differently, specifically the conversion of CR to hyphen in headers. This requires knowledge of HTTP protocol nuances and the specific behavior of Node.js.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

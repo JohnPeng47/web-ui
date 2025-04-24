@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "gentlemenhacker ",
+    "title": "\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 portal is open to enumeration once authenticated.  Session ID's appear static.  All PII available once a valid session ID is found.",
+    "content": "\nDescription:\nOnce Authenticated to \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 portal with valid credentials you can type in another members session id and you can see any service members data as if you were authenticated as them.\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nI did not see if there was a way to dump all session id's, but wouldn't be too surprised if it was vulnerable to this.\nReferences\nReplacing that string above with valid session ID's let me see \u2588\u2588\u2588\u2588\u2588\u2588 info\nImpact\nAll PII held in \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 portal exposed. \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\n\nIf website doesn't stop me, I could either dump the list of id's or utilize a tool to brute force a range.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nStep 1: Authenticate to \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 portal with valid credentials.\nStep 2: navigate straight to this page with a valid session id\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nIf you have a valid session id, you can see any service members data as if you were authenticated as them.\nSuggested Mitigation/Remediation Actions\nrandom session ids. better authorization to data.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Session Fixation"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1618961580,
+    "report_url": "https://hackerone.com/reports/1150573",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Authenticate to \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 portal with valid credentials."
+        ],
+        [
+            2,
+            "Navigate straight to this page with a valid session id: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
+        ]
+    ],
+    "vuln_description": "Once authenticated to the portal, an attacker can access any service member's data by simply changing the session ID in the URL, as the session IDs are static and do not require additional authorization checks.",
+    "reason": "The vulnerability involves a straightforward manipulation of the session ID in the URL after authentication, without the need for complex interactions or understanding of multiple components. The static nature of session IDs is a well-known issue and the attack does not require novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

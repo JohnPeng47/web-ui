@@ -1,0 +1,45 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "ahihi ",
+  "title": "bunyan - RCE via insecure command formatting",
+  "content": "\nI would like to report RCE in bunyan\nIt allows arbitrary commands remotely inside the victim's PC\nModule\nmodule name: bunyan\nversion: 1.8.12\nnpm page: https://www.npmjs.com/package/bunyan\nModule Description\nBunyan is a simple and fast JSON logging library for node.js services:\nModule Stats\n[920,196] weekly downloads\nVulnerability\nVulnerability Description\nThe issue occurs because a user input is formatted inside a command that will be executed without any check. https://github.com/trentm/node-bunyan/blob/master/bin/bunyan#L1224\nSteps To Reproduce:\nRun the following command\nnpm install bunyan\n./node_modules/bunyan/bin/bunyan -p \"S'11;touch hacked ;'\"\nRecheck the files: now hacked has been created\n## Patch\nCheck input before command\nSupporting Material/References:\nState all technical information about the stack where the vulnerability was found\n[OPERATING SYSTEM VERSION]: Ubuntu 18.04\n\n\nWrap up\nSelect Y or N for the following statements:\nI contacted the maintainer to let them know: [Y/N] N\nI opened an issue in the related repository: [Y/N] N\nImpact\nRCE on bunyan.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1593237180,
+  "report_url": "https://hackerone.com/reports/902739",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install bunyan: npm install bunyan"
+    ],
+    [
+      2,
+      "Execute the vulnerable command: ./node_modules/bunyan/bin/bunyan -p \"S'11;touch hacked ;'\""
+    ]
+  ],
+  "vuln_description": "The vulnerability in bunyan allows for Remote Code Execution (RCE) due to insecure command formatting. An attacker can inject arbitrary commands via user input that is directly executed without proper sanitization or checks.",
+  "reason": "The vulnerability is straightforward to exploit as it involves direct command injection without the need for complex interactions or state manipulations. The attack vector is clear and does not require understanding of multiple components or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection in the bunyan module, which is not related to authentication or authorization (AuthN/AuthZ) issues. The proposed methodologies focus on detecting AuthN/AuthZ bypasses and IDOR vulnerabilities by manipulating user sessions and resource IDs within the same application context. Since this RCE vulnerability does not involve user sessions, resource IDs, or cross-user authorization checks, it falls outside the scope of the described detection methods.",
+    "is_detectable": false
+  }
+}

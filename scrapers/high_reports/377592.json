@@ -1,0 +1,38 @@
+{
+  "reported_to": "Monero",
+  "reported_by": "jagerman ",
+  "title": "A bug in the Monero wallet balance can enable theft from exchanges",
+  "content": "\nSummary:\nA Monero bug (already fixed in master) allows theft from exchanges. This has been exploited again a Monero-derived coin, so the exploit may be underway currently.\nDescription:\n(fluffypony: Also please mention you spoke to me and I recommended you put it on HackerOne)\nPR #3985 fixed a wallet balance display bug, which seems innocuous enough, but this bug also extends to exchanges: a transfer of, e.g., 1 XMR to an exchange with a duplicated TX pub key will show up on an exchange as a 2 XMR deposit, which then allows the attacker to withdraw 2 XMR from the exchange's wallet. An attacker could exploit this repeatedly to siphon of all of the exchange's balance.\nReleases Affected:\n0.12.2.0, which is currently active and used by exchanges, and likely earlier releases.\ncurrent master and the 0.12.3.0 PR branch have the fix applied\nSteps To Reproduce:\ndeliberately double-sign a transaction with the tx pub key, e.g. by doubling the add_tx_pub_key_to_extra(tx, txkey_pub); call in src/cryptonote_core/cryptonote_tx_utils.cpp.\nTransfer an amount (or send to an exchange)\nSee 2x the transferred amount appear on the recipient wallet (or the exchange).\nSupporting Material/References:\nI've notified several other Monero-derived coins that I am in contact with, along with Cryptopia.\nThis attack was carried out against ArQmA on altex.exchange; 4 different wallets managed to steal the entire ARQ exchange deposits before the ARQ wallet was put into maintenance.\nImpact\nTheft of all coins deposited in an exchange wallet.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 10,
+  "weaknesses": [
+    "Business Logic Errors"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1533183120,
+  "report_url": "https://hackerone.com/reports/377592",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Deliberately double-sign a transaction with the tx pub key by doubling the 'add_tx_pub_key_to_extra(tx, txkey_pub);' call in 'src/cryptonote_core/cryptonote_tx_utils.cpp'."
+    ],
+    [
+      2,
+      "Transfer an amount (or send to an exchange) and observe that 2x the transferred amount appears on the recipient wallet (or the exchange)."
+    ]
+  ],
+  "vuln_description": "A bug in the Monero wallet balance display allows an attacker to exploit exchanges by duplicating the TX pub key in a transaction. This causes the exchange to display double the actual deposit amount, enabling the attacker to withdraw more funds than deposited, potentially draining the exchange's balance.",
+  "reason": "The vulnerability involves understanding the transaction signing process in Monero, the role of the TX pub key, and how exchanges process deposits. The exploit requires manipulating the transaction construction in a non-obvious way and understanding the impact on the exchange's balance calculation.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

@@ -1,0 +1,38 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "ronperris ",
+  "title": "[url-parse] Improper Validation and Sanitization",
+  "content": "\nNOTE! Thanks for submitting a report! Please replace all the [square] sections below with the pertinent details. Remember, the more detail you provide, the easier it is for us to triage and respond quickly, so be sure to take your time filling out the report!\nI would like to report Improper Validation and Sanitization in url-parse.\nIt allows attacker-controlled URL values to bypass validation and sanitization.\nModule\nmodule name: url-parse\nversion: 1.4.4\nnpm page: https://www.npmjs.com/package/url-parse\nModule Description\nThe url-parse method exposes two different API interfaces. The url interface that you know from Node.js and the new URL interface that is available in the latest browsers.\nModule Stats\nReplace stats below with numbers from npm\u2019s module page:\n5,544,078 downloads in the last week\nVulnerability\nVulnerability Description\nWhen using url-parse in the browser the protocol of the URL returned by the parser is not validated correctly. In the Node.js environment strings like, javascript: return and empty string on the resulting URL object, but in the browser the current document.location.protocol is used when the provided URL doesn't match the validation expression /^([a-z][a-z0-9.+-]*:)?(\\/\\/)?([\\S\\s]*)/i.\nSteps To Reproduce:\nAdd the following test to test/test.js and run npm run test-browser.\nassume(parse.extractProtocol(' javscript:')).eql({\nslashes: false,\nprotocol: '',\nrest: ''\n})\nWrap up\nLine 199 in index.js is setting the protocol to location.protocol, this is probably not the right move.\nurl protocol = extracted.protocol || location.protocol || '';\nSelect Y or N for the following statements:\nI contacted the maintainer to let them know: [Y]\nI opened an issue in the related repository: [N]\nImpact\nBypass input sanitization and validation.\n\n",
+  "severity": [
+    7.3,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Input Validation"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1580134200,
+  "report_url": "https://hackerone.com/reports/496293",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Add the following test to test/test.js and run npm run test-browser: assume(parse.extractProtocol(' javscript:')).eql({ slashes: false, protocol: '', rest: '' })"
+    ],
+    [
+      2,
+      "Observe that the protocol is incorrectly set to location.protocol instead of being empty when parsing ' javascript:'"
+    ]
+  ],
+  "vuln_description": "The url-parse module in the browser environment fails to properly validate and sanitize the protocol of a URL, allowing attacker-controlled values to bypass validation. When parsing a URL like ' javascript:', it incorrectly uses the current document.location.protocol instead of returning an empty string as it does in Node.js.",
+  "reason": "The vulnerability involves understanding the difference in URL parsing behavior between Node.js and browser environments, but the core issue is straightforward to identify once this difference is known. The attack does not require complex state manipulation or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

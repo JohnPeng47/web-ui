@@ -1,0 +1,45 @@
+{
+  "reported_to": "Brave Software",
+  "reported_by": "bobrov ",
+  "title": "[Android] HTML Injection in BatterySaveArticleRenderer WebView",
+  "content": "\nSummary:\nHTML Injection in BatterySaveArticleRenderer WebView.\nProducts affected:\nAndroid Brave Browser 1.9.56\nSteps To Reproduce:\nOpen https://blackfan.ru/brave or html\nCode 99 Bytes\n1<script>\n2location=\"https://www.google.com/search?q=</title><h1><marquee><s>Injection<!--\"\n3</script>\nWait for a full load\nClick on ArticleModeButton\nSupporting Material/References:\nVulnerable code:\nCode 516 Bytes\n1public class aot\n2...\n3// s7 == title\n4if(s7 != null)\n5{\n6  s4 = (new StringBuilder()).append(s5).append(\"<title>\").append(s7).append(\"</title>\").toString();\n7  s1 = (new StringBuilder()).append(s6).append(\"<p style=\\\"font-size:\").append(s1).append(\";line-height:120%;font-weight:bold;margin:\").append(s3).append(\" 0px 12px 0px\\\">\").append(s7).append(\"</p>\").toString();\n8...\n9// s8 == authorName\n10if(s8 != null)\n11  s1 = (new StringBuilder()).append(\"<span class=\\\"nowrap\\\"><b>\").append(s8).append(\"</b>,</span> \").toString();\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 150,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1540252260,
+  "report_url": "https://hackerone.com/reports/176065",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "MOBILE",
+  "steps": [
+    [
+      1,
+      "Open https://blackfan.ru/brave or a custom HTML file containing the provided script"
+    ],
+    [
+      2,
+      "Wait for the page to fully load, then click on the ArticleModeButton"
+    ]
+  ],
+  "vuln_description": "The vulnerability is an HTML injection in the BatterySaveArticleRenderer WebView of the Android Brave Browser. By injecting a script into the title or author name fields, an attacker can manipulate the WebView to redirect to a malicious URL or alter the page content. The injected script executes when the Article Mode is activated, demonstrating a lack of proper input sanitization in the WebView rendering process.",
+  "reason": "The vulnerability involves a straightforward HTML injection that does not require complex interactions between components or manipulation of application states. The attack vector is direct and leverages common web vulnerabilities (HTML/JS injection) in a WebView context, which is a well-known security issue pattern.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The HTML injection vulnerability involves manipulating WebView content through crafted HTML/JavaScript, which is not related to authentication or authorization checks. The methodology described focuses on AuthN/AuthZ bypasses and IDOR vulnerabilities by testing user sessions and resource access controls, not injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

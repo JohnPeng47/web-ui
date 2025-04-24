@@ -1,0 +1,38 @@
+{
+  "reported_to": "shopify-scripts",
+  "reported_by": "raydot ",
+  "title": "DoS: type confusion in mrb_no_method_error",
+  "content": "\nOverwriting the 'new' method of the NoMethodError singleton to not return an exception object leads to memory corruption and possibly arbitrary code execution.\nRunning the following code under the mruny-engine sandbox script results in a native crash:\nNoMethodError.define_singleton_method(:new) do \"waat\" end\nObject.q\nAttached is a patch to mitigate the issue.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Uncontrolled Resource Consumption"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1488421500,
+  "report_url": "https://hackerone.com/reports/181871",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Overwrite the 'new' method of the NoMethodError singleton to not return an exception object: `NoMethodError.define_singleton_method(:new) do \"waat\" end`"
+    ],
+    [
+      2,
+      "Trigger a method that would normally raise a NoMethodError, such as `Object.q`"
+    ]
+  ],
+  "vuln_description": "Overwriting the 'new' method of the NoMethodError singleton to not return an exception object leads to memory corruption and possibly arbitrary code execution when a NoMethodError is triggered.",
+  "reason": "The vulnerability involves a subtle interaction between method overwriting and error handling in Ruby, but the attack itself is straightforward with only two clear steps. The complexity lies in understanding the implications of overwriting core error handling methods, which is not immediately obvious but doesn't involve multiple components or complex state manipulation.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

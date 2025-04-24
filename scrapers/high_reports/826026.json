@@ -1,0 +1,46 @@
+{
+  "reported_to": "PlayStation",
+  "reported_by": "theflow0 ",
+  "title": "Use-After-Free In IPV6_2292PKTOPTIONS leading To Arbitrary Kernel R/W Primitives",
+  "content": "\nSummary\nDue to missing locks in option IPV6_2292PKTOPTIONS of setsockopt , it is possible to race and free the struct ip6_pktopts buffer, while it is being handled by ip6_setpktopt. This structure contains pointers (ip6po_pktinfo) that can be hijacked to obtain arbitrary kernel R/W primitives. As a consequence, it is easy to have kernel code execution. This vulnerability is reachable from WebKit sandbox and is available in the latest FW, that is 7.02.\nAttachment\nAttached is a Proof-Of-Concept that achieves a Local Privilege Escalation on FreeBSD 9 and FreeBSD 12.\nImpact\nIn conjunction with a WebKit exploit, a fully chained remote attack can be achieved.\nIt is possible to steal/manipulate user data.\nDump and run pirated games.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 10000,
+  "weaknesses": [
+    "Use After Free"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1594077120,
+  "report_url": "https://hackerone.com/reports/826026",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify the setsockopt function with IPV6_2292PKTOPTIONS option in the kernel code."
+    ],
+    [
+      2,
+      "Exploit the race condition by freeing the struct ip6_pktopts buffer while it is being handled by ip6_setpktopt."
+    ],
+    [
+      3,
+      "Hijack the pointers (ip6po_pktinfo) within the freed structure to achieve arbitrary kernel read/write primitives."
+    ],
+    [
+      4,
+      "Use the kernel R/W primitives to execute arbitrary code in the kernel context."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a use-after-free in the IPV6_2292PKTOPTIONS option of the setsockopt function, caused by missing locks. This allows an attacker to race and free the struct ip6_pktopts buffer while it is being processed, leading to arbitrary kernel read/write primitives via hijacking pointers within the structure. This can result in kernel code execution and is exploitable from within the WebKit sandbox.",
+  "reason": "This vulnerability requires deep understanding of kernel memory management, race conditions, and pointer manipulation. The attacker must identify the specific race condition in a complex kernel subsystem (IPv6 socket options) and craft a precise exploit to trigger the use-after-free and subsequent pointer hijacking. The interaction between the race condition and the pointer manipulation is subtle and non-obvious.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

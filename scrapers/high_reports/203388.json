@@ -1,0 +1,38 @@
+{
+  "reported_to": "Gratipay",
+  "reported_by": "a0xnirudh ",
+  "title": "Content length restriction bypass can lead to DOS by reading large files on gip.rocks",
+  "content": "\nHello team,\nIntroduction\nSince you mentioned in the rules that all libraries listed on your github repositories are in scope, I decided to take a look at http://gip.rocks\nProblem:\nThe application reads an image file and convert it into smaller formats, zip it and let the users to download the updated file. But the problem here is the condition check before reading the file to the variable:\nFile: https://github.com/gratipay/gip.rocks/blob/master/www/v1.spt\nCode 285 Bytes\n1if int(request.headers['Content-Length']) > 256 * 1024:\n2    raise Response(413)\n3\n4image_type = request.headers['Content-Type']\n5if image_type not in ('image/png', 'image/jpeg'):\n6    raise Response(415)\n7\n8# Load the image.\n9fp = StringIO(request.raw_body)\n10fp.seek(0)\n11image = Image.open(fp)\n12\nHere you can see that you are calculating the length of the incoming file from the content-length HTTP header and if it is less than 256 * 1024, you will accept the request. But this is not a correct way to check size of the incoming file.\nPOC:\n1) Initiate a system wide proxy with burp suite\n2) Try to send a curl request with a huge file and see the request in curl\n3) The content length will be obviously greater than the max value application accepts but modify the content-length header to a value which is less than 256 * 1024.\n4) Forward the request and you can see that the server will read the files to a variable and if the file is large enough, this is more than enough to DOS the server.\nNow since this deals with DOS, I haven't actually tried out this attack but we can easily confirm this from the source code that this can be bypassed in the way I explained above. I also tried deploying locally but I had a hard time making the software run locally and I don't have enough free time to debug what is happening.\nBut I think the bug is very clear from the source code itself, which is why I really didn't test it but thought to report it.\nMitigation:\nPutting your trust on HTTP headers may not be a good idea. But I am not really sure what is a solid method to find the proper length of the string in this case.\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Uncontrolled Resource Consumption"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1490986200,
+  "report_url": "https://hackerone.com/reports/203388",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Initiate a system-wide proxy with Burp Suite to intercept the request."
+    ],
+    [
+      2,
+      "Send a curl request with a large file, modify the Content-Length header to a value less than 256 * 1024, and forward the request."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows bypassing content length restrictions by manipulating the Content-Length HTTP header, potentially leading to a Denial of Service (DOS) by forcing the server to read excessively large files into memory.",
+  "reason": "The attack involves a straightforward manipulation of HTTP headers without requiring complex interactions or understanding of multiple components. The vulnerability is evident from the source code inspection, making the discovery process relatively simple.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

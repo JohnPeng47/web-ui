@@ -1,0 +1,53 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "saltyyolk ",
+  "title": "Persistent XSS in Note objects",
+  "content": "\nSummary:\nSome cache invalidation and project import logic issues enable an attacker to import a project with XSS payloads in places like MR discussions and similar places where a Note object exists.\nDescription:\nThere are basically 3 issues causing the XSS here:\nAll attributes of Note objects are controllable in project.json, for example note_html and cached_markdown_version.\nNow I can control the value of note_html to contain my XSS payload, but the problem is that the value of this field is a CacheMarkdownField, it's regenerated from the value of note during new object creation (when note_object.note_html_invalidated? returns true). The next question is how to trick GitLab that the field does not need to be regenerated.\nin app/models/concerns/cache_markdown_field.rb\nCode 361 Bytes\n1      define_method(invalidation_method) do\n2        changed_fields = changed_attributes.keys\n3        invalidations  = changed_fields & [markdown_field.to_s, *INVALIDATED_BY]\n4        invalidations.delete(markdown_field.to_s) if changed_fields.include?(\"#{markdown_field}_html\")\n5\n6        !invalidations.empty? || !cached_html_up_to_date?(markdown_field)\n7      end\nThere are 2 checks here (also the last 2 issues):\nthe first one is:\nCode 238 Bytes\n1        INVALIDATED_BY = %w[author project].freeze\n2...\n3        invalidations  = changed_fields & [markdown_field.to_s, *INVALIDATED_BY]\n4        invalidations.delete(markdown_field.to_s) if changed_fields.include?(\"#{markdown_field}_html\")\nCode 238 Bytes\n1note_object.changed_attributes.keys\n2=> [\"note\", \"noteable_type\", \"author_id\", \"created_at\", \"updated_at\", \"project_id\", \"line_code\", \"position\", \"original_position\", \"note_html\", \"cached_markdown_version\", \"change_position\", \"attachment\"]\nThis check is, unfortunately, voided because\nNeither author nor project is in the changed_attributes list, but author_id and project_id\nnote is deleted from invalidations because note_html is also changed So invalidations is empty.\nand the other one is:\nCode 40 Bytes\n1!cached_html_up_to_date?(markdown_field)\nIt basically checks whether attribute cached_markdown_version equals to latest_cached_markdown_version\nThis is really interesting, because I found that latest_cached_markdown_version is always 917504 in my GitLab instance (also gitlab.com). Looks like local_version is always 0 for at least Notes in MR.\nCode 441 Bytes\n1  def latest_cached_markdown_version\n2    @latest_cached_markdown_version ||= (CacheMarkdownField::CACHE_COMMONMARK_VERSION << 16) | local_version\n3  end\n4\n5  def local_version\n6    return local_markdown_version if has_attribute?(:local_markdown_version)\n7\n8    settings = Gitlab::CurrentSettings.current_application_settings\n9\n10    if settings.respond_to?(:local_markdown_version)\n11      settings.local_markdown_version\n12    else\n13      0\n14    end\n15  end\nFinally, I could set note_html to the XSS payload, and cached_markdown_version to the magic number to avoid my payload being overwritten by GitLab. :P\nSteps To Reproduce:\n(Add details for how we can reproduce the issue)\nCreate an export of a project with at least 1 discussion in at least 1 merge request.\nModify the project.json, add field note_html and cached_markdown_version\nCode 235 Bytes\n1      \"notes\": [\n2        {\n3          \"id\": 1,\n4          \"note\": \"interesting note here\",\n5          \"note_html\": \"<img src=\\\"test\\\" onerror=\\\"alert(document.domain)\\\"></img>html overwritten\",\n6          \"cached_markdown_version\": 917504,\nImport the modified project\nView the only discussion of the imported project.\nSupporting Material/References:\nCheck https://gitlab.com/Nyangawa/xss/merge_requests/1, you should be able to see a pop-up.\nImpact\nThis is a typical persistent XSS issue and the link I mentioned above is accessible publicly, so all GitLab users are vulnerable theoretically.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 4500,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1563508980,
+  "report_url": "https://hackerone.com/reports/508184",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create an export of a project with at least 1 discussion in at least 1 merge request."
+    ],
+    [
+      2,
+      "Modify the project.json file to include XSS payload in note_html and set cached_markdown_version to 917504."
+    ],
+    [
+      3,
+      "Import the modified project into GitLab."
+    ],
+    [
+      4,
+      "View the discussion in the imported project to trigger the XSS payload."
+    ]
+  ],
+  "vuln_description": "This is a persistent XSS vulnerability in GitLab's Note objects where an attacker can inject malicious scripts through manipulated project imports. The vulnerability arises from improper cache invalidation and project import logic, allowing the attacker to bypass markdown regeneration checks and execute arbitrary JavaScript in the context of the victim's session.",
+  "reason": "The vulnerability involves understanding and manipulating multiple components: the Note object's attributes, cache invalidation logic, and markdown version checks. The attacker needs to identify the specific conditions under which the markdown regeneration is skipped (note_html and cached_markdown_version manipulation) and the fixed version number (917504) that bypasses the check. This requires deep knowledge of GitLab's internal workings and non-obvious interactions between these components.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves manipulating Note objects during project import, which is a specific action not covered by the general (user_session, action, resource_id) tuple testing methodology. The methodology focuses on testing existing actions with different sessions or resource IDs, not on manipulating data during import processes.",
+    "is_detectable": false
+  }
+}

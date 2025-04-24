@@ -1,0 +1,52 @@
+{
+    "reported_to": "X (Formerly Twitter)",
+    "reported_by": "rahulkankrale ",
+    "title": "Twitter lite(Android): Vulnerable to local file steal, Javascript injection, Open redirect ",
+    "content": "\nSummary: com.twitter.android.lite.TwitterLiteActivity is set to exported and doesn't validate data pass to intent due to which this activity vulnerable to steal users local files, javascript injection and open redirect.\nDescription: com.twitter.android.lite.TwitterLiteActivity is set to exported so external app can communicate with it.\nAs this activity doesn't validate data pass through intent critical uri like javascript and file so malicious app can steal users files as well as inject javascript.\nIt can leads to many issue like UXSS, Token steal, etc.\nSteps To Reproduce:\nTo reproduce we use ADB tool\nTo reproduce local file access use: adb shell am start -n com.twitter.android.lite/com.twitter.android.lite.TwitterLiteActivity -d \"file:///sdcard/BugBounty/1.html\"\nTo reproduce javascript injection: adb shell am start -n com.twitter.android.lite/com.twitter.android.lite.TwitterLiteActivity -d \"javascript://example.com%0A alert(1);\"\nTo reproduce open redirect: adb shell am start -n com.twitter.android.lite/com.twitter.android.lite.TwitterLiteActivity -d \"http://evilzone.org\"\nVideo of POC attached.\nThanks\nImpact\nAs critical uri like javascript & file is not being validate malicious app can steal users session token, users files etc.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1556569020,
+    "report_url": "https://hackerone.com/reports/499348",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "MOBILE",
+    "steps": [
+        [
+            1,
+            "Use ADB tool to start Twitter Lite activity with a file URI: adb shell am start -n com.twitter.android.lite/com.twitter.android.lite.TwitterLiteActivity -d \"file:///sdcard/BugBounty/1.html\""
+        ],
+        [
+            2,
+            "Use ADB tool to start Twitter Lite activity with a javascript URI: adb shell am start -n com.twitter.android.lite/com.twitter.android.lite.TwitterLiteActivity -d \"javascript://example.com%0A alert(1);\""
+        ],
+        [
+            3,
+            "Use ADB tool to start Twitter Lite activity with an open redirect URI: adb shell am start -n com.twitter.android.lite/com.twitter.android.lite.TwitterLiteActivity -d \"http://evilzone.org\""
+        ]
+    ],
+    "vuln_description": "The Twitter Lite Android app's TwitterLiteActivity is exported and does not validate data passed to it via intent. This allows external apps to communicate with it and pass malicious URIs, leading to local file theft, JavaScript injection, and open redirect vulnerabilities. These can result in UXSS, token theft, and other security issues.",
+    "reason": "The vulnerability involves a straightforward exploitation of an exported activity without proper URI validation. The steps to reproduce are simple and do not require complex interactions or state manipulation. The issue is common in Android apps that do not properly secure exported activities.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": true,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

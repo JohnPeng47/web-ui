@@ -1,0 +1,42 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "h3xr ",
+    "title": "Wrong settings in ADF Faces leads to information disclosure",
+    "content": "\nHello, Team.\nFound some interesting links which leads to information disclosure in \u2588\u2588\u2588\u2588\u2588\nLink 1: [\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588]\u2588\u2588\u2588\nLink 2: [\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588]\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nLink 3: [\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588]\u2588\u2588\u2588\nEvery link goes through https://\u2588\u2588\u2588\u2588\u2588\u2588to https://\u2588\u2588\u2588\u2588\nFor Link 3 is possible to change data in the fields: First Name, Last Name, Phone Number. Just click \"\u2588\u2588\u2588\u2588\u2588\u2588\".\nViewing the code gives us some more info about the system:\nCode 6 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\nADF \u2588\u2588\u2588\u2588\u2588\u2588\u2588 is outdated\nThe Ref. Page says:\nA.2.3.16 Version Number Information\nUse the oracle.adf.view.rich.versionString.HIDDEN parameter to determine whether or not to display version information an a page's HTML. When the parameter is set to false, the HTML of an ADF Faces page contains information about the version of ADF Faces and other components used to create the page as shown in Example A-2.\nWhen you create a new application, the parameter is set to true. It should also be set to true in a production environment. Set the parameter to false to display this version information for debugging information.\nNote:\nIn a production environment, set this parameter to true to avoid security issues. It should be set to false only in a development environment for debugging purposes.\nThis Ref. points us that Link 3 is:\n\u2588\u2588\u2588\u2588\u2588\u2588S lists any \u2588\u2588\u2588\u2588\u2588s waiting for your approval. If there are none, there will be a message like the one in \u2588\u2588\u2588\u2588\u2588\u2588\u2588. Click the Logout button to exit \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588S. You can use the link in your email to return to the \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\nBut we see the Logout button and can modify some data - so perhaps we are logged in.\nImpact\nSensitive information disclosure\nInformation modification\nPrivacy Violation\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nOracle ADF Faces\nCVE Numbers\nSteps to Reproduce\nIn the Desc. section\nSuggested Mitigation/Remediation Actions\nUpdate Oracle ADF\nClose sensitive information from unauthenticated users\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1642638480,
+    "report_url": "https://hackerone.com/reports/1422641",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Access the provided links (Link 1, Link 2, Link 3) which lead to information disclosure."
+        ],
+        [
+            2,
+            "For Link 3, modify the fields (First Name, Last Name, Phone Number) and click the specified button to observe data modification."
+        ],
+        [
+            3,
+            "View the page source to identify version information and other system details exposed due to misconfigured ADF Faces settings."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves information disclosure and unauthorized data modification due to misconfigured Oracle ADF Faces settings. The system exposes sensitive information and allows unauthenticated users to modify data, violating privacy and security policies.",
+    "reason": "The vulnerability is straightforward to discover as it involves accessing publicly available links and modifying visible fields without authentication. The misconfiguration is a known issue with Oracle ADF Faces, making it easier to identify.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

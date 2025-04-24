@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "jalio ",
+  "title": "CVE-2017-13089 wget stack smash",
+  "content": "\nThe http.c:skip_short_body() function is called in some circumstances, such as when processing redirects. When the response is sent chunked in wget before 1.19.2, the chunk parser uses strtol() to read each chunk's length, but doesn't check that the chunk length is a non-negative number. The code then tries to skip the chunk in pieces of 512 bytes by using the MIN() macro, but ends up passing the negative chunk length to connect.c:fd_read(). As fd_read() takes an int argument, the high 32 bits of the chunk length are discarded, leaving fd_read() with a completely attacker controlled length argument.\nReproduction:\nTo reproduce, use two terminals. In the first terminal:\n$ nc -l -p 8080 <wget-stack-smash.reply\nIn the second terminal:\n$ wget http://127.0.0.1:8080/foo\nDepending on how wget is compiled, this will either simply segfault or\ncomplain about the stack being smashed (on debian due to being compiled\nthe stack protector.)\nExternal links:\nhttps://nvd.nist.gov/vuln/detail/CVE-2017-13089\nhttp://www.securityfocus.com/bid/101592\nhttp://git.savannah.gnu.org/cgit/wget.git/commit/?id=d892291fb8ace4c3b734ea5125770989c215df3f\nhttp://www.securitytracker.com/id/1039661\nhttps://www.viestintavirasto.fi/en/cybersecurity/vulnerabilities/2017/haavoittuvuus-2017-037.html\n\n",
+  "severity": [
+    8.8,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Classic Buffer Overflow"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1573620300,
+  "report_url": "https://hackerone.com/reports/287666",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Start a netcat listener on port 8080 with a malicious response file: $ nc -l -p 8080 <wget-stack-smash.reply"
+    ],
+    [
+      2,
+      "In another terminal, execute wget to fetch a file from the malicious server: $ wget http://127.0.0.1:8080/foo"
+    ]
+  ],
+  "vuln_description": "The vulnerability is in wget's handling of chunked HTTP responses. When processing redirects, the http.c:skip_short_body() function is called. If the response is chunked, wget before version 1.19.2 uses strtol() to read each chunk's length without checking for negative values. This negative value is then passed to connect.c:fd_read() via the MIN() macro, where the high 32 bits are discarded, allowing an attacker to control the length argument. This can lead to a stack smash or segmentation fault.",
+  "reason": "The vulnerability involves understanding HTTP chunked encoding, parsing logic in wget, and how negative values can be exploited in memory operations. While the attack itself is straightforward to execute, discovering the vulnerability requires deep knowledge of wget's internal parsing mechanisms and how it handles chunked transfers.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

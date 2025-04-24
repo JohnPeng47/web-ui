@@ -1,0 +1,40 @@
+{
+  "reported_to": "MTN Group",
+  "reported_by": "3mm3 ",
+  "title": "Unauthenticated Arbitrary File Deletion (CVE-2020-3187)",
+  "content": "\nSummary:\nA vulnerability in the web services interface of Cisco Adaptive Security Appliance (ASA) Software and Cisco Firepower Threat Defense (FTD) Software could allow an unauthenticated, remote attacker to conduct directory traversal attacks and obtain read and delete access to sensitive files on a targeted system. The vulnerability is due to a lack of proper input validation of the HTTP URL. An attacker could exploit this vulnerability by sending a crafted HTTP request containing directory traversal character sequences.\nVulnerable Endpoint:\nCode 49 Bytes\n1https://129.0.176.5/+CSCOE+/session_password.html\nSteps To Reproduce:\nFirst I performed a curl request to validate that /session_password.html gave a 200 response.\nExample to delete logo file \"/+CSCOU+/csco_logo.gif\".\nCode 101 Bytes\n1curl -k -H \"Cookie: token=../+CSCOU+/csco_logo.gif\" https://129.0.176.5/+CSCOE+/session_password.html\nWHOIS\n<image_0>\nNOTE: No destructive behavior was performed on target.\nImpact\nAn exploit could allow the attacker to view or delete arbitrary files on the system.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/ccjt1nqtda9u95ae2cnegm1lc4qk?response-content-disposition=attachment%3B%20filename%3D%22aaa.png%22%3B%20filename%2A%3DUTF-8%27%27aaa.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQUUSJQRTI%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T185422Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIFMcTpBlzllh2dbG7RwnpQ8LyY6OsYQlIZHDdsRVUPWMAiEA%2FB2Y6na90vydKnQsWULqB0HBSQgKEuGma3cUBoryubEqsQUIGxADGgwwMTM2MTkyNzQ4NDkiDJdHmoQom18AipkiTiqOBTq3f1oK8zjXY324dawbUfPrdDPeaxFVuiiRGZNhB7TSPZ8w%2F0%2FgEbrvsI9JirIcjdxG4lldCEid8HHmdwbAFUY2VLvzUyNUsLxzPi9rQbvlN4DWSfwiN9fBkc%2FHRh7rsXqft9jfnxeHm4OWWnkmdnFdEWtmai7hnuXVytZOITLsoUM7RRAgIU1f2lTjRyw0dIxvVt0RflHV1yRt2bptvQRFh5PrzCBzrQtqKDwUMFeDXUhMgvDJNLPV2XzL4Y9uCerDwSqbjy581MqLxZrZvvgJzzX1h0D%2Fp35gvnhrtrsJD0oZoI1rRMx5f2yAWXAxVG%2BxCz%2Flo1lgCb1lHmfcVFzb%2F%2BuNAbi8XN61bTKv1ssui1XGjDqvwBB5%2B5aKJBqrZPaaiouvHLDf1N6ibR9tHP6iHgCzF%2FuHNYogxvsjK5C6SOX7UiLe%2FVIvTcHVNhFWtx9Rem0gdiCdrk3ZGCW2%2FJIT2Q8CCY9g9CkYYo7XAN1uOxsETFNVJa5d298iaIFMiegttbmchM5YruGlh%2F7kxHMfk5gSlIk6szYZ05zH4gJ544PI1lp2H1rSwWIR9D4Vgc0Q%2FQce%2FvskQgeUngWY8f5gCTekm%2B3jdmekUV7sfrzW6G6Yy7GVAWfJ%2BxXaEAnU9f07GtUy8kp4ZWJLauLdcU8rOcPoPEh2oUp0w3uN41EptWW3Z059cfy8YrSvbk4JRycAzQttlJlD4FAM0CpT2OjR9paQyzoQ4HEfy40nvYsGNngCI2eM9Rmhm%2BbSaSg65GoBQaJEvmM4v%2BB9E%2BbtUqnRaVDN6ZkWxE6TU15ZCJZNvle5TNtXIAnnzMaHKlFt%2BfitUqKX6wboOcrkErUSAWlFLaF%2BVmrKmWJkskpXmzCC5ou%2FBjqxAVESDbdMQ%2BgwR%2B1LR%2FSsAXrk6aDzYZl%2BljxmgPEBHa9xQiUjcKOEDrqvxLroTPfz9JHPaXooejDGELs7%2Bd1ENAb9yeJpXhAxFQ6XP6aUsWHpJtDH%2FY6rWB3lAmDmWh6HFNLotwVI6L5OwIr9%2FNAcA6RJh%2FaHx5rVsZXX9GS7QhcXmDhw%2FTcLHWCEVBdfqWhGeaB%2FAplFvo0ZzizoGZWtoTtqpECzFo2hyENal%2BaXcRfzQA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=343e77e991290ae4371a6851c27072999e540c6afbd1221db42ca17221dbb70e"
+  },
+  "disclosed_date": 1630265100,
+  "report_url": "https://hackerone.com/reports/1056611",
+  "vuln_category": "WEB_APP",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "steps": [
+    [
+      1,
+      "Perform a curl request to validate that /session_password.html gives a 200 response."
+    ],
+    [
+      2,
+      "Send a crafted HTTP request with directory traversal sequences in the Cookie header to delete arbitrary files, e.g., curl -k -H \"Cookie: token=../+CSCOU+/csco_logo.gif\" https://129.0.176.5/+CSCOE+/session_password.html"
+    ]
+  ],
+  "vuln_description": "A vulnerability in the web services interface of Cisco Adaptive Security Appliance (ASA) Software and Cisco Firepower Threat Defense (FTD) Software allows an unauthenticated, remote attacker to conduct directory traversal attacks and obtain read and delete access to sensitive files on a targeted system. The vulnerability is due to a lack of proper input validation of the HTTP URL.",
+  "reason": "The attack involves a straightforward directory traversal technique with no complex interactions or state manipulations. The vulnerability is discovered by sending a simple crafted HTTP request with a directory traversal sequence in the Cookie header.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

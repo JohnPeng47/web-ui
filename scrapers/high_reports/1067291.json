@@ -1,0 +1,45 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "skarsom ",
+  "title": "RCE in \u2588\u2588\u2588\u2588\u2588\u2588 subdomain via CVE-2017-1000486",
+  "content": "\nSummary:\nThe application at \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ftn-Website/ uses primefaces 5.3 but not 5.3.8, making it vulnerable to unauthenticated RCE CVE-2017-1000486.\nStep-by-step Reproduction Instructions\nGet the publicly available POC for this vulnerability here: https://github.com/pimps/CVE-2017-1000486\nExecute: python primefaces.py \u2588\u2588\u2588/ftn-Website/ -c id\nSuccess: uid=91(tomcat) gid=91(tomcat) groups=91(tomcat) context=system_u:system_r:tomcat_t:s0\nProduct, Version, and Configuration (If applicable)\nprimefaces 5.3\nSuggested Mitigation/Remediation Actions\nUpdate primefaces.\nImpact\nAn unauthenticated, 3rd-party attacker or adversary can execute remote code on restsvr1.ftn.research.usafa.edu as the unix tomcat user. Note that this service uses a DoD IP, suggesting an attacker could potentially pivot elsewhere afterwards.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1617922320,
+  "report_url": "https://hackerone.com/reports/1067291",
+  "vuln_category": "WEB_APP",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "steps": [
+    [
+      1,
+      "Get the publicly available POC for this vulnerability from https://github.com/pimps/CVE-2017-1000486"
+    ],
+    [
+      2,
+      "Execute the POC with the command: python primefaces.py \u2588\u2588\u2588/ftn-Website/ -c id"
+    ]
+  ],
+  "vuln_description": "The application uses a vulnerable version of primefaces (5.3, not 5.3.8), which is susceptible to unauthenticated remote code execution (RCE) via CVE-2017-1000486. An attacker can execute arbitrary commands on the server as the tomcat user.",
+  "reason": "The vulnerability is straightforward to exploit using a publicly available proof-of-concept (POC) script. The attack does not involve multiple components, complex interactions, or novel logic. It simply requires running the POC against the vulnerable endpoint.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an unauthenticated RCE via a known CVE (CVE-2017-1000486) in a specific version of PrimeFaces. The methodology described focuses on authentication and authorization bypasses (AuthN/AuthZ) and IDOR vulnerabilities by manipulating user sessions and resource IDs within the same application. Since this RCE does not involve session or resource ID manipulation, but rather exploits a known vulnerability in a third-party component, it falls outside the scope of the described detection methodology.",
+    "is_detectable": false
+  }
+}

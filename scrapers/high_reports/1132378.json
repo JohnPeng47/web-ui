@@ -1,0 +1,38 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "saltyyolk ",
+  "title": "Arbitrary file read during project import",
+  "content": "\nNOTE! Thanks for submitting a report! Please replace all the (parenthesized) sections below with the pertinent details. Remember, the more detail you provide, the easier it is for us to triage and respond quickly, so be sure to take your time filling out the report!\nSummary\nA mis-usage of json schema validator could be used by an attacker to read any file in GitLab server. The issue allows the attacker to leak ~250 bytes of data of any file.\nAt the same time, as the root cause of the issue here is 'open-uri'. It's an SSRF issue at the same time.\nSteps to reproduce\nUse the import feature of gitlab.com to import the attached import.tar.gz as 'GitLab export' \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nWait the import process to finish\nAccess URL: https://gitlab.com/api/v4/projects/PROJECT_ID/import where PROJECT_ID is the id of the imported project, which could be found in the home page of the project.\nThe connection information of gitlab's production database is in the output, as attached.\nImpact\nFor GitLab.com, this issue could be used to leak some critical credentials. I went through the charts in https://gitlab.com/gitlab-org/charts/gitlab/-/tree/master/charts/gitlab/charts/sidekiq/templates. It seems that there're a bunch of juicy credentials could be leaked with this method, including Rails secret_key_base, database credentials and GitLab's smtp credentials. The object storage service account credential is limitedly accessed because of the 250 bytes limitation.\nFor self-hosted GitLab instances, this issue could cause more severe problems since most of self-hosted GitLab instances has sidekiq running with gitlab-rails & gitlab-shell. So .gitlab_shell_token could be easily downloaded and be used to access internal APIs such as '/api/v4/internal/personal_access_token', which could issue an private access token of an admin of someone else.\nRelevant logs and/or screenshots\n\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nOutput of checks\nThis bug happens on GitLab.com\nImpact\nFor GitLab.com, this issue could be used to leak some critical credentials. I went through the charts in https://gitlab.com/gitlab-org/charts/gitlab/-/tree/master/charts/gitlab/charts/sidekiq/templates. It seems that there're a bunch of juicy credentials could be leaked with this method, including Rails secret_key_base, database credentials and GitLab's smtp credentials. The object storage service account credential is limitedly accessed because of the 250 bytes limitation.\nFor self-hosted GitLab instances, this issue could cause more severe problems since most of self-hosted GitLab instances has sidekiq running with gitlab-rails & gitlab-shell. So .gitlab_shell_token could be easily downloaded and be used to access internal APIs such as '/api/v4/internal/personal_access_token', which could issue an private access token of an admin of someone else.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 16000,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1621860660,
+  "report_url": "https://hackerone.com/reports/1132378",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Use the import feature of gitlab.com to import a specially crafted import.tar.gz as 'GitLab export'"
+    ],
+    [
+      2,
+      "Access the URL: https://gitlab.com/api/v4/projects/PROJECT_ID/import where PROJECT_ID is the id of the imported project"
+    ]
+  ],
+  "vuln_description": "A mis-usage of json schema validator in GitLab allows an attacker to read arbitrary files on the server, leaking ~250 bytes of data per file. This is also an SSRF issue due to the root cause being 'open-uri'. Critical credentials like database connections, Rails secret_key_base, and SMTP credentials can be exposed.",
+  "reason": "The vulnerability requires understanding of GitLab's import feature, crafting a malicious import file, and knowing the API endpoint to access the leaked data. The interaction between the import process and JSON schema validation is non-obvious.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

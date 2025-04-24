@@ -1,0 +1,42 @@
+{
+    "reported_to": "Stripo Inc",
+    "reported_by": "secyour-org ",
+    "title": "Open memory dump method leaking customer information ,secret keys , password , source code & admin accounts",
+    "content": "\nSummary:\nStripo uses Spring boot for the backend API development , and misconfigured the application to open actuator APIs to the public.\nThis issue is found in 3 domains , don't know if I need to publish 3 reports for that, or just one report , but the domains are :\nhttps://my.stripo.email/cabinet/stripeapi/actuator\nhttps://plugins.stripo.email/actuator\nhttps://plugin.stripo.email/actuator\nit might be available in other micro services as well\nSteps To Reproduce:\nGo to the following URL : https://my.stripo.email/cabinet/stripeapi/actuator/heapdump\nThis url will download the heap dump of the server\nusing a memory analyzer such as Eclipse memory analyzer or VisualVM open the downloaded file\nBy searching inside the file you can find all the secrets , credentials , urls , JWT tokens & JWT secret keys, which can be used and generate any JWT token and takeover any account on the system.\nAttached some examples of what can be found and used by this vulnerability, and you can imagine any bad scenario, and this issue can be used to take over/down Stripo\nSupporting Material/References:\nPlease find more information about actuator on the following URL:\nhttps://docs.spring.io/spring-boot/docs/current-SNAPSHOT/actuator-api/html/#heapdump\nExample of open functionalities:\n\u2588\u2588\u2588\u2588\nAdmin Credentials:\n\u2588\u2588\u2588\nOther User's information:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nBilling Service Credentials:\n\u2588\u2588\u2588\u2588\nConfig Server Credentials:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nThis vulnerability allows any attacker to perform many severe attacks such as :\nUpgrade accounts without payments.\nGet logged in customer information and get access to the session & JWT tokes to take over accounts\nPII Data leaking\nAccessing all credentials from the application properties such as , admin credentials, swagger credentials , billing credentials .\nGet database credentials\nServer Environment variable\nServer config Properties.\nPayments manipulations and money stealing\nand more\n\n",
+    "severity": [
+        10.0,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Exposed Dangerous Method or Function"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1580476260,
+    "report_url": "https://hackerone.com/reports/783360",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Navigate to the exposed actuator endpoint: https://my.stripo.email/cabinet/stripeapi/actuator/heapdump"
+        ],
+        [
+            2,
+            "Download the heap dump file and analyze it using a memory analyzer tool like Eclipse Memory Analyzer or VisualVM"
+        ],
+        [
+            3,
+            "Search within the heap dump for sensitive information such as credentials, JWT tokens, secret keys, and other confidential data"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves a misconfigured Spring Boot actuator endpoint that is publicly accessible, allowing anyone to download heap dumps containing sensitive information such as admin credentials, JWT tokens, secret keys, and other confidential data. This can lead to severe attacks including account takeover, data leakage, and financial fraud.",
+    "reason": "The vulnerability is straightforward to discover as it only requires accessing a publicly exposed endpoint and analyzing the downloaded heap dump. There are no complex interactions or multiple components involved, and the issue is a common misconfiguration in Spring Boot applications.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

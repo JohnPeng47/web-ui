@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "jordyzomer ",
+  "title": "phar_tar_writeheaders_int() buffer overflow",
+  "content": "\nA buffer overflow has been found in the phar_tar_writeheaders_int() function.\nit does a strncpy to header->linkname from entry->link with the size of entry->link.\nAs you can see in https://github.com/php/php-src/blob/master/ext/phar/tar.h#L66 , header->linkname is a char of the size 100. Once entry->link contains a value that's bigger than 100 it will overflow the _tar_header structure.\nThis can be fixed by setting the size argument of strncpy to sizeof(header->linkname) for example:\nstrncpy(header.linkname, entry->link, strlen(header->linkname);\nThis has been fixed in the following references:\nhttps://github.com/php/php-src/commit/071e18c6971c4cf64297378b30b945a1b85d682a\nhttp://git.php.net/?p=php-src.git;a=commit;h=e0f5d62bd6690169998474b62f92a8c5ddf0e699\nhttps://bugs.php.net/bug.php?id=77586&edit=2\nKind Regards,\nJordy Zomer\nImpact\nAn attacker could overflow the buffer resulting in either a crash (DoS), EOP or RCE.\n\n",
+  "severity": [
+    8.1,
+    null
+  ],
+  "bounty": 1500,
+  "weaknesses": [
+    "Classic Buffer Overflow"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1604904360,
+  "report_url": "https://hackerone.com/reports/504761",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify the phar_tar_writeheaders_int() function in the PHP source code."
+    ],
+    [
+      2,
+      "Analyze the strncpy operation where entry->link is copied to header->linkname without proper bounds checking."
+    ]
+  ],
+  "vuln_description": "A buffer overflow vulnerability exists in the phar_tar_writeheaders_int() function due to improper bounds checking in the strncpy operation. The function copies entry->link to header->linkname without limiting the copy size to the destination buffer's capacity (100 bytes), leading to a potential overflow of the _tar_header structure.",
+  "reason": "The vulnerability involves a straightforward buffer overflow due to missing bounds checking, a common issue in C programming. The discovery requires examining the source code for unsafe string operations but does not involve complex interactions or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

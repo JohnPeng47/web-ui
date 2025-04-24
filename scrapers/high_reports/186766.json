@@ -1,0 +1,51 @@
+{
+    "reported_to": "Starbucks",
+    "reported_by": "dpgribkov ",
+    "title": "Subdomain takeover on happymondays.starbucks.com due to non-used AWS S3 DNS record",
+    "content": "\nHi,\n<image_0>\n<image_1>\nAs you might consider, the impact of this are pretty significant. I now can publish whatever I want on this domain, even fetching httpOnly cookies. I would also be able to register SSL certificate for this domain through Let's Encrypt (it is only need meta/file verification to issue the certificate) That would end up with the ability to read secure cookies as well.\nIn addition, there's no way at all for a visitor of this page to validate that the content on this domain is not served by Starbucks, making it extremely easy to utilize this for targeting the organization by fake login forms / spear phishing using your own domain to plant the attack.\nCheers,\nDanil\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Privilege Escalation"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/138/556/c01c8f0e8a8eb1df987a7f1cf291b057640dfbb7/Screenshot_from_2016-11-30_00-50-20.png?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_from_2016-11-30_00-50-20.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_from_2016-11-30_00-50-20.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQSB7CA6KB%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T234820Z&X-Amz-Expires=1485&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIFbJYAseu%2BTGefEskiTxq89YOKXkcEjg97XdM5ZxB27VAiB%2FZ4OYdfxPu1CH4IksjP6kNXA19mSbt16Z6A%2BtKrQBXCqyBQgzEAMaDDAxMzYxOTI3NDg0OSIM50574mevMFPrpdS4Ko8FgR%2FyfPDUgYSMC04HLakf2eb9Rdkdl%2FAGKaz4E5u88rnTtSnkTlc0HEfPPU%2BFZEvIdZw3X3h7CewMfTOW6vlzwP24wl8xfdDpvXVtQDh51GlE6JxfuiSF5kpcfVUa9fiN4wXVkZ0jZRBBQ%2BFJbJXYLXdJoNvj7xSaZ%2FlfZlDvC0lbHKMZbdOMGvMwyQs0LaJCAclMaGnkkbAv3g8uf56P0xkPp8OqjiQXU%2FbS7btnVonKetUhpbrKq6Uxe3ivjyoW2Ujb1%2FH88EKqBQm46aWl6A%2BZjqmkUqncXAKHuQyNulZnDJ8uZI0rY9gAGdBJS2ybZAS5lrwQqDaITuvk4pKxCjVgex%2FAvJXAOMVFwF55HZo1CRFInsjGkVueQHgEtuWgpcKRi7JBebus4Irt037OKjYEP51scD3GiYlHZv1srMBkRnvjiN4DX%2BjezXBX%2BOn8QCjTtAIxFq3owcogr%2FbHM35Sh8cboDjwwdTcQsA84lB1jTVgh3oAq6xekWxbz62pMGfXTjtNk%2BxOEUlVIYCiUovcDoUNVNSz9V8MuVciDIue0NckGEU%2Bl7AJqGmSM0s3%2B5MXydt5TS6JVARAvWemcfdfhsljWX1FgKbqv37vJtMZZU7CFTHIET7WAaid5RAOPQsEWmdG3LJPr1nbnh7f8Ob1EfBSGna5xycRiea90U5oIUpmWC2cvzIJNJAl62A1E%2Ffzzl10PlWNOqnKQv7XOqX7iW9SoGV4%2FnQq1dgVqLJaEcoOLbE3KWoJWHFDKOVv3KCE0NWecap78FNUrc8l8R8iJu2DzLn%2FniqfqMhWeYKL3FqSyi%2F8%2BRZ7Z78lfrEx41YprIYmIegLNO8sEQdUCkqy%2FN%2BrXYb5hqsNyBDFCjDm%2F5C%2FBjqyAeeDL5RL4aKg7%2BZ5YjrqaCOqg8Lo3u385DY6r5TLqIkGsvx%2BPF26gFJBV0XPiZ2Ebw9SEPFslztgxh1l6jAw3JRVKEfOncE2%2FzSfnEXONJu8LVcQkvud2azmJrTd8bU8JzSoHqQLlfcIgV%2Fld6Mu4fsClkau7bC2%2FKnzvrtMrXNFY4fQtz9AaDP%2FeOtP4AFsIB%2FbK9qZ9QFtAWMgw0Sy7wpBgqgZjdkx%2FMNLaOghHKvbjAw%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=15a5b4605d9c16cd40be7e8779269533c16a6996e6704741bb349bf47f5b5dd4",
+        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/138/557/dd4d3a4734daf9aa9d4d900b9863688322913ee6/Screenshot_from_2016-11-30_00-58-45.png?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_from_2016-11-30_00-58-45.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_from_2016-11-30_00-58-45.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQSB7CA6KB%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T234820Z&X-Amz-Expires=1485&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIFbJYAseu%2BTGefEskiTxq89YOKXkcEjg97XdM5ZxB27VAiB%2FZ4OYdfxPu1CH4IksjP6kNXA19mSbt16Z6A%2BtKrQBXCqyBQgzEAMaDDAxMzYxOTI3NDg0OSIM50574mevMFPrpdS4Ko8FgR%2FyfPDUgYSMC04HLakf2eb9Rdkdl%2FAGKaz4E5u88rnTtSnkTlc0HEfPPU%2BFZEvIdZw3X3h7CewMfTOW6vlzwP24wl8xfdDpvXVtQDh51GlE6JxfuiSF5kpcfVUa9fiN4wXVkZ0jZRBBQ%2BFJbJXYLXdJoNvj7xSaZ%2FlfZlDvC0lbHKMZbdOMGvMwyQs0LaJCAclMaGnkkbAv3g8uf56P0xkPp8OqjiQXU%2FbS7btnVonKetUhpbrKq6Uxe3ivjyoW2Ujb1%2FH88EKqBQm46aWl6A%2BZjqmkUqncXAKHuQyNulZnDJ8uZI0rY9gAGdBJS2ybZAS5lrwQqDaITuvk4pKxCjVgex%2FAvJXAOMVFwF55HZo1CRFInsjGkVueQHgEtuWgpcKRi7JBebus4Irt037OKjYEP51scD3GiYlHZv1srMBkRnvjiN4DX%2BjezXBX%2BOn8QCjTtAIxFq3owcogr%2FbHM35Sh8cboDjwwdTcQsA84lB1jTVgh3oAq6xekWxbz62pMGfXTjtNk%2BxOEUlVIYCiUovcDoUNVNSz9V8MuVciDIue0NckGEU%2Bl7AJqGmSM0s3%2B5MXydt5TS6JVARAvWemcfdfhsljWX1FgKbqv37vJtMZZU7CFTHIET7WAaid5RAOPQsEWmdG3LJPr1nbnh7f8Ob1EfBSGna5xycRiea90U5oIUpmWC2cvzIJNJAl62A1E%2Ffzzl10PlWNOqnKQv7XOqX7iW9SoGV4%2FnQq1dgVqLJaEcoOLbE3KWoJWHFDKOVv3KCE0NWecap78FNUrc8l8R8iJu2DzLn%2FniqfqMhWeYKL3FqSyi%2F8%2BRZ7Z78lfrEx41YprIYmIegLNO8sEQdUCkqy%2FN%2BrXYb5hqsNyBDFCjDm%2F5C%2FBjqyAeeDL5RL4aKg7%2BZ5YjrqaCOqg8Lo3u385DY6r5TLqIkGsvx%2BPF26gFJBV0XPiZ2Ebw9SEPFslztgxh1l6jAw3JRVKEfOncE2%2FzSfnEXONJu8LVcQkvud2azmJrTd8bU8JzSoHqQLlfcIgV%2Fld6Mu4fsClkau7bC2%2FKnzvrtMrXNFY4fQtz9AaDP%2FeOtP4AFsIB%2FbK9qZ9QFtAWMgw0Sy7wpBgqgZjdkx%2FMNLaOghHKvbjAw%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=e131547deb5a8d7b3873a4e2c2585b2e2c778e64941c831aea946faa00c90367"
+    },
+    "disclosed_date": 1482206340,
+    "report_url": "https://hackerone.com/reports/186766",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify the subdomain happymondays.starbucks.com and check its DNS records."
+        ],
+        [
+            2,
+            "Observe that the DNS record points to an unused AWS S3 bucket, indicating a potential subdomain takeover."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves a subdomain takeover of happymondays.starbucks.com due to an unused AWS S3 DNS record. This allows an attacker to host malicious content on the domain, potentially leading to phishing attacks, cookie theft, and unauthorized SSL certificate issuance.",
+    "reason": "The vulnerability is straightforward to discover as it primarily involves checking DNS records and identifying unused AWS S3 buckets. There are no complex interactions or novel logic involved.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": false
+    }
+}

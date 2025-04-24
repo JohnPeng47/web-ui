@@ -1,0 +1,58 @@
+{
+    "reported_to": "Upserve ",
+    "reported_by": "ctulhu ",
+    "title": "Payment method token being sent to 3rd party analytics service",
+    "content": "\nVulnerability Details:\nPayment Tokens can be re-used to link the Credit Card to Another Users Account.\nWhen Linking a Credit Card, a url with Payment_method_token will be generated and then the user will be redirected to the generated url\n<image_0>\nThen, a Request will be Made to orders.upserve.com to Finally Link the Credit Card using the payment_method_token\n<image_1>\nReproduction Steps\n1.) Create 2 Accounts on https://app.upserve.com/s/upserve-lounge-test-providence-2\njuandelacruz@gmail.com\njuandoe@gmail.com\n2.) Add a Credit Card\n4834422077410033|01|2023|730 - for juandelacruz@gmail.com\n4834422073330870|06|2024|582 - juandoe@gmail.com\n3.) While Adding the Credit Cards, Make sure to Capture all Request.\n4.) Remove the Credit Card linked to the account of juandoe@gmail.com\n5.) Using the payment_method_token of juandelacruz@gmail.com we will link his credit card to the account of juandoe@gmail.com\n6.) Your Credit Card Will be linked to the account of juandoe@gmail.com.\nI am Confused:\nThe last_four\":\"3579\" is confusing me here, it doesnt really validate the last 4 digit it just accepts what ever is on the request, you can change it to any 4 digit numbers.\nIf you Added a MasterCard Credit Card, if the card_type is set to visa, it will show as a Visa Card.\nCould you Please Verify on your Endpoint?\n\"payment_method_token\":\"a0543b88d2ddae5d2bd5f8fe\"\nctulhu@wearehackerone.com\nalso\nImportant Details Such as Payment Method Tokens are shared thru 3rd Party Analytics.\n<image_2>\nProof of Concept:\nImpact\nIf any attacker can access the 3rd party analytics account, they can get the payment method token of upserve users and use the tokens to link any credit cards to their account and cause a monetary impact to Upserve, a merchant, or a customer ( creating a payment method they dont own)\nLarge Scale Fraud\n\n",
+    "severity": [
+        7.7,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/523/794/db6c2c45d8328d33b7f3aeb8fae248133357c6b4/60.png?response-content-disposition=attachment%3B%20filename%3D%2260.png%22%3B%20filename%2A%3DUTF-8%27%2760.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ72HSHSM5%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T184722Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIACFIgPJymuvLs04o%2FphkqAZ0Ez2PLmvEd3i0xKi24cVAiEA3kYj3Jo3WWTumqRt16Zf2aUTT5VoLBaR1XwZ6Uzqoq4qsQUIGxADGgwwMTM2MTkyNzQ4NDkiDO%2FDV4Ln249zK5bi6yqOBWpXaujSA7c3UafccP753qZdwjkjabQrQzxvIfaHjPOVrvCuSfqOlksLzQy4UjDhnznIQRFWv4ZufvORCpXVyTWxC9r4tRnhYNP0LfGSW7%2FE0z9ka4mNsYj82%2BIdhPW97yJNOIvVMjxhwZODeOYzcEvsWRa%2F8BiTJbseqc6QnA2AZmSbuJq7xFO5R79VmHPYDWpCLzzekDWfqjFMYeQ085lDlqHBhE9JM9jx%2BC2bPOwWpX9bEup05YzKuXNiE5mr5TsfecbT6O%2F7afjBkGzwQzwcyLQ%2B7eEz9nVotv%2BCquJDz91XZlsHEQsq6b8HTrYdsNiR%2BioyiptlT%2By2kOsD3CI449g5r%2F9%2F3EzrpPHdGJYxBZ7JFxNuxf7kI%2BDY25Fa1hc6dv9DkkzfiE%2FSrVDl32Zfjbh3%2FTvBhKHtFSgzlhO%2BsA%2FwwRRxgPC7Yg43Bgke4x%2Bh1fA4sDEAj3p6ep4%2BAYkrix1sn7VKJd0Cx0y6%2FtrbRB8KV8dKmS9TXf2y6Q0yEGBnK4nNUHpXiio7gy%2FnRZTWe3XMe%2FKutH6GVpy9lQrGrw0Xep4xyg4YibEYBHZwJ02PFlxi2PxBdhvgzaas%2BcT8UeS1wc9sySkCeZollVnW7UHTwsnABsXbsvy9i9tk73XW%2BsVtXvsoQTEKNwCzL1SdazOIJJUXtTP4m%2F3GudOMdv9MVZMreckZldtLqbtgrjmN8poIi7MKytQL3uyhBc6oDpk99unLgCDd5WDmA26ajE62FryFIJRht1girTKbTbNHnadTTwjNpAidOeTx8h%2B8nNaQtbX0RM1d425ZKfkAhvgu9le%2BYvntBJCHHANOIw62Ic3mIQD0rVnxs40Pwc7yylR%2F2znYKbRdLdf7JTCK3Iu%2FBjqxARa%2BdYHRUv8L%2FwW74BhYYgChBDV7FCD%2BxKhQQ%2Bk1Cc2aQ8ROgWd1Yu4j5CmLym%2BMQKp8bgs6xwdGurSDrcS6cXYzMNQiiWPCh0dwqc8vdMkdgnsPAfQslKPiRhObpj5VMM6UrAelpsbauqgqJG%2FaF%2BR1smISimyV0GC9BAn3rE7Hq3hkWrdXdLOZi5CMjtGOuQMtGqST1%2BLXaGJUS8oZGqVIplOhjUWErsBamMGUvDARTA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=b934a4355d06e3b9b2868c6db0e6f92e2d1beb930f132f80a1d034b32ab60185",
+        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/523/795/59add291378585b0f90fba10d3e4077410bcfe11/61.png?response-content-disposition=attachment%3B%20filename%3D%2261.png%22%3B%20filename%2A%3DUTF-8%27%2761.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ72HSHSM5%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T184722Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIACFIgPJymuvLs04o%2FphkqAZ0Ez2PLmvEd3i0xKi24cVAiEA3kYj3Jo3WWTumqRt16Zf2aUTT5VoLBaR1XwZ6Uzqoq4qsQUIGxADGgwwMTM2MTkyNzQ4NDkiDO%2FDV4Ln249zK5bi6yqOBWpXaujSA7c3UafccP753qZdwjkjabQrQzxvIfaHjPOVrvCuSfqOlksLzQy4UjDhnznIQRFWv4ZufvORCpXVyTWxC9r4tRnhYNP0LfGSW7%2FE0z9ka4mNsYj82%2BIdhPW97yJNOIvVMjxhwZODeOYzcEvsWRa%2F8BiTJbseqc6QnA2AZmSbuJq7xFO5R79VmHPYDWpCLzzekDWfqjFMYeQ085lDlqHBhE9JM9jx%2BC2bPOwWpX9bEup05YzKuXNiE5mr5TsfecbT6O%2F7afjBkGzwQzwcyLQ%2B7eEz9nVotv%2BCquJDz91XZlsHEQsq6b8HTrYdsNiR%2BioyiptlT%2By2kOsD3CI449g5r%2F9%2F3EzrpPHdGJYxBZ7JFxNuxf7kI%2BDY25Fa1hc6dv9DkkzfiE%2FSrVDl32Zfjbh3%2FTvBhKHtFSgzlhO%2BsA%2FwwRRxgPC7Yg43Bgke4x%2Bh1fA4sDEAj3p6ep4%2BAYkrix1sn7VKJd0Cx0y6%2FtrbRB8KV8dKmS9TXf2y6Q0yEGBnK4nNUHpXiio7gy%2FnRZTWe3XMe%2FKutH6GVpy9lQrGrw0Xep4xyg4YibEYBHZwJ02PFlxi2PxBdhvgzaas%2BcT8UeS1wc9sySkCeZollVnW7UHTwsnABsXbsvy9i9tk73XW%2BsVtXvsoQTEKNwCzL1SdazOIJJUXtTP4m%2F3GudOMdv9MVZMreckZldtLqbtgrjmN8poIi7MKytQL3uyhBc6oDpk99unLgCDd5WDmA26ajE62FryFIJRht1girTKbTbNHnadTTwjNpAidOeTx8h%2B8nNaQtbX0RM1d425ZKfkAhvgu9le%2BYvntBJCHHANOIw62Ic3mIQD0rVnxs40Pwc7yylR%2F2znYKbRdLdf7JTCK3Iu%2FBjqxARa%2BdYHRUv8L%2FwW74BhYYgChBDV7FCD%2BxKhQQ%2Bk1Cc2aQ8ROgWd1Yu4j5CmLym%2BMQKp8bgs6xwdGurSDrcS6cXYzMNQiiWPCh0dwqc8vdMkdgnsPAfQslKPiRhObpj5VMM6UrAelpsbauqgqJG%2FaF%2BR1smISimyV0GC9BAn3rE7Hq3hkWrdXdLOZi5CMjtGOuQMtGqST1%2BLXaGJUS8oZGqVIplOhjUWErsBamMGUvDARTA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=4933903ea00f839376781f47ae2f677fac1dd9d36c190697fea3e1c7e933ca26",
+        "image_2": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/523/791/30ed295ebf16019abc9bc6b8774efbbbf0969846/58.png?response-content-disposition=attachment%3B%20filename%3D%2258.png%22%3B%20filename%2A%3DUTF-8%27%2758.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ72HSHSM5%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T184722Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIACFIgPJymuvLs04o%2FphkqAZ0Ez2PLmvEd3i0xKi24cVAiEA3kYj3Jo3WWTumqRt16Zf2aUTT5VoLBaR1XwZ6Uzqoq4qsQUIGxADGgwwMTM2MTkyNzQ4NDkiDO%2FDV4Ln249zK5bi6yqOBWpXaujSA7c3UafccP753qZdwjkjabQrQzxvIfaHjPOVrvCuSfqOlksLzQy4UjDhnznIQRFWv4ZufvORCpXVyTWxC9r4tRnhYNP0LfGSW7%2FE0z9ka4mNsYj82%2BIdhPW97yJNOIvVMjxhwZODeOYzcEvsWRa%2F8BiTJbseqc6QnA2AZmSbuJq7xFO5R79VmHPYDWpCLzzekDWfqjFMYeQ085lDlqHBhE9JM9jx%2BC2bPOwWpX9bEup05YzKuXNiE5mr5TsfecbT6O%2F7afjBkGzwQzwcyLQ%2B7eEz9nVotv%2BCquJDz91XZlsHEQsq6b8HTrYdsNiR%2BioyiptlT%2By2kOsD3CI449g5r%2F9%2F3EzrpPHdGJYxBZ7JFxNuxf7kI%2BDY25Fa1hc6dv9DkkzfiE%2FSrVDl32Zfjbh3%2FTvBhKHtFSgzlhO%2BsA%2FwwRRxgPC7Yg43Bgke4x%2Bh1fA4sDEAj3p6ep4%2BAYkrix1sn7VKJd0Cx0y6%2FtrbRB8KV8dKmS9TXf2y6Q0yEGBnK4nNUHpXiio7gy%2FnRZTWe3XMe%2FKutH6GVpy9lQrGrw0Xep4xyg4YibEYBHZwJ02PFlxi2PxBdhvgzaas%2BcT8UeS1wc9sySkCeZollVnW7UHTwsnABsXbsvy9i9tk73XW%2BsVtXvsoQTEKNwCzL1SdazOIJJUXtTP4m%2F3GudOMdv9MVZMreckZldtLqbtgrjmN8poIi7MKytQL3uyhBc6oDpk99unLgCDd5WDmA26ajE62FryFIJRht1girTKbTbNHnadTTwjNpAidOeTx8h%2B8nNaQtbX0RM1d425ZKfkAhvgu9le%2BYvntBJCHHANOIw62Ic3mIQD0rVnxs40Pwc7yylR%2F2znYKbRdLdf7JTCK3Iu%2FBjqxARa%2BdYHRUv8L%2FwW74BhYYgChBDV7FCD%2BxKhQQ%2Bk1Cc2aQ8ROgWd1Yu4j5CmLym%2BMQKp8bgs6xwdGurSDrcS6cXYzMNQiiWPCh0dwqc8vdMkdgnsPAfQslKPiRhObpj5VMM6UrAelpsbauqgqJG%2FaF%2BR1smISimyV0GC9BAn3rE7Hq3hkWrdXdLOZi5CMjtGOuQMtGqST1%2BLXaGJUS8oZGqVIplOhjUWErsBamMGUvDARTA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=2e34da8b0830b3240dddd790a4ee86808631d826bd2d1d53f3685acd304cec28"
+    },
+    "disclosed_date": 1630695960,
+    "report_url": "https://hackerone.com/reports/637267",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create two accounts on https://app.upserve.com/s/upserve-lounge-test-providence-2 (e.g., juandelacruz@gmail.com and juandoe@gmail.com)"
+        ],
+        [
+            2,
+            "Add a credit card to each account (e.g., 4834422077410033|01|2023|730 for juandelacruz@gmail.com and 4834422073330870|06|2024|582 for juandoe@gmail.com)"
+        ],
+        [
+            3,
+            "Capture all requests made during the credit card addition process"
+        ],
+        [
+            4,
+            "Remove the credit card linked to juandoe@gmail.com"
+        ],
+        [
+            5,
+            "Use the payment_method_token from juandelacruz@gmail.com to link his credit card to juandoe@gmail.com's account"
+        ],
+        [
+            6,
+            "Observe that the credit card is successfully linked to juandoe@gmail.com's account"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to reuse a payment method token to link a credit card to another user's account. The system does not properly validate the last four digits of the credit card or the card type, accepting arbitrary values in the request. Additionally, payment method tokens are shared with third-party analytics services, which could be accessed by an attacker to perform large-scale fraud.",
+    "reason": "This vulnerability involves multiple components, including intercepting and reusing payment tokens, manipulating credit card details, and exploiting third-party analytics. The interaction between these components is non-obvious, and the attack requires understanding the token reuse mechanism and the lack of validation in the system.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

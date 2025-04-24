@@ -1,0 +1,45 @@
+{
+  "reported_to": "Informatica",
+  "reported_by": "gorkha ",
+  "title": "[careers.informatica.com] Cross Site Script Vulnerability on informatica",
+  "content": "\nInformation:- Vulnerability resides on the Carriers page of informatica, where search bar of the carrier page failed to sanitized the users query and hence gives the XSS popup.\nVulnerable URL:- https://careers.informatica.com/\nPayload:- \"><svg/onload=prompt(1);>\nSteps to Reproduce the Vulnerability\nOpen Carriers page of Informatica and search for anything.\nOn the next page (search Result page) of search result, there is a option of All Location.\nNow search on the All Location field with you JavaScript Payload. (For E.g :- \"><svg/onload=prompt(1);>)\nAs it search, you will get the XSS popup on your Screen which shows that page is vulnerable to XSS vulnerability.\nHope you got the issue and fixed it soon.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1494402120,
+  "report_url": "https://hackerone.com/reports/42537",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Open the Carriers page of Informatica and search for anything."
+    ],
+    [
+      2,
+      "On the search result page, use the 'All Location' field to search with the JavaScript payload: '><svg/onload=prompt(1);>."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Cross-Site Scripting (XSS) issue on the Informatica careers page. The search bar on the Carriers page does not properly sanitize user input, allowing JavaScript code to be executed when a malicious payload is entered into the 'All Location' search field.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common XSS payload in a standard input field without any complex interactions or state manipulations required. The steps to reproduce are simple and do not require deep understanding of the application's logic or state.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves client-side input sanitization failure, not authentication or authorization bypass. The methodology described focuses on authN/authZ issues (IDOR, session swapping, etc.), not client-side input validation vulnerabilities like XSS.",
+    "is_detectable": false
+  }
+}

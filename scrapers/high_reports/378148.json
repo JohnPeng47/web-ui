@@ -1,0 +1,45 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "saltyyolk ",
+  "title": "Vulnerability in project import leads to arbitrary command execution",
+  "content": "\nSummary:\nA filename regular expression could be bypassed and enable the attacker to create a symbolic link in Gitlab upload directory by importing a specially crafted Gitlab export. Further more, Gitlab is designed to not delete project upload directory currently. So, the attacker could delete the imported project and then upload another specially crafted Gitlab export to a project with the same name, which leads to path traversal/arbitrary file upload and finally enables the attacker to be able to get a shell with the permission of the system gitlab user.\nDescription:\nhow to create a symbolic link in the upload directory\ncode in file_importer.rb uses %r{.*/\\.{1,2}$} to except . and .. in the extracted project import directory tree, and check everything else that does not match this regex and delete all symlinks. However, we can easily construct a symlink with the name .\\nevil in the tarball that matches this regex perfectly. Therefore, it will not be removed by function remove_symlinks! in the same file, and finally uploaded to /var/opt/gitlab/gitlab-rails/uploads/nyangawa/myrepo/.\\nevil -> /var/opt/gitlab (assume we import the project to nyangawa/myrepo and the symlink points to /var/opt/gitlab)\nhow to use the uploaded symbolic link to get shell access\nFirst delete the nyangawa/myrepo project we just created. For some reasons the upload directory of this project does not get purged. Then we import another tarball which has, for example, uploads/.\\neviil/.ssh/authorized_keys in it. And the content of this file is my ssh public key. Then import this tarball to create project nyangawa/myrepo again.\nafter all\nthe uploaded authorized_keys is copied to /var/opt/gitlab/gitlab-rails/uploads/nyangawa/myrepo/.\\nevil/.ssh/authorized_keys of the victim's filesystem but unfortunately, this path redirects to /var/opt/gitlab/.ssh/authorized_keys. Then I can login to the victim server by ssh with Gitlab's system username.\nFor step 2 and 3, there're some other approaches to get command executed since we can already upload any file to the victim's file system controlled by Gitlab.\nSteps To Reproduce:\nAs I stated in description. I can upload the 2 PoC tarballs if you ask.\nImpact\nAn attacker can upload arbitrary file to the victim's file system\nData of other users could be override\nAn attacker can get a system shell by overwrite specific files.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1534946160,
+  "report_url": "https://hackerone.com/reports/378148",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create a specially crafted GitLab export tarball containing a symbolic link named '.\\nevil' that bypasses the regex check in file_importer.rb"
+    ],
+    [
+      2,
+      "Import the tarball to create a project, then delete the project while the upload directory remains. Import another tarball with malicious files (e.g., authorized_keys) to the same project name, exploiting the symbolic link to overwrite system files"
+    ]
+  ],
+  "vuln_description": "A vulnerability in GitLab's project import functionality allows an attacker to bypass filename regex checks to create symbolic links in the upload directory. Combined with GitLab's behavior of not purging upload directories, this enables path traversal and arbitrary file upload, potentially leading to remote code execution as the GitLab system user.",
+  "reason": "The attack involves multiple non-obvious components: bypassing a regex check with a carefully crafted filename, understanding GitLab's upload directory retention behavior, and chaining these with a second import to achieve file overwrite. The interaction between these components is subtle and requires precise timing/sequence.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves manipulating file paths and symbolic links during project import, which is not directly related to authentication or authorization checks between user sessions and resources. The described methodology focuses on testing authorization boundaries between user sessions and actions/resources, not file system operations or path traversal vulnerabilities.",
+    "is_detectable": false
+  }
+}

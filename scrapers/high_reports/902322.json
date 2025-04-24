@@ -1,0 +1,38 @@
+{
+  "reported_to": "RATELIMITED",
+  "reported_by": "0xd0ff9 ",
+  "title": "Source code disclosure at \u2588\u2588\u2588",
+  "content": "\nSummary:\nSource code disclosure at \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSteps To Reproduce:\nPOC: link download source code: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSupporting Material/References:\n\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nSource Code Disclosure\nSensitive Information Disclosure\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Information Disclosure"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1592630460,
+  "report_url": "https://hackerone.com/reports/902322",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Access the provided download link to obtain the source code."
+    ],
+    [
+      2,
+      "Analyze the downloaded source code for sensitive information or vulnerabilities."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves the disclosure of source code through a publicly accessible download link, potentially exposing sensitive information and application logic.",
+  "reason": "The attack is straightforward as it only requires accessing a provided link and does not involve complex interactions or state manipulations. The discovery difficulty is low because the source code is directly accessible without any need for advanced techniques or understanding of the application's internal workings.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

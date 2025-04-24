@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "tmnt53 ",
+  "title": "Heap-buffer-overflow in Perl__byte_dump_string (utf8.c) could lead to memory leak",
+  "content": "\nWith crafted regex match, I have found a heap-over-flow in function Perl__byte_dump_string, which would lead to memory leak.\nReported to the Perl security mailing list on 11 Sep 2017.\nConfirmed as a security flaw by TonyC on 24 Feb 2018\nCVE-2018-6797 assigned to this flaw on 7 Feb 2018\nPublic security advisory released on 14 April 2018\nCode 2.84 KiB\n1=================================================================\n2==2895==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xb610081c at pc 0x08a72387 bp 0xbfea6038 sp 0xbfea602c\n3WRITE of size 4 at 0xb610081c thread T0\n4    #0 0x8a72386 in S_pack_rec /root/karas/perl5-blead/pp_pack.c:2703:17\n5    #1 0x8a42706 in Perl_packlist /root/karas/perl5-blead/pp_pack.c:1980:11\n6    #2 0x8a73626 in Perl_pp_pack /root/karas/perl5-blead/pp_pack.c:3135:5\n7    #3 0x84dc7ac in Perl_runops_debug /root/karas/perl5-blead/dump.c:2465:23\n8    #4 0x818858a in S_fold_constants /root/karas/perl5-blead/op.c:4557:2\n9    #5 0x8186c5a in Perl_op_convert_list /root/karas/perl5-blead/op.c:4896:12\n10    #6 0x8363e7e in Perl_yyparse /root/karas/perl5-blead/perly.y:889:23\n11    #7 0x8232350 in S_parse_body /root/karas/perl5-blead/perl.c:2401:9\n12    #8 0x82285e3 in perl_parse /root/karas/perl5-blead/perl.c:1719:2\n13    #9 0x81494a6 in main /root/karas/perl5-blead/perlmain.c:121:18\n14    #10 0xb74d5636 in __libc_start_main /build/glibc-KM3i_a/glibc-2.23/csu/../csu/libc-start.c:291\n15    #11 0x8075847 in _start (/root/karas/perl5-blead/perl+0x8075847)\n16\n170xb610081c is located 2 bytes to the right of 10-byte region [0xb6100810,0xb610081a)\n18allocated by thread T0 here:\n19    #0 0x8119b84 in malloc (/root/karas/perl5-blead/perl+0x8119b84)\n20    #1 0x84e2987 in Perl_safesysmalloc /root/karas/perl5-blead/util.c:153:21\n21\n22SUMMARY: AddressSanitizer: heap-buffer-overflow /root/karas/perl5-blead/pp_pack.c:2703:17 in S_pack_rec\n23Shadow bytes around the buggy address:\n24  0x36c200b0: fa fa fd fd fa fa fd fd fa fa fd fd fa fa 00 04\n25  0x36c200c0: fa fa fd fd fa fa 00 04 fa fa 00 04 fa fa 00 04\n26  0x36c200d0: fa fa 00 04 fa fa 00 04 fa fa 00 04 fa fa 00 04\n27  0x36c200e0: fa fa 00 04 fa fa 00 04 fa fa 00 04 fa fa 00 04\n28  0x36c200f0: fa fa fd fa fa fa fd fd fa fa 00 02 fa fa 01 fa\n29=>0x36c20100: fa fa 00[02]fa fa 00 02 fa fa fd fd fa fa 00 04\n30  0x36c20110: fa fa 02 fa fa fa 00 02 fa fa 07 fa fa fa 00 02\n31  0x36c20120: fa fa 00 02 fa fa 00 00 fa fa 00 05 fa fa 00 01\n32  0x36c20130: fa fa 00 07 fa fa 00 fa fa fa 00 02 fa fa 05 fa\n33  0x36c20140: fa fa 00 02 fa fa 06 fa fa fa 00 02 fa fa 05 fa\n34  0x36c20150: fa fa 00 05 fa fa 04 fa fa fa 05 fa fa fa 05 fa\n35Shadow byte legend (one shadow byte represents 8 application bytes):\n36  Addressable:           00\n37  Partially addressable: 01 02 03 04 05 06 07\n38  Heap left redzone:       fa\n39  Heap right redzone:      fb\n40  Freed heap region:       fd\n41  Stack left redzone:      f1\n42  Stack mid redzone:       f2\n43  Stack right redzone:     f3\n44  Stack partial redzone:   f4\n45  Stack after return:      f5\n46  Stack use after scope:   f8\n47  Global redzone:          f9\n48  Global init order:       f6\n49  Poisoned by user:        f7\n50  Container overflow:      fc\n51  Array cookie:            ac\n52  Intra object redzone:    bb\n53  ASan internal:           fe\n54  Left alloca redzone:     ca\n55  Right alloca redzone:    cb\n56==2895==ABORTING\nImpact\nDepending on the heap implementation a remote attacker could leak heap information to bypass ASLR.\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Buffer Over-read"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1571965020,
+  "report_url": "https://hackerone.com/reports/480778",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create a crafted regex pattern that triggers the heap-buffer-overflow in Perl__byte_dump_string"
+    ],
+    [
+      2,
+      "Execute the crafted regex pattern in a Perl environment with AddressSanitizer enabled to observe the overflow"
+    ]
+  ],
+  "vuln_description": "A heap-buffer-overflow vulnerability in Perl's utf8.c file within the Perl__byte_dump_string function, which can be triggered by a specially crafted regex match, leading to potential memory leaks and possible ASLR bypass.",
+  "reason": "The vulnerability involves a single component (crafted regex) and a straightforward memory corruption issue. While it requires knowledge of Perl's internal memory handling, the attack itself is not complex in terms of interactions or state manipulation.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

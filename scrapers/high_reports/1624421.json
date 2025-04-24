@@ -1,0 +1,46 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "pwn33d ",
+    "title": "CSRF to ATO at https://\u2588\u2588\u2588\u2588\u2588/user/account [HtUS]",
+    "content": "\nhello dod security team today while i was doing pentest on your scope\ni came across\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/user/account\nso i register and after that tried to edit my data and the data was in json request\nso i simple change content-type to\ncontent-type application/x-www-form-urlencoded\nand the data was change\nand in the next step i create html file\nto edit users data with\n0 click\nwhich allow me to change victim email and leads to account takeover\ncheck my html poc file and video\nImpact\naccount takeover\n\n",
+    "severity": [
+        8.1,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-Site Request Forgery (CSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1673049000,
+    "report_url": "https://hackerone.com/reports/1624421",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Register an account on the target website at https://\u2588\u2588\u2588\u2588\u2588/user/account"
+        ],
+        [
+            2,
+            "Intercept the account data edit request and change the Content-Type header to 'application/x-www-form-urlencoded'"
+        ],
+        [
+            3,
+            "Create an HTML file that automatically submits a modified request to change the victim's email without their interaction"
+        ],
+        [
+            4,
+            "Execute the HTML file in the victim's browser context to perform the account takeover"
+        ]
+    ],
+    "vuln_description": "The vulnerability is a CSRF (Cross-Site Request Forgery) flaw that allows an attacker to change a victim's email address without their consent, leading to account takeover. The attack leverages a lack of proper CSRF tokens and the application's acceptance of form-urlencoded content type for JSON endpoints.",
+    "reason": "The attack involves understanding the application's handling of different content types and crafting a malicious HTML payload, but does not require complex application state manipulation or novel logic. The steps are relatively straightforward for a security tester familiar with CSRF attacks.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

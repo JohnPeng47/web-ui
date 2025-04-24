@@ -1,0 +1,54 @@
+{
+  "reported_to": "Automattic",
+  "reported_by": "ali ",
+  "title": "Stored Self XSS on https://app.crowdsignal.com (in Photo Insert App) + Stored XSS on https://*your-subdomain*.survey.fm",
+  "content": "\nSteps:\nGo to https://app.crowdsignal.com/dashboard and click Create a New > Quiz\nAdd Multiple Choice to your page and click image button, upload a photo and click upload.\nStart the burp suite and click Save button. Look at the request (poc1.png) and you will see media_code= parameter. It will be your photo's id and change it as payload and forward the request. Payload: \"><svg/onload=alert(document.domain)>\nNow you will see xss (poc2.png). Copy the quiz link and open it the new tab. You will see second xss (poc3.png). And this one is stored xss.\nImpact\nXSS\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1571684280,
+  "report_url": "https://hackerone.com/reports/667188",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Go to https://app.crowdsignal.com/dashboard and click Create a New > Quiz"
+    ],
+    [
+      2,
+      "Add Multiple Choice to your page and click the image button, upload a photo, and click upload"
+    ],
+    [
+      3,
+      "Start Burp Suite and click the Save button. Observe the request (poc1.png) and note the media_code parameter"
+    ],
+    [
+      4,
+      "Change the media_code parameter to the payload: \"><svg/onload=alert(document.domain)> and forward the request"
+    ],
+    [
+      5,
+      "Observe the XSS (poc2.png). Copy the quiz link and open it in a new tab to see the stored XSS (poc3.png)"
+    ]
+  ],
+  "vuln_description": "This vulnerability involves a stored Self XSS on the Crowdsignal platform, specifically in the Photo Insert App, and a stored XSS on survey.fm subdomains. By manipulating the media_code parameter during photo upload, an attacker can inject malicious JavaScript payloads that execute when the quiz is viewed.",
+  "reason": "The attack requires understanding the media upload process, intercepting and modifying requests, and crafting a payload that exploits the application's handling of the media_code parameter. While the steps are straightforward, the need to intercept and modify requests adds some complexity.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XSS vulnerabilities described involve manipulating input (media_code parameter) to inject malicious scripts, which is a client-side issue and not directly related to authentication or authorization boundaries. The methodology focuses on testing AuthN/AuthZ by swapping user sessions or resource IDs, not on input validation or script injection.",
+    "is_detectable": false
+  }
+}

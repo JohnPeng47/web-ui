@@ -1,0 +1,54 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "mahmoud0x00 ",
+  "title": "[Uppy] Internal Server side request forgery (bypass of #786956)",
+  "content": "\nI would like to report Internal Server-side request forgery in Uppy\nIt allows the attacker to easily extract information from internal servers\nModule\nmodule name: Uppy\nversion:1.15.0\nnpm page: https://www.npmjs.com/package/uppy\nModule Description\nUppy is a sleek, modular JavaScript file uploader that integrates seamlessly with any application. It\u2019s fast, easy to use and lets you worry about more important problems than building a file uploader.\nModule Stats\n[1] weekly downloads: 37,599\nVulnerability\nServer-Side Request Forgery (SSRF)\n## Vulnerability Description\nWhen I checked your fix on #786956, I noticed that you fixed this issue by doing a check on the host 's IP address against a blacklist before passing it to the server to fetch (You can check that here, But you forgot to stop redirection to these IP addresses, therefore attacker can create a host or file and redirect all requests which are being received to a specific internal host, this will bypass your check, in the first phase, System will check if this host is allowed or no, if it is allowed, Server will pass the request. But it won't be able to verify which host is being redirected to.\nSteps To Reproduce:\nfeel free to set up a custom Uppy version on your server and try these steps on\nGo to https://uppy.io/\nChoose download file via a link\nPass this link to the system https://tinyurl.com/gqdv39p (it redirects to http://169.254.169.254/metadata/v1/)\nUpload fetched file\nDownload that file\nOpen that file and you should see a copy of DigitalOcean 's metadata host response \u2588\u2588\u2588\u2588\u2588\u2588\nSupporting Material/References:\n\u2588\u2588\u2588\nWrap up\nSelect Y or N for the following statements:\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nUnauthorized access to sensitive info on internal hosts/services.\n\n",
+  "severity": [
+    9.3,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Server-Side Request Forgery (SSRF)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1593366600,
+  "report_url": "https://hackerone.com/reports/891270",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Go to https://uppy.io/"
+    ],
+    [
+      2,
+      "Choose download file via a link"
+    ],
+    [
+      3,
+      "Pass this link to the system: https://tinyurl.com/gqdv39p (it redirects to http://169.254.169.254/metadata/v1/)"
+    ],
+    [
+      4,
+      "Upload fetched file"
+    ],
+    [
+      5,
+      "Download that file"
+    ],
+    [
+      6,
+      "Open that file and you should see a copy of DigitalOcean's metadata host response"
+    ]
+  ],
+  "vuln_description": "The vulnerability is an Internal Server-Side Request Forgery (SSRF) in Uppy, where an attacker can bypass IP blacklist checks by exploiting redirections. The system checks the initial host's IP against a blacklist but fails to verify subsequent redirections, allowing access to internal servers.",
+  "reason": "The attack involves understanding the SSRF vulnerability, the blacklist bypass via redirection, and the interaction between the initial host check and subsequent redirections. While the concept of SSRF is common, the specific bypass via redirection adds a layer of complexity.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "786956"
+}

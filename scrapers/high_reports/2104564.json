@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "haxatron1 ",
+  "title": "(CVE-2023-32004) Permission model bypass by specifying a path traversal sequence in a Buffer",
+  "content": "\nhttps://nodejs.org/en/blog/vulnerability/august-2023-security-releases#permission-model-bypass-by-specifying-a-path-traversal-sequence-in-a-buffer-highcve-2023-32004\nhttps://hackerone.com/reports/2038134\nAlso, patch was provided in the report and matched https://github.com/nodejs/node/commit/1f64147eb607f82060e08884f993597774c69280 (excluding tests).\nImpact\nsee reports.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 4368,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1696718700,
+  "report_url": "https://hackerone.com/reports/2104564",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Enable Node.js experimental permission model with the --experimental-permission flag"
+    ],
+    [
+      2,
+      "Create a Buffer containing a path traversal sequence (e.g., '../../secret_file') and pass it to a filesystem API that checks permissions"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows bypassing Node.js's permission model by specifying a path traversal sequence in a Buffer object. When the permission model checks paths for access control, it fails to properly validate Buffer inputs containing traversal sequences, allowing access to files outside the permitted directories.",
+  "reason": "The vulnerability requires understanding of Node.js's permission model and how it handles Buffer inputs, but the core issue is relatively straightforward once these components are known. The attack doesn't involve complex state manipulation or novel logic.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

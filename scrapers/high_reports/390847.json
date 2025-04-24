@@ -1,0 +1,42 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "cris_semmle ",
+    "title": "Prototype Pollution Vulnerability in cached-path-relative Package",
+    "content": "\nI would like to report a prototype pollution attack in cached-path-relative.\nIt allows an attacker to inject properties on Object.prototype which are then inherited by all the JS objects through the prototype chain.\nModule\nmodule name: cached-path-relative\nversion: 1.0.1\nnpm page: https://www.npmjs.com/package/cached-path-relative\nModule Description\nMemoize the results of the path.relative function. path.relative can be an expensive operation if it happens a lot, and its results shouldn't change for the same arguments.\nModule Stats\n352,446 downloads in the last week\nVulnerability\nVulnerability Description\nIf the attacker can control both the path and the cached value, she can deploy a prototype pollution attack and thus overwrite arbitrary properties on Object.prototype.\nSteps To Reproduce:\nCode 94 Bytes\n1var relative = require('cached-path-relative');\n2relative('__proto__', 'x');\n3console.log({}.x);\nPatch\nInitialize the cache using Object.create(null) or use the Map data structure.\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nI am not sure how clients of this module use the API, but if attacker can control both the values passed to cached-path-relative, the attacker can write arbitrary properties on Object.prototype.\n\n",
+    "severity": [
+        7.6,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Uncontrolled Resource Consumption"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1541170260,
+    "report_url": "https://hackerone.com/reports/390847",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "var relative = require('cached-path-relative');"
+        ],
+        [
+            2,
+            "relative('__proto__', 'x');"
+        ],
+        [
+            3,
+            "console.log({}.x);"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to inject properties on Object.prototype through the cached-path-relative package, which are then inherited by all JavaScript objects via the prototype chain. This occurs when the attacker can control both the path and the cached value passed to the function.",
+    "reason": "The attack is straightforward and involves a well-known prototype pollution pattern. It requires minimal components (controlling input to a single function) and no complex state manipulation or novel logic. The interaction between the components is obvious to anyone familiar with prototype pollution vulnerabilities.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

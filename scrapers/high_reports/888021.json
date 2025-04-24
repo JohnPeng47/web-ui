@@ -1,0 +1,38 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "vrechson ",
+  "title": "[wappalyzer] ReDoS allows an attacker to completely break Wappalyzer",
+  "content": "\nNOTE! Thanks for submitting a report! Please replace all the [square] sections below with the pertinent details. Remember, the more detail you provide, the easier it is for us to triage and respond quickly, so be sure to take your time filling out the report!\nI would like to report [VULNERABILITY] in [MODULE]\nIt allows [DESCRIBE THE IMPACT OF THE VULNERABILITY - E.G READ ARBITRARY FILES, READ DATA FROM DATABASE ETC]\nModule\nmodule name: Wappalyzer\nversion: 6.0.2\nnpm page: https://www.npmjs.com/package/wappalyzer\nModule Description\nWappalyzer identifies technologies on websites.\nModule Stats\nWeekly downloads: 1,290\n88 issues\n16 pull requests\nlast publish: 3 days ago\nVulnerability\nReDoS (Catastrophic backtracking)\nVulnerability Description\nAn attacker can make wappalyzer (all drivers, like browser extension and cli) stop working due to ReDoS in one of it's services regex .\nSteps To Reproduce:\nCreate a web page with the following tag: <script src='//c.c..j..c.c..j..c.c..j..c.c..j..c.c..j..c.c..j..c.c..j..c.c..j..jskhtlcnipmos.cdnjs.cdnjs.dnjs.cdnjs.cloudflar.jsjs.cloudf'></script>\nNow open this page using wappalyzer extension in browser or it's cli\nWappalyzer will stop answering and it's CPU percentage will start to increase to high levels\nPatch\nIn order to test this issue, you can see that the problem resides in this line https://github.com/AliasIO/wappalyzer/blob/master/src/apps.json#L11644 of wappalyzer application. When this regex test the input shown, it takes process the application indefinitely, making it stop working. Running it in browser extension completely crash the extension in all tabs, and in cli/node version the execution takes forever.\nTo patch this issue, the current regex must be changed to a more restrict one in this piece: (?:[^\\\\/]+\\\\.)*\nSupporting Material/References:\nState all technical information about the stack where the vulnerability was found\nOS: Archlinux - Linux 5.6.13-arch1-1 #1 SMP PREEMPT Thu, 14 May 2020 06:52:53 +0000 x86_64 GNU/Linux\nNode version: v12.16.3\nNPM version: 6.14.5\nFirefox: 76.0.1 (64-bit) - Mozilla Firefox for Arch Linux - archlinux - 1.0\nReScuE was used to test for ReDoS (https://github.com/2bdenny/ReScue)\nWrap up\nSelect Y or N for the following statements:\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nAn attacker can make wappalyzer stop working in it's pages, or pages in which he has injection and make user CPU starts to throttle\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Uncontrolled Resource Consumption"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1592517660,
+  "report_url": "https://hackerone.com/reports/888021",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create a web page with the following tag: <script src='//c.c..j..c.c..j..c.c..j..c.c..j..c.c..j..c.c..j..c.c..j..c.c..j..jskhtlcnipmos.cdnjs.cdnjs.dnjs.cdnjs.cloudflar.jsjs.cloudf'></script>"
+    ],
+    [
+      2,
+      "Open this page using the Wappalyzer browser extension or CLI"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a ReDoS (Regular Expression Denial of Service) in Wappalyzer, where a specially crafted script tag causes catastrophic backtracking in the application's regex processing. This leads to high CPU usage and makes Wappalyzer unresponsive or crash.",
+  "reason": "The attack involves a single, straightforward component (a malicious script tag) and leverages a known vulnerability pattern (ReDoS). The discovery primarily requires understanding regex behavior and testing with crafted inputs, which is a common testing approach for such vulnerabilities.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

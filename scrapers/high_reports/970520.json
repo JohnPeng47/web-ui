@@ -1,0 +1,38 @@
+{
+  "reported_to": "Kubernetes",
+  "reported_by": "zevfw5pp ",
+  "title": "exposed Git Repo at http://api.e2e-kops-aws-canary.test-cncf-aws.canary.k8s.io/.git/",
+  "content": "\nDear Security team,\nIf this report is out of scope, please let me know and I will close the report myself\nI found a git repository on http://api.e2e-kops-aws-canary.test-cncf-aws.canary.k8s.io/.git/.git. This endpoint allows an attacker to retrieve much of the source code and git history for this service which could potentially reveal sensitive information, it all depends what is stored there.\nExample:\nhttp://api.e2e-kops-aws-canary.test-cncf-aws.canary.k8s.io/.git/logs/HEAD\nhttp://api.e2e-kops-aws-canary.test-cncf-aws.canary.k8s.io/.git/config\nMitigation\nThe restrict access (403 forbidden) are enabled only on /.git and not their subfolders. You just need to add all the git subfolders to the same rule.\nBest Regards,\nDaniel\nImpact\nAn attacker can get information just dumping data using .git repository.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Information Disclosure"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1610062380,
+  "report_url": "https://hackerone.com/reports/970520",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to http://api.e2e-kops-aws-canary.test-cncf-aws.canary.k8s.io/.git/"
+    ],
+    [
+      2,
+      "Access subdirectories like /.git/logs/HEAD or /.git/config to retrieve source code and git history"
+    ]
+  ],
+  "vuln_description": "The exposed Git repository at the specified URL allows unauthorized access to source code and version control history, potentially revealing sensitive information. The vulnerability exists because access restrictions (403 forbidden) are only applied to the root /.git directory but not its subdirectories.",
+  "reason": "This vulnerability is straightforward to discover as it only requires checking common .git paths on a web server. No complex interactions or state manipulations are needed, and the attack pattern is well-known in security testing.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

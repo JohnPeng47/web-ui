@@ -1,0 +1,38 @@
+{
+  "reported_to": "Shopify",
+  "reported_by": "augustozanellato ",
+  "title": "Github access token exposure",
+  "content": "\nWhile dissecting an application made by one of your employees I found his GitHub Personal Access Token (PAT), he's a member of the org with pull and push access to all of your repositories.\nAs a proof I can tell you that on the repo github.com/Shopify/shopify at commit hash cea9c273391d the sha512 of the README.md is 69750574bec56c1f1052db3471252b1daacdc9dda9f6d5332a3400a847fa413ec1caf19ef0b5501f18a5a76c232e7210d5f3b91c24c9439f4e0f64c02d6db824.\nImpact\nRead and write access to all your private github repositories.\n\n",
+  "severity": [
+    10.0,
+    null
+  ],
+  "bounty": 50000,
+  "weaknesses": [
+    "None"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1627343400,
+  "report_url": "https://hackerone.com/reports/1087489",
+  "vuln_category": "CODE",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "steps": [
+    [
+      1,
+      "Analyze the application to locate embedded GitHub Personal Access Token (PAT)."
+    ],
+    [
+      2,
+      "Use the discovered PAT to gain read and write access to all private GitHub repositories."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves the exposure of a GitHub Personal Access Token (PAT) within an application, which grants unauthorized read and write access to all private repositories in the organization.",
+  "reason": "The discovery difficulty is low because the attack primarily involves locating an exposed token within the application, which is a straightforward process if the token is hardcoded or embedded in an accessible part of the application. There are no complex interactions or states to manipulate, and the logic is not novel.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

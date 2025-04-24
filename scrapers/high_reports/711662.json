@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "pirateducky ",
+    "title": "default \u2588\u2588\u2588\u2588 creds on https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+    "content": "\nDescription:\nI can log into https://\u2588\u2588\u2588 using \u2588\u2588\u2588\u2588\u2588 as credentials\nImpact\nCan do anything an \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 can do in this application, Server Now\nStep-by-step Reproduction Instructions\ngo to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nlog in using \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\nuse proper authentication, this might be a test account but it should still not use \u2588\u2588\u2588 as the creds\nImpact\nlogged in as \u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588 as shown in the screenshot\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1644891420,
+    "report_url": "https://hackerone.com/reports/711662",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the target URL: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
+        ],
+        [
+            2,
+            "Log in using the default credentials: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the use of default credentials (\u2588\u2588\u2588\u2588\u2588) to log into the application at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588, granting the attacker the same privileges as an \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 user. This allows unauthorized access and potential misuse of the application's functionalities.",
+    "reason": "The discovery of this vulnerability is straightforward as it only requires knowledge of the default credentials and the target URL. There are no complex interactions, state manipulations, or novel logic involved.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

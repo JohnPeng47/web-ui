@@ -1,0 +1,45 @@
+{
+  "reported_to": "Reddit",
+  "reported_by": "dvorakxl ",
+  "title": "[accounts.reddit.com] Redirect parameter allows for XSS",
+  "content": "\nSummary:\nHello team! I was tampering with the dest parameter in accounts.reddit.com and found out it is vulnerable to Cross Site Scripting once the victim performs the log in.\nSteps To Reproduce:\nEnter to the following link: https://accounts.reddit.com/?dest=javascript:alert(document.domain)\nIf not signed in, the user will be promped to log in and after doing so XSS will excecute\n<image_0>\nIf user is logged into his account, following the link will also make the XSS pop up\n<image_1>\nImpact\nAn attacker could trick users into executing XSS, executing code and stealing their cookies only by them logging in.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 5000,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/wiuky8bwub311yuo17b9xgln6fxt?response-content-disposition=attachment%3B%20filename%3D%22XSSnotsignedin.jpg%22%3B%20filename%2A%3DUTF-8%27%27XSSnotsignedin.jpg&response-content-type=image%2Fjpeg&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQUMFBJSG5%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T000242Z&X-Amz-Expires=1145&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIFZuqlSX62MWhAr2BKxofV%2BULLbJUGShROYuJwTzwxSHAiABsJuF3X%2BSFrH06L4Cm0FwhT9iXitSnRhmo40I6nd8tyq7BQjz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMPKZSz1zhJ%2BHgQpSGKo8FyQdojXMTrsTk7gorsU9P9opgY1BMpc2s2pcZdb0IzeGoA0JbJ9kgHmT99F4ZKuYbe9pOszMBjS9rXnQDHimGVzsLMRIyiwjsfPW00dA%2B%2BYEHsNwY%2FsFRRcw4%2FxU2MCGlTB%2BcdM4EipVKrCm7E%2FwFvk5Hx1WfV4K8GUGpTA17IwoV%2BhtxxmvZ0CV9PEtZWDIpCr8RT8%2BnQTsHKgMK2kIs%2BEeyedkdK5MHE1tcLzSOsoP7YKJlIn2Q8ugaDePU65CB3DAqGuTTvs3dRm9lXokoig8ZqbQ3bdVwiZ%2B5Oi9VpWuLH5KzV0IELXHUsDIChejbRPmQCZrmT0CNOIhhqzovtswvvU4FwGna6lTeB62A1cNTbgvW2BtdNBKMs7rYOumrI91eiTL351ATJmAYV6q7o417mV9tn9uqSk%2FBEiVZxMD4JUkYPyKaMPQStS%2BFHweJYwg%2FmWGv3otMytmiH2mGaz%2FQ%2FozJZNGJyqr9LKM8WKa4UaLtDSAj%2F8m8Nm0URUoWZnlEunOqteIQqyZowgBa924y%2FIQAvYDQ9G0KS7Sugi9cePAUL%2Bs7NYLr%2FT8QfO4W5xub9xMTNIY80D4Tkd9xe7FfcU8JaKDZlwEZ8WiQVykzqFFPGHY5asHPkJiumQqDiWJLXKvO6gCzI3EOjuwbbXgXL9TSqx5LH0mMuffK3NStibdL9DWLzsXHPrg7W3xUwDmMrDvw2%2FM3qXKS76rRkCoc3X5blQSRMzRcFw7uXpU92bko9wZL4%2F5aiVDlGZjeUCzQaj3i7f8q7P63u%2F10bAFYv4hnpdSVVPbmfXMX3hmGqzjKRPxs1%2FjWgmOWeqmgfedj0XLSy5oV9z6i%2BNEewEMSxJlhMp34t%2FLYtfN4GjDHwoa%2FBjqyAT0SVyRHJU%2FUtwNZn6uXvfp3fv8d0PHp7EbAvFcLYLenK7abBQO%2BFFO2dYtDDnKKf0GmTP7zPSnJd6rbIJd5tKh7xLgpE8ZbhwmRMyp6enZ5cIc5qZrYxv0KpWMx33dg2eVM6bw3Lrs27d5VZsOYqa7ts%2Fgd95uXq4BxzNDIciREtU3McOmr56lveNVNk0rZ3eFyQU54HkSCoXgVzvi5XGQG%2BHfCMmyHVBhIDpBAiDS4f%2Bk%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=76b1c8078c617a7d5e00ac0af9d4cb18e2460bb6b2f04a10c39779a8df96d38a",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/vle7tevykwrkwqdf2z46bk3zwz83?response-content-disposition=attachment%3B%20filename%3D%22XSSsignedin.jpg%22%3B%20filename%2A%3DUTF-8%27%27XSSsignedin.jpg&response-content-type=image%2Fjpeg&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQUMFBJSG5%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T000242Z&X-Amz-Expires=1145&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIFZuqlSX62MWhAr2BKxofV%2BULLbJUGShROYuJwTzwxSHAiABsJuF3X%2BSFrH06L4Cm0FwhT9iXitSnRhmo40I6nd8tyq7BQjz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMPKZSz1zhJ%2BHgQpSGKo8FyQdojXMTrsTk7gorsU9P9opgY1BMpc2s2pcZdb0IzeGoA0JbJ9kgHmT99F4ZKuYbe9pOszMBjS9rXnQDHimGVzsLMRIyiwjsfPW00dA%2B%2BYEHsNwY%2FsFRRcw4%2FxU2MCGlTB%2BcdM4EipVKrCm7E%2FwFvk5Hx1WfV4K8GUGpTA17IwoV%2BhtxxmvZ0CV9PEtZWDIpCr8RT8%2BnQTsHKgMK2kIs%2BEeyedkdK5MHE1tcLzSOsoP7YKJlIn2Q8ugaDePU65CB3DAqGuTTvs3dRm9lXokoig8ZqbQ3bdVwiZ%2B5Oi9VpWuLH5KzV0IELXHUsDIChejbRPmQCZrmT0CNOIhhqzovtswvvU4FwGna6lTeB62A1cNTbgvW2BtdNBKMs7rYOumrI91eiTL351ATJmAYV6q7o417mV9tn9uqSk%2FBEiVZxMD4JUkYPyKaMPQStS%2BFHweJYwg%2FmWGv3otMytmiH2mGaz%2FQ%2FozJZNGJyqr9LKM8WKa4UaLtDSAj%2F8m8Nm0URUoWZnlEunOqteIQqyZowgBa924y%2FIQAvYDQ9G0KS7Sugi9cePAUL%2Bs7NYLr%2FT8QfO4W5xub9xMTNIY80D4Tkd9xe7FfcU8JaKDZlwEZ8WiQVykzqFFPGHY5asHPkJiumQqDiWJLXKvO6gCzI3EOjuwbbXgXL9TSqx5LH0mMuffK3NStibdL9DWLzsXHPrg7W3xUwDmMrDvw2%2FM3qXKS76rRkCoc3X5blQSRMzRcFw7uXpU92bko9wZL4%2F5aiVDlGZjeUCzQaj3i7f8q7P63u%2F10bAFYv4hnpdSVVPbmfXMX3hmGqzjKRPxs1%2FjWgmOWeqmgfedj0XLSy5oV9z6i%2BNEewEMSxJlhMp34t%2FLYtfN4GjDHwoa%2FBjqyAT0SVyRHJU%2FUtwNZn6uXvfp3fv8d0PHp7EbAvFcLYLenK7abBQO%2BFFO2dYtDDnKKf0GmTP7zPSnJd6rbIJd5tKh7xLgpE8ZbhwmRMyp6enZ5cIc5qZrYxv0KpWMx33dg2eVM6bw3Lrs27d5VZsOYqa7ts%2Fgd95uXq4BxzNDIciREtU3McOmr56lveNVNk0rZ3eFyQU54HkSCoXgVzvi5XGQG%2BHfCMmyHVBhIDpBAiDS4f%2Bk%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=1f24f66fe93f12d593292d25c8e61ef368b7628d1f5324b1eeece55f013d78df"
+  },
+  "disclosed_date": 1684431960,
+  "report_url": "https://hackerone.com/reports/1962645",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to the following link: https://accounts.reddit.com/?dest=javascript:alert(document.domain)"
+    ],
+    [
+      2,
+      "If not signed in, log in to trigger the XSS execution. If already logged in, the XSS will execute immediately upon visiting the link."
+    ]
+  ],
+  "vuln_description": "The 'dest' parameter in accounts.reddit.com is vulnerable to Cross-Site Scripting (XSS) when a user logs in after being redirected to a malicious JavaScript URL.",
+  "reason": "The vulnerability involves a straightforward manipulation of a URL parameter to inject JavaScript, which is a common and well-documented attack vector. The discovery does not require understanding complex application states or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves a redirect parameter ('dest') that executes JavaScript after authentication. The methodology focuses on testing authorization boundaries by swapping user sessions and resource IDs, but does not explicitly cover testing for XSS via redirect parameters. However, the 'dest' parameter manipulation could be considered an action that changes the navigation flow, which is somewhat related to the AuthZ bypass detection method (step b or c).",
+    "is_detectable": false
+  }
+}

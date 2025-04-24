@@ -1,0 +1,45 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "ronperris ",
+  "title": "The react-marked-markdown module allows XSS injection in href values.",
+  "content": "\nNOTE! Thanks for submitting a report! Please replace all the [square] sections below with the pertinent details. Remember, the more detail you provide, the easier it is for us to triage and respond quickly, so be sure to take your time filling out the report!\nI would like to report XSS in react-marked-markdown.\nThe react-marked-markdown module incorrectly sanitizes href values and allows arbitrary code injection (XSS) via user provided Markdown.\nModule\nmodule name: react-marked-markdown\nversion: 1.4.6\nnpm page: https://www.npmjs.com/package/1.4.6\nModule Description\nA react components package that helps you use Markdown easily.\nModule Stats\nReplace stats below with numbers from npm\u2019s module page:\n133 downloads in the last day\n935 downloads in the last week\n4207 downloads in the last month\nVulnerability\nVulnerability Description\nThe React component created with react-marked-markdown contains XSS in link values even when the sanitize option is set to true.\nThe react-marked-markdown module uses marked.Render() but overwrites the link method with a custom version that doesn't correctly escape values passed to the href prop of anchor components.\nSteps To Reproduce:\nimport React from 'react'\nimport ReactDOM from 'react-dom'\nimport { MarkdownPreview } from 'react-marked-markdown'\nReactDOM.render(\n<MarkdownPreview\nmarkedOptions={{ sanitize: true }}\nvalue={'[XSS](javascript: alert1)'}\n/>,\ndocument.getElementById('root')\n)\nPatch\nSupporting Material/References:\nState all technical information about the stack where the vulnerability was found\nmacOS 10.13\nNode.js 8.11.1\nnpm 6.0\nWrap up\nSelect Y or N for the following statements:\nI contacted the maintainer to let them know: Y\nI opened an issue in the related repository: Y\nhttps://github.com/Vincent-P/react-marked-markdown/issues/61\nImpact\nThe software does not neutralize or incorrectly neutralizes user-controllable input before it is placed in output that is used as a web page that is served to other users. This allows attackes to add malicious scripts to the page via Markdown.\n\n",
+  "severity": [
+    9.3,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1526245860,
+  "report_url": "https://hackerone.com/reports/344069",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install the react-marked-markdown module (version 1.4.6) in a React project."
+    ],
+    [
+      2,
+      "Use the MarkdownPreview component with the markedOptions.sanitize set to true and pass a malicious markdown string containing a JavaScript URI in a link, e.g., '[XSS](javascript: alert1)'."
+    ]
+  ],
+  "vuln_description": "The react-marked-markdown module incorrectly sanitizes href values in markdown links, allowing arbitrary JavaScript code execution (XSS) even when the sanitize option is enabled. This occurs because the module overwrites the link rendering method without properly escaping href attributes.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common XSS pattern (JavaScript URIs in links) and the issue manifests with basic usage of the library. The only non-obvious aspect is that it persists despite the sanitize flag being set, but this is easily verifiable.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability in react-marked-markdown involves improper sanitization of href values in Markdown links, which is not directly related to authentication or authorization (AuthN/AuthZ) boundaries. The proposed methodologies focus on testing AuthN/AuthZ issues by swapping user sessions and resource IDs, not on input sanitization or XSS vulnerabilities.",
+    "is_detectable": false
+  }
+}

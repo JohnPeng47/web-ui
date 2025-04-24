@@ -1,0 +1,48 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "martinvw ",
+    "title": "Subdomain takeover \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil",
+    "content": "\nDescription:\nThe subdomain \u2588\u2588\u2588\u2588\u2588.mil is pointing to peosol-lg.\u2588\u2588\u2588\u2588\u2588\u2588\u2588., the domain \u2588\u2588\u2588\u2588\u2588\u2588 is currently available for registration as can be seen at https://www.godaddy.com/nl-nl/domainsearch/find?domainToCheck=\u2588\u2588\u2588\u2588\u2588\nGiven the rules, residency of the US, of the us-tld I decided not to register the domain, also I do believe the output to be enough.\nReferences\nImpact\nUsing this vulnerability an attacker can:\nhost unwanted/malicious content under your domain\nreceive email on subdomains mentioned above\neffectively execute cross-site scripting attacks\nin some cases, steal cookie data\nin some cases, trick password managers into filling passwords\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nSee the DIG output:\nCode 632 Bytes\n1\u221a martinvw@denali:~/src > dig \u2588\u2588\u2588\u2588\u2588.mil\n2\n3; <<>> DiG 9.10.6 <<>> \u2588\u2588\u2588\u2588.mil\n4;; global options: +cmd\n5;; Got answer:\n6;; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN, id: 44977\n7;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: 1\n8\n9;; OPT PSEUDOSECTION:\n10; EDNS: version: 0, flags:; udp: 512\n11;; QUESTION SECTION:\n12;\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil.\t\t\tIN\tA\n13\n14;; ANSWER SECTION:\n15\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil.\t\t3600\tIN\tCNAME\tpeosol-lg.\u2588\u2588\u2588.\n16\n17;; AUTHORITY SECTION:\n18us.\t\t\t900\tIN\tSOA\ta.cctld.us. admin.tldns.godaddy. 1715345748 1800 300 604800 1800\n19\n20;; Query time: 166 msec\n21;; SERVER: 8.8.8.8#53(8.8.8.8)\n22;; WHEN: Fri May 10 15:06:32 CEST 2024\n23;; MSG SIZE  rcvd: 148\nAnd the GoDaddy page: https://www.godaddy.com/nl-nl/domainsearch/find?domainToCheck=\u2588\u2588\u2588\nAnd whois:\nCode 1.71 KiB\n1\u221a martinvw@denali:~/src > whois \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\n2% IANA WHOIS server\n3% for more information on IANA, visit http://www.iana.org\n4% This query returned 1 object\n5\n6refer:        whois.nic.us\n7\n8domain:       US\n9\n10organisation: Registry Services, LLC\n11address:      100 S. Mill Ave, Suite 1600\n12address:      Tempe AZ 85281\n13address:      United States of America (the)\n14\n15contact:      administrative\n16name:         IANA Contact\n17organisation: Registry Services, LLC\n18address:      100 S. Mill Ave, Suite 1600\n19address:      Tempe AZ 85281\n20address:      United States of America (the)\n21phone:        +1 480 505 8800\n22fax-no:       +1 480 393 4275\n23e-mail:       iana@about.us\n24\n25contact:      technical\n26name:         IANA Contact\n27organisation: Registry Services, LLC\n28address:      100 S. Mill Ave, Suite 1600\n29address:      Tempe AZ 85281\n30address:      United States of America (the)\n31phone:        +1 480 505 8800\n32fax-no:       +1 480 393 4275\n33e-mail:       iana@about.us\n34\n35nserver:      B.CCTLD.US 156.154.125.70 2001:502:ad09:0:0:0:0:29\n36nserver:      F.CCTLD.US 2001:500:3682:0:0:0:0:11 209.173.58.70\n37nserver:      K.CCTLD.US 156.154.128.70 2001:503:e239:0:0:0:3:1\n38nserver:      W.CCTLD.US 2001:dcd:1:0:0:0:0:15 37.209.192.15\n39nserver:      X.CCTLD.US 2001:dcd:2:0:0:0:0:15 37.209.194.15\n40nserver:      Y.CCTLD.US 2001:dcd:3:0:0:0:0:15 37.209.196.15\n41ds-rdata:     59017 8 2 7daf469d42b5d8e5537fd4dd4b6057710e9a61f72c32eb7fb6526f52277ec2b0\n42\n43whois:        whois.nic.us\n44\n45status:       ACTIVE\n46remarks:      Registration information: http://www.nic.us\n47\n48created:      1985-02-15\n49changed:      2024-04-16\n50source:       IANA\n51\n52# whois.nic.us\n53\n54No Data Found\n55URL of the ICANN Whois Inaccuracy Complaint Form: https://www.icann.org/wicf/\n56>>> Last update of WHOIS database: 2024-05-10T13:10:37Z <<<\nSuggested Mitigation/Remediation Actions\nRemove CNAME record \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1719524040,
+    "report_url": "https://hackerone.com/reports/2499178",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Check the DNS records of the subdomain \u2588\u2588\u2588\u2588\u2588.mil using a tool like dig to see if it points to an external domain."
+        ],
+        [
+            2,
+            "Verify if the pointed domain (peosol-lg.\u2588\u2588\u2588\u2588\u2588\u2588\u2588.) is available for registration by checking on a domain registrar like GoDaddy."
+        ]
+    ],
+    "vuln_description": "The subdomain \u2588\u2588\u2588\u2588\u2588.mil is pointing to an external domain (peosol-lg.\u2588\u2588\u2588\u2588\u2588\u2588\u2588.) that is available for registration. This creates a subdomain takeover vulnerability where an attacker could register the domain and host malicious content, receive emails, execute cross-site scripting attacks, steal cookie data, or trick password managers.",
+    "reason": "The vulnerability involves straightforward DNS checks and domain availability verification, with no complex interactions or novel logic required.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": true,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": false
+    }
+}

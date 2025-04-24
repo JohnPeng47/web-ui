@@ -1,0 +1,54 @@
+{
+    "reported_to": "X (Formerly Twitter)",
+    "reported_by": "protostar0 ",
+    "title": "http request smuggling in  twitter.com",
+    "content": "\nSummary:\nthe same vulnerability reported in other domain , see this report here\nDescription:\nthe Description of HTTP request smuggling attacks : here\nDetect HTTP request smuggling attack (subdomains vulnerable):\n-to detect HTTP request smuggling attack with add header Transfer-Encoding: chunked\nand encode the body of request with chunked encode.\nsend request with a valid chunked encode and you will get response means that the back-end server accept chunked encode\nsend a large value in hex of chunked encode , if get delay of response means its vulnerable. resource: https://portswigger.net/web-security/request-smuggling/finding\nCONFIRMATION:\nPOC:\nin this POC i will use TWEET request as second request (payload) ,means that if the HTTP request smuggling attack success,\nwill get a new TWEET in my account\ntwitter_HTTP_SMUG_POC.mp4 (F609847)\nSteps To Reproduce:\nps : i use chrome browser,with burp\n1- choose any valid POST request (or change GET to POST) from twitter.com and send it to repeater\n2- delete this header (Connection: close ,Accept-Encoding: gzip, deflate)\n3- add this header <Transfer-Encoding: chunked>\n4- add chunked encode put a valid chunked code or [ put just 0 with two CRLFs]\n5-put the second request [i use a TWEET request ]\n6- send the attacker request\nImpact\nimpact of http request smuggling\nhttps://portswigger.net/research/http-desync-attacks-request-smuggling-reborn\nhttps://portswigger.net/web-security/request-smuggling/exploiting\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "HTTP Request Smuggling"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1605677100,
+    "report_url": "https://hackerone.com/reports/715996",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Choose any valid POST request from twitter.com and send it to repeater"
+        ],
+        [
+            2,
+            "Delete headers (Connection: close, Accept-Encoding: gzip, deflate)"
+        ],
+        [
+            3,
+            "Add header Transfer-Encoding: chunked"
+        ],
+        [
+            4,
+            "Add chunked encode with a valid chunked code or just 0 with two CRLFs"
+        ],
+        [
+            5,
+            "Put the second request (e.g., a TWEET request)"
+        ],
+        [
+            6,
+            "Send the attacker request"
+        ]
+    ],
+    "vuln_description": "HTTP request smuggling vulnerability in twitter.com allows an attacker to smuggle a second request (e.g., a TWEET request) by manipulating the Transfer-Encoding header and chunked encoding. If successful, the back-end server processes the smuggled request, leading to unintended actions like unauthorized tweets.",
+    "reason": "The attack involves multiple components (headers, chunked encoding, and a second request) and requires understanding of HTTP request smuggling techniques. However, the steps are well-documented and follow a known pattern, making the discovery process less complex.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

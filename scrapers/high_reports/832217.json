@@ -1,0 +1,46 @@
+{
+    "reported_to": "Rocket.Chat",
+    "reported_by": "legalizenepal ",
+    "title": "Android App Crashes while sending message to users/ on channel ",
+    "content": "\nDescription\nI found a security vulnerability in Rocket's latest android app by which I was able to remotely crash any user\u2019s app instantly just by just sending a simple message in private or in channel. The vulnerability require the victim open the message.\nDevices and Versions\nRocket.Chat.Android version: (e.g. 4.5.1)\nMobile device model and OS version: (tested on :+1: -- \" Android 6.0, 8.0, 10.0\"), probably any other android version\nSteps to reproduce\nCreate new #test channel\nSend POC Code onto the channel\nOpen Mobile App\nApp gets crashed\nPOC\nCrafted code to crash mobile app\nhttps://i.postimg.cc/zvBWdMzT/Screenshot-20200320-112405.png\nMessage Preview\nhttps://i.postimg.cc/fbCJ6KgC/Screenshot-20200320-112541.png\nApp Gets Crashed\nhttps://i.postimg.cc/26J8DXdQ/Screenshot-20200320-112711.png\nCode Link\nhttps://pastebin.com/raw/JEDcC5Yr\nThere is no such problem in iOS client and rocket web\nImpact\nAn attacker could crash the internal chat user's phone, everytime he/she opens the rocket chat , i.e posting crafted code on #general channel\nHi, i even posted the issue on github, before i got to know about rocket chat on H1, but issue still not fixed, so just tryna keep you updated guys.\nhttps://github.com/RocketChat/Rocket.Chat.ReactNative/issues/1907\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Classic Buffer Overflow"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1616086980,
+    "report_url": "https://hackerone.com/reports/832217",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "MEDIUM",
+    "vuln_category": "MOBILE",
+    "steps": [
+        [
+            1,
+            "Create a new channel (e.g., #test) in Rocket.Chat"
+        ],
+        [
+            2,
+            "Send a specially crafted message (POC code) to the channel"
+        ],
+        [
+            3,
+            "Open the Rocket.Chat mobile app and view the message"
+        ],
+        [
+            4,
+            "Observe the app crashing upon viewing the message"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to remotely crash any Rocket.Chat Android app user by sending a specially crafted message. The crash occurs when the victim opens the message, affecting multiple Android versions.",
+    "reason": "The attack involves crafting a specific message that triggers a crash in the Android app. While the steps to reproduce are straightforward, the discovery requires understanding how the app processes messages and identifying a payload that causes a crash. The interaction between the crafted message and the app's message processing logic is non-obvious.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

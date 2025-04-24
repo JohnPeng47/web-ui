@@ -1,0 +1,46 @@
+{
+  "reported_to": "Monero",
+  "reported_by": "l00ph0le ",
+  "title": "Monero Wallet Gui for Windows (Arbitrary Code Execution)",
+  "content": "\nSummary:\nThe windows version of the monero-wallet-gui.exe application allows for code injection. The monero-wallet-gui.exe utilizes a precompiled OpenSSL library called libeay32.dll. This OpenSSL library is trying to read a configuration file that doesn\u2019t exist. By default, on windows systems, authenticated users can create under the c:\\ drive. A user with low privileges can create the folder structure and copy a malicious openssl config and .dll files into their path. When the monero-wallet-gui.exe application is executed, the malicious .dll file is also executed.\nDescription:\nIf you download Microsoft sys internals process monitor and execute it. Then open the monero-wallet-gui.exe application, you can see the \u201cmonero-wallet-gui.exe\u201d binary trying to read a file called openssl.cnf and getting the result \u201cPATH NOT FOUND\u201d. See attached screenshot (FileNotFound.png).\nI believe the issue can be resolved by compiling the OpenSSL library using \u2013openssldir parameter and specifying a directory that can only be written too by administrators (i.e. C:\\Program Files, C:\\ProgramData). Currently it looks for the \u201cssl\u201d directory in the parent directory of the Monero install path. For example, if I download the monero-gui-win-x64-v0.14.0.0.zip file and save it to the c: drive, then extract the file, the install path becomes \u201cC:\\monero-gui-win-x64-v0.14.0.0\\monero-gui-v0.14.0.0\u201d. When monero-wallet-gui.exe is executed, it looks for the openssl.cnf file in \u201cC:\\monero-gui-win-x64-v0.14.0.0\\ssl\u201d, which doesn\u2019t exist.\nI\u2019ve included two example exploits for this;\nExploit example 1\ncalc.c \u2013 source code of my .dll file to execute calc.exe\ncalc.dll \u2013 compiled version of the calc.exe library\nopenssl-calc.cnf \u2013 example malicious openssl config\nExploit example 2\nbackdoor.c \u2013 source code my .dll file to create a local administrator, this uses a known uac bypass\nbackdoor.dll \u2013 compiled version of the local admin backdoor library\nopenssl-backdoor.cnf - example malicious openssl config\nSteps To Reproduce:\nDownload and extract monero-gui-win-x64-v0.14.0.0.zip to c: drive.\nExploit 1 \u2013 calc.exe \u2013 See attached video calc.mp4\nLogin with a low privileged user (part of Users group)\nOpen a cmd.exe and issue command: mkdir C:\\monero-gui-win-x64-v0.14.0.0\\ssl\nCopy calc.dll C:\\monero-gui-win-x64-v0.14.0.0\\ssl\nCopy openssl-calc.cnf to C:\\monero-gui-win-x64-v0.14.0.0\\ssl\nRename openssl-calc.cnf to openssl.cnf\nLogout of low privileged user.\nLogin with local administrator.\nLaunch monero-wallet-gui.exe application.\nCalc.exe with execute.\nExploit 2 \u2013 create a local admin user (uac bypass) \u2013 See attached video backdoor.mp4\nLogin with a low privileged user (part of Users group)\nOpen a cmd.exe and issue command: mkdir C:\\monero-gui-win-x64-v0.14.0.0\\ssl\nCopy backdoor.dll to C:\\monero-gui-win-x64-v0.14.0.0\\ssl\nCopy openssl-backdoor.cnf .dll to C:\\monero-gui-win-x64-v0.14.0.0\\ssl\nRename openssl-backdoor.cnf to openssl.cnf\nLogout of low privileged user.\nLogin with local administrator.\nLaunch monero-wallet-gui.exe application.\nOpen \u201cComputer Management\u201d\nNavigate to \u201cSystem Tools\u201d -> \u201cLocal Users and Groups\u201d -> \u201cUsers\u201d\nA new user of \u201cbackdoor\u201d with a password of \u201cbackdoor\u201d was added.\nRight click on \u201cbackdoor\u201d and click \u201cProperties\u201d, then click \u201cMember Of\u201d.\nThe \u201cbackdoor\u201d user is part of the local administrator group.\nHow can the system be exploited with this bug?\nDLL Hi-jacking can be used for many nefarious purposes. It can be used by malware to propagate and establish persistence on a workstation. It can be used to privilege escalation in the post exploitation phases of an attack.\nImpact\nThe impact is high. Successful exploitation leads to arbitrary code execution on the windows system. There are many actions a nefarious individual could accomplish with this vulnerability. In addition to post-exploitation privilege escalation, another example could be ransomware, or other malware.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1574130780,
+  "report_url": "https://hackerone.com/reports/630903",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Download and extract monero-gui-win-x64-v0.14.0.0.zip to the C: drive."
+    ],
+    [
+      2,
+      "Create the folder structure C:\\monero-gui-win-x64-v0.14.0.0\\ssl and place malicious openssl.cnf and .dll files in it."
+    ],
+    [
+      3,
+      "Execute monero-wallet-gui.exe as an administrator, triggering the malicious .dll."
+    ]
+  ],
+  "vuln_description": "The Windows version of monero-wallet-gui.exe is vulnerable to arbitrary code execution due to DLL hijacking via a missing OpenSSL configuration file. A low-privileged user can plant malicious DLLs in a writable path that the application attempts to load, leading to code execution with administrator privileges.",
+  "reason": "The vulnerability involves understanding OpenSSL's configuration file loading behavior, DLL hijacking techniques, and Windows file system permissions. While the components are standard (OpenSSL, DLL loading), the interaction between them is non-obvious and requires knowledge of how OpenSSL searches for its configuration file.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves DLL hijacking through the OpenSSL configuration file path, which is not directly related to the authentication or authorization boundaries within the same application. The methodology described focuses on swapping user sessions, actions, and resource IDs within the same application context, not on file system permissions or DLL loading mechanisms.",
+    "is_detectable": false
+  }
+}

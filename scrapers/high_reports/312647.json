@@ -1,0 +1,60 @@
+{
+  "reported_to": "Discourse",
+  "reported_by": "mishre ",
+  "title": "Gaining access to private topics using quoting feature",
+  "content": "\nDescription\nSome topics have limited access to certain groups and users, and while there exists a validation for access on this topic, it can be bypassed by abusing a vulnerability in the \"onebox\" quoting feature.\nWhen pasting a link in a reply, if this link happens to be a link to another topic on Discourse a small preview is shown which includes the topic content or the post content where the link is pointing to. Also there are some protections in place to make sure that the user can view the linked content, the said protections can be bypassed by adding a query string parameter to the link containing the value\nCode 34 Bytes\n1?source_topic_id={victim-topic-id}\nSteps to reproduce\nLogin as an administrator to Discourse and create a topic which can only be viewed by the staff.\nCopy the topic's id from the topic's page. the topic id can be found by browsing the topic and then copying the number in the end of the url (http://localhost:4000/t/{topic-name}/{topic-id})\nLogin with a non-admin user.\nGo to any topic you have access to, and type in the following reply:\nCode 51 Bytes\n1http://localhost:80/t/blablabla/?source_topic_id=29\nplease note that the port should 80 or 443 even if the url of your local installation is a different (probably some software bug)\n5. Wait for the preview to load and see that you can see topic's content.\nRoot cause\nThe following piece of code determines if the logged-in user is capable of viewing the post/topic :\nCode 475 Bytes\n1        def can_see_post?(post, source_topic)\n2          return false if post.nil? || post.hidden || post.trashed? || post.topic.nil?\n3          Guardian.new.can_see_post?(post) || same_category?(post.topic.category, source_topic)\n4        end\n5\n6        def can_see_topic?(topic, source_topic)\n7          return false if topic.nil? || topic.trashed? || topic.private_message?\n8          Guardian.new.can_see_topic?(topic) || same_category?(topic.category, source_topic)\n9        end\nas can be seen here: https://github.com/discourse/discourse/blob/master/lib/onebox/engine/discourse_local_onebox.rb#L113\nHowever, the source_topic parameter is controlled directly by user input:\nCode 59 Bytes\n1source_topic_id = @url[/[&?]source_topic_id=(\\d+)/, 1].to_i\nas can be seen here:\nhttps://github.com/discourse/discourse/blob/master/lib/onebox/engine/discourse_local_onebox.rb#L47\nSo if we pass in the same topic id as the one we are trying to view, basically the function same_category will always return true, effectively bypassing any protection in place.\nImpact\nAn attacker will be able to access all private topics and posts on Discourse.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 256,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1521325620,
+  "report_url": "https://hackerone.com/reports/312647",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Login as an administrator and create a private topic (staff-only)"
+    ],
+    [
+      2,
+      "Note the topic ID from the URL (e.g., http://localhost:4000/t/{topic-name}/{topic-id})"
+    ],
+    [
+      3,
+      "Login as a non-admin user"
+    ],
+    [
+      4,
+      "In any accessible topic, post a reply with a link to a dummy topic but append ?source_topic_id={victim-topic-id}"
+    ],
+    [
+      5,
+      "Observe the private topic content in the onebox preview"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows bypassing access controls on private Discourse topics by exploiting a flaw in the onebox quoting feature. By appending a query parameter (?source_topic_id={victim-topic-id}) to a topic link, the system incorrectly validates access by comparing the source and target topic categories, granting unauthorized preview access.",
+  "reason": "The attack involves understanding Discourse's onebox feature, the access control logic, and the subtle interaction where user-controlled input (source_topic_id) bypasses validation by matching category checks. However, the core flaw (parameter manipulation to match categories) is relatively straightforward once identified.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true
+  }
+}

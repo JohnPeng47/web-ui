@@ -1,0 +1,38 @@
+{
+    "reported_to": "HackerOne",
+    "reported_by": "haxta4ok00 ",
+    "title": "Account takeover via leaked session cookie",
+    "content": "\nSummary:\nYou are disclose for me you session\nDescription:\nyou are gevi me your session on last report\nI am can use your session(sorry)\n\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nHackerOneStaff Access, i can read all reports @security and more program\n\n",
+    "severity": [
+        8.3,
+        null
+    ],
+    "bounty": 20000,
+    "weaknesses": [
+        "Insufficiently Protected Credentials"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1575410400,
+    "report_url": "https://hackerone.com/reports/745324",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Obtain the session cookie from the victim, either through a leak or other means."
+        ],
+        [
+            2,
+            "Use the session cookie to impersonate the victim and gain unauthorized access to their account."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the unauthorized use of a leaked session cookie to take over a user's account, granting access to sensitive information and functionalities.",
+    "reason": "The attack is straightforward, involving only the interception and use of a session cookie without any complex interactions or manipulations of application states.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

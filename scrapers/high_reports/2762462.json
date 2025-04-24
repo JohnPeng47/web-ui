@@ -1,0 +1,58 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "trev0ck ",
+    "title": "Ability to Add and Verify Uncontrolled Mobile Numbers Leading to Account Takeover (ATO)",
+    "content": "\nSummary\nA critical vulnerability was identified in the OTP verification process on the shop.mtn.ng platform, which allows attackers to add and verify mobile numbers that they do not control. By tampering with the OTP verification request, an attacker can link a victim's mobile number to their account. This leads to an Account Takeover (ATO) scenario where the attacker gains full access to the victim's account without owning or controlling the victim's phone number.\nSteps to Reproduce\nInitiate OTP Request\nBegin the login or registration process on the platform.\nEnter a valid mobile number (MSISDN) and request an OTP.\nCapture OTP Verification Request\nUse a proxy tool like Burp Suite or Caido to intercept the OTP verification request when submitting the OTP.\nThe intercepted request will look like this\nCode 181 Bytes\n1POST /mtn_otp/index/verification/ HTTP/2\n2Host: shop.mtn.ng\n3Content-Type: application/x-www-form-urlencoded\n4Content-Length: 53\n5\n6ajax=1&action=verifyotp&msisdn=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588&otp=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nManipulate Server Response\nUpon capturing the request, submit an incorrect OTP to receive the server's response\nCode 96 Bytes\n1{\n2  \"status\": 400,\n3  \"message\": \"Invalid OTP\",\n4  \"msisdn\": \"2347037855490\",\n5  \"success\": false\n6}\nModify the response in the intercepted traffic to indicate a successful verification\nCode 91 Bytes\n1{\n2  \"status\": 200,\n3  \"message\": \"success\",\n4  \"msisdn\": \"2347037855490\",\n5  \"success\": true\n6}\nThis will trick the client into thinking that the OTP was successfully verified, even though the OTP is incorrect.\nThe manipulated server response now grants full access to the victim's phone number account. Even though the OTP was incorrect, the altered response bypasses the verification, which could allow the attacker to log in as the target user.\nNOTE I do not own this phone number at all and as you can see it is now linked to my account\n<image_0>\nRoot Cause\nThe application fails to protect against the manipulation of the OTP verification response. The server does not perform integrity checks on the response sent back to the client, allowing attackers to alter it and bypass OTP verification entirely.\nImpact\nAn attacker can exploit this flaw to hijack user accounts by manipulating the OTP verification response. This allows the attacker to\nAccess personal user information such as names, phone numbers, and email addresses.\nModify sensitive account settings like passwords, linked emails, and phone numbers.\nPerform unauthorized actions such as transactions or purchases.\nFurther escalate the attack to other services connected to the victim's account.\n\n",
+    "severity": [
+        9.1,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Authentication Bypass Using an Alternate Path or Channel"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/7o2ush1cxxearobqmih1mf29vczb?response-content-disposition=attachment%3B%20filename%3D%22image.png%22%3B%20filename%2A%3DUTF-8%27%27image.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQUMFBJSG5%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T200017Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIFZuqlSX62MWhAr2BKxofV%2BULLbJUGShROYuJwTzwxSHAiABsJuF3X%2BSFrH06L4Cm0FwhT9iXitSnRhmo40I6nd8tyq7BQjz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMPKZSz1zhJ%2BHgQpSGKo8FyQdojXMTrsTk7gorsU9P9opgY1BMpc2s2pcZdb0IzeGoA0JbJ9kgHmT99F4ZKuYbe9pOszMBjS9rXnQDHimGVzsLMRIyiwjsfPW00dA%2B%2BYEHsNwY%2FsFRRcw4%2FxU2MCGlTB%2BcdM4EipVKrCm7E%2FwFvk5Hx1WfV4K8GUGpTA17IwoV%2BhtxxmvZ0CV9PEtZWDIpCr8RT8%2BnQTsHKgMK2kIs%2BEeyedkdK5MHE1tcLzSOsoP7YKJlIn2Q8ugaDePU65CB3DAqGuTTvs3dRm9lXokoig8ZqbQ3bdVwiZ%2B5Oi9VpWuLH5KzV0IELXHUsDIChejbRPmQCZrmT0CNOIhhqzovtswvvU4FwGna6lTeB62A1cNTbgvW2BtdNBKMs7rYOumrI91eiTL351ATJmAYV6q7o417mV9tn9uqSk%2FBEiVZxMD4JUkYPyKaMPQStS%2BFHweJYwg%2FmWGv3otMytmiH2mGaz%2FQ%2FozJZNGJyqr9LKM8WKa4UaLtDSAj%2F8m8Nm0URUoWZnlEunOqteIQqyZowgBa924y%2FIQAvYDQ9G0KS7Sugi9cePAUL%2Bs7NYLr%2FT8QfO4W5xub9xMTNIY80D4Tkd9xe7FfcU8JaKDZlwEZ8WiQVykzqFFPGHY5asHPkJiumQqDiWJLXKvO6gCzI3EOjuwbbXgXL9TSqx5LH0mMuffK3NStibdL9DWLzsXHPrg7W3xUwDmMrDvw2%2FM3qXKS76rRkCoc3X5blQSRMzRcFw7uXpU92bko9wZL4%2F5aiVDlGZjeUCzQaj3i7f8q7P63u%2F10bAFYv4hnpdSVVPbmfXMX3hmGqzjKRPxs1%2FjWgmOWeqmgfedj0XLSy5oV9z6i%2BNEewEMSxJlhMp34t%2FLYtfN4GjDHwoa%2FBjqyAT0SVyRHJU%2FUtwNZn6uXvfp3fv8d0PHp7EbAvFcLYLenK7abBQO%2BFFO2dYtDDnKKf0GmTP7zPSnJd6rbIJd5tKh7xLgpE8ZbhwmRMyp6enZ5cIc5qZrYxv0KpWMx33dg2eVM6bw3Lrs27d5VZsOYqa7ts%2Fgd95uXq4BxzNDIciREtU3McOmr56lveNVNk0rZ3eFyQU54HkSCoXgVzvi5XGQG%2BHfCMmyHVBhIDpBAiDS4f%2Bk%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=72ec82aef064cd11115c74b725b3e376c6644bf023a4a56576c2648d135454d2"
+    },
+    "disclosed_date": 1741113000,
+    "report_url": "https://hackerone.com/reports/2762462",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Initiate OTP Request: Begin the login or registration process on the platform and request an OTP for a valid mobile number."
+        ],
+        [
+            2,
+            "Capture OTP Verification Request: Use a proxy tool like Burp Suite to intercept the OTP verification request when submitting the OTP."
+        ],
+        [
+            3,
+            "Manipulate Server Response: Submit an incorrect OTP, intercept the response, and modify it to indicate a successful verification."
+        ],
+        [
+            4,
+            "Bypass Verification: The manipulated response tricks the client into granting access to the victim's account without correct OTP validation."
+        ]
+    ],
+    "vuln_description": "A critical vulnerability in the OTP verification process allows attackers to add and verify mobile numbers they do not control by manipulating the server response. This leads to Account Takeover (ATO) by bypassing OTP verification.",
+    "reason": "The attack involves intercepting and modifying server responses, which is a straightforward process with proxy tools. The vulnerability stems from a lack of server-side integrity checks, a common oversight in OTP implementations.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

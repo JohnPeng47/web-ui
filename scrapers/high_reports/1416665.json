@@ -1,0 +1,38 @@
+{
+    "reported_to": "Paragon Initiative Enterprises",
+    "reported_by": "aif_lill ",
+    "title": "Recaptcha Secret key Leaked",
+    "content": "\nGreeting from @kashifinfo90,\nI hope Paragonie Security Team is doing great, Following Secret Keys are leaked:\n\"secret-key\": \"6Ldy5BYTAAAAAPBh868BMm2nGZelOUyXJHTUE4no\",\n\"site-key\": \"6Ldy5BYTAAAAACk3Tj8wDUBLcVxSL2JXFBw-Dtj3\"\n\"secret-key\": \"6Ld27iETAAAAAF6tsd5SaoCgc5cFX-tkfHqx7FtX\",\n\"site-key\": \"6Ld27iETAAAAAI51EVcu0nBw2wkxQiZxg1zGv2uI\"\nSteps To Reproduce:\nTo find the leak please Click Here\nImpact\nTo avoid any legal issue i didn't try anything with these key, hence it up to you to fully investigate them and figure out if they have any security impact.\nNote: If it is out of scope or your figure out that the security impact is un considerable please allow me to selfclose it, It will prevent decrease in my current reputation points.\nkind Regards,\n@kashifinfo90.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1638659220,
+    "report_url": "https://hackerone.com/reports/1416665",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Locate the leaked reCAPTCHA secret and site keys in the report."
+        ],
+        [
+            2,
+            "Use the leaked keys to bypass reCAPTCHA verification on the affected site."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the exposure of reCAPTCHA secret and site keys, which could allow attackers to bypass CAPTCHA protections on the affected website. This could lead to automated attacks such as spam submissions or brute force attempts.",
+    "reason": "The discovery of this vulnerability is straightforward as it involves finding publicly exposed keys, which does not require complex interactions or understanding of multiple components. The keys are directly usable without any additional manipulation or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

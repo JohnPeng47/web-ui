@@ -1,0 +1,53 @@
+{
+  "reported_to": "Nextcloud",
+  "reported_by": "rcejules ",
+  "title": "potential RCE and XSS via file upload requiring user account and default settings",
+  "content": "\npotential RCE and XSS via file upload requiring user account and default settings\nRequirements\nUser account that can upload files (NO admin)\nUser account name on creation (usually the same as on creation/displayed name)\ndata directory inside of nextcloud server folder (suggested by /var/www/nextcloud/config/config.sample.php)\nTested on\ncurrent release\nVersion 16.0.4.1\nstable\nBuild: '2019-08-14T18:57:27+00:00 a1a245e88202d834f08f4c2e4451dcbe9baee3aa'\nBasic idea\nOn nextcloud php files can be uploaded, but when clicked they are only shown in a text editor. If the URL to our skript is known, we get code execution.\nA RCE will work if the server has set it's data directory inside the nextcloud server folder and the username is known.\nconfig example\nThe following is located in /var/www/nextcloud/config/config.sample.php:\n[https://github.com/nextcloud/server/blob/master/config/config.sample.php]\nCode 104 Bytes\n1 *\n2 * Default to ``data/`` in the Nextcloud directory.\n3 */\n4'datadirectory' => '/var/www/nextcloud/data',\nIf this config is used, RCE is possible.\nAttack scenario:\nShort video attached.\n(To reproduce use a nextcloud instance and setup a user named attacker. Use any php script called shell.php, and set the datadirectory to /var/www/nextcloud/data)\nLogin to obtained user account (assume his name is \"attacker\")\nupload malicious php script. (assume it is called \"shell.php\")\nnavigate to https://www.ournextclouddomain.com/data/attacker/files/shell.php\nsee some shells poppin\nThis is possible since we know the direct path to our php script.\nNote: This can also be used for XSS since we can upload any html file!\nPrevention\nuser accounts could extend a seed on their foldername like attacker-19320143158015\nusage of a custom seed inside the data directory.\ndifferent config than on the example\nImpact\nRCE, extract ser data or modify config file (if no special permissions are set), take over the server, also XSS is possible\n\n",
+  "severity": [
+    8.8,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1585745400,
+  "report_url": "https://hackerone.com/reports/678727",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Login to a Nextcloud user account (non-admin) that has file upload permissions."
+    ],
+    [
+      2,
+      "Upload a malicious PHP file (e.g., shell.php) to the Nextcloud instance."
+    ],
+    [
+      3,
+      "Navigate to the direct URL of the uploaded PHP file, which follows the pattern: https://[nextcloud-domain]/data/[username]/files/[filename].php"
+    ],
+    [
+      4,
+      "Observe the execution of the PHP script, leading to Remote Code Execution (RCE)."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows a non-admin user to achieve Remote Code Execution (RCE) and Cross-Site Scripting (XSS) by uploading malicious files (PHP or HTML) when the Nextcloud data directory is located within the server's web-accessible folder and the username is predictable. The attacker can execute arbitrary code by accessing the uploaded file directly via its URL.",
+  "reason": "The vulnerability involves understanding the default configuration of Nextcloud (data directory location), predictable user directory naming, and the ability to upload executable files. While the steps are straightforward, the attacker must know or guess the server's configuration and the username's directory structure.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves authenticated file uploads and access to uploaded files via known paths, which can be detected by analyzing (user_session, action, resource_id) tuples. The methodology covers this by testing actions with different user sessions and resource IDs, including unauthenticated sessions.",
+    "is_detectable": true
+  }
+}

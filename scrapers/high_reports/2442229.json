@@ -1,0 +1,68 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "bulldawg ",
+    "title": "Missing Access Control Allows for User Creation and Privilege Escalation ",
+    "content": "\nHello,\nThe RSI Test Environment application at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ords/f?p=842:1 does not enforce access controls on the user management endpoint. This allows any unauthenticated person to both create new users as well as give them the administrator role. This then provides access to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ords/f?p=303 as an administrator.\nThe user management endpoint can be accessed at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ords/f?p=842:9::::::\nI have attached screenshots which show this misconfiguration.\nIf there are any questions or concerns please let me know as I am more than happy to provide additional information!\nImpact\nThis is a critical security issue which poses risk to the confidentiality and integrity of data within the \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 application. An attacker would be able to view, modify, and/or delete the restricted information and documents within the application as well as manage other user accounts. This provides unauthorized access that is otherwise restricted to USG-authorized individuals per the disclaimer.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nVisit https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ords/f?p=842:9, which is the user management endpoint for the environment.\nUnder \"Add New User\", enter an email address, first name, last name, and select an Agency.\nUnder \"Assign User Roles\", select the newly created user and apply the administrator role.\nRetrieve the credentials for the new account that were sent to the email address entered.\nGo to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ords/f?p=303 and login using the credentials.\nChange to a new password on prompt.\nView the logged in username in the top right with the Administrator role.\nSuggested Mitigation/Remediation Actions\nEnforce access controls on page 9 of the application with an ID of 842.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1721414220,
+    "report_url": "https://hackerone.com/reports/2442229",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Visit the user management endpoint at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ords/f?p=842:9"
+        ],
+        [
+            2,
+            "Under 'Add New User', enter an email address, first name, last name, and select an Agency"
+        ],
+        [
+            3,
+            "Under 'Assign User Roles', select the newly created user and apply the administrator role"
+        ],
+        [
+            4,
+            "Retrieve the credentials for the new account that were sent to the email address entered"
+        ],
+        [
+            5,
+            "Go to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ords/f?p=303 and login using the credentials"
+        ],
+        [
+            6,
+            "Change to a new password on prompt"
+        ],
+        [
+            7,
+            "View the logged in username in the top right with the Administrator role"
+        ]
+    ],
+    "vuln_description": "The RSI Test Environment application does not enforce access controls on the user management endpoint, allowing any unauthenticated person to create new users and assign them the administrator role. This provides unauthorized access to restricted information and documents within the application.",
+    "reason": "The vulnerability involves a straightforward exploitation of missing access controls on a user management endpoint. The steps to reproduce are linear and do not require complex interactions or state manipulation.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

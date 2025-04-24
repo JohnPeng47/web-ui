@@ -1,0 +1,38 @@
+{
+  "reported_to": "curl",
+  "reported_by": "nyymi ",
+  "title": "CVE-2021-22901: TLS session caching disaster",
+  "content": "\nSummary:\nlib/vtls/openssl.c ossl_connect_step1 sets up the ossl_new_session_cb sessionid callback with SSL_CTX_sess_set_new_cb, and adds association from data_idx and connectdata_idx to current conn and data respectively:\nCode 167 Bytes\n1  SSL_CTX_set_session_cache_mode(backend->ctx,\n2      SSL_SESS_CACHE_CLIENT | SSL_SESS_CACHE_NO_INTERNAL);\n3  SSL_CTX_sess_set_new_cb(backend->ctx, ossl_new_session_cb);\n...\nCode 118 Bytes\n1      SSL_set_ex_data(backend->handle, data_idx, data);\n2      SSL_set_ex_data(backend->handle, connectdata_idx, conn);\nWhenever the ossl_new_session_cb callback is called the code fetches the conn and data associated via:\nCode 158 Bytes\n1  conn = (struct connectdata*) SSL_get_ex_data(ssl, connectdata_idx);\n2  if(!conn)\n3    return 0;\n4\n5  data = (struct Curl_easy *) SSL_get_ex_data(ssl, data_idx);\nHowever, it is possible that the connection is disassociated from these pointers via Curl_detach_connnection, and reassociated to a different connection via Curl_attach_connnection. Yet, Curl_detach_connnection doesn't SSL_set_ex_data the data_idx / connectdata_idx/ to NULL, nor does Curl_attach_connnection update the pointers with new ones. I am not absolutely certain but this appears to lead to a situation where a stale pointer(s) can exists when the session callback is called.\nSteps To Reproduce:\nUnfortunately I currently have no easy to way reproduce this issue. I might attempt to do this later.\nNotes\nThis issue is currently lacking information but includes what I believe is the potential root cause of the issue. This information might be wrong or lacking necessary details to make full determination of the validity of this issue at this time.\nThis issue seems to be occurring somewhat periodically when webkit browser is built with the libcurl backend. Typically this is a rare use case, I know of only Sony Playstation devices that use in larger scale.\nImpact\nUse after free, with potential for (remote(*)) code execution as ossl_new_session_cb calls Curl_ssl_sessionid_lock(data); with potentially repurposed memory. Attacker would need to control data->share pointer to attacker controller memory. This fake struct Curl_share would need to be crafted in a way that if(share->specifier & (1<<type)) is taken. share->lockfunc would then get called by the function, resulting in code execution.\n*) caveat here, as it is unknown if external attacker can trigger this situation. It would be difficult, but cannot be completely ruled out.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 2000,
+  "weaknesses": [
+    "Use After Free"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1622031840,
+  "report_url": "https://hackerone.com/reports/1180380",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Set up a TLS session using libcurl with OpenSSL backend, ensuring SSL_SESS_CACHE_CLIENT and SSL_SESS_CACHE_NO_INTERNAL flags are set."
+    ],
+    [
+      2,
+      "Trigger a scenario where Curl_detach_connection and Curl_attach_connection are called, causing the connection to be disassociated and reassociated without updating SSL_set_ex_data pointers."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves a use-after-free scenario in libcurl's OpenSSL backend where stale pointers can exist when the session callback is called. This occurs due to improper handling of connection detachment and reattachment, leading to potential code execution if an attacker can control the memory pointed to by the stale pointers.",
+  "reason": "The vulnerability requires understanding of TLS session caching, OpenSSL callback mechanisms, and libcurl's connection handling. The interaction between these components is subtle and non-obvious, especially the timing and state management of connection detachment and reattachment. Additionally, the potential for remote exploitation adds to the complexity.",
+  "new_complexity": "HIGH",
+  "requires_code": true,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null
+}

