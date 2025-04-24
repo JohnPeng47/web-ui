@@ -5,7 +5,7 @@ from collections import defaultdict
 from typing import Dict, List, Any
 
 
-def analyze_injection_reports(input_dir: str, output_file: str):
+def analyze_injection_reports(input_dir: str, output_file: str, title: str = "Injection Vulnerabilities Analysis"):
     """
     Analyzes all reports in the specified directory
     and writes their vulnerability descriptions and steps to a file.
@@ -42,7 +42,7 @@ def analyze_injection_reports(input_dir: str, output_file: str):
     
     # Write results to file
     with open(output_path, "w", encoding="utf-8") as f:
-        f.write("Injection Vulnerabilities Analysis\n")
+        f.write(f"{title}\n")
         f.write("==================================================\n\n")
         
         total_reports = sum(len(reports) for reports in categorized_reports.values())
@@ -56,6 +56,11 @@ def analyze_injection_reports(input_dir: str, output_file: str):
                 f.write(f"Report {report.get('report_url')}: {report.get('title', 'No Title')}\n")
                 f.write("=" * 80 + "\n")
                 
+                f.write("RAW DESCRIPTION:\n")
+                f.write(f"{report.get('content', 'No description available')}\n\n")
+
+                f.write("=" * 80 + "\n")
+
                 # Write vulnerability description
                 f.write("Vulnerability Description:\n")
                 f.write(f"{report.get('vuln_description', 'No description available')}\n\n")
@@ -82,10 +87,12 @@ def main():
     parser = argparse.ArgumentParser(description="Generate injection vulnerability report from JSON files")
     parser.add_argument("input_dir", help="Directory containing JSON report files")
     parser.add_argument("output_file", help="Output file path for the analysis report")
+    parser.add_argument("--title", default="Injection Vulnerabilities Analysis", 
+                        help="Title for the analysis report")
     
     args = parser.parse_args()
     
-    analyze_injection_reports(args.input_dir, args.output_file)
+    analyze_injection_reports(args.input_dir, args.output_file, args.title)
 
 
 if __name__ == "__main__":

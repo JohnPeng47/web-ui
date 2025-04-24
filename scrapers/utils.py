@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from tqdm import tqdm
 from random import shuffle
 from pydantic import BaseModel
+from datetime import datetime
 
 class VulnCategory(str, Enum):
     WEB_APP = "WEB_APP"
@@ -19,10 +20,18 @@ class SeverityLevel(str, Enum):
     MEDIUM = "MEDIUM"
     LOW = "LOW"
 
-class AuthNZVulnInfo(BaseModel):
-    idor_detectable: bool
-    authnz_byppass_detectable: bool
+class AuthNZMetadata(BaseModel):
+    reason: str
+    is_detectable: bool
 
+class InjectionMetadata(BaseModel):
+    is_simple_payload: bool
+
+class InjectionStruct(BaseModel):
+    injection_metadata: InjectionMetadata 
+
+class AuthNZStruct(BaseModel):
+    authnz_metadata: AuthNZMetadata
 
 class InjectionReport(BaseModel):
     reported_to: str
@@ -50,12 +59,23 @@ class InjectionReport(BaseModel):
 
 class Weaknesses(str, Enum):
     XSS = "XSS"
-    AUTHZ_AUTN = "AUTHZ/AUTN"
+    AUTHZ_AUTHN = "AUTHZ/AUTN"
     OTHER_INJECTION = "OTHER_INJECTION"
     SSRF = "SSRF"
     OTHER = "OTHER"
     CODE_VULNS_IGNORE = "CODE_VULNS_IGNORE"
     IDK = "IDK"
+
+def epoch_to_year(epoch_time):
+    """Convert Unix epoch timestamp to year
+    
+    Args:
+        epoch_time (int): Unix epoch timestamp
+        
+    Returns:
+        int: Year extracted from timestamp
+    """
+    return datetime.fromtimestamp(epoch_time).year
 
 def convert_weakness(weakness):
     ISSUES_MAPPING = {
@@ -66,7 +86,7 @@ def convert_weakness(weakness):
             "Cross-site Scripting (XSS) - Generic",
             "Reflected XSS"
         ],
-        Weaknesses.AUTHZ_AUTN: [
+        Weaknesses.AUTHZ_AUTHN: [
             "Improper Access Control - Generic",
             "Insecure Direct Object Reference (IDOR)",
             "Improper Authentication - Generic", 
@@ -258,12 +278,17 @@ def read_reports_in_batches(reports_dir: Path, batch_size: int = 50):
                 if not report:
                     continue
 
+                if report.get("new_complexity", None):
+                    continue
+
                 # FILTER LOGIC
+                # TODO: 
                 weakness = report.get("weaknesses", [])
                 if weakness:
                     weakness = weakness[0]
                     weakness = convert_weakness(weakness)
-                    if weakness != Weaknesses.AUTHZ_AUTN:
+                    # if weakness in [Weaknesses.OTHER_INJECTION, Weaknesses.XSS]:
+                    if weakness in [Weaknesses.AUTHZ_AUTHN]:
                         continue
 
         except (json.JSONDecodeError, OSError) as e:
@@ -279,6 +304,67 @@ def read_reports_in_batches(reports_dir: Path, batch_size: int = 50):
     if batch:  # Yield any remaining reports
         yield batch
 
+def get_reports_with_count(reports_dir: Path, batch_size: int = 50):
+    """Returns a generator of batched reports and the total count of matching reports
+    
+    Args:
+        reports_dir: Directory containing report JSON files
+        batch_size: Number of reports to include in each batch
+    
+    Returns:
+        tuple: (generator of batched reports, total count of matching reports)
+    """
+    # First pass to count matching reports
+    matching_reports = []
+    report_files = list(reports_dir.glob("*.json"))
+    
+    for report_file in report_files:
+        try:
+            with open(report_file, "r") as f:
+                report = json.load(f)
+                if not report:
+                    continue
+
+                # Apply same FILTER LOGIC as in read_reports_in_batches
+                weakness = report.get("weaknesses", [])
+                if weakness:
+                    weakness = weakness[0]
+                    weakness = convert_weakness(weakness)
+                    if weakness not in [Weaknesses.XSS, Weaknesses.OTHER_INJECTION]:
+                        continue
+                
+                matching_reports.append(report_file)
+                
+        except (json.JSONDecodeError, OSError) as e:
+            print(f"Error reading {report_file}: {e}")
+            continue
+    
+    # Now create a generator with the pre-filtered list
+    def batch_generator():
+        shuffle(matching_reports)
+        batch = []
+        for report_file in matching_reports:
+            try:
+                with open(report_file, "r") as f:
+                    report = json.load(f)
+                    if not report:
+                        continue
+                    
+                report["_file"] = report_file  # Store filename for later
+                batch.append(report)
+                if len(batch) >= batch_size:
+                    yield batch
+                    batch = []
+                    
+            except (json.JSONDecodeError, OSError) as e:
+                print(f"Error reading {report_file}: {e}")
+                continue
+                
+        if batch:  # Yield any remaining reports
+            yield batch
+    
+    return batch_generator(), len(matching_reports) // batch_size + 1
+
 def process_reports_in_batches(reports_dir, 
                                lmp: LMP, 
                                batch_size=50, 
@@ -286,17 +372,7 @@ def process_reports_in_batches(reports_dir,
                                model_name="deepseek-reasoner",
                                total_reports=None):   
     batch_index = 0
-    llm = LLMModel()
-    # Calculate the number of batches based on the number of reports
-    all_reports = len(list(reports_dir.glob("*.json")))
-    
-    # If total_reports is specified, use the smaller of total_reports or all_reports
-    if total_reports is not None:
-        all_reports = min(all_reports, total_reports)
-        
-    batch_num = (all_reports + batch_size - 1) // batch_size
-    print(f"Using calculated batch_num: {batch_num}")
-
+    llm = LLMModel()        
     def process_report(report, pbar):
         try:
             # if report.get("new_complexity", None):
@@ -318,13 +394,17 @@ def process_reports_in_batches(reports_dir,
                 # if field_name in report:
                 #     print(f"Error: Field '{field_name}' already exists in report {report['_file']}")
                 #     sys.exit(1)
+                obj_field = getattr(result, field_name)
+                if isinstance(obj_field, BaseModel):
+                    obj_field = obj_field.model_dump()
 
-                report[field_name] = getattr(result, field_name)
-                print(getattr(result, field_name))
+                report[field_name] = obj_field
+
             with open(report["_file"], "w") as f:
                 # Remove temp filename before saving
                 report_to_save = report.copy()
                 del report_to_save["_file"]
+
                 json.dump(report_to_save, f, indent=2)
             
             pbar.update(1)
@@ -334,17 +414,8 @@ def process_reports_in_batches(reports_dir,
             print(f"Error processing {report['_file'].name}: {str(e)}")
             pbar.update(1)
 
-    # Calculate total reports to process
-    reports_to_process = batch_num * batch_size
-    if total_reports is not None:
-        reports_to_process = min(reports_to_process, total_reports)
-    
-    print(f"Processing {reports_to_process} reports")
-    print("total_reports", total_reports)
-    print("batch_num", batch_num)
-
     # Create the generator once outside the loop
-    batch_generator = read_reports_in_batches(reports_dir, batch_size=batch_size)
+    batch_generator, batch_num = get_reports_with_count(reports_dir, batch_size=batch_size)
     processed_reports = 0
     
     with ThreadPoolExecutor(max_workers=max_workers) as executor:

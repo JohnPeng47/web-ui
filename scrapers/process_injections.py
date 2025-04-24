@@ -1,15 +1,8 @@
 from johnllm import LLMModel, LMP
-from typing import List, Tuple
-from pydantic import BaseModel
 from enum import Enum
-import json
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor
-from tqdm import tqdm
-from random import shuffle
-import time
 
-from .utils import process_reports_in_batches
+from .utils import process_reports_in_batches, InjectionStruct
 
 class Level(str, Enum):
     LOW = "LOW"
@@ -17,22 +10,22 @@ class Level(str, Enum):
     HIGH = "HIGH"
     VERY_HIGH = "VERY_HIGH"
 
-
-# TODO: once labeled, run again with all examples
-# to rank them in order of complexity
-class InjectionClassifications(BaseModel):
-    is_simple_injection: bool
-    output_retrievable: bool
-    
-
 class CategorizeReports(LMP):
     prompt = """
 {{report}}
 
+Okay here is a proposed methodology for finding a class of bugs. 
+# Simple Payloads
+1. Find every injectable parameter on a webpage.
+2. Then using a *simple* payload list that contains common permutations of payloads such as b64 encoding, context positioning for XSS, etc.,
+inject the payload into the parameter and send the request
+-> *simple* means a generic payload that does not include any kind of custom filter bypass
+3. Payload execution can be determined within the same channel ie. for blind SQLi payloads, there is usually some way
+to detect the response
 
-
+Return your answer as a boolean called is_simple_payload
 """
-    response_format = InjectionClassifications
+    response_format = InjectionStruct
 
 if __name__ == "__main__":
     process_reports_in_batches(
