@@ -1,48 +1,48 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "phibz ",
-    "title": "Exposed Docker Registry at https://\u2588\u2588\u2588\u2588",
-    "content": "\nSummary:\nThe docker registry at https://\u2588\u2588\u2588\u2588\u2588\u2588 has no authentication in place and is therefore exposed to the public. This leads to full disclosure of all available docker containers, the possibility to upload docker container and manipulate and delete existing docker containers.\nDescription:\nFrom https://www.acunetix.com/vulnerabilities/web/docker-registry-api-is-accessible-without-authentication/ :\nThe Docker Registry HTTP API is the protocol to facilitate the distribution of images to the docker engine. It interacts with instances of the docker registry, which is a service to manage information about docker images and enable their distribution.\nThis Docker Registry API is accessible without authentication. A properly secured registry should return 401 when the \"/v2/\" endpoint is hit without credentials. The response should include a WWW-Authenticate challenge, guiding how to authenticate, such as with basic auth or a token service.\nImpact\nHigh. An attacker can view all available (deployed) docker containers and their containing information, patch the containers to transform the containers to malicious containers (backdoors, malfunction, authentication bypass, RCE, etc.) and upload new possibly malicious containers.\nStep-by-step Reproduction Instructions\nViewing and Downloading existing docker containers\nWe can examine the existing docker containers by visiting https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/v2/_catalog. We can see that multiple \"private\" custom docker containers are available (refer to docker_catalog.png)\nWe can download any of these containers with the following command docker pull \u2588\u2588\u2588\u2588\u2588/<container>. For example we can download the container \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 with docker pull \u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588 (refer to shell_download_container.png)\nAt this point we can start the container with docker run --rm -it \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588 sh and investigate what is inside the container, to look for credentials and other useful information, etc. (refer to shell_inside_container.png)\nUploading containers\nWe can not only view all the information in the existing containers, but we are also able to upload containers.\nAs a proof of concept, I uploaded the default hello-world container\nCode 183 Bytes\n1docker pull hello-world   # Get the hello-world docker\n2docker tag hello-world:latest \u2588\u2588\u2588\u2588\u2588\u2588/chron0x/hello-world   # Set destination\n3docker push \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/chron0x/hello-world   # Push \nCarefully observing https://\u2588\u2588\u2588\u2588\u2588/v2/_catalog we can see that the container chron0x/hello-world is present (refer to docker_catalog_chron0x.png) . The uploaded container is succesfully uploaded and would now be executed server-side.\nManipulating existing dockers\nCombining the two points above it is also possible to manipulate existing docker containers, by\nDownloading an existing container\nPatching the container\nUploading the container again\nWith such manipulations backdoors can be planted, the server can be taken over completely, authentications can be bypassed, forced into malfunction etc.\nI did not manipulate any of the existing containers since I did not want to mess with the system. I can of course present a manipulation, like planting a file into one of the containers on request.\nProduct, Version, and Configuration (If applicable)\nDocker Registry v2\nSuggested Mitigation/Remediation Actions\nRestrict access to the Docker Registry API. Except for registries running on secure local networks, registries should always implement access restrictions.\nThe simplest way to achieve access restriction is through basic authentication (this is very similar to other web servers basic authentication mechanism).\nCheck all existing docker containers for manipulations, or set them up again from scratch, since they have been potentially been tampered with.\nResources:\nhttps://www.acunetix.com/vulnerabilities/web/docker-registry-api-is-accessible-without-authentication/\nhttps://www.notsosecure.com/anatomy-of-a-hack-docker-registry/\nImpact\nHigh. An attacker can view all available (deployed) docker containers and their containing information, patch the containers to transform the containers to malicious containers (backdoors, malfunction, authentication bypass, RCE, DDOS etc.) and upload new possibly malicious containers.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "phibz ",
+  "title": "Exposed Docker Registry at https://\u2588\u2588\u2588\u2588",
+  "content": "\nSummary:\nThe docker registry at https://\u2588\u2588\u2588\u2588\u2588\u2588 has no authentication in place and is therefore exposed to the public. This leads to full disclosure of all available docker containers, the possibility to upload docker container and manipulate and delete existing docker containers.\nDescription:\nFrom https://www.acunetix.com/vulnerabilities/web/docker-registry-api-is-accessible-without-authentication/ :\nThe Docker Registry HTTP API is the protocol to facilitate the distribution of images to the docker engine. It interacts with instances of the docker registry, which is a service to manage information about docker images and enable their distribution.\nThis Docker Registry API is accessible without authentication. A properly secured registry should return 401 when the \"/v2/\" endpoint is hit without credentials. The response should include a WWW-Authenticate challenge, guiding how to authenticate, such as with basic auth or a token service.\nImpact\nHigh. An attacker can view all available (deployed) docker containers and their containing information, patch the containers to transform the containers to malicious containers (backdoors, malfunction, authentication bypass, RCE, etc.) and upload new possibly malicious containers.\nStep-by-step Reproduction Instructions\nViewing and Downloading existing docker containers\nWe can examine the existing docker containers by visiting https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/v2/_catalog. We can see that multiple \"private\" custom docker containers are available (refer to docker_catalog.png)\nWe can download any of these containers with the following command docker pull \u2588\u2588\u2588\u2588\u2588/<container>. For example we can download the container \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 with docker pull \u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588 (refer to shell_download_container.png)\nAt this point we can start the container with docker run --rm -it \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588 sh and investigate what is inside the container, to look for credentials and other useful information, etc. (refer to shell_inside_container.png)\nUploading containers\nWe can not only view all the information in the existing containers, but we are also able to upload containers.\nAs a proof of concept, I uploaded the default hello-world container\nCode 183 Bytes\n1docker pull hello-world   # Get the hello-world docker\n2docker tag hello-world:latest \u2588\u2588\u2588\u2588\u2588\u2588/chron0x/hello-world   # Set destination\n3docker push \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/chron0x/hello-world   # Push \nCarefully observing https://\u2588\u2588\u2588\u2588\u2588/v2/_catalog we can see that the container chron0x/hello-world is present (refer to docker_catalog_chron0x.png) . The uploaded container is succesfully uploaded and would now be executed server-side.\nManipulating existing dockers\nCombining the two points above it is also possible to manipulate existing docker containers, by\nDownloading an existing container\nPatching the container\nUploading the container again\nWith such manipulations backdoors can be planted, the server can be taken over completely, authentications can be bypassed, forced into malfunction etc.\nI did not manipulate any of the existing containers since I did not want to mess with the system. I can of course present a manipulation, like planting a file into one of the containers on request.\nProduct, Version, and Configuration (If applicable)\nDocker Registry v2\nSuggested Mitigation/Remediation Actions\nRestrict access to the Docker Registry API. Except for registries running on secure local networks, registries should always implement access restrictions.\nThe simplest way to achieve access restriction is through basic authentication (this is very similar to other web servers basic authentication mechanism).\nCheck all existing docker containers for manipulations, or set them up again from scratch, since they have been potentially been tampered with.\nResources:\nhttps://www.acunetix.com/vulnerabilities/web/docker-registry-api-is-accessible-without-authentication/\nhttps://www.notsosecure.com/anatomy-of-a-hack-docker-registry/\nImpact\nHigh. An attacker can view all available (deployed) docker containers and their containing information, patch the containers to transform the containers to malicious containers (backdoors, malfunction, authentication bypass, RCE, DDOS etc.) and upload new possibly malicious containers.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Authentication - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1596145860,
+  "report_url": "https://hackerone.com/reports/924487",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Access the Docker Registry API endpoint at https://\u2588\u2588\u2588\u2588\u2588\u2588/v2/_catalog to view available containers"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Authentication - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1596145860,
-    "report_url": "https://hackerone.com/reports/924487",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Access the Docker Registry API endpoint at https://\u2588\u2588\u2588\u2588\u2588\u2588/v2/_catalog to view available containers"
-        ],
-        [
-            2,
-            "Use docker commands to pull, modify, and push containers to the registry"
-        ]
-    ],
-    "vuln_description": "The Docker Registry at https://\u2588\u2588\u2588\u2588\u2588\u2588 is exposed to the public without authentication, allowing unauthorized users to view, download, modify, and upload containers. This can lead to information disclosure, container manipulation, and potential system compromise.",
-    "reason": "The vulnerability is straightforward to discover as it involves accessing a well-known Docker Registry endpoint and using standard Docker commands. No complex interactions or novel logic are required.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      2,
+      "Use docker commands to pull, modify, and push containers to the registry"
+    ]
+  ],
+  "vuln_description": "The Docker Registry at https://\u2588\u2588\u2588\u2588\u2588\u2588 is exposed to the public without authentication, allowing unauthorized users to view, download, modify, and upload containers. This can lead to information disclosure, container manipulation, and potential system compromise.",
+  "reason": "The vulnerability is straightforward to discover as it involves accessing a well-known Docker Registry endpoint and using standard Docker commands. No complex interactions or novel logic are required.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an exposed Docker Registry API without authentication, which is a server-side misconfiguration. The proposed methodologies focus on client-side interactions (user sessions, actions, resource IDs) within a single application context, not server-side API misconfigurations like this one.",
+    "is_detectable": false
+  }
 }

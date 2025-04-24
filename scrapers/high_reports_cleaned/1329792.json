@@ -1,48 +1,48 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "al-madjus ",
-    "title": "AWS subdomain takeover of www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
-    "content": "\nDescription:\nThe AWS bucket hosted on www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 was vulnerable to a subdomain takeover. It has a DNS record pointing to an unclaimed bucket that I was able to register and serve a PoC on.\nReferences\nOutput of dig:\nCode 468 Bytes\n1;; QUESTION SECTION:\n2;www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\t\tIN\tA\n3\n4;; ANSWER SECTION:\n5www.\u2588\u2588\u2588\u2588.\t1833\tIN\tCNAME\t\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\n6\u2588\u2588\u2588. 60 IN\tA\t\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n7\u2588\u2588\u2588\u2588\u2588. 60 IN\tA\t\u2588\u2588\u2588\n8\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588. 60 IN\tA\t\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n9\u2588\u2588\u2588\u2588\u2588. 60 IN\tA\t\u2588\u2588\u2588\n10\n11;; AUTHORITY SECTION:\n12\u2588\u2588\u2588\u2588\u2588. 1831 IN\tNS\t\u2588\u2588\u2588\u2588.\n13\u2588\u2588\u2588. 1831 IN\tNS\t\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\n14\u2588\u2588\u2588\u2588\u2588\u2588\u2588. 1831 IN\tNS\t\u2588\u2588\u2588\u2588\u2588\u2588.\n15\u2588\u2588\u2588\u2588\u2588\u2588. 1831 IN\tNS\t\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\n16\n17;; ADDITIONAL SECTION:\n18\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\t151098\tIN\tA\t\u2588\u2588\u2588\u2588\n19\u2588\u2588\u2588\u2588.\t153636\tIN\tA\t\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n20\u2588\u2588\u2588\u2588\u2588.\t132552\tIN\tA\t\u2588\u2588\u2588\u2588\u2588\n21\u2588\u2588\u2588\u2588\u2588\u2588\u2588. 6009\tIN\tA\t\u2588\u2588\u2588\n22\u2588\u2588\u2588\u2588.\t56631\tIN\tAAAA\t\u2588\u2588\u2588\n23\nImpact\nThe impact for a subdomain takeover can be varied and wide: potentially steal cookies, bypass CSP and CORS policies, bypass domain whitelisting for SSRF, spy on legitimate requests sent to that domain, phising vector, etc.\nSystem Host(s)\nwww.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nGo to https://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 which is the PoC I have hosted.\nSuggested Mitigation/Remediation Actions\nPlease remove all dangling DNS records if they are not needed, or claim the buckets if they are.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "al-madjus ",
+  "title": "AWS subdomain takeover of www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+  "content": "\nDescription:\nThe AWS bucket hosted on www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 was vulnerable to a subdomain takeover. It has a DNS record pointing to an unclaimed bucket that I was able to register and serve a PoC on.\nReferences\nOutput of dig:\nCode 468 Bytes\n1;; QUESTION SECTION:\n2;www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\t\tIN\tA\n3\n4;; ANSWER SECTION:\n5www.\u2588\u2588\u2588\u2588.\t1833\tIN\tCNAME\t\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\n6\u2588\u2588\u2588. 60 IN\tA\t\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n7\u2588\u2588\u2588\u2588\u2588. 60 IN\tA\t\u2588\u2588\u2588\n8\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588. 60 IN\tA\t\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n9\u2588\u2588\u2588\u2588\u2588. 60 IN\tA\t\u2588\u2588\u2588\n10\n11;; AUTHORITY SECTION:\n12\u2588\u2588\u2588\u2588\u2588. 1831 IN\tNS\t\u2588\u2588\u2588\u2588.\n13\u2588\u2588\u2588. 1831 IN\tNS\t\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\n14\u2588\u2588\u2588\u2588\u2588\u2588\u2588. 1831 IN\tNS\t\u2588\u2588\u2588\u2588\u2588\u2588.\n15\u2588\u2588\u2588\u2588\u2588\u2588. 1831 IN\tNS\t\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\n16\n17;; ADDITIONAL SECTION:\n18\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\t151098\tIN\tA\t\u2588\u2588\u2588\u2588\n19\u2588\u2588\u2588\u2588.\t153636\tIN\tA\t\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n20\u2588\u2588\u2588\u2588\u2588.\t132552\tIN\tA\t\u2588\u2588\u2588\u2588\u2588\n21\u2588\u2588\u2588\u2588\u2588\u2588\u2588. 6009\tIN\tA\t\u2588\u2588\u2588\n22\u2588\u2588\u2588\u2588.\t56631\tIN\tAAAA\t\u2588\u2588\u2588\n23\nImpact\nThe impact for a subdomain takeover can be varied and wide: potentially steal cookies, bypass CSP and CORS policies, bypass domain whitelisting for SSRF, spy on legitimate requests sent to that domain, phising vector, etc.\nSystem Host(s)\nwww.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nGo to https://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 which is the PoC I have hosted.\nSuggested Mitigation/Remediation Actions\nPlease remove all dangling DNS records if they are not needed, or claim the buckets if they are.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1635466680,
+  "report_url": "https://hackerone.com/reports/1329792",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify a subdomain (www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588) with a DNS record pointing to an unclaimed AWS S3 bucket."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Access Control - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1635466680,
-    "report_url": "https://hackerone.com/reports/1329792",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Identify a subdomain (www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588) with a DNS record pointing to an unclaimed AWS S3 bucket."
-        ],
-        [
-            2,
-            "Register the unclaimed AWS S3 bucket and host a Proof of Concept (PoC) to demonstrate the takeover."
-        ]
-    ],
-    "vuln_description": "The AWS bucket hosted on www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 was vulnerable to a subdomain takeover. It had a DNS record pointing to an unclaimed bucket that could be registered, allowing an attacker to serve malicious content or exploit the domain for various attacks such as phishing, cookie theft, or bypassing security policies.",
-    "reason": "The attack involves identifying a misconfigured DNS record and claiming an unclaimed AWS S3 bucket, which is a straightforward process once the vulnerable subdomain is identified. There are no complex interactions or novel logic involved.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": true,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": false
-    }
+    [
+      2,
+      "Register the unclaimed AWS S3 bucket and host a Proof of Concept (PoC) to demonstrate the takeover."
+    ]
+  ],
+  "vuln_description": "The AWS bucket hosted on www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 was vulnerable to a subdomain takeover. It had a DNS record pointing to an unclaimed bucket that could be registered, allowing an attacker to serve malicious content or exploit the domain for various attacks such as phishing, cookie theft, or bypassing security policies.",
+  "reason": "The attack involves identifying a misconfigured DNS record and claiming an unclaimed AWS S3 bucket, which is a straightforward process once the vulnerable subdomain is identified. There are no complex interactions or novel logic involved.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": true,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The AWS subdomain takeover vulnerability involves DNS records pointing to an unclaimed bucket, which is not directly related to authentication or authorization within a single application. The methodology described focuses on testing AuthN/AuthZ boundaries within an application by swapping user sessions or resource IDs, not on detecting misconfigured DNS records or cloud storage buckets.",
+    "is_detectable": false
+  }
 }

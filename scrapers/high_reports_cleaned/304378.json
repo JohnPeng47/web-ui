@@ -1,52 +1,52 @@
 {
-    "reported_to": "Internet Bug Bounty",
-    "reported_by": "fransrosen ",
-    "title": "ACME TLS-SNI-01/02 challenge vulnerable when combined with shared hosting providers",
-    "content": "\nThe ACME TLS-SNI-01 (and TLS-SNI-02) specification assumed wrong in terms of how current major cloud providers routed and validated domains. This was reported earlier this week to Let's Encrypt, and they decided to disable the method. Today Let's Encrypt decided to sunset both TLS-SNI-01 and TLS-SNI-02 due to the vulnerability I found.\nA full writeup of the finding and my side of the timeline can be found here:\nHow I exploited ACME TLS-SNI-01 issuing Let's Encrypt SSL-certs for any domain using shared hosting\nHere is Let's Encrypt first and second announcement about the reported issue:\n2018.01.09 Issue with TLS-SNI-01 and Shared Hosting Infrastructure\n2018.01.11 Update Regarding ACME TLS-SNI and Shared Hosting Infrastructure\nRegards,\nFrans\nImpact\nThe ability to issue SSL-certificates for domains not under the attacker's control but served using the same shared hosting provider.\n\n",
-    "severity": [
-        9.9,
-        null
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "fransrosen ",
+  "title": "ACME TLS-SNI-01/02 challenge vulnerable when combined with shared hosting providers",
+  "content": "\nThe ACME TLS-SNI-01 (and TLS-SNI-02) specification assumed wrong in terms of how current major cloud providers routed and validated domains. This was reported earlier this week to Let's Encrypt, and they decided to disable the method. Today Let's Encrypt decided to sunset both TLS-SNI-01 and TLS-SNI-02 due to the vulnerability I found.\nA full writeup of the finding and my side of the timeline can be found here:\nHow I exploited ACME TLS-SNI-01 issuing Let's Encrypt SSL-certs for any domain using shared hosting\nHere is Let's Encrypt first and second announcement about the reported issue:\n2018.01.09 Issue with TLS-SNI-01 and Shared Hosting Infrastructure\n2018.01.11 Update Regarding ACME TLS-SNI and Shared Hosting Infrastructure\nRegards,\nFrans\nImpact\nThe ability to issue SSL-certificates for domains not under the attacker's control but served using the same shared hosting provider.\n\n",
+  "severity": [
+    9.9,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Privilege Escalation"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1526772120,
+  "report_url": "https://hackerone.com/reports/304378",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Identify a shared hosting provider that serves multiple domains under the same IP address."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Privilege Escalation"
+    [
+      2,
+      "Use the ACME TLS-SNI-01/02 challenge to request a certificate for a target domain hosted on the same shared hosting provider."
     ],
-    "screenshots": {},
-    "disclosed_date": 1526772120,
-    "report_url": "https://hackerone.com/reports/304378",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Identify a shared hosting provider that serves multiple domains under the same IP address."
-        ],
-        [
-            2,
-            "Use the ACME TLS-SNI-01/02 challenge to request a certificate for a target domain hosted on the same shared hosting provider."
-        ],
-        [
-            3,
-            "Exploit the shared hosting provider's routing mechanism to validate the challenge for the target domain, thereby obtaining a certificate for a domain not under your control."
-        ]
-    ],
-    "vuln_description": "The ACME TLS-SNI-01 and TLS-SNI-02 challenges were vulnerable to exploitation when used with shared hosting providers. The vulnerability allowed an attacker to issue SSL certificates for domains not under their control but served by the same shared hosting provider, due to incorrect assumptions about how cloud providers routed and validated domains.",
-    "reason": "The vulnerability involves understanding the ACME protocol's TLS-SNI challenges, the routing mechanisms of shared hosting providers, and the subtle interaction between these components that allows for certificate issuance bypass. The attack requires manipulating the validation process in a non-obvious way by leveraging shared infrastructure.",
-    "new_complexity": "HIGH",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": true,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": false
-    }
+    [
+      3,
+      "Exploit the shared hosting provider's routing mechanism to validate the challenge for the target domain, thereby obtaining a certificate for a domain not under your control."
+    ]
+  ],
+  "vuln_description": "The ACME TLS-SNI-01 and TLS-SNI-02 challenges were vulnerable to exploitation when used with shared hosting providers. The vulnerability allowed an attacker to issue SSL certificates for domains not under their control but served by the same shared hosting provider, due to incorrect assumptions about how cloud providers routed and validated domains.",
+  "reason": "The vulnerability involves understanding the ACME protocol's TLS-SNI challenges, the routing mechanisms of shared hosting providers, and the subtle interaction between these components that allows for certificate issuance bypass. The attack requires manipulating the validation process in a non-obvious way by leveraging shared infrastructure.",
+  "new_complexity": "HIGH",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": true,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves cross-domain validation issues in ACME TLS-SNI-01/02 challenges, which are not covered by the proposed methodologies as they focus on session and resource ID manipulation within the same application. The issue here is at the protocol level with domain validation, not within the application's authN/authZ boundaries.",
+    "is_detectable": false
+  }
 }

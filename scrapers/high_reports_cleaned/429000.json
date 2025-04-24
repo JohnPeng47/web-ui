@@ -1,84 +1,84 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "cablej_dds ",
-    "title": "Access to all \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 files, including CAC authentication bypass",
-    "content": "\nSummary:\nDue to an Insecure Direct Object Reference (IDOR) in adding recipients to a shared package on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, an unauthenticated attacker can access all files uploaded to \u2588\u2588\u2588\u2588. As described on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 website, this includes documents with classifications up to FOUO, including PII / PHI Privacy Act data, and documents classified FOUO//CLOSE HOLD, FOUO//SENSITIVE, and FOUO//LIMITED DISTRIBUTION DOCUMENT.\nAdditionally, \u2588\u2588\u2588\u2588\u2588 enforces CAC pickup requirements to require users to first authorize via CAC. This too, can be bypassed, allowing an attacker to download any file sent over \u2588\u2588\u2588\u2588.\nNote that in addition to this vulnerability, other IDORs exist in sensitive areas, such as confirming email addresses, allowing an attacker to pretend to send documents from any email address.\nImpact\nBased on analysis of file ids, over 2000 documents are uploaded per hour to \u2588\u2588\u2588. When combined with a \u2588\u2588\u2588\u2588\u2588\u2588, this exposes over 500,000 recent documents and new documents that are sent every hour. Additionally, as metadata for historical documents is not purged, this also includes details such as sender names/emails, file descriptions, and share dates for over 15 million past documents.\nStep-by-step Reproduction Instructions\nVisit\u2588\u2588\u2588\u2588/Default.aspx and proceed to send a file to yourself.\nClick through the verification email and verify the file.\nLog in to the Package Status page at\u2588\u2588\u2588/StatusLogIn.aspx?PackageID=x using the provided password.\nIntercept the request to add a new recipient via the recipients list, entering your email address as the email to add. This is a POST request to POST /\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Status.aspx?ID=x.\nModify the ID parameter to any other number, e.g. decrement the number by 1.\nObserve that the package will be sent to your email, which can then be downloaded using the provided password.\nRepeat with any numeric ID to download hundreds of thousands of files.\nTo bypass CAC authentication:\nA user can elect to require CAC authentication when downloading a file. This can be bypassed via the normal file download flow.\nVisit\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588?id=15745307 (the initial file ID here does not matter).\nEnter the password emailed for the file that requires CAC authentication.\nIntercept the request to submit the form. Replace the id parameter in the url with the id of the file with CAC authentication.\nObserve that the file's information will be displayed and can be downloaded.\nSuggested Mitigation/Remediation Actions\nEnsure that a user can only modify their own packages\nEnsure that a file cannot be downloaded without CAC authentication\nEnsure that a user can only verify their own packages.\nImpact\n.\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "cablej_dds ",
+  "title": "Access to all \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 files, including CAC authentication bypass",
+  "content": "\nSummary:\nDue to an Insecure Direct Object Reference (IDOR) in adding recipients to a shared package on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, an unauthenticated attacker can access all files uploaded to \u2588\u2588\u2588\u2588. As described on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 website, this includes documents with classifications up to FOUO, including PII / PHI Privacy Act data, and documents classified FOUO//CLOSE HOLD, FOUO//SENSITIVE, and FOUO//LIMITED DISTRIBUTION DOCUMENT.\nAdditionally, \u2588\u2588\u2588\u2588\u2588 enforces CAC pickup requirements to require users to first authorize via CAC. This too, can be bypassed, allowing an attacker to download any file sent over \u2588\u2588\u2588\u2588.\nNote that in addition to this vulnerability, other IDORs exist in sensitive areas, such as confirming email addresses, allowing an attacker to pretend to send documents from any email address.\nImpact\nBased on analysis of file ids, over 2000 documents are uploaded per hour to \u2588\u2588\u2588. When combined with a \u2588\u2588\u2588\u2588\u2588\u2588, this exposes over 500,000 recent documents and new documents that are sent every hour. Additionally, as metadata for historical documents is not purged, this also includes details such as sender names/emails, file descriptions, and share dates for over 15 million past documents.\nStep-by-step Reproduction Instructions\nVisit\u2588\u2588\u2588\u2588/Default.aspx and proceed to send a file to yourself.\nClick through the verification email and verify the file.\nLog in to the Package Status page at\u2588\u2588\u2588/StatusLogIn.aspx?PackageID=x using the provided password.\nIntercept the request to add a new recipient via the recipients list, entering your email address as the email to add. This is a POST request to POST /\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Status.aspx?ID=x.\nModify the ID parameter to any other number, e.g. decrement the number by 1.\nObserve that the package will be sent to your email, which can then be downloaded using the provided password.\nRepeat with any numeric ID to download hundreds of thousands of files.\nTo bypass CAC authentication:\nA user can elect to require CAC authentication when downloading a file. This can be bypassed via the normal file download flow.\nVisit\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588?id=15745307 (the initial file ID here does not matter).\nEnter the password emailed for the file that requires CAC authentication.\nIntercept the request to submit the form. Replace the id parameter in the url with the id of the file with CAC authentication.\nObserve that the file's information will be displayed and can be downloaded.\nSuggested Mitigation/Remediation Actions\nEnsure that a user can only modify their own packages\nEnsure that a file cannot be downloaded without CAC authentication\nEnsure that a user can only verify their own packages.\nImpact\n.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Insecure Direct Object Reference (IDOR)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1554757440,
+  "report_url": "https://hackerone.com/reports/429000",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Visit \u2588\u2588\u2588\u2588/Default.aspx and send a file to yourself."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Insecure Direct Object Reference (IDOR)"
+    [
+      2,
+      "Click through the verification email and verify the file."
     ],
-    "screenshots": {},
-    "disclosed_date": 1554757440,
-    "report_url": "https://hackerone.com/reports/429000",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Visit \u2588\u2588\u2588\u2588/Default.aspx and send a file to yourself."
-        ],
-        [
-            2,
-            "Click through the verification email and verify the file."
-        ],
-        [
-            3,
-            "Log in to the Package Status page at \u2588\u2588\u2588/StatusLogIn.aspx?PackageID=x using the provided password."
-        ],
-        [
-            4,
-            "Intercept the request to add a new recipient via the recipients list, entering your email address as the email to add (POST request to POST /\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Status.aspx?ID=x)."
-        ],
-        [
-            5,
-            "Modify the ID parameter to any other number (e.g., decrement by 1)."
-        ],
-        [
-            6,
-            "Observe that the package is sent to your email and can be downloaded using the provided password."
-        ],
-        [
-            7,
-            "Repeat with any numeric ID to download other files."
-        ],
-        [
-            8,
-            "To bypass CAC authentication: Visit \u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588?id=15745307 (initial file ID does not matter)."
-        ],
-        [
-            9,
-            "Enter the password emailed for the file that requires CAC authentication."
-        ],
-        [
-            10,
-            "Intercept the request to submit the form and replace the id parameter in the URL with the ID of a file requiring CAC authentication."
-        ],
-        [
-            11,
-            "Observe that the file's information is displayed and can be downloaded without CAC authentication."
-        ]
+    [
+      3,
+      "Log in to the Package Status page at \u2588\u2588\u2588/StatusLogIn.aspx?PackageID=x using the provided password."
     ],
-    "vuln_description": "This vulnerability involves an Insecure Direct Object Reference (IDOR) in a file-sharing system, allowing unauthenticated attackers to access sensitive documents (including FOUO-classified files) and bypass CAC authentication. Attackers can manipulate package IDs to access files not intended for them and bypass CAC requirements by intercepting and modifying requests.",
-    "reason": "The attack involves multiple components (IDOR, CAC bypass, request interception) and requires understanding of the application's state and request flow. However, the steps are methodical and do not involve highly novel or subtle interactions.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": true
-    }
+    [
+      4,
+      "Intercept the request to add a new recipient via the recipients list, entering your email address as the email to add (POST request to POST /\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Status.aspx?ID=x)."
+    ],
+    [
+      5,
+      "Modify the ID parameter to any other number (e.g., decrement by 1)."
+    ],
+    [
+      6,
+      "Observe that the package is sent to your email and can be downloaded using the provided password."
+    ],
+    [
+      7,
+      "Repeat with any numeric ID to download other files."
+    ],
+    [
+      8,
+      "To bypass CAC authentication: Visit \u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588?id=15745307 (initial file ID does not matter)."
+    ],
+    [
+      9,
+      "Enter the password emailed for the file that requires CAC authentication."
+    ],
+    [
+      10,
+      "Intercept the request to submit the form and replace the id parameter in the URL with the ID of a file requiring CAC authentication."
+    ],
+    [
+      11,
+      "Observe that the file's information is displayed and can be downloaded without CAC authentication."
+    ]
+  ],
+  "vuln_description": "This vulnerability involves an Insecure Direct Object Reference (IDOR) in a file-sharing system, allowing unauthenticated attackers to access sensitive documents (including FOUO-classified files) and bypass CAC authentication. Attackers can manipulate package IDs to access files not intended for them and bypass CAC requirements by intercepting and modifying requests.",
+  "reason": "The attack involves multiple components (IDOR, CAC bypass, request interception) and requires understanding of the application's state and request flow. However, the steps are methodical and do not involve highly novel or subtle interactions.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an Insecure Direct Object Reference (IDOR) and authentication bypass (CAC) within the same application. The methodology described involves testing (user_session, action, resource_id) tuples and swapping sessions/resource_ids to detect authorization boundary crossings. The IDOR and CAC bypass in the report fit this pattern, as they involve manipulating resource IDs (package IDs) and authentication flows within the same application context. The steps to reproduce align with the methodology's test cases (e.g., substituting resource IDs and testing unauthenticated access).",
+    "is_detectable": true
+  }
 }

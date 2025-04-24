@@ -1,56 +1,56 @@
 {
-    "reported_to": "HackerOne",
-    "reported_by": "harshdranjan ",
-    "title": "IDOR - Delete all Licenses and certifications from users account using CreateOrUpdateHackerCertification GraphQL query",
-    "content": "\nSummary:\nHey team,\nWhile editing our Licenses and certifications if we change the ID number we can delete other users Licenses and certifications. it simply can be done by editing the ID number in our graphql query.\nIf change the ID from 1 to X possible range then we can delete all the Licenses and certifications present between these.\nSteps To Reproduce\nLog in to your own account in two browsers A and B with User A and User B\nCreate your own *Licenses and certifications in both the account\nNow edit your own *Licenses and certifications and Intercept this using a Burp Proxy\nNow In the body change the ID number and you will be able to delete all the Licenses and certifications present in HackerOne\nFor now change the ID to the Licenses and certifications ID of the Other account and it will be deleted.\nPoC Video: \u2588\u2588\u2588\u2588\nImpact\nAble to delete all the Licenses and certifications present in HackerOne\n\n",
-    "severity": [
-        7.5,
-        null
+  "reported_to": "HackerOne",
+  "reported_by": "harshdranjan ",
+  "title": "IDOR - Delete all Licenses and certifications from users account using CreateOrUpdateHackerCertification GraphQL query",
+  "content": "\nSummary:\nHey team,\nWhile editing our Licenses and certifications if we change the ID number we can delete other users Licenses and certifications. it simply can be done by editing the ID number in our graphql query.\nIf change the ID from 1 to X possible range then we can delete all the Licenses and certifications present between these.\nSteps To Reproduce\nLog in to your own account in two browsers A and B with User A and User B\nCreate your own *Licenses and certifications in both the account\nNow edit your own *Licenses and certifications and Intercept this using a Burp Proxy\nNow In the body change the ID number and you will be able to delete all the Licenses and certifications present in HackerOne\nFor now change the ID to the Licenses and certifications ID of the Other account and it will be deleted.\nPoC Video: \u2588\u2588\u2588\u2588\nImpact\nAble to delete all the Licenses and certifications present in HackerOne\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": 12500,
+  "weaknesses": [
+    "Insecure Direct Object Reference (IDOR)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1693333800,
+  "report_url": "https://hackerone.com/reports/2122671",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Log in to your own account in two different browsers (User A and User B)."
     ],
-    "bounty": 12500,
-    "weaknesses": [
-        "Insecure Direct Object Reference (IDOR)"
+    [
+      2,
+      "Intercept the GraphQL request (CreateOrUpdateHackerCertification) while editing your own licenses/certifications using a proxy tool like Burp."
     ],
-    "screenshots": {},
-    "disclosed_date": 1693333800,
-    "report_url": "https://hackerone.com/reports/2122671",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Log in to your own account in two different browsers (User A and User B)."
-        ],
-        [
-            2,
-            "Intercept the GraphQL request (CreateOrUpdateHackerCertification) while editing your own licenses/certifications using a proxy tool like Burp."
-        ],
-        [
-            3,
-            "Modify the ID parameter in the request to target another user's licenses/certifications."
-        ],
-        [
-            4,
-            "Send the modified request to delete the target user's licenses/certifications."
-        ]
+    [
+      3,
+      "Modify the ID parameter in the request to target another user's licenses/certifications."
     ],
-    "vuln_description": "This is an Insecure Direct Object Reference (IDOR) vulnerability in the CreateOrUpdateHackerCertification GraphQL query. By manipulating the ID parameter, an attacker can delete any user's licenses and certifications without proper authorization.",
-    "reason": "The vulnerability is straightforward to discover as it only requires modifying a single parameter (ID) in a GraphQL request. The attack does not involve complex interactions or multiple components, and the logic is commonly seen in IDOR vulnerabilities.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": false
-    }
+    [
+      4,
+      "Send the modified request to delete the target user's licenses/certifications."
+    ]
+  ],
+  "vuln_description": "This is an Insecure Direct Object Reference (IDOR) vulnerability in the CreateOrUpdateHackerCertification GraphQL query. By manipulating the ID parameter, an attacker can delete any user's licenses and certifications without proper authorization.",
+  "reason": "The vulnerability is straightforward to discover as it only requires modifying a single parameter (ID) in a GraphQL request. The attack does not involve complex interactions or multiple components, and the logic is commonly seen in IDOR vulnerabilities.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves swapping resource IDs (licenses/certifications IDs) in a GraphQL query to delete other users' data. This matches the IDOR detection methodology where (user_session, action, resource_id) tuples are collected and tested by substituting resource_ids with existing ones (test e) in the methodology). The action (CreateOrUpdateHackerCertification) and resource_type (licenses/certifications) are part of the same application context, making it detectable.",
+    "is_detectable": true
+  }
 }

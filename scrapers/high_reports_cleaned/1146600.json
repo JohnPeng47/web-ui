@@ -1,51 +1,51 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "fiveguyslover ",
-    "title": "Administration Authentication Bypass on https://\u2588\u2588\u2588\u2588\u2588",
-    "content": "\nHi there\nI found a way to connect to an administration space on your website https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nhow to reproduce ?\n1) - go to this link : https://\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n2) - create a html file with :\nCode 188 Bytes\n1<form action=\"https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\" method=\"post\">\n2    <input type=\"hidden\" name=\"\u2588\u2588\u2588\u2588\u2588\" value=\"\">\n3    <input type=\"hidden\" name=\"\u2588\u2588\u2588\u2588\u2588\" value=\"1\">\n4    <input type=\"submit\">\n5</form>\n3) - launch the file, click on the button and return to the page https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\n4) - refresh the page and you have access to the administration\nPOC :\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nif you need more information, contact me\nbest regards,\nfiveguyslover\nImpact\naccess to sensitive data and the ability to modify information.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\n1) - go to this link : https://\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n2) - create a html file with :\nCode 175 Bytes\n1<form action=\"https://\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\" method=\"post\">\n2    <input type=\"hidden\" name=\"\u2588\u2588\u2588\" value=\"\">\n3    <input type=\"hidden\" name=\"\u2588\u2588\u2588\u2588\" value=\"1\">\n4    <input type=\"submit\">\n5</form>\n3) - launch the file, click on the button and return to the page https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\n4) - refresh the page and you have access to the administration\nSuggested Mitigation/Remediation Actions\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "fiveguyslover ",
+  "title": "Administration Authentication Bypass on https://\u2588\u2588\u2588\u2588\u2588",
+  "content": "\nHi there\nI found a way to connect to an administration space on your website https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nhow to reproduce ?\n1) - go to this link : https://\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n2) - create a html file with :\nCode 188 Bytes\n1<form action=\"https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\" method=\"post\">\n2    <input type=\"hidden\" name=\"\u2588\u2588\u2588\u2588\u2588\" value=\"\">\n3    <input type=\"hidden\" name=\"\u2588\u2588\u2588\u2588\u2588\" value=\"1\">\n4    <input type=\"submit\">\n5</form>\n3) - launch the file, click on the button and return to the page https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\n4) - refresh the page and you have access to the administration\nPOC :\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nif you need more information, contact me\nbest regards,\nfiveguyslover\nImpact\naccess to sensitive data and the ability to modify information.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\n1) - go to this link : https://\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n2) - create a html file with :\nCode 175 Bytes\n1<form action=\"https://\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\" method=\"post\">\n2    <input type=\"hidden\" name=\"\u2588\u2588\u2588\" value=\"\">\n3    <input type=\"hidden\" name=\"\u2588\u2588\u2588\u2588\" value=\"1\">\n4    <input type=\"submit\">\n5</form>\n3) - launch the file, click on the button and return to the page https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\n4) - refresh the page and you have access to the administration\nSuggested Mitigation/Remediation Actions\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Authentication - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1618961640,
+  "report_url": "https://hackerone.com/reports/1146600",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Go to the link: https://\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Authentication - Generic"
+    [
+      2,
+      "Create an HTML file with the provided form code and submit it"
     ],
-    "screenshots": {},
-    "disclosed_date": 1618961640,
-    "report_url": "https://hackerone.com/reports/1146600",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Go to the link: https://\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
-        ],
-        [
-            2,
-            "Create an HTML file with the provided form code and submit it"
-        ],
-        [
-            3,
-            "Return to the administration page and refresh to gain access"
-        ]
-    ],
-    "vuln_description": "This vulnerability allows an attacker to bypass authentication and gain unauthorized access to the administration space by submitting a specially crafted HTML form, which manipulates the application state to grant access upon refreshing the page.",
-    "reason": "The attack involves a simple HTML form submission and page refresh, with no complex interactions or state manipulations required. The vulnerability is straightforward and does not require deep understanding of the application's logic or multiple components.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      3,
+      "Return to the administration page and refresh to gain access"
+    ]
+  ],
+  "vuln_description": "This vulnerability allows an attacker to bypass authentication and gain unauthorized access to the administration space by submitting a specially crafted HTML form, which manipulates the application state to grant access upon refreshing the page.",
+  "reason": "The attack involves a simple HTML form submission and page refresh, with no complex interactions or state manipulations required. The vulnerability is straightforward and does not require deep understanding of the application's logic or multiple components.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an authentication bypass where a form submission with specific hidden fields grants unauthorized access to an administration space. This fits the AuthN/AuthZ Bypass methodology where an unauthenticated or low-privileged user can access restricted functionality by manipulating form submissions. The methodology would detect this by executing the action (form submission) with an unauthenticated session (test d) and observing the unauthorized access.",
+    "is_detectable": true
+  }
 }

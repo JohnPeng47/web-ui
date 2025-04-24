@@ -1,60 +1,60 @@
 {
-    "reported_to": "Nextcloud",
-    "reported_by": "hitman_47 ",
-    "title": "Missing ownership check on remote wipe endpoint",
-    "content": "\nOn settings/user/security\nYou can mark a device for wipe out that does not belong to you.\nSteps:\nCreate 2 accounts one for the hacker and one for the victim\nOn both accounts add devices with different names\nOn the hacker account, while intercepting with burpsuite, select the option to wipe out a device\nForward with burpsuite and in the url that looks like settings/personal/authtokens/wipe/{data-id}, change the data-id to the id of the device of the victim\nStop intercepting or forward again and the device of the victim will be marked for wipe out.\nImpact\nAttacker can wipe out the device of another user by using the device ID\n\n",
-    "severity": [
-        7.7,
-        null
+  "reported_to": "Nextcloud",
+  "reported_by": "hitman_47 ",
+  "title": "Missing ownership check on remote wipe endpoint",
+  "content": "\nOn settings/user/security\nYou can mark a device for wipe out that does not belong to you.\nSteps:\nCreate 2 accounts one for the hacker and one for the victim\nOn both accounts add devices with different names\nOn the hacker account, while intercepting with burpsuite, select the option to wipe out a device\nForward with burpsuite and in the url that looks like settings/personal/authtokens/wipe/{data-id}, change the data-id to the id of the device of the victim\nStop intercepting or forward again and the device of the victim will be marked for wipe out.\nImpact\nAttacker can wipe out the device of another user by using the device ID\n\n",
+  "severity": [
+    7.7,
+    null
+  ],
+  "bounty": 500,
+  "weaknesses": [
+    "Insecure Direct Object Reference (IDOR)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1587316500,
+  "report_url": "https://hackerone.com/reports/819807",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create two accounts: one for the attacker (hacker) and one for the victim."
     ],
-    "bounty": 500,
-    "weaknesses": [
-        "Insecure Direct Object Reference (IDOR)"
+    [
+      2,
+      "Add devices with different names to both accounts."
     ],
-    "screenshots": {},
-    "disclosed_date": 1587316500,
-    "report_url": "https://hackerone.com/reports/819807",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Create two accounts: one for the attacker (hacker) and one for the victim."
-        ],
-        [
-            2,
-            "Add devices with different names to both accounts."
-        ],
-        [
-            3,
-            "On the hacker account, intercept the request to wipe a device using Burp Suite."
-        ],
-        [
-            4,
-            "Modify the URL in the intercepted request to target the victim's device ID (e.g., change 'settings/personal/authtokens/wipe/{data-id}' to the victim's device ID)."
-        ],
-        [
-            5,
-            "Forward the modified request to mark the victim's device for wipe."
-        ]
+    [
+      3,
+      "On the hacker account, intercept the request to wipe a device using Burp Suite."
     ],
-    "vuln_description": "The vulnerability allows an attacker to mark another user's device for remote wipe by manipulating the device ID in the wipe endpoint URL. This occurs due to a missing ownership check on the endpoint, enabling unauthorized access to device wipe functionality.",
-    "reason": "The attack involves intercepting and modifying a request, which is a common technique, and the vulnerability stems from a straightforward missing ownership check. The steps are linear and do not require complex interactions or novel logic.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": false
-    }
+    [
+      4,
+      "Modify the URL in the intercepted request to target the victim's device ID (e.g., change 'settings/personal/authtokens/wipe/{data-id}' to the victim's device ID)."
+    ],
+    [
+      5,
+      "Forward the modified request to mark the victim's device for wipe."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to mark another user's device for remote wipe by manipulating the device ID in the wipe endpoint URL. This occurs due to a missing ownership check on the endpoint, enabling unauthorized access to device wipe functionality.",
+  "reason": "The attack involves intercepting and modifying a request, which is a common technique, and the vulnerability stems from a straightforward missing ownership check. The steps are linear and do not require complex interactions or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves swapping resource_ids (device IDs) with existing (action, resource_id) tuples, which is covered by test e) in the methodology. The attacker uses their own session to perform an action (wipe device) but changes the resource_id to that of the victim's device, which is detectable by the proposed method.",
+    "is_detectable": true
+  }
 }

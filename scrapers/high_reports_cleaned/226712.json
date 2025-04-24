@@ -1,56 +1,56 @@
 {
-    "reported_to": "Paragon Initiative Enterprises",
-    "reported_by": "koviri_jagdish ",
-    "title": "Broken Authentication & Session Management - Failure to Invalidate Session on all other browsers at Password change",
-    "content": "\nBroken Authentication & Session Management - Failure to Invalidate Session on all other browsers at Password change\nHello Team,\nWhile I was testing your web application \"Paragon Initiative Enterprises\", I came to know that it is vulnerable to \"Broken Authentication and Session Management > Failure to Invalidate Session > On Password Reset\" at https://bridge.cspr.ng/my/account .\nDescription : When a user changes his account password, all the sessions on other devices/browsers should expire.\nCause : Suppose any user (victim) left his account logged in on any computer/browser (victim could use browser at Cyber Cafe or any shared computer). And after a particular he realized that he left his account logged in, and there is a security provided that when a user changes his account password all other sessions should invalidate or expire, which will expire the session from that shared computer.\nBut in your web application, I didn't found any such security that invalidate the session after password. Here if any user left his account logged in, any attacker can misuse the victim's account and there is no option available to the victim to invalidate the session on that shared computer which could lead to some major problems.\nSteps to reproduce the bug :\nStep 1 : Go to Browser A at (say Mozilla Firefox) and login with your credentials at https://bridge.cspr.ng/ and login with your credentials.\nStep 2 : Similarly, Go to Browser B at (say Google Chrome) and login with your same credentials at https://bridge.cspr.ng/ and login with your credentials.\nStep 3 : Suppose Browser A (Mozilla Firefox) is an shared computer's browser, and you left your account logged in at that computer. Go to Browser B (Google Chrome) and change your account\npassword at https://bridge.cspr.ng/my/account.\nStep 4 : When you change your account password at Browser B (Google Chrome), the session at Browser A (Mozilla Firefox) should expire and the account should automatically logged out.\nStep 5 : Go to Browser A (Mozilla Firefox), and visit your https://bridge.cspr.ng/ account page and refresh the page.\nYou will notice that even after changing the account password at Browser B (Google Chrome), the session at Browser A (Mozilla Firefox) didn't expired which can cause major problems.\nPlease fix the bug and let me know if you need any other information.\nRegards\nK. Jagdish\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "Paragon Initiative Enterprises",
+  "reported_by": "koviri_jagdish ",
+  "title": "Broken Authentication & Session Management - Failure to Invalidate Session on all other browsers at Password change",
+  "content": "\nBroken Authentication & Session Management - Failure to Invalidate Session on all other browsers at Password change\nHello Team,\nWhile I was testing your web application \"Paragon Initiative Enterprises\", I came to know that it is vulnerable to \"Broken Authentication and Session Management > Failure to Invalidate Session > On Password Reset\" at https://bridge.cspr.ng/my/account .\nDescription : When a user changes his account password, all the sessions on other devices/browsers should expire.\nCause : Suppose any user (victim) left his account logged in on any computer/browser (victim could use browser at Cyber Cafe or any shared computer). And after a particular he realized that he left his account logged in, and there is a security provided that when a user changes his account password all other sessions should invalidate or expire, which will expire the session from that shared computer.\nBut in your web application, I didn't found any such security that invalidate the session after password. Here if any user left his account logged in, any attacker can misuse the victim's account and there is no option available to the victim to invalidate the session on that shared computer which could lead to some major problems.\nSteps to reproduce the bug :\nStep 1 : Go to Browser A at (say Mozilla Firefox) and login with your credentials at https://bridge.cspr.ng/ and login with your credentials.\nStep 2 : Similarly, Go to Browser B at (say Google Chrome) and login with your same credentials at https://bridge.cspr.ng/ and login with your credentials.\nStep 3 : Suppose Browser A (Mozilla Firefox) is an shared computer's browser, and you left your account logged in at that computer. Go to Browser B (Google Chrome) and change your account\npassword at https://bridge.cspr.ng/my/account.\nStep 4 : When you change your account password at Browser B (Google Chrome), the session at Browser A (Mozilla Firefox) should expire and the account should automatically logged out.\nStep 5 : Go to Browser A (Mozilla Firefox), and visit your https://bridge.cspr.ng/ account page and refresh the page.\nYou will notice that even after changing the account password at Browser B (Google Chrome), the session at Browser A (Mozilla Firefox) didn't expired which can cause major problems.\nPlease fix the bug and let me know if you need any other information.\nRegards\nK. Jagdish\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Authentication - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1494189840,
+  "report_url": "https://hackerone.com/reports/226712",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Log in to the web application using Browser A (e.g., Mozilla Firefox)."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Authentication - Generic"
+    [
+      2,
+      "Log in to the same account using Browser B (e.g., Google Chrome)."
     ],
-    "screenshots": {},
-    "disclosed_date": 1494189840,
-    "report_url": "https://hackerone.com/reports/226712",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Log in to the web application using Browser A (e.g., Mozilla Firefox)."
-        ],
-        [
-            2,
-            "Log in to the same account using Browser B (e.g., Google Chrome)."
-        ],
-        [
-            3,
-            "Change the account password in Browser B."
-        ],
-        [
-            4,
-            "Verify that the session in Browser A remains active after the password change."
-        ]
+    [
+      3,
+      "Change the account password in Browser B."
     ],
-    "vuln_description": "The web application fails to invalidate existing sessions when a user changes their password, allowing sessions on other devices or browsers to remain active. This could lead to unauthorized access if a user leaves their account logged in on a shared or public computer.",
-    "reason": "The vulnerability involves a straightforward test of session management after a password change, which is a common security practice. The steps are simple and do not require complex interactions or novel logic.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      4,
+      "Verify that the session in Browser A remains active after the password change."
+    ]
+  ],
+  "vuln_description": "The web application fails to invalidate existing sessions when a user changes their password, allowing sessions on other devices or browsers to remain active. This could lead to unauthorized access if a user leaves their account logged in on a shared or public computer.",
+  "reason": "The vulnerability involves a straightforward test of session management after a password change, which is a common security practice. The steps are simple and do not require complex interactions or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves session management within the same application, specifically the failure to invalidate sessions across browsers after a password change. This falls under the AuthZ/AuthN methodology as it tests the authorization boundary of session validity after a critical action (password change). The methodology would detect this by observing that the session (user_session) remains valid after the password change action, which violates the expected authorization boundary.",
+    "is_detectable": true
+  }
 }

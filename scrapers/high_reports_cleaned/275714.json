@@ -1,51 +1,51 @@
 {
-    "reported_to": "Starbucks",
-    "reported_by": "dpgribkov ",
-    "title": "Subdomain takeover on developer.openapi.starbucks.com",
-    "content": "\nHi team,\nSummary:\nSubdomain developer.openapi.starbucks.com is vulnerable to subdomain takeover via Mashery service. The reason why it's worked unfortunately not fully clear to me.\nDetails:\n<image_0>\n<image_1>\nPoC:\nI added simple js code to the Welcome page alert(document.domain) for this proof-of-concept.\nTo confirm it just click this link http://developer.openapi.starbucks.com/\nImpact:\nAs I can serve my own content without any restrictions, with this webpage I can set up a campaign to steal user cookie sessions, or use it to steal credentials, or for phishing purposes.\nPlease let me know, if you need more information!\nThanks,\nDanil\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Starbucks",
+  "reported_by": "dpgribkov ",
+  "title": "Subdomain takeover on developer.openapi.starbucks.com",
+  "content": "\nHi team,\nSummary:\nSubdomain developer.openapi.starbucks.com is vulnerable to subdomain takeover via Mashery service. The reason why it's worked unfortunately not fully clear to me.\nDetails:\n<image_0>\n<image_1>\nPoC:\nI added simple js code to the Welcome page alert(document.domain) for this proof-of-concept.\nTo confirm it just click this link http://developer.openapi.starbucks.com/\nImpact:\nAs I can serve my own content without any restrictions, with this webpage I can set up a campaign to steal user cookie sessions, or use it to steal credentials, or for phishing purposes.\nPlease let me know, if you need more information!\nThanks,\nDanil\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/227/581/4b4004776d70ce916e539a2d1f1960d67b18edd6/developers_starbucks_com__216_87_148_114__80.png?response-content-disposition=attachment%3B%20filename%3D%22developers_starbucks_com__216_87_148_114__80.png%22%3B%20filename%2A%3DUTF-8%27%27developers_starbucks_com__216_87_148_114__80.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQY65IP7J5%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T175411Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMn%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIFWSzpGBw0gpxrV1Rg20EGdMeClH35vXtLZx7i01ff%2FUAiEA9zvCJ48YaiuF4%2FSBNZYPeujj5w74UuyL%2BWQYdFHCIagqsgUIMhADGgwwMTM2MTkyNzQ4NDkiDKKL73KbRO0XvzYeBSqPBUvm0o0r3FB%2B2yu69YvhXQIxl3VLF6eFtMJQbnngi8WsN2yQuluAkfz%2B%2F8rAWTPRk65oAs3y8NUp4JBXQH%2F81iqB6YsdRHICNBzLSKTUjt3M%2FNRcogqGt0Jr4zaFfjoGeEeu7W4%2F1iiOawdA%2B7BvBTexlVzRnXFQtMItqbC%2BD8PIrrn1FW%2BF4GGcSHd101XaGhRypDfbXeCqB0WRDG9%2BmLcnw3iDWpMw29K8xo5Y8d2FqPC%2BeAjtX%2FpXD5XtgYIFjjmrIuFRZvpfx%2FME8ni25LcHIJMMFuf1ESWV%2FqpP%2FnSZZtZpKOtSns6RgjnQLvTLaLjnOh9mr1dacs1%2Brlyngle220bxuyxabqsFue%2BIJqCCWeiig4yBvFsHKPbt8hL32p5dLq6kva%2FzNd5ZQ1TJB4N%2BZvg47L2LRTxnPf4MCWcm%2FhBhg0%2BSTfnm2N8uV083kajVeYi8j2W2gf9ESQyf1qorTdAsHuQmfgcvfHifRixObbdPdRRSS%2Bctu4wToXdBVVmzo5VHv32mg%2Fz8X5Z8WjSyh6L0QvPVSedxqClAo1PFUqt3r3ErYaJJreMAQC53zDO1U4lLwzYwrTWckamCWaoXIAlqILNfL6xIHJJU60gil5DK5H0c8fBcJcm%2BkX%2BcPO33ZvTFhTaExQYWSGeDctaHSWTlngWJWq4e26Kn9VtQ0xpPmBZhzL%2FFGSnJ0K8WzdoIdShiSCpPMBbJ2NR3SXDDnYlI8ogQAyH356zv19hPHwbog2jEPxX%2B0uNKlAF0pqzPLjfs52sgdumxInuljr%2FOqzV7Dl3i%2F6yfKYEe3smtCsOWpNpRsBQeZiBC2SnS0Mr%2FUsoL1vOfcROkEYHjS%2F6QuuDAbOddhzJVV%2FCKJOIw79WQvwY6sQEsdyk4wYBVQdsV346TE09lBBtkPiwytdTXoJSHxNvQrPIiOH%2F%2B3g0PQDxHYgdg9FgNzcnW6ZJXKAnyxKILMXmXgIgVHYqXAj9wmKeMC%2F5OBd1FRcLjhvPJM9vYU6oFSy3W2k7l2DhIyCBToR2G16rpOgfSejCS2Of9RNEH%2BkStTHmXIxMZHt6xzYaqpG1a%2BKZeXtdigH74gZQPo3wPrLYbmj1yEfdP5PkUyskYa04Vr4k%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=5f88aa249f0549ff1f306f3693a939022b33b59d7b4a8b8ceeddda17e55782a3",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/227/586/184bf2c1ee4d5e14a975499ce083d58669d1bcce/Screenshot_2017-10-09_13.38.41.png?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_2017-10-09_13.38.41.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_2017-10-09_13.38.41.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQY65IP7J5%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T175411Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMn%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIFWSzpGBw0gpxrV1Rg20EGdMeClH35vXtLZx7i01ff%2FUAiEA9zvCJ48YaiuF4%2FSBNZYPeujj5w74UuyL%2BWQYdFHCIagqsgUIMhADGgwwMTM2MTkyNzQ4NDkiDKKL73KbRO0XvzYeBSqPBUvm0o0r3FB%2B2yu69YvhXQIxl3VLF6eFtMJQbnngi8WsN2yQuluAkfz%2B%2F8rAWTPRk65oAs3y8NUp4JBXQH%2F81iqB6YsdRHICNBzLSKTUjt3M%2FNRcogqGt0Jr4zaFfjoGeEeu7W4%2F1iiOawdA%2B7BvBTexlVzRnXFQtMItqbC%2BD8PIrrn1FW%2BF4GGcSHd101XaGhRypDfbXeCqB0WRDG9%2BmLcnw3iDWpMw29K8xo5Y8d2FqPC%2BeAjtX%2FpXD5XtgYIFjjmrIuFRZvpfx%2FME8ni25LcHIJMMFuf1ESWV%2FqpP%2FnSZZtZpKOtSns6RgjnQLvTLaLjnOh9mr1dacs1%2Brlyngle220bxuyxabqsFue%2BIJqCCWeiig4yBvFsHKPbt8hL32p5dLq6kva%2FzNd5ZQ1TJB4N%2BZvg47L2LRTxnPf4MCWcm%2FhBhg0%2BSTfnm2N8uV083kajVeYi8j2W2gf9ESQyf1qorTdAsHuQmfgcvfHifRixObbdPdRRSS%2Bctu4wToXdBVVmzo5VHv32mg%2Fz8X5Z8WjSyh6L0QvPVSedxqClAo1PFUqt3r3ErYaJJreMAQC53zDO1U4lLwzYwrTWckamCWaoXIAlqILNfL6xIHJJU60gil5DK5H0c8fBcJcm%2BkX%2BcPO33ZvTFhTaExQYWSGeDctaHSWTlngWJWq4e26Kn9VtQ0xpPmBZhzL%2FFGSnJ0K8WzdoIdShiSCpPMBbJ2NR3SXDDnYlI8ogQAyH356zv19hPHwbog2jEPxX%2B0uNKlAF0pqzPLjfs52sgdumxInuljr%2FOqzV7Dl3i%2F6yfKYEe3smtCsOWpNpRsBQeZiBC2SnS0Mr%2FUsoL1vOfcROkEYHjS%2F6QuuDAbOddhzJVV%2FCKJOIw79WQvwY6sQEsdyk4wYBVQdsV346TE09lBBtkPiwytdTXoJSHxNvQrPIiOH%2F%2B3g0PQDxHYgdg9FgNzcnW6ZJXKAnyxKILMXmXgIgVHYqXAj9wmKeMC%2F5OBd1FRcLjhvPJM9vYU6oFSy3W2k7l2DhIyCBToR2G16rpOgfSejCS2Of9RNEH%2BkStTHmXIxMZHt6xzYaqpG1a%2BKZeXtdigH74gZQPo3wPrLYbmj1yEfdP5PkUyskYa04Vr4k%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=838c5737c493b07b96cc8e5167fef83dec5427e8ce0507695576b9aca8c7f52d"
+  },
+  "disclosed_date": 1518903240,
+  "report_url": "https://hackerone.com/reports/275714",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify the subdomain developer.openapi.starbucks.com as potentially vulnerable to subdomain takeover."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Access Control - Generic"
-    ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/227/581/4b4004776d70ce916e539a2d1f1960d67b18edd6/developers_starbucks_com__216_87_148_114__80.png?response-content-disposition=attachment%3B%20filename%3D%22developers_starbucks_com__216_87_148_114__80.png%22%3B%20filename%2A%3DUTF-8%27%27developers_starbucks_com__216_87_148_114__80.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQY65IP7J5%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T175411Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMn%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIFWSzpGBw0gpxrV1Rg20EGdMeClH35vXtLZx7i01ff%2FUAiEA9zvCJ48YaiuF4%2FSBNZYPeujj5w74UuyL%2BWQYdFHCIagqsgUIMhADGgwwMTM2MTkyNzQ4NDkiDKKL73KbRO0XvzYeBSqPBUvm0o0r3FB%2B2yu69YvhXQIxl3VLF6eFtMJQbnngi8WsN2yQuluAkfz%2B%2F8rAWTPRk65oAs3y8NUp4JBXQH%2F81iqB6YsdRHICNBzLSKTUjt3M%2FNRcogqGt0Jr4zaFfjoGeEeu7W4%2F1iiOawdA%2B7BvBTexlVzRnXFQtMItqbC%2BD8PIrrn1FW%2BF4GGcSHd101XaGhRypDfbXeCqB0WRDG9%2BmLcnw3iDWpMw29K8xo5Y8d2FqPC%2BeAjtX%2FpXD5XtgYIFjjmrIuFRZvpfx%2FME8ni25LcHIJMMFuf1ESWV%2FqpP%2FnSZZtZpKOtSns6RgjnQLvTLaLjnOh9mr1dacs1%2Brlyngle220bxuyxabqsFue%2BIJqCCWeiig4yBvFsHKPbt8hL32p5dLq6kva%2FzNd5ZQ1TJB4N%2BZvg47L2LRTxnPf4MCWcm%2FhBhg0%2BSTfnm2N8uV083kajVeYi8j2W2gf9ESQyf1qorTdAsHuQmfgcvfHifRixObbdPdRRSS%2Bctu4wToXdBVVmzo5VHv32mg%2Fz8X5Z8WjSyh6L0QvPVSedxqClAo1PFUqt3r3ErYaJJreMAQC53zDO1U4lLwzYwrTWckamCWaoXIAlqILNfL6xIHJJU60gil5DK5H0c8fBcJcm%2BkX%2BcPO33ZvTFhTaExQYWSGeDctaHSWTlngWJWq4e26Kn9VtQ0xpPmBZhzL%2FFGSnJ0K8WzdoIdShiSCpPMBbJ2NR3SXDDnYlI8ogQAyH356zv19hPHwbog2jEPxX%2B0uNKlAF0pqzPLjfs52sgdumxInuljr%2FOqzV7Dl3i%2F6yfKYEe3smtCsOWpNpRsBQeZiBC2SnS0Mr%2FUsoL1vOfcROkEYHjS%2F6QuuDAbOddhzJVV%2FCKJOIw79WQvwY6sQEsdyk4wYBVQdsV346TE09lBBtkPiwytdTXoJSHxNvQrPIiOH%2F%2B3g0PQDxHYgdg9FgNzcnW6ZJXKAnyxKILMXmXgIgVHYqXAj9wmKeMC%2F5OBd1FRcLjhvPJM9vYU6oFSy3W2k7l2DhIyCBToR2G16rpOgfSejCS2Of9RNEH%2BkStTHmXIxMZHt6xzYaqpG1a%2BKZeXtdigH74gZQPo3wPrLYbmj1yEfdP5PkUyskYa04Vr4k%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=5f88aa249f0549ff1f306f3693a939022b33b59d7b4a8b8ceeddda17e55782a3",
-        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/227/586/184bf2c1ee4d5e14a975499ce083d58669d1bcce/Screenshot_2017-10-09_13.38.41.png?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_2017-10-09_13.38.41.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_2017-10-09_13.38.41.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQY65IP7J5%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T175411Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMn%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIFWSzpGBw0gpxrV1Rg20EGdMeClH35vXtLZx7i01ff%2FUAiEA9zvCJ48YaiuF4%2FSBNZYPeujj5w74UuyL%2BWQYdFHCIagqsgUIMhADGgwwMTM2MTkyNzQ4NDkiDKKL73KbRO0XvzYeBSqPBUvm0o0r3FB%2B2yu69YvhXQIxl3VLF6eFtMJQbnngi8WsN2yQuluAkfz%2B%2F8rAWTPRk65oAs3y8NUp4JBXQH%2F81iqB6YsdRHICNBzLSKTUjt3M%2FNRcogqGt0Jr4zaFfjoGeEeu7W4%2F1iiOawdA%2B7BvBTexlVzRnXFQtMItqbC%2BD8PIrrn1FW%2BF4GGcSHd101XaGhRypDfbXeCqB0WRDG9%2BmLcnw3iDWpMw29K8xo5Y8d2FqPC%2BeAjtX%2FpXD5XtgYIFjjmrIuFRZvpfx%2FME8ni25LcHIJMMFuf1ESWV%2FqpP%2FnSZZtZpKOtSns6RgjnQLvTLaLjnOh9mr1dacs1%2Brlyngle220bxuyxabqsFue%2BIJqCCWeiig4yBvFsHKPbt8hL32p5dLq6kva%2FzNd5ZQ1TJB4N%2BZvg47L2LRTxnPf4MCWcm%2FhBhg0%2BSTfnm2N8uV083kajVeYi8j2W2gf9ESQyf1qorTdAsHuQmfgcvfHifRixObbdPdRRSS%2Bctu4wToXdBVVmzo5VHv32mg%2Fz8X5Z8WjSyh6L0QvPVSedxqClAo1PFUqt3r3ErYaJJreMAQC53zDO1U4lLwzYwrTWckamCWaoXIAlqILNfL6xIHJJU60gil5DK5H0c8fBcJcm%2BkX%2BcPO33ZvTFhTaExQYWSGeDctaHSWTlngWJWq4e26Kn9VtQ0xpPmBZhzL%2FFGSnJ0K8WzdoIdShiSCpPMBbJ2NR3SXDDnYlI8ogQAyH356zv19hPHwbog2jEPxX%2B0uNKlAF0pqzPLjfs52sgdumxInuljr%2FOqzV7Dl3i%2F6yfKYEe3smtCsOWpNpRsBQeZiBC2SnS0Mr%2FUsoL1vOfcROkEYHjS%2F6QuuDAbOddhzJVV%2FCKJOIw79WQvwY6sQEsdyk4wYBVQdsV346TE09lBBtkPiwytdTXoJSHxNvQrPIiOH%2F%2B3g0PQDxHYgdg9FgNzcnW6ZJXKAnyxKILMXmXgIgVHYqXAj9wmKeMC%2F5OBd1FRcLjhvPJM9vYU6oFSy3W2k7l2DhIyCBToR2G16rpOgfSejCS2Of9RNEH%2BkStTHmXIxMZHt6xzYaqpG1a%2BKZeXtdigH74gZQPo3wPrLYbmj1yEfdP5PkUyskYa04Vr4k%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=838c5737c493b07b96cc8e5167fef83dec5427e8ce0507695576b9aca8c7f52d"
-    },
-    "disclosed_date": 1518903240,
-    "report_url": "https://hackerone.com/reports/275714",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Identify the subdomain developer.openapi.starbucks.com as potentially vulnerable to subdomain takeover."
-        ],
-        [
-            2,
-            "Confirm the vulnerability by hosting and serving custom content (e.g., a simple JavaScript alert) on the subdomain."
-        ]
-    ],
-    "vuln_description": "The subdomain developer.openapi.starbucks.com is vulnerable to subdomain takeover via the Mashery service, allowing an attacker to serve malicious content and potentially steal user credentials or conduct phishing campaigns.",
-    "reason": "The vulnerability involves identifying a misconfigured subdomain and leveraging a known service (Mashery) for takeover, which is a straightforward process without complex interactions or novel logic.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": false
-    }
+    [
+      2,
+      "Confirm the vulnerability by hosting and serving custom content (e.g., a simple JavaScript alert) on the subdomain."
+    ]
+  ],
+  "vuln_description": "The subdomain developer.openapi.starbucks.com is vulnerable to subdomain takeover via the Mashery service, allowing an attacker to serve malicious content and potentially steal user credentials or conduct phishing campaigns.",
+  "reason": "The vulnerability involves identifying a misconfigured subdomain and leveraging a known service (Mashery) for takeover, which is a straightforward process without complex interactions or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The subdomain takeover vulnerability involves a misconfiguration in DNS or service delegation (Mashery service in this case), which is unrelated to authentication or authorization mechanisms within an application. The proposed methodologies focus on testing AuthN/AuthZ boundaries within an application by manipulating user sessions, actions, and resource IDs, not external infrastructure configurations.",
+    "is_detectable": false
+  }
 }

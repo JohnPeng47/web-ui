@@ -1,52 +1,52 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "sp1d3rs ",
-    "title": "Authentication bypass and potential RCE on the https://\u2588\u2588\u2588\u2588 due to exposed Cisco TelePresence SX80 with default credentials",
-    "content": "\nDescription\nHello. I was able to identify another one Cisco TelePresence SX80 device located on the https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 right near the previous device \u2588\u2588\u2588\u2588 (after #684070 report I decided to check \u2588\u2588\u2588\u2588* range)\nAccording to the IP Info: https://ipinfo.io/AS257/\u2588\u2588\u2588\u25880/24 it belongs to ASN with ID\nCode 9 Bytes\n1AS257 \u2588\u2588\u2588\nThe mentioned instance has same credentials admin:admin.\nThis instance is different and less used, the logs reveals that last time device was used in 2017 year.\nPOC\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nLogin with admin:admin\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSince we are logged in as admin, we can completely control the device and all connections, and add our startup scripts via https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/web/scripts thus achiecing code execution.\nSuggested fix\nChange the credentials and likely you will need to reset the device to factory settings\nImpact\nPotential device compromise and code execution. This devices are used mainly for trainings, briefings, and demonstration rooms, as well as auditoriums, so attacker with full control of the device potentially can intercept the data (RCE potential is interesting, but ability to silently compromise the device and use it as backdoor can be much more harmful).\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "sp1d3rs ",
+  "title": "Authentication bypass and potential RCE on the https://\u2588\u2588\u2588\u2588 due to exposed Cisco TelePresence SX80 with default credentials",
+  "content": "\nDescription\nHello. I was able to identify another one Cisco TelePresence SX80 device located on the https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 right near the previous device \u2588\u2588\u2588\u2588 (after #684070 report I decided to check \u2588\u2588\u2588\u2588* range)\nAccording to the IP Info: https://ipinfo.io/AS257/\u2588\u2588\u2588\u25880/24 it belongs to ASN with ID\nCode 9 Bytes\n1AS257 \u2588\u2588\u2588\nThe mentioned instance has same credentials admin:admin.\nThis instance is different and less used, the logs reveals that last time device was used in 2017 year.\nPOC\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nLogin with admin:admin\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSince we are logged in as admin, we can completely control the device and all connections, and add our startup scripts via https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/web/scripts thus achiecing code execution.\nSuggested fix\nChange the credentials and likely you will need to reset the device to factory settings\nImpact\nPotential device compromise and code execution. This devices are used mainly for trainings, briefings, and demonstration rooms, as well as auditoriums, so attacker with full control of the device potentially can intercept the data (RCE potential is interesting, but ability to silently compromise the device and use it as backdoor can be much more harmful).\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Authentication - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1721413800,
+  "report_url": "https://hackerone.com/reports/684758",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "IOT",
+  "steps": [
+    [
+      1,
+      "Identify a Cisco TelePresence SX80 device on the network, specifically checking IP ranges similar to previously reported vulnerable devices."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Authentication - Generic"
+    [
+      2,
+      "Access the device's web interface using the default credentials admin:admin."
     ],
-    "screenshots": {},
-    "disclosed_date": 1721413800,
-    "report_url": "https://hackerone.com/reports/684758",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "IOT",
-    "steps": [
-        [
-            1,
-            "Identify a Cisco TelePresence SX80 device on the network, specifically checking IP ranges similar to previously reported vulnerable devices."
-        ],
-        [
-            2,
-            "Access the device's web interface using the default credentials admin:admin."
-        ],
-        [
-            3,
-            "Navigate to the scripts section at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/web/scripts and upload a malicious startup script to achieve remote code execution."
-        ]
-    ],
-    "vuln_description": "The vulnerability involves an authentication bypass and potential remote code execution (RCE) on a Cisco TelePresence SX80 device due to exposed default credentials (admin:admin). An attacker can gain full control of the device, manipulate connections, and execute arbitrary code by uploading malicious scripts.",
-    "reason": "The vulnerability is straightforward to discover as it relies on default credentials, a common and well-known security misconfiguration. The attack does not involve complex interactions or novel logic, making it easy to identify and exploit.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": "684070",
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      3,
+      "Navigate to the scripts section at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/web/scripts and upload a malicious startup script to achieve remote code execution."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves an authentication bypass and potential remote code execution (RCE) on a Cisco TelePresence SX80 device due to exposed default credentials (admin:admin). An attacker can gain full control of the device, manipulate connections, and execute arbitrary code by uploading malicious scripts.",
+  "reason": "The vulnerability is straightforward to discover as it relies on default credentials, a common and well-known security misconfiguration. The attack does not involve complex interactions or novel logic, making it easy to identify and exploit.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "684070",
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves default credentials (admin:admin) on an exposed Cisco TelePresence SX80 device. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs within the same application, but this case involves a device with default credentials, which is a different class of vulnerability. The methodology does not cover scanning for default credentials on exposed devices.",
+    "is_detectable": false
+  }
 }

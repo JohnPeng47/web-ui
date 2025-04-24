@@ -1,72 +1,72 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "hunt4p1zza ",
-    "title": "[Critical] Insufficient Access Control On Registration Page of Webapps Website Allows Privilege Escalation to Administrator ",
-    "content": "\nSummary:\nHello.\nDue to insufficient access controls and poor implementation of the registration at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588/login.cfm it was possible to register while privilege escalating to an administrator.\nDescription:\nIt was possible to tamper with the registration request at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588/screen_questions.cfm which is aimed to \u2588\u2588\u2588\u2588\u2588\u2588\u2588 applications for education in order to sign-up with administrator privileges. As a result, it was possible to gain access to personally identifiable information (PII) of all the applicants in the system, including SSNs, names, phones and emails.\nAt this point I stopped digging further and I started writing this report.\nNote: Please can you liaise with the system's administrator and kindly ask them to remove the below accounts from the system after this has been triaged and resolved:\nCode 61 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\n2\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3\u2588\u2588\u2588\n4\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n5\u2588\u2588\u2588\u2588\u2588\u2588\n6\u2588\u2588\u2588\n7\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n8\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nApologies for creating all these accounts, most of them are just low privileged applicants, but I was confused as to why this attack worked and it took few attempts to figure it out.\nPlease let me know when this is resolved and I will remove any evidence that include PII data from my local system which are only kept locally.\nImpact\nAn attacker can gain administrative access in the system allowing them to expose sensitive PII information, such as including SSNs, names, phones and emails. Having this access, an attacker could completely take over the website and perform further attacks against it from this authenticated viewpoint - however I did not perform this. Attackers may sell this PII information on black-markets for profit.\nIf this was exploited and published there would be severe reputational and legal ramifications for DoD.\nStep-by-step Reproduction Instructions\nInitially, enable your web intercepting proxy such as Burp Suite\nNext, browse to the initial registration page at: https://\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/screen_questions.cfm and choose options in the dropdown lists: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nNext, you will be taken at the actual registration page at https://\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/newuser.cfm?loc_class=L (you can probably skip step 2 and come right here)\nFill in this form with some information and a legitimate looking SSN number. Keep in mind that if the SSN is registered in the system, the website will error, so you will have to try another one.\nIntercept the request and modify it so that the user_type parameter has value 4, and the fname and lname parameters have values Hackerone<% and test<%xss. I believe it is <% that is causing this privilege escalate issue, but as I am not 100% positive I am giving you the full values. The request should look like mine: \u2588\u2588\u2588\u2588\u2588\nIf all went well, you should be logged in and prompted with a Privacy page which you need to accept.\nNotice how this account has administrator access, an example is shown below: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nFinally, I created 2 short PoC videos showing how I was able to register as admin and how I was able to access PII data:\nCreate admin account video: \u2588\u2588\u2588\u2588\u2588\u2588\nAccess PII data video: {F716040}\nProduct, Version, and Configuration (If applicable)\nThe https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 website is under \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 which is part of DoD, as shown: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\nUnfortunately, I am not 100% positive on what exactly is causing this flaw, but injection of <% is required. This could be mitigated by applying strict user input validation in the fname and lname fields. Please see the link below for more information:\nhttps://owasp.org/www-project-cheat-sheets/cheatsheets/Input_Validation_Cheat_Sheet\nI would also recommend that you review the current user access types and levels in accordance with the findings above to ensure that setting the user_type to other numbers than the default one when registering (5) does not allow users to gain more privileges than they are authorized to.\nAdditionally, review the whole codebase for broken access control, the following cheatsheet from OWASP provides more information:\nhttps://owasp.org/www-project-cheat-sheets/cheatsheets/Access_Control_Cheat_Sheet\nFinally, the web application appears to be very susceptible to common web application attacks and I would recommend that this undertakes a full thorough security test if possible or a code review, if of course it is required and cannot be decommissioned.\nPS: I will do my best to submit reports in terms of the rest of flaws I was able to spot while looking at it.\nImpact\nAn attacker can gain administrative access in the system allowing them to expose sensitive PII information, such as including SSNs, names, phones and emails. Having this access, an attacker could completely take over the website and perform further attacks against it from this authenticated viewpoint - however I did not perform this. Attackers may sell this PII information on black-markets for profit.\nIf this was exploited and published there would be severe reputational and legal ramifications for DoD.\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "hunt4p1zza ",
+  "title": "[Critical] Insufficient Access Control On Registration Page of Webapps Website Allows Privilege Escalation to Administrator ",
+  "content": "\nSummary:\nHello.\nDue to insufficient access controls and poor implementation of the registration at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588/login.cfm it was possible to register while privilege escalating to an administrator.\nDescription:\nIt was possible to tamper with the registration request at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588/screen_questions.cfm which is aimed to \u2588\u2588\u2588\u2588\u2588\u2588\u2588 applications for education in order to sign-up with administrator privileges. As a result, it was possible to gain access to personally identifiable information (PII) of all the applicants in the system, including SSNs, names, phones and emails.\nAt this point I stopped digging further and I started writing this report.\nNote: Please can you liaise with the system's administrator and kindly ask them to remove the below accounts from the system after this has been triaged and resolved:\nCode 61 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\n2\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3\u2588\u2588\u2588\n4\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n5\u2588\u2588\u2588\u2588\u2588\u2588\n6\u2588\u2588\u2588\n7\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n8\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nApologies for creating all these accounts, most of them are just low privileged applicants, but I was confused as to why this attack worked and it took few attempts to figure it out.\nPlease let me know when this is resolved and I will remove any evidence that include PII data from my local system which are only kept locally.\nImpact\nAn attacker can gain administrative access in the system allowing them to expose sensitive PII information, such as including SSNs, names, phones and emails. Having this access, an attacker could completely take over the website and perform further attacks against it from this authenticated viewpoint - however I did not perform this. Attackers may sell this PII information on black-markets for profit.\nIf this was exploited and published there would be severe reputational and legal ramifications for DoD.\nStep-by-step Reproduction Instructions\nInitially, enable your web intercepting proxy such as Burp Suite\nNext, browse to the initial registration page at: https://\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/screen_questions.cfm and choose options in the dropdown lists: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nNext, you will be taken at the actual registration page at https://\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/newuser.cfm?loc_class=L (you can probably skip step 2 and come right here)\nFill in this form with some information and a legitimate looking SSN number. Keep in mind that if the SSN is registered in the system, the website will error, so you will have to try another one.\nIntercept the request and modify it so that the user_type parameter has value 4, and the fname and lname parameters have values Hackerone<% and test<%xss. I believe it is <% that is causing this privilege escalate issue, but as I am not 100% positive I am giving you the full values. The request should look like mine: \u2588\u2588\u2588\u2588\u2588\nIf all went well, you should be logged in and prompted with a Privacy page which you need to accept.\nNotice how this account has administrator access, an example is shown below: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nFinally, I created 2 short PoC videos showing how I was able to register as admin and how I was able to access PII data:\nCreate admin account video: \u2588\u2588\u2588\u2588\u2588\u2588\nAccess PII data video: {F716040}\nProduct, Version, and Configuration (If applicable)\nThe https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 website is under \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 which is part of DoD, as shown: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\nUnfortunately, I am not 100% positive on what exactly is causing this flaw, but injection of <% is required. This could be mitigated by applying strict user input validation in the fname and lname fields. Please see the link below for more information:\nhttps://owasp.org/www-project-cheat-sheets/cheatsheets/Input_Validation_Cheat_Sheet\nI would also recommend that you review the current user access types and levels in accordance with the findings above to ensure that setting the user_type to other numbers than the default one when registering (5) does not allow users to gain more privileges than they are authorized to.\nAdditionally, review the whole codebase for broken access control, the following cheatsheet from OWASP provides more information:\nhttps://owasp.org/www-project-cheat-sheets/cheatsheets/Access_Control_Cheat_Sheet\nFinally, the web application appears to be very susceptible to common web application attacks and I would recommend that this undertakes a full thorough security test if possible or a code review, if of course it is required and cannot be decommissioned.\nPS: I will do my best to submit reports in terms of the rest of flaws I was able to spot while looking at it.\nImpact\nAn attacker can gain administrative access in the system allowing them to expose sensitive PII information, such as including SSNs, names, phones and emails. Having this access, an attacker could completely take over the website and perform further attacks against it from this authenticated viewpoint - however I did not perform this. Attackers may sell this PII information on black-markets for profit.\nIf this was exploited and published there would be severe reputational and legal ramifications for DoD.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1590603600,
+  "report_url": "https://hackerone.com/reports/796379",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Enable a web intercepting proxy like Burp Suite."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Access Control - Generic"
+    [
+      2,
+      "Browse to the registration page at https://\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/screen_questions.cfm and select options in the dropdown lists."
     ],
-    "screenshots": {},
-    "disclosed_date": 1590603600,
-    "report_url": "https://hackerone.com/reports/796379",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Enable a web intercepting proxy like Burp Suite."
-        ],
-        [
-            2,
-            "Browse to the registration page at https://\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/screen_questions.cfm and select options in the dropdown lists."
-        ],
-        [
-            3,
-            "Proceed to the registration form at https://\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/newuser.cfm?loc_class=L."
-        ],
-        [
-            4,
-            "Fill in the form with legitimate-looking information, including a unique SSN."
-        ],
-        [
-            5,
-            "Intercept the request and modify the user_type parameter to 4, and the fname and lname parameters to include '<%'."
-        ],
-        [
-            6,
-            "Submit the modified request to register with administrator privileges."
-        ],
-        [
-            7,
-            "Accept the Privacy page prompt upon successful login."
-        ],
-        [
-            8,
-            "Verify administrative access by checking for access to PII data."
-        ]
+    [
+      3,
+      "Proceed to the registration form at https://\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/newuser.cfm?loc_class=L."
     ],
-    "vuln_description": "Insufficient access control on the registration page allows privilege escalation to administrator by tampering with the registration request, specifically by injecting '<%' into the fname and lname fields and modifying the user_type parameter. This grants unauthorized access to sensitive PII data.",
-    "reason": "The attack involves manipulating the registration request in a non-obvious way (injecting '<%' and changing user_type) to escalate privileges. While the steps are straightforward, the need to discover the specific injection and parameter manipulation adds complexity.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      4,
+      "Fill in the form with legitimate-looking information, including a unique SSN."
+    ],
+    [
+      5,
+      "Intercept the request and modify the user_type parameter to 4, and the fname and lname parameters to include '<%'."
+    ],
+    [
+      6,
+      "Submit the modified request to register with administrator privileges."
+    ],
+    [
+      7,
+      "Accept the Privacy page prompt upon successful login."
+    ],
+    [
+      8,
+      "Verify administrative access by checking for access to PII data."
+    ]
+  ],
+  "vuln_description": "Insufficient access control on the registration page allows privilege escalation to administrator by tampering with the registration request, specifically by injecting '<%' into the fname and lname fields and modifying the user_type parameter. This grants unauthorized access to sensitive PII data.",
+  "reason": "The attack involves manipulating the registration request in a non-obvious way (injecting '<%' and changing user_type) to escalate privileges. While the steps are straightforward, the need to discover the specific injection and parameter manipulation adds complexity.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves modifying the registration request to escalate privileges by injecting specific characters ('<%') into the 'fname' and 'lname' fields and changing the 'user_type' parameter. This falls under the AuthZ Bypass category where a regular user can gain administrative access. The methodology described involves testing (user_session, action, resource_id) tuples and swapping user sessions or resource IDs to detect such vulnerabilities. Since the attack involves modifying parameters in a registration request (an action) to escalate privileges (an authorization boundary), it aligns with the detection method of swapping user sessions or parameters to test for AuthZ bypasses.",
+    "is_detectable": true
+  }
 }

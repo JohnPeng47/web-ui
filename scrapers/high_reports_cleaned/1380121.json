@@ -1,52 +1,52 @@
 {
-    "reported_to": "Urban Company",
-    "reported_by": "ian ",
-    "title": "Critical full compromise of jarvis-new.urbanclap.com via weak session signing",
-    "content": "\nSummary\nHi there, I discovered that jarvis-new.urbanclap.com uses a weak Flask session key. Because Flask sessions are signed with a static secret, if this secret is known to an attacker then they can modify the session state. In this case, we can modify the Redash user_id for the session and log in as any user. This results in a full compromise of the instance. I have attached a screenshot showing that I logged into \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588@urbancompany.com and have full admin permissions:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nHow to fix\nChange the REDASH_COOKIE_SECRET and REDASH_SECRET_KEY to a random value immediately.\nPoC\nFor simplicity, it is easiest to forge a password reset link for Redash. We can do this with a bit of Python. To get the reset link for user ID 1, we simply run:\nCode 167 Bytes\n1>>> from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature\n2>>> serializer = URLSafeTimedSerializer(\"\u2588\u2588\u2588\")\n3>>> serializer.dumps(str(\"1\"))\n4'\u2588\u2588\u2588'\nThen, we can browse to https://jarvis-new.urbanclap.com/reset/\u2588\u2588\u2588\u2588\u2588 and choose a new password for user ID 1. This then logs us into their account.\nImpact\nSince this is connected to all of your databases, this is likely a significant leak of PII and other sensitive information. This is easily a critical issue.\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "Urban Company",
+  "reported_by": "ian ",
+  "title": "Critical full compromise of jarvis-new.urbanclap.com via weak session signing",
+  "content": "\nSummary\nHi there, I discovered that jarvis-new.urbanclap.com uses a weak Flask session key. Because Flask sessions are signed with a static secret, if this secret is known to an attacker then they can modify the session state. In this case, we can modify the Redash user_id for the session and log in as any user. This results in a full compromise of the instance. I have attached a screenshot showing that I logged into \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588@urbancompany.com and have full admin permissions:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nHow to fix\nChange the REDASH_COOKIE_SECRET and REDASH_SECRET_KEY to a random value immediately.\nPoC\nFor simplicity, it is easiest to forge a password reset link for Redash. We can do this with a bit of Python. To get the reset link for user ID 1, we simply run:\nCode 167 Bytes\n1>>> from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature\n2>>> serializer = URLSafeTimedSerializer(\"\u2588\u2588\u2588\")\n3>>> serializer.dumps(str(\"1\"))\n4'\u2588\u2588\u2588'\nThen, we can browse to https://jarvis-new.urbanclap.com/reset/\u2588\u2588\u2588\u2588\u2588 and choose a new password for user ID 1. This then logs us into their account.\nImpact\nSince this is connected to all of your databases, this is likely a significant leak of PII and other sensitive information. This is easily a critical issue.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 1500,
+  "weaknesses": [
+    "Improper Authentication - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1643590980,
+  "report_url": "https://hackerone.com/reports/1380121",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify that jarvis-new.urbanclap.com uses a weak Flask session key."
     ],
-    "bounty": 1500,
-    "weaknesses": [
-        "Improper Authentication - Generic"
+    [
+      2,
+      "Use the known weak secret to forge a session token or password reset link for any user ID."
     ],
-    "screenshots": {},
-    "disclosed_date": 1643590980,
-    "report_url": "https://hackerone.com/reports/1380121",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Identify that jarvis-new.urbanclap.com uses a weak Flask session key."
-        ],
-        [
-            2,
-            "Use the known weak secret to forge a session token or password reset link for any user ID."
-        ],
-        [
-            3,
-            "Access the reset link to change the password and log in as the targeted user."
-        ]
-    ],
-    "vuln_description": "The vulnerability involves a weak Flask session key that allows an attacker to forge session tokens or password reset links, leading to authentication bypass and full account compromise.",
-    "reason": "The attack requires knowledge of the weak session key and the ability to forge tokens, but the steps are straightforward once the key is known. The interaction between the weak key and token forgery is a common issue in web applications.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": true
-    }
+    [
+      3,
+      "Access the reset link to change the password and log in as the targeted user."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves a weak Flask session key that allows an attacker to forge session tokens or password reset links, leading to authentication bypass and full account compromise.",
+  "reason": "The attack requires knowledge of the weak session key and the ability to forge tokens, but the steps are straightforward once the key is known. The interaction between the weak key and token forgery is a common issue in web applications.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves weak session signing in Flask, which allows session forgery. The methodology described involves testing authorization boundaries by swapping user sessions and resource IDs. Since the issue is about session forgery (AuthN bypass) and not about testing existing sessions against resources, it falls outside the scope of the described methodology. The methodology assumes valid sessions are being tested, not forged ones.",
+    "is_detectable": false
+  }
 }

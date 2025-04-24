@@ -1,56 +1,56 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "risinghunter ",
-    "title": "idor on upload profile functionality ",
-    "content": "\nVulnerable URL: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588ID/#Common/EditOne/Person/{account_id}\nsteps to reproduce:\n1).browse the image and click on the upload button\n2).capture this request in burp suite\n3). change the value 'personId' parameter to account2 account_id\n(please see screenshot1)\n4).then goes to account2, then you will see the uploaded image is successfully goes to the approved tab\nplease see video attach below you will understand completely\nImpact\nan attacker is able to change profile image of any user\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "risinghunter ",
+  "title": "idor on upload profile functionality ",
+  "content": "\nVulnerable URL: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588ID/#Common/EditOne/Person/{account_id}\nsteps to reproduce:\n1).browse the image and click on the upload button\n2).capture this request in burp suite\n3). change the value 'personId' parameter to account2 account_id\n(please see screenshot1)\n4).then goes to account2, then you will see the uploaded image is successfully goes to the approved tab\nplease see video attach below you will understand completely\nImpact\nan attacker is able to change profile image of any user\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Insecure Direct Object Reference (IDOR)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1589490720,
+  "report_url": "https://hackerone.com/reports/741683",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Browse the image and click on the upload button."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Insecure Direct Object Reference (IDOR)"
+    [
+      2,
+      "Capture the request in Burp Suite."
     ],
-    "screenshots": {},
-    "disclosed_date": 1589490720,
-    "report_url": "https://hackerone.com/reports/741683",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Browse the image and click on the upload button."
-        ],
-        [
-            2,
-            "Capture the request in Burp Suite."
-        ],
-        [
-            3,
-            "Change the 'personId' parameter to another account's ID."
-        ],
-        [
-            4,
-            "Verify the uploaded image appears in the target account's approved tab."
-        ]
+    [
+      3,
+      "Change the 'personId' parameter to another account's ID."
     ],
-    "vuln_description": "This is an Insecure Direct Object Reference (IDOR) vulnerability that allows an attacker to change the profile image of any user by manipulating the 'personId' parameter in the upload request.",
-    "reason": "The vulnerability involves a straightforward parameter manipulation in a single request. The attack does not require understanding complex application states or novel logic, nor does it involve multiple components or subtle interactions.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": false
-    }
+    [
+      4,
+      "Verify the uploaded image appears in the target account's approved tab."
+    ]
+  ],
+  "vuln_description": "This is an Insecure Direct Object Reference (IDOR) vulnerability that allows an attacker to change the profile image of any user by manipulating the 'personId' parameter in the upload request.",
+  "reason": "The vulnerability involves a straightforward parameter manipulation in a single request. The attack does not require understanding complex application states or novel logic, nor does it involve multiple components or subtle interactions.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves swapping the 'personId' parameter in an authenticated request to modify another user's profile image, which falls under the IDOR vulnerability class. The methodology described includes testing for such scenarios by swapping resource_ids (in this case, account IDs) with existing user sessions to check for authorization boundary violations.",
+    "is_detectable": true
+  }
 }

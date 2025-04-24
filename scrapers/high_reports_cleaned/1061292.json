@@ -1,47 +1,47 @@
 {
-    "reported_to": "U.S. General Services Administration",
-    "reported_by": "skarsom",
-    "title": "TAMS registration details API for admins open at https://tamsapi.gsa.gov/user/tams/api/usermgmnt/pendingUserDetails/",
-    "content": "\nSummary:\nTAMS administrators are supposed to approve or deny all registration requests. The dashboard that shows these administrators details of a registration request calls the endpoint https://tamsapi.gsa.gov/user/tams/api/usermgmnt/pendingUserDetails/(REGISTRATION_ID), where (REGISTRATION_ID) is numeric.\nThis endpoint will, without authentication, return the email, address, phone, attachment IDs, address, corporate info, and user roles. It will also return their request status and denial reason if applicable.\nAttachments can then be viewed unauthenticated through https://tamsapi.gsa.gov/user/tams/api/usermgmnt/getAttachmentBytes/(ATTACHMENT_ID).\nSteps To Reproduce:\nNavigate to the following URL: https://tamsapi.gsa.gov/user/tams/api/usermgmnt/pendingUserDetails/2634\nFor attachments, navigate to the following URL: https://tamsapi.gsa.gov/user/tams/api/usermgmnt/getAttachmentBytes/600\nRecommended Mitigation:\nOnly allow users with valid JWT tokens for the admin role view these two endpoints.\nImpact\nAn unauthorized attacker can view personal information about contractors and employees gaining access to TAMS.\n\n",
-    "severity": [
-        7.5,
-        null
+  "reported_to": "U.S. General Services Administration",
+  "reported_by": "skarsom",
+  "title": "TAMS registration details API for admins open at https://tamsapi.gsa.gov/user/tams/api/usermgmnt/pendingUserDetails/",
+  "content": "\nSummary:\nTAMS administrators are supposed to approve or deny all registration requests. The dashboard that shows these administrators details of a registration request calls the endpoint https://tamsapi.gsa.gov/user/tams/api/usermgmnt/pendingUserDetails/(REGISTRATION_ID), where (REGISTRATION_ID) is numeric.\nThis endpoint will, without authentication, return the email, address, phone, attachment IDs, address, corporate info, and user roles. It will also return their request status and denial reason if applicable.\nAttachments can then be viewed unauthenticated through https://tamsapi.gsa.gov/user/tams/api/usermgmnt/getAttachmentBytes/(ATTACHMENT_ID).\nSteps To Reproduce:\nNavigate to the following URL: https://tamsapi.gsa.gov/user/tams/api/usermgmnt/pendingUserDetails/2634\nFor attachments, navigate to the following URL: https://tamsapi.gsa.gov/user/tams/api/usermgmnt/getAttachmentBytes/600\nRecommended Mitigation:\nOnly allow users with valid JWT tokens for the admin role view these two endpoints.\nImpact\nAn unauthorized attacker can view personal information about contractors and employees gaining access to TAMS.\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Insecure Direct Object Reference (IDOR)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1620377100,
+  "report_url": "https://hackerone.com/reports/1061292",
+  "vuln_category": "API",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "steps": [
+    [
+      1,
+      "Navigate to the following URL: https://tamsapi.gsa.gov/user/tams/api/usermgmnt/pendingUserDetails/2634"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Insecure Direct Object Reference (IDOR)"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1620377100,
-    "report_url": "https://hackerone.com/reports/1061292",
-    "vuln_category": "API",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "steps": [
-        [
-            1,
-            "Navigate to the following URL: https://tamsapi.gsa.gov/user/tams/api/usermgmnt/pendingUserDetails/2634"
-        ],
-        [
-            2,
-            "For attachments, navigate to the following URL: https://tamsapi.gsa.gov/user/tams/api/usermgmnt/getAttachmentBytes/600"
-        ]
-    ],
-    "vuln_description": "This vulnerability involves an information disclosure issue where sensitive personal data (email, address, phone, attachments, etc.) of users pending registration approval can be accessed without authentication. Additionally, attachments can be viewed unauthenticated by directly accessing their URLs.",
-    "reason": "The vulnerability is straightforward to discover as it involves directly accessing URLs without any authentication or complex manipulation. The steps are simple and do not require understanding of multiple components or subtle interactions.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": true,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": true
-    }
+    [
+      2,
+      "For attachments, navigate to the following URL: https://tamsapi.gsa.gov/user/tams/api/usermgmnt/getAttachmentBytes/600"
+    ]
+  ],
+  "vuln_description": "This vulnerability involves an information disclosure issue where sensitive personal data (email, address, phone, attachments, etc.) of users pending registration approval can be accessed without authentication. Additionally, attachments can be viewed unauthenticated by directly accessing their URLs.",
+  "reason": "The vulnerability is straightforward to discover as it involves directly accessing URLs without any authentication or complex manipulation. The steps are simple and do not require understanding of multiple components or subtle interactions.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": true,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an unauthenticated endpoint that exposes sensitive user data. The methodology described includes testing actions with unauthenticated user sessions (step d), which would detect this issue by attempting to access the endpoint without authentication.",
+    "is_detectable": true
+  }
 }

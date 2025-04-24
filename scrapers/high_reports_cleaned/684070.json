@@ -1,48 +1,48 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "sp1d3rs ",
-    "title": "Authentication bypass and RCE on the https://\u2588\u2588\u2588\u2588 due to exposed Cisco TelePresence SX80 with default credentials",
-    "content": "\nDescription\nHello. I was able to identify Cisco TelePresence SX80 device located on the https://\u2588\u2588\u2588\u2588\u2588\nAccording to the IP Info: https://ipinfo.io/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588it belongs to ASN with ID\nCode 7 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nso it's likely in scope of the program.\nThe mentioned instance has default credentials \u2588\u2588\u2588\u2588\nPOC\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nLogin with \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\nSince we are logged in as \u2588\u2588\u2588, we can completely control the device and all connections, and add our startup scripts via https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/web/scripts\nSuggested fix\nChange the credentials and likely you will need to reset the device\nImpact\nPotential device compromise and code execution. This devices are used mainly for trainings, briefings, and demonstration rooms, as well as auditoriums, so attacker with full control of the device potentially can intercept the data (RCE potential is interesting, but ability to silently compromise the device and use it as backdoor can be much more harmful).\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "sp1d3rs ",
+  "title": "Authentication bypass and RCE on the https://\u2588\u2588\u2588\u2588 due to exposed Cisco TelePresence SX80 with default credentials",
+  "content": "\nDescription\nHello. I was able to identify Cisco TelePresence SX80 device located on the https://\u2588\u2588\u2588\u2588\u2588\nAccording to the IP Info: https://ipinfo.io/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588it belongs to ASN with ID\nCode 7 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nso it's likely in scope of the program.\nThe mentioned instance has default credentials \u2588\u2588\u2588\u2588\nPOC\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nLogin with \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\nSince we are logged in as \u2588\u2588\u2588, we can completely control the device and all connections, and add our startup scripts via https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/web/scripts\nSuggested fix\nChange the credentials and likely you will need to reset the device\nImpact\nPotential device compromise and code execution. This devices are used mainly for trainings, briefings, and demonstration rooms, as well as auditoriums, so attacker with full control of the device potentially can intercept the data (RCE potential is interesting, but ability to silently compromise the device and use it as backdoor can be much more harmful).\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Authentication - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1610506500,
+  "report_url": "https://hackerone.com/reports/684070",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "IOT",
+  "steps": [
+    [
+      1,
+      "Identify the Cisco TelePresence SX80 device on the target URL https://\u2588\u2588\u2588\u2588\u2588"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Authentication - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1610506500,
-    "report_url": "https://hackerone.com/reports/684070",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "IOT",
-    "steps": [
-        [
-            1,
-            "Identify the Cisco TelePresence SX80 device on the target URL https://\u2588\u2588\u2588\u2588\u2588"
-        ],
-        [
-            2,
-            "Login to the device using the default credentials \u2588\u2588\u2588\u2588"
-        ]
-    ],
-    "vuln_description": "The vulnerability involves an authentication bypass and remote code execution (RCE) on a Cisco TelePresence SX80 device due to exposed default credentials. This allows an attacker to gain full control of the device, potentially intercepting data and using it as a backdoor.",
-    "reason": "The attack is straightforward, involving only the identification of the device and the use of default credentials. There are no complex interactions or state manipulations required.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      2,
+      "Login to the device using the default credentials \u2588\u2588\u2588\u2588"
+    ]
+  ],
+  "vuln_description": "The vulnerability involves an authentication bypass and remote code execution (RCE) on a Cisco TelePresence SX80 device due to exposed default credentials. This allows an attacker to gain full control of the device, potentially intercepting data and using it as a backdoor.",
+  "reason": "The attack is straightforward, involving only the identification of the device and the use of default credentials. There are no complex interactions or state manipulations required.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves default credentials on an exposed device, which is not covered by the described methodology that focuses on session/user swapping and resource ID manipulation within the same application. The methodology does not account for scanning or identifying default credentials on exposed services.",
+    "is_detectable": false
+  }
 }

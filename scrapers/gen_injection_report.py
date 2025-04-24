@@ -58,6 +58,7 @@ def analyze_injection_reports(input_dir: str, output_file: str, title: str = "In
                 
                 f.write("RAW DESCRIPTION:\n")
                 f.write(f"{report.get('content', 'No description available')}\n\n")
+                f.write(f"Company: {report.get('reported_to', 'n/a')}\n")
 
                 f.write("=" * 80 + "\n")
 

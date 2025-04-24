@@ -1,56 +1,56 @@
 {
-    "reported_to": "WordPress",
-    "reported_by": "yuvraj_dighe ",
-    "title": "Add users to groups who have restricted group invites",
-    "content": "\nDescription:\nWordPress version: 5.2\nBuddyPress version: 4.2.0\nThrough this vulnerability, an attacker could add users to groups who have set :\nI want to restrict Group invites to my friends only.\nThere is no proper validation of the personal settings of the user and thus the users with such privacy settings selected could be added.\nSteps to Reproduce:\nMake 2 accounts A and B, make sure they are not friends.\nFrom account of user A, enable the setting I want to restrict Group invites to my friends only. from the following URL http://bbwordpress.esy.es/members/yuvraj/settings/invites/.\nFrom account of user B, make a POST request to :\nPOST : http://bbwordpress.esy.es/wp-admin/admin-ajax.php\nBODY : message=&nonce=21f500cbfd&group_id=1&action=groups_send_group_invites&_wpnonce=7264177f51&users%5B%5D=3\nReplace the value of users with the victims user id , i.e id of user A.\nVictim (user A) would receive an invitation from Attacker (user B) even though the privacy setting to restrict group invites has been enabled.\nImpact\nAn attacker who is not a friend of the victim can send him a group invite even though the victim has selected to restrict group invites from friends only.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "WordPress",
+  "reported_by": "yuvraj_dighe ",
+  "title": "Add users to groups who have restricted group invites",
+  "content": "\nDescription:\nWordPress version: 5.2\nBuddyPress version: 4.2.0\nThrough this vulnerability, an attacker could add users to groups who have set :\nI want to restrict Group invites to my friends only.\nThere is no proper validation of the personal settings of the user and thus the users with such privacy settings selected could be added.\nSteps to Reproduce:\nMake 2 accounts A and B, make sure they are not friends.\nFrom account of user A, enable the setting I want to restrict Group invites to my friends only. from the following URL http://bbwordpress.esy.es/members/yuvraj/settings/invites/.\nFrom account of user B, make a POST request to :\nPOST : http://bbwordpress.esy.es/wp-admin/admin-ajax.php\nBODY : message=&nonce=21f500cbfd&group_id=1&action=groups_send_group_invites&_wpnonce=7264177f51&users%5B%5D=3\nReplace the value of users with the victims user id , i.e id of user A.\nVictim (user A) would receive an invitation from Attacker (user B) even though the privacy setting to restrict group invites has been enabled.\nImpact\nAn attacker who is not a friend of the victim can send him a group invite even though the victim has selected to restrict group invites from friends only.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1564233720,
+  "report_url": "https://hackerone.com/reports/538008",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create two accounts (A and B) and ensure they are not friends."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Access Control - Generic"
+    [
+      2,
+      "From account A, enable the setting 'I want to restrict Group invites to my friends only' in the privacy settings."
     ],
-    "screenshots": {},
-    "disclosed_date": 1564233720,
-    "report_url": "https://hackerone.com/reports/538008",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Create two accounts (A and B) and ensure they are not friends."
-        ],
-        [
-            2,
-            "From account A, enable the setting 'I want to restrict Group invites to my friends only' in the privacy settings."
-        ],
-        [
-            3,
-            "From account B, send a POST request to the vulnerable endpoint with the victim's (account A) user ID in the payload."
-        ],
-        [
-            4,
-            "Observe that account A receives an invitation from account B despite the privacy setting."
-        ]
+    [
+      3,
+      "From account B, send a POST request to the vulnerable endpoint with the victim's (account A) user ID in the payload."
     ],
-    "vuln_description": "An attacker can bypass the privacy setting that restricts group invites to friends only by directly sending a POST request to the vulnerable endpoint with the victim's user ID, allowing unauthorized group invitations.",
-    "reason": "The vulnerability involves a simple bypass of a privacy setting by directly interacting with the endpoint, without needing to understand complex application states or novel logic. The attack is straightforward once the endpoint and the lack of validation are identified.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": false
-    }
+    [
+      4,
+      "Observe that account A receives an invitation from account B despite the privacy setting."
+    ]
+  ],
+  "vuln_description": "An attacker can bypass the privacy setting that restricts group invites to friends only by directly sending a POST request to the vulnerable endpoint with the victim's user ID, allowing unauthorized group invitations.",
+  "reason": "The vulnerability involves a simple bypass of a privacy setting by directly interacting with the endpoint, without needing to understand complex application states or novel logic. The attack is straightforward once the endpoint and the lack of validation are identified.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an authenticated user (user B) sending a group invite to another user (user A) despite user A's privacy settings restricting such actions to friends only. This fits the IDOR vulnerability class where the action (groups_send_group_invites) is performed with a resource_id (user A's ID) that should be restricted based on user A's settings. The methodology would detect this by swapping user sessions and testing the action with different resource_ids (user IDs in this case).",
+    "is_detectable": true
+  }
 }

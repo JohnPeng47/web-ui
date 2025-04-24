@@ -1,68 +1,68 @@
 {
-    "reported_to": "Acronis",
-    "reported_by": "twvyy3vyaw8k ",
-    "title": "Local privilege escalation via insecure MSI file",
-    "content": "\nSummary\nI've found a vulnerability which leads to a local privilege escalation starting from a non-admin user.\nWhen True Image client installs it drops 2 MSI files into C:\\Windows\\Installer folder.\nSince this folder (by default) is readable by anyone, a non-admin user can execute commands like msiexec /fa installer_name.msi, which forces installer_name.msi to \"repair\" the program.\nOne of these 2 MSIs (i can't named it because MSI file names are random and unique for every installation) when forced to repair it creates a dll in %TEMP%\\random_name and then, after some time, MsiExec.exe loads it. Since MsiExec.exe auto-escalate privileges when executed and %TEMP% is writable by anyone, this behavior could be abused to gain nt authority\\system privileges.\nSteps To Reproduce\nOpen %TEMP% and C:\\Windows\\Installer\nLocate the MSI file in the installer folder: it's 1.3 GB large and has Acronis as author\nOpen cmd.exe and execute msiexec /fa C:\\Windows\\Installer\\installer_name.msi. After few seconds a new folder will appear in %TEMP%\nReplace schedule.dll inside that folder with the schedule.dll attachment in this report\nWait until the process finishes. After some time a UAC should prompt, just select \"no\"\nA new cmd should pop up. Type whoami to confirm the new privileges\nI've also recorded a PoC video in case something it's not clear.\nRecommendations\nDo not use local %TEMP% to create schedule.dll, use C:\\Windows\\TEMP.\nImpact\nLPEs like this one are often used by malwares to evade antivirus engines, install rootkits, spread over the network, etc...\nA malware author could use this exploit to target Acronis end users.\n\n",
-    "severity": [
-        7.9,
-        null
+  "reported_to": "Acronis",
+  "reported_by": "twvyy3vyaw8k ",
+  "title": "Local privilege escalation via insecure MSI file",
+  "content": "\nSummary\nI've found a vulnerability which leads to a local privilege escalation starting from a non-admin user.\nWhen True Image client installs it drops 2 MSI files into C:\\Windows\\Installer folder.\nSince this folder (by default) is readable by anyone, a non-admin user can execute commands like msiexec /fa installer_name.msi, which forces installer_name.msi to \"repair\" the program.\nOne of these 2 MSIs (i can't named it because MSI file names are random and unique for every installation) when forced to repair it creates a dll in %TEMP%\\random_name and then, after some time, MsiExec.exe loads it. Since MsiExec.exe auto-escalate privileges when executed and %TEMP% is writable by anyone, this behavior could be abused to gain nt authority\\system privileges.\nSteps To Reproduce\nOpen %TEMP% and C:\\Windows\\Installer\nLocate the MSI file in the installer folder: it's 1.3 GB large and has Acronis as author\nOpen cmd.exe and execute msiexec /fa C:\\Windows\\Installer\\installer_name.msi. After few seconds a new folder will appear in %TEMP%\nReplace schedule.dll inside that folder with the schedule.dll attachment in this report\nWait until the process finishes. After some time a UAC should prompt, just select \"no\"\nA new cmd should pop up. Type whoami to confirm the new privileges\nI've also recorded a PoC video in case something it's not clear.\nRecommendations\nDo not use local %TEMP% to create schedule.dll, use C:\\Windows\\TEMP.\nImpact\nLPEs like this one are often used by malwares to evade antivirus engines, install rootkits, spread over the network, etc...\nA malware author could use this exploit to target Acronis end users.\n\n",
+  "severity": [
+    7.9,
+    null
+  ],
+  "bounty": 250,
+  "weaknesses": [
+    "Privilege Escalation"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1628377860,
+  "report_url": "https://hackerone.com/reports/1071832",
+  "vuln_category": "CODE",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "steps": [
+    [
+      1,
+      "Open %TEMP% and C:\\Windows\\Installer"
     ],
-    "bounty": 250,
-    "weaknesses": [
-        "Privilege Escalation"
+    [
+      2,
+      "Locate the MSI file in the installer folder: it's 1.3 GB large and has Acronis as author"
     ],
-    "screenshots": {},
-    "disclosed_date": 1628377860,
-    "report_url": "https://hackerone.com/reports/1071832",
-    "vuln_category": "CODE",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "steps": [
-        [
-            1,
-            "Open %TEMP% and C:\\Windows\\Installer"
-        ],
-        [
-            2,
-            "Locate the MSI file in the installer folder: it's 1.3 GB large and has Acronis as author"
-        ],
-        [
-            3,
-            "Open cmd.exe and execute msiexec /fa C:\\Windows\\Installer\\installer_name.msi"
-        ],
-        [
-            4,
-            "After few seconds a new folder will appear in %TEMP%"
-        ],
-        [
-            5,
-            "Replace schedule.dll inside that folder with a malicious schedule.dll"
-        ],
-        [
-            6,
-            "Wait until the process finishes. After some time a UAC should prompt, just select 'no'"
-        ],
-        [
-            7,
-            "A new cmd should pop up. Type whoami to confirm the new privileges"
-        ]
+    [
+      3,
+      "Open cmd.exe and execute msiexec /fa C:\\Windows\\Installer\\installer_name.msi"
     ],
-    "vuln_description": "A local privilege escalation vulnerability exists in the True Image client installation process. The installer drops MSI files in a world-readable directory (C:\\Windows\\Installer), allowing non-admin users to trigger a repair operation that creates and loads a DLL from a writable location (%TEMP%). Since MsiExec.exe auto-escalates privileges, this can be exploited to gain SYSTEM privileges by replacing the DLL with a malicious one.",
-    "reason": "The vulnerability involves understanding the MSI repair mechanism, the auto-escalation behavior of MsiExec.exe, and the writable nature of %TEMP%. While these components are known in security research, putting them together to exploit the vulnerability requires some insight into Windows installer behavior and privilege escalation techniques.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": false
-    }
+    [
+      4,
+      "After few seconds a new folder will appear in %TEMP%"
+    ],
+    [
+      5,
+      "Replace schedule.dll inside that folder with a malicious schedule.dll"
+    ],
+    [
+      6,
+      "Wait until the process finishes. After some time a UAC should prompt, just select 'no'"
+    ],
+    [
+      7,
+      "A new cmd should pop up. Type whoami to confirm the new privileges"
+    ]
+  ],
+  "vuln_description": "A local privilege escalation vulnerability exists in the True Image client installation process. The installer drops MSI files in a world-readable directory (C:\\Windows\\Installer), allowing non-admin users to trigger a repair operation that creates and loads a DLL from a writable location (%TEMP%). Since MsiExec.exe auto-escalates privileges, this can be exploited to gain SYSTEM privileges by replacing the DLL with a malicious one.",
+  "reason": "The vulnerability involves understanding the MSI repair mechanism, the auto-escalation behavior of MsiExec.exe, and the writable nature of %TEMP%. While these components are known in security research, putting them together to exploit the vulnerability requires some insight into Windows installer behavior and privilege escalation techniques.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves local privilege escalation via insecure MSI file handling, which is outside the scope of the described methodologies for detecting IDOR and AuthN/AuthZ bypass vulnerabilities in web applications. The described methodologies focus on HTTP requests and user sessions within a single application, whereas this vulnerability involves local system file permissions and MSI execution behavior.",
+    "is_detectable": false
+  }
 }

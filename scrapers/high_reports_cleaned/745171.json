@@ -1,48 +1,48 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "byteone ",
-    "title": "Unprotected \u2588\u2588\u2588\u2588\u2588\u2588 and Test site API Exposes Documents, Credentials, and Emails in \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 Proposal System",
-    "content": "\nSummary:\nThe test/integration API of the \u2588\u2588\u2588\u2588\u2588 web services is publicly exposed: disclosing documents, emails, and credentials to what appears to be the Seaport Bid proposal system. Because I did not attempt any exploitation outside of that necessary to deem this a reportable issue, it is not clear if the data is only test generated or if the system contains production documents, credentials, etc.\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nDescription:\nWhile performing manual reconnaissance, I came across Swagger/API documentation for the \u2588\u2588\u2588 web services API at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/.\nThe API endpoint appears to have four main types of functionality:\n1) Document storage/retrieval\n2) Email template storage\n3) Email generation\n4) PDF generation\nDue to the lack of authentication on the API, the system can be easily abused by a minimally sophisticated attacker.\nImpact & Steps to Reproduce\n1) Documents stored in the system can be uploaded, modified, or deleted via the API. Per the DoD program rules on data exfil, I did not try to access the documents. You can view a listing of the documents here:\nhttps://\u2588\u2588\u2588/api/1_0/Documents\n2) Email templates can be access and modified. For example, you can view all email templates here:\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/api/1_0/EmailTemplates\nYou can also add, modify, or delete templates via the API.\n3) Most importantly, you can view all of the emails that the system has sent via the API. The exact route is:\nhttps://\u2588\u2588\u2588\u2588/api/1_0/EmailMessages\nThe emails are highly sensitive because they contain the activation codes needed to create a new account and access the \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 Proposal System at https://\u2588\u2588\u2588/Bid/.\nFor example, one of the last emails sent includes the following:\nCode 622 Bytes\n1\n2{\"resultmetadata\":[{\"emailId\":\"3f6f7fb7-167b-432d-b35b-f443709ba832\",\"systemcode\":null,\"senderEmailAddress\":\"\u2588\u2588\u2588\u2588 Admin<DoNotReply@\u2588\u2588\u2588\u2588\u2588.com>\",\"acknowledgementRequested\":false,\"attachments\":[],\"tags\":[],\"tokens\":null,\"emailStatus\":\"Sent\",\"Subject\":\"Your \u2588\u2588\u2588\u2588\u2588\u2588\u2588 Authentication Code\",\"Body\":\"Your authentication code is 373A51. This code will expire at 09:23 AM on 11/22/2019.\\r\\n\\r\\n-----------------------------------------------------------------\\r\\n\\r\\nYou may check in through the following link https://\u2588\u2588\u2588\u2588/Bid.\\r\\n\\r\\nThank you for your business with \u2588\u2588\u2588\u2588\u2588\u2588\u2588.\\r\\n\\r\\nPlease do not reply directly to this message. \n3\nNote the \u2588\u2588\u2588\u2588\u2588 Authentication Code 373A51, which would allow an attacker to login to the system at https://\u2588\u2588\u2588\u2588\u2588/Bid.\nThe emails also include usernames of current users in the system who will have access expiring in the near future:\n\u2588\u2588\u2588\u2588\u2588\nYou can view the full list of emails here:\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/api/1_0/EmailMessages\nSuggested Mitigation/Remediation Actions\nUtilize bearer token authentication on the API route so that unauthorized parties cannot query it. Alternatively, lock down access to the API endpoint to restricted IP addresses or networks so that it is no longer publicly accessible.\nImpact\nUpload, delete, or download sensitive files stored in the document DB\nSend, read, and modify emails from \u2588\u2588\u2588\u2588 admin\nLogin to \u2588\u2588\u2588\u2588 proposal system using stolen authentication codes sent to users\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "byteone ",
+  "title": "Unprotected \u2588\u2588\u2588\u2588\u2588\u2588 and Test site API Exposes Documents, Credentials, and Emails in \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 Proposal System",
+  "content": "\nSummary:\nThe test/integration API of the \u2588\u2588\u2588\u2588\u2588 web services is publicly exposed: disclosing documents, emails, and credentials to what appears to be the Seaport Bid proposal system. Because I did not attempt any exploitation outside of that necessary to deem this a reportable issue, it is not clear if the data is only test generated or if the system contains production documents, credentials, etc.\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nDescription:\nWhile performing manual reconnaissance, I came across Swagger/API documentation for the \u2588\u2588\u2588 web services API at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/.\nThe API endpoint appears to have four main types of functionality:\n1) Document storage/retrieval\n2) Email template storage\n3) Email generation\n4) PDF generation\nDue to the lack of authentication on the API, the system can be easily abused by a minimally sophisticated attacker.\nImpact & Steps to Reproduce\n1) Documents stored in the system can be uploaded, modified, or deleted via the API. Per the DoD program rules on data exfil, I did not try to access the documents. You can view a listing of the documents here:\nhttps://\u2588\u2588\u2588/api/1_0/Documents\n2) Email templates can be access and modified. For example, you can view all email templates here:\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/api/1_0/EmailTemplates\nYou can also add, modify, or delete templates via the API.\n3) Most importantly, you can view all of the emails that the system has sent via the API. The exact route is:\nhttps://\u2588\u2588\u2588\u2588/api/1_0/EmailMessages\nThe emails are highly sensitive because they contain the activation codes needed to create a new account and access the \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 Proposal System at https://\u2588\u2588\u2588/Bid/.\nFor example, one of the last emails sent includes the following:\nCode 622 Bytes\n1\n2{\"resultmetadata\":[{\"emailId\":\"3f6f7fb7-167b-432d-b35b-f443709ba832\",\"systemcode\":null,\"senderEmailAddress\":\"\u2588\u2588\u2588\u2588 Admin<DoNotReply@\u2588\u2588\u2588\u2588\u2588.com>\",\"acknowledgementRequested\":false,\"attachments\":[],\"tags\":[],\"tokens\":null,\"emailStatus\":\"Sent\",\"Subject\":\"Your \u2588\u2588\u2588\u2588\u2588\u2588\u2588 Authentication Code\",\"Body\":\"Your authentication code is 373A51. This code will expire at 09:23 AM on 11/22/2019.\\r\\n\\r\\n-----------------------------------------------------------------\\r\\n\\r\\nYou may check in through the following link https://\u2588\u2588\u2588\u2588/Bid.\\r\\n\\r\\nThank you for your business with \u2588\u2588\u2588\u2588\u2588\u2588\u2588.\\r\\n\\r\\nPlease do not reply directly to this message. \n3\nNote the \u2588\u2588\u2588\u2588\u2588 Authentication Code 373A51, which would allow an attacker to login to the system at https://\u2588\u2588\u2588\u2588\u2588/Bid.\nThe emails also include usernames of current users in the system who will have access expiring in the near future:\n\u2588\u2588\u2588\u2588\u2588\nYou can view the full list of emails here:\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/api/1_0/EmailMessages\nSuggested Mitigation/Remediation Actions\nUtilize bearer token authentication on the API route so that unauthorized parties cannot query it. Alternatively, lock down access to the API endpoint to restricted IP addresses or networks so that it is no longer publicly accessible.\nImpact\nUpload, delete, or download sensitive files stored in the document DB\nSend, read, and modify emails from \u2588\u2588\u2588\u2588 admin\nLogin to \u2588\u2588\u2588\u2588 proposal system using stolen authentication codes sent to users\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1663202400,
+  "report_url": "https://hackerone.com/reports/745171",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Navigate to the exposed Swagger/API documentation at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Access Control - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1663202400,
-    "report_url": "https://hackerone.com/reports/745171",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Navigate to the exposed Swagger/API documentation at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/"
-        ],
-        [
-            2,
-            "Access various unprotected API endpoints such as https://\u2588\u2588\u2588/api/1_0/Documents, https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/api/1_0/EmailTemplates, and https://\u2588\u2588\u2588\u2588/api/1_0/EmailMessages to view, modify, or delete sensitive data"
-        ]
-    ],
-    "vuln_description": "The test/integration API of the \u2588\u2588\u2588\u2588\u2588 web services is publicly exposed without authentication, disclosing sensitive documents, emails, and credentials related to the Seaport Bid proposal system. This allows unauthorized access to document storage, email templates, and sent emails, including authentication codes for system access.",
-    "reason": "The vulnerability was discovered through manual reconnaissance of publicly accessible API documentation. The lack of authentication makes the API endpoints easily accessible without requiring complex exploitation techniques or deep understanding of the system's internal workings.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": true,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      2,
+      "Access various unprotected API endpoints such as https://\u2588\u2588\u2588/api/1_0/Documents, https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/api/1_0/EmailTemplates, and https://\u2588\u2588\u2588\u2588/api/1_0/EmailMessages to view, modify, or delete sensitive data"
+    ]
+  ],
+  "vuln_description": "The test/integration API of the \u2588\u2588\u2588\u2588\u2588 web services is publicly exposed without authentication, disclosing sensitive documents, emails, and credentials related to the Seaport Bid proposal system. This allows unauthorized access to document storage, email templates, and sent emails, including authentication codes for system access.",
+  "reason": "The vulnerability was discovered through manual reconnaissance of publicly accessible API documentation. The lack of authentication makes the API endpoints easily accessible without requiring complex exploitation techniques or deep understanding of the system's internal workings.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": true,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an unprotected API endpoint that does not require any authentication or authorization checks. The methodology described involves testing for authentication and authorization bypasses by swapping user sessions and resource IDs, which would not apply here since the API is completely unprotected and does not require any user session or specific resource ID to access sensitive data.",
+    "is_detectable": false
+  }
 }

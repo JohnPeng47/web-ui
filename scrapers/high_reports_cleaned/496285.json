@@ -1,48 +1,48 @@
 {
-    "reported_to": "Internet Bug Bounty",
-    "reported_by": "initstring ",
-    "title": "Ubuntu Linux privilege escalation (dirty_sock)",
-    "content": "\nHi team,\nThis week, I have publicly disclosed the dirty_sock local root exploit affecting multiple Linux Operating Systems.\nVery detailed information on the vulnerability can be found in my blog posting here.\nAnd the exploit code can be found in my GitHub repository here.\nThe vulnerability exists in stock versions of Ubuntu Linux due to the default inclusion of the snapd service, but all Linux distributions are vulnerable if they install the package. The disclosure was handled directly with Canonical via the bug tracked here.\nA large percentage of the Internet is safer today than it was a week ago, due to the amazing response by the team at Canonical.\nImpact\nLinux relies on a functioning security model, particularly in environments shared by multiple users. The ability of any user to obtain immediate root access completely breaks this model, putting sensitive data all around the world at risk of exposure.\nThe exploits provided allow any user to immediately elevate to a root account.\n\n",
-    "severity": [
-        7.8,
-        null
+  "reported_to": "Internet Bug Bounty",
+  "reported_by": "initstring ",
+  "title": "Ubuntu Linux privilege escalation (dirty_sock)",
+  "content": "\nHi team,\nThis week, I have publicly disclosed the dirty_sock local root exploit affecting multiple Linux Operating Systems.\nVery detailed information on the vulnerability can be found in my blog posting here.\nAnd the exploit code can be found in my GitHub repository here.\nThe vulnerability exists in stock versions of Ubuntu Linux due to the default inclusion of the snapd service, but all Linux distributions are vulnerable if they install the package. The disclosure was handled directly with Canonical via the bug tracked here.\nA large percentage of the Internet is safer today than it was a week ago, due to the amazing response by the team at Canonical.\nImpact\nLinux relies on a functioning security model, particularly in environments shared by multiple users. The ability of any user to obtain immediate root access completely breaks this model, putting sensitive data all around the world at risk of exposure.\nThe exploits provided allow any user to immediately elevate to a root account.\n\n",
+  "severity": [
+    7.8,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Privilege Escalation"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1566971340,
+  "report_url": "https://hackerone.com/reports/496285",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Identify that the target system is running Ubuntu Linux with the snapd service installed and running."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Privilege Escalation"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1566971340,
-    "report_url": "https://hackerone.com/reports/496285",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "CODE",
-    "steps": [
-        [
-            1,
-            "Identify that the target system is running Ubuntu Linux with the snapd service installed and running."
-        ],
-        [
-            2,
-            "Download and execute the exploit code from the GitHub repository provided in the report."
-        ]
-    ],
-    "vuln_description": "The dirty_sock vulnerability allows any local user to escalate privileges to root on Ubuntu Linux systems due to a flaw in the snapd service. The exploit leverages the service's default inclusion and misconfiguration to gain root access.",
-    "reason": "The vulnerability involves understanding the snapd service's default configuration and its interaction with the system's privilege model. The exploit requires knowledge of how to craft a specific payload to trigger the privilege escalation, but the steps are straightforward once the initial conditions are met.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": true,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": false
-    }
+    [
+      2,
+      "Download and execute the exploit code from the GitHub repository provided in the report."
+    ]
+  ],
+  "vuln_description": "The dirty_sock vulnerability allows any local user to escalate privileges to root on Ubuntu Linux systems due to a flaw in the snapd service. The exploit leverages the service's default inclusion and misconfiguration to gain root access.",
+  "reason": "The vulnerability involves understanding the snapd service's default configuration and its interaction with the system's privilege model. The exploit requires knowledge of how to craft a specific payload to trigger the privilege escalation, but the steps are straightforward once the initial conditions are met.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": true,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The dirty_sock vulnerability involves local privilege escalation via the snapd service, which is not related to web-based authentication or authorization mechanisms. The proposed methodologies focus on detecting web-based IDOR and AuthN/AuthZ bypass vulnerabilities by analyzing HTTP requests and responses, which are not applicable to this local system exploit.",
+    "is_detectable": false
+  }
 }

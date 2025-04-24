@@ -1,48 +1,48 @@
 {
-    "reported_to": "U.S. General Services Administration",
-    "reported_by": "ahmed0x0mahmoud ",
-    "title": "access nagios dashboard using default credentials in ** omon1.fpki.gov, 3.220.248.203**",
-    "content": "\nSummary:\nwhen i performing recon on fpki.gov i found nagios dashboard in omon1.fpki.gov, 3.220.248.203 and i accessed it using default credentials\nusername: nagiosadmin\npassword : nagiosadmin\nSteps To Reproduce:\nvisit these urls : https://omon1.fpki.gov/nagios/side.php https://3.220.248.203/nagios/side.php\nhe will ask to put your credentials in basic authentication enter these credentials username: nagiosadmin password : nagiosadmin\nPOC:\nlook at poc pic\nImpact\nattacker can make any action like an admin he has full control on your panal.\nthanks , have a nice day :)\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "U.S. General Services Administration",
+  "reported_by": "ahmed0x0mahmoud ",
+  "title": "access nagios dashboard using default credentials in ** omon1.fpki.gov, 3.220.248.203**",
+  "content": "\nSummary:\nwhen i performing recon on fpki.gov i found nagios dashboard in omon1.fpki.gov, 3.220.248.203 and i accessed it using default credentials\nusername: nagiosadmin\npassword : nagiosadmin\nSteps To Reproduce:\nvisit these urls : https://omon1.fpki.gov/nagios/side.php https://3.220.248.203/nagios/side.php\nhe will ask to put your credentials in basic authentication enter these credentials username: nagiosadmin password : nagiosadmin\nPOC:\nlook at poc pic\nImpact\nattacker can make any action like an admin he has full control on your panal.\nthanks , have a nice day :)\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1666409580,
+  "report_url": "https://hackerone.com/reports/1700896",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Visit the URLs: https://omon1.fpki.gov/nagios/side.php or https://3.220.248.203/nagios/side.php"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Access Control - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1666409580,
-    "report_url": "https://hackerone.com/reports/1700896",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Visit the URLs: https://omon1.fpki.gov/nagios/side.php or https://3.220.248.203/nagios/side.php"
-        ],
-        [
-            2,
-            "Enter the default credentials when prompted (username: nagiosadmin, password: nagiosadmin)"
-        ]
-    ],
-    "vuln_description": "The Nagios dashboard on omon1.fpki.gov and 3.220.248.203 was accessible using default credentials (nagiosadmin/nagiosadmin), allowing full administrative control over the panel.",
-    "reason": "The vulnerability involves no complex components or interactions. It is a straightforward case of default credentials being left unchanged, which is a common and well-known issue.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      2,
+      "Enter the default credentials when prompted (username: nagiosadmin, password: nagiosadmin)"
+    ]
+  ],
+  "vuln_description": "The Nagios dashboard on omon1.fpki.gov and 3.220.248.203 was accessible using default credentials (nagiosadmin/nagiosadmin), allowing full administrative control over the panel.",
+  "reason": "The vulnerability involves no complex components or interactions. It is a straightforward case of default credentials being left unchanged, which is a common and well-known issue.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves accessing a Nagios dashboard using default credentials (nagiosadmin:nagiosadmin) on a specific host (omon1.fpki.gov, 3.220.248.203). This falls under the AuthN/AuthZ Bypass category where default credentials allow unauthorized access to admin functionality. The methodology described involves testing authentication and authorization boundaries by swapping user sessions and actions, but in this case, the vulnerability is detected by attempting to access the dashboard with default credentials, which is a known weak authentication mechanism.",
+    "is_detectable": true
+  }
 }

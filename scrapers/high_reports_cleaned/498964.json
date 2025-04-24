@@ -1,62 +1,62 @@
 {
-    "reported_to": "GitLab",
-    "reported_by": "rijalrojan ",
-    "title": "Full access to internal Gitlab instances at redash.gitlab.com, dashboards.gitlab.com, prometheus.gitlab.com",
-    "content": "\nSummary:\nLack of proper ticket trick security leads to internal access on Gitlab instances. **I did not use support.gitlab.com instead just using support@gitlab.com email was suffice.\nDescription:\nGetting a support@gitlab.com Google Account\nAfter the Ticket Trick attack that Inti reported and disclosed, many companies including Gitlab added proper security measures to prevent this kind of attack. What companies did not realize is that Zendesk has a feature that can be exploited by attackers other than the CC feature.\nIn this case, Gitlab has blocked sending emails to support+*@gitlab.com which prevents Ticket Trick that Inti came up with. However, the CC feature along with the Zendesk's feature can lead to further exploitation.\nTo begin with, I sent an email to support@gitlab.com. After this, an automated reply was sent by Gitlab with confirmation that my ticket went through. Next, I went to accounts.google.com and registered support@gitlab.com. For the firstname and last name I copied a special hash for the ticket. Zendesk as a feature has a special hash for each ticket that is generated in the system This hash is like the key in a dictionary and can be used to add more content to the ticket. So by getting that hash and sending the request, Google allegedly sends an email to verify.\nWhat happened here was due to Zendesk's own security measures, the first email from Google will be set as private because they are not CCed to my ticket. So then, I replied to the support ticket from Gitlab and in CC put noreply@google.com. Once this was done, I replayed the request in Google and again tried to verify support@gitlab.com this time the ticket had the verification code public.\n{F427388}\nIf you check the image on the top right corner you can see the hash repeated twice because I put that as a first and last name.\nOnce this was done, I had a verified support@gitlab.com email.\n{F427390}\nNext, I went to crt.sh to search for gitlab.com domains and found 3 domains that stood out:\nprometheus.gitlab.com\n{F427391}\nredash.gitlab.com\n{F427393}\n<image_0>\nImpact\nGetting access to internal applications.\n\n",
-    "severity": [
-        10.0,
-        null
+  "reported_to": "GitLab",
+  "reported_by": "rijalrojan ",
+  "title": "Full access to internal Gitlab instances at redash.gitlab.com, dashboards.gitlab.com, prometheus.gitlab.com",
+  "content": "\nSummary:\nLack of proper ticket trick security leads to internal access on Gitlab instances. **I did not use support.gitlab.com instead just using support@gitlab.com email was suffice.\nDescription:\nGetting a support@gitlab.com Google Account\nAfter the Ticket Trick attack that Inti reported and disclosed, many companies including Gitlab added proper security measures to prevent this kind of attack. What companies did not realize is that Zendesk has a feature that can be exploited by attackers other than the CC feature.\nIn this case, Gitlab has blocked sending emails to support+*@gitlab.com which prevents Ticket Trick that Inti came up with. However, the CC feature along with the Zendesk's feature can lead to further exploitation.\nTo begin with, I sent an email to support@gitlab.com. After this, an automated reply was sent by Gitlab with confirmation that my ticket went through. Next, I went to accounts.google.com and registered support@gitlab.com. For the firstname and last name I copied a special hash for the ticket. Zendesk as a feature has a special hash for each ticket that is generated in the system This hash is like the key in a dictionary and can be used to add more content to the ticket. So by getting that hash and sending the request, Google allegedly sends an email to verify.\nWhat happened here was due to Zendesk's own security measures, the first email from Google will be set as private because they are not CCed to my ticket. So then, I replied to the support ticket from Gitlab and in CC put noreply@google.com. Once this was done, I replayed the request in Google and again tried to verify support@gitlab.com this time the ticket had the verification code public.\n{F427388}\nIf you check the image on the top right corner you can see the hash repeated twice because I put that as a first and last name.\nOnce this was done, I had a verified support@gitlab.com email.\n{F427390}\nNext, I went to crt.sh to search for gitlab.com domains and found 3 domains that stood out:\nprometheus.gitlab.com\n{F427391}\nredash.gitlab.com\n{F427393}\n<image_0>\nImpact\nGetting access to internal applications.\n\n",
+  "severity": [
+    10.0,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Incorrect Authorization"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/427/395/076f26b9650ed27dc6cbaec3c2c7d5d40c0aa6ca/grafana.PNG?response-content-disposition=attachment%3B%20filename%3D%22grafana.PNG%22%3B%20filename%2A%3DUTF-8%27%27grafana.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQQBVJH7R3%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T043904Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEL3%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDAsPJ%2BKTWVWGFK7%2FvNjQDz37M4FTFq%2BZJrSaeY8mjhhwIgAj5Qllim%2BRCB8LReu3HndfJE%2FYYpvtOQIcjFQdVfy1cqsgUIJhADGgwwMTM2MTkyNzQ4NDkiDNzVqqedJBrNnz%2F%2BJyqPBV8JIhcGhPFSCKElXehQ86SLWFEFS3ahGuSOKSxTFch4VQabdZyWk2lVATpsmBWIsNoxzhr09%2FwGgJCiwWIyJwl%2FSFJNoYobPrYtbgb%2FAJzD9cuwO9YR%2BTjKaLlzj1iPC8xGXPxf8TDbjDgWZ3tKFHjx%2Fc21pWECkWhSpT%2BhWzUotZEMGv3U5zpNGwqFivRguROLBLQJgPU9vj6jeGWHBBdOi7mGvEy0RqGKvxcvf0BnahiHzIN98x6fhhNu2nHr30%2BmnDG%2BFQ4PbXiD%2FRp6b2NE2ZG4cDCvJJI0nCudBV%2F8SH75Lbqbxv%2FAu6Ilest%2FBth4YW5H4b%2F%2ByzQZQ%2BxWO0h77y91PdCPgmGsFpbBEQtoNd1SQhvuI2f6Lp77B3zmRx3lDfsWo4OQqy9B6VigFnLl5KkKdxmxHPQz4dx1abD04GAFmbuy%2FjQS9TAJLl9o6LyXnMbbjCi5%2FMw2M9UFyatzxcWjR7tRwfwZYzWTCnwBEMgQDyNJ8iYob0G9YWvLw9nYZch0NlJcEKRnIkkNseJVGRVyfCq%2FNssweNny5eCLUq3uKznqXiaOukH9xUYjm1YHoCNl%2F5z9kJsn%2FpVxDy3y6hSBIFQsWtaBIuJ1LlOKh3PuxCvUGJFJ4dBPCQGHVFJUz2Rhtkm5T2SZBRfDyY4%2FWncTKkwszVWJx8mGh3q1EgOQeMqiRYqfkb%2FGYGEIxpL2LEVvjvd3RehubUp2s7ZQYuN6%2Fb%2BZ2zuh4unEYDu2IVUSL6w5uogR%2BHYTLXUEqINUlh%2BVOWbF7i1GkQvxo0Ft6zkgNCWg9FCLGDb8BNidE86vNsoYWFZ%2FX5OJ485HcmlYOESIhXVf%2BeiOugpz5XNcr1LHQRkPL%2BfcB5pakgEw3oKOvwY6sQG2bJlK7whjDQbarAna%2BVRrjyjb4F6mjMjZKKTIVQxvkdabc7SEwGBIFmaUUtGVZpXnFW80UDguDwPLYLEOzEwuKQvev9%2F6FuWgTnjZsxvzBcMy7gXVZqm3gCN7uviZ%2BKEs62j%2FBFZfYA5p%2BO4nQMWpbas9TbNle5AXxub1Qr63rklNUSkwOdOpePUeeIRHgzFWzBYKh%2BSvckffE2e4Mx41twnmsoznmUpJR4pGrLGOkq0%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=082c0294cb48bafaba4e93fcc50c3518c24a9975a6dfc3b3b271be2e80a4c53d"
+  },
+  "disclosed_date": 1555681560,
+  "report_url": "https://hackerone.com/reports/498964",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send an email to support@gitlab.com to initiate a support ticket."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Incorrect Authorization"
+    [
+      2,
+      "Register a Google account with the email support@gitlab.com, using the ticket hash as the first and last name."
     ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/427/395/076f26b9650ed27dc6cbaec3c2c7d5d40c0aa6ca/grafana.PNG?response-content-disposition=attachment%3B%20filename%3D%22grafana.PNG%22%3B%20filename%2A%3DUTF-8%27%27grafana.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQQBVJH7R3%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T043904Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEL3%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDAsPJ%2BKTWVWGFK7%2FvNjQDz37M4FTFq%2BZJrSaeY8mjhhwIgAj5Qllim%2BRCB8LReu3HndfJE%2FYYpvtOQIcjFQdVfy1cqsgUIJhADGgwwMTM2MTkyNzQ4NDkiDNzVqqedJBrNnz%2F%2BJyqPBV8JIhcGhPFSCKElXehQ86SLWFEFS3ahGuSOKSxTFch4VQabdZyWk2lVATpsmBWIsNoxzhr09%2FwGgJCiwWIyJwl%2FSFJNoYobPrYtbgb%2FAJzD9cuwO9YR%2BTjKaLlzj1iPC8xGXPxf8TDbjDgWZ3tKFHjx%2Fc21pWECkWhSpT%2BhWzUotZEMGv3U5zpNGwqFivRguROLBLQJgPU9vj6jeGWHBBdOi7mGvEy0RqGKvxcvf0BnahiHzIN98x6fhhNu2nHr30%2BmnDG%2BFQ4PbXiD%2FRp6b2NE2ZG4cDCvJJI0nCudBV%2F8SH75Lbqbxv%2FAu6Ilest%2FBth4YW5H4b%2F%2ByzQZQ%2BxWO0h77y91PdCPgmGsFpbBEQtoNd1SQhvuI2f6Lp77B3zmRx3lDfsWo4OQqy9B6VigFnLl5KkKdxmxHPQz4dx1abD04GAFmbuy%2FjQS9TAJLl9o6LyXnMbbjCi5%2FMw2M9UFyatzxcWjR7tRwfwZYzWTCnwBEMgQDyNJ8iYob0G9YWvLw9nYZch0NlJcEKRnIkkNseJVGRVyfCq%2FNssweNny5eCLUq3uKznqXiaOukH9xUYjm1YHoCNl%2F5z9kJsn%2FpVxDy3y6hSBIFQsWtaBIuJ1LlOKh3PuxCvUGJFJ4dBPCQGHVFJUz2Rhtkm5T2SZBRfDyY4%2FWncTKkwszVWJx8mGh3q1EgOQeMqiRYqfkb%2FGYGEIxpL2LEVvjvd3RehubUp2s7ZQYuN6%2Fb%2BZ2zuh4unEYDu2IVUSL6w5uogR%2BHYTLXUEqINUlh%2BVOWbF7i1GkQvxo0Ft6zkgNCWg9FCLGDb8BNidE86vNsoYWFZ%2FX5OJ485HcmlYOESIhXVf%2BeiOugpz5XNcr1LHQRkPL%2BfcB5pakgEw3oKOvwY6sQG2bJlK7whjDQbarAna%2BVRrjyjb4F6mjMjZKKTIVQxvkdabc7SEwGBIFmaUUtGVZpXnFW80UDguDwPLYLEOzEwuKQvev9%2F6FuWgTnjZsxvzBcMy7gXVZqm3gCN7uviZ%2BKEs62j%2FBFZfYA5p%2BO4nQMWpbas9TbNle5AXxub1Qr63rklNUSkwOdOpePUeeIRHgzFWzBYKh%2BSvckffE2e4Mx41twnmsoznmUpJR4pGrLGOkq0%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=082c0294cb48bafaba4e93fcc50c3518c24a9975a6dfc3b3b271be2e80a4c53d"
-    },
-    "disclosed_date": 1555681560,
-    "report_url": "https://hackerone.com/reports/498964",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Send an email to support@gitlab.com to initiate a support ticket."
-        ],
-        [
-            2,
-            "Register a Google account with the email support@gitlab.com, using the ticket hash as the first and last name."
-        ],
-        [
-            3,
-            "Reply to the support ticket from GitLab, CC'ing noreply@google.com to make the verification code public."
-        ],
-        [
-            4,
-            "Verify the support@gitlab.com email using the public verification code."
-        ],
-        [
-            5,
-            "Use the verified email to gain access to internal GitLab instances like redash.gitlab.com, dashboards.gitlab.com, and prometheus.gitlab.com."
-        ]
+    [
+      3,
+      "Reply to the support ticket from GitLab, CC'ing noreply@google.com to make the verification code public."
     ],
-    "vuln_description": "The vulnerability involves exploiting Zendesk's ticket system and Google's email verification process to gain unauthorized access to internal GitLab instances. By manipulating the ticket hash and leveraging Zendesk's features, an attacker can verify a support@gitlab.com email and use it to access sensitive internal systems.",
-    "reason": "This vulnerability requires understanding and manipulating multiple systems (Zendesk, Google email verification, GitLab's internal domains) and involves subtle interactions between these components. The attacker must also recognize the opportunity to use the ticket hash in a non-obvious way to bypass security measures.",
-    "new_complexity": "HIGH",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      4,
+      "Verify the support@gitlab.com email using the public verification code."
+    ],
+    [
+      5,
+      "Use the verified email to gain access to internal GitLab instances like redash.gitlab.com, dashboards.gitlab.com, and prometheus.gitlab.com."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves exploiting Zendesk's ticket system and Google's email verification process to gain unauthorized access to internal GitLab instances. By manipulating the ticket hash and leveraging Zendesk's features, an attacker can verify a support@gitlab.com email and use it to access sensitive internal systems.",
+  "reason": "This vulnerability requires understanding and manipulating multiple systems (Zendesk, Google email verification, GitLab's internal domains) and involves subtle interactions between these components. The attacker must also recognize the opportunity to use the ticket hash in a non-obvious way to bypass security measures.",
+  "new_complexity": "HIGH",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves exploiting Zendesk's ticket system and email verification process, which is outside the scope of the proposed methodologies that focus on HTTP request/response analysis within a single application. The attack leverages cross-application interactions (Zendesk, Google, GitLab) and email verification flows, which are not covered by the (user_session, action, resource_id) tuple analysis.",
+    "is_detectable": false
+  }
 }

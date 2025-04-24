@@ -1,48 +1,48 @@
 {
-    "reported_to": "Elastic",
-    "reported_by": "dee-see ",
-    "title": "Improper authorization on `/api/as/v1/credentials/` allows any App Search user to access all API keys and escalate privileges",
-    "content": "\nSummary\nHello team, I hope you're doing well! App Search has a credentials page located at /as#/credentials that lists all the API keys a user has access to, if any. That same page will 404 for users with Analyst or Editor role. This is all working as intended, however there is also an API endpoint to query that same data at /api/as/v1/credentials/ and this will list all existing API keys for any authenticated user regardless of their App Search role.\nSteps to reproduce\nI'm going to use the cloud environment for the reproduction\nPreparation\nLog in App Search with the admin (elastic) user and go to the Users & roles page (/as#/role-mappings/)\nClick Add mapping\nIn the Attribute value field enter h1-repro\nIn the Role box select Analyst\nIn the Engine Access select Limited Engine Access, no need to select any engine\nWe now have created the most limited role possible\nWe now have created the most limited role possible\nLog in Kibana with the admin (elastic) user and go to the Stack Management > Users page (/app/management/security/users/)\nClick Create user\nIn the Username field enter hi-repro\nSet any password you like and then click Create user\nReproduction\nLog in App Search with the h1-repro user\nNavigate to /as#/role-mappings/ and observe that it's a 404 because you don't have access to this page\nNavigate to /api/as/v1/credentials/ and observe that you have access to all the API keys\nImpact\nPrivilege escalation. The default App Search install has a Private API Key with read/write access to all engines. If a Private Admin Key has been created before. the attacker can use it to create new API keys or delete existing ones.\n\n",
-    "severity": [
-        8.8,
-        null
+  "reported_to": "Elastic",
+  "reported_by": "dee-see ",
+  "title": "Improper authorization on `/api/as/v1/credentials/` allows any App Search user to access all API keys and escalate privileges",
+  "content": "\nSummary\nHello team, I hope you're doing well! App Search has a credentials page located at /as#/credentials that lists all the API keys a user has access to, if any. That same page will 404 for users with Analyst or Editor role. This is all working as intended, however there is also an API endpoint to query that same data at /api/as/v1/credentials/ and this will list all existing API keys for any authenticated user regardless of their App Search role.\nSteps to reproduce\nI'm going to use the cloud environment for the reproduction\nPreparation\nLog in App Search with the admin (elastic) user and go to the Users & roles page (/as#/role-mappings/)\nClick Add mapping\nIn the Attribute value field enter h1-repro\nIn the Role box select Analyst\nIn the Engine Access select Limited Engine Access, no need to select any engine\nWe now have created the most limited role possible\nWe now have created the most limited role possible\nLog in Kibana with the admin (elastic) user and go to the Stack Management > Users page (/app/management/security/users/)\nClick Create user\nIn the Username field enter hi-repro\nSet any password you like and then click Create user\nReproduction\nLog in App Search with the h1-repro user\nNavigate to /as#/role-mappings/ and observe that it's a 404 because you don't have access to this page\nNavigate to /api/as/v1/credentials/ and observe that you have access to all the API keys\nImpact\nPrivilege escalation. The default App Search install has a Private API Key with read/write access to all engines. If a Private Admin Key has been created before. the attacker can use it to create new API keys or delete existing ones.\n\n",
+  "severity": [
+    8.8,
+    null
+  ],
+  "bounty": 1000,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1622667960,
+  "report_url": "https://hackerone.com/reports/1168528",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Log in to App Search with an admin (elastic) user and create a new user with the most limited role (Analyst) and no engine access."
     ],
-    "bounty": 1000,
-    "weaknesses": [
-        "Improper Access Control - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1622667960,
-    "report_url": "https://hackerone.com/reports/1168528",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Log in to App Search with an admin (elastic) user and create a new user with the most limited role (Analyst) and no engine access."
-        ],
-        [
-            2,
-            "Log in as the newly created limited user and access the `/api/as/v1/credentials/` endpoint to observe all API keys."
-        ]
-    ],
-    "vuln_description": "The `/api/as/v1/credentials/` endpoint in App Search improperly authorizes access, allowing any authenticated user, regardless of role, to view all API keys, leading to potential privilege escalation.",
-    "reason": "The vulnerability involves understanding role-based access control and API endpoint authorization, but the steps to reproduce are straightforward and do not require complex interactions or state manipulation.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": true
-    }
+    [
+      2,
+      "Log in as the newly created limited user and access the `/api/as/v1/credentials/` endpoint to observe all API keys."
+    ]
+  ],
+  "vuln_description": "The `/api/as/v1/credentials/` endpoint in App Search improperly authorizes access, allowing any authenticated user, regardless of role, to view all API keys, leading to potential privilege escalation.",
+  "reason": "The vulnerability involves understanding role-based access control and API endpoint authorization, but the steps to reproduce are straightforward and do not require complex interactions or state manipulation.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an API endpoint (`/api/as/v1/credentials/`) that improperly authorizes access to sensitive data (API keys) for any authenticated user, regardless of their role. This fits the AuthZ Bypass methodology where a less privileged user (Analyst or Editor) can access functionality (listing all API keys) that should be restricted to higher-privileged users. The methodology involves swapping user sessions (from admin to limited user) and testing access to the same action (querying the credentials endpoint), which would reveal the authorization boundary being crossed.",
+    "is_detectable": true
+  }
 }

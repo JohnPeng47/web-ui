@@ -1,60 +1,60 @@
 {
-    "reported_to": "Snapchat",
-    "reported_by": "prickn9 ",
-    "title": "Delete anyone's content spotlight remotely.",
-    "content": "\nHello Snapchat,\nSnapchat has viral video feature callled spotlight which alone was the biggest trend and increase snapchat users and profit in millions.\nI found a way to delete anyone's spotlight remotely.\nPlease see the below poc:-\nFirst go to https://my.snapchat.com/myposts and log in there.\nYou will see your posts .\nNow turn burp suite and intercept. 4.Select any of your posts and click delete option.\nNow capture the delete request. In delete request there is parameter of id\n{\"operationName\":\"DeleteStorySnaps\",\"variables\":{\"ids\":[\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\"],\"storyType\":\"SPOTLIGHT_STORY\"},\"query\":\"mutation DeleteStorySnaps($ids: [String!]!, $storyType: StoryType!) {\\n deleteStorySnaps(ids: $ids, storyType: $storyType)\\n}\\n\"}\nYou just have to change this id parameter. You can easily get the id parameter. Now forward the request after replacing id with someone's else video id.\nAnd the video of other user will get delete.\nHOW TO GET ID PARAMETER\nWhenever you share spotlight you can see the parameter in the url as: https://story.snapchat.com/spotlight/\u2588\u2588\u2588\u2588\u2588\nI have attached a video POC please check it out\nImpact\nDelete anyone's Content Spotlight. Imagine deleting video biggest influencers and content creators.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Snapchat",
+  "reported_by": "prickn9 ",
+  "title": "Delete anyone's content spotlight remotely.",
+  "content": "\nHello Snapchat,\nSnapchat has viral video feature callled spotlight which alone was the biggest trend and increase snapchat users and profit in millions.\nI found a way to delete anyone's spotlight remotely.\nPlease see the below poc:-\nFirst go to https://my.snapchat.com/myposts and log in there.\nYou will see your posts .\nNow turn burp suite and intercept. 4.Select any of your posts and click delete option.\nNow capture the delete request. In delete request there is parameter of id\n{\"operationName\":\"DeleteStorySnaps\",\"variables\":{\"ids\":[\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\"],\"storyType\":\"SPOTLIGHT_STORY\"},\"query\":\"mutation DeleteStorySnaps($ids: [String!]!, $storyType: StoryType!) {\\n deleteStorySnaps(ids: $ids, storyType: $storyType)\\n}\\n\"}\nYou just have to change this id parameter. You can easily get the id parameter. Now forward the request after replacing id with someone's else video id.\nAnd the video of other user will get delete.\nHOW TO GET ID PARAMETER\nWhenever you share spotlight you can see the parameter in the url as: https://story.snapchat.com/spotlight/\u2588\u2588\u2588\u2588\u2588\nI have attached a video POC please check it out\nImpact\nDelete anyone's Content Spotlight. Imagine deleting video biggest influencers and content creators.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 15000,
+  "weaknesses": [
+    "Insecure Direct Object Reference (IDOR)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1678156320,
+  "report_url": "https://hackerone.com/reports/1819832",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Go to https://my.snapchat.com/myposts and log in."
     ],
-    "bounty": 15000,
-    "weaknesses": [
-        "Insecure Direct Object Reference (IDOR)"
+    [
+      2,
+      "Turn on Burp Suite and intercept the request when deleting a post."
     ],
-    "screenshots": {},
-    "disclosed_date": 1678156320,
-    "report_url": "https://hackerone.com/reports/1819832",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Go to https://my.snapchat.com/myposts and log in."
-        ],
-        [
-            2,
-            "Turn on Burp Suite and intercept the request when deleting a post."
-        ],
-        [
-            3,
-            "Capture the delete request and note the 'id' parameter in the JSON payload."
-        ],
-        [
-            4,
-            "Replace the 'id' parameter with another user's Spotlight video ID obtained from the URL (e.g., https://story.snapchat.com/spotlight/\u2588\u2588\u2588\u2588\u2588)."
-        ],
-        [
-            5,
-            "Forward the modified request to delete the targeted user's Spotlight video."
-        ]
+    [
+      3,
+      "Capture the delete request and note the 'id' parameter in the JSON payload."
     ],
-    "vuln_description": "This vulnerability allows an attacker to delete any user's Spotlight video remotely by intercepting and modifying the delete request. The attack involves replacing the 'id' parameter in the request with the target video's ID, which can be easily obtained from the video's URL.",
-    "reason": "The vulnerability involves intercepting and modifying a straightforward HTTP request, which is a common technique in web application testing. The steps are linear and do not require complex interactions or deep understanding of the application's state or logic. The only non-trivial part is identifying the correct 'id' parameter, but this is easily found in the video URL.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": false
-    }
+    [
+      4,
+      "Replace the 'id' parameter with another user's Spotlight video ID obtained from the URL (e.g., https://story.snapchat.com/spotlight/\u2588\u2588\u2588\u2588\u2588)."
+    ],
+    [
+      5,
+      "Forward the modified request to delete the targeted user's Spotlight video."
+    ]
+  ],
+  "vuln_description": "This vulnerability allows an attacker to delete any user's Spotlight video remotely by intercepting and modifying the delete request. The attack involves replacing the 'id' parameter in the request with the target video's ID, which can be easily obtained from the video's URL.",
+  "reason": "The vulnerability involves intercepting and modifying a straightforward HTTP request, which is a common technique in web application testing. The steps are linear and do not require complex interactions or deep understanding of the application's state or logic. The only non-trivial part is identifying the correct 'id' parameter, but this is easily found in the video URL.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves swapping resource IDs (video IDs) in an authenticated request to delete another user's content, which falls under the IDOR vulnerability class. The methodology described includes testing for such scenarios by substituting resource IDs and executing requests with different user sessions.",
+    "is_detectable": true
+  }
 }

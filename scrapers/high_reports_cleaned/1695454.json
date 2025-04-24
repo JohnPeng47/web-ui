@@ -1,64 +1,64 @@
 {
-    "reported_to": "Automattic",
-    "reported_by": "bugra ",
-    "title": "IDOR in API applications (able to see any API token, leads to account takeover)",
-    "content": "\nSummary:\nHi,\n@ehtis, thank you for the test account. Here is a critical report. :)\nOn Pressable, we can create API applications at https://my.pressable.com/api/applications, and we can access many things using the API token via following the API docs\nI created an API application and tried to update it, I saw this request :\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAs you can see there is an application[id] parameter that contains the application ID. I changed it to my second account's application ID and that API app moved to my account. So, there is an IDOR but it doesn't have a great impact because it just removes the API application from the victim's account.\nSo I tried to escalate its impact and I noticed if we remove all parameters except application[id] and authenticity_token, then send the request, the endpoint gives an error with Name must be provided and prints the given application ID's page. And, that page contains Client ID and Client Secret!\nWith this information, the attacker can make many actions on the victim's account. (https://my.pressable.com/documentation/api/v1)\nSteps To Reproduce:\nGo to https://my.pressable.com/api/applications and create an API app\nClick on the application and turn on your proxy program\nClick Update and you will send a POST request to /api/applications\nIn this request, change the application%5Bid%5D parameter's value to the target app ID, then remove all parameters except application%5Bid%5D and authenticity_token\nThe page will give an error and you will see the victim app's page which contains Client ID and Client Secret\nNow, you can use these API credentials on the Pressable API.\nNotes:\nAPI application IDs are sequential, so the attacker doesn't have to guess the IDs, s/he can access all applications\nThe impact is critical because we can access many things via the API, that includes the \"collaborator\" endpoint https://my.pressable.com/documentation/api/v1#collaborator-bulk-create\nImpact\nThe attacker can access all API credentials using this vulnerability, and that leads to account takeover (via adding collaborator etc.)\nRegards,\nBugra\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "Automattic",
+  "reported_by": "bugra ",
+  "title": "IDOR in API applications (able to see any API token, leads to account takeover)",
+  "content": "\nSummary:\nHi,\n@ehtis, thank you for the test account. Here is a critical report. :)\nOn Pressable, we can create API applications at https://my.pressable.com/api/applications, and we can access many things using the API token via following the API docs\nI created an API application and tried to update it, I saw this request :\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAs you can see there is an application[id] parameter that contains the application ID. I changed it to my second account's application ID and that API app moved to my account. So, there is an IDOR but it doesn't have a great impact because it just removes the API application from the victim's account.\nSo I tried to escalate its impact and I noticed if we remove all parameters except application[id] and authenticity_token, then send the request, the endpoint gives an error with Name must be provided and prints the given application ID's page. And, that page contains Client ID and Client Secret!\nWith this information, the attacker can make many actions on the victim's account. (https://my.pressable.com/documentation/api/v1)\nSteps To Reproduce:\nGo to https://my.pressable.com/api/applications and create an API app\nClick on the application and turn on your proxy program\nClick Update and you will send a POST request to /api/applications\nIn this request, change the application%5Bid%5D parameter's value to the target app ID, then remove all parameters except application%5Bid%5D and authenticity_token\nThe page will give an error and you will see the victim app's page which contains Client ID and Client Secret\nNow, you can use these API credentials on the Pressable API.\nNotes:\nAPI application IDs are sequential, so the attacker doesn't have to guess the IDs, s/he can access all applications\nThe impact is critical because we can access many things via the API, that includes the \"collaborator\" endpoint https://my.pressable.com/documentation/api/v1#collaborator-bulk-create\nImpact\nThe attacker can access all API credentials using this vulnerability, and that leads to account takeover (via adding collaborator etc.)\nRegards,\nBugra\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Insecure Direct Object Reference (IDOR)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1667357160,
+  "report_url": "https://hackerone.com/reports/1695454",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Go to https://my.pressable.com/api/applications and create an API app"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Insecure Direct Object Reference (IDOR)"
+    [
+      2,
+      "Click on the application and turn on your proxy program"
     ],
-    "screenshots": {},
-    "disclosed_date": 1667357160,
-    "report_url": "https://hackerone.com/reports/1695454",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Go to https://my.pressable.com/api/applications and create an API app"
-        ],
-        [
-            2,
-            "Click on the application and turn on your proxy program"
-        ],
-        [
-            3,
-            "Click Update and you will send a POST request to /api/applications"
-        ],
-        [
-            4,
-            "In this request, change the application%5Bid%5D parameter's value to the target app ID, then remove all parameters except application%5Bid%5D and authenticity_token"
-        ],
-        [
-            5,
-            "The page will give an error and you will see the victim app's page which contains Client ID and Client Secret"
-        ],
-        [
-            6,
-            "Now, you can use these API credentials on the Pressable API."
-        ]
+    [
+      3,
+      "Click Update and you will send a POST request to /api/applications"
     ],
-    "vuln_description": "This vulnerability is an Insecure Direct Object Reference (IDOR) in the API applications endpoint of Pressable. By manipulating the application ID in a POST request and removing certain parameters, an attacker can access the Client ID and Client Secret of any API application, leading to potential account takeover.",
-    "reason": "The vulnerability involves manipulating a POST request to expose sensitive information. While the steps are straightforward, the discovery requires understanding the API behavior and the impact of parameter manipulation, which is not immediately obvious.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": false
-    }
+    [
+      4,
+      "In this request, change the application%5Bid%5D parameter's value to the target app ID, then remove all parameters except application%5Bid%5D and authenticity_token"
+    ],
+    [
+      5,
+      "The page will give an error and you will see the victim app's page which contains Client ID and Client Secret"
+    ],
+    [
+      6,
+      "Now, you can use these API credentials on the Pressable API."
+    ]
+  ],
+  "vuln_description": "This vulnerability is an Insecure Direct Object Reference (IDOR) in the API applications endpoint of Pressable. By manipulating the application ID in a POST request and removing certain parameters, an attacker can access the Client ID and Client Secret of any API application, leading to potential account takeover.",
+  "reason": "The vulnerability involves manipulating a POST request to expose sensitive information. While the steps are straightforward, the discovery requires understanding the API behavior and the impact of parameter manipulation, which is not immediately obvious.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an IDOR where the attacker can access API tokens by manipulating the application ID parameter in a request. This fits the methodology's test case e) where substituting the resource_id (application ID) with a new one and executing it with existing users can reveal authorization issues. The methodology covers this by testing all combinations of (user_session, action, resource_id) and would detect the IDOR when the attacker's session is used to access another user's API credentials.",
+    "is_detectable": true
+  }
 }

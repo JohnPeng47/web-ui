@@ -1,48 +1,48 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "maskedpersian ",
-    "title": "Default Admin Username and Password on \u2588\u2588\u2588",
-    "content": "\nIt is possible to access the application is using the default username and password\nSteps To Reproduce:\n1-Go to https://\u2588\u2588\u2588/geoportal/ and login with credentials:\nuser and password: admin\nuser and password: gptadmin\nPoc video attached\nImpact\nA Department of Defense website was misconfigured in a manner that may have allowed a malicious user to login with administrator for the default organization account credentials and delete posts , edit website\nSystem Host(s)\n\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nPOC video\nSuggested Mitigation/Remediation Actions\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "maskedpersian ",
+  "title": "Default Admin Username and Password on \u2588\u2588\u2588",
+  "content": "\nIt is possible to access the application is using the default username and password\nSteps To Reproduce:\n1-Go to https://\u2588\u2588\u2588/geoportal/ and login with credentials:\nuser and password: admin\nuser and password: gptadmin\nPoc video attached\nImpact\nA Department of Defense website was misconfigured in a manner that may have allowed a malicious user to login with administrator for the default organization account credentials and delete posts , edit website\nSystem Host(s)\n\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nPOC video\nSuggested Mitigation/Remediation Actions\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1703198100,
+  "report_url": "https://hackerone.com/reports/2262365",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Go to https://\u2588\u2588\u2588/geoportal/"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Access Control - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1703198100,
-    "report_url": "https://hackerone.com/reports/2262365",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Go to https://\u2588\u2588\u2588/geoportal/"
-        ],
-        [
-            2,
-            "Attempt to log in using the default credentials: username 'admin' and password 'admin' or username 'gptadmin' and password 'gptadmin'"
-        ]
-    ],
-    "vuln_description": "The application is using default admin credentials (username and password: admin, username and password: gptadmin), which allows unauthorized access to administrative functions, including the ability to delete posts and edit the website.",
-    "reason": "The vulnerability involves a straightforward attack vector\u2014using default credentials\u2014which is a common and well-documented issue. There are no complex interactions or states involved, and the attack does not require any novel logic or multiple components.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      2,
+      "Attempt to log in using the default credentials: username 'admin' and password 'admin' or username 'gptadmin' and password 'gptadmin'"
+    ]
+  ],
+  "vuln_description": "The application is using default admin credentials (username and password: admin, username and password: gptadmin), which allows unauthorized access to administrative functions, including the ability to delete posts and edit the website.",
+  "reason": "The vulnerability involves a straightforward attack vector\u2014using default credentials\u2014which is a common and well-documented issue. There are no complex interactions or states involved, and the attack does not require any novel logic or multiple components.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves default credentials (username and password) for an admin account, which falls under AuthN/AuthZ bypass. The methodology described involves testing with different user sessions and actions, including unauthenticated sessions (test d). Since the default credentials are a form of authentication, attempting to log in with these credentials would be detectable as part of the AuthN/AuthZ bypass testing.",
+    "is_detectable": true
+  }
 }

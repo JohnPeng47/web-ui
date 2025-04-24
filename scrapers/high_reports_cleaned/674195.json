@@ -1,56 +1,56 @@
 {
-    "reported_to": "GitLab",
-    "reported_by": "rpadovani ",
-    "title": "Stealing data from customers.gitlab.com without user interaction",
-    "content": "\nSummary\nAn attacker can link her own customers.gitlab.com account to the one of the victim, and these give access to 3 different vulnerabilities:\ndestroying subscriptions of the victim\nbuying new subscriptions using victim credit card for its own groups\nsome (minor) information disclosure about what is over Gitlab.com\nSteps to reproduce\nThe attacker registers herself on customers.gitlab.com, logging in using her Gitlab.com account.\nAfter that, she updates her customers.gitlab.com account and link it to the victim's Gitlab account through the victim's account userId (they are sequential and they are not secret, so no problem retrieving it).\nThis update is quite easy, attacker needs only to copy how \"Update Account\" HTTP request, and change the customer%5Buid%5D field, like this:\nCode 743 Bytes\n1await fetch(\"https://customers.gitlab.com/customers\", {\n2    \"credentials\": \"include\",\n3    \"referrer\": \"https://customers.gitlab.com/customers/edit\",\n4    \"body\": \"utf8=%E2%9C%93&_method=patch&authenticity_token=YOquJGc9evhkHMfLOZljuw9OcDn0gtJw8AHPb0yVhyml9q1TISGHa%2FK57DAlg8jB%2BEqvJYYob26BRgx4sZbRzg%3D%3D&customer%5Bfirst_name%5D=Riccardo&customer%5Blast_name%5D=Padovani&customer%5Baddress_1%5D=&customer%5Baddress_2%5D=&customer%5Bcity%5D=Munich&customer%5Bzip_code%5D=81479&customer%5Bcountry%5D=DEU&customer%5Bstate%5D=BY&customer%5Bvat_code%5D=&customer%5Bcompany%5D=Riccardo+Padovani&customer%5Bemail%5D=hackerone1%40rpadovani.com&customer%5Bprovider%5D=gitlab&customer%5Buid%5D=VICTIM_ID\",\n5    \"method\": \"POST\",\n6    \"mode\": \"cors\"\n7});\nThe backend will validate the input, and now the two accounts are somehow linked.\nImpact\nWhen the victim will login again, all his subscriptions will be lost\nIf the victim updates his data after the attack, the attacker account will be updated with the same data, INCLUDING CREDIT CARD. The attacker can now purchase plans using victim's credit card\nAttacker has also a list of teams victim is owner, when she purchases a new plan.\nIf attacker wants to purchase a plan for her own group, she can nominate victim owner, so now attacker's group will be in the dropdown, buy the plan, remove the victim.\nExamples\nI attached a video with all these attacks, sorry but it is a bit messy.\nOn the left there is victim's browser, on the right attacker's browser. When it appears a console, is for the attacker's browser. The attacker's is in a private session, so it is completely separated from the victim.\n0:00-0:10: we see victim has a subscription, and attacker no. They also have different data\n0:10-0:40: attacker does a first attack, changing both uid and email, and it doesn't work\n0:40-1:10: attacker does a proper attack, changing only uid. Notice how bottom right the Gitlab.com account changes\n1:10-1:30: nothing else has changed\n1:30-1:50: victim does log out and login again and ALL DATA AND SUBSCRIPTIONS ARE GONE\nYou can skip to\n2:30-2:40: victim updates his data, also attacker's data are updated accordingly\n2:40-4:30: victim buys a new subscription\n4:30-5:00: attackers can use victim's credit card\nWhat is the current bug behavior?\ncustomers.gitlab.com user can update its link to Gitlab.com without any verification\nEnd notes:\nI'd like you also reset my customers.gitlab.com accounts, now they are all a bit a mess.\nAlso, while testing I think I associated my customers.gitlab.com account with Gitlab's account with UID 1 due an error in copy-paste. I removed immediately the link, but maybe you should check if the link is indeed being delete, and say sorry on my behalf to Sid!\nI noticed that in the video it appears my CC data - so please do not disclose the issue, also on the Gitlab.com issue tracker, without removing the video first, please!\nImpact\nAttackers can steal victim's data, including last 4 numbers of CC, and use victim's CC to buy subscriptions\n\n",
-    "severity": [
-        8.1,
-        null
+  "reported_to": "GitLab",
+  "reported_by": "rpadovani ",
+  "title": "Stealing data from customers.gitlab.com without user interaction",
+  "content": "\nSummary\nAn attacker can link her own customers.gitlab.com account to the one of the victim, and these give access to 3 different vulnerabilities:\ndestroying subscriptions of the victim\nbuying new subscriptions using victim credit card for its own groups\nsome (minor) information disclosure about what is over Gitlab.com\nSteps to reproduce\nThe attacker registers herself on customers.gitlab.com, logging in using her Gitlab.com account.\nAfter that, she updates her customers.gitlab.com account and link it to the victim's Gitlab account through the victim's account userId (they are sequential and they are not secret, so no problem retrieving it).\nThis update is quite easy, attacker needs only to copy how \"Update Account\" HTTP request, and change the customer%5Buid%5D field, like this:\nCode 743 Bytes\n1await fetch(\"https://customers.gitlab.com/customers\", {\n2    \"credentials\": \"include\",\n3    \"referrer\": \"https://customers.gitlab.com/customers/edit\",\n4    \"body\": \"utf8=%E2%9C%93&_method=patch&authenticity_token=YOquJGc9evhkHMfLOZljuw9OcDn0gtJw8AHPb0yVhyml9q1TISGHa%2FK57DAlg8jB%2BEqvJYYob26BRgx4sZbRzg%3D%3D&customer%5Bfirst_name%5D=Riccardo&customer%5Blast_name%5D=Padovani&customer%5Baddress_1%5D=&customer%5Baddress_2%5D=&customer%5Bcity%5D=Munich&customer%5Bzip_code%5D=81479&customer%5Bcountry%5D=DEU&customer%5Bstate%5D=BY&customer%5Bvat_code%5D=&customer%5Bcompany%5D=Riccardo+Padovani&customer%5Bemail%5D=hackerone1%40rpadovani.com&customer%5Bprovider%5D=gitlab&customer%5Buid%5D=VICTIM_ID\",\n5    \"method\": \"POST\",\n6    \"mode\": \"cors\"\n7});\nThe backend will validate the input, and now the two accounts are somehow linked.\nImpact\nWhen the victim will login again, all his subscriptions will be lost\nIf the victim updates his data after the attack, the attacker account will be updated with the same data, INCLUDING CREDIT CARD. The attacker can now purchase plans using victim's credit card\nAttacker has also a list of teams victim is owner, when she purchases a new plan.\nIf attacker wants to purchase a plan for her own group, she can nominate victim owner, so now attacker's group will be in the dropdown, buy the plan, remove the victim.\nExamples\nI attached a video with all these attacks, sorry but it is a bit messy.\nOn the left there is victim's browser, on the right attacker's browser. When it appears a console, is for the attacker's browser. The attacker's is in a private session, so it is completely separated from the victim.\n0:00-0:10: we see victim has a subscription, and attacker no. They also have different data\n0:10-0:40: attacker does a first attack, changing both uid and email, and it doesn't work\n0:40-1:10: attacker does a proper attack, changing only uid. Notice how bottom right the Gitlab.com account changes\n1:10-1:30: nothing else has changed\n1:30-1:50: victim does log out and login again and ALL DATA AND SUBSCRIPTIONS ARE GONE\nYou can skip to\n2:30-2:40: victim updates his data, also attacker's data are updated accordingly\n2:40-4:30: victim buys a new subscription\n4:30-5:00: attackers can use victim's credit card\nWhat is the current bug behavior?\ncustomers.gitlab.com user can update its link to Gitlab.com without any verification\nEnd notes:\nI'd like you also reset my customers.gitlab.com accounts, now they are all a bit a mess.\nAlso, while testing I think I associated my customers.gitlab.com account with Gitlab's account with UID 1 due an error in copy-paste. I removed immediately the link, but maybe you should check if the link is indeed being delete, and say sorry on my behalf to Sid!\nI noticed that in the video it appears my CC data - so please do not disclose the issue, also on the Gitlab.com issue tracker, without removing the video first, please!\nImpact\nAttackers can steal victim's data, including last 4 numbers of CC, and use victim's CC to buy subscriptions\n\n",
+  "severity": [
+    8.1,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Insecure Direct Object Reference (IDOR)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1598464920,
+  "report_url": "https://hackerone.com/reports/674195",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Register an attacker account on customers.gitlab.com using a GitLab.com account."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Insecure Direct Object Reference (IDOR)"
+    [
+      2,
+      "Update the attacker's account by changing the 'customer%5Buid%5D' field to the victim's user ID in the 'Update Account' HTTP request."
     ],
-    "screenshots": {},
-    "disclosed_date": 1598464920,
-    "report_url": "https://hackerone.com/reports/674195",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Register an attacker account on customers.gitlab.com using a GitLab.com account."
-        ],
-        [
-            2,
-            "Update the attacker's account by changing the 'customer%5Buid%5D' field to the victim's user ID in the 'Update Account' HTTP request."
-        ],
-        [
-            3,
-            "Victim logs in again, causing loss of subscriptions and potential data synchronization."
-        ],
-        [
-            4,
-            "Attacker can now use victim's credit card to purchase subscriptions or access victim's data."
-        ]
+    [
+      3,
+      "Victim logs in again, causing loss of subscriptions and potential data synchronization."
     ],
-    "vuln_description": "An attacker can link their own customers.gitlab.com account to a victim's account by manipulating the user ID in the account update request. This allows the attacker to access and modify the victim's subscriptions, use their credit card for purchases, and disclose minor information about the victim's GitLab.com account.",
-    "reason": "The vulnerability involves manipulating the account linking mechanism without verification, which is a straightforward process once the sequential and non-secret nature of user IDs is understood. The attack does not require complex interactions or novel logic, making it relatively easy to discover.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": false
-    }
+    [
+      4,
+      "Attacker can now use victim's credit card to purchase subscriptions or access victim's data."
+    ]
+  ],
+  "vuln_description": "An attacker can link their own customers.gitlab.com account to a victim's account by manipulating the user ID in the account update request. This allows the attacker to access and modify the victim's subscriptions, use their credit card for purchases, and disclose minor information about the victim's GitLab.com account.",
+  "reason": "The vulnerability involves manipulating the account linking mechanism without verification, which is a straightforward process once the sequential and non-secret nature of user IDs is understood. The attack does not require complex interactions or novel logic, making it relatively easy to discover.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an attacker linking their own customers.gitlab.com account to a victim's account by manipulating the 'customer%5Buid%5D' field in an HTTP request. This action is performed within the same application (customers.gitlab.com) and involves swapping the victim's user ID (resource_id) with the attacker's session (user_session). The methodology described would capture this as it involves testing (user_session, action, resource_id) tuples and swapping resource_ids with existing actions, which aligns with test e) in the methodology.",
+    "is_detectable": true
+  }
 }

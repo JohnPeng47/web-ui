@@ -1,52 +1,52 @@
 {
-    "reported_to": "Nextcloud",
-    "reported_by": "rullzer ",
-    "title": "End-to-end encrypted file-drops can be made inaccessible",
-    "content": "\nAssume a filedrop that is send to 2 people, USER and ATTACKER\nuser uploads their E2EE encrypted fileA into the filedrop\nAll goes well\nNow ATTACKER comes along and wants mess up the upload from USER\nThey obtain the metadatafile\nThey modify the entry in the filedrop list that USER created\nThey upload their new metadatafile\nUnlock it\nFileA is now not able to be decoded at all anymore.\nImpact\nThe CIA model (Confidentiality, integrity and availability) is here very easy to break. An attacker can almost trivially in this case break the availability.\nNote that due to the nature of providing the metadatafile an attacker can trivially know if there are other filedrop files.\nTo solve\nDo not provide the metadata file to the user in file drop at all\nOnly send back the new entry (which they can create without the metadatafile)\nAppend the new entry in the backend code.\n\n",
-    "severity": [
-        7.5,
-        null
+  "reported_to": "Nextcloud",
+  "reported_by": "rullzer ",
+  "title": "End-to-end encrypted file-drops can be made inaccessible",
+  "content": "\nAssume a filedrop that is send to 2 people, USER and ATTACKER\nuser uploads their E2EE encrypted fileA into the filedrop\nAll goes well\nNow ATTACKER comes along and wants mess up the upload from USER\nThey obtain the metadatafile\nThey modify the entry in the filedrop list that USER created\nThey upload their new metadatafile\nUnlock it\nFileA is now not able to be decoded at all anymore.\nImpact\nThe CIA model (Confidentiality, integrity and availability) is here very easy to break. An attacker can almost trivially in this case break the availability.\nNote that due to the nature of providing the metadatafile an attacker can trivially know if there are other filedrop files.\nTo solve\nDo not provide the metadata file to the user in file drop at all\nOnly send back the new entry (which they can create without the metadatafile)\nAppend the new entry in the backend code.\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": 400,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1687428780,
+  "report_url": "https://hackerone.com/reports/1914115",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "USER uploads an E2EE encrypted file (fileA) into the filedrop."
     ],
-    "bounty": 400,
-    "weaknesses": [
-        "Improper Access Control - Generic"
+    [
+      2,
+      "ATTACKER obtains the metadata file, modifies the entry in the filedrop list created by USER, and uploads the modified metadata file."
     ],
-    "screenshots": {},
-    "disclosed_date": 1687428780,
-    "report_url": "https://hackerone.com/reports/1914115",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "USER uploads an E2EE encrypted file (fileA) into the filedrop."
-        ],
-        [
-            2,
-            "ATTACKER obtains the metadata file, modifies the entry in the filedrop list created by USER, and uploads the modified metadata file."
-        ],
-        [
-            3,
-            "ATTACKER unlocks the modified metadata file, rendering fileA inaccessible for decoding."
-        ]
-    ],
-    "vuln_description": "An attacker can disrupt the availability of an end-to-end encrypted file in a filedrop by modifying the metadata file, making the original file undecodable. This breaks the CIA triad's availability aspect.",
-    "reason": "The attack involves understanding the metadata file's role in the filedrop system and how modifying it affects file accessibility. However, the steps are straightforward once the metadata file's purpose is known.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": true,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": true
-    }
+    [
+      3,
+      "ATTACKER unlocks the modified metadata file, rendering fileA inaccessible for decoding."
+    ]
+  ],
+  "vuln_description": "An attacker can disrupt the availability of an end-to-end encrypted file in a filedrop by modifying the metadata file, making the original file undecodable. This breaks the CIA triad's availability aspect.",
+  "reason": "The attack involves understanding the metadata file's role in the filedrop system and how modifying it affects file accessibility. However, the steps are straightforward once the metadata file's purpose is known.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": true,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an attacker modifying metadata in a file drop system, which is not directly related to the authentication or authorization checks within a single application's session or resource access. The proposed methodologies focus on session and resource ID manipulation within the same application context, not cross-user metadata tampering in a file drop system.",
+    "is_detectable": false
+  }
 }

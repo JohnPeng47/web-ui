@@ -1,50 +1,50 @@
 {
-    "reported_to": "U.S. Department of State",
-    "reported_by": "qualw1n ",
-    "title": "Accessing unauthorized administration pages and seeing admin password - speakerkit.state.gov",
-    "content": "\nSummary:\nI discovered an issue referred to as no-redirect in a subdomain on state.gov. When you enter the page, it directs you directly to the entrance. When I examined it via burp suite, it gave 302 found, but the homepage data was showing below. When I tried it as admin, it still gave 302 found, but this time we could see the content of the admin page. this way i was able to see admin user and normal user's info. I was also able to perform many transactions. uploading files, adding categories and many more.\nSteps To Reproduce:\n1- Login to https://speakerkit.state.gov/\nand it will throw you to the page named \"spklogin\". Using the find and replace feature on burpsuite, I told it to change all requests that gave 302 found to 200 Ok, and I easily performed my operations. You will be able to do it when you watch the video.\nSupporting Material/References:\nhttps://hackerone.com/reports/1026146\nhttps://hackerone.com/reports/95441\n[attachment / reference]\n<image_0>\n[ poc / video] \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\naccess the admin page. unauthorized.\n\n",
-    "severity": [
-        8.2,
-        null
+  "reported_to": "U.S. Department of State",
+  "reported_by": "qualw1n ",
+  "title": "Accessing unauthorized administration pages and seeing admin password - speakerkit.state.gov",
+  "content": "\nSummary:\nI discovered an issue referred to as no-redirect in a subdomain on state.gov. When you enter the page, it directs you directly to the entrance. When I examined it via burp suite, it gave 302 found, but the homepage data was showing below. When I tried it as admin, it still gave 302 found, but this time we could see the content of the admin page. this way i was able to see admin user and normal user's info. I was also able to perform many transactions. uploading files, adding categories and many more.\nSteps To Reproduce:\n1- Login to https://speakerkit.state.gov/\nand it will throw you to the page named \"spklogin\". Using the find and replace feature on burpsuite, I told it to change all requests that gave 302 found to 200 Ok, and I easily performed my operations. You will be able to do it when you watch the video.\nSupporting Material/References:\nhttps://hackerone.com/reports/1026146\nhttps://hackerone.com/reports/95441\n[attachment / reference]\n<image_0>\n[ poc / video] \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\naccess the admin page. unauthorized.\n\n",
+  "severity": [
+    8.2,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/a59xoe5aah16t1gx49w6nc90oa4m?response-content-disposition=attachment%3B%20filename%3D%22image.png%22%3B%20filename%2A%3DUTF-8%27%27image.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7W75TSZN%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T002923Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKD%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIDRgk%2FVlweoHzHRb59pInKBD64s3N6dDGYXh8mUlA4YvAiEA6oUy0DpBWsbwrT2Re%2FT7M1bhOA%2BtHqEfAiKMGVkoTIoquwUI%2Bf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDEvA6I9u06EhQTWhZyqPBTGXfTv%2Ft6JSQSLXA3hUBIEbcjiIrLTDH%2BWl2tR5oTXdklGwB1URZBiVx6FPSqDdOlomItRkl4kOLsMuT3SLwloyaqxg3j5K55Lk9UW0nnY96T%2FWVQYQETyWrFeksis3aOpPdQefQrSsPGMLbTEp1P040XpxSGswSmJ21aXu9rziWreXHF5QZQI%2FphF%2BAy3LlUwNJaeZRV9mrg0%2Bk3KLJTQ%2Ft3jwWi7vuuENmY1WE%2F8eBTBUyLbqU4bvwaswyOMtW%2FEaZpRT5kSOv1Uxp38NIFxi7lymfYxAydGpRORVNJtLbWCeAgq9msWZxO0hQfCK6yIVIUSFOzPIYARF08T9wANRV7KbqBTmRmJIDRbE56j07Je0VKEMWMU3b7wGNOm4kLQyEY4AcVPu8sSv7QlWE7cxiEl993lOCbgtddOOwZv5TL6843t8FWaEQPfQty9LFP%2FB07iU9WsIJJGzhtoTa5lLwPyELvmD2aOGCRupEg69wyz%2F7FO9AzNm5aOEK9B2dSk28pNvQxM%2FFrQ2HZmuOOtdtFC6dtoWOFnjKicrS1193Jlu8hAg1ZfzMNK9rJg8qFrl53kqG%2FLdQyN%2BSBBrtSCLGHma%2F9IF6wsyqswBPHJdUQb95fJX4%2BbpLkvxR4xihzogJ2OaohFffttoRJ4mLeGY3Oxwswp6OZdfKuq0gAssRvyhSCfdQpY3FVJ%2BxthHvdoi%2Fxwj7%2BxgRQuYEOzBrURqraXTCTPLEBqvrf4PP7rVd94C0TEA%2BiOzAKp5%2FX%2FuyuwxyS34yVW9NG1nFtm3rKx0BzVVR42wBBF4RlVBQ%2BB5D6fQgdPL2Bv%2BD4PfkvQqy1qyP4wLd99PPyluhO6rEgYGW%2BbA96MxcrKqu%2BuS7A4w092HvwY6sQERl0awffJVJRn0IfsgQXaK01yw4SraNWW6sahJu%2FqnRUpUW0mtzYKKzkwFKsTVEIvNsjgH0wKwkkhwU7nOIZK6y8znJoxXBB%2B5ArfqWS0%2BKSxxbv3%2BZ08r1YxxjPDnL00ND4Dxdi%2FKBmV4DSjXDlx1hiZACj11vvh6RJ%2B2VYOh5ijEa5f73k9HdD9WxoszC9Z9qsbNRQlVF80mazdvFs1VbVoCroakrXuqXDE02m9QMD0%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=71fb55d318631053d8dbba0d3e16e28a610dc1f4d75114befaa5ef554f4b9890"
+  },
+  "disclosed_date": 1679766240,
+  "report_url": "https://hackerone.com/reports/1806387",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Access https://speakerkit.state.gov/ and observe the redirect to 'spklogin'."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Access Control - Generic"
-    ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/a59xoe5aah16t1gx49w6nc90oa4m?response-content-disposition=attachment%3B%20filename%3D%22image.png%22%3B%20filename%2A%3DUTF-8%27%27image.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7W75TSZN%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T002923Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKD%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIDRgk%2FVlweoHzHRb59pInKBD64s3N6dDGYXh8mUlA4YvAiEA6oUy0DpBWsbwrT2Re%2FT7M1bhOA%2BtHqEfAiKMGVkoTIoquwUI%2Bf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDEvA6I9u06EhQTWhZyqPBTGXfTv%2Ft6JSQSLXA3hUBIEbcjiIrLTDH%2BWl2tR5oTXdklGwB1URZBiVx6FPSqDdOlomItRkl4kOLsMuT3SLwloyaqxg3j5K55Lk9UW0nnY96T%2FWVQYQETyWrFeksis3aOpPdQefQrSsPGMLbTEp1P040XpxSGswSmJ21aXu9rziWreXHF5QZQI%2FphF%2BAy3LlUwNJaeZRV9mrg0%2Bk3KLJTQ%2Ft3jwWi7vuuENmY1WE%2F8eBTBUyLbqU4bvwaswyOMtW%2FEaZpRT5kSOv1Uxp38NIFxi7lymfYxAydGpRORVNJtLbWCeAgq9msWZxO0hQfCK6yIVIUSFOzPIYARF08T9wANRV7KbqBTmRmJIDRbE56j07Je0VKEMWMU3b7wGNOm4kLQyEY4AcVPu8sSv7QlWE7cxiEl993lOCbgtddOOwZv5TL6843t8FWaEQPfQty9LFP%2FB07iU9WsIJJGzhtoTa5lLwPyELvmD2aOGCRupEg69wyz%2F7FO9AzNm5aOEK9B2dSk28pNvQxM%2FFrQ2HZmuOOtdtFC6dtoWOFnjKicrS1193Jlu8hAg1ZfzMNK9rJg8qFrl53kqG%2FLdQyN%2BSBBrtSCLGHma%2F9IF6wsyqswBPHJdUQb95fJX4%2BbpLkvxR4xihzogJ2OaohFffttoRJ4mLeGY3Oxwswp6OZdfKuq0gAssRvyhSCfdQpY3FVJ%2BxthHvdoi%2Fxwj7%2BxgRQuYEOzBrURqraXTCTPLEBqvrf4PP7rVd94C0TEA%2BiOzAKp5%2FX%2FuyuwxyS34yVW9NG1nFtm3rKx0BzVVR42wBBF4RlVBQ%2BB5D6fQgdPL2Bv%2BD4PfkvQqy1qyP4wLd99PPyluhO6rEgYGW%2BbA96MxcrKqu%2BuS7A4w092HvwY6sQERl0awffJVJRn0IfsgQXaK01yw4SraNWW6sahJu%2FqnRUpUW0mtzYKKzkwFKsTVEIvNsjgH0wKwkkhwU7nOIZK6y8znJoxXBB%2B5ArfqWS0%2BKSxxbv3%2BZ08r1YxxjPDnL00ND4Dxdi%2FKBmV4DSjXDlx1hiZACj11vvh6RJ%2B2VYOh5ijEa5f73k9HdD9WxoszC9Z9qsbNRQlVF80mazdvFs1VbVoCroakrXuqXDE02m9QMD0%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=71fb55d318631053d8dbba0d3e16e28a610dc1f4d75114befaa5ef554f4b9890"
-    },
-    "disclosed_date": 1679766240,
-    "report_url": "https://hackerone.com/reports/1806387",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Access https://speakerkit.state.gov/ and observe the redirect to 'spklogin'."
-        ],
-        [
-            2,
-            "Use Burp Suite to intercept the request and modify the HTTP response code from 302 Found to 200 OK, revealing the admin page content."
-        ]
-    ],
-    "vuln_description": "The vulnerability involves an improper redirect handling issue where modifying the HTTP response code from 302 Found to 200 OK exposes the admin page content, allowing unauthorized access to sensitive information and administrative functions.",
-    "reason": "The attack requires understanding of HTTP response codes and the use of a tool like Burp Suite to manipulate them. However, the steps are straightforward once the initial redirect behavior is observed and the tool is employed.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": "95441",
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      2,
+      "Use Burp Suite to intercept the request and modify the HTTP response code from 302 Found to 200 OK, revealing the admin page content."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves an improper redirect handling issue where modifying the HTTP response code from 302 Found to 200 OK exposes the admin page content, allowing unauthorized access to sensitive information and administrative functions.",
+  "reason": "The attack requires understanding of HTTP response codes and the use of a tool like Burp Suite to manipulate them. However, the steps are straightforward once the initial redirect behavior is observed and the tool is employed.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "95441",
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves manipulating HTTP response codes (302 to 200) to bypass authentication/authorization checks, which falls under the AuthN/AuthZ Bypass methodology. The steps involve modifying requests and responses, which can be captured and analyzed by the proposed detection method.",
+    "is_detectable": true
+  }
 }

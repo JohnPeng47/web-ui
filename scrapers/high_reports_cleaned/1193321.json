@@ -1,48 +1,48 @@
 {
-    "reported_to": "Nextcloud",
-    "reported_by": "rtod ",
-    "title": "Scoped apptokens can be changed by that very apptoken",
-    "content": "\nI noticed that there is the possibility to limit apptokens to not be able to access the filesystem.\nCreate a new apptoken in https://server/settings/user/security\nClick the .. of your new apptoken and make it not allowed to access the filesystem\nLog out\nNavigate to https://server/remote.php/dav and login with your username + apptoken\nNavigate again to https://server/settings/user/security\nYou won't be able to access the apptoken data\nObtain the CSRF token\nSend a PUT request to https://server/settings/personal/authtokens/ID chaging the scope\nNow the ID you do not know. However even on a decent sized system it is not hard to iterate this as there is no rate limiting or throttling at all.\nAnd voila. You have filesystem access.\nYou could also remove other apptokens of the same user (if you'd want).\nImpact\nLeaked scoped tokens could be used to gain full access to all your data. Defeating the whole purpose of scoped tokens.\nI recommend.\nOnly allow tokens that result from a real login (so user+pass+2fa) to modify/delete tokens\nDo not allow the current token in use to edit itself\n\n",
-    "severity": [
-        8.7,
-        null
+  "reported_to": "Nextcloud",
+  "reported_by": "rtod ",
+  "title": "Scoped apptokens can be changed by that very apptoken",
+  "content": "\nI noticed that there is the possibility to limit apptokens to not be able to access the filesystem.\nCreate a new apptoken in https://server/settings/user/security\nClick the .. of your new apptoken and make it not allowed to access the filesystem\nLog out\nNavigate to https://server/remote.php/dav and login with your username + apptoken\nNavigate again to https://server/settings/user/security\nYou won't be able to access the apptoken data\nObtain the CSRF token\nSend a PUT request to https://server/settings/personal/authtokens/ID chaging the scope\nNow the ID you do not know. However even on a decent sized system it is not hard to iterate this as there is no rate limiting or throttling at all.\nAnd voila. You have filesystem access.\nYou could also remove other apptokens of the same user (if you'd want).\nImpact\nLeaked scoped tokens could be used to gain full access to all your data. Defeating the whole purpose of scoped tokens.\nI recommend.\nOnly allow tokens that result from a real login (so user+pass+2fa) to modify/delete tokens\nDo not allow the current token in use to edit itself\n\n",
+  "severity": [
+    8.7,
+    null
+  ],
+  "bounty": 1000,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1626390600,
+  "report_url": "https://hackerone.com/reports/1193321",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create a new apptoken in https://server/settings/user/security and restrict its filesystem access."
     ],
-    "bounty": 1000,
-    "weaknesses": [
-        "Improper Access Control - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1626390600,
-    "report_url": "https://hackerone.com/reports/1193321",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Create a new apptoken in https://server/settings/user/security and restrict its filesystem access."
-        ],
-        [
-            2,
-            "Use the restricted apptoken to authenticate and modify its own scope via a PUT request to https://server/settings/personal/authtokens/ID, bypassing the intended restrictions."
-        ]
-    ],
-    "vuln_description": "A scoped apptoken, which is supposed to have restricted access (e.g., no filesystem access), can be used to modify its own scope, thereby granting itself elevated privileges such as filesystem access. This defeats the purpose of scoped tokens and could lead to full system compromise if the token is leaked.",
-    "reason": "The vulnerability involves understanding the token scope modification process and exploiting the lack of checks preventing a token from modifying its own scope. While the steps are straightforward, the interaction between token authentication and scope modification is subtle and not immediately obvious.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": true
-    }
+    [
+      2,
+      "Use the restricted apptoken to authenticate and modify its own scope via a PUT request to https://server/settings/personal/authtokens/ID, bypassing the intended restrictions."
+    ]
+  ],
+  "vuln_description": "A scoped apptoken, which is supposed to have restricted access (e.g., no filesystem access), can be used to modify its own scope, thereby granting itself elevated privileges such as filesystem access. This defeats the purpose of scoped tokens and could lead to full system compromise if the token is leaked.",
+  "reason": "The vulnerability involves understanding the token scope modification process and exploiting the lack of checks preventing a token from modifying its own scope. While the steps are straightforward, the interaction between token authentication and scope modification is subtle and not immediately obvious.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an authenticated user modifying their own apptoken's scope, which falls under the (user_session, action, resource_id) tuple analysis. The methodology would detect this by observing the action of modifying the token scope and testing it with different user sessions and resource IDs.",
+    "is_detectable": true
+  }
 }

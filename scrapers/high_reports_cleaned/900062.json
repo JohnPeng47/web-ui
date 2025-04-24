@@ -1,48 +1,48 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "flavsec_ ",
-    "title": "Subdomain takeover of \u2588\u2588\u2588\u2588",
-    "content": "\nSummary:\nI was able to claim the subdomain: \u2588\u2588\u2588\u2588 using Microsoft Azure ( CDN profiles)\nDescription:\nImpact\nPlatform(s) Affected:\nSubdomain\nAzure CDN\nStep-by-step Reproduction Instructions\nUsing dig, I was able to determine that the subdomain '\u2588\u2588\u2588\u2588\u2588\u2588\u2588' was vulnerable to takeover. The record showed status: NXDOMAIN and was pointing to the CNAME: \u2588\u2588\u2588\u2588\u2588.\nUsing this information, I was able to create a new Azure CDN Profile with the name '\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588'. This would resolve to the CNAME record mentioned above.\nI then created a Web App domain through Azure where I uploaded a small proof html file through FTP, I then set the CDN's origin type to WebApp and selected the url that I created earlier, this would serve the proof file (\u2588\u2588\u2588\u2588\u2588/proof.html) , Last and final step I set the custom domain to \u2588\u2588\u2588\u2588\u2588\u2588\u2588 and enabled ssl.\nI was then able to view the uploaded site at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/proof.html\nSuggested Mitigation/Remediation Actions\nTo mitigate this issue you can:\nRemove the DNS record from the DNS zone if it is no longer needed.\nClaim the domain name in a permanent DNS record so it cannot be used elsewhere.\nImpact\nThis is extremely vulnerable to attacks as a malicious user could create any web page with any content and host it on the \u2588\u2588\u2588\u2588 domain. This would allow them to post malicious content which would be mistaken for a valid site. They could steal cookies, bypass domain security, steal sensitive user data, malware distribution, etc.\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "flavsec_ ",
+  "title": "Subdomain takeover of \u2588\u2588\u2588\u2588",
+  "content": "\nSummary:\nI was able to claim the subdomain: \u2588\u2588\u2588\u2588 using Microsoft Azure ( CDN profiles)\nDescription:\nImpact\nPlatform(s) Affected:\nSubdomain\nAzure CDN\nStep-by-step Reproduction Instructions\nUsing dig, I was able to determine that the subdomain '\u2588\u2588\u2588\u2588\u2588\u2588\u2588' was vulnerable to takeover. The record showed status: NXDOMAIN and was pointing to the CNAME: \u2588\u2588\u2588\u2588\u2588.\nUsing this information, I was able to create a new Azure CDN Profile with the name '\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588'. This would resolve to the CNAME record mentioned above.\nI then created a Web App domain through Azure where I uploaded a small proof html file through FTP, I then set the CDN's origin type to WebApp and selected the url that I created earlier, this would serve the proof file (\u2588\u2588\u2588\u2588\u2588/proof.html) , Last and final step I set the custom domain to \u2588\u2588\u2588\u2588\u2588\u2588\u2588 and enabled ssl.\nI was then able to view the uploaded site at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/proof.html\nSuggested Mitigation/Remediation Actions\nTo mitigate this issue you can:\nRemove the DNS record from the DNS zone if it is no longer needed.\nClaim the domain name in a permanent DNS record so it cannot be used elsewhere.\nImpact\nThis is extremely vulnerable to attacks as a malicious user could create any web page with any content and host it on the \u2588\u2588\u2588\u2588 domain. This would allow them to post malicious content which would be mistaken for a valid site. They could steal cookies, bypass domain security, steal sensitive user data, malware distribution, etc.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Privilege Escalation"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1594244340,
+  "report_url": "https://hackerone.com/reports/900062",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Use dig to determine that the subdomain is vulnerable (NXDOMAIN status and points to a CNAME record)."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Privilege Escalation"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1594244340,
-    "report_url": "https://hackerone.com/reports/900062",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Use dig to determine that the subdomain is vulnerable (NXDOMAIN status and points to a CNAME record)."
-        ],
-        [
-            2,
-            "Create an Azure CDN Profile matching the CNAME, set up a Web App with a proof file, configure the CDN origin to the Web App, and enable the custom domain with SSL."
-        ]
-    ],
-    "vuln_description": "A subdomain takeover vulnerability where an attacker can claim an unused subdomain via Azure CDN by exploiting an unclaimed CNAME record, allowing them to host malicious content under the victim's domain.",
-    "reason": "The attack involves multiple components (DNS, Azure CDN, Web App setup) and requires knowledge of Azure services, but the steps are straightforward once the vulnerable CNAME is identified.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": true,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": false
-    }
+    [
+      2,
+      "Create an Azure CDN Profile matching the CNAME, set up a Web App with a proof file, configure the CDN origin to the Web App, and enable the custom domain with SSL."
+    ]
+  ],
+  "vuln_description": "A subdomain takeover vulnerability where an attacker can claim an unused subdomain via Azure CDN by exploiting an unclaimed CNAME record, allowing them to host malicious content under the victim's domain.",
+  "reason": "The attack involves multiple components (DNS, Azure CDN, Web App setup) and requires knowledge of Azure services, but the steps are straightforward once the vulnerable CNAME is identified.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": true,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The subdomain takeover vulnerability involves claiming a subdomain via Azure CDN, which is not directly related to authentication or authorization within a single application. The methodology focuses on testing AuthN/AuthZ boundaries within the same application by swapping user sessions or resource IDs, not on DNS or cloud service misconfigurations.",
+    "is_detectable": false
+  }
 }

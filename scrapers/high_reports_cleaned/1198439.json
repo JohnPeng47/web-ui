@@ -1,48 +1,48 @@
 {
-    "reported_to": "UPchieve",
-    "reported_by": "recreati ",
-    "title": "No Valid SPF Records/don't have DMARC record",
-    "content": "\nI have already reported this isssue through email and the company has accepted my report.\nHiii,\nThere is any issue No valid SPF Records on\nhttps://app.upchieve.org\nDesciprition :\nThere is a email spoofing vulnerability.Email spoofing is the forgery of an email header so that the message appears to have originated from someone or somewhere other than the actual source. Email spoofing is a tactic used in phishing and spam campaigns because people are more likely to open an email when they think it has been sent by a legitimate source. The goal of email spoofing is to get recipients to open, and possibly even respond to, a solicitation.\nI found :\nSPF record lookup and validation for: https://app.upchieve.org\nSPF records are published in DNS as TXT records.\nThe TXT records found for your domain are:\nNo valid SPF record found.\nUse the back button on your browser to return to the SPF checking tool without clearing the form.\nRemediation :\nReplace ~all with -all to prevent fake email.\nss attched with this\nyou can check this using https://www.kitterman.com/spf/validate.html\nif you had a valid spf record then you don't have DMARC record due to which any one can send the mail on behalf of comapny which cause same issues of damaging comapny reputation can be used to get user data.\nfor checking this visit : https://dmarcian.com/spf-survey/\nand type your url and you'll find all the details i\ni send you the screen shot as a proof of both the above.\nImpact\nAn attacker would send a Fake email. can also use to get user credential after send a psihing link through mail.The results can be more dangerous.\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "UPchieve",
+  "reported_by": "recreati ",
+  "title": "No Valid SPF Records/don't have DMARC record",
+  "content": "\nI have already reported this isssue through email and the company has accepted my report.\nHiii,\nThere is any issue No valid SPF Records on\nhttps://app.upchieve.org\nDesciprition :\nThere is a email spoofing vulnerability.Email spoofing is the forgery of an email header so that the message appears to have originated from someone or somewhere other than the actual source. Email spoofing is a tactic used in phishing and spam campaigns because people are more likely to open an email when they think it has been sent by a legitimate source. The goal of email spoofing is to get recipients to open, and possibly even respond to, a solicitation.\nI found :\nSPF record lookup and validation for: https://app.upchieve.org\nSPF records are published in DNS as TXT records.\nThe TXT records found for your domain are:\nNo valid SPF record found.\nUse the back button on your browser to return to the SPF checking tool without clearing the form.\nRemediation :\nReplace ~all with -all to prevent fake email.\nss attched with this\nyou can check this using https://www.kitterman.com/spf/validate.html\nif you had a valid spf record then you don't have DMARC record due to which any one can send the mail on behalf of comapny which cause same issues of damaging comapny reputation can be used to get user data.\nfor checking this visit : https://dmarcian.com/spf-survey/\nand type your url and you'll find all the details i\ni send you the screen shot as a proof of both the above.\nImpact\nAn attacker would send a Fake email. can also use to get user credential after send a psihing link through mail.The results can be more dangerous.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1621378140,
+  "report_url": "https://hackerone.com/reports/1198439",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Check the SPF record for the domain using a tool like https://www.kitterman.com/spf/validate.html"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Access Control - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1621378140,
-    "report_url": "https://hackerone.com/reports/1198439",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Check the SPF record for the domain using a tool like https://www.kitterman.com/spf/validate.html"
-        ],
-        [
-            2,
-            "Check the DMARC record for the domain using a tool like https://dmarcian.com/spf-survey/"
-        ]
-    ],
-    "vuln_description": "The vulnerability involves the absence of valid SPF and DMARC records for the domain, which allows email spoofing. Attackers can forge emails to appear as if they are sent from the domain, potentially leading to phishing attacks and reputational damage.",
-    "reason": "The vulnerability is straightforward to discover as it only requires checking the DNS records for SPF and DMARC using publicly available tools. There are no complex interactions or states involved.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": true,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": false
-    }
+    [
+      2,
+      "Check the DMARC record for the domain using a tool like https://dmarcian.com/spf-survey/"
+    ]
+  ],
+  "vuln_description": "The vulnerability involves the absence of valid SPF and DMARC records for the domain, which allows email spoofing. Attackers can forge emails to appear as if they are sent from the domain, potentially leading to phishing attacks and reputational damage.",
+  "reason": "The vulnerability is straightforward to discover as it only requires checking the DNS records for SPF and DMARC using publicly available tools. There are no complex interactions or states involved.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": true,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability report pertains to missing SPF and DMARC records, which are DNS configurations and not related to authentication or authorization flaws within the application itself. The proposed methodologies focus on testing AuthN/AuthZ boundaries within the application by manipulating user sessions, actions, and resource IDs, which does not apply to DNS misconfigurations.",
+    "is_detectable": false
+  }
 }

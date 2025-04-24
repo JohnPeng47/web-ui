@@ -1,76 +1,76 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "nightm4re ",
-    "title": "Account takeover on \u2588\u2588\u2588\u2588\u2588\u2588\u2588 [HtUS]",
-    "content": "\nHello,\nI have found an endpoint in \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 is vulnerable to Account takeover\nSteps to reproduce:\nCreate 2 accounts ( Attacker ( A ) and vicitm ( B ) )\nLog in to all of them and go to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588/EditUserProfile with attacker's account\nNow fill out the password with your password\nChange the attacker's attacker@gmail.com email with victim's email victim@gmail.com\nClick Submit button and forward the request to repeater\nNow if the vicim tried to log into his account, he will facing an error\nBack to the request go to repeater and change the User id of the attacker with the vicim's user ID ( You probley need to brute-force it )\nForward the request and you will see 302 code response\nStay in the request and change back all changes ( EMAIL and USER ID of Attacker ) and send the request again\nNow try to log into the victim's victim@gmail.com account with your password\nYou will be logged in\nPOC:\n\u2588\u2588\u2588\u2588\nImpact\nAn attacker can takeover accounts\n\n",
-    "severity": [
-        7.0,
-        null
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "nightm4re ",
+  "title": "Account takeover on \u2588\u2588\u2588\u2588\u2588\u2588\u2588 [HtUS]",
+  "content": "\nHello,\nI have found an endpoint in \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 is vulnerable to Account takeover\nSteps to reproduce:\nCreate 2 accounts ( Attacker ( A ) and vicitm ( B ) )\nLog in to all of them and go to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588/EditUserProfile with attacker's account\nNow fill out the password with your password\nChange the attacker's attacker@gmail.com email with victim's email victim@gmail.com\nClick Submit button and forward the request to repeater\nNow if the vicim tried to log into his account, he will facing an error\nBack to the request go to repeater and change the User id of the attacker with the vicim's user ID ( You probley need to brute-force it )\nForward the request and you will see 302 code response\nStay in the request and change back all changes ( EMAIL and USER ID of Attacker ) and send the request again\nNow try to log into the victim's victim@gmail.com account with your password\nYou will be logged in\nPOC:\n\u2588\u2588\u2588\u2588\nImpact\nAn attacker can takeover accounts\n\n",
+  "severity": [
+    7.0,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Authentication - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1665767100,
+  "report_url": "https://hackerone.com/reports/1627961",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create two accounts: Attacker (A) and Victim (B). Log in to both accounts."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Authentication - Generic"
+    [
+      2,
+      "Navigate to the profile edit page (https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588/EditUserProfile) using the attacker's account."
     ],
-    "screenshots": {},
-    "disclosed_date": 1665767100,
-    "report_url": "https://hackerone.com/reports/1627961",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Create two accounts: Attacker (A) and Victim (B). Log in to both accounts."
-        ],
-        [
-            2,
-            "Navigate to the profile edit page (https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588/EditUserProfile) using the attacker's account."
-        ],
-        [
-            3,
-            "Change the attacker's email to the victim's email (victim@gmail.com) and fill in the password field with the attacker's password."
-        ],
-        [
-            4,
-            "Submit the changes and capture the request in a repeater tool (e.g., Burp Repeater)."
-        ],
-        [
-            5,
-            "Observe that the victim can no longer log in to their account due to the email change."
-        ],
-        [
-            6,
-            "In the repeater, modify the request by changing the User ID from the attacker's to the victim's (may require brute-forcing the victim's User ID)."
-        ],
-        [
-            7,
-            "Send the modified request and observe a 302 response code."
-        ],
-        [
-            8,
-            "Revert the email and User ID changes in the request and send it again."
-        ],
-        [
-            9,
-            "Log in to the victim's account (victim@gmail.com) using the attacker's password. The attacker now has access to the victim's account."
-        ]
+    [
+      3,
+      "Change the attacker's email to the victim's email (victim@gmail.com) and fill in the password field with the attacker's password."
     ],
-    "vuln_description": "The vulnerability allows an attacker to take over a victim's account by manipulating the email and User ID fields in a profile edit request. The attacker changes their email to the victim's, locks the victim out, then modifies the User ID to the victim's, and reverts the email. This results in the attacker's password being associated with the victim's account.",
-    "reason": "The attack involves multiple steps, including manipulating email and User ID fields, understanding the application's response codes (302), and reverting changes to achieve the desired state. The interaction between these steps is non-obvious, and the attack requires maintaining context across several requests.",
-    "new_complexity": "HIGH",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": true
-    }
+    [
+      4,
+      "Submit the changes and capture the request in a repeater tool (e.g., Burp Repeater)."
+    ],
+    [
+      5,
+      "Observe that the victim can no longer log in to their account due to the email change."
+    ],
+    [
+      6,
+      "In the repeater, modify the request by changing the User ID from the attacker's to the victim's (may require brute-forcing the victim's User ID)."
+    ],
+    [
+      7,
+      "Send the modified request and observe a 302 response code."
+    ],
+    [
+      8,
+      "Revert the email and User ID changes in the request and send it again."
+    ],
+    [
+      9,
+      "Log in to the victim's account (victim@gmail.com) using the attacker's password. The attacker now has access to the victim's account."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to take over a victim's account by manipulating the email and User ID fields in a profile edit request. The attacker changes their email to the victim's, locks the victim out, then modifies the User ID to the victim's, and reverts the email. This results in the attacker's password being associated with the victim's account.",
+  "reason": "The attack involves multiple steps, including manipulating email and User ID fields, understanding the application's response codes (302), and reverting changes to achieve the desired state. The interaction between these steps is non-obvious, and the attack requires maintaining context across several requests.",
+  "new_complexity": "HIGH",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an authenticated user session (attacker) modifying their own profile to change the email to the victim's email, then brute-forcing the victim's user ID to take over the account. This fits the methodology's test case e) where resource_ids (emails and user IDs) are substituted with existing ones to test for authorization boundaries.",
+    "is_detectable": true
+  }
 }

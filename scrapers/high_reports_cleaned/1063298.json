@@ -1,48 +1,48 @@
 {
-    "reported_to": "U.S. General Services Administration",
-    "reported_by": "7azimo ",
-    "title": "Unauthorized access to employee panel with default credentials.",
-    "content": "\nSummary:\nHello,\nWhen hunting for your web application.\nI have managed to go https://cars.fas.gsa.gov/cars/cars and get displayed with a form.\nI have already tried to login to Cars and without success.\nHowever i've noticed the loginChk() function and change the value of the form hence bypassing it and logging in succesfuly.\nSteps To Reproduce:\ngo to https://cars.fas.gsa.gov/cars/cars\ntype loginChk() function in console.\nIt would return false.\nNow type in console ( can be opened using F12). document.forms[0].scSelCen.value = \"admin\"\nNow try to login by clicking on CARS button.\nSupporting Material/References:\nNavigator used : google chrome.\nIf you need any additional information. feel free to ask me.\nPS : I think the website went for a maintenance right now.\nEven though i didn't use anything of that panel.\nImpact\nAny attacker would have the access to admin panel and do whatever he wants.\nAs i can see , it's a platform for reporting accidents.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "U.S. General Services Administration",
+  "reported_by": "7azimo ",
+  "title": "Unauthorized access to employee panel with default credentials.",
+  "content": "\nSummary:\nHello,\nWhen hunting for your web application.\nI have managed to go https://cars.fas.gsa.gov/cars/cars and get displayed with a form.\nI have already tried to login to Cars and without success.\nHowever i've noticed the loginChk() function and change the value of the form hence bypassing it and logging in succesfuly.\nSteps To Reproduce:\ngo to https://cars.fas.gsa.gov/cars/cars\ntype loginChk() function in console.\nIt would return false.\nNow type in console ( can be opened using F12). document.forms[0].scSelCen.value = \"admin\"\nNow try to login by clicking on CARS button.\nSupporting Material/References:\nNavigator used : google chrome.\nIf you need any additional information. feel free to ask me.\nPS : I think the website went for a maintenance right now.\nEven though i didn't use anything of that panel.\nImpact\nAny attacker would have the access to admin panel and do whatever he wants.\nAs i can see , it's a platform for reporting accidents.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Authentication Bypass Using an Alternate Path or Channel"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1636854360,
+  "report_url": "https://hackerone.com/reports/1063298",
+  "vuln_category": "WEB_APP",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "steps": [
+    [
+      1,
+      "Navigate to https://cars.fas.gsa.gov/cars/cars"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Authentication Bypass Using an Alternate Path or Channel"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1636854360,
-    "report_url": "https://hackerone.com/reports/1063298",
-    "vuln_category": "WEB_APP",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "steps": [
-        [
-            1,
-            "Navigate to https://cars.fas.gsa.gov/cars/cars"
-        ],
-        [
-            2,
-            "Open the browser's developer console (F12) and execute the following commands:\n   - `loginChk()` (should return false)\n   - `document.forms[0].scSelCen.value = \"admin\"`\n   - Click the 'CARS' button to login"
-        ]
-    ],
-    "vuln_description": "The vulnerability allows unauthorized access to the employee panel by manipulating the form values via client-side JavaScript, bypassing authentication checks. The loginChk() function can be overridden, and default credentials can be injected to gain admin access.",
-    "reason": "The attack involves minimal components (a single form manipulation) and relies on straightforward client-side JavaScript execution. There are no complex interactions or state manipulations required, and the logic is common in poorly secured web applications.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      2,
+      "Open the browser's developer console (F12) and execute the following commands:\n   - `loginChk()` (should return false)\n   - `document.forms[0].scSelCen.value = \"admin\"`\n   - Click the 'CARS' button to login"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows unauthorized access to the employee panel by manipulating the form values via client-side JavaScript, bypassing authentication checks. The loginChk() function can be overridden, and default credentials can be injected to gain admin access.",
+  "reason": "The attack involves minimal components (a single form manipulation) and relies on straightforward client-side JavaScript execution. There are no complex interactions or state manipulations required, and the logic is common in poorly secured web applications.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves bypassing authentication by manipulating client-side JavaScript to change form values, which is a type of AuthN/AuthZ bypass. The methodology described includes testing actions with unauthenticated user sessions (step d) and swapping user sessions to test authorization boundaries (step c). Since the report involves bypassing the login form by manipulating client-side values, it falls under the AuthN/AuthZ bypass category and would be detectable by the described methodology.",
+    "is_detectable": true
+  }
 }

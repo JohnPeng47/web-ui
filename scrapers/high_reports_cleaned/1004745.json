@@ -1,55 +1,55 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "silentbreach ",
-    "title": "View another user information with IDOR vulnerability ",
-    "content": "\n1- Navigate to the system. (https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/login.php)\n2- Navigate to register page. (https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/register.php)(i created user, username:\u2588\u2588\u2588\u2588\u2588\u2588 pass: TEst.123.!)\n3- Login to the system. (https://\u2588\u2588\u2588/login.php)\n4- Navigate to \"My Profile Page\".\n5- Intercept the request.\n6- Change the \"UID2=4820038\" cookie value with \"UID2=4820036\".\n7- Send the request to server.\n8- View another user information.\nImpact\nI can view another user information.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "silentbreach ",
+  "title": "View another user information with IDOR vulnerability ",
+  "content": "\n1- Navigate to the system. (https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/login.php)\n2- Navigate to register page. (https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/register.php)(i created user, username:\u2588\u2588\u2588\u2588\u2588\u2588 pass: TEst.123.!)\n3- Login to the system. (https://\u2588\u2588\u2588/login.php)\n4- Navigate to \"My Profile Page\".\n5- Intercept the request.\n6- Change the \"UID2=4820038\" cookie value with \"UID2=4820036\".\n7- Send the request to server.\n8- View another user information.\nImpact\nI can view another user information.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Insecure Direct Object Reference (IDOR)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1606173780,
+  "report_url": "https://hackerone.com/reports/1004745",
+  "vuln_category": "WEB_APP",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "steps": [
+    [
+      1,
+      "Navigate to the system and register a new user."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Insecure Direct Object Reference (IDOR)"
+    [
+      2,
+      "Log in and intercept the request on the 'My Profile Page'."
     ],
-    "screenshots": {},
-    "disclosed_date": 1606173780,
-    "report_url": "https://hackerone.com/reports/1004745",
-    "vuln_category": "WEB_APP",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "steps": [
-        [
-            1,
-            "Navigate to the system and register a new user."
-        ],
-        [
-            2,
-            "Log in and intercept the request on the 'My Profile Page'."
-        ],
-        [
-            3,
-            "Modify the 'UID2' cookie value to another user's ID and send the request."
-        ],
-        [
-            4,
-            "Observe the response containing another user's information."
-        ]
+    [
+      3,
+      "Modify the 'UID2' cookie value to another user's ID and send the request."
     ],
-    "vuln_description": "This vulnerability allows an attacker to view another user's information by manipulating the 'UID2' cookie value in the request, exploiting an Insecure Direct Object Reference (IDOR) issue.",
-    "reason": "The attack involves straightforward steps of intercepting and modifying a single cookie value, which is a common and well-documented vulnerability pattern. No complex interactions or novel logic is required.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": false
-    }
+    [
+      4,
+      "Observe the response containing another user's information."
+    ]
+  ],
+  "vuln_description": "This vulnerability allows an attacker to view another user's information by manipulating the 'UID2' cookie value in the request, exploiting an Insecure Direct Object Reference (IDOR) issue.",
+  "reason": "The attack involves straightforward steps of intercepting and modifying a single cookie value, which is a common and well-documented vulnerability pattern. No complex interactions or novel logic is required.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves swapping the UID cookie value to access another user's information, which falls under the IDOR vulnerability class. The methodology described includes testing for such scenarios by swapping resource_ids (in this case, the UID cookie value) with existing (action, resource_id) pairs, which would cover this case.",
+    "is_detectable": true
+  }
 }

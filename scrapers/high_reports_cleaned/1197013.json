@@ -1,47 +1,47 @@
 {
-    "reported_to": "8x8",
-    "reported_by": "ian ",
-    "title": "Subdomain takeover of \u2588\u2588\u2588\u2588.jitsi.net",
-    "content": "\nSummary\n\u2588\u2588\u2588\u2588\u2588.jitsi.net points to an AWS EC2 instance at 18.195.93.116 that no longer exists. I was able to take control of this IP address and run my own EC2 instance. I can now serve content on this domain, obtain a TLS certificate for this domain, etc.\nIf any customers or servers are pointing to anything within this domain, I could serve them arbitrary/malicious content. I could also use this in case your domain whitelists your own domain for OAuth, or if there are cookies scoped to the entire domain. Usually this can have a high impact.\nCode 99 Bytes\n1% dig +short \u2588\u2588\u2588\u2588\u2588\u2588.jitsi.net\n218.195.93.116\n3\n4% curl \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.jitsi.net\n5<!-- hackerone.com/ian -->\nImpact\nSubdomain takeover\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "8x8",
+  "reported_by": "ian ",
+  "title": "Subdomain takeover of \u2588\u2588\u2588\u2588.jitsi.net",
+  "content": "\nSummary\n\u2588\u2588\u2588\u2588\u2588.jitsi.net points to an AWS EC2 instance at 18.195.93.116 that no longer exists. I was able to take control of this IP address and run my own EC2 instance. I can now serve content on this domain, obtain a TLS certificate for this domain, etc.\nIf any customers or servers are pointing to anything within this domain, I could serve them arbitrary/malicious content. I could also use this in case your domain whitelists your own domain for OAuth, or if there are cookies scoped to the entire domain. Usually this can have a high impact.\nCode 99 Bytes\n1% dig +short \u2588\u2588\u2588\u2588\u2588\u2588.jitsi.net\n218.195.93.116\n3\n4% curl \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.jitsi.net\n5<!-- hackerone.com/ian -->\nImpact\nSubdomain takeover\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Privilege Escalation"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1621028100,
+  "report_url": "https://hackerone.com/reports/1197013",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Use dig to check the DNS records for the subdomain: dig +short \u2588\u2588\u2588\u2588\u2588\u2588.jitsi.net"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Privilege Escalation"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1621028100,
-    "report_url": "https://hackerone.com/reports/1197013",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Use dig to check the DNS records for the subdomain: dig +short \u2588\u2588\u2588\u2588\u2588\u2588.jitsi.net"
-        ],
-        [
-            2,
-            "Attempt to access the subdomain via curl: curl \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.jitsi.net"
-        ]
-    ],
-    "vuln_description": "The subdomain \u2588\u2588\u2588\u2588.jitsi.net points to an AWS EC2 instance that no longer exists. An attacker can take control of this IP address by launching their own EC2 instance, thereby serving malicious content, obtaining TLS certificates, and potentially exploiting domain-wide OAuth or cookie scoping.",
-    "reason": "The vulnerability involves straightforward steps of checking DNS records and verifying the availability of the subdomain. The attack does not require complex interactions or manipulation of application states, nor does it involve novel logic.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": "ian",
-    "idor_detectable": false,
-    "authnz_byppass_detectable": false,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": false
-    }
+    [
+      2,
+      "Attempt to access the subdomain via curl: curl \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.jitsi.net"
+    ]
+  ],
+  "vuln_description": "The subdomain \u2588\u2588\u2588\u2588.jitsi.net points to an AWS EC2 instance that no longer exists. An attacker can take control of this IP address by launching their own EC2 instance, thereby serving malicious content, obtaining TLS certificates, and potentially exploiting domain-wide OAuth or cookie scoping.",
+  "reason": "The vulnerability involves straightforward steps of checking DNS records and verifying the availability of the subdomain. The attack does not require complex interactions or manipulation of application states, nor does it involve novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "ian",
+  "idor_detectable": false,
+  "authnz_byppass_detectable": false,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The subdomain takeover vulnerability involves a misconfiguration in DNS records pointing to a non-existent AWS EC2 instance, allowing an attacker to claim the IP and serve malicious content. This is not related to authentication or authorization within an application, but rather a infrastructure misconfiguration.",
+    "is_detectable": false
+  }
 }

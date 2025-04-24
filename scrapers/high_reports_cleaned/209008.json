@@ -1,56 +1,56 @@
 {
-    "reported_to": "Automattic",
-    "reported_by": "saurabhb ",
-    "title": "Authentication Bypass - Chaining two vulnerabilities leads to account takeover at en.instagram-brand.com",
-    "content": "\nProduct / URL\nhttps://en.instagram-brand.com/wp-json/brc/v1/login/\nDescription and Impact\nAn attacker can perform account takeover by leveraging following two vulnerabilities:\nAuth Bypass = Username Enumeration + Login Brute Force\nA. Username Enumeration:\nFor the site https://en.instagram-brand.com/, it is made sure that a malicious user cannot enumerate usernames of the users by implementing CAPTCHAs at Sign Up (https://en.instagram-brand.com/register/signup) and Forgot Password (https://en.instagram-brand.com/register/signin) pages.\nThis is made the site secure.\nBut I have found a way to bypass this protection. The endpoint: https://en.instagram-brand.com/wp-json/brc/v1/resend-verify has absolutely no rate limiting, thus a malicious user can take its advantage to enumerate usernames.\nAnother thing of concern is that, if a valid username is found, then the Instagram site sends an account verification link to that email. Even if the account is previously verified !! And if those victims try to login, then they can't. The site asks to first verify their account by clicking on the account activation links !!\nAn attacker can harvest the usernames and abuse this functionality to bother the victims.\nFollowing is the analysis:\n1) The endpoint to which the actual request goes - https://en.instagram-brand.com/wp-json/brc/v1/resend-verify\n2) The total number of requests/attempts you were able to make - 1001 (you can do it infinite)\n3) The time in which you made those requests/attempts - 10 minutes\n4) Some demonstration that you weren't actually just silently locked out -Refer the attached exploit.\nExploit Developed:\nSave the files email.txt and InstagramBrandEnumerationExploit.rb in a folder.\nRun the exploit like this: ruby InstagramBrandEnumerationExploit.rb\nObserve in the console that the right emails are disclosed within seconds.\nReproduction Instructions / Proof of Concept\nSign Up using any email address.\nAttach a local intercepting proxy.\nAfter signing up, a resend email button will appear.\nClick on it and intercept the request.\nFor the parameter, 'email' in the request body, put your payloads i.e. email addresses to need to be enumerated.\nSend the request.\nObserve the response. It is verbose and states clearly if the user exists or not.\nNow try to login using any of the victim's email.\nObserve that the web app does not let you login.\nThe HTTP Request is:\nPOST /wp-json/brc/v1/resend-verify HTTP/1.1 Host: en.instagram-brand.com User-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0 Accept: */* Accept-Language: en-US,en;q=0.5 Accept-Encoding: gzip, deflate, br X-WP-Nonce: 30436dbdab Content-Type: application/x-www-form-urlencoded Referer: https://en.instagram-brand.com/register/signup Content-Length: 29 Cookie: pll_language=en; _ga=GA1.2.2112289023.1486871994; _gat=1 Connection: keep-alive\nemail=<your email here>\nB. Login Brute Force\nThe endpoint https://en.instagram-brand.com/wp-json/brc/v1/login/ does not have any rate limiting. This still allows an attacker to make the following number of guesses from one single system single threaded : 100 per min, 6,000 per hour, 1,44,000 per day or 43,20,000/month. No additional protection mechanism such as Captcha (pre-auth) or account lockout requiring additional email/phone verification (pre- or post-auth) were identified at any time. I could make 1020 attempts in 10 minutes.\nSolution:\nImplement a Captcha after a reasonable number of failed login attempts against one account at the application-layer. The Captcha should not only be shown to offending IP addresses, but to anyone who attempts to login to the account under attack. Another option is to enable an account lockout policy which effectively locks down an account that has been attacked (e.g. after 20 failed consecutive logins) and requires out-of-band validation by the real account owner (e.g. email, mobile) before becoming accessible again.\nReproduction Instructions / Proof of Concept\nI have developed an exploit in Ruby to demonstrate this attack.\nIts usage:\nSave the InstagramBrandLoginBruteForce.rb in any folder.\nHave a long list of passwords in passlist.txt file and keep it in the same folder.\nOn line number 7, enter the name of the victim's email who you want to target. This can also come from username enumeration list fetched from the exploit InstagramBrandEnumerationExploit.rb\nUsing cmd, navigate to that folder and run it like this: ruby InstagramBrandLoginBruteForce.rb\nObserve the results.\nAdditional Note:\nI have used single threading for these attacks, but these can be more powerful if multi threading is used.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Automattic",
+  "reported_by": "saurabhb ",
+  "title": "Authentication Bypass - Chaining two vulnerabilities leads to account takeover at en.instagram-brand.com",
+  "content": "\nProduct / URL\nhttps://en.instagram-brand.com/wp-json/brc/v1/login/\nDescription and Impact\nAn attacker can perform account takeover by leveraging following two vulnerabilities:\nAuth Bypass = Username Enumeration + Login Brute Force\nA. Username Enumeration:\nFor the site https://en.instagram-brand.com/, it is made sure that a malicious user cannot enumerate usernames of the users by implementing CAPTCHAs at Sign Up (https://en.instagram-brand.com/register/signup) and Forgot Password (https://en.instagram-brand.com/register/signin) pages.\nThis is made the site secure.\nBut I have found a way to bypass this protection. The endpoint: https://en.instagram-brand.com/wp-json/brc/v1/resend-verify has absolutely no rate limiting, thus a malicious user can take its advantage to enumerate usernames.\nAnother thing of concern is that, if a valid username is found, then the Instagram site sends an account verification link to that email. Even if the account is previously verified !! And if those victims try to login, then they can't. The site asks to first verify their account by clicking on the account activation links !!\nAn attacker can harvest the usernames and abuse this functionality to bother the victims.\nFollowing is the analysis:\n1) The endpoint to which the actual request goes - https://en.instagram-brand.com/wp-json/brc/v1/resend-verify\n2) The total number of requests/attempts you were able to make - 1001 (you can do it infinite)\n3) The time in which you made those requests/attempts - 10 minutes\n4) Some demonstration that you weren't actually just silently locked out -Refer the attached exploit.\nExploit Developed:\nSave the files email.txt and InstagramBrandEnumerationExploit.rb in a folder.\nRun the exploit like this: ruby InstagramBrandEnumerationExploit.rb\nObserve in the console that the right emails are disclosed within seconds.\nReproduction Instructions / Proof of Concept\nSign Up using any email address.\nAttach a local intercepting proxy.\nAfter signing up, a resend email button will appear.\nClick on it and intercept the request.\nFor the parameter, 'email' in the request body, put your payloads i.e. email addresses to need to be enumerated.\nSend the request.\nObserve the response. It is verbose and states clearly if the user exists or not.\nNow try to login using any of the victim's email.\nObserve that the web app does not let you login.\nThe HTTP Request is:\nPOST /wp-json/brc/v1/resend-verify HTTP/1.1 Host: en.instagram-brand.com User-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0 Accept: */* Accept-Language: en-US,en;q=0.5 Accept-Encoding: gzip, deflate, br X-WP-Nonce: 30436dbdab Content-Type: application/x-www-form-urlencoded Referer: https://en.instagram-brand.com/register/signup Content-Length: 29 Cookie: pll_language=en; _ga=GA1.2.2112289023.1486871994; _gat=1 Connection: keep-alive\nemail=<your email here>\nB. Login Brute Force\nThe endpoint https://en.instagram-brand.com/wp-json/brc/v1/login/ does not have any rate limiting. This still allows an attacker to make the following number of guesses from one single system single threaded : 100 per min, 6,000 per hour, 1,44,000 per day or 43,20,000/month. No additional protection mechanism such as Captcha (pre-auth) or account lockout requiring additional email/phone verification (pre- or post-auth) were identified at any time. I could make 1020 attempts in 10 minutes.\nSolution:\nImplement a Captcha after a reasonable number of failed login attempts against one account at the application-layer. The Captcha should not only be shown to offending IP addresses, but to anyone who attempts to login to the account under attack. Another option is to enable an account lockout policy which effectively locks down an account that has been attacked (e.g. after 20 failed consecutive logins) and requires out-of-band validation by the real account owner (e.g. email, mobile) before becoming accessible again.\nReproduction Instructions / Proof of Concept\nI have developed an exploit in Ruby to demonstrate this attack.\nIts usage:\nSave the InstagramBrandLoginBruteForce.rb in any folder.\nHave a long list of passwords in passlist.txt file and keep it in the same folder.\nOn line number 7, enter the name of the victim's email who you want to target. This can also come from username enumeration list fetched from the exploit InstagramBrandEnumerationExploit.rb\nUsing cmd, navigate to that folder and run it like this: ruby InstagramBrandLoginBruteForce.rb\nObserve the results.\nAdditional Note:\nI have used single threading for these attacks, but these can be more powerful if multi threading is used.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 175,
+  "weaknesses": [
+    "Improper Authentication - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1561227120,
+  "report_url": "https://hackerone.com/reports/209008",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Identify the endpoint https://en.instagram-brand.com/wp-json/brc/v1/resend-verify for username enumeration."
     ],
-    "bounty": 175,
-    "weaknesses": [
-        "Improper Authentication - Generic"
+    [
+      2,
+      "Use the endpoint to enumerate usernames by sending multiple requests with different email addresses."
     ],
-    "screenshots": {},
-    "disclosed_date": 1561227120,
-    "report_url": "https://hackerone.com/reports/209008",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Identify the endpoint https://en.instagram-brand.com/wp-json/brc/v1/resend-verify for username enumeration."
-        ],
-        [
-            2,
-            "Use the endpoint to enumerate usernames by sending multiple requests with different email addresses."
-        ],
-        [
-            3,
-            "Identify the endpoint https://en.instagram-brand.com/wp-json/brc/v1/login/ for login brute force."
-        ],
-        [
-            4,
-            "Use the enumerated usernames and a list of passwords to perform brute force attacks on the login endpoint."
-        ]
+    [
+      3,
+      "Identify the endpoint https://en.instagram-brand.com/wp-json/brc/v1/login/ for login brute force."
     ],
-    "vuln_description": "An attacker can perform account takeover by chaining two vulnerabilities: username enumeration via the resend-verify endpoint without rate limiting and login brute force via the login endpoint without rate limiting or CAPTCHA protection.",
-    "reason": "The attack involves multiple components (username enumeration and brute force) and requires understanding the interaction between them. However, the steps are straightforward once the vulnerable endpoints are identified, and the logic is not novel.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      4,
+      "Use the enumerated usernames and a list of passwords to perform brute force attacks on the login endpoint."
+    ]
+  ],
+  "vuln_description": "An attacker can perform account takeover by chaining two vulnerabilities: username enumeration via the resend-verify endpoint without rate limiting and login brute force via the login endpoint without rate limiting or CAPTCHA protection.",
+  "reason": "The attack involves multiple components (username enumeration and brute force) and requires understanding the interaction between them. However, the steps are straightforward once the vulnerable endpoints are identified, and the logic is not novel.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves username enumeration and brute force attacks on the same application's authentication endpoints. The methodology described includes testing for authentication bypass by swapping user sessions and actions, which would cover the brute force aspect. The username enumeration part could be detected by analyzing the responses from the resend-verify endpoint for differences that indicate valid usernames, which falls under the methodology's scope of analyzing HTTP requests and responses for authorization boundaries.",
+    "is_detectable": true
+  }
 }

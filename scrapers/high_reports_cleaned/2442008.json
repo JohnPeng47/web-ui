@@ -1,52 +1,52 @@
 {
-    "reported_to": "HackerOne",
-    "reported_by": "xklepxn ",
-    "title": "Attachment disclosure via summary report ",
-    "content": "\nSummary:\nHackerone provides a form for reporting vulnerabilities to various programs. where the form supports uploading files & previews (images or videos) but is not allowed to use file ids belonging to other accounts. but with the sumary report feature I as a hacker can reveal files belonging to other users just changing the id. this is very severe.\nDescription:\nI have tried to call files belonging to other accounts through the submit report, edit report form but it doesn't work it always gets the response \"was_successful\":false,. but fortunately I can find another endpoint that is able to read files belonging to other accounts, namely in the sumary report feature.\nSteps To Reproduce\nIf you look at the video I attached, there I made the scenario \"failed to read other account files\" & \"successfully read other account files\" as for the steps as follows:\nnote : left victim right attacker\nthe attacker creates a report either draft or existing, then creates a Hacker summary\nthen edit the summary and give the file to.\nintercept with intercept change the attacker file id to the victim file id\nboom file read in markdown preview.\n{F3155289}\nPOC\nI don't know, uploading large files takes too long in attacth, I just put the poc via yt. : https://\u2588\u2588\u2588\u2588 (private video)\nor in gdrive, if yt can't be seen yet : https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nOptional: Supporting Material/References (Screenshots)\nraw text in video :\nCode 320 Bytes\n1attachment leaked via add sumary report :\n2\n3victim file id : \n43155239\n5\n6I WILL CHANGE F3155244 TO 3155239\n7ATTACKER file : \n8\n93155241\n103155242\n11\"was_successful\":true, (IF FILE FROM ATTACKER) I WILL CHANGE TO VICTIM FILE\n12\"was_successful\":false, WILL FALSE \n13\n14trying leak via content : false positive\n15leak via sumary : successful\nendpoint affected (attachment_ids)\nCode 908 Bytes\n1PUT /reports/\u2588\u2588\u2588\u2588/summaries/\u2588\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/2\n2Host: hackerone.com\n3.....all header ...\n4Content-Length: 908\n5Origin: https://hackerone.com\n6Sec-Fetch-Dest: empty\n7Sec-Fetch-Mode: cors\n8Sec-Fetch-Site: same-origin\n9Te: trailers\n10\n11{\"id\":\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588,\"category\":\"researcher\",\"content\":\"TESTEDIT\\n\\n{F3155244} \",\"updated_at\":\"2024-03-30T17:16:29.625Z\",\"user\":{\"id\":\u2588\u2588\u2588\u2588\u2588,\"username\":\"\u2588\u2588\u2588\u2588\u2588\",\"name\":\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\",\"bio\":\"please see pdfx\",\"cleared\":false,\"verified\":false,\"website\":null,\"location\":\"\",\"created_at\":\"2024-03-29T11:27:50.077Z\",\"url\":\"https://hackerone.com/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\",\"hackerone_triager\":false,\"hackerone_employee\":false,\"user_type\":\"hacker\",\"profile_picture_urls\":{\"small\":\"/assets/avatars/default-\u2588\u2588\u2588\u2588\u2588.png\",\"medium\":\"/assets/avatars/default-\u2588\u2588\u2588\u2588\u2588\u2588\u2588.png\",\"xtralarge\":\"/assets/avatars/default-\u2588\u2588\u2588\u2588\u2588\u2588\u2588.png\"}},\"can_view?\":true,\"can_create?\":true,\"attachments\":[],\"action_type\":\"publish\",\"attachment_ids\":[\n123155239]}\nImpact\nThis is very bad especially the id form is only numeric in order. I can just add all the file ids of the hackerone account. I can see other people's pocs if it's a video.\n\n",
-    "severity": [
-        9.8,
-        null
+  "reported_to": "HackerOne",
+  "reported_by": "xklepxn ",
+  "title": "Attachment disclosure via summary report ",
+  "content": "\nSummary:\nHackerone provides a form for reporting vulnerabilities to various programs. where the form supports uploading files & previews (images or videos) but is not allowed to use file ids belonging to other accounts. but with the sumary report feature I as a hacker can reveal files belonging to other users just changing the id. this is very severe.\nDescription:\nI have tried to call files belonging to other accounts through the submit report, edit report form but it doesn't work it always gets the response \"was_successful\":false,. but fortunately I can find another endpoint that is able to read files belonging to other accounts, namely in the sumary report feature.\nSteps To Reproduce\nIf you look at the video I attached, there I made the scenario \"failed to read other account files\" & \"successfully read other account files\" as for the steps as follows:\nnote : left victim right attacker\nthe attacker creates a report either draft or existing, then creates a Hacker summary\nthen edit the summary and give the file to.\nintercept with intercept change the attacker file id to the victim file id\nboom file read in markdown preview.\n{F3155289}\nPOC\nI don't know, uploading large files takes too long in attacth, I just put the poc via yt. : https://\u2588\u2588\u2588\u2588 (private video)\nor in gdrive, if yt can't be seen yet : https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nOptional: Supporting Material/References (Screenshots)\nraw text in video :\nCode 320 Bytes\n1attachment leaked via add sumary report :\n2\n3victim file id : \n43155239\n5\n6I WILL CHANGE F3155244 TO 3155239\n7ATTACKER file : \n8\n93155241\n103155242\n11\"was_successful\":true, (IF FILE FROM ATTACKER) I WILL CHANGE TO VICTIM FILE\n12\"was_successful\":false, WILL FALSE \n13\n14trying leak via content : false positive\n15leak via sumary : successful\nendpoint affected (attachment_ids)\nCode 908 Bytes\n1PUT /reports/\u2588\u2588\u2588\u2588/summaries/\u2588\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/2\n2Host: hackerone.com\n3.....all header ...\n4Content-Length: 908\n5Origin: https://hackerone.com\n6Sec-Fetch-Dest: empty\n7Sec-Fetch-Mode: cors\n8Sec-Fetch-Site: same-origin\n9Te: trailers\n10\n11{\"id\":\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588,\"category\":\"researcher\",\"content\":\"TESTEDIT\\n\\n{F3155244} \",\"updated_at\":\"2024-03-30T17:16:29.625Z\",\"user\":{\"id\":\u2588\u2588\u2588\u2588\u2588,\"username\":\"\u2588\u2588\u2588\u2588\u2588\",\"name\":\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\",\"bio\":\"please see pdfx\",\"cleared\":false,\"verified\":false,\"website\":null,\"location\":\"\",\"created_at\":\"2024-03-29T11:27:50.077Z\",\"url\":\"https://hackerone.com/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\",\"hackerone_triager\":false,\"hackerone_employee\":false,\"user_type\":\"hacker\",\"profile_picture_urls\":{\"small\":\"/assets/avatars/default-\u2588\u2588\u2588\u2588\u2588.png\",\"medium\":\"/assets/avatars/default-\u2588\u2588\u2588\u2588\u2588\u2588\u2588.png\",\"xtralarge\":\"/assets/avatars/default-\u2588\u2588\u2588\u2588\u2588\u2588\u2588.png\"}},\"can_view?\":true,\"can_create?\":true,\"attachments\":[],\"action_type\":\"publish\",\"attachment_ids\":[\n123155239]}\nImpact\nThis is very bad especially the id form is only numeric in order. I can just add all the file ids of the hackerone account. I can see other people's pocs if it's a video.\n\n",
+  "severity": [
+    9.8,
+    null
+  ],
+  "bounty": 10500,
+  "weaknesses": [
+    "Insecure Direct Object Reference (IDOR)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1714379520,
+  "report_url": "https://hackerone.com/reports/2442008",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Attacker creates a report (draft or existing) and generates a Hacker summary."
     ],
-    "bounty": 10500,
-    "weaknesses": [
-        "Insecure Direct Object Reference (IDOR)"
+    [
+      2,
+      "Attacker edits the summary and attaches a file, then intercepts the request to change the file ID to a victim's file ID."
     ],
-    "screenshots": {},
-    "disclosed_date": 1714379520,
-    "report_url": "https://hackerone.com/reports/2442008",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Attacker creates a report (draft or existing) and generates a Hacker summary."
-        ],
-        [
-            2,
-            "Attacker edits the summary and attaches a file, then intercepts the request to change the file ID to a victim's file ID."
-        ],
-        [
-            3,
-            "The victim's file is successfully displayed in the markdown preview, bypassing access controls."
-        ]
-    ],
-    "vuln_description": "The vulnerability allows an attacker to disclose files belonging to other users by exploiting the summary report feature. By manipulating the file ID in the request, the attacker can access and preview files that should be restricted to other accounts.",
-    "reason": "The attack involves understanding the file attachment mechanism and identifying a bypass in the summary report feature. While the steps are straightforward, the discovery of the vulnerable endpoint (summary report) and the manipulation of file IDs require some exploration and testing.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": false
-    }
+    [
+      3,
+      "The victim's file is successfully displayed in the markdown preview, bypassing access controls."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to disclose files belonging to other users by exploiting the summary report feature. By manipulating the file ID in the request, the attacker can access and preview files that should be restricted to other accounts.",
+  "reason": "The attack involves understanding the file attachment mechanism and identifying a bypass in the summary report feature. While the steps are straightforward, the discovery of the vulnerable endpoint (summary report) and the manipulation of file IDs require some exploration and testing.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an IDOR (Insecure Direct Object Reference) where an attacker can access files belonging to other users by manipulating file IDs in the summary report feature. This fits the methodology of testing (user_session, action, resource_id) tuples by swapping resource_ids (file IDs in this case) with those belonging to other users. The detection method would involve collecting these tuples and testing with different user sessions and resource IDs to see if unauthorized access is possible.",
+    "is_detectable": true
+  }
 }

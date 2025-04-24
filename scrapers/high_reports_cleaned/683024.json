@@ -1,48 +1,48 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "javilarx8 ",
-    "title": "Unrestricted File Upload",
-    "content": "\nSummary:\nThe endpoint at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ui/core/index.html required authentication, but navigating to https://\u2588\u2588\u2588\u2588\u2588/ui/core/index.html?mode=public#expl-tabl./SHARED/rpchllmd/CSAT allow for read/write access.\nDescription:\nThe endpoint at https://\u2588\u2588\u2588\u2588/ui/core/index.html?mode=public#expl-tabl./SHARED/rpchllmd/CSAT allowed for read as well as write access. It was possible to create directories and upload images as well as .exe files such as putty.exe.\nImpact\nAn attacker can attempt to use the site to host malware, or perform social engineering attacks since the domain URL will be a .mil address.\nStep-by-step Reproduction Instructions\nNavigate to: https://\u2588\u2588\u2588\u2588/ui/core/index.html?mode=public#expl-tabl./SHARED/rpchllmd/CSAT\nCreate sub-directory\nUpload test files\nFiles are then uploaded and hosted on a .mil website without authenticating to the application.\nProduct, Version, and Configuration (If applicable)\nFileCloud software\nhttps://www.getfilecloud.com/\n## Suggested Mitigation/Remediation Actions\nEnforce authentication on endpoints of the application, restrict file uploads to only necessary business requirements. If possible restrict uploads to .jpg .pfd .docx. Don't allowed upload of executable files\nImpact\nAn attacker can attempt to use the site to host malware, or perform social engineering attacks since the domain URL will be a .mil address.\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "javilarx8 ",
+  "title": "Unrestricted File Upload",
+  "content": "\nSummary:\nThe endpoint at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ui/core/index.html required authentication, but navigating to https://\u2588\u2588\u2588\u2588\u2588/ui/core/index.html?mode=public#expl-tabl./SHARED/rpchllmd/CSAT allow for read/write access.\nDescription:\nThe endpoint at https://\u2588\u2588\u2588\u2588/ui/core/index.html?mode=public#expl-tabl./SHARED/rpchllmd/CSAT allowed for read as well as write access. It was possible to create directories and upload images as well as .exe files such as putty.exe.\nImpact\nAn attacker can attempt to use the site to host malware, or perform social engineering attacks since the domain URL will be a .mil address.\nStep-by-step Reproduction Instructions\nNavigate to: https://\u2588\u2588\u2588\u2588/ui/core/index.html?mode=public#expl-tabl./SHARED/rpchllmd/CSAT\nCreate sub-directory\nUpload test files\nFiles are then uploaded and hosted on a .mil website without authenticating to the application.\nProduct, Version, and Configuration (If applicable)\nFileCloud software\nhttps://www.getfilecloud.com/\n## Suggested Mitigation/Remediation Actions\nEnforce authentication on endpoints of the application, restrict file uploads to only necessary business requirements. If possible restrict uploads to .jpg .pfd .docx. Don't allowed upload of executable files\nImpact\nAn attacker can attempt to use the site to host malware, or perform social engineering attacks since the domain URL will be a .mil address.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1589229600,
+  "report_url": "https://hackerone.com/reports/683024",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to: https://\u2588\u2588\u2588\u2588/ui/core/index.html?mode=public#expl-tabl./SHARED/rpchllmd/CSAT"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Access Control - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1589229600,
-    "report_url": "https://hackerone.com/reports/683024",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Navigate to: https://\u2588\u2588\u2588\u2588/ui/core/index.html?mode=public#expl-tabl./SHARED/rpchllmd/CSAT"
-        ],
-        [
-            2,
-            "Create sub-directory and upload test files (including executable files like putty.exe)"
-        ]
-    ],
-    "vuln_description": "The endpoint at https://\u2588\u2588\u2588\u2588/ui/core/index.html?mode=public#expl-tabl./SHARED/rpchllmd/CSAT allowed for read and write access without authentication, enabling the creation of directories and uploading of files, including executable files. This could be exploited to host malware or perform social engineering attacks.",
-    "reason": "The vulnerability involves a straightforward bypass of authentication by appending a specific parameter (?mode=public) to the URL. The attack does not require multiple components, complex interactions, or manipulation of application states. The ability to upload arbitrary files, including executables, is a common and well-documented vulnerability.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      2,
+      "Create sub-directory and upload test files (including executable files like putty.exe)"
+    ]
+  ],
+  "vuln_description": "The endpoint at https://\u2588\u2588\u2588\u2588/ui/core/index.html?mode=public#expl-tabl./SHARED/rpchllmd/CSAT allowed for read and write access without authentication, enabling the creation of directories and uploading of files, including executable files. This could be exploited to host malware or perform social engineering attacks.",
+  "reason": "The vulnerability involves a straightforward bypass of authentication by appending a specific parameter (?mode=public) to the URL. The attack does not require multiple components, complex interactions, or manipulation of application states. The ability to upload arbitrary files, including executables, is a common and well-documented vulnerability.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an endpoint that allows unauthenticated read/write access, which can be detected by testing the endpoint with an unauthenticated session (part of the methodology's step d). The methodology covers testing actions with unauthenticated sessions, which would reveal this bypass.",
+    "is_detectable": true
+  }
 }

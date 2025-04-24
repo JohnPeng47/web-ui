@@ -1,64 +1,64 @@
 {
-    "reported_to": "WakaTime",
-    "reported_by": "anurag98 ",
-    "title": "Session Duplication due to Broken Access Control",
-    "content": "\nDue to improper validation of user before generating an API-KEY and improper measures taken at the time of password reset, it is possible to generate a parallel session at the attacker's end.\nProof of concept video is attached to confirm the vulnerability and to demonstrate the Impact of this logical bug.\nSteps to Reproduce\nAttacker\nCreate an account with victims email.\nDownload the coding platforms and get API-KEY.\nHe can code from the platforms using the victims API-key.\nVictim\nUser fails to create an account, due to email already registered and does a password reset.\nDownloads the coding platform and get API-KEY.\nHe codes using API-KEY.\nIt is possible for the Attacker and Victim, for coding at the same time, which will be shown at the dashboard. Attacker can reduce the difficulty and can damage the reputation of the coder.\nImpact\nAttacker can brute-force email and register multiple account on wakatime to get API-Key of many users.\nImproper rank calculation.\nSession duplication by the attacker\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "WakaTime",
+  "reported_by": "anurag98 ",
+  "title": "Session Duplication due to Broken Access Control",
+  "content": "\nDue to improper validation of user before generating an API-KEY and improper measures taken at the time of password reset, it is possible to generate a parallel session at the attacker's end.\nProof of concept video is attached to confirm the vulnerability and to demonstrate the Impact of this logical bug.\nSteps to Reproduce\nAttacker\nCreate an account with victims email.\nDownload the coding platforms and get API-KEY.\nHe can code from the platforms using the victims API-key.\nVictim\nUser fails to create an account, due to email already registered and does a password reset.\nDownloads the coding platform and get API-KEY.\nHe codes using API-KEY.\nIt is possible for the Attacker and Victim, for coding at the same time, which will be shown at the dashboard. Attacker can reduce the difficulty and can damage the reputation of the coder.\nImpact\nAttacker can brute-force email and register multiple account on wakatime to get API-Key of many users.\nImproper rank calculation.\nSession duplication by the attacker\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1499686380,
+  "report_url": "https://hackerone.com/reports/247225",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Attacker creates an account using the victim's email address."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Access Control - Generic"
+    [
+      2,
+      "Attacker downloads the coding platform and obtains the API-KEY."
     ],
-    "screenshots": {},
-    "disclosed_date": 1499686380,
-    "report_url": "https://hackerone.com/reports/247225",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Attacker creates an account using the victim's email address."
-        ],
-        [
-            2,
-            "Attacker downloads the coding platform and obtains the API-KEY."
-        ],
-        [
-            3,
-            "Attacker uses the victim's API-KEY to code on the platform."
-        ],
-        [
-            4,
-            "Victim attempts to create an account but fails due to email already being registered."
-        ],
-        [
-            5,
-            "Victim performs a password reset and downloads the coding platform to obtain their API-KEY."
-        ],
-        [
-            6,
-            "Both attacker and victim can code simultaneously using the same API-KEY, leading to session duplication."
-        ]
+    [
+      3,
+      "Attacker uses the victim's API-KEY to code on the platform."
     ],
-    "vuln_description": "The vulnerability allows an attacker to create a parallel session by registering with the victim's email, obtaining an API-KEY, and then using it alongside the victim. This occurs due to improper validation during account creation and password reset processes, leading to session duplication and potential reputation damage.",
-    "reason": "The attack involves multiple components (account creation, API-KEY generation, password reset) and requires understanding the interaction between these components. However, the steps are relatively straightforward once the initial flaw (improper email validation) is identified.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      4,
+      "Victim attempts to create an account but fails due to email already being registered."
+    ],
+    [
+      5,
+      "Victim performs a password reset and downloads the coding platform to obtain their API-KEY."
+    ],
+    [
+      6,
+      "Both attacker and victim can code simultaneously using the same API-KEY, leading to session duplication."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to create a parallel session by registering with the victim's email, obtaining an API-KEY, and then using it alongside the victim. This occurs due to improper validation during account creation and password reset processes, leading to session duplication and potential reputation damage.",
+  "reason": "The attack involves multiple components (account creation, API-KEY generation, password reset) and requires understanding the interaction between these components. However, the steps are relatively straightforward once the initial flaw (improper email validation) is identified.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves session duplication due to improper validation during API-KEY generation and password reset. The methodology described involves testing for authorization boundaries by swapping user sessions and resource IDs, which would cover the scenario where an attacker can create a parallel session using the victim's email and API-KEY. The steps involve actions that would be captured in the normal flow of the application (account creation, API-KEY generation, password reset), making it detectable by the proposed methodology.",
+    "is_detectable": true
+  }
 }

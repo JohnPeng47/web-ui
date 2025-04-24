@@ -1,56 +1,56 @@
 {
-    "reported_to": "Snapchat",
-    "reported_by": "coolboss ",
-    "title": "Stealing SSO Login Tokens (snappublisher.snapchat.com)",
-    "content": "\nDescription\nAttacker can steal SSO login tokens for snappublisher.snapchat.com by chaining different flaws in SSO and Snapchat\u2019s Snappublisher tool. Detailed attack flow is as follows.\nAttack Flow\n1.. Snapchat fetches a SSO LOGIN TOKEN from accounts.snapchat.com to login into different products of Snapchat i.e. SnapPublisher, Ads Manager, Business Manager, etc. provided that user is logged into accounts.snapchat.com.\neg. To login into SnapPublisher following requests are made \u2026\n1] https://accounts.snapchat.com/accounts/login?client_id=creativesuite-prod&referrer=https://snappublisher.snapchat.com/sso_continue\n2] 302 redirect to\nhttps://accounts.snapchat.com/accounts/sso?client_id=creativesuite-prod&referrer=https%3A%2F%2Fsnappublisher.snapchat.com%2Fsso_continue\n3] again 302 redirect to\nhttps://snappublisher.snapchat.com/sso_continue?ticket=redacted\nSo, a SSO login token ticket is sent from accounts.snapchat.com to snappublisher.snapchat.com which is used to login the user. And is also used in Authorization header when making requests to API.\nNow, we are going to steal this SSO login token ticket which will allow us to login and control victim\u2019s account.\n2.. On snappublisher.snapchat.com, I was able to upload a svg image to google cloud storage, using which I run my javascript code.\nNote: Use import from site functionality via https://snappublisher.snapchat.com/snaps/create/new and import my xss-svg image from here (\u2588\u2588\u2588\u2588\u2588\u2588\u2588/tokenstealer.svg). This alerts and logs #hashfragment in the console.\nI have already did this in my POC so this is just for understanding purpose. My image URL is https://snappublisher.snapchat.com/api/v1/media/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/file/somthine.svg?%23pranav\n3.. Now, other flaws in SSO \u2026\n1] In this URL\nhttps://accounts.snapchat.com/accounts/sso?client_id=creativesuite-prod&referrer=https://snappublisher.snapchat.com/api/v1/media/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/file/somthine.svg?%23pranav\nreferrer parameter can be controlled and any snappublisher.snapchat.com URL is allowed.\nAlso, %23pranav, this #hashfragment is allowed in referrer parameter.\nI take advantage of both these flaws to flow the SSO login token to my website or land to a page which I control.\nNote: #hashfragment is send further by browser for 302 / 307 redirects.\n4.. CSRF Login flaw\nSSO functionality is vulnerable to CSRF attack so I can login other people into my account. I use this functionality to login user into my account.\n5.. Token doesn\u2019t expire flaw\nOnce the SSO login token is used, it doesn\u2019t expire and can be reused multiple times.\nSo, simple attack flow is as follows :\nUser is logged into accounts.snapchat.com.\nAttacker logs user into his/her snappublisher.snapchat.com account via CSRF login flaw.\nNow, attacker makes a request to fetch SSO login token https://accounts.snapchat.com/accounts/sso?client_id=creativesuite-prod&referrer=https://snappublisher.snapchat.com/api/v1/media/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/file/somthine.svg?%23pranav and redirects the token in #hashfragment to https://snappublisher.snapchat.com/api/v1/media/\u2588\u2588\u2588\u2588\u2588/file/somthine.svg?%23pranav\nhttps://snappublisher.snapchat.com/api/v1/media/\u2588\u2588\u2588\u2588/file/somthine.svg?%23pranav this redirects with 307 status code to storage.googleapis.com/creativesuite-prod-media/* with SSO login token ticket in #hashfragment carried forward by browser.\nSvg image executes my js code and alerts and logs the SSO login token ticket in the console.\nI can use the ticket to login into victim\u2019s account. Via https://snappublisher.snapchat.com/sso_continue?ticket=<stolen token>\nProof Of Concept\nVideo POC : \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588(Unlisted video on youtube)\nLogin into your account on accounts.snapchat.com.\nLogin into your SnapPublisher account snappublisher.snapchat.com.\nVisit (\u2588\u2588\u2588\u2588\u2588) which fetches user\u2019s SSO login token which can be used to login. (This alerts and logs the token in console.)\nUse the token via https://snappublisher.snapchat.com/sso_continue?ticket=<stolen token>\nImpact\nGain unauthorized access to Snappublisher account.\nCan use the SSO login token to make API requests.\nRecommendations\nFor SSO functionality \u2026\n1] Add state param to prevent CSRF login on https://snappublisher.snapchat.com/sso_continue?ticket=<token>\n2] In referrer param of the following URL\nhttps://accounts.snapchat.com/accounts/sso?client_id=creativesuite-prod&referrer=https://snappublisher.snapchat.com/api/v1/media/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/file/somthine.svg?%23pranav disallow #hashfragments to be included.\n3] Make the referrer param of the following URL\nhttps://accounts.snapchat.com/accounts/sso?client_id=creativesuite-prod&referrer=https://snappublisher.snapchat.com/api/v1/media/\u2588\u2588\u2588\u2588\u2588\u2588\u2588/file/somthine.svg?%23pranav more specific and restricted similar to your OAuth2 adsapi.\n4] SSO login token should be one time use and should not be able to use it again and again.\nFor SnapPublisher\n1] I observed you are using Google Cloud Storage, so blocking svg images or disallowing any uploads of svg-xss images will further enhance security. Otherwise, one can easily get xss on storage.google\nLet me know if you need any help. :-)\nRegards,\nPranav Hivarekar\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Snapchat",
+  "reported_by": "coolboss ",
+  "title": "Stealing SSO Login Tokens (snappublisher.snapchat.com)",
+  "content": "\nDescription\nAttacker can steal SSO login tokens for snappublisher.snapchat.com by chaining different flaws in SSO and Snapchat\u2019s Snappublisher tool. Detailed attack flow is as follows.\nAttack Flow\n1.. Snapchat fetches a SSO LOGIN TOKEN from accounts.snapchat.com to login into different products of Snapchat i.e. SnapPublisher, Ads Manager, Business Manager, etc. provided that user is logged into accounts.snapchat.com.\neg. To login into SnapPublisher following requests are made \u2026\n1] https://accounts.snapchat.com/accounts/login?client_id=creativesuite-prod&referrer=https://snappublisher.snapchat.com/sso_continue\n2] 302 redirect to\nhttps://accounts.snapchat.com/accounts/sso?client_id=creativesuite-prod&referrer=https%3A%2F%2Fsnappublisher.snapchat.com%2Fsso_continue\n3] again 302 redirect to\nhttps://snappublisher.snapchat.com/sso_continue?ticket=redacted\nSo, a SSO login token ticket is sent from accounts.snapchat.com to snappublisher.snapchat.com which is used to login the user. And is also used in Authorization header when making requests to API.\nNow, we are going to steal this SSO login token ticket which will allow us to login and control victim\u2019s account.\n2.. On snappublisher.snapchat.com, I was able to upload a svg image to google cloud storage, using which I run my javascript code.\nNote: Use import from site functionality via https://snappublisher.snapchat.com/snaps/create/new and import my xss-svg image from here (\u2588\u2588\u2588\u2588\u2588\u2588\u2588/tokenstealer.svg). This alerts and logs #hashfragment in the console.\nI have already did this in my POC so this is just for understanding purpose. My image URL is https://snappublisher.snapchat.com/api/v1/media/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/file/somthine.svg?%23pranav\n3.. Now, other flaws in SSO \u2026\n1] In this URL\nhttps://accounts.snapchat.com/accounts/sso?client_id=creativesuite-prod&referrer=https://snappublisher.snapchat.com/api/v1/media/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/file/somthine.svg?%23pranav\nreferrer parameter can be controlled and any snappublisher.snapchat.com URL is allowed.\nAlso, %23pranav, this #hashfragment is allowed in referrer parameter.\nI take advantage of both these flaws to flow the SSO login token to my website or land to a page which I control.\nNote: #hashfragment is send further by browser for 302 / 307 redirects.\n4.. CSRF Login flaw\nSSO functionality is vulnerable to CSRF attack so I can login other people into my account. I use this functionality to login user into my account.\n5.. Token doesn\u2019t expire flaw\nOnce the SSO login token is used, it doesn\u2019t expire and can be reused multiple times.\nSo, simple attack flow is as follows :\nUser is logged into accounts.snapchat.com.\nAttacker logs user into his/her snappublisher.snapchat.com account via CSRF login flaw.\nNow, attacker makes a request to fetch SSO login token https://accounts.snapchat.com/accounts/sso?client_id=creativesuite-prod&referrer=https://snappublisher.snapchat.com/api/v1/media/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/file/somthine.svg?%23pranav and redirects the token in #hashfragment to https://snappublisher.snapchat.com/api/v1/media/\u2588\u2588\u2588\u2588\u2588/file/somthine.svg?%23pranav\nhttps://snappublisher.snapchat.com/api/v1/media/\u2588\u2588\u2588\u2588/file/somthine.svg?%23pranav this redirects with 307 status code to storage.googleapis.com/creativesuite-prod-media/* with SSO login token ticket in #hashfragment carried forward by browser.\nSvg image executes my js code and alerts and logs the SSO login token ticket in the console.\nI can use the ticket to login into victim\u2019s account. Via https://snappublisher.snapchat.com/sso_continue?ticket=<stolen token>\nProof Of Concept\nVideo POC : \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588(Unlisted video on youtube)\nLogin into your account on accounts.snapchat.com.\nLogin into your SnapPublisher account snappublisher.snapchat.com.\nVisit (\u2588\u2588\u2588\u2588\u2588) which fetches user\u2019s SSO login token which can be used to login. (This alerts and logs the token in console.)\nUse the token via https://snappublisher.snapchat.com/sso_continue?ticket=<stolen token>\nImpact\nGain unauthorized access to Snappublisher account.\nCan use the SSO login token to make API requests.\nRecommendations\nFor SSO functionality \u2026\n1] Add state param to prevent CSRF login on https://snappublisher.snapchat.com/sso_continue?ticket=<token>\n2] In referrer param of the following URL\nhttps://accounts.snapchat.com/accounts/sso?client_id=creativesuite-prod&referrer=https://snappublisher.snapchat.com/api/v1/media/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/file/somthine.svg?%23pranav disallow #hashfragments to be included.\n3] Make the referrer param of the following URL\nhttps://accounts.snapchat.com/accounts/sso?client_id=creativesuite-prod&referrer=https://snappublisher.snapchat.com/api/v1/media/\u2588\u2588\u2588\u2588\u2588\u2588\u2588/file/somthine.svg?%23pranav more specific and restricted similar to your OAuth2 adsapi.\n4] SSO login token should be one time use and should not be able to use it again and again.\nFor SnapPublisher\n1] I observed you are using Google Cloud Storage, so blocking svg images or disallowing any uploads of svg-xss images will further enhance security. Otherwise, one can easily get xss on storage.google\nLet me know if you need any help. :-)\nRegards,\nPranav Hivarekar\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 7500,
+  "weaknesses": [
+    "Authentication Bypass"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1627612620,
+  "report_url": "https://hackerone.com/reports/265943",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Upload an SVG image with malicious JavaScript to Google Cloud Storage via SnapPublisher's import functionality."
     ],
-    "bounty": 7500,
-    "weaknesses": [
-        "Authentication Bypass"
+    [
+      2,
+      "Use CSRF to log the victim into the attacker's SnapPublisher account."
     ],
-    "screenshots": {},
-    "disclosed_date": 1627612620,
-    "report_url": "https://hackerone.com/reports/265943",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Upload an SVG image with malicious JavaScript to Google Cloud Storage via SnapPublisher's import functionality."
-        ],
-        [
-            2,
-            "Use CSRF to log the victim into the attacker's SnapPublisher account."
-        ],
-        [
-            3,
-            "Trigger a request to fetch the SSO login token, redirecting it to the malicious SVG via the referrer parameter and hash fragment."
-        ],
-        [
-            4,
-            "Capture the SSO token from the SVG's JavaScript execution and use it to log into the victim's account."
-        ]
+    [
+      3,
+      "Trigger a request to fetch the SSO login token, redirecting it to the malicious SVG via the referrer parameter and hash fragment."
     ],
-    "vuln_description": "This vulnerability allows an attacker to steal SSO login tokens for SnapPublisher by chaining multiple flaws, including CSRF, token reuse, and SVG-based XSS. The attacker can then use the stolen token to gain unauthorized access to the victim's SnapPublisher account.",
-    "reason": "The attack involves multiple components (CSRF, token handling, XSS via SVG) and requires understanding subtle interactions between them, such as how the referrer parameter and hash fragments are handled during SSO token redirection. Additionally, the attack manipulates complex application states (SSO flow, token validation) and includes novel logic not commonly seen in other applications.",
-    "new_complexity": "VERY_HIGH",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      4,
+      "Capture the SSO token from the SVG's JavaScript execution and use it to log into the victim's account."
+    ]
+  ],
+  "vuln_description": "This vulnerability allows an attacker to steal SSO login tokens for SnapPublisher by chaining multiple flaws, including CSRF, token reuse, and SVG-based XSS. The attacker can then use the stolen token to gain unauthorized access to the victim's SnapPublisher account.",
+  "reason": "The attack involves multiple components (CSRF, token handling, XSS via SVG) and requires understanding subtle interactions between them, such as how the referrer parameter and hash fragments are handled during SSO token redirection. Additionally, the attack manipulates complex application states (SSO flow, token validation) and includes novel logic not commonly seen in other applications.",
+  "new_complexity": "VERY_HIGH",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves chaining multiple flaws in the SSO and SnapPublisher tool, including CSRF, token leakage via referrer parameter, and token reuse. The methodology described focuses on testing (user_session, action, resource_id) tuples within the same application, but this attack involves cross-application interactions (accounts.snapchat.com and snappublisher.snapchat.com) and specific SVG-based XSS exploitation, which are not covered by the naive methodology.",
+    "is_detectable": false
+  }
 }

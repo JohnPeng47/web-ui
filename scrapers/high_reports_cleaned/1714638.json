@@ -1,59 +1,59 @@
 {
-    "reported_to": "MTN Group",
-    "reported_by": "reachaxis ",
-    "title": "IDOR Leads To  User Profile Modification https://mtnmobad.mtnbusiness.com.ng/app/updateUser",
-    "content": "\nSummary:\nHello Team,\nhttps://mtnmobad.mtnbusiness.com.ng/app/updateUser allows authenticated users to alter their account profile. But, however, there is no authorization check when updating another user's profile thus, allowing attacker to modify anyone's profile info such as Username, Address, Mobile Number, Company Name and Company Size\nSteps To Reproduce:\nRequirements:\nCreate two Test Accounts (Attacker & Victim)\nLogin into attacker's account In Mozilla Firefox at https://mtnmobad.mtnbusiness.com.ng/#/login1.\nVisit https://mtnmobad.mtnbusiness.com.ng/#/userProfile\nGoto to Burp and turn Intercept is on to capture request.\nLocate this endpoint POST /app/updateUser HTTP/1.1 while still proxying traffic through Burp. Notice, json blob data being presented.\nRecord \"id\":\"/###\", \"email\":\"redacted+attacker@wearehackerone.com\" for attacker's account and Logout.\nNow, Login into victim's account and repeat step [1, 2 & 3] and Logout.\nAttack Steps\nLogin into attacker's account in Mozilla Firefox and Victim's Account in Google Chrome.\nUsing attacker's account in Firefox, visit https://mtnmobad.mtnbusiness.com.ng/#/userProfile and capture request with Burp.\nSwitch attacker's \"id\":\"/redacted\", \"email\":\"redacted+attacker@wearehackerone.com\" to victim \"id\":\"/redacted\" \"email\":\"redacted+victim@wearehackerone.com\" and forward request.\nGo to victim's account in google chrome and refresh the page.\nVisit victim's profile and notice, attacker has successfully updated the user's Profile without their knowledge.\nRecommendation/Remediation:\nImplement stringent authorization controls to make sure a user has the necessary rights before allowing them to make such a harmful request on another account.\nGenerate random userIds to prevent attacker from predicting such userIds.\nSupporting Material/References:\nScreenshots:\n<image_0>\nAfter:\n<image_1>\n[attachment / reference]\nTools\nBurpSuite Community Edition: [v2022.8.4]\nMorzila Firefox: 105.0.1 (64-bit)\nGoogle Chrome: Version 105.0.5195.127 (Official Build) (64-bit)\nOS: Microsoft Windows [Version 10.0.22000.856]\nImpact\nAn attacker will be able to use this technique to change any user's (advertiser's) profile, for example, a company name and phone number under the attacker's control to commit a crime entirely in the victim's name.\nRegards!\n@v3rvain0001\n\n",
-    "severity": [
-        10.0,
-        null
+  "reported_to": "MTN Group",
+  "reported_by": "reachaxis ",
+  "title": "IDOR Leads To  User Profile Modification https://mtnmobad.mtnbusiness.com.ng/app/updateUser",
+  "content": "\nSummary:\nHello Team,\nhttps://mtnmobad.mtnbusiness.com.ng/app/updateUser allows authenticated users to alter their account profile. But, however, there is no authorization check when updating another user's profile thus, allowing attacker to modify anyone's profile info such as Username, Address, Mobile Number, Company Name and Company Size\nSteps To Reproduce:\nRequirements:\nCreate two Test Accounts (Attacker & Victim)\nLogin into attacker's account In Mozilla Firefox at https://mtnmobad.mtnbusiness.com.ng/#/login1.\nVisit https://mtnmobad.mtnbusiness.com.ng/#/userProfile\nGoto to Burp and turn Intercept is on to capture request.\nLocate this endpoint POST /app/updateUser HTTP/1.1 while still proxying traffic through Burp. Notice, json blob data being presented.\nRecord \"id\":\"/###\", \"email\":\"redacted+attacker@wearehackerone.com\" for attacker's account and Logout.\nNow, Login into victim's account and repeat step [1, 2 & 3] and Logout.\nAttack Steps\nLogin into attacker's account in Mozilla Firefox and Victim's Account in Google Chrome.\nUsing attacker's account in Firefox, visit https://mtnmobad.mtnbusiness.com.ng/#/userProfile and capture request with Burp.\nSwitch attacker's \"id\":\"/redacted\", \"email\":\"redacted+attacker@wearehackerone.com\" to victim \"id\":\"/redacted\" \"email\":\"redacted+victim@wearehackerone.com\" and forward request.\nGo to victim's account in google chrome and refresh the page.\nVisit victim's profile and notice, attacker has successfully updated the user's Profile without their knowledge.\nRecommendation/Remediation:\nImplement stringent authorization controls to make sure a user has the necessary rights before allowing them to make such a harmful request on another account.\nGenerate random userIds to prevent attacker from predicting such userIds.\nSupporting Material/References:\nScreenshots:\n<image_0>\nAfter:\n<image_1>\n[attachment / reference]\nTools\nBurpSuite Community Edition: [v2022.8.4]\nMorzila Firefox: 105.0.1 (64-bit)\nGoogle Chrome: Version 105.0.5195.127 (Official Build) (64-bit)\nOS: Microsoft Windows [Version 10.0.22000.856]\nImpact\nAn attacker will be able to use this technique to change any user's (advertiser's) profile, for example, a company name and phone number under the attacker's control to commit a crime entirely in the victim's name.\nRegards!\n@v3rvain0001\n\n",
+  "severity": [
+    10.0,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Incorrect Authorization"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/gumerq3wzy3q8ag70qi0vs5wcr99?response-content-disposition=attachment%3B%20filename%3D%22001.jpg%22%3B%20filename%2A%3DUTF-8%27%27001.jpg&response-content-type=image%2Fjpeg&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7FC4X3GK%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T210314Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIHZIl66o32FE6IZh%2B9Esolbj3p0fpTa3b2MvibHyI0y0AiBQhjy4n6wpQ64dQBA2aQxEftSrg3JWZubYAkljDpRniCq7BQj0%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMogC0K6LtAguRYS65Ko8FqVdvx%2F9NK6alwAagIgcM5S%2B6lDltgh75I1rFoKkMMHQZmey0FAnWlyoNc%2BveFTfijKx89NS3RtDg3ZZUV%2FkmUs7V3BWGOvl1IoFZGRdj4V5%2Fq9VTUFhMDFG9SviRMzQkjKBj%2FS2%2Bh7GSKdAS1v%2B4ZQxzOPaMKdBHVXfUZ2moBcfEPOUC1iA90B1WL0Ifta6%2B5Yp%2FEhd1VDTADSFdiDHrkw1G2bwqfkW%2FJiprJ9ANjxzg4AZZQXMs1YkNjHIEqJSDj904xlT6T1wv2OXBQqMpHW%2BNz7mN2iZUZ9jXTbxeK8gIOAgK11i%2BWonSN83Y2u%2B3teLBGazTNyqJ3BCfj1Pg%2BxPUPQKxq2wNGc3W%2BsKHrfj8IlPhfA1%2FGYyZodngKoli9ZglZF2pB23f27iWzg8iAw%2FtkSTTbP4LWD6cC0DzJq%2BIxM7K8i%2BhIAGkycg65KYv8naf0XQc%2BVrSe4WFFnTMf8QN8EoYtHfYuv2nAoYVT14K3eYWo3TvR76QIrAeLsy1IC09auIjCS95vhN%2BhlA%2FbtWJRiUAViXdBEegzZey%2BA1WDpzj4Md42IJto2BMVwPcm9JVkxsvXE5GxJRGYk3YBtAcT1jGBaFxYaYbg6Mih1ZK1%2FOoau615Tv9vnRcDQ64e3ylfvEMJijk042PHwMqZy0w7q8wyRgXPGmXuA7OTQaRM7NjUuT87eyPzX%2B8VYy%2BDGCleoxjW6mTj1rtTez6X4huorR0g0iLjPRbODdqqlUFYKtdDLTOTatKhpMwesT7pM3nwn%2FZweKtfNZI3Htc9qkcjv2tDlRvF%2Fn53o92r6j%2FJjMpsh%2BsHNrLrymaXr7NSpZx3njfesmxLeqCjWXRguzqOEfJ5tbvltbpo3bWSzC3zIa%2FBjqyAb9iAVnLpZTkrgsjPj3dfDTpduboFnMKQu30fy1CYjETQZygxC7SGEbzNYNKgSs%2FNWUTPCNCIyNk%2Flo5KGyiAXU6UQDc%2BtonmAEoVhtB8V3aSpUO3mMo3vH4EVFJLAGlDIglmvJ8DVe4sOCE8TGq3utbaJH%2FM42Ad2T3iJZI9hUjooQZwrZJCzJG6ZcfCnop6MyQ3PWU4d1%2BVPVeijA23aQnj22DxVV%2BbeH%2BRK1kMUzCuF8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=0ad87435475618313526c86ca62c5904bdcffbbbda5259420dbb16642fee98f3",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/qf012wgjes8iulamg2fxfgn33yp1?response-content-disposition=attachment%3B%20filename%3D%22004.jpg%22%3B%20filename%2A%3DUTF-8%27%27004.jpg&response-content-type=image%2Fjpeg&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7FC4X3GK%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T210314Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIHZIl66o32FE6IZh%2B9Esolbj3p0fpTa3b2MvibHyI0y0AiBQhjy4n6wpQ64dQBA2aQxEftSrg3JWZubYAkljDpRniCq7BQj0%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMogC0K6LtAguRYS65Ko8FqVdvx%2F9NK6alwAagIgcM5S%2B6lDltgh75I1rFoKkMMHQZmey0FAnWlyoNc%2BveFTfijKx89NS3RtDg3ZZUV%2FkmUs7V3BWGOvl1IoFZGRdj4V5%2Fq9VTUFhMDFG9SviRMzQkjKBj%2FS2%2Bh7GSKdAS1v%2B4ZQxzOPaMKdBHVXfUZ2moBcfEPOUC1iA90B1WL0Ifta6%2B5Yp%2FEhd1VDTADSFdiDHrkw1G2bwqfkW%2FJiprJ9ANjxzg4AZZQXMs1YkNjHIEqJSDj904xlT6T1wv2OXBQqMpHW%2BNz7mN2iZUZ9jXTbxeK8gIOAgK11i%2BWonSN83Y2u%2B3teLBGazTNyqJ3BCfj1Pg%2BxPUPQKxq2wNGc3W%2BsKHrfj8IlPhfA1%2FGYyZodngKoli9ZglZF2pB23f27iWzg8iAw%2FtkSTTbP4LWD6cC0DzJq%2BIxM7K8i%2BhIAGkycg65KYv8naf0XQc%2BVrSe4WFFnTMf8QN8EoYtHfYuv2nAoYVT14K3eYWo3TvR76QIrAeLsy1IC09auIjCS95vhN%2BhlA%2FbtWJRiUAViXdBEegzZey%2BA1WDpzj4Md42IJto2BMVwPcm9JVkxsvXE5GxJRGYk3YBtAcT1jGBaFxYaYbg6Mih1ZK1%2FOoau615Tv9vnRcDQ64e3ylfvEMJijk042PHwMqZy0w7q8wyRgXPGmXuA7OTQaRM7NjUuT87eyPzX%2B8VYy%2BDGCleoxjW6mTj1rtTez6X4huorR0g0iLjPRbODdqqlUFYKtdDLTOTatKhpMwesT7pM3nwn%2FZweKtfNZI3Htc9qkcjv2tDlRvF%2Fn53o92r6j%2FJjMpsh%2BsHNrLrymaXr7NSpZx3njfesmxLeqCjWXRguzqOEfJ5tbvltbpo3bWSzC3zIa%2FBjqyAb9iAVnLpZTkrgsjPj3dfDTpduboFnMKQu30fy1CYjETQZygxC7SGEbzNYNKgSs%2FNWUTPCNCIyNk%2Flo5KGyiAXU6UQDc%2BtonmAEoVhtB8V3aSpUO3mMo3vH4EVFJLAGlDIglmvJ8DVe4sOCE8TGq3utbaJH%2FM42Ad2T3iJZI9hUjooQZwrZJCzJG6ZcfCnop6MyQ3PWU4d1%2BVPVeijA23aQnj22DxVV%2BbeH%2BRK1kMUzCuF8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=0a09ba307be34ed2447c11615e93d82f6221b7c2f098564546e42d2745889c8b"
+  },
+  "disclosed_date": 1726716060,
+  "report_url": "https://hackerone.com/reports/1714638",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create two test accounts (Attacker & Victim) and log in to the attacker's account."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Incorrect Authorization"
+    [
+      2,
+      "Capture the profile update request using Burp Suite while logged in as the attacker."
     ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/gumerq3wzy3q8ag70qi0vs5wcr99?response-content-disposition=attachment%3B%20filename%3D%22001.jpg%22%3B%20filename%2A%3DUTF-8%27%27001.jpg&response-content-type=image%2Fjpeg&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7FC4X3GK%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T210314Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIHZIl66o32FE6IZh%2B9Esolbj3p0fpTa3b2MvibHyI0y0AiBQhjy4n6wpQ64dQBA2aQxEftSrg3JWZubYAkljDpRniCq7BQj0%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMogC0K6LtAguRYS65Ko8FqVdvx%2F9NK6alwAagIgcM5S%2B6lDltgh75I1rFoKkMMHQZmey0FAnWlyoNc%2BveFTfijKx89NS3RtDg3ZZUV%2FkmUs7V3BWGOvl1IoFZGRdj4V5%2Fq9VTUFhMDFG9SviRMzQkjKBj%2FS2%2Bh7GSKdAS1v%2B4ZQxzOPaMKdBHVXfUZ2moBcfEPOUC1iA90B1WL0Ifta6%2B5Yp%2FEhd1VDTADSFdiDHrkw1G2bwqfkW%2FJiprJ9ANjxzg4AZZQXMs1YkNjHIEqJSDj904xlT6T1wv2OXBQqMpHW%2BNz7mN2iZUZ9jXTbxeK8gIOAgK11i%2BWonSN83Y2u%2B3teLBGazTNyqJ3BCfj1Pg%2BxPUPQKxq2wNGc3W%2BsKHrfj8IlPhfA1%2FGYyZodngKoli9ZglZF2pB23f27iWzg8iAw%2FtkSTTbP4LWD6cC0DzJq%2BIxM7K8i%2BhIAGkycg65KYv8naf0XQc%2BVrSe4WFFnTMf8QN8EoYtHfYuv2nAoYVT14K3eYWo3TvR76QIrAeLsy1IC09auIjCS95vhN%2BhlA%2FbtWJRiUAViXdBEegzZey%2BA1WDpzj4Md42IJto2BMVwPcm9JVkxsvXE5GxJRGYk3YBtAcT1jGBaFxYaYbg6Mih1ZK1%2FOoau615Tv9vnRcDQ64e3ylfvEMJijk042PHwMqZy0w7q8wyRgXPGmXuA7OTQaRM7NjUuT87eyPzX%2B8VYy%2BDGCleoxjW6mTj1rtTez6X4huorR0g0iLjPRbODdqqlUFYKtdDLTOTatKhpMwesT7pM3nwn%2FZweKtfNZI3Htc9qkcjv2tDlRvF%2Fn53o92r6j%2FJjMpsh%2BsHNrLrymaXr7NSpZx3njfesmxLeqCjWXRguzqOEfJ5tbvltbpo3bWSzC3zIa%2FBjqyAb9iAVnLpZTkrgsjPj3dfDTpduboFnMKQu30fy1CYjETQZygxC7SGEbzNYNKgSs%2FNWUTPCNCIyNk%2Flo5KGyiAXU6UQDc%2BtonmAEoVhtB8V3aSpUO3mMo3vH4EVFJLAGlDIglmvJ8DVe4sOCE8TGq3utbaJH%2FM42Ad2T3iJZI9hUjooQZwrZJCzJG6ZcfCnop6MyQ3PWU4d1%2BVPVeijA23aQnj22DxVV%2BbeH%2BRK1kMUzCuF8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=0ad87435475618313526c86ca62c5904bdcffbbbda5259420dbb16642fee98f3",
-        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/qf012wgjes8iulamg2fxfgn33yp1?response-content-disposition=attachment%3B%20filename%3D%22004.jpg%22%3B%20filename%2A%3DUTF-8%27%27004.jpg&response-content-type=image%2Fjpeg&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7FC4X3GK%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T210314Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIHZIl66o32FE6IZh%2B9Esolbj3p0fpTa3b2MvibHyI0y0AiBQhjy4n6wpQ64dQBA2aQxEftSrg3JWZubYAkljDpRniCq7BQj0%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMogC0K6LtAguRYS65Ko8FqVdvx%2F9NK6alwAagIgcM5S%2B6lDltgh75I1rFoKkMMHQZmey0FAnWlyoNc%2BveFTfijKx89NS3RtDg3ZZUV%2FkmUs7V3BWGOvl1IoFZGRdj4V5%2Fq9VTUFhMDFG9SviRMzQkjKBj%2FS2%2Bh7GSKdAS1v%2B4ZQxzOPaMKdBHVXfUZ2moBcfEPOUC1iA90B1WL0Ifta6%2B5Yp%2FEhd1VDTADSFdiDHrkw1G2bwqfkW%2FJiprJ9ANjxzg4AZZQXMs1YkNjHIEqJSDj904xlT6T1wv2OXBQqMpHW%2BNz7mN2iZUZ9jXTbxeK8gIOAgK11i%2BWonSN83Y2u%2B3teLBGazTNyqJ3BCfj1Pg%2BxPUPQKxq2wNGc3W%2BsKHrfj8IlPhfA1%2FGYyZodngKoli9ZglZF2pB23f27iWzg8iAw%2FtkSTTbP4LWD6cC0DzJq%2BIxM7K8i%2BhIAGkycg65KYv8naf0XQc%2BVrSe4WFFnTMf8QN8EoYtHfYuv2nAoYVT14K3eYWo3TvR76QIrAeLsy1IC09auIjCS95vhN%2BhlA%2FbtWJRiUAViXdBEegzZey%2BA1WDpzj4Md42IJto2BMVwPcm9JVkxsvXE5GxJRGYk3YBtAcT1jGBaFxYaYbg6Mih1ZK1%2FOoau615Tv9vnRcDQ64e3ylfvEMJijk042PHwMqZy0w7q8wyRgXPGmXuA7OTQaRM7NjUuT87eyPzX%2B8VYy%2BDGCleoxjW6mTj1rtTez6X4huorR0g0iLjPRbODdqqlUFYKtdDLTOTatKhpMwesT7pM3nwn%2FZweKtfNZI3Htc9qkcjv2tDlRvF%2Fn53o92r6j%2FJjMpsh%2BsHNrLrymaXr7NSpZx3njfesmxLeqCjWXRguzqOEfJ5tbvltbpo3bWSzC3zIa%2FBjqyAb9iAVnLpZTkrgsjPj3dfDTpduboFnMKQu30fy1CYjETQZygxC7SGEbzNYNKgSs%2FNWUTPCNCIyNk%2Flo5KGyiAXU6UQDc%2BtonmAEoVhtB8V3aSpUO3mMo3vH4EVFJLAGlDIglmvJ8DVe4sOCE8TGq3utbaJH%2FM42Ad2T3iJZI9hUjooQZwrZJCzJG6ZcfCnop6MyQ3PWU4d1%2BVPVeijA23aQnj22DxVV%2BbeH%2BRK1kMUzCuF8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=0a09ba307be34ed2447c11615e93d82f6221b7c2f098564546e42d2745889c8b"
-    },
-    "disclosed_date": 1726716060,
-    "report_url": "https://hackerone.com/reports/1714638",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Create two test accounts (Attacker & Victim) and log in to the attacker's account."
-        ],
-        [
-            2,
-            "Capture the profile update request using Burp Suite while logged in as the attacker."
-        ],
-        [
-            3,
-            "Modify the captured request to replace the attacker's user ID and email with the victim's details."
-        ],
-        [
-            4,
-            "Forward the modified request and observe the victim's profile is updated without authorization."
-        ]
+    [
+      3,
+      "Modify the captured request to replace the attacker's user ID and email with the victim's details."
     ],
-    "vuln_description": "The vulnerability is an Insecure Direct Object Reference (IDOR) that allows an authenticated attacker to modify any user's profile information by manipulating the user ID in the update request, bypassing authorization checks.",
-    "reason": "The attack involves straightforward manipulation of a single request parameter (user ID) without requiring complex interactions or understanding of multiple components. The vulnerability is a common IDOR flaw with no novel or subtle logic involved.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": false
-    }
+    [
+      4,
+      "Forward the modified request and observe the victim's profile is updated without authorization."
+    ]
+  ],
+  "vuln_description": "The vulnerability is an Insecure Direct Object Reference (IDOR) that allows an authenticated attacker to modify any user's profile information by manipulating the user ID in the update request, bypassing authorization checks.",
+  "reason": "The attack involves straightforward manipulation of a single request parameter (user ID) without requiring complex interactions or understanding of multiple components. The vulnerability is a common IDOR flaw with no novel or subtle logic involved.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an authenticated user (attacker) modifying another user's (victim) profile by swapping the victim's 'id' and 'email' in the request. This fits the methodology's test case e) where a new resource_id (victim's credentials) is substituted with an existing resource_id (attacker's credentials) and executed with the existing user session (attacker's session). The methodology would detect this as it involves checking authorization boundaries by swapping resource_ids within the same application context.",
+    "is_detectable": true
+  }
 }

@@ -1,56 +1,56 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "g4mb4 ",
-    "title": "Broken access discloses users and PII at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588 [HtUS]",
-    "content": "\nGood morning,\nI was able to register at https://\u2588\u2588\u2588\u2588/ and get the list of users.\n1- Go to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/OA_HTML/ibeCAcpSSOReg.jsp and register.\n2- Go to https://\u2588\u2588\u2588/OA_HTML/AppsLocalLogin.jsp with the created user and login.\n3- On the homepage, click on vacations rules, create, and search users.\n4- User are disclosed.\n\u2588\u2588\u2588\u2588\u2588\u2588\nRegards,\nG4MB4\nImpact\nAn attacker is able to access users information.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "g4mb4 ",
+  "title": "Broken access discloses users and PII at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588 [HtUS]",
+  "content": "\nGood morning,\nI was able to register at https://\u2588\u2588\u2588\u2588/ and get the list of users.\n1- Go to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/OA_HTML/ibeCAcpSSOReg.jsp and register.\n2- Go to https://\u2588\u2588\u2588/OA_HTML/AppsLocalLogin.jsp with the created user and login.\n3- On the homepage, click on vacations rules, create, and search users.\n4- User are disclosed.\n\u2588\u2588\u2588\u2588\u2588\u2588\nRegards,\nG4MB4\nImpact\nAn attacker is able to access users information.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1665769980,
+  "report_url": "https://hackerone.com/reports/1624374",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Go to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/OA_HTML/ibeCAcpSSOReg.jsp and register a new user."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Improper Access Control - Generic"
+    [
+      2,
+      "Log in with the created user at https://\u2588\u2588\u2588/OA_HTML/AppsLocalLogin.jsp."
     ],
-    "screenshots": {},
-    "disclosed_date": 1665769980,
-    "report_url": "https://hackerone.com/reports/1624374",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Go to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/OA_HTML/ibeCAcpSSOReg.jsp and register a new user."
-        ],
-        [
-            2,
-            "Log in with the created user at https://\u2588\u2588\u2588/OA_HTML/AppsLocalLogin.jsp."
-        ],
-        [
-            3,
-            "Navigate to the homepage, click on 'vacations rules', then 'create', and perform a user search."
-        ],
-        [
-            4,
-            "Observe the list of disclosed users and their PII."
-        ]
+    [
+      3,
+      "Navigate to the homepage, click on 'vacations rules', then 'create', and perform a user search."
     ],
-    "vuln_description": "The vulnerability allows an attacker to register an account and subsequently access a list of users and their personally identifiable information (PII) through the 'vacations rules' feature. This constitutes a broken access control issue leading to unauthorized information disclosure.",
-    "reason": "The attack involves straightforward steps: registration, login, and navigating to a specific feature. There are no complex interactions, state manipulations, or novel logic required. The vulnerability is discovered through basic exploration of the application's features.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": false
-    }
+    [
+      4,
+      "Observe the list of disclosed users and their PII."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to register an account and subsequently access a list of users and their personally identifiable information (PII) through the 'vacations rules' feature. This constitutes a broken access control issue leading to unauthorized information disclosure.",
+  "reason": "The attack involves straightforward steps: registration, login, and navigating to a specific feature. There are no complex interactions, state manipulations, or novel logic required. The vulnerability is discovered through basic exploration of the application's features.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves accessing user information by registering and navigating through the application, which fits the AuthN/AuthZ Bypass methodology. The steps involve swapping user sessions and actions to access restricted data, which is covered by the detection methods described.",
+    "is_detectable": true
+  }
 }

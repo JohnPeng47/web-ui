@@ -1,51 +1,51 @@
 {
-    "reported_to": "Mattermost",
-    "reported_by": "uchihaluckycs ",
-    "title": "Reset password link sent over unsecured http protocol",
-    "content": "\nSummary:\nAfter creating the workspace, if victim clicks on forgot password then reset password link has been generated and sent over mail and that password link is unsecured http protocol.\nSteps To Reproduce:\nSignup to a workspace\nNavigate to https://h1-*your-own-instance*.cloud.mattermost.com/reset_password and enter signup email\n<image_0>\n<image_1>\nMitigation:\nGenerate reset password link with secured https protocol.\nImpact\nIf the victim opens the reset password link and forgot to update the password, anyone from intermediate computers through network or sniffer can reset the password.\n\n",
-    "severity": [
-        7.3,
-        null
+  "reported_to": "Mattermost",
+  "reported_by": "uchihaluckycs ",
+  "title": "Reset password link sent over unsecured http protocol",
+  "content": "\nSummary:\nAfter creating the workspace, if victim clicks on forgot password then reset password link has been generated and sent over mail and that password link is unsecured http protocol.\nSteps To Reproduce:\nSignup to a workspace\nNavigate to https://h1-*your-own-instance*.cloud.mattermost.com/reset_password and enter signup email\n<image_0>\n<image_1>\nMitigation:\nGenerate reset password link with secured https protocol.\nImpact\nIf the victim opens the reset password link and forgot to update the password, anyone from intermediate computers through network or sniffer can reset the password.\n\n",
+  "severity": [
+    7.3,
+    null
+  ],
+  "bounty": 750,
+  "weaknesses": [
+    "Improper Access Control - Generic"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/7wyvivx4cvw4iy0g8vf219edou38?response-content-disposition=attachment%3B%20filename%3D%22chrome_iQDUTN9H1J.png%22%3B%20filename%2A%3DUTF-8%27%27chrome_iQDUTN9H1J.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7FC4X3GK%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T230729Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIHZIl66o32FE6IZh%2B9Esolbj3p0fpTa3b2MvibHyI0y0AiBQhjy4n6wpQ64dQBA2aQxEftSrg3JWZubYAkljDpRniCq7BQj0%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMogC0K6LtAguRYS65Ko8FqVdvx%2F9NK6alwAagIgcM5S%2B6lDltgh75I1rFoKkMMHQZmey0FAnWlyoNc%2BveFTfijKx89NS3RtDg3ZZUV%2FkmUs7V3BWGOvl1IoFZGRdj4V5%2Fq9VTUFhMDFG9SviRMzQkjKBj%2FS2%2Bh7GSKdAS1v%2B4ZQxzOPaMKdBHVXfUZ2moBcfEPOUC1iA90B1WL0Ifta6%2B5Yp%2FEhd1VDTADSFdiDHrkw1G2bwqfkW%2FJiprJ9ANjxzg4AZZQXMs1YkNjHIEqJSDj904xlT6T1wv2OXBQqMpHW%2BNz7mN2iZUZ9jXTbxeK8gIOAgK11i%2BWonSN83Y2u%2B3teLBGazTNyqJ3BCfj1Pg%2BxPUPQKxq2wNGc3W%2BsKHrfj8IlPhfA1%2FGYyZodngKoli9ZglZF2pB23f27iWzg8iAw%2FtkSTTbP4LWD6cC0DzJq%2BIxM7K8i%2BhIAGkycg65KYv8naf0XQc%2BVrSe4WFFnTMf8QN8EoYtHfYuv2nAoYVT14K3eYWo3TvR76QIrAeLsy1IC09auIjCS95vhN%2BhlA%2FbtWJRiUAViXdBEegzZey%2BA1WDpzj4Md42IJto2BMVwPcm9JVkxsvXE5GxJRGYk3YBtAcT1jGBaFxYaYbg6Mih1ZK1%2FOoau615Tv9vnRcDQ64e3ylfvEMJijk042PHwMqZy0w7q8wyRgXPGmXuA7OTQaRM7NjUuT87eyPzX%2B8VYy%2BDGCleoxjW6mTj1rtTez6X4huorR0g0iLjPRbODdqqlUFYKtdDLTOTatKhpMwesT7pM3nwn%2FZweKtfNZI3Htc9qkcjv2tDlRvF%2Fn53o92r6j%2FJjMpsh%2BsHNrLrymaXr7NSpZx3njfesmxLeqCjWXRguzqOEfJ5tbvltbpo3bWSzC3zIa%2FBjqyAb9iAVnLpZTkrgsjPj3dfDTpduboFnMKQu30fy1CYjETQZygxC7SGEbzNYNKgSs%2FNWUTPCNCIyNk%2Flo5KGyiAXU6UQDc%2BtonmAEoVhtB8V3aSpUO3mMo3vH4EVFJLAGlDIglmvJ8DVe4sOCE8TGq3utbaJH%2FM42Ad2T3iJZI9hUjooQZwrZJCzJG6ZcfCnop6MyQ3PWU4d1%2BVPVeijA23aQnj22DxVV%2BbeH%2BRK1kMUzCuF8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=ea8b955033fac63c6fad3abceaba81c2ecc6b74cf1e1e0f8e0b61f9a945b5490",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/95k7ytq3v9yw73g5ru8csc3iydw3?response-content-disposition=attachment%3B%20filename%3D%22sublime_text_opnUofVDz2.png%22%3B%20filename%2A%3DUTF-8%27%27sublime_text_opnUofVDz2.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7FC4X3GK%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T230729Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIHZIl66o32FE6IZh%2B9Esolbj3p0fpTa3b2MvibHyI0y0AiBQhjy4n6wpQ64dQBA2aQxEftSrg3JWZubYAkljDpRniCq7BQj0%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMogC0K6LtAguRYS65Ko8FqVdvx%2F9NK6alwAagIgcM5S%2B6lDltgh75I1rFoKkMMHQZmey0FAnWlyoNc%2BveFTfijKx89NS3RtDg3ZZUV%2FkmUs7V3BWGOvl1IoFZGRdj4V5%2Fq9VTUFhMDFG9SviRMzQkjKBj%2FS2%2Bh7GSKdAS1v%2B4ZQxzOPaMKdBHVXfUZ2moBcfEPOUC1iA90B1WL0Ifta6%2B5Yp%2FEhd1VDTADSFdiDHrkw1G2bwqfkW%2FJiprJ9ANjxzg4AZZQXMs1YkNjHIEqJSDj904xlT6T1wv2OXBQqMpHW%2BNz7mN2iZUZ9jXTbxeK8gIOAgK11i%2BWonSN83Y2u%2B3teLBGazTNyqJ3BCfj1Pg%2BxPUPQKxq2wNGc3W%2BsKHrfj8IlPhfA1%2FGYyZodngKoli9ZglZF2pB23f27iWzg8iAw%2FtkSTTbP4LWD6cC0DzJq%2BIxM7K8i%2BhIAGkycg65KYv8naf0XQc%2BVrSe4WFFnTMf8QN8EoYtHfYuv2nAoYVT14K3eYWo3TvR76QIrAeLsy1IC09auIjCS95vhN%2BhlA%2FbtWJRiUAViXdBEegzZey%2BA1WDpzj4Md42IJto2BMVwPcm9JVkxsvXE5GxJRGYk3YBtAcT1jGBaFxYaYbg6Mih1ZK1%2FOoau615Tv9vnRcDQ64e3ylfvEMJijk042PHwMqZy0w7q8wyRgXPGmXuA7OTQaRM7NjUuT87eyPzX%2B8VYy%2BDGCleoxjW6mTj1rtTez6X4huorR0g0iLjPRbODdqqlUFYKtdDLTOTatKhpMwesT7pM3nwn%2FZweKtfNZI3Htc9qkcjv2tDlRvF%2Fn53o92r6j%2FJjMpsh%2BsHNrLrymaXr7NSpZx3njfesmxLeqCjWXRguzqOEfJ5tbvltbpo3bWSzC3zIa%2FBjqyAb9iAVnLpZTkrgsjPj3dfDTpduboFnMKQu30fy1CYjETQZygxC7SGEbzNYNKgSs%2FNWUTPCNCIyNk%2Flo5KGyiAXU6UQDc%2BtonmAEoVhtB8V3aSpUO3mMo3vH4EVFJLAGlDIglmvJ8DVe4sOCE8TGq3utbaJH%2FM42Ad2T3iJZI9hUjooQZwrZJCzJG6ZcfCnop6MyQ3PWU4d1%2BVPVeijA23aQnj22DxVV%2BbeH%2BRK1kMUzCuF8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=c14a24a2aa18e3e90ac1f50a82416fc9c244721c09fb4778343c95f898c87931"
+  },
+  "disclosed_date": 1683723180,
+  "report_url": "https://hackerone.com/reports/1888915",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Sign up to a workspace"
     ],
-    "bounty": 750,
-    "weaknesses": [
-        "Improper Access Control - Generic"
-    ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/7wyvivx4cvw4iy0g8vf219edou38?response-content-disposition=attachment%3B%20filename%3D%22chrome_iQDUTN9H1J.png%22%3B%20filename%2A%3DUTF-8%27%27chrome_iQDUTN9H1J.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7FC4X3GK%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T230729Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIHZIl66o32FE6IZh%2B9Esolbj3p0fpTa3b2MvibHyI0y0AiBQhjy4n6wpQ64dQBA2aQxEftSrg3JWZubYAkljDpRniCq7BQj0%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMogC0K6LtAguRYS65Ko8FqVdvx%2F9NK6alwAagIgcM5S%2B6lDltgh75I1rFoKkMMHQZmey0FAnWlyoNc%2BveFTfijKx89NS3RtDg3ZZUV%2FkmUs7V3BWGOvl1IoFZGRdj4V5%2Fq9VTUFhMDFG9SviRMzQkjKBj%2FS2%2Bh7GSKdAS1v%2B4ZQxzOPaMKdBHVXfUZ2moBcfEPOUC1iA90B1WL0Ifta6%2B5Yp%2FEhd1VDTADSFdiDHrkw1G2bwqfkW%2FJiprJ9ANjxzg4AZZQXMs1YkNjHIEqJSDj904xlT6T1wv2OXBQqMpHW%2BNz7mN2iZUZ9jXTbxeK8gIOAgK11i%2BWonSN83Y2u%2B3teLBGazTNyqJ3BCfj1Pg%2BxPUPQKxq2wNGc3W%2BsKHrfj8IlPhfA1%2FGYyZodngKoli9ZglZF2pB23f27iWzg8iAw%2FtkSTTbP4LWD6cC0DzJq%2BIxM7K8i%2BhIAGkycg65KYv8naf0XQc%2BVrSe4WFFnTMf8QN8EoYtHfYuv2nAoYVT14K3eYWo3TvR76QIrAeLsy1IC09auIjCS95vhN%2BhlA%2FbtWJRiUAViXdBEegzZey%2BA1WDpzj4Md42IJto2BMVwPcm9JVkxsvXE5GxJRGYk3YBtAcT1jGBaFxYaYbg6Mih1ZK1%2FOoau615Tv9vnRcDQ64e3ylfvEMJijk042PHwMqZy0w7q8wyRgXPGmXuA7OTQaRM7NjUuT87eyPzX%2B8VYy%2BDGCleoxjW6mTj1rtTez6X4huorR0g0iLjPRbODdqqlUFYKtdDLTOTatKhpMwesT7pM3nwn%2FZweKtfNZI3Htc9qkcjv2tDlRvF%2Fn53o92r6j%2FJjMpsh%2BsHNrLrymaXr7NSpZx3njfesmxLeqCjWXRguzqOEfJ5tbvltbpo3bWSzC3zIa%2FBjqyAb9iAVnLpZTkrgsjPj3dfDTpduboFnMKQu30fy1CYjETQZygxC7SGEbzNYNKgSs%2FNWUTPCNCIyNk%2Flo5KGyiAXU6UQDc%2BtonmAEoVhtB8V3aSpUO3mMo3vH4EVFJLAGlDIglmvJ8DVe4sOCE8TGq3utbaJH%2FM42Ad2T3iJZI9hUjooQZwrZJCzJG6ZcfCnop6MyQ3PWU4d1%2BVPVeijA23aQnj22DxVV%2BbeH%2BRK1kMUzCuF8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=ea8b955033fac63c6fad3abceaba81c2ecc6b74cf1e1e0f8e0b61f9a945b5490",
-        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/95k7ytq3v9yw73g5ru8csc3iydw3?response-content-disposition=attachment%3B%20filename%3D%22sublime_text_opnUofVDz2.png%22%3B%20filename%2A%3DUTF-8%27%27sublime_text_opnUofVDz2.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7FC4X3GK%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T230729Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIHZIl66o32FE6IZh%2B9Esolbj3p0fpTa3b2MvibHyI0y0AiBQhjy4n6wpQ64dQBA2aQxEftSrg3JWZubYAkljDpRniCq7BQj0%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMogC0K6LtAguRYS65Ko8FqVdvx%2F9NK6alwAagIgcM5S%2B6lDltgh75I1rFoKkMMHQZmey0FAnWlyoNc%2BveFTfijKx89NS3RtDg3ZZUV%2FkmUs7V3BWGOvl1IoFZGRdj4V5%2Fq9VTUFhMDFG9SviRMzQkjKBj%2FS2%2Bh7GSKdAS1v%2B4ZQxzOPaMKdBHVXfUZ2moBcfEPOUC1iA90B1WL0Ifta6%2B5Yp%2FEhd1VDTADSFdiDHrkw1G2bwqfkW%2FJiprJ9ANjxzg4AZZQXMs1YkNjHIEqJSDj904xlT6T1wv2OXBQqMpHW%2BNz7mN2iZUZ9jXTbxeK8gIOAgK11i%2BWonSN83Y2u%2B3teLBGazTNyqJ3BCfj1Pg%2BxPUPQKxq2wNGc3W%2BsKHrfj8IlPhfA1%2FGYyZodngKoli9ZglZF2pB23f27iWzg8iAw%2FtkSTTbP4LWD6cC0DzJq%2BIxM7K8i%2BhIAGkycg65KYv8naf0XQc%2BVrSe4WFFnTMf8QN8EoYtHfYuv2nAoYVT14K3eYWo3TvR76QIrAeLsy1IC09auIjCS95vhN%2BhlA%2FbtWJRiUAViXdBEegzZey%2BA1WDpzj4Md42IJto2BMVwPcm9JVkxsvXE5GxJRGYk3YBtAcT1jGBaFxYaYbg6Mih1ZK1%2FOoau615Tv9vnRcDQ64e3ylfvEMJijk042PHwMqZy0w7q8wyRgXPGmXuA7OTQaRM7NjUuT87eyPzX%2B8VYy%2BDGCleoxjW6mTj1rtTez6X4huorR0g0iLjPRbODdqqlUFYKtdDLTOTatKhpMwesT7pM3nwn%2FZweKtfNZI3Htc9qkcjv2tDlRvF%2Fn53o92r6j%2FJjMpsh%2BsHNrLrymaXr7NSpZx3njfesmxLeqCjWXRguzqOEfJ5tbvltbpo3bWSzC3zIa%2FBjqyAb9iAVnLpZTkrgsjPj3dfDTpduboFnMKQu30fy1CYjETQZygxC7SGEbzNYNKgSs%2FNWUTPCNCIyNk%2Flo5KGyiAXU6UQDc%2BtonmAEoVhtB8V3aSpUO3mMo3vH4EVFJLAGlDIglmvJ8DVe4sOCE8TGq3utbaJH%2FM42Ad2T3iJZI9hUjooQZwrZJCzJG6ZcfCnop6MyQ3PWU4d1%2BVPVeijA23aQnj22DxVV%2BbeH%2BRK1kMUzCuF8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=c14a24a2aa18e3e90ac1f50a82416fc9c244721c09fb4778343c95f898c87931"
-    },
-    "disclosed_date": 1683723180,
-    "report_url": "https://hackerone.com/reports/1888915",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Sign up to a workspace"
-        ],
-        [
-            2,
-            "Navigate to the reset password page and enter the signup email to receive the reset link over HTTP"
-        ]
-    ],
-    "vuln_description": "The reset password link is sent over an unsecured HTTP protocol instead of HTTPS, making it vulnerable to interception by attackers on the same network.",
-    "reason": "The vulnerability is straightforward to discover as it only requires checking the protocol used in the reset password link, which is a common security practice.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": false
-    }
+    [
+      2,
+      "Navigate to the reset password page and enter the signup email to receive the reset link over HTTP"
+    ]
+  ],
+  "vuln_description": "The reset password link is sent over an unsecured HTTP protocol instead of HTTPS, making it vulnerable to interception by attackers on the same network.",
+  "reason": "The vulnerability is straightforward to discover as it only requires checking the protocol used in the reset password link, which is a common security practice.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves the reset password link being sent over an unsecured HTTP protocol, which is a security misconfiguration rather than an authorization or authentication boundary being crossed. The proposed methodologies focus on testing authorization and authentication boundaries by swapping user sessions and resource IDs, not on detecting protocol-level security misconfigurations.",
+    "is_detectable": false
+  }
 }

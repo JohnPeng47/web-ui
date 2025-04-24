@@ -1,48 +1,48 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "cablej_dds ",
-    "title": "\u2588\u2588\u2588\u2588\u2588\u2588\u2588 Site Exposes \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 forms",
-    "content": "\nSummary\nThe \u2588\u2588\u2588\u2588\u2588 site (https://\u2588\u2588\u2588\u2588\u2588\u2588.mil/) allows authenticated users to submit \u2588\u2588\u2588\u2588\u2588\u2588 e-forms. Due to a vulnerability in this system, any authenticated user can access the full \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 e-form of any other user.\nSteps to reproduce\nIntercept an authenticated request on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 containing an Authorization header.\nReplace the url with \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588. Observe that the id in the url can be incremented/decremented to view recently generated OMPFs.\nUpon submitting the request, the user's full \u2588\u2588\u2588\u2588\u2588\u2588\u2588 form JSON response will be sent.\nImpact\nAccess to \u2588\u2588\u2588\u2588 is possible through either a Department of Defense Self-Service logon, CAC card, or \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588password. Thus, a compromise of a single account on any of these systems would allow for unrestricted access to all \u2588\u2588\u2588\u2588 forms.\nThe \u2588\u2588\u2588\u2588 form includes the following\nPII such as SSN, DoB, addresses, etc\nPersonal remarks\nOther fields related to security clearances, education, maritial status, etc\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "cablej_dds ",
+  "title": "\u2588\u2588\u2588\u2588\u2588\u2588\u2588 Site Exposes \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 forms",
+  "content": "\nSummary\nThe \u2588\u2588\u2588\u2588\u2588 site (https://\u2588\u2588\u2588\u2588\u2588\u2588.mil/) allows authenticated users to submit \u2588\u2588\u2588\u2588\u2588\u2588 e-forms. Due to a vulnerability in this system, any authenticated user can access the full \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 e-form of any other user.\nSteps to reproduce\nIntercept an authenticated request on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 containing an Authorization header.\nReplace the url with \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588. Observe that the id in the url can be incremented/decremented to view recently generated OMPFs.\nUpon submitting the request, the user's full \u2588\u2588\u2588\u2588\u2588\u2588\u2588 form JSON response will be sent.\nImpact\nAccess to \u2588\u2588\u2588\u2588 is possible through either a Department of Defense Self-Service logon, CAC card, or \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588password. Thus, a compromise of a single account on any of these systems would allow for unrestricted access to all \u2588\u2588\u2588\u2588 forms.\nThe \u2588\u2588\u2588\u2588 form includes the following\nPII such as SSN, DoB, addresses, etc\nPersonal remarks\nOther fields related to security clearances, education, maritial status, etc\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Insecure Direct Object Reference (IDOR)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1554507900,
+  "report_url": "https://hackerone.com/reports/395246",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Intercept an authenticated request containing an Authorization header."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Insecure Direct Object Reference (IDOR)"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1554507900,
-    "report_url": "https://hackerone.com/reports/395246",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Intercept an authenticated request containing an Authorization header."
-        ],
-        [
-            2,
-            "Modify the URL to increment/decrement the ID parameter to access other users' forms."
-        ]
-    ],
-    "vuln_description": "The vulnerability allows any authenticated user to access the full e-form of any other user by manipulating the ID parameter in the URL, leading to unauthorized access to sensitive personal information.",
-    "reason": "The attack involves simple manipulation of the ID parameter in the URL, which is a common and straightforward technique. There are no complex interactions or states involved.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "idor_detectable": true,
-    "authnz_byppass_detectable": false,
-    "is_simple_payload": true,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "idor_detectable": true,
-        "authnz_byppass_detectable": false
-    }
+    [
+      2,
+      "Modify the URL to increment/decrement the ID parameter to access other users' forms."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows any authenticated user to access the full e-form of any other user by manipulating the ID parameter in the URL, leading to unauthorized access to sensitive personal information.",
+  "reason": "The attack involves simple manipulation of the ID parameter in the URL, which is a common and straightforward technique. There are no complex interactions or states involved.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "idor_detectable": true,
+  "authnz_byppass_detectable": false,
+  "is_simple_payload": true,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an authenticated user accessing another user's full form by manipulating the resource ID in the URL, which falls under the IDOR vulnerability class. The proposed methodology includes testing for such scenarios by swapping resource IDs and user sessions, which would detect this issue.",
+    "is_detectable": true
+  }
 }
