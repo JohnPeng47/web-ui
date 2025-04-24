@@ -1,0 +1,50 @@
+{
+    "reported_to": "MariaDB",
+    "reported_by": "gabriel_sztejnworcel ",
+    "title": "Named pipe connection inteception",
+    "content": "\nWith MariaDB running on Windows, when local clients connect to the server over named pipes, it's possible for an unprivileged user with an ability to run code on the server machine to intercept the named pipe connection and act as a man-in-the-middle, gaining access to all the data passed between the client and the server, and getting the ability to run arbitrary SQL commands on behalf of the connected user.\nOn Windows, MariaDB allows local clients to connect to the server over named pipes. Unfortunately, when creating the named pipe server, the security descriptor is not set correctly, and as a result every user on the system can create pipe server instances. This allows for the following attack scenario:\nThe attacker creates a pipe server instance and waits for a client to connect to it.\nOnce a client is connected, the attacker connects to the real pipe server instance as a client.\nAt this point, the attacker is connected to the legitimate client and server, and can pass the messages back and forth, reading the messages (as they are passed in clear text) and possibly changing the messages.\nPlease see the attached report and POC tool for more information.\nImpact\nAll the SQL requests/responses from the intercepted connection\nAbility to run SQL commands\n\n",
+    "severity": [
+        7.8,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1608265440,
+    "report_url": "https://hackerone.com/reports/1019891",
+    "vuln_category": "CODE",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "steps": [
+        [
+            1,
+            "Identify that MariaDB is running on Windows and allows local clients to connect via named pipes."
+        ],
+        [
+            2,
+            "Create a malicious named pipe server instance with incorrect security descriptors to intercept client connections."
+        ],
+        [
+            3,
+            "Wait for a legitimate client to connect to the malicious pipe server."
+        ],
+        [
+            4,
+            "Connect to the real MariaDB pipe server as a client to establish a man-in-the-middle position."
+        ],
+        [
+            5,
+            "Intercept, read, and potentially modify SQL queries and responses between the client and server."
+        ]
+    ],
+    "vuln_description": "MariaDB on Windows incorrectly sets security descriptors for named pipes, allowing any local user to create a malicious pipe server. This enables man-in-the-middle attacks where an attacker can intercept, read, and modify SQL communications between legitimate clients and the server.",
+    "reason": "The vulnerability involves understanding Windows named pipe security, MariaDB's pipe handling, and the man-in-the-middle setup. While the components are standard, the interaction between them is non-obvious, requiring knowledge of both Windows security and database communication.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

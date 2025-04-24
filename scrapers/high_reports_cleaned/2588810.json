@@ -1,0 +1,64 @@
+{
+    "reported_to": "HackerOne",
+    "reported_by": "noob_but_cut3 ",
+    "title": "TOTP Authenticator implementation Accepts Expired Codes",
+    "content": "\nSummary:\nHi,\nDuring testing hackerone.com, I discovered that the TOTP authenticator implementation accepts expired codes, allowing attackers to bypass authentication. This is a security vulnerability that reduces the effectiveness of the TOTP authentication mechanism.\nDescription:\nTOTP (Time-Based One-Time Password) is a widely used authentication mechanism that generates a new password every 30 seconds. The password is valid for a short period, typically 30 seconds, before a new password is generated. This mechanism is designed to prevent attackers from using previously generated passwords.\nDuring testing, I discovered that the TOTP authenticator implementation accepts expired codes, allowing attackers to bypass authentication. Specifically, I found that the authenticator accepts codes that are more than 1 minute old, which is considered a large window of acceptance.\nThis vulnerability reduces the security benefits of TOTP, allowing attackers to reuse expired codes. This can lead to unauthorized access to the system, which can result in data breaches, financial losses, and reputational damage.\nSteps To Reproduce\nEnable TOTP authentication for the account at hackerone.com with google authenticator.\nLog in to the tfa enabled account with correct password.\nWhen it comes to tfa state, save the current totp code from authenticator app.\nWait for the code to expire (e.g., 1 minute).\nSubmit the expired code to the authentication endpoint.\nObserve that the authentication is successful despite using an expired code.\nSuggest Fix\nReduce the window of acceptance to a more secure value (e.g., 30 seconds).\nImplement a more robust TOTP algorithm that rejects expired codes.\nOptional: Supporting Material/References (Screenshots)\nI have attached a POC video via google drive link cause it is over 250 mb.\nhttps://drive.google.com/file/d/1onGsQvF-mmPXisjmxhkBbQUB4sbvoXz5/view?usp=sharing\nImpact\nThe attacker can bypass the two factor authentication by using expired otp code.\n\n",
+    "severity": [
+        7.2,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Authentication - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1720722420,
+    "report_url": "https://hackerone.com/reports/2588810",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Enable TOTP authentication for the account at hackerone.com with Google Authenticator."
+        ],
+        [
+            2,
+            "Log in to the TFA-enabled account with the correct password."
+        ],
+        [
+            3,
+            "When prompted for TFA, save the current TOTP code from the authenticator app."
+        ],
+        [
+            4,
+            "Wait for the code to expire (e.g., 1 minute)."
+        ],
+        [
+            5,
+            "Submit the expired code to the authentication endpoint."
+        ],
+        [
+            6,
+            "Observe that the authentication is successful despite using an expired code."
+        ]
+    ],
+    "vuln_description": "The TOTP authenticator implementation accepts expired codes, allowing attackers to bypass authentication by reusing old codes. This reduces the security benefits of TOTP, potentially leading to unauthorized access.",
+    "reason": "The vulnerability involves a straightforward test of TOTP code expiration logic. The steps are simple and do not require complex interactions or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

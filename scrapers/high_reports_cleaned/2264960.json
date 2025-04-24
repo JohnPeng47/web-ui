@@ -1,0 +1,38 @@
+{
+    "reported_to": "EXNESS",
+    "reported_by": "ashwarya ",
+    "title": "Unrestricted Access to Celery Flower Instance",
+    "content": "\nHi Team,\nThe Celery Flower instance is running and publicly accessible via the PIM mobile route /pim/flower/*. The access to this service is presently unrestricted.\nI quickly took a glance at the API to ensure that access is unrestricted. From this quick look, it appears possible to shut down a worker instance, revoke or terminate tasks, and perform other actions. In addition to unrestricted access to tasks and workers, I observed \u2588\u2588\u2588 via /api/tasks endpoint. Most importantly, the endpoint /api/task/async-apply/* seems to apply a task asynchronously, and there seems to be a possibility to execute arbitrary code on the Celery worker through this endpoint. I believe it's unwise for me to go beyond this since the instance is running in the prod environment, so I'm sending this quick report to you. If some form of escalation is needed for impact assessment, please let me know.\nVulnerable Endpoint\nCode 36 Bytes\n1https://api.excalls.mobi/pim/flower/\nSteps to Reproduce\nCode 180 Bytes\n1https://api.excalls.mobi/pim/flower/api/workers\n2https://api.excalls.mobi/pim/flower/api/tasks\n3https://api.excalls.mobi/pim/flower/api/task/info/dc58fcb7-be31-4f4e-aeff-5837f0c32d30\nProof of Concept\n\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\nSuggested Mitigation\nSet the flower_unauthenticated_api environment variable to false\nImpact\nThe impact includes, but is not limited to:\nManipulating tasks to achieve unintended outcomes, such as disrupting or halting PIM processes.\n\u2588\u2588\u2588\nA malicious actor could continuously monitor and revoke tasks as they are created, preventing their execution and consuming resources. This could exhaust the Celery worker's resources and hinder its ability to handle legitimate tasks.\nThere seems to be a possibility to execute arbitrary code on the Celery worker by executing a task asynchronously.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 4337,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1702584720,
+    "report_url": "https://hackerone.com/reports/2264960",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Access the Celery Flower instance via the public route: https://api.excalls.mobi/pim/flower/"
+        ],
+        [
+            2,
+            "Interact with the exposed API endpoints such as /api/workers, /api/tasks, and /api/task/async-apply/* to manipulate tasks or workers"
+        ]
+    ],
+    "vuln_description": "The Celery Flower instance is publicly accessible without authentication, allowing unrestricted access to its API. This enables an attacker to manipulate tasks, revoke or terminate them, and potentially execute arbitrary code on the Celery worker through the /api/task/async-apply/* endpoint.",
+    "reason": "The vulnerability involves straightforward access to an unprotected API with clear endpoints for task and worker manipulation. The steps to exploit are simple and do not require complex interactions or state manipulation.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

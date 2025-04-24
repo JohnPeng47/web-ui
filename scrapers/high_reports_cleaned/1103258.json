@@ -1,0 +1,48 @@
+{
+    "reported_to": "GitLab",
+    "reported_by": "taraszelyk ",
+    "title": "Stored DOM XSS via Mermaid chart",
+    "content": "\nPrologue\nGitlab supports Mermaid as part of GFM to allow users to generate diagrams and flowcharts from text.\nIn version 8.6.0, Mermaid added a support of directives to add more control over styles(themes) applied to the diagrams.\nYou can read more about how this works here: https://mermaid-js.github.io/mermaid/#/directives\nSyntax for declaring the directive is %%{init: {<JSON_OBJECT>}}%%\nDirectives can be used to overwrite default theme properties like fontFamily or fontSize to the graph.\nBehind the scenes, library takes JSON_OBJECT from directive and merges it with config object. Later that config is used to generate new CSS rules:\nCode 428 Bytes\n1  let userStyles = '';\n2  // user provided theme CSS\n3  if (cnf.themeCSS !== undefined) {\n4    userStyles += `\\n${cnf.themeCSS}`;\n5  }\n6  // user provided theme CSS\n7  if (cnf.fontFamily !== undefined) {\n8    userStyles += `\\n:root { --mermaid-font-family: ${cnf.fontFamily}}`;\n9  }\n10  // user provided theme CSS\n11  if (cnf.altFontFamily !== undefined) {\n12    userStyles += `\\n:root { --mermaid-alt-font-family: ${cnf.altFontFamily}}`;\n13  }\nVulnerability description\nProblem is that there is no sanitization of user-supplied values, which are added to style tag via innerHTML method afterwards:\nCode 237 Bytes\n1  const stylis = new Stylis();\n2  const rules = stylis(`#${id}`, getStyles(graphType, userStyles, cnf.themeVariables));\n3\n4  const style1 = document.createElement('style');\n5  style1.innerHTML = rules;\n6  svg.insertBefore(style1, firstChild);\nThis leads to Cross-Site Scripting attack via following directive:\nCode 85 Bytes\n1%%{init: { 'fontFamily': '\\\"></style><img src=x onerror=alert(document.cookie)>'} }%%\nSteps to reproduce\nCreate an issue in any repository\nCreate mermaid diagram with following payload:\nCode 143 Bytes\n1%%{init: { 'fontFamily': '\\\"></style><img src=x onerror=alert(document.cookie)>'} }%%\n2sequenceDiagram\n3Alice->>Bob: Hi Bob\n4Bob->>Alice: Hi Alice\nSave the issue. XSS will be triggered every time a user opens a page with this issue.\nPoC\nVisit https://gitlab.com/bugbountyuser1/asdf/-/issues/3\nYou will see CSP errors in the console.\n<image_0>\nWhat is the current bug behavior?\nMermaid fails to properly sanitize user-supplied input via directive which leads to XSS.\nWhat is the expected correct behavior?\nMermaid strips/encodes malicious characters, so there is no way to perform XSS attack.\nOutput of checks\nThis vulnerability was tested on gitlab.com. CSP blocks XSS from executing, but I have an idea on how to bypass CSP.\nOn a local Gitlab instance with a newer version(same as gitlab.com) of Mermaid, it works too.\nResults of GitLab environment info\n(For installations with omnibus-gitlab package run and paste the output of:\nsudo gitlab-rake gitlab:env:info)\n(For installations from source run and paste the output of:\nsudo -u git -H bundle exec rake gitlab:env:info RAILS_ENV=production)\nImpact\nThe Impact is standard as for any Stored XSS. User interaction is minimal - the user needs to navigate to a page with a Mermaid chart(issues page, etc). CSP is blocking XSS on gitlab.com, but I can work on XSS bypass if it is needed to show the impact/increase bounty amount. So let me know if you need CSP bypass too.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 3000,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/2a2fct4tbhdvjgxnnl5vhivj6ifz?response-content-disposition=attachment%3B%20filename%3D%222021-02-14_19-00.png%22%3B%20filename%2A%3DUTF-8%27%272021-02-14_19-00.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQSLI3URIS%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T192204Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCk1HqFlh6wXhHmTbE7hAJVm%2Bl2HO7IHsu7w1b6OhDI%2FAIgPwySbxooBx3NigSpJ72K%2BfH%2BAsF4ECM3nFhRevhE9%2BkqsgUIHBADGgwwMTM2MTkyNzQ4NDkiDMNCVU%2BomcFZKrEakyqPBcVbTi7AiC1T3S5ib3MazKgl1%2FIUwEAk1mSeqorZCn9IvbZZXNXhaUckzSvXCdwylWykqjKrO3PAbi8Q3AMmJkXMZrZj%2FE%2FhDd%2BsyWJNhpSUUWp57ytCfc8LU03Dc1IAYOKD0LxEp41BOEHHbgC4TP%2BZHR6c%2FCAv4BfSTg5P12krx%2F7uQKt1HzJ4x2sFqGN%2B0E5V3jPY9NyPTPgZlGfcpjjZskifw%2Bf4MFZfBMtd5VNvvWyUKS2O9w4uAqHN%2F2A5b%2BcPt5KTiOeRmRESFbHmHG9LGcX4Kg6QHY0P3hJ%2BDD0r3iYbM1y7bKlz%2FJXlM3khUxpmWrh5l7rnnhRRwYB%2FPxiPlK5Iv7qVvUgzMNV%2BQ4dn6C%2FiC8N5v3SfSAALXxd4TYq0igKtindj%2FizMZwd%2BZnaINPMyH4ZuapGnx1XOgwzH%2FpCc%2BZFTDY8HOusLIPnKlcLg88Fw5JMdWfTxctY7JD1EcPvzhE56F0pDu9wUeLaoQeY84PktOGldyd7wSE50ei8Ly4l6RKBsTjXdcbjVON0X1wIB6cHA1DzMDv%2F7vUMOIRii8h3imJLFwcuamLZSb%2FZghqgLax0A18exBoZGCTQIc%2Ff%2F3HhANfWA7vnyVHdN2qiGFj8xX%2BRbCEclQgo2ux%2F4bj%2F3DNxVDVXLJdbNKLJGjnqAlP%2BGumLMt%2BJ2Lkwn0AIEnLIbbsbphdJMLpvYetfsW3MuL%2BJ1OuWcP%2B3Vyew1mvwt9sV0SMIwUxeC1ZLy%2BMME2Q1g8T9aCUvhFcUHo%2FB9U%2BRyGnAAQyuz7j0hvKHzYguZNUeIaA1ZKZYW%2BG%2F9XKL%2BbMCyRKYRtAroRO2GCIRaOQPlaVVDkFcgskzozZhFT7ZIiJGSKdUf9HVwVxwwlO2LvwY6sQFHwt%2FrBA%2FiEbBvhO8lmrcv3sWiy8VnaFMtatHrPZnVKmwRXNSXr9Cmi2Bnvo6rseE67pWYifCbUC6YeKN26VLcglFUGbBCFNLbaycM0uxXrBemm9iRdFtOhnPjyWVvHvldp38tvruUtkFlf%2BJRSuN2PT0x4PKcW4zO5fuS6DSVDK32ijI1W5aIbkv6akX%2FKmLEKWa97pv%2B1hmTIPo8hADMhpLLt5rG%2Br24lvFTeDUDlt4%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=626371b96558f6936b4db875a8e9a88a76f32520e27c1e9a78ed6292cfe5c30d"
+    },
+    "disclosed_date": 1626145200,
+    "report_url": "https://hackerone.com/reports/1103258",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create an issue in any repository"
+        ],
+        [
+            2,
+            "Insert the Mermaid diagram with the malicious payload: %%{init: { 'fontFamily': '\"></style><img src=x onerror=alert(document.cookie)>'} }%%"
+        ],
+        [
+            3,
+            "Save the issue and observe the XSS trigger when the page is opened"
+        ]
+    ],
+    "vuln_description": "The vulnerability is a Stored DOM XSS via Mermaid chart in GitLab, where user-supplied input in Mermaid directives is not properly sanitized before being inserted into the DOM via innerHTML, allowing for arbitrary JavaScript execution.",
+    "reason": "The vulnerability involves understanding the Mermaid directive syntax and how it interacts with the DOM, but the attack itself is straightforward once the directive syntax and the lack of sanitization are known. The complexity is increased slightly by the need to bypass CSP in some environments, but the core vulnerability is not highly complex.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The vulnerability involves a stored XSS via Mermaid chart directives, which is a client-side injection issue rather than an authentication or authorization bypass. The methodology described focuses on testing authentication and authorization boundaries by swapping user sessions and resource IDs, which doesn't apply to this XSS vulnerability.",
+        "is_detectable": false
+    }
+}

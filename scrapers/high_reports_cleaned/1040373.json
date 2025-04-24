@@ -1,0 +1,54 @@
+{
+    "reported_to": "Khan Academy",
+    "reported_by": "tomorrowisnew_ ",
+    "title": "Password authentication when changing information bypass. Bypass of report #721341",
+    "content": "\nSUMMARY\nWhen reading the disclosed reports of your program, i see this one report #721341 . The reporter reported a lack of password confirmation when linking accounts. A fix was applied, adding password confirmation when linking account to other services. But i found a way to bypass this, The password confirmation is only done in the client side. This is bad because such methods are vulnerable to response manipulation. I will add a video poc\nSTEPS TO REPRODUCE\nOpen a browser in which a user has previously logged into an account, but hasn't logged out.\nOpen another browser and login using your account\nTry to link gmail using your account, it will prompt for a password confirmation, enter your password\nIntercept the response and copy it\nGo to the victims account and link to gmail again\nThis time enter any password and intercept response\nPaste the copied response from the attacker account\nPOC\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nAn attacker can take over an account and lock a user out by resetting the password.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Unverified Password Change"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1613102880,
+    "report_url": "https://hackerone.com/reports/1040373",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "steps": [
+        [
+            1,
+            "Open a browser where a user is already logged in (victim's account) and another browser where you log in with your own account."
+        ],
+        [
+            2,
+            "Attempt to link a Gmail account in your account, enter your password when prompted, and intercept the response."
+        ],
+        [
+            3,
+            "Copy the intercepted response from your account."
+        ],
+        [
+            4,
+            "Go to the victim's account and attempt to link a Gmail account again, entering any password, and intercept the response."
+        ],
+        [
+            5,
+            "Paste the copied response from your account into the victim's intercepted response."
+        ],
+        [
+            6,
+            "The victim's account is now linked to the attacker's Gmail without proper password verification."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to bypass password authentication when linking accounts by manipulating client-side responses. The system only checks password confirmation on the client side, making it susceptible to response manipulation. An attacker can exploit this to take over an account or lock the user out by resetting the password.",
+    "reason": "The attack involves multiple steps, including intercepting and manipulating responses, but the core issue (client-side password verification) is a well-known security anti-pattern. The steps are straightforward once the initial flaw is identified.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "721341"
+}

@@ -1,0 +1,51 @@
+{
+    "reported_to": "Shopify",
+    "reported_by": "filedescriptor ",
+    "title": "H1514 DOMXSS on Embedded SDK via Shopify.API.setWindowLocation abusing cookie Stuffing",
+    "content": "\nHi Team!\nI'm reporting a rather unusual DOMXSS that allows an attacker to perform a XSS attack on any Shopify apps that use the Embedded SDK. To exploit this, several techniques were chained together: Cookie Stuffing -> Login CSRF -> (Not Open) Redirect -> DOMXSS.\nDetails\nInspired by #381192, I decided to check all pages to see if there's any broken origin validation. The results were frustrating since they all seemed to be done properly. However I noticed embedded apps did it in a way that it verifies if the coming origin is the logged-in store. Say if I am an admin on foobar.myshopify.com, then an embedded app will check if in-coming messages originate from https://foobar.myshopify.com. I went ahead to look up some documentations, confirming this is by design (shopOrigin):\nCode 84 Bytes\n1ShopifyApp.init({\n2  shopOrigin: 'https://CURRENT_LOGGED_IN_SHOP.myshopify.com'\n3[...]\nNow this is interesting because by design we can execute any JavaScript on our own stores. That means, I can iframe an embedded app on my store, then post any message to it and it will accept it. So I quickly beautify the SDK source code to see if there's any interesting event. Checking common DOMXSS sinks I found that it registers the Shopify.API.setWindowLocation event that navigates to a said destination.\nhttps://cdn.shopify.com/s/assets/external/app.js\nCode 292 Bytes\n1e.setWindowLocation = function(e) {\n2    return window.location = e\n3}, e.bindWindowLocation = function() {\n4    return _Shopify.Messenger.addHandler(\"Shopify.API.setWindowLocation\", function(e) {\n5        return function(t, n) {\n6            return e.setWindowLocation(n)\n7        }\n8    }(this))\n9}\nBy navigate to a javascript: pseudo URL it can lead to XSS. This can be verified by opening any embedded apps and execute the following code in the DevTools' console\nCode 140 Bytes\n1$$('iframe')[0].contentWindow.postMessage('{\"message\":\"Shopify.API.setWindowLocation\",\"data\":\"javascript:alert(document.domain);0[0]\"}','*')\n<image_0>\nHowever this XSS is almost useless because the embedded app is authenticated as us, the attacker. When we try to exploit it on a victim it won't work because they are not logged into our store. So you could say this is, a self DOMXSS. Well, almost.\nWhat if we use Login CSRF to force a victim to be logged into our store? After the victim is logged in to our store, we can then instruct user's browser to log into the embedded app as us by navigating to /admin/oauth/authorize. Then the current logged in store will be ours. I came up with an idea to stuff the session cookies using JavaScript.\nThe session cookies consist of _secure_admin_session_id and _master_udr. While I could simply write _secure_admin_session_id with docuemnt.cookie API, I realized a problem with _master_udr. Unlike _secure_admin_session_id, _master_udr is scoped to .myshopify.com. If we triy to write our _master_udr, then this will happen:\nCode 386 Bytes\n1GET https://canvasfoobar.myshopify.com/admin/oauth/authorize?client_id=d25e45407e508f96409c2dd796e9bd95&redirect_uri=https%3A%2F%2Fscript-editor.shopifycloud.com%2Fauth%2Fshopify%2Fcallback&response_type=code&scope=write_scripts%2Cread_products%2Cread_customers&state=a HTTP/1.1\n2Host: canvasfoobar.myshopify.com\n3Cookie: _master_udr=LEGIT; _master_udr=EVIL; _secure_admin_session_id=EVIL\nThe legitimate _master_udr will override our evil one and the server will refuse to authenticate as us. There is a trick fortunately.\n\u201cCookies with longer paths are listed before cookies with shorter paths.\u201d \u2013RFC 6265\nBy setting a cookie with a very specific (/admin/oauth in this case) we can outrun the original one. The code that we will use to force a login will be:\nCode 124 Bytes\n1document.cookie = '_secure_admin_session_id=EVIL;path=/admin/oauth';\n2document.cookie = '_master_udr=EVIL;path=/admin/oauth';\nAnother problem is even after all this, the victim will be logged into the embedded app as us. That means, all actions only affect our store.\nTo solve this we can simply relog in the victim to the embedded app. Since the victim is still logged in their store, we can navigate the victim to https://victim.myshopify.com/admin/oauth/authorize to trigger the auth flow for the embedded app. The drawback is we need to know which store the victim is logged in as. Luckily https://www.shopify.com/path will redirect to the last logged in store of a user, therefore navigating to https://www.shopify.com/admin/oauth/authorize will lead them to https://victim.myshopify.com/admin/oauth/authorize.\nEventually we have our XSS running on the embedded app's domain running with the victim's session.\nSteps to Reproduce\nIn the PoC, Script Editor will be used as an example.\nBe logged into your store as an admin and have Script Editor installed\nNavigate to https://canvasfoobar.myshopify.com/products/canary\nAfter the iframe turns grey, click it\nAfter a while, a fake modal dialog will show up and a New Script will be created\nI'm also attaching a video demo.\nFix\nI recommend fixing this issue by validating the URL for Shopify.API.setWindowLocation. The other small issues are by design so they are hard to fix.\nImpact\nPerform unauthorized actions on a store admin on any embedded apps.\n\n",
+    "severity": [
+        8.1,
+        null
+    ],
+    "bounty": 2500,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - DOM"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/358/299/9053ddf265ccf985ec5ce584ce4e23d8e61e7c40/Screen_Shot_2018-10-10_at_2.58.16_PM.png?response-content-disposition=attachment%3B%20filename%3D%22Screen_Shot_2018-10-10_at_2.58.16_PM.png%22%3B%20filename%2A%3DUTF-8%27%27Screen_Shot_2018-10-10_at_2.58.16_PM.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQZULTDQBD%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T043910Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDplz9brzr514rVkb%2BNd3ul8FTyjgMZj8FeRr5q9%2BFMwgIgWpWNXsVuN9n5g0z1gxoZEcEMvaM2MmUQXdLt52ckgu4qsgUIJRADGgwwMTM2MTkyNzQ4NDkiDDeKAC2G%2BM3WZNN5UCqPBb9Ihol%2FEIfIcoj3w790kvbgzRdr2FS1l1gKrmep5tIn5%2FxKg5cyS4H8ahtiuoVR550dCPdcjW1nEDFNzZLIojZ15mh4qZgMB%2ByU%2FwkaQxVIf8JSG%2Bqi5EZFVbqxUORqV2G5rZ1HQrPclUH3%2F%2BC%2BwNsDCtIXeIVvRM6Z29xDilQWRSQhuSuPmS1P0zQVW94JJLw9oThJmemjk5Wl6ARjX46G%2BAUSkuSS83L4b0DpDuqn%2Ff6bhyY4%2B8zhQX0hCJZngufVVbt6LzniMAoCUr8kyFy%2BTuR4sVy6T9z9SkDZVo36F2vbO9WI3lOZJ7oaM5wJvcrR9ce2P7H4%2Fa8UaK4z43o1k6hUEiNezXHHROnmQ1Kuda6%2F05GHwOpctRnTa0oJJDGcUZiHH42ZUenioncnLbKRgqmWzYQQuotjb985f%2BH4PO7FArKs3EI7xPOJrXzQsZwkbhL8yUzcPdOzSz8hdovzRckyIoCFolkbHnVIhWV8BveSaDggRsJRpPfXiZvLbrnKs3lAMhUUrhTRwCeMy1EfSN3zZbDWDVuDA2UozzS3qtCXHgRcNi5VbcH7RVjCwNaJ5I9H886VRNww8NLGv0964nL21J%2B%2B3ABIfjVJtsQ0lZv9Fsr2DH%2BNYWWpVhlfKeEtv55pPFodxxm1tVnv9Kd4EIXbKaXGdJ45ZKWXL5HgxGo0JgbOMK1ITgOO6msJ7hLHVyeoX7f%2BUb8neMk8nuKBirf4Xxyh2RNejF1nz2dEW7nbYpoHr8TM515isMjKQahdNVTtx28UtjEG1hWkAOymVwdUcCnpFJIDp1stlfYCh1u9MrhJy61MKNbncaiIHymeOVFtZ63i%2FVyvipZjXbdvmOIzn39GmBASzRVnyOkwp%2FeNvwY6sQEXgnb6goVHZSrPqep70ec23NQhE3fHjrnirlyr2VJEKNmItq2AMzWs8r7lD3QXqBo8WFaP%2F7FRsvurBOp%2Flf8696rjbE9eYhMEjUnxgp78VYNjK8zBPu2iCbBAcXUBZmucCwVFZZoFP24ZGn0T4qGf%2BuUihhMm6onjaN%2F%2F0mW7l6q1XnzRt1RopkuYnQZT%2Fdtj5zHTkocC%2BP%2BUYsdLpCPXq%2BsblC%2FY1zI%2BFsEEfE7XaOw%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=9e936314c468b66c8cd9075445e05552059c75dc3517d1e9b19e6f0bbfbd59fd"
+    },
+    "disclosed_date": 1555526400,
+    "report_url": "https://hackerone.com/reports/422043",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Log in to your Shopify store as an admin and install the Script Editor app."
+        ],
+        [
+            2,
+            "Navigate to a product page (e.g., https://canvasfoobar.myshopify.com/products/canary) and wait for the iframe to turn grey, then click it."
+        ],
+        [
+            3,
+            "Observe the fake modal dialog appearing and a new script being created without authorization."
+        ]
+    ],
+    "vuln_description": "This vulnerability is a DOM-based XSS in Shopify's Embedded SDK, which allows an attacker to execute arbitrary JavaScript in the context of any Shopify app using the SDK. The attack chains multiple techniques: cookie stuffing to force a victim to log into the attacker's store, login CSRF to authenticate the victim in the embedded app, and a DOMXSS via the Shopify.API.setWindowLocation method to execute malicious code.",
+    "reason": "The attack involves multiple complex components: cookie stuffing with path manipulation to override legitimate cookies, login CSRF to force authentication, and a DOMXSS via a non-obvious message handler in the Embedded SDK. The attacker must also understand the subtle interaction between cookie paths and session management, as well as the specific behavior of the Shopify.API.setWindowLocation method. The novel use of cookie stuffing combined with login CSRF and DOMXSS makes this a highly sophisticated attack.",
+    "new_complexity": "VERY_HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "381192",
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "reason": "The vulnerability involves chaining multiple techniques (Cookie Stuffing, Login CSRF, Redirect, DOMXSS) across different domains and sessions, which is outside the scope of the proposed methodologies that focus on single-application session and resource manipulation.",
+        "is_detectable": false
+    }
+}

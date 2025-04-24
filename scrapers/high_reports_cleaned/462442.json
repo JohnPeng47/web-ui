@@ -1,0 +1,56 @@
+{
+    "reported_to": "Monero",
+    "reported_by": "thanhb ",
+    "title": "Unauthorized access of Monero wallet by an unprivileged process",
+    "content": "\nDescription:\nAs per our understanding, Monero wallet app provides a separate executable for the user to enable the RPC interface (monero-wallet-rpc). When the user runs the executable, the RPC server will start on a port number that is specified by the user. The RPC server authenticates the client with the HTTP digest access authentication scheme, which is based on a simple challenge-response paradigm. Basically, the client receives a nonce from the server and then replies with a MD5 hash value of the username, the password, the nonce, the HTTP method, and the URI.\nAn attacker is a non-privileged user, who can sign in to the victim\u2019s computer with his own credentials or guest account. The attacker first needs to run a process in the background when the victim is using the computer. On Linux and macOS, the attacker only needs to log in, run the process, and leave it running when he logs out. On Windows, user processes are killed at the end of the login session, and thus the attacker needs to do fast user switching to leave his session in the background. The attacker can also remotely run his malicious process if SSH or remote desktop is enabled on the target computer.\nWith the malicious process running in the background, it is possible to perform server impersonation on the Monero wallet by hijacking the port number before the victim starts the RPC server. The digest access authentication mechanism does not help here because it only authenticates the client. However, the RPC executable will fail to start if the port that it uses has already been taken. While this allows the victim to detect the attack, it does not free him from risks. For example, an aggressively-caching user may attach the RPC executable to the operating system's startup to launch it automatically after login for convenience. In that case, since the RPC server process does not have a GUI to notify the victim that it has failed, the victim will not notice the failure and thus assume that the RPC server is running. Hence, the attacker's malicious server captures commands from the benign client. An example of such commands is \u201ccreate_wallet\u201d, which tells the server to create a new wallet account. This allows the attacker to have access to the new account because it is created by the attacker instead of the real wallet application.\nThe attack is straightforward, and no privilege escalation is needed. Also, there are many potential attackers who can perform the attack. For example, in enterprise environments that employ centralized access control mechanisms and allow login by multiple users to the same computer, anyone is a potential attacker. Any computer with guest account enabled is similarly vulnerable.\nReleases Affected:\nTested on Monero wallet 0.12.3\nHow to fix:\nWe found similar issues on other cryptocurrencies\u2019 wallet applications and are working with them to address the issues. There are various ways to prevent the attack, some of which are as follows:\nMandate the use of TLS on the RPC interface.\nThe RPC server accepts only RPC clients that are owned by users belonging to Administrators or a special group.\nSupporting Material/References:\nRecently, we have shown similar critical vulnerabilities in many well-known password managers, hardware tokens, and other security-critical applications at Usenix Security and DefCon:\nhttps://www.usenix.org/conference/usenixsecurity18/presentation/bui\nImpact\nAccess to the victim's wallet without knowing authentication credentials.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 2,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1554345480,
+    "report_url": "https://hackerone.com/reports/462442",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "The attacker logs into the victim's computer with their own credentials or a guest account."
+        ],
+        [
+            2,
+            "The attacker runs a malicious process in the background that will hijack the port used by the Monero wallet RPC server."
+        ],
+        [
+            3,
+            "The victim starts the Monero wallet RPC server, which fails to start because the port is already taken by the attacker's process."
+        ],
+        [
+            4,
+            "The attacker's malicious server now captures commands from the victim's benign client, such as 'create_wallet', allowing the attacker to create and access new wallet accounts."
+        ]
+    ],
+    "vuln_description": "An unprivileged attacker can impersonate the Monero wallet RPC server by hijacking the port before the victim starts the server. This allows the attacker to capture commands from the victim's client, potentially gaining access to new wallet accounts created by the attacker's malicious server.",
+    "reason": "The attack involves understanding the Monero wallet RPC server's behavior, port hijacking, and the digest access authentication mechanism. However, the steps are straightforward and do not require complex interactions or novel logic.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": true,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

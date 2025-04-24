@@ -1,0 +1,50 @@
+{
+    "reported_to": "LinkedIn",
+    "reported_by": "sevada797 ",
+    "title": "Can see phone numbers of others by providing mail address",
+    "content": "\nIt is possible for an attacker to see anyone's phone numbers abusing bug in reset password functionality. Bug allows to see anyone's phone number via email address. I will provide video POC a bit later.\nSteps to reproduce.\n1) Go to Forget password page \u2588\u2588\u2588\n2) Type your email press enter\n3) After verification code is sent to your mail, Press can't access this email\n4) You will see half of the phone number with that account, select the checkbox with phone number and press Send code\n5) You will be surprised seeing the phone number in the input tag visible to eye even without inspecting the page further\nSaying Your phone is not set up for password recovery. Please use one of the confirmed emails or eligible phone linked to your account.\nImpact\nThe exposure of users' phone numbers presents several security and privacy risks:\nPrivacy Violation: Users' private information is exposed without their consent.\nPhishing Attacks: Attackers can use the obtained phone numbers to launch targeted phishing attacks.\nSocial Engineering: Attackers may exploit the information to impersonate users or gather more personal details through social engineering tactics.\nFurther Compromise: Knowledge of the phone number could potentially aid in other forms of attacks, such as SIM swapping or bypassing two-factor authentication (2FA).\n\n",
+    "severity": [
+        7.5,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1731539100,
+    "report_url": "https://hackerone.com/reports/2534458",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to the 'Forgot Password' page"
+        ],
+        [
+            2,
+            "Enter an email address and press 'Enter'"
+        ],
+        [
+            3,
+            "After the verification code is sent, click 'Can't access this email'"
+        ],
+        [
+            4,
+            "Observe the partially masked phone number, select it, and click 'Send code'"
+        ],
+        [
+            5,
+            "View the full phone number displayed in the input field"
+        ]
+    ],
+    "vuln_description": "An attacker can exploit a bug in the password reset functionality to view a user's full phone number by entering their email address. This occurs when the system displays the phone number in the input field after selecting the 'Can't access this email' option, bypassing intended masking.",
+    "reason": "The vulnerability involves a straightforward sequence of steps without complex interactions or state manipulations. The discovery primarily relies on exploring the password reset flow and noticing the unintended exposure of the phone number.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,48 @@
+{
+    "reported_to": "AWS VDP",
+    "reported_by": "zolaer9527 ",
+    "title": "A potential risk in the experimental-programmatic-access-ccft which can be used to privilege escalation.",
+    "content": "\nSummary: I found a potential risk in the experimental-programmatic-access-ccft when I deployed it in the AWS Serverless Application Repository. A malicious can leverage the \"sts:AssumeRole\" permissions for \"*\" resources to escalate permission.\nDescription: The experimental-programmatic-access-ccft application creates a function named ExtractCarbonEmissionsFunction, and the associated role is assigned policies with permissions such as \"sts:AssumeRole \" for \"*\" resources. A malicious user can leverage the \"sts:AssumeRole\" permissions to assume into any AWS Account in the AWS Organization, resulting in privilege escalation. This poses a significant security risk to the account used to deploy the application.\nRemediation Instructions\nUse finer-grained authorization policies to replace the AWS-managed policies. And use the specific resource names to replace the \"*\".\nThe permissions for STS resources should be removed if they do not affect normal functionality.\nAdd a permissions boundary to restrict the permission.\nSupporting Material/References:\nIndicate the Amazon service or product that this vulnerability occurs on: (AWS S3, Amazon Lambda, etc): Amazon Lambda\nImpact\nSummary:\nA malicious user could leverage these permissions to escalate his/her privilege.\n\n",
+    "severity": [
+        7.3,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Incorrect Privilege Assignment"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1730942820,
+    "report_url": "https://hackerone.com/reports/2808412",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Deploy the experimental-programmatic-access-ccft application from the AWS Serverless Application Repository."
+        ],
+        [
+            2,
+            "Inspect the IAM role associated with the ExtractCarbonEmissionsFunction to identify the overly permissive 'sts:AssumeRole' permission for '*' resources."
+        ]
+    ],
+    "vuln_description": "The experimental-programmatic-access-ccft application creates a Lambda function with an IAM role that has overly permissive 'sts:AssumeRole' permissions for all resources ('*'). This allows a malicious user to assume any role in the AWS Organization, leading to privilege escalation.",
+    "reason": "The vulnerability involves a straightforward inspection of IAM permissions and does not require complex interactions between components or manipulation of application states. The issue is relatively easy to identify once the IAM policies are reviewed.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

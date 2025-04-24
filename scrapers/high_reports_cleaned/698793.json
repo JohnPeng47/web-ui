@@ -1,0 +1,42 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "sp1d3rs ",
+    "title": "Unauthenticated arbitrary file upload on the https://\u2588\u2588\u2588\u2588\u2588/ (\u2588\u2588\u2588\u2588\u2588.mil)",
+    "content": "\nDescription\nI was able to identify unsafe upload endpoint on the https://\u2588\u2588\u2588\u2588\u2588\u2588/upload.php\nPOC\n1) Go to the https://\u2588\u2588\u2588\u2588\u2588\u2588/upload.php\n2) Upload some test file.\nYou will see success message, leaking some internal paths\n3) Visit https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/delete.me and you will see your uploaded file there\nI uploaded example image file there:\n\u2588\u2588\u2588\u2588\u2588\nImpact\nArbitrary file upload, may lead to the Stored XSS, hosting attacker's content and code execution.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Violation of Secure Design Principles"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1721414160,
+    "report_url": "https://hackerone.com/reports/698793",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to https://\u2588\u2588\u2588\u2588\u2588\u2588/upload.php"
+        ],
+        [
+            2,
+            "Upload a test file and note the success message revealing internal paths"
+        ],
+        [
+            3,
+            "Visit https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/delete.me to confirm the file was uploaded"
+        ]
+    ],
+    "vuln_description": "An unauthenticated arbitrary file upload vulnerability was found on the target site, allowing attackers to upload files without authentication. This could lead to stored XSS, hosting malicious content, or even remote code execution.",
+    "reason": "The vulnerability is straightforward to discover as it involves a direct file upload endpoint without authentication checks. The steps to reproduce are simple and do not require complex interactions or state manipulation.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

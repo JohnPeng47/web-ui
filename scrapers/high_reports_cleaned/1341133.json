@@ -1,0 +1,48 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "fdeleite ",
+    "title": "Subdomain takeover [\u200b\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588]",
+    "content": "\nThe subdomain \u2588\u2588\u2588\u2588\u2588\u2588\u2588 was pointing to an Azure Cloud App domain (araz-sp.centralus.cloudapp.azure.com), but that endpoint was not registered.\nImpact\nIt's extremely vulnerable to attacks as a malicious user could create any web page with any content and host it on the vulnerable domain. This would allow them to post malicious content which would be mistaken for a valid site.\nThey could perform several attacks like:\nCookie Stealing\nPhishing campaigns.\nBypass Content-Security Policies and CORS.\nRecommendations for fix\nRemove the affected DNS record if not used\nSupporting Material/References:\nhttps://0xpatrik.com/subdomain-takeover/\nhttps://hackerone.com/reports/661751\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nJust go to\nhttp://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nYou will see a blank page, but checking the source code you will see proof of the take over.\nCode 42 Bytes\n1<html>  \n2<!-- poc by deleite --> \n3 </html>\nSuggested Mitigation/Remediation Actions\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Privilege Escalation"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1634177820,
+    "report_url": "https://hackerone.com/reports/1341133",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the subdomain (http://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588) and observe a blank page."
+        ],
+        [
+            2,
+            "Inspect the page source to confirm the presence of the takeover proof (e.g., '<!-- poc by deleite -->')."
+        ]
+    ],
+    "vuln_description": "The subdomain was pointing to an unregistered Azure Cloud App domain, making it vulnerable to takeover. An attacker could host malicious content on the domain, enabling attacks like cookie stealing, phishing, or bypassing security policies.",
+    "reason": "The vulnerability is straightforward to discover as it only requires checking the DNS records and verifying the subdomain's response. There are no complex interactions or states involved.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "661751",
+    "idor_detectable": false,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": true,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": false
+    }
+}

@@ -1,0 +1,50 @@
+{
+    "reported_to": "UPchieve",
+    "reported_by": "rupachandransangothi ",
+    "title": "OTP reflecting in response sensitive data exposure leads to account take over",
+    "content": "\nSummary:\nSensitive data that is otp is reflecting in the response of phone number otp verification in https://app.upchieve.org\nSteps To Reproduce:\nSignin with a account 2.After signin it will ask for phone number for otp verification. 3.Capture the request using burpsuite and see the response 4.Now otp is exposing in the response. 5.Account take over is happening.\nImpact\nAny attacker can login into user account with his/her otp verification which is a high impact of this website.sensitive data is exposing here\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1648332000,
+    "report_url": "https://hackerone.com/reports/1318087",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Sign in to an account on https://app.upchieve.org"
+        ],
+        [
+            2,
+            "Enter a phone number for OTP verification"
+        ],
+        [
+            3,
+            "Capture the request using a tool like Burp Suite"
+        ],
+        [
+            4,
+            "Observe the OTP exposed in the response"
+        ],
+        [
+            5,
+            "Use the exposed OTP to bypass verification and take over the account"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the exposure of OTP (One-Time Password) in the response during phone number verification, allowing an attacker to intercept and use this OTP to bypass authentication and take over the user's account.",
+    "reason": "The vulnerability is straightforward to discover as it involves intercepting a single request during a common authentication flow (OTP verification) and observing the OTP in the response. There are no complex interactions or states involved, and the issue is a common misconfiguration in web applications.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

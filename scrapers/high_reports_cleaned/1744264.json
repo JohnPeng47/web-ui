@@ -1,0 +1,56 @@
+{
+    "reported_to": "Reddit",
+    "reported_by": "beksem35 ",
+    "title": " read and message other user's messages",
+    "content": "\ngo to your account's chat page, stop the request and change the reddit session parameter, now leave the request and you will be able to access the test account's chat screen\nsend the request to the repeater change the reddit session parameter and send it then you will see the return result is 200\nshow reply in browser and copy and paste the address into your browser you will access the chat page of your test account\nImpact\nother users' chat screen can be accessed\nand message can be sent\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Insecure Direct Object Reference (IDOR)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1684432560,
+    "report_url": "https://hackerone.com/reports/1744264",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to your account's chat page and intercept the request using a proxy tool like Burp Suite."
+        ],
+        [
+            2,
+            "Modify the 'reddit session' parameter in the intercepted request to that of another user's session and forward the request."
+        ],
+        [
+            3,
+            "Observe the response (200 OK) and open the chat page in the browser using the modified session to access another user's chat."
+        ],
+        [
+            4,
+            "Send messages from the intercepted session as if you were the other user."
+        ]
+    ],
+    "vuln_description": "This vulnerability allows an attacker to access and interact with another user's chat by intercepting and modifying the session parameter in the request. This leads to unauthorized access to private messages and the ability to send messages as the victim.",
+    "reason": "The attack involves intercepting and modifying a session parameter, which is a straightforward manipulation of HTTP requests. The steps are linear and do not require understanding complex application states or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": true,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": true
+    }
+}

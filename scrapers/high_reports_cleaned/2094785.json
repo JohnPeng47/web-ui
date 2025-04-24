@@ -1,0 +1,38 @@
+{
+    "reported_to": "Internet Bug Bounty",
+    "reported_by": "addisoncrump ",
+    "title": " Cargo not respecting umask when extracting crate archives",
+    "content": "\nCargo did not properly protect files in the cargo registry. When an archive contained files which were marked as globally writeable, they would be unpacked as-is and retain their global writeability. This is CWE-278 (not available in HackerOne).\nThis was discovered as part of a (personal) routine file permissions check:\nCode 48 Bytes\n1find / ! -type l -perm -002 -exec ls -alhd {} \\;\nImpact\nA local attacker may inject arbitrary code into the cached files present in the cargo registry. This, in turn, allows for a local attacker to act as the targeted user (when the user compiles the modified code) or to poison prebuilt binaries built by that user and thus have arbitrary code execution against downstream users (supply chain attack).\n\n",
+    "severity": [
+        7.9,
+        null
+    ],
+    "bounty": 4660,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1692137700,
+    "report_url": "https://hackerone.com/reports/2094785",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Run the command: `find / ! -type l -perm -002 -exec ls -alhd {} \\;` to identify files with global write permissions."
+        ],
+        [
+            2,
+            "Extract a crate archive containing files marked as globally writeable and observe that Cargo retains these permissions in the cargo registry."
+        ]
+    ],
+    "vuln_description": "Cargo does not respect the umask when extracting crate archives, allowing files with global write permissions to retain these permissions in the cargo registry. This can lead to local attackers injecting arbitrary code into cached files, potentially resulting in arbitrary code execution when the user compiles the modified code or when prebuilt binaries are used by downstream users.",
+    "reason": "The vulnerability involves understanding file permissions and the umask behavior during archive extraction. While the issue is straightforward to identify once the file permissions are checked, it requires knowledge of how Cargo handles file permissions during extraction, which is not immediately obvious.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

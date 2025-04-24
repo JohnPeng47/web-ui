@@ -1,0 +1,46 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "martinvw ",
+    "title": "Subdomain takeover of \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+    "content": "\nI have found a subdomain of \u2588\u2588\u2588\u2588\u2588\u2588\u2588 to be vulnerable to takeovers via a CNAME to unclaimed domain. I have claimed this domain and redirected them to a blank page to prevent a bad actor from doing so in the meantime, and hosted a POC file at obscure URLs. These are the following domains I discovered and the outdated endpoints on Azure to which they point:\n\u2588\u2588\u2588\u2588\u2588 --> \u2588\u2588\u2588\u2588\n...and the proof-of-concept file is at the following location:\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/proof.e7437329-ab61-4f22-a049-df5b3685313a.txt\nI have not hosted any other file nor attempted any other vector of attack.\nImpact\nYou're probably familiar with takeovers like this by now, but through this vulnerability, it would be possible for an attacker to obtain cookies and other sensitive information from your users via phishing, cookie hijacking, or XSS.\nMore info on possible attack vectors can be found at MDN: https://developer.mozilla.org/en-US/docs/Web/Security/Subdomain_takeovers\nSystem Host(s)\n\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nTo confirm the issue visit:\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/proof.e7437329-ab61-4f22-a049-df5b3685313a.txt\nSuggested Mitigation/Remediation Actions\nRemove CNAME of \u2588\u2588\u2588\u2588\u2588\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Security Through Obscurity"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1662504600,
+    "report_url": "https://hackerone.com/reports/1457928",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify subdomains of the target domain (\u2588\u2588\u2588\u2588\u2588\u2588\u2588) that have CNAME records pointing to unclaimed or vulnerable services."
+        ],
+        [
+            2,
+            "Verify the CNAME records point to outdated or unclaimed endpoints (e.g., Azure) that can be registered by an attacker."
+        ],
+        [
+            3,
+            "Claim the vulnerable domain and host a proof-of-concept file (e.g., https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/proof.e7437329-ab61-4f22-a049-df5b3685313a.txt) to demonstrate the takeover."
+        ],
+        [
+            4,
+            "Confirm the vulnerability by accessing the hosted proof-of-concept file."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves a subdomain takeover where a subdomain of \u2588\u2588\u2588\u2588\u2588\u2588\u2588 has a CNAME record pointing to an unclaimed domain. An attacker can claim this domain and potentially exploit it for phishing, cookie hijacking, or XSS attacks.",
+    "reason": "The attack involves identifying subdomains with misconfigured CNAME records, which is a straightforward process using tools like DNS enumeration. The interaction between the subdomain and the unclaimed service is obvious once the CNAME record is discovered. No complex application states or novel logic is required.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

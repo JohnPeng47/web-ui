@@ -1,0 +1,54 @@
+{
+    "reported_to": "HackerOne",
+    "reported_by": "bob004x ",
+    "title": "Two-factor authentication bypass lead to information disclosure about the program and all hackers participate",
+    "content": "\nSummary:\nTwo-factor authentication bypass lead to information disclosure about the program and all hackers participate\nDescription:\nHi dear\nwhen you have an invitation from a program and to accept that invitation to see the program content you need to have Two-factor authentication turned on ,\ntry to use google app without an account to turn on the tow factor in that way you can access the apps and accept the invitation and see all the program details and all hacker participate\nif you back to turn off the tow factor and set it again with your email from google app you will find that you have been emailed again with invitations to accept it\n\nlike you didn't see that before\nSteps To Reproduce\nTurn on the tow factor with any mobile with option without an account\nTry to access your invitation for any program\nAccept the invitation to see all the program data and all participate\n4-Back to turn off the tow factor\n5-Turn on again and connect it that timewith your email from google app\n6-You will notice that you have been invited again to the same programs via email\n\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n7- Accept the invitation that time to see all the data you have seen before\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nIn the video you will notice that i have accept the invitation for mondoo program two times with the two factor time setup\nImpact\ninformation disclosure for all the private programs data without being accepting the invitation\n\n",
+    "severity": [
+        8.3,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1720725180,
+    "report_url": "https://hackerone.com/reports/2486086",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Turn on two-factor authentication using a Google app without an account"
+        ],
+        [
+            2,
+            "Access and accept an invitation to a private program to view its details and participants"
+        ],
+        [
+            3,
+            "Turn off two-factor authentication"
+        ],
+        [
+            4,
+            "Turn on two-factor authentication again, this time connecting it with your email from the Google app"
+        ],
+        [
+            5,
+            "Notice that you receive the same invitations again via email"
+        ],
+        [
+            6,
+            "Accept the invitations again to view the same program data"
+        ]
+    ],
+    "vuln_description": "A two-factor authentication bypass allows unauthorized access to private program details and participant information by manipulating the authentication setup process. By initially setting up two-factor authentication without an account, a user can accept invitations and view sensitive data. Disabling and re-enabling two-factor authentication with an email account then triggers the system to re-send invitations, allowing the user to access the same data again.",
+    "reason": "The vulnerability involves a non-obvious interaction between the two-factor authentication setup process and the invitation system. The attacker must understand that setting up two-factor authentication without an account allows bypassing the intended security checks, and that reconfiguring it with an email account resets the invitation state. This requires knowledge of both the authentication flow and the invitation handling logic.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,60 @@
+{
+    "reported_to": "GitLab",
+    "reported_by": "sadd_man ",
+    "title": "Adding everyone to the repo due to the lack of rate limit",
+    "content": "\nSummary\nSince there is no rate limit in the inviting users to the repository section, it is possible to add all users on gitlab to a repository.\nSteps to reproduce\n(Step-by-step guide to reproduce the issue, including:)\nCreate a repository\ngo to the project members section\nchoose a random user\nbefore clicking the invite button, we need to capture the request with the burp suite..\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSend it to the Intruder module, specify the \u2588\u2588\u2588\u2588\u2588 field here between 1 and 7006996 and send the request.\nImpact\nIt is possible to collect all users on Gitlab in a single repository, so users' mailboxes will be filled with notifications.\nNote\nBecause the rate limit is out of scope, I tested it and I could not stop the python script, and there were users affected.\nImpact\nIt is possible to collect all users on Gitlab in a single repository, so users' mailboxes will be filled with notifications.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Insecure Direct Object Reference (IDOR)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1600140480,
+    "report_url": "https://hackerone.com/reports/978768",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create a repository"
+        ],
+        [
+            2,
+            "Go to the project members section"
+        ],
+        [
+            3,
+            "Choose a random user and capture the invite request with Burp Suite"
+        ],
+        [
+            4,
+            "Send the request to the Intruder module, specifying the user ID field with a range from 1 to 7006996"
+        ],
+        [
+            5,
+            "Execute the attack to add all users to the repository"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to add all users on GitLab to a single repository due to the lack of rate limiting in the user invitation feature. This can flood users' mailboxes with notifications and potentially cause denial of service.",
+    "reason": "The attack is straightforward and involves a single component (the user invitation feature) with no complex interactions or state manipulations. The lack of rate limiting is a common issue and the attack method is not novel.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": true,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": false
+    }
+}

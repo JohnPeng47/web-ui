@@ -1,0 +1,40 @@
+{
+    "reported_to": "Nextcloud",
+    "reported_by": "lawsoul ",
+    "title": "Bypass hide download Nextcloud Share",
+    "content": "\nSummary\n<image_0>\nPlatform(s) Affected:\nNextcloud Server\nImpact\nSensitive documents after sharing that do not allow downloading will be reloaded even if disabled, for anyone\n\n",
+    "severity": [
+        7.1,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/pM5VcfKtJyKQwNFvXJVmCMjn?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_2020-05-04_21-01-36.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_2020-05-04_21-01-36.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7ZJYMYW5%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T223953Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIHEtprC56zaUG2%2FRQnJQU1AahNVwinnmCjz0AMvEoLsJAiAtalDhcF3yKdYS%2Bb1p8vvhihOuEKKMZPrP9cZEXC3ZpSqyBQgeEAMaDDAxMzYxOTI3NDg0OSIMOxvIuAztr0KG0YJwKo8F99h1YUQQcm2FE6WzHuEqtut56cvYoqSEi3cDXPxVrNiau8f2FYc%2BGVh2pPFTLKTWq%2Fj9iBMNwaq2umeN3jG1S2EV67bK2tEUv%2BTtWtrCMzQI53hrD9RZSJ54R%2BwxqyV%2FsD0VCEQfjCmxonnWej7%2BD6VYaVi0YZOJAwNX5PAcDSg99s7wgPnrGHkfizmBvpvc0J6tZmQMe0FO%2FsO%2FOr4b8WMTLITP93YwuKfT8lIKhx9QlLUnDmgzanjtBG%2BOwDOBlVrGLQUA717L6fPSpfPVellRn3oOtlutzwdgJ3SJK%2BFtx4zKRPhyPI4wfo0MPaf2QDDVlK1NIvP3f1KildXYEtiPXyAGlwqMxm8tox397UvQqriUNCUY%2BQT0cuvxiJNx7qawK%2FhWr52PoDZBnHEgOMp%2F0So6e2ZK77%2BsfVHx%2FL1naxQZjbNE%2BJB35ADm9FSxGnat5OW1Ji715LXd3xB4zrbga5cIckAfHehUkFQkbqKPjib7swUSMa3J3HnO2gyFgpagMJT8GNc4yYUVc8p8lpZb%2BlvjPd4O98aeVtKDOdmJ2YuiA%2B9qcHVy7rh6iNwYYeLneIenOFNG%2FiQi1fgJNxEop5QW3r7U08KWWhYbzQgsZyzOwHg41m9r2iYmU%2Fave%2BiPmpK3t5Qyhm1c9qPxo4M%2FH2HWhAgQMUlkwWrmd8jcIbK%2F9qsRlmwnXi9a1yi7msI2PoFIai04bTpQB3s5yMjxumH5hJ6oBlTDHVqMMRonaHWlH3XBEWizIg1Tl4cBCnRg3yC76ayBTft2vb3xYqWKTZ5d11UZYCSD5W%2Ftw2XvkwcHAlN6ei6bKxPx9rAIjGd6R4%2Fe1FpV4o8r3JkutsNv7D4qGeUZPnsgCO6gnjC%2BtYy%2FBjqyASN16RTKYay%2FwLUU9mPD2YYiV%2F6FCO4IfRUuBmbxOTqOFynX7rTVbCya622jgE8c%2FnRr5QSvkGhqZbU8DxKHWqNL9YFhm8Z2ygZhdwZ9jrOnc0xajDHRFlniTLW%2FMiEvLUOcXkj7rjkUl4ialh%2B0vmGphL66I%2FiMHlbx9laqjEldVMubzZPVSeBzvOd8z5FzQGxL61EakDASTVnd5UzDSzq2YfpItACnyq6a899PD1rYcWY%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=ab8a4679b83ac5bba505dc06b17bff50b7c4d42fc0eed49f686fb8fd15334962"
+    },
+    "disclosed_date": 1601908860,
+    "report_url": "https://hackerone.com/reports/865777",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Share a document in Nextcloud with the 'hide download' option enabled."
+        ],
+        [
+            2,
+            "Attempt to download the shared document by bypassing the 'hide download' restriction, which should not be possible."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows anyone to bypass the 'hide download' option in Nextcloud shares, enabling them to download sensitive documents that were shared with download restrictions.",
+    "reason": "The vulnerability involves a straightforward bypass of a single security feature without the need for complex interactions or multiple components. The issue is likely due to a misconfiguration or oversight in the implementation of the 'hide download' feature.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

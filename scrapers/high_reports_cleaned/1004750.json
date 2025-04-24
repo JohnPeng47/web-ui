@@ -1,0 +1,60 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "silentbreach ",
+    "title": "IDOR + Account Takeover  [UNAUTHENTICATED]",
+    "content": "\n1- Open the burp suite.\n2- Switch the \"Repeater\" tab.\n3- Paste the content of the attached request into the repeater.\n4- Replace the \"UID2 = 4820041\" value in the cookie with the ID value of the user to be attacked. Also write the user's email in the \"userName\" input.\n5- Replace the victim user's password\nNote: Follow the steps in the \"1004745\" report to get the user's email address.\nImpact\nYou can change users' passwords and take over their account.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Insecure Direct Object Reference (IDOR)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1604964480,
+    "report_url": "https://hackerone.com/reports/1004750",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "steps": [
+        [
+            1,
+            "Open Burp Suite and switch to the 'Repeater' tab."
+        ],
+        [
+            2,
+            "Paste the content of the attached request into the repeater."
+        ],
+        [
+            3,
+            "Replace the 'UID2 = 4820041' value in the cookie with the ID value of the user to be attacked and write the user's email in the 'userName' input."
+        ],
+        [
+            4,
+            "Replace the victim user's password in the request."
+        ],
+        [
+            5,
+            "Follow the steps in the '1004745' report to get the user's email address if not already known."
+        ]
+    ],
+    "vuln_description": "This vulnerability allows an unauthenticated attacker to change users' passwords and take over their accounts by exploiting an Insecure Direct Object Reference (IDOR) issue. The attacker manipulates the UID2 cookie and userName input to target a specific user and change their password without proper authorization.",
+    "reason": "The attack involves manipulating a single parameter (UID2) in the cookie and requires knowledge of the victim's email address, which can be obtained from another report. The steps are straightforward and do not involve complex interactions or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "1004745",
+    "idor_detectable": true,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": true
+    }
+}

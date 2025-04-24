@@ -1,0 +1,38 @@
+{
+    "reported_to": "Tor",
+    "reported_by": "sasikaran ",
+    "title": "Information Exposure Through Directory Listing",
+    "content": "\nVulnerability description\nThe web server is configured to display the list of files contained in this directory. This is not recommended because the directory may contain files that are not normally exposed through links on the web site.\nLink as POC:\nhttps://www.torproject.org/static/\nhttps://www.torproject.org/static/css/\nhttps://www.torproject.org/static/findoc/\nhttps://www.torproject.org/static/fonts/\nhttps://www.torproject.org/static/js/\nhttps://www.torproject.org/static/images/\nhttps://www.torproject.org/static/keys/\nFor obvious reasons, I can not check whether this service is in scope, thats why i haven't searched for any critical informations and haven't check tokens and other stuff\nPlease let me know if you need some extra information.\nSorry for out of scope report, i thought it could be informative for you!\nThanks in advance!\nImpact\nExposing the contents of a directory can lead to an attacker gaining access to source code or providing useful information for the attacker to devise exploits, such as creation times of files or any information that may be encoded in file names. The directory listing may also compromise private or confidential data.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Exposure Through Directory Listing"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1630077300,
+    "report_url": "https://hackerone.com/reports/1316412",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the URL: https://www.torproject.org/static/"
+        ],
+        [
+            2,
+            "Observe the directory listing of files and folders"
+        ]
+    ],
+    "vuln_description": "The web server is configured to display the list of files contained in the directory, which may expose sensitive information or files not normally linked on the website.",
+    "reason": "The vulnerability is straightforward to discover as it only requires accessing a URL and observing the directory listing. There are no complex interactions or multiple components involved.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

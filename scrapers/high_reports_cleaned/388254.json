@@ -1,0 +1,50 @@
+{
+    "reported_to": "WordPress",
+    "reported_by": "rewanth_cool ",
+    "title": "Account takeover vulnerability by editor role privileged users/attackers via clickjacking",
+    "content": "\nVulnerability -\nEditor role privileged users are able to hack into other's account by exploiting clickjacking vulnerability.\nVersion-\n4.9.7\nIssue-\nhttps://make.wordpress.org/core/handbook/testing/reporting-security-vulnerabilities/#why-are-some-users-allowed-to-post-unfiltered-html\nAs mentioned per the above link, the editor and admin roles are given permissions to inject arbitary javascript in the posts. Though its a severe vulnerability we can't report about injecting javascript to steal cookies.\nBut only the admin roles/users have the permissions to change the details of other users. Due to this vulnerability editor privileged users are even able to do account takeover of other users account.\nAllowing the editor role privileged users to use unfiltered HTML (https://en.support.wordpress.com/code/) exposed a new vulnerability via clickjacking. Impact has been explained clearly in the below section. This attack expects the wordpress user to be logged in before he opens the malicious post link sent by the editor privileged user.\nReproduction steps-\nCreate two user accounts, one with author/subscriber privileges and other with editor privileges.\nGet logged in using the editor privileged account and create a new post with the following code. Replace 159.65.157.23:9080 with your IP address.\nCode 663 Bytes\n1<iframe src=\"http://159.65.157.23:9080/wp-admin/profile.php\" id=\"frame\" onload=\"loaded()\" style=\"visibility:hidden\"></iframe>\n2\n3<script>\n4var MyIFrame = document.getElementById(\"frame\");\n5var MyIFrameDoc = (MyIFrame.contentWindow || MyIFrame.contentDocument || MyIFrame.document);\n6function loaded(){\n7MyIFrameDoc.document.getElementById(\"your-profile\").first_name.value=\"hacked by rewanthcool\"\n8MyIFrameDoc.document.getElementById(\"your-profile\").submit.click();\n9alert(\"Your first name has been changed to \" + MyIFrameDoc.document.getElementById(\"your-profile\").first_name.value + \". Visit http://159.65.157.23:9080/wp-admin/profile.php for confirmation\");\n10}\n11</script>\nNow click on publish button to publish the URL. Copy the URL to the malicious post.\nNow get logged in as another user with author/subscriber privileged roles in another browser/incognito tab.\nNow paste the malicious URL (copied in step 3) in this browser and press enter.\nBoom !! Now the open the profile page of the author/subscriber privileged user http://159.65.157.23:9080/wp-admin/profile.php and you can see his firstname got changed to rewanthcool.\nSimilarly you can change the email of the user by changing first_name parameter in above payload to email. So, now your payload becomes, MyIFrameDoc.document.getElementById(\"your-profile\").email.value=\"attacker_rewanthcool@gmail.com\". By submitting this payload, you will get a confirmation email link to your profile and you can takeover the victim's account.\nNOTE-\nCSRF protection adds _wpnonce to prevent these kind of CSRF attacks but since we are handling everything in an iframe bypasses this CSRF protection as it generates a new valid _wpnonce while it gets loaded in the iframe.\nIn the above payload, the attacker was able to change the firstname of the victim. That's just a sample. In worst cases, there are two main fields in the same page. They are\nEmail-id\nNew Password which generates new password by click on a button.\nSessions: Logout everywhere else.\nBy using the combination of hidden iframe and javascript, the attacker can craft a similar payload and takeover a wordpress users account.\nMitigation-\nDisallow editor privileged users from injecting iframes into the pages/posts by changing the X-Frame-Options header to DENY.\nImpact\nEditor role users can access other users account and change his personal information, change this settings, etc just by making the user to visit a nicely crafted page post.\nWorst-case attack scenario\nMost dangerous impact can be account takeover by changing the email-id and password of the victim by injecting an iframe.\nDetailed explanation of vulnerability-\nCSRF on edit-profile has been smartly handled by wordpress developers by adding _wpnonce to it. But allowing the editor privileged users to inject iframes into the posts bypasses this CSRF protection.\nA hidden iframe can be put in a post and its URL can be sent to the victim(lower privileged user like author, subscriber, etc). Once the victim clicks on the URL sent by the attacker, the hidden iframe will be submitting a javascript request to change the victim's firstname and lastname. In worst cases, the attacker can submit two requests via iframe using javascript to make account takeover.\nFirst request, to generate new password via hidden iframe.. This disabled the victim from using old password.\nSecond request, to change the victim's email id to attacker's email id via hidden iframe. This completely disables to user to use the forgot-password option as the email id has been changed.\nAttacker now clicks on forgot-password and a reset email will be sent to the attackers email id.\nAccount takeover completed and editor privileged user hacked the other wordpress users with other privileges.\nBonus feature/exploit to lock the victim-\nThere's an option to logout from everywhere in the edit-profile page, by clicking on that the attacker can make sure that the victim is not logged into any other accounts after he changed the password.\nOnly admin privileged users should be having the abilities to change the personal information like usernames, email-id, etc of other accounts but due to this vulnerability the editor privileged user is also getting the same amount of privileges as admin privileged user which definitely is a bad practice.\nConsidering the high severity of the issue, I'm sure this will be considered as an exceptional report with immediate fix.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "UI Redressing (Clickjacking)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1535992020,
+    "report_url": "https://hackerone.com/reports/388254",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create two user accounts: one with author/subscriber privileges and another with editor privileges."
+        ],
+        [
+            2,
+            "Log in as the editor and create a new post with a malicious iframe and JavaScript payload targeting the profile.php page."
+        ],
+        [
+            3,
+            "Publish the post and copy the URL of the malicious post."
+        ],
+        [
+            4,
+            "Log in as the author/subscriber in another browser/incognito tab and visit the malicious URL."
+        ],
+        [
+            5,
+            "Observe the victim's profile details (e.g., first name, email) being altered without their consent."
+        ]
+    ],
+    "vuln_description": "Editor role users can exploit clickjacking via unfiltered HTML injection to hijack other users' accounts by manipulating hidden iframes and JavaScript to submit unauthorized changes to the victim's profile (e.g., email, password). This bypasses CSRF protections due to iframe-generated nonces.",
+    "reason": "The attack combines multiple non-obvious components: understanding WordPress role permissions, leveraging unfiltered HTML for iframe injection, bypassing CSRF via iframe-generated nonces, and crafting JavaScript to automate profile changes. The interaction between these components is subtle and requires deep knowledge of WordPress internals.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

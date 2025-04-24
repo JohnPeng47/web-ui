@@ -1,0 +1,70 @@
+{
+    "reported_to": "Automattic",
+    "reported_by": "fuzzme ",
+    "title": "[intensedebate.com] No Rate Limit On The report Functionality Lead To Delete Any Comment When it is enabled",
+    "content": "\nHello\nSummary:\nI have found a no rate limit issue on the report functionality.\nWhen you enabled the report functionality on your site, you can set a number of reports before deleting the comment reported.\nBy default, this functionality is unable, but if you enabled this and you set a $x number of reports before deleting the comment, an attacker can spamming this functionality and delete your comment.\nSteps To Reproduce:\n1) Login at https://intensedebate.com\n2) Create your own site at https://intensedebate.com/install, and follow the instructions (use generic install)\n3) After setup your site, go to https://www.intensedebate.com/user-dashboard, on click to Moderate.\n<image_0>\n4) Go to the comment setting by clicking to Comments\n<image_1>\n5) Setup the Report functionality by checked the Enable \"Report this comment\" button and set a number of reports before deleting the comment to 10 and save it\n<image_2>\n6) Go to your site and add a comment\n7) With a other account go to your site, and report the comment manually x10\n8) After spam the Report functionality\n9) Refresh the page, and you will see the comment is deleted\nPOC\nThe video POC NoRateLimit.mp4\nThank you,\nFuzzme.\nImpact\nDelete any comment in any site when the report functionality is enabled\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/cw60tfeyvc50dyure65vui0sn45e?response-content-disposition=attachment%3B%20filename%3D%22step.png%22%3B%20filename%2A%3DUTF-8%27%27step.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQSY4B4WPV%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T211816Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIC0jz0KCax0Xw5xm3S%2Fz6EDqL2MtW2GdnZqmxOuVZQmPAiEAwgxNbwWfvsV6toAaAmHIKoQM96jp07p9NzfQnAAtl9EqsgUIHRADGgwwMTM2MTkyNzQ4NDkiDAFzIh4lqLuAVVcdxiqPBdr5HC4kCK%2Bu5dMaQ7TcjjXj%2BZxqzXjM2MTeJKqqBcT8R927XuXaZwsvm2QK%2FuoxKSd9RTqNFl7EnJ2do41Y9AEM%2FIS%2BRG8uc8arepQ4nAkbBBAPIpwWkSQe%2Fca7ocTBZmfeH4XHoiDr42MhOn183cZHUZc2on8EvxNN%2BKvV0tIZcoZpFIKK4Xz%2FtlZA9qpAz28%2Fb%2Fg9cZ6UiLKOF1IM%2Bw6eQaMCOi4Gp3np5jOaiRknpKPYpksEWvAF1z5JHl40wvbN2bqfyVYAv9e3D%2BbYBmOD%2BnF7t7vseNMYRxPAJIhpRJWqsvbClb6PtFxjt8HupW8qQC9SWfGF2kYmyPOlh7QUHdLRIbes0yRlGIx3hfanmBHXepJC5O3O7%2BSLPT1Kik35fKSW2ZBECKRvkG0vC0EwYusejaukR0Rp06JqcRBKgrN8%2FgB2FVobjXklBpLPxHAPvuHBuy9a89pzBmhgicsp57AuUo4Ci%2FHW5Ai3SI8FiuTXInmUZaO1oCVlzf%2B9evgq61JS9J6D6dJ06JAj1Ddn951w7%2B%2BJ1jnsvuO7QqgW1A87KOSI0l4izN8l4sADiwpTpjJofwF6yalytvBxKSPg48zbt7y4mjEwLSG4mSu0qpFCM2Hb%2FcLSnbQO3wznW2yNMoBDLBYdLbIlyugblhsRmi%2BI3HSVrjwFkRf5KklZj6s48hkbk1yntmeZ2UPfXCOyKODe%2FOL1JxfenIp1mOdwQ3l%2FV073a6QReJvlgBzdSdu2oKeLEin6XU9%2FKs4ASUk%2B9bL%2FMdxtDME8CO6v8eqPz9Y36TwZz3UmJxsqDVM%2FWPMXqT8RnagEIt0%2Bt5QjBvKxs0KuXcKWw%2BfIq7p8%2Bt9%2BVaUGnDDIiBrz5h1MNH8wgJOMvwY6sQF7y8zHGzOk6bvoE15dgSfYWmryXWC9PptOhu5MPkiNgh%2Bk3022wgaOyJCCTw%2B57KLdWY%2F5j3UbMKs6TvsmoKdFImHXxU%2FXUOUKCk88cXgo2PmozrthirNAdBwY%2FUBOMW0gefKeLd61U9aW6FuBgvWiy89JJBP1E%2Bf4kTPM5YjKy%2BWQSKIaLfWdcxehGfvqmJV9GwpkymXexvkpmXSHo39BBi%2FGd41cZB3wd4KUpq04FBI%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=44ad45965d351cbbb1324339917655db3f74c690b2ed61099108c2ca9088776a",
+        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/nex4t58xel7vcdx37omjj3z3qdap?response-content-disposition=attachment%3B%20filename%3D%22step1.png%22%3B%20filename%2A%3DUTF-8%27%27step1.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQSY4B4WPV%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T211816Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIC0jz0KCax0Xw5xm3S%2Fz6EDqL2MtW2GdnZqmxOuVZQmPAiEAwgxNbwWfvsV6toAaAmHIKoQM96jp07p9NzfQnAAtl9EqsgUIHRADGgwwMTM2MTkyNzQ4NDkiDAFzIh4lqLuAVVcdxiqPBdr5HC4kCK%2Bu5dMaQ7TcjjXj%2BZxqzXjM2MTeJKqqBcT8R927XuXaZwsvm2QK%2FuoxKSd9RTqNFl7EnJ2do41Y9AEM%2FIS%2BRG8uc8arepQ4nAkbBBAPIpwWkSQe%2Fca7ocTBZmfeH4XHoiDr42MhOn183cZHUZc2on8EvxNN%2BKvV0tIZcoZpFIKK4Xz%2FtlZA9qpAz28%2Fb%2Fg9cZ6UiLKOF1IM%2Bw6eQaMCOi4Gp3np5jOaiRknpKPYpksEWvAF1z5JHl40wvbN2bqfyVYAv9e3D%2BbYBmOD%2BnF7t7vseNMYRxPAJIhpRJWqsvbClb6PtFxjt8HupW8qQC9SWfGF2kYmyPOlh7QUHdLRIbes0yRlGIx3hfanmBHXepJC5O3O7%2BSLPT1Kik35fKSW2ZBECKRvkG0vC0EwYusejaukR0Rp06JqcRBKgrN8%2FgB2FVobjXklBpLPxHAPvuHBuy9a89pzBmhgicsp57AuUo4Ci%2FHW5Ai3SI8FiuTXInmUZaO1oCVlzf%2B9evgq61JS9J6D6dJ06JAj1Ddn951w7%2B%2BJ1jnsvuO7QqgW1A87KOSI0l4izN8l4sADiwpTpjJofwF6yalytvBxKSPg48zbt7y4mjEwLSG4mSu0qpFCM2Hb%2FcLSnbQO3wznW2yNMoBDLBYdLbIlyugblhsRmi%2BI3HSVrjwFkRf5KklZj6s48hkbk1yntmeZ2UPfXCOyKODe%2FOL1JxfenIp1mOdwQ3l%2FV073a6QReJvlgBzdSdu2oKeLEin6XU9%2FKs4ASUk%2B9bL%2FMdxtDME8CO6v8eqPz9Y36TwZz3UmJxsqDVM%2FWPMXqT8RnagEIt0%2Bt5QjBvKxs0KuXcKWw%2BfIq7p8%2Bt9%2BVaUGnDDIiBrz5h1MNH8wgJOMvwY6sQF7y8zHGzOk6bvoE15dgSfYWmryXWC9PptOhu5MPkiNgh%2Bk3022wgaOyJCCTw%2B57KLdWY%2F5j3UbMKs6TvsmoKdFImHXxU%2FXUOUKCk88cXgo2PmozrthirNAdBwY%2FUBOMW0gefKeLd61U9aW6FuBgvWiy89JJBP1E%2Bf4kTPM5YjKy%2BWQSKIaLfWdcxehGfvqmJV9GwpkymXexvkpmXSHo39BBi%2FGd41cZB3wd4KUpq04FBI%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=8f8b5f7c8362a6e0fa75e56a0a038c1151b2dcafd464ba68506a53ba2d957ab1",
+        "image_2": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/jgvqtkel9rxx6gkh01nbwh4u25d5?response-content-disposition=attachment%3B%20filename%3D%22step2.png%22%3B%20filename%2A%3DUTF-8%27%27step2.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQSY4B4WPV%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T211816Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIC0jz0KCax0Xw5xm3S%2Fz6EDqL2MtW2GdnZqmxOuVZQmPAiEAwgxNbwWfvsV6toAaAmHIKoQM96jp07p9NzfQnAAtl9EqsgUIHRADGgwwMTM2MTkyNzQ4NDkiDAFzIh4lqLuAVVcdxiqPBdr5HC4kCK%2Bu5dMaQ7TcjjXj%2BZxqzXjM2MTeJKqqBcT8R927XuXaZwsvm2QK%2FuoxKSd9RTqNFl7EnJ2do41Y9AEM%2FIS%2BRG8uc8arepQ4nAkbBBAPIpwWkSQe%2Fca7ocTBZmfeH4XHoiDr42MhOn183cZHUZc2on8EvxNN%2BKvV0tIZcoZpFIKK4Xz%2FtlZA9qpAz28%2Fb%2Fg9cZ6UiLKOF1IM%2Bw6eQaMCOi4Gp3np5jOaiRknpKPYpksEWvAF1z5JHl40wvbN2bqfyVYAv9e3D%2BbYBmOD%2BnF7t7vseNMYRxPAJIhpRJWqsvbClb6PtFxjt8HupW8qQC9SWfGF2kYmyPOlh7QUHdLRIbes0yRlGIx3hfanmBHXepJC5O3O7%2BSLPT1Kik35fKSW2ZBECKRvkG0vC0EwYusejaukR0Rp06JqcRBKgrN8%2FgB2FVobjXklBpLPxHAPvuHBuy9a89pzBmhgicsp57AuUo4Ci%2FHW5Ai3SI8FiuTXInmUZaO1oCVlzf%2B9evgq61JS9J6D6dJ06JAj1Ddn951w7%2B%2BJ1jnsvuO7QqgW1A87KOSI0l4izN8l4sADiwpTpjJofwF6yalytvBxKSPg48zbt7y4mjEwLSG4mSu0qpFCM2Hb%2FcLSnbQO3wznW2yNMoBDLBYdLbIlyugblhsRmi%2BI3HSVrjwFkRf5KklZj6s48hkbk1yntmeZ2UPfXCOyKODe%2FOL1JxfenIp1mOdwQ3l%2FV073a6QReJvlgBzdSdu2oKeLEin6XU9%2FKs4ASUk%2B9bL%2FMdxtDME8CO6v8eqPz9Y36TwZz3UmJxsqDVM%2FWPMXqT8RnagEIt0%2Bt5QjBvKxs0KuXcKWw%2BfIq7p8%2Bt9%2BVaUGnDDIiBrz5h1MNH8wgJOMvwY6sQF7y8zHGzOk6bvoE15dgSfYWmryXWC9PptOhu5MPkiNgh%2Bk3022wgaOyJCCTw%2B57KLdWY%2F5j3UbMKs6TvsmoKdFImHXxU%2FXUOUKCk88cXgo2PmozrthirNAdBwY%2FUBOMW0gefKeLd61U9aW6FuBgvWiy89JJBP1E%2Bf4kTPM5YjKy%2BWQSKIaLfWdcxehGfvqmJV9GwpkymXexvkpmXSHo39BBi%2FGd41cZB3wd4KUpq04FBI%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=98bc7fb5e9b7c7bec5ae1a5a2277f591ef44dd73feda3979cb25afc44cf958ea"
+    },
+    "disclosed_date": 1611414780,
+    "report_url": "https://hackerone.com/reports/1051734",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "steps": [
+        [
+            1,
+            "Login at https://intensedebate.com"
+        ],
+        [
+            2,
+            "Create your own site at https://intensedebate.com/install, and follow the instructions (use generic install)"
+        ],
+        [
+            3,
+            "After setup your site, go to https://www.intensedebate.com/user-dashboard, on click to Moderate"
+        ],
+        [
+            4,
+            "Go to the comment setting by clicking to Comments"
+        ],
+        [
+            5,
+            "Setup the Report functionality by checked the Enable \"Report this comment\" button and set a number of reports before deleting the comment to 10 and save it"
+        ],
+        [
+            6,
+            "Go to your site and add a comment"
+        ],
+        [
+            7,
+            "With a other account go to your site, and report the comment manually x10"
+        ],
+        [
+            8,
+            "After spam the Report functionality"
+        ],
+        [
+            9,
+            "Refresh the page, and you will see the comment is deleted"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to delete any comment on any site where the report functionality is enabled by exploiting the lack of rate limiting on the report feature. By spamming the report functionality, an attacker can trigger the automatic deletion of comments once the set threshold of reports is reached.",
+    "reason": "The vulnerability involves straightforward steps to reproduce and does not require complex interactions or understanding of subtle application states. The attack is simple and relies on the absence of rate limiting, a common security oversight.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,56 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "jarvis0x1 ",
+    "title": "[\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588] Unauthorized access to admin panel",
+    "content": "\nIn previous reports, I described vulnerabilities in a panel to which I had access.\n#512269\n#512693\n#512695\nI could log in to this site and then perform some attacks, such as SQL injection\\XSS or other bugs. But before the above vulnerabilities were considered by you, the possibility to bypass authorization on the site was disabled. And after that, the vulnerabilities could not be reproduced and I was forced to close my reports.\nRecently, I began to explore this site again. And I found that the developers have poorly implemented the restriction of authorization on the site.\nI can still get the contents of an authorized site. How? When I visit some pages of the site, I get a redirect to the authorization form. But in addition to the redirect, the response body also contains HTML code of auth site.\nLook this pages:\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/mission.php\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/personnel.php\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/index.php\nSteps to reproduce\n1) Turn on Live Interception in burp (Proxy-Intercept)\n2) Intercept request. Press right mouse button-> Do intercept -> Response this request\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3) Delete this redirection\n\u2588\u2588\u2588\u2588\nHere I can see a lot of private information\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/personnel.php\n\u2588\u2588\u2588\u2588\u2588\nhttps://\u2588\u2588\u2588/index.php\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nIncorrect access restriction to the authorized interface of the site leads to information leakage.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1589489520,
+    "report_url": "https://hackerone.com/reports/648222",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Turn on Live Interception in Burp Suite (Proxy-Intercept)."
+        ],
+        [
+            2,
+            "Intercept the request to the target page (e.g., /mission.php, /personnel.php, /index.php). Right-click the request and select 'Do intercept -> Response to this request.'"
+        ],
+        [
+            3,
+            "Modify the intercepted response by removing the redirection header (e.g., 'Location: /login.php')."
+        ],
+        [
+            4,
+            "Forward the modified response. The response body will now display the HTML content of the authorized page, bypassing authentication."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves an improper access control mechanism where the server returns the HTML content of authorized pages in the response body even when redirecting unauthenticated users to the login page. By intercepting and modifying the response to remove the redirection, an attacker can view sensitive information intended only for authenticated users.",
+    "reason": "The vulnerability is straightforward to discover once the tester is familiar with intercepting and modifying HTTP responses using tools like Burp Suite. The attack does not involve complex interactions or novel logic, and the steps are relatively simple and linear.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": true,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

@@ -1,0 +1,40 @@
+{
+    "reported_to": "GitLab",
+    "reported_by": "vaib25vicky ",
+    "title": "Unauthorized user is able to access schedule pipeline variables and values",
+    "content": "\nSummary\nThe feature allows to add or overwrite variables that are passed to jobs in order to modify the behavior just for that specific instance.\nAs per this https://gitlab.com/gitlab-org/gitlab-foss/-/issues/32568#note_32531510 , the current security model is\nIf you are owner of schedule (as developer) or master => you can read, modify and delete,\nIf you are developer => you can just list, not read,\nThis allows only owners and masters to read variables assigned to the schedule. It prevents other developers from hijacking schedules, but allows master to fully control them. Master already has access to Secret Variables.\nBut api endpoints are cleary showing this values to everyone even if the user is not part of the project. https://docs.gitlab.com/ee/api/pipeline_schedules.html#get-a-single-pipeline-schedule\nPoC\nThis is my test project https://gitlab.com/thevicc/trigg with schedule pipeline which custom variables you can't read.\nNow, run this to read the variable and its value\ncurl --header \"Private-Token: <your_access_token>\" https://gitlab.com/api/v4/projects/20618145/pipeline_schedules/69918\n<image_0>\nSteps to reproduce\nCreate a project and add a schedule pipeline with custom variables\nOnly you or owner can read variables\nAs second account, use the api https://docs.gitlab.com/ee/api/pipeline_schedules.html#get-a-single-pipeline-schedule\nImpact\nThis bug allows unauthorized users to read scheduled pipeline custom variables and values. As per security model, this allows other devs to hijack schedules.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 500,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/D3aYLgiPwc3CnrsWnHVxx6o8?response-content-disposition=attachment%3B%20filename%3D%22poc_var.png%22%3B%20filename%2A%3DUTF-8%27%27poc_var.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7TQC2VD6%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T220045Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCYDwKXk5Alyw%2B6%2BX%2BlVXoBMf4XmCPCsq5EwXvZPLtgCQIgT%2FrZMWp7e3s3CKA3loVFAhhhXbt%2FTaX3S0aqtxP3aDUqsgUIGxADGgwwMTM2MTkyNzQ4NDkiDJScpqQPy3cyUv4zlyqPBSr6nPfyuLwmw45DDK%2FT5zEBZh27hxvsarhrpINU7peZkWTDJ50AHazM%2F7FxK7Ggbk3RO4v9b%2Fix7IHG7vKHYIp88zvv8SDdB5SbN4eAJ3l7oDs6TIKgdD6a1o%2B0Wn95z7oyrL9ybb4BDUp3oG4wGCgJDrKxhE3OrsoQyW38yGPJ2q%2BaEtAom%2BCR6Lzozu48pKS8JZ5yhVqDdBREfR00o8uT%2B5LxjYK0z7B9DbJzaXGzucqw918zU%2FcNCGf7x4tA1P0rPoNKvDyGlNvFahv7K86Rbfy8Vhg2e8mt4eCuTCgHRnFHNIdJ4W0CtKoxmV%2FTDHkGmVhq92S4OO9dH28ap3nBPbEXhl2tot7zwI32u%2FNyqSbaYHwdfgL5oDPoTiacSeyzEgiSvhCZzUJiPdGoyG5kZ%2FmyHekN%2BCsc2J9nlvGoywZD2uNvs1cQ6q4%2BTbf9mNPWgrTwaYHxTv7FtRExNL8NCq5OzhPAgevBkUjclKjv8DXCHvUzOLikoOrfIZ5MacV9MmCficRevsX13eP1qpkmHRsxWKvpIlRLIR1alhcx83TV7ylzbHbnzRCjcw1tfyNndJ3c5pcHuU3pmrax8ETBLR9ZIU1eObuDhaInzn8JM0vK9e7jiA3hC35si1e6UFoAiysum4sB7FTJd6DGETvrjcWf4barRplQ%2BcN%2FH9EFxsBh49gRR52os49H%2FSWCssFiomopx4UKeke9y7rFiLVp9QGrBSs5sttQ%2B6FmN9TlFnBRLiigGw95vpjQh3iLWIbdWrzq2cG8u42hpA7pcVrnVbbdX6mAP4UK6rC733Ld%2BB0y2yXi7CMbs7PxFxEdw8%2BfcFruwatDvlSZIsAMlYPgkWxvOJy7cemU6JKKcNYwr86LvwY6sQHdH5QGntFNiTGshX463%2BxLxFkye8af3crmCWRzuYrGwuWkalhbznlubOWpcKblYQgmaSubcFkeLHGhe1Nj97yMCKMd%2FuF9D79i9ovcfO0PJY%2FFHBNP6Pc8mFsTaDfsId48c8crslltNM1gtyhNOdqzzEPMM2RlA6enaLl4hUC8DbCZRSCvSPmgCVVYknlzADOx92QDmt3EZ%2Fop6BdkyzmOh04tfZ0YAXvLvRyz%2BTchNRk%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=d855ce84617e6aaccf8900304ba1bc44709230b1352d99b9a1583d6cdd746ea6"
+    },
+    "disclosed_date": 1606796220,
+    "report_url": "https://hackerone.com/reports/962462",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Create a project and add a schedule pipeline with custom variables"
+        ],
+        [
+            2,
+            "Use the API endpoint https://docs.gitlab.com/ee/api/pipeline_schedules.html#get-a-single-pipeline-schedule with a second account to read the variables"
+        ]
+    ],
+    "vuln_description": "This vulnerability allows unauthorized users to read scheduled pipeline custom variables and values via an API endpoint, bypassing the intended security model that restricts access to owners and masters.",
+    "reason": "The vulnerability involves a straightforward API call that does not enforce the intended access controls, making it easy to discover once the API endpoint is known.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

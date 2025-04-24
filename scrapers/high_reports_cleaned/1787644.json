@@ -1,0 +1,38 @@
+{
+    "reported_to": "HackerOne",
+    "reported_by": "jobert ",
+    "title": "Any organization's assets pending review can be downloaded",
+    "content": "\nSteps to reproduce\nsign in as any user\nvisit https://hackerone.com/organizations/:handle/assets/download_pending_reviews.csv, where :handle is the organization you want to download the assets for\nImpact\nThis may leak sensitive data about an organization's attack surface.\n\n",
+    "severity": [
+        8.3,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1669764960,
+    "report_url": "https://hackerone.com/reports/1787644",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Sign in as any user on HackerOne."
+        ],
+        [
+            2,
+            "Visit the URL https://hackerone.com/organizations/:handle/assets/download_pending_reviews.csv, replacing :handle with the target organization's handle."
+        ]
+    ],
+    "vuln_description": "This vulnerability allows any authenticated user to download a CSV file containing an organization's pending review assets, potentially leaking sensitive data about the organization's attack surface.",
+    "reason": "The attack involves a straightforward URL manipulation with no complex interactions or state manipulations required. The vulnerability is easily discoverable by inspecting the application's URL patterns or by guessing the endpoint based on common REST conventions.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

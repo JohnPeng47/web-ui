@@ -1,0 +1,55 @@
+{
+    "reported_to": "Automattic",
+    "reported_by": "bugra ",
+    "title": "Can buy Atavist Magazine subscription for free",
+    "content": "\nSummary:\nHi team\nIf you go to https://magazine.atavist.com/ and scroll down. You will see membership price is $25, but I found a way to buy this subscription for free via Gift feature.\nWhen you send gift request before adding any credit card to your account you will see this response :\n<image_0>\nHowever, if you check the gift recipient's email you will see the Gift email that contains the gift link.\n<image_1>\nSteps To Reproduce:\nJust send this request (change YOUR_EMAIL, YOUR_PASSWORD, RECIPIENT_EMAIL, gift_timestamp to current date, it was 2020-8-4 while reporting this) :\nCode 670 Bytes\n1POST /api/v2/store/purchase.php HTTP/1.1\n2Host: magazine.atavist.com\n3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0\n4Accept: application/json, text/javascript, */*; q=0.01\n5Accept-Language: tr-TR,tr;q=0.8,en-US;q=0.5,en;q=0.3\n6Accept-Encoding: gzip, deflate\n7Content-Type: application/x-www-form-urlencoded; charset=UTF-8\n8Content-Length: 204\n9Origin: https://magazine.atavist.com\n10DNT: 1\n11Connection: close\n12Referer: https://magazine.atavist.com/\n13\n14email=YOUR_EMAIL&password=YOUR_PASSWORD&product_id=com.theatavist.atavist.subscription.membership&gift_timestamp=2020-8-4&gift_recipient=RECIPIENT_EMAIL&gift_message=test&gift_gifter=test\nYou will see {\"error\":\"invalid_request_error\",\"error_description\":\"The customer must have an active payment source attached.\"} in response but if you check the recipient's email, you will see the gift link.\nImpact\nAble to buy magazine membership for free\nThanks,\nBugra\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/sEiDnZbpb6oFZJpfZyDGh5nH?response-content-disposition=attachment%3B%20filename%3D%22request.PNG%22%3B%20filename%2A%3DUTF-8%27%27request.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQVF6FZTJJ%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T221121Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCMGq3%2B7ARUFrIfQv2QlkbGtUabq2%2FrxaYYI2EyuFoVBwIgTbMSLELSN0BtDBjEVgT9fOjzORjcfCpNvzjNkFWENiEqsgUIHhADGgwwMTM2MTkyNzQ4NDkiDJi1a4MBZHzE1a4i%2BiqPBYtXtLiD7Czv1%2Bc%2FdH1ME1HhV1%2BFBMkfetEesR9fnwYJ9GcAaStAmyq0zAFwYJCJyX8uahpHhGQXR4JHV6xbNiFFVIvVw4hkwXqZw9wXRqdUYYNpJX7WY%2FZ2uP%2BUaFe0CYWyYrxArD5%2F6rVJ4CSJ1MhceAiPTdgKcZ1rZCVE3gKCxbwWisTVlvRoBlbrxIfWriQAY5GrHXnHlVsfdeNKzTVuiBtX6wtmNTCSBk001HKpliKSLHuiHxJE8U3jJQV5phz6vbIgSmEVhnS3xhtfVRb7ZX60aW%2B%2FufYjsyaRg8B4wPUxZ81GmThGD1KxxYtBgJ77%2BS0SqebMKp9C9RFI865W1U1dooVo04XDgLRWQM816MBLpFp3oySgkQYQAgWzyxiYlehVNNd%2BOHIXWb8zWJgsMh%2FtRo0rk4apNyCvbiaz6Qh67Jd9Gk9yIaAJRcaOpoTMHEEgpm5jlrqBSdQIDu76yrEBKCI9AaA7J267eWdT18FiM3D7aCeSCellSVlSYr3apZ0yUeIhrEiw07Noa%2F%2BsDbX0gkVqHUkYT30WJHEC4BC4D7GvAVuo5plD1pDulDjSQmOcGAXq6i1xd7wmSwRxOuaol9XMl%2BZqclDA%2BxUFCvnYrwMayofeiZzV%2FA19eU2GH4ZXOI58C8V0E0x%2BsKGGi%2Ftv6Gdflb%2BnhZ1knxDFWrjBpduduLcgy%2BZQgCu95mNLCLD3xCIjjKPj5%2B8e3xKnFZcxHvd11rgU1BfLNWz%2FJGky4OkUPglmvcGGqSS9ZGp%2FPsaOEreKpdlUSuVcu3%2BrT%2F8kSrGPCyMLZ4T%2B9VYV6gbCF5TR77%2BEcizkN60id%2Fsa9qnsqzh%2Bg4kq8OKQumFm%2BZP%2B%2BayjVk9hv3dOMiAw56CMvwY6sQHJgr88EKPPmUFr3ylmE1yHYW2slG0N2i3ktINbimtmMCqaE0K6eokJb5UbKseUDLINFMtQh5AgKEmTsGdFLy1oPmkQ4kCl4769G5YmGRwp8bKHA8nWvD4TnoSUjLsebPreioF0Nboy2DDxNwW1pCmvZLaWjswOEYF%2Fjxe7IOYNpBFIWI4qHgyDU%2BJmuQF8sp0E6Zosc5i1AH48%2BXEXegIb79lBK%2FNHRMorMh7LbWewkUE%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=dbdf531aaba03a398311876ba450b2e2b5630b06432d553681a8839c19e38cc6",
+        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/sFTD2oTm46nQz7X3FgWwFhPj?response-content-disposition=attachment%3B%20filename%3D%22mail.PNG%22%3B%20filename%2A%3DUTF-8%27%27mail.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQVF6FZTJJ%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T221121Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCMGq3%2B7ARUFrIfQv2QlkbGtUabq2%2FrxaYYI2EyuFoVBwIgTbMSLELSN0BtDBjEVgT9fOjzORjcfCpNvzjNkFWENiEqsgUIHhADGgwwMTM2MTkyNzQ4NDkiDJi1a4MBZHzE1a4i%2BiqPBYtXtLiD7Czv1%2Bc%2FdH1ME1HhV1%2BFBMkfetEesR9fnwYJ9GcAaStAmyq0zAFwYJCJyX8uahpHhGQXR4JHV6xbNiFFVIvVw4hkwXqZw9wXRqdUYYNpJX7WY%2FZ2uP%2BUaFe0CYWyYrxArD5%2F6rVJ4CSJ1MhceAiPTdgKcZ1rZCVE3gKCxbwWisTVlvRoBlbrxIfWriQAY5GrHXnHlVsfdeNKzTVuiBtX6wtmNTCSBk001HKpliKSLHuiHxJE8U3jJQV5phz6vbIgSmEVhnS3xhtfVRb7ZX60aW%2B%2FufYjsyaRg8B4wPUxZ81GmThGD1KxxYtBgJ77%2BS0SqebMKp9C9RFI865W1U1dooVo04XDgLRWQM816MBLpFp3oySgkQYQAgWzyxiYlehVNNd%2BOHIXWb8zWJgsMh%2FtRo0rk4apNyCvbiaz6Qh67Jd9Gk9yIaAJRcaOpoTMHEEgpm5jlrqBSdQIDu76yrEBKCI9AaA7J267eWdT18FiM3D7aCeSCellSVlSYr3apZ0yUeIhrEiw07Noa%2F%2BsDbX0gkVqHUkYT30WJHEC4BC4D7GvAVuo5plD1pDulDjSQmOcGAXq6i1xd7wmSwRxOuaol9XMl%2BZqclDA%2BxUFCvnYrwMayofeiZzV%2FA19eU2GH4ZXOI58C8V0E0x%2BsKGGi%2Ftv6Gdflb%2BnhZ1knxDFWrjBpduduLcgy%2BZQgCu95mNLCLD3xCIjjKPj5%2B8e3xKnFZcxHvd11rgU1BfLNWz%2FJGky4OkUPglmvcGGqSS9ZGp%2FPsaOEreKpdlUSuVcu3%2BrT%2F8kSrGPCyMLZ4T%2B9VYV6gbCF5TR77%2BEcizkN60id%2Fsa9qnsqzh%2Bg4kq8OKQumFm%2BZP%2B%2BayjVk9hv3dOMiAw56CMvwY6sQHJgr88EKPPmUFr3ylmE1yHYW2slG0N2i3ktINbimtmMCqaE0K6eokJb5UbKseUDLINFMtQh5AgKEmTsGdFLy1oPmkQ4kCl4769G5YmGRwp8bKHA8nWvD4TnoSUjLsebPreioF0Nboy2DDxNwW1pCmvZLaWjswOEYF%2Fjxe7IOYNpBFIWI4qHgyDU%2BJmuQF8sp0E6Zosc5i1AH48%2BXEXegIb79lBK%2FNHRMorMh7LbWewkUE%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=6306ec03ac3d545e9ca0d91dc3037f34f264c0d3f1682860c53de35d30e3481f"
+    },
+    "disclosed_date": 1605727260,
+    "report_url": "https://hackerone.com/reports/951230",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Go to https://magazine.atavist.com/ and scroll down to see the membership price of $25."
+        ],
+        [
+            2,
+            "Send a gift request without adding any credit card to your account using the provided POST request, changing the placeholders (YOUR_EMAIL, YOUR_PASSWORD, RECIPIENT_EMAIL, gift_timestamp) to appropriate values."
+        ],
+        [
+            3,
+            "Check the recipient's email to find the gift link, despite receiving an error response ('The customer must have an active payment source attached.')"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows users to obtain a free subscription to Atavist Magazine by exploiting the gift feature. By sending a gift request without an active payment source, the system generates a gift link in the recipient's email, bypassing the payment requirement.",
+    "reason": "The vulnerability involves a simple bypass of the payment check during the gift request process. The interaction between the gift request and the email generation is straightforward, and the steps to reproduce are not complex. The main challenge is knowing to check the recipient's email despite the error message.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

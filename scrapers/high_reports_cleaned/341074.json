@@ -1,0 +1,38 @@
+{
+    "reported_to": "Nextcloud",
+    "reported_by": "shawalkhan ",
+    "title": "Bruteforce in admin panel",
+    "content": "\nHello there,\nAdmin panel of your website (https://nextcloud.com/wp-login.php) is vulnerable to bruteforce attacks as their is no rate-limiting.\nImpact\nCan gain access to admin panel.\nTo fix this, Just add rate limiting.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Restriction of Authentication Attempts"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1580498340,
+    "report_url": "https://hackerone.com/reports/341074",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the admin panel login page at https://nextcloud.com/wp-login.php"
+        ],
+        [
+            2,
+            "Use a tool like Hydra or Burp Suite to perform a bruteforce attack by sending multiple login attempts with different credentials"
+        ]
+    ],
+    "vuln_description": "The admin panel of the website is vulnerable to bruteforce attacks due to the absence of rate-limiting, allowing attackers to potentially gain unauthorized access by repeatedly trying different credentials.",
+    "reason": "The vulnerability is straightforward to discover as it only requires attempting multiple login requests without any sophisticated techniques or understanding of complex application states.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

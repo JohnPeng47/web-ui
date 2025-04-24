@@ -1,0 +1,54 @@
+{
+    "reported_to": "Shopify",
+    "reported_by": "corb3nik ",
+    "title": "H1514 [*.(my)shopify.com] - Viewing Password Protected Content",
+    "content": "\nHi guys!\nWhen administering a shop, the owner has the ability to preview his shop with various themes. When previewing, a unique link is generated, which the owner can share with various people without any authentication.\nThe generation of that unique link does not require authentication, which means any user can generate a preview link and view the contents of the shop.\nPreviewing isn't affected by password protection, so a user who has managed to obtain a preview link can successfully view the shop's content without knowing the password.\nSteps to Reproduce\nVisit the following shop : https://mycorb3nikshop.myshopify.com.\nNotice that it is protected by a password.\nVisit https://mycorb3nikshop.myshopify.com/preview_bar and view the page's source code.\nSearch for a shopifypreview.com URL. This is the preview link generated for mycorb3nikshop.\nVisit the preview URL.\nYou should now see the contents of the shop. Note that we've successfully viewed the content without any authentication.\n<image_0>\nImpact\nThe impact of this bug is pretty straightforward. Because of the /preview_bar, the password protection is rendered useless.\nDepending on the confidentiality of a shop's content, I would set the severity to either high or medium here :)\n\n",
+    "severity": [
+        9.3,
+        null
+    ],
+    "bounty": 3000,
+    "weaknesses": [
+        "Improper Authentication - Generic"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/358/126/b1afe375978df05cf5585d39aa21c570169db609/Screen_Shot_2018-10-09_at_7.25.21_PM.png?response-content-disposition=attachment%3B%20filename%3D%22Screen_Shot_2018-10-09_at_7.25.21_PM.png%22%3B%20filename%2A%3DUTF-8%27%27Screen_Shot_2018-10-09_at_7.25.21_PM.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYN2EPGHR%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T042104Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQC1H419oM2x8L8F9k1w3sddJCRKSjNna4vbuFcKcCFebwIgXc0v4N92Vid6uRau%2BDfAzu7dFyebcapOXGeZFAP%2Fxd8qsQUIJRADGgwwMTM2MTkyNzQ4NDkiDHcdRq0ZObis1iQTMyqOBf7aT9koJtzz4zmDY61xh4c3FwEmntpYAb0fXrPmH79tHty0JwyKf9rK%2BTcXguxSrQoTGPgGWWtrJNCSnFy%2Bx9AvxbEZdsWHBG6DZCU0Ux%2Fxth2GQ%2BRkzo%2FtzBMBB7acTpK1hGjIeleyQYtwDdfKEetIddp0rRmHojORb7IREM2RuVbCmt2B89m%2BpLQbu73VtLLWlVmEsg%2Ba7FCAVAhmd%2FSXurZzF5YyvUHhhUPoGXO8G93riHxqfdJRf2QdhLhbrZqVhlTWV4mJnkUFuNMJKEEc4It%2BJ6D23gQhSrt%2FKlsMMyOEI8mSybppGKCt1yLzPqdBhZCmpyZLzQTufK1kY7IHYgMJ40Wjp0MrC8xVFwunv2%2FNlUfeual%2BzuQjw7CR4BhlGVrdA%2Bel2L3i8w6QNr83cwDL5T6ls5Sue1gHjdkfSszgBzBtVMiwJZwmL2%2BvMS%2FlG%2FimhQWtx2akC4HNs0pGLDK44UWUsSMYCPy2drqvhO%2FwTd%2F4uRe4ic418jX6wwC7clziT9yJjiXx%2FqTt3174d2Zdqm2xuZtcyr9mNLJwP9XcodgldaWnP7u%2BsVcO33raz0toQ1X6xZbY4wBwQUUHUm6NF%2BWc2%2FgcoJLqo9Cj7h22lZapPWlV6HRvtq2Lge%2BNeAL71el1s69GSzLth%2Bvk4VtG52KZbQ8uuy2D%2BcvGKJta6UPs1P593ZATnMX9oLeK%2BMLVO73vqC5OvdSOf0EtPcag18qbKzePTjK2hRBRsNwEMfQsgY0NP3Oi5Gp7cR%2BO3aM55j08FKYNwzGu4N0Lm8b6X9BHgeA1I1z4cAww%2BCEpNvDucHvCO9udYaj1meFdscGPwbYoq4shIljRL3lK58gRTImQacVUDXVNpDDr%2Fo2%2FBjqxASMugYiA419WvhkWxPjaqKi%2Fs2ZsyBbjjSihR2tz1ko3BsICo2ylSEOy%2BvjGNCw6U8mLk%2FVUkq2c8d9OSxtEs%2FB64epetRCyjfQY%2FK%2F1Gs%2BAGDyrmoMJs6k9%2F0EwurzWYN43SrLEWpxOGcAn65AcnfIDK%2BSDY29jAU4lBsiKKgI30GvQ%2B3x2xnX9tbBwsP1o0DVmjgiKGmfpUKuyXSTzZ70EAxCYJY0YFDdiFyMCoZcuyQ%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=7b4e3c8d7322f9c3cd54657442aeefcbfd52af9f145340828b7944ca4b878561"
+    },
+    "disclosed_date": 1558564200,
+    "report_url": "https://hackerone.com/reports/421859",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Visit the password-protected shop: https://mycorb3nikshop.myshopify.com"
+        ],
+        [
+            2,
+            "Access the preview link via https://mycorb3nikshop.myshopify.com/preview_bar and view the page's source code to find the shopifypreview.com URL"
+        ],
+        [
+            3,
+            "Visit the preview URL to bypass password protection and view the shop's content"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows any user to bypass password protection on a Shopify store by generating a preview link through the /preview_bar endpoint, which does not require authentication. This preview link grants access to the store's content without needing the password.",
+    "reason": "The attack involves a straightforward process of accessing a known endpoint (/preview_bar) and extracting the preview link from the source code. There are no complex interactions or state manipulations required, and the logic is not novel but rather a simple oversight in access control.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

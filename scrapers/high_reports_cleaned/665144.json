@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "alyssa_herrera ",
+    "title": "Partial SSN exposed through Presentation slides on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+    "content": "\nSummary:\nDuring a search of \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 I discovered that one of the slides ina presentation contained a screen shot of live data.\nDescription:\nThe slides describe testing and using military application to organize and aggregate data on users. On one of the slides it does show a screen shot of actual data. I'm assuming it's live due to the fact that part of it was blocked out like the previous report where it showed XXXX and 4 digits.\n## Impact\nCritical\n## Step-by-step Reproduction Instructions\n\u2588\u2588\u2588\u2588\n## Product, Version, and Configuration (If applicable)\nN/A\n## Suggested Mitigation/Remediation Actions\nPurge the file\nImpact\nLast 4 digits of an SSN can be used on various web portals along with knowing the full name of the soldier can give us access to sensitive portals\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Insecure Storage of Sensitive Information"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1570749240,
+    "report_url": "https://hackerone.com/reports/665144",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Search through \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 for presentation slides containing screenshots of live data."
+        ],
+        [
+            2,
+            "Identify a slide that shows a screenshot with partially redacted SSN (last 4 digits visible)."
+        ]
+    ],
+    "vuln_description": "A presentation slide contains a screenshot of live data, exposing the last 4 digits of a soldier's SSN, which could be used to gain unauthorized access to sensitive portals when combined with the soldier's full name.",
+    "reason": "The vulnerability involves identifying a slide with sensitive data in a presentation, which is a straightforward task once the presentation is accessed. There are no complex interactions or multiple components involved in discovering this vulnerability.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

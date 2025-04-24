@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "arinerron2 ",
+    "title": "Trace.axd page leaks sensitive information",
+    "content": "\nSummary\nTrace.axd leaks sensitive information on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 by allowing signed in users to view previous requests sent to the webserver.\nImpact\nInformation leaked includes (but is not limited to):\nfull names\nemail addresses\nsocial security numbers\ndates of birth\nplaintext passwords\ncookies, session tokens, and CSRF tokens\nIP addresses and headers\napplication specific information (endpoints, files and directories on the filesystem, software versions, )\nStep-by-step Reproduction Instructions\nVisit https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Gateway/sso.aspx and sign in. Note that any user can create a user (and any privilege level works for this vulnerability as long as a user is signed in), so this should be considered an unauthenticated vulnerability.\nVisit https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588/Trace.axd\nClick on View Details for any request that seems interesting. You can find social security numbers by visiting any of the /candidate_app/dspstatus.aspx pages and then Ctrl+F'ing for app_ssn.\nSuggested Mitigation/Remediation Actions\nDisable Trace.axd. https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/ms972204(v=msdn.10)\nImpact\nAny attacker can potentially access the following information of current or future Navy personnel:\nfull names\nemail addresses\nsocial security numbers\ndates of birth\nplaintext passwords\ncookies, session tokens, and CSRF tokens\nIP addresses and headers\napplication specific information (endpoints, files and directories on the filesystem, software versions, )\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Exposure Through Debug Information"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1566231660,
+    "report_url": "https://hackerone.com/reports/519418",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Visit the target website's SSO login page and authenticate with any valid user credentials."
+        ],
+        [
+            2,
+            "Navigate to the Trace.axd endpoint to view detailed request information, including sensitive data."
+        ]
+    ],
+    "vuln_description": "The Trace.axd page on the target website leaks sensitive information, including personal and application data, to any authenticated user. This information disclosure vulnerability exposes details such as social security numbers, passwords, and session tokens.",
+    "reason": "The vulnerability involves a straightforward access to a known debugging endpoint (Trace.axd) after basic authentication. No complex interactions or state manipulations are required, making the discovery process simple once the endpoint is identified.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

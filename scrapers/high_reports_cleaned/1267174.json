@@ -1,0 +1,48 @@
+{
+    "reported_to": "JetBlue",
+    "reported_by": "0xjackal ",
+    "title": "Access to tomcat-manager with default creds",
+    "content": "\nSummary:\nHi jetblue Security Team.\nI Found that this domain \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 using Apache Tomcat/6.0.35 , And i was able to login to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/manager/html With default credentials tomcat:tomcat\nSee the following Screenshots:-\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\nSteps To Reproduce:\nGo To https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/manager/html\nLogin with default creds tomcat:tomcat\nSupporting Material/References:\nhttps://book.hacktricks.xyz/pentesting/pentesting-web/tomcat\nImpact\nImproper Authentication\nDefault Credentials lead to access admin manager.\nFix:-\nChange default creds.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Authentication - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1675619940,
+    "report_url": "https://hackerone.com/reports/1267174",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/manager/html"
+        ],
+        [
+            2,
+            "Enter default credentials: username 'tomcat', password 'tomcat'"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves accessing the Apache Tomcat manager interface using default credentials (tomcat:tomcat), which allows unauthorized administrative access to the server.",
+    "reason": "The attack is straightforward, involving only the use of default credentials without any need for complex interactions or state manipulations. Default credentials are well-documented and commonly known in security contexts.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

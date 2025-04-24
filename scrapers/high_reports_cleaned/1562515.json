@@ -1,0 +1,38 @@
+{
+    "reported_to": "Glovo",
+    "reported_by": "0f1c3r ",
+    "title": "Integer overflow vulnerability ",
+    "content": "\nSummary:\nIn one of my previous reports i send parameter tampering report vulnerability. Then you asked me to send PoC and you just closed it, that's why i'm sending you this new report with exactly name of vulnerability. Integer Overflows are closely related to other conditions that occur when manipulating integers. An Integer Overflow is the condition that occurs when the result of an arithmetic operation, such as multiplication or addition, exceeds the maximum size of the integer type used to store it. When an integer overflow occurs, the interpreted value will appear to have \u201cwrapped around\u201d the maximum value and started again at the minimum value. For example, an 8-bit signed integer on most common computer architectures has a maximum value of 127 and a minimum value of -128. If a programmer stores the value 127 in such a variable and adds 1 to it, the result should be 128. However, this value exceeds the maximum for this integer type, so the interpreted value will \u201cwrap around\u201d and become -128.\nAttackers can use these conditions to influence the value of variables in ways that the programmer did not intend. The security impact depends on the actions taken based on those variables. Examples include, but are certainly not limited, to the following:\nAn integer overflow during a buffer length calculation can result in allocating a buffer that is too small to hold the data to be copied into it. A buffer overflow can result when the data is copied.\nWhen calculating a purchase order total, an integer overflow could allow the total to shift from a positive value to a negative one. This would, in effect, give money to the customer in addition to their purchases, when the transaction is completed.\nWithdrawing 1 dollar from an account with a balance of 0 could cause an integer underflow and yield a new balance of 4,294,967,295.\nA very large positive number in a bank transfer could be cast as a signed integer by a back-end system. In such case, the interpreted value could become a negative number and reverse the flow of money - from a victim's account into the attacker's.\nSteps To Reproduce:\nBeside card payment, you have option \"cache on delivery\" and there i found one mistake which gives me possibility to change price in last moment.. The moment when you actually should change quantity value is:\nSupporting Material/References:\n[list any additional material (e.g. screenshots, logs, etc.)]\n[attachment / reference]\nImpact\nInteger overflow, quantity value manipulation leads to price manipulation..\n\n",
+    "severity": [
+        9.3,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Integer Overflow"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1652809560,
+    "report_url": "https://hackerone.com/reports/1562515",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Select the 'cash on delivery' payment option during checkout."
+        ],
+        [
+            2,
+            "Manipulate the quantity value at the final step to trigger an integer overflow, altering the final price."
+        ]
+    ],
+    "vuln_description": "An integer overflow vulnerability exists in the 'cash on delivery' payment option, allowing attackers to manipulate the quantity value to alter the final price. This occurs when the arithmetic operation exceeds the maximum size of the integer type, causing the value to wrap around and potentially result in a negative or unintended value.",
+    "reason": "The vulnerability involves a straightforward manipulation of a single input field (quantity) during checkout, with no need for complex interactions or state manipulations. The attack is simple and does not require understanding of multiple components or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

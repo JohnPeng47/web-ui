@@ -1,0 +1,38 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "ibrahimatix0x01 ",
+    "title": "Download full backup  [Mtn.co.rw]",
+    "content": "\nSummary:\nI discovered few critical vulnerabilities here, one of them is exposed backup files via directory listing.\nSteps To Reproduce:\ngo to https://mtn.co.rw/mtn.zip and download the file\nextract the file and open\nyou will see the full backup of the website\nSimilar report:\nhttps://hackerone.com/reports/684838\nImpact\nSource code & DB credentials leakage. Attacker can use it to compromise the resource.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1652536440,
+    "report_url": "https://hackerone.com/reports/1516520",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to https://mtn.co.rw/mtn.zip and download the file."
+        ],
+        [
+            2,
+            "Extract the file to view the full backup of the website, including source code and DB credentials."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves exposed backup files via directory listing, leading to source code and database credentials leakage. Attackers can exploit this to compromise the resource.",
+    "reason": "The vulnerability is straightforward to discover as it only requires accessing a direct URL to download a backup file. There are no complex interactions or states involved.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "684838"
+}

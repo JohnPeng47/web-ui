@@ -1,0 +1,50 @@
+{
+    "reported_to": "Rockstar Games",
+    "reported_by": "scraps ",
+    "title": "Login form on non-HTTPS page",
+    "content": "\nSummary:\nA page on a microsite is not fully protected by an SSL certificate. This could allow an attacker in a Man-in-the-Middle position to obtain usernames and passwords of users visiting the site.\nDescription:\nOn the Red Dead Redemption subpage, the comments section on news articles allows registered social club users to post comments. When posting a comment, the user first has to login, which appears as if it is done over a non-secure page:\nhttp://www.rockstargames.com/reddeadredemption/news/article/52645/rockstar-fan-art-gallery-gta-in-a-bottle-8-bit-bully-red.html/#comments\nNote the warning in screenshot 1, firefox has identified that this page is not protected with an SSL certificate, therefore the username and password will be sent over a plaintext connection. In itself, this may be enough to put some users off using your page.\nInterestingly, if you manually change the address bar to be https, it does redirect to a https version of the same page, albeit with a mixed content error (screenshot 2). This indicates that an SSL certificate is in place for this page, however not all requests are sent through HTTPS by default.\nOnce submit is pressed on the comment, it appears as though the request is sent over a HTTPS connection (when seen through Burp Suite or Wireshark), which suggests that the page does protect the username and password with SSL/TLS, see packets 167501-167519 in screenshot 3. Although this will work in most cases, there are techniques that can defeat this, such as using the sslstrip tool. There are several in-depth descriptions of how this works, such as this one\nAn example of using this is shown in screenshots 4 and 5 below, which was carried out solely on my own computer and against my own user account (scrapsH1).\nSteps to reproduce:\nOn a Kali Linux machine, set up sslstrip as per screenshot 3\nSet the browser settings to use the Kali machine as a proxy server. NB, this was done in this example for convenience. In a real-world attack, an attacker could force everyone on the network to use his machine as a proxy using a technique such as ARP Spoofing, thereby requiring no interaction from the user\nWhen the user submits a comment, rather than their POST request being protected by HTTPS, the attacking machine will negotiate the HTTPS connection with the rockstargames server, but trick the user machine into believing that the request should be sent as a HTTP request rather than HTTPS\nAs the request has been sent via HTTP, the POST request is now visible to sslstrip, which collects the credentials entered by the user, as per screenshot 5.\nImpact:\nIf a user were to visit this page from a public or shared network (eg, starbucks, airport, library, etc) and submit a comment, a malicious user on the same network would be able to obtain that users username and password by conducting a Man-in-the-Middle attack using sslstrip and wireshark.\nThis would allow the malicious user complete access to the user's account.\nRemediation:\nIf any part of a site is required to be protected by SSL, the entire site should be protected by SSL. Ts this would stop the attack outlined above from working, as a certificate error would be displayed to the user.\nHTTP Strict Transport security could be used to mitigate this attack, which would tell all browsers not to allow a HTTP connection to the rockstargames website\n\n",
+    "severity": [
+        7.7,
+        null
+    ],
+    "bounty": 350,
+    "weaknesses": [
+        "Cleartext Transmission of Sensitive Information"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1493252160,
+    "report_url": "https://hackerone.com/reports/214571",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Set up sslstrip on a Kali Linux machine."
+        ],
+        [
+            2,
+            "Configure browser settings to use the Kali machine as a proxy server."
+        ],
+        [
+            3,
+            "Navigate to the non-HTTPS login page: http://www.rockstargames.com/reddeadredemption/news/article/52645/rockstar-fan-art-gallery-gta-in-a-bottle-8-bit-bully-red.html/#comments."
+        ],
+        [
+            4,
+            "Enter credentials and submit the login form."
+        ],
+        [
+            5,
+            "Observe the captured credentials in sslstrip."
+        ]
+    ],
+    "vuln_description": "The login form on a non-HTTPS page exposes user credentials to Man-in-the-Middle attacks, allowing attackers to capture usernames and passwords via tools like sslstrip.",
+    "reason": "The vulnerability involves setting up a proxy and using sslstrip, which are standard tools and techniques in security testing. The interaction between the non-HTTPS page and the proxy is straightforward and well-documented.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

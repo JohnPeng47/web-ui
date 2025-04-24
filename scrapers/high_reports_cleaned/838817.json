@@ -1,0 +1,38 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "xlife ",
+    "title": "Insecure crossdomain.xml on https://vdc.mtnonline.com/",
+    "content": "\nHi,\nhttps://vdc.mtnonline.com/crossdomain.xml contains the following xml file:\nCode 349 Bytes\n1\n2<?xml version=\"1.0\"?>\n3<!DOCTYPE cross-domain-policy SYSTEM \"http://www.adobe.com/xml/dtds/cross-domain-policy.dtd\">\n4\t<cross-domain-policy>    \n5\t<site-control permitted-cross-domain-policies=\"all\"/>    \n6\t<allow-access-from domain=\"*\"  secure=\"false\" to-ports=\"*\"/>\n7\t<allow-http-request-headers-from domain=\"*\" headers=\"*\"/> \n8\t</cross-domain-policy>\n9\nImpact\nThis will make any one able to receive content from https://vdc.mtnonline.com/ , attacker can steal CSRF tokens and user PII.\nMore information about this issue is available here:\nhttps://medium.com/@x41x41x41/exploiting-crossdomain-xml-missconfigurations-3c8d407d05a8\nBest regards,\nVishu10x00 \u2764\ufe0f\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1647768660,
+    "report_url": "https://hackerone.com/reports/838817",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to https://vdc.mtnonline.com/crossdomain.xml in a web browser or use a tool like curl to fetch the file."
+        ],
+        [
+            2,
+            "Inspect the contents of the crossdomain.xml file to verify the presence of overly permissive policies such as 'allow-access-from domain=\"*\"' and 'allow-http-request-headers-from domain=\"*\" headers=\"*\"'."
+        ]
+    ],
+    "vuln_description": "The crossdomain.xml file on https://vdc.mtnonline.com/ is configured with overly permissive policies, allowing any domain to access the site's content, including sensitive data like CSRF tokens and PII. This misconfiguration can be exploited by attackers to perform cross-domain attacks.",
+    "reason": "The vulnerability is straightforward to discover as it only requires accessing a publicly available file (crossdomain.xml) and verifying its contents. There are no complex interactions or multiple components involved in identifying this issue.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

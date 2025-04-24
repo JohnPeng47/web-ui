@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "ezequielpuig ",
+    "title": "Subdomain Takeover via Host Header Injection on www.\u2588\u2588\u2588\u2588\u2588",
+    "content": "\nVulnerability Overview\nReported By: Ezequiel [@ezequielpuig]\nReported Date: 01/October/2023\nReported To: U.S. Department Of Defense\nVulnerability Type: Subdomain Takeover\nAffected URL: www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nHello U.S. Department Of Defense Security Team, I hope this report finds you well.\nI want to bring to your attention a serious security issue that poses a significant risk to www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588. This is related to a subdomain takeover vulnerability, which could allow malicious individuals to gain control over the subdomain and potentially misuse it for malicious purposes.\n_Overview:\nThe affected subdomain is www.\u2588\u2588\u2588, which currently points to an unclaimed CNAME record on the \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.netlify.app. This situation allows anyone to potentially take ownership of the subdomain and manipulate its content. Since www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 has a CNAME record pointing to \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.netlify.app, by changing the Host header to www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, it is possible to visualize the malicious content hosted on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.netlify.app.\nHere are a few scenarios where the Host header can be modified:\nProxy Servers: If you control a proxy server, you can intercept incoming requests and modify the Host header before forwarding the request to the intended destination. This is often done for load balancing, content caching, or security purposes.\nDNS Spoofing: In a malicious context, an attacker might attempt DNS spoofing to redirect requests to a different server with a modified Host header.\nServer-Side Scripting: If you have control over the server-side code that processes incoming requests, you can modify the Host header as part of your application logic.\nBrowser Extensions: Malicious browser extensions installed can modify the Host header for all outgoing requests.\n_Proof of Concept (PoC):\nThis vulnerability materializes when an HTTP request is sent to www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 with a manipulated Host header.\nPoC via curl:\ncurl -skS https://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588 --header \"Host: \u2588\u2588\u2588.netlify.app\"\nPoC via Burp Suite:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n_Impact:\nSubdomain takeover can be exploited for various malicious purposes, including:\nMalware distribution\nPhishing / Spear phishing attacks\nCross-Site Scripting (XSS) attacks\nAuthentication bypass\nAnd more.\n_Mitigation:\nTo address this issue and prevent potential abuse, I recommend taking the following steps:\nRemove the CNAME record from the DNS zone for www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\nReclaim and register the affected subdomain (\u2588\u2588\u2588.netlify.app) in the Netlify portal to prevent takeover by unauthorized entities.\nI urge you to take swift action to remediate this vulnerability to safeguard the security and reputation of U.S. Department Of Defense.\n//\nPlease feel free to reach out to me if you need any further information or assistance in resolving this matter.\nBest regards,\nEzequiel Puig\nHackerOne: https://hackerone.com/ezequielpuig\nLinkedIn: https://linkedin.com/in/ezequielpuig\nMail: puigezequiel@gmail.com\nImpact\nImpact detailed above.\nSystem Host(s)\nwww.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nSteps to reproduce detailed above.\nSuggested Mitigation/Remediation Actions\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Violation of Secure Design Principles"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1718744220,
+    "report_url": "https://hackerone.com/reports/2188240",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify the subdomain (www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588) pointing to an unclaimed CNAME record on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.netlify.app."
+        ],
+        [
+            2,
+            "Use curl or Burp Suite to send a request to the subdomain with a manipulated Host header (e.g., 'Host: \u2588\u2588\u2588.netlify.app')."
+        ]
+    ],
+    "vuln_description": "A subdomain takeover vulnerability exists where the affected subdomain (www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588) points to an unclaimed CNAME record on Netlify. By manipulating the Host header, an attacker can serve malicious content from the unclaimed Netlify subdomain.",
+    "reason": "The vulnerability involves straightforward steps: identifying a misconfigured DNS record and manipulating the Host header. No complex interactions or novel logic is required.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

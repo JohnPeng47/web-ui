@@ -1,0 +1,38 @@
+{
+    "reported_to": "Rockset",
+    "reported_by": "fonte ",
+    "title": "Leaking Rockset API key on Github",
+    "content": "\nSummary:\nWe all know that Github is great, but it runs the risk of some credentials being revealed by mistake. In this case I found a Rockset API key, This API key is not in the current code, but it is visible in an old commit.\nSteps To Reproduce:\nYou can find the leak in this link : https://github.com/rockset/recipes/pull/19/files\nCode 289 Bytes\n1        /* Getting the distance covered by each vehicle using the latest and oldest locations */\n2        distance_for_vehicles AS (\n3        SELECT\n4            ST_DISTANCE(\n5@@ -128,7 +147,7 @@\n6    'q4': query4 \n7}\n8\n9api_key = \"skZMJRZSXLZZj5HAdBjNxUfZbarWV5dLqfVO6U623zW5KROzfY0vNRa22ToZfRRe\"\nThen I visited the documentation of Rockset ( https://docs.rockset.com/rest-api/ ) and I found this way to check if the API key is revoke or not\nCode 193 Bytes\n1curl --request GET \\\n2    --url https://api.rs2.usw2.rockset.com/v1/orgs/self/users/self/apikeys \\\n3    -H 'Authorization: ApiKey skZMJRZSXLZZj5HAdBjNxUfZbarWV5dLqfVO6U623zW5KROzfY0vNRa22ToZfRRe'\nand I got this answer:\nCode 175 Bytes\n1{\"data\":[{\"created_at\":\"2019-10-22T06:08:37Z\",\"name\":\"K1\",\"key\":\"skZMJRZSXLZZj5HAdBjNxUfZbarWV5dLqfVO6U623zW5KROzfY0vNRa22ToZfRRe\",\"last_access_time\":null,\"created_by\":null}]}\nSo I could verify that it was not revoked\nImpact\nI just checked that the key was not revoked. I didn't try anything with the token to be prudent, and I don't know the real impact of this, But I think it is a good idea to share this with you, to avoid any risk that may grow.\nRegards!\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cleartext Storage of Sensitive Information"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1614718920,
+    "report_url": "https://hackerone.com/reports/1094151",
+    "vuln_category": "CODE",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "steps": [
+        [
+            1,
+            "Locate an old commit in the GitHub repository (https://github.com/rockset/recipes/pull/19/files) that contains a leaked Rockset API key."
+        ],
+        [
+            2,
+            "Verify the API key is active by using the Rockset REST API endpoint (https://api.rs2.usw2.rockset.com/v1/orgs/self/users/self/apikeys) with the leaked key in the Authorization header."
+        ]
+    ],
+    "vuln_description": "A Rockset API key was leaked in an old GitHub commit. The key was still active at the time of discovery, potentially allowing unauthorized access to Rockset services.",
+    "reason": "The vulnerability involves a straightforward discovery of credentials in public source code history and a simple API call to verify the key's validity. No complex interactions or novel logic is required.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

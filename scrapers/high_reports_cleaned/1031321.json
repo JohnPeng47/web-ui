@@ -1,0 +1,46 @@
+{
+    "reported_to": "X (Formerly Twitter)",
+    "reported_by": "milankatwal99 ",
+    "title": " Github Account hijack through broken link in developer.twitter.com",
+    "content": "\nDescription\nA link in https://developer.twitter.com/en/docs/twitter-api/tools-and-libraries was broken and anyone could create that account which leads to account impersonate\nSteps To Reproduce\n1) Visit https://developer.twitter.com/en/docs/twitter-api/tools-and-libraries\n2) Scroll down to Javascript/Node.js and click on by @HunterLarco (v2)\n3) Create github username HunterLarcol\n4) When someone visits and scroll down to javascript/Node.js and click on @HunterLarco (v2). They are redirected to my account\nsimilar report\nhttps://hackerone.com/reports/265696\nTo solve this issue\nput this link https://github.com/HunterLarco\nPlease let me know if you have any questions. I am happy to help\nImpact\nImpact\nThe users are coming from developer.twitter.com So, the attacker can put malicious content on the github and many users will be the victim for example https://github.com/HunterLarcol/twitter-v2. Moreover it leads to the loss in the reputation of the company\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Phishing"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1612437900,
+    "report_url": "https://hackerone.com/reports/1031321",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "steps": [
+        [
+            1,
+            "Visit https://developer.twitter.com/en/docs/twitter-api/tools-and-libraries"
+        ],
+        [
+            2,
+            "Scroll down to Javascript/Node.js and click on by @HunterLarco (v2)"
+        ],
+        [
+            3,
+            "Create github username HunterLarcol"
+        ],
+        [
+            4,
+            "When someone visits and scrolls down to javascript/Node.js and clicks on @HunterLarco (v2), they are redirected to the attacker's account"
+        ]
+    ],
+    "vuln_description": "A broken link on developer.twitter.com pointed to a non-existent GitHub account (@HunterLarco). An attacker could register this username, leading to impersonation when users click the link. This could be exploited to serve malicious content under the guise of an official Twitter-related project.",
+    "reason": "The vulnerability requires noticing a broken link and realizing the GitHub username is unclaimed, but does not involve complex interactions or state manipulation. The attack surface is straightforward once the broken link is identified.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "265696"
+}

@@ -1,0 +1,42 @@
+{
+    "reported_to": "Khan Academy",
+    "reported_by": "ethanluismcdonough ",
+    "title": "XSS through document projects",
+    "content": "\nHello, I'm Ethan Luis McDonough (@elmt2 on Khan Academy), and I found a way to inject scripts into document projects. Since KA document projects output HTML, I can edit the PUT request that updates projects (https://www.khanacademy.org/api/internal/scratchpads/ID) and inject JavaScript code inside an <img> tag's onload attribute. Here's a demo that completely redirects a learner from KA to another site: https://www.khanacademy.org/physics/woah/4740384569491456.\nNote: the stored script does not run in Firefox because document projects don't seem to be working on that browser (at least on my machine).\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1522464900,
+    "report_url": "https://hackerone.com/reports/244902",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify a Khan Academy document project that outputs HTML."
+        ],
+        [
+            2,
+            "Intercept the PUT request to update the project (https://www.khanacademy.org/api/internal/scratchpads/ID) and inject JavaScript code within an <img> tag's onload attribute."
+        ]
+    ],
+    "vuln_description": "This vulnerability allows for Cross-Site Scripting (XSS) by injecting JavaScript code into a document project on Khan Academy. The injected script executes when the project is loaded, potentially redirecting users to another site.",
+    "reason": "The attack involves understanding how document projects output HTML and manipulating the PUT request to inject malicious code. While the concept of XSS is common, the specific method of injection via the PUT request and the onload attribute in an <img> tag is less obvious.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The XSS vulnerability involves injecting scripts into document projects by manipulating the PUT request. This is a client-side vulnerability that does not involve authentication or authorization checks, so it falls outside the scope of the proposed methodologies which focus on AuthN/AuthZ and IDOR vulnerabilities.",
+        "is_detectable": false
+    }
+}

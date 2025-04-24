@@ -1,0 +1,42 @@
+{
+    "reported_to": "X (Formerly Twitter)",
+    "reported_by": "antisocial_eng ",
+    "title": "Ability to perform actions (Tweet, Retweet, DM) and other actions, unauthenticated, on any account with SMS enabled.",
+    "content": "\nSummary: By knowing the mobile phone number associated with a Twitter account, or by using random mobile phone numbers! It is possible to perform the following actions against a target without their knowledge or interaction. With no account takeover scenario.\nIt's a case of, if I know the mobile number... I can control basic functions of the account.\nI can do everything that is listed here: https://help.twitter.com/en/using-twitter/sms-commands on an account, completely unauthenticated.\nSteps To Reproduce:\n(Add details for how we can reproduce the issue)\nSpoof target number, send an SMS to a special short code for the geographical location, as seen here: https://help.twitter.com/en/using-twitter/supported-mobile-carriers\nImpact: Massive. I can remove the SMS two factor of the account. I can DM people without them knowing. If I had the mobile number of Donald Trump, I could send Tweets as him... There is so much wrong here.\nSupporting Material/References:\nList any additional material (e.g. screenshots, logs, etc.)\nhttps://twitter.com/___Sh4rk___/status/1076204152546619392 this is a tweet I sent from my close friends account. She did not reveal her password or authenticate it at all.\nImpact\nRemove 2FA\nTweet on someones behalf.\nDM Someone.\nDelete someones tweets\nTurn off all phone SMS notifications\nFollow people\nUnfollow people.\nBlock/Report people - with a little script I could get 10000 phone numbers all reporting innocent tweets. Controlling media etc\nMore stuff really.\n\n",
+    "severity": [
+        9.4,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1569553080,
+    "report_url": "https://hackerone.com/reports/470749",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Identify the mobile phone number associated with a Twitter account or use random mobile phone numbers."
+        ],
+        [
+            2,
+            "Spoof the target number and send an SMS to Twitter's special short code for the geographical location (as listed in supported mobile carriers)."
+        ],
+        [
+            3,
+            "Use SMS commands (as documented in Twitter's help center) to perform actions like tweeting, retweeting, sending DMs, removing 2FA, etc., without authentication."
+        ]
+    ],
+    "vuln_description": "By knowing or guessing the mobile phone number associated with a Twitter account, an attacker can perform various actions (tweeting, retweeting, sending DMs, removing 2FA, etc.) without any authentication. This is possible by spoofing the target number and sending SMS commands to Twitter's short code.",
+    "reason": "The vulnerability is straightforward to exploit once the attacker knows the target's phone number and understands Twitter's SMS command system. It does not involve complex interactions or novel logic, but relies on a lack of authentication for SMS-based commands.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

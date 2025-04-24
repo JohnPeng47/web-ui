@@ -1,0 +1,46 @@
+{
+    "reported_to": "HackerOne",
+    "reported_by": "popeax ",
+    "title": "Improper UUID validation results in bypass of #419896",
+    "content": "\nThis was found while evaluating the vulnerability and patch identified in #419896. I determined the deployed patch to be effective. However, I noticed tracer values could be sent which didn't conform to the UUID specification as characters outside of the a-f and 0-9 ranges could be used. For example, a value such as \"zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzzzz\" was accepted by the server as valid. Likely this indicates a problem with a regex filter that needs to be slightly changed.\nSteps\nNavigate to a program which allows anonymous submissions.\nOpen the report submission form and add an attachment.\nObserve the request sent to /attachments includes a client side generated UUID in the tracer field.\nReplay the request from step 3. Use an invalid UUID (e.g. \"zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzzzz\") for the tracer and observe the server accepts the value.\nImpact\nThe impact is unknown, but it is believed to have a cascading side effect. I was asked to submit this by @jobert.\n\n",
+    "severity": [
+        7.7,
+        null
+    ],
+    "bounty": 7500,
+    "weaknesses": [
+        "Improper Input Validation"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1540521480,
+    "report_url": "https://hackerone.com/reports/423073",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to a program which allows anonymous submissions and open the report submission form."
+        ],
+        [
+            2,
+            "Add an attachment and observe the request sent to /attachments includes a client-side generated UUID in the tracer field."
+        ],
+        [
+            3,
+            "Replay the request with an invalid UUID (e.g., 'zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzzzz') in the tracer field."
+        ],
+        [
+            4,
+            "Observe that the server accepts the invalid UUID as valid."
+        ]
+    ],
+    "vuln_description": "The server improperly validates UUIDs in the tracer field, accepting values that do not conform to the UUID specification (e.g., containing characters outside the a-f and 0-9 ranges). This could potentially lead to a bypass of security measures or other cascading effects.",
+    "reason": "The vulnerability involves a straightforward manipulation of the UUID value in a single field, without requiring complex interactions or state manipulation. The issue is primarily due to a weak or incorrect regex filter, which is a common and easily identifiable flaw.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "419896"
+}

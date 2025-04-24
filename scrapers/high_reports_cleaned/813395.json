@@ -1,0 +1,50 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "un4gi ",
+    "title": "Unrestricted File Upload to \u2588\u2588\u2588\u2588\u2588\u2588\u2588SubmitRequest/Index.cfm?fwa=wizardform",
+    "content": "\nSummary:\nAn attacker is able to upload files of any type to \u2588\u2588\u2588SubmitRequest/Index.cfm?fwa=wizardform as long as they are less than 5 MB.\nDescription:\nThe \u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588 Request System allows a user to submit requests to the \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588 for event support. An attacker can exploit this request form by uploading malicious files due to an unrestricted file upload feature.\nImpact\nAn attacker is able to upload malicious files onto the server. These files are attached to a request for support from the \u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588. If a member of the \u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588 were to open the malicious file, the attacker could gain remote code execution on \u2588\u2588\u2588\u2588 information systems. Alternatively, if the attacker finds out how to browse to the file, they could obtain a web shell on the target, giving them remote code execution.\nStep-by-step Reproduction Instructions\nBrowse to \u2588\u2588\u2588\u2588\u2588\u2588PublicSite/index.cfm?fwa=newreq and click on Create a New Request. \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nFill in your e-mail address and click Submit. \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nFill out the fields in the form. \u2588\u2588\u2588 \u2588\u2588\u2588\u2588 \u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nBefore submitting the request, click the Upload Files tab. \u2588\u2588\u2588\u2588\u2588\nThis page will allow you to upload any file you wish as long as it is under 5MB in size. I tested by uploading an executable (visual studio community installer) and a php file. These files were deleted from my request after submitting this report. \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nOnce uploaded, you can submit your request. An attacker would need to submit this request in hopes of the \u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 downloading the malicious attachment.\nSuggested Mitigation/Remediation Actions\nRestrict file uploads to safe extensions such as .jpg, .png, etc. to prevent an attacker from uploading malicious files onto the server.\nImpact\nAn attacker is able to upload malicious files onto the server. These files are attached to a request for support from the \u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588. If a member of the \u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 were to open the malicious file, the attacker could gain remote code execution on \u2588\u2588\u2588\u2588\u2588\u2588 information systems. Alternatively, if the attacker finds out how to browse to the file, they could obtain a web shell on the target, giving them remote code execution.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Violation of Secure Design Principles"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1591913640,
+    "report_url": "https://hackerone.com/reports/813395",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Browse to the request form at \u2588\u2588\u2588\u2588\u2588\u2588PublicSite/index.cfm?fwa=newreq and click on 'Create a New Request'."
+        ],
+        [
+            2,
+            "Fill in your email address and click 'Submit'."
+        ],
+        [
+            3,
+            "Fill out the required fields in the form."
+        ],
+        [
+            4,
+            "Click the 'Upload Files' tab and upload any file (e.g., executable or PHP file) under 5MB in size."
+        ],
+        [
+            5,
+            "Submit the request with the uploaded file."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to upload any file type (including malicious files) to the server via an unrestricted file upload feature in the request form. This could lead to remote code execution if the file is opened by a member of the support team or if the attacker can browse to the uploaded file.",
+    "reason": "The vulnerability is straightforward to discover as it involves a simple file upload process without any restrictions or complex interactions. The attacker only needs to follow the standard request submission flow and attempt to upload a malicious file.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,54 @@
+{
+    "reported_to": "Zomato",
+    "reported_by": "chajer ",
+    "title": "Information Disclosure through Sentry Instance \u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+    "content": "\nHello team\nI found a bug (sensitive information ) can be used from attackers to perfom attack in youre server\nI don't know if this in scope so i'm sorry if i'm wrrong\nwithou spending youre time\nhere the steps how i found this bug :\n1-Please use burp suite to reproduce the same result\n2-i notice you have as tool for track errors (sentry)\n3- i send the request to \u2588\u2588\u2588 via /api/20/store\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n4-change request from get to post\nRequest:\nPOST /api/20/store\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/1.1\nHost: \u2588\u2588\u2588\nConnection: close\nCache-Control: max-age=0\nUpgrade-Insecure-Requests: 1\n\u2588\u2588\u2588\u2588\u2588\u2588\nSec-Fetch-Mode: navigate\nSec-Fetch-User: ?1\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,/;q=0.8,application/signed-exchange;v=b3\nSec-Fetch-Site: none\nAccept-Encoding: gzip, deflate\nAccept-Language: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 0\n5-go to response and click in the [Render ] to view disclosure UI\n6- i get alot of information disclosure \u2588\u2588\u2588(see my screenns) i think the server behind this is [\u2588\u2588\u2588] with \u2588\u2588\u2588\nImpact\nPlease see the screens for more information\nbest regards\nlet me know if you need more information.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 750,
+    "weaknesses": [
+        "Information Exposure Through Debug Information"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1568899620,
+    "report_url": "https://hackerone.com/reports/697512",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Use Burp Suite to intercept traffic to the target host."
+        ],
+        [
+            2,
+            "Identify the Sentry instance endpoint (e.g., /api/20/store)."
+        ],
+        [
+            3,
+            "Change the request method from GET to POST."
+        ],
+        [
+            4,
+            "Send the modified request with an empty body."
+        ],
+        [
+            5,
+            "View the response and click 'Render' to see the disclosed UI."
+        ],
+        [
+            6,
+            "Observe sensitive information in the response."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves an information disclosure issue in a Sentry instance, where changing a GET request to a POST request on the /api/20/store endpoint reveals sensitive information in the response. This could potentially be exploited by attackers to gather intelligence about the server.",
+    "reason": "The attack is straightforward, involving only a simple modification of the HTTP request method and observing the response. There are no complex interactions or states involved, and the logic is not novel.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

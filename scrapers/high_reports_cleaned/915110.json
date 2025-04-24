@@ -1,0 +1,58 @@
+{
+    "reported_to": "Automattic",
+    "reported_by": "bugra ",
+    "title": "No Email Checking at Invitation Confirmation Link leads to Account Takeover without User Interaction at CrowdSignal",
+    "content": "\nSummary:\n<image_0>\nSteps To Reproduce:\nGo to https://app.crowdsignal.com/users/list-users.php with your team account\nInvite an existing email (write victim's email)\nAnd click to confirmation link with your account\nYou will log-in to victim's account directly\nPoC video :\nImpact\nAccount Takeover without user interaction\nThanks,\nBugra\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/QAsGnaXfTMFhT1QrWwQjxQQY?response-content-disposition=attachment%3B%20filename%3D%221.PNG%22%3B%20filename%2A%3DUTF-8%27%271.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQT5BYM67U%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T220722Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELb%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIBJ5LNeIFcDbIRB%2FauldYC%2FrFvmPlraV4OK5zL7cy2jrAiBE6NmrA4WVHUYX8TzdFYZFWycQt19hVQmcNgqvhURGTyqxBQgfEAMaDDAxMzYxOTI3NDg0OSIM1switCLMy%2BdBmaYBKo4FCzDq%2FOzM9NC7QakQWGByTEp%2FypRRiUmWvj6FxGou1T%2BJO7hj9Q6XrXckJ6ApM5PkS6%2BhH%2F4UVA03Ss%2BasiZjSgX0hayj0ageju1MT%2Foy7qcGikebR91YQF3eILeMYqbQf33cQGI8NevBkYZKrlxwTZqYdiWFrvgbRGB%2FLCJ5CJ%2B9tKkmztmBLUrX%2Bmd8d6S0AAp%2FXcaih8l5RSfnxVVY5gsLMefOAOttaFNru%2F4O36tkUgEEaAeMAVzbjautDYOP67DHbPQrWWoThm5TD31lQ76zvkd7BHf2TdLWDUwd9u5UX92JiELRod5ROFUB9%2FsJ2BmgDQQjWLgWloH%2FeXAoSq7FMJXljS9GvbfGTY%2BMq1dvxUN3Ehj4FTfoUbwY%2Bx0mB3lMFc1rXmfeENqX3HrkVDkdpsGRtH98F6YjGQapPmL24YpwNuyGo%2FYohWSOEyX9LrXmm95RpIcFQeRB4TwUp5jk95b0I4rekJYdC2CsVzbasXTSoM9HGSXMDo%2F%2FxARZ7INbkc9QMS%2B5xVdWIxsYlUBQlBHAf3jYHh%2FBXzFrbiUJJvhKPsNZ7CoRGjjRnsK4uAx8GqA0V6vS7FAW5eMRc4uFu5%2BO7gt3QJh3exlIpaYVQtTX1octKaUDvePasJ0HNMOLz066J2V40y4sEiXqfrtEKSDl%2FVOH4mFoGhMsyFbDUCMLGPMAFACCPPwTnyYgh6E0MYB3hBTss5UX5R9y7okJLNfKEX3g7mT7TmXRpA3JvrUjnX5umd8aZDUi%2FtueFv6tQbOLMR3xHJd060FHkNUAZ9vQPVH5EBPqqSulReORgZAVYqGzk0m8d3qdJojGT1NjdiWFfppq6ts6%2BwayY0z%2FLUaGJfoRTGDfbsI9MNK%2BjL8GOrIBM7fs91SDfcLDuP5nM8Lewdenh534UdQpRbzpMPVVK7GojeaN4fv3n0u8Ro%2FEtAztw63TmEUxZEX30Tpb7WNwZx4I3FSJboK8pHGEUQQhKYzReW5sKLUwcVjkFNtp7pbAehEyjOZaFJOJ7I8i7GO3ctBnwBee29hJ7XlUB69hFHQc3NWXrJVRPaCC2dJVTyUplhoomooMvTP%2FyMQbF19KG6egNSWEfJEBVvP3Pxu3%2Fow99A%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=31f765aeea418f0d5f753125954855faaecc782a7b8ed78a7c127e422728db8e"
+    },
+    "disclosed_date": 1605727380,
+    "report_url": "https://hackerone.com/reports/915110",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to https://app.crowdsignal.com/users/list-users.php with your team account"
+        ],
+        [
+            2,
+            "Invite an existing email (write victim's email)"
+        ],
+        [
+            3,
+            "Click to confirmation link with your account"
+        ],
+        [
+            4,
+            "You will log-in to victim's account directly"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to take over a victim's account by simply clicking on the confirmation link of an invitation sent to the victim's email, without any interaction from the victim. This bypasses the usual email verification step, leading to an account takeover.",
+    "reason": "The vulnerability involves a straightforward process of inviting an existing user and clicking a confirmation link, without requiring complex interactions or understanding of subtle application behaviors. The flaw is in the lack of proper email verification before account access is granted.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": true
+    }
+}

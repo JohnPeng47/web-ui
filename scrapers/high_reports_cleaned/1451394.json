@@ -1,0 +1,45 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "shuvam321 ",
+    "title": "POST BASED REFLECTED XSS IN dailydeals.mtn.co.za",
+    "content": "\nSummary:\nDear Team ,\nI have found a post based reflected XSS in https://dailydeals.mtn.co.za/ .\nSteps To Reproduce:\n1.Create a html file with following content .\n2.Open the HTML file in any web-browser.\n3.Cross site Scripting will be triggered .\nImpact\nAttacker can exploit this vulnerability to steal users cookies , redirect them to arbitrary domain and perform various attacks.\n\n",
+    "severity": [
+        7.1,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Reflected"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1657893360,
+    "report_url": "https://hackerone.com/reports/1451394",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create a html file with following content."
+        ],
+        [
+            2,
+            "Open the HTML file in any web-browser."
+        ]
+    ],
+    "vuln_description": "A post based reflected XSS vulnerability in https://dailydeals.mtn.co.za/ allows an attacker to execute arbitrary JavaScript code in the context of the victim's browser, potentially leading to cookie theft, redirection to malicious sites, and other attacks.",
+    "reason": "The vulnerability is straightforward to discover as it involves basic XSS testing techniques without requiring complex interactions or state manipulation. The attack is simple and does not involve multiple components or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "reason": "The XSS vulnerability involves injecting malicious scripts through user input, which is not directly related to authentication or authorization bypass. The proposed methodologies focus on testing access control boundaries by swapping user sessions or resource IDs, not on input validation or script injection vulnerabilities.",
+        "is_detectable": false
+    }
+}

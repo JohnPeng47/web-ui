@@ -1,0 +1,42 @@
+{
+    "reported_to": "Shopify",
+    "reported_by": "cyber__sec ",
+    "title": "Stored XSS in my staff name fired in another your internal panel",
+    "content": "\nHi all,\nI had lots of tests for bug bounty in my test store \"trstore-3.myshopify.com\" (created about 4 years ago) and then one of your developers noticed that a stored cross-site scripting payload in my staff name fired in another your internal panel.\nI have attached the email sent to me by your collegue and I'd like to get a award and I am very happy.\nThanks alot.\nImpact\nStored XSS\n\n",
+    "severity": [
+        8.3,
+        null
+    ],
+    "bounty": 5000,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1596074760,
+    "report_url": "https://hackerone.com/reports/946053",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create a test store 'trstore-3.myshopify.com' on Shopify"
+        ],
+        [
+            2,
+            "Inject a stored XSS payload into the staff name field in the test store"
+        ]
+    ],
+    "vuln_description": "A stored cross-site scripting (XSS) vulnerability was discovered where a payload injected into the staff name field in a test store executed in an internal Shopify panel. This indicates that the staff name data was shared or accessible across different systems without proper sanitization.",
+    "reason": "The vulnerability involves a straightforward stored XSS injection in a user-controllable field (staff name) that was then reflected in another internal system. The discovery does not require complex interactions or understanding of multiple components, as it follows a typical stored XSS pattern where user input is not properly sanitized before being rendered in another context.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The vulnerability involves a stored XSS payload in a staff name that fires in an internal panel, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, which does not apply to this XSS scenario.",
+        "is_detectable": false
+    }
+}

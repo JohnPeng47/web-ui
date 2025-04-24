@@ -1,0 +1,42 @@
+{
+    "reported_to": "Drugs.com",
+    "reported_by": "mathara ",
+    "title": "Stored Xss On \"https://www.question.com/\"",
+    "content": "\nHi Team I'm Find the Stored Xss On your Site\nStored XSS, also known as persistent XSS, is the more damaging than non-persistent XSS. It occurs when a malicious script is injected directly into a vulnerable web application.\nSteps To Reproduce:\nGo To Your Site https://www.question.com/\nNave https://www.question.com/ask/\nAsk a Question Enter the Payload <iframe onload=alert(document.domail)>\nClick to Sumit Question & Redirect to https://www.question.com/iframe-onload-alert-9-1631390.html\nXSS was Tigred you See the Popup\nPOC\n\u2588\u2588\u2588\u2588\nTested on Firefox and chrome.\nImpact\nThe attacker can steal data from whoever checks the report.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1726869600,
+    "report_url": "https://hackerone.com/reports/1901706",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the site https://www.question.com/ask/"
+        ],
+        [
+            2,
+            "Submit a question with the payload <iframe onload=alert(document.domail)>"
+        ]
+    ],
+    "vuln_description": "Stored XSS vulnerability on the question submission page of https://www.question.com/, where injecting a malicious iframe payload results in persistent execution of arbitrary JavaScript when the question is viewed.",
+    "reason": "The attack involves a straightforward injection of a common XSS payload without any need for complex interactions, state manipulation, or novel logic. The vulnerability is easily reproducible with basic knowledge of XSS techniques.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The stored XSS vulnerability involves injecting a malicious script into a web application, which is a different class of vulnerability from the AuthN/AuthZ bugs described in the methodologies. The methodologies focus on testing authorization boundaries by swapping user sessions and resource IDs, not on detecting script injection points or payload execution.",
+        "is_detectable": false
+    }
+}

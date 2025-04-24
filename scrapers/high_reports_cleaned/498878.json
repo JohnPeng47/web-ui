@@ -1,0 +1,38 @@
+{
+    "reported_to": "Nextcloud",
+    "reported_by": "chernobyl ",
+    "title": "User Editable nextcloud Wiki pages of Public Repositories",
+    "content": "\nSummary :\nI have found that the \"Edit\" Permissions of WIKI pages are NOT disabled on the public repositories of nextcloud. Generally Edit permissions are given only to the collaborators of a specific repository. but that is not the case with Nextcloud, It is public editable which isn't right in terms of security.\nAn attacker can create a new Wiki page for this particular nextcloud Github Wiki page : There is no restriction on it.\nhttps://github.com/nextcloud/logreader/wiki\nAn attacker could include any content/links and direct users to other similar nextcloud pages to steal user information.\nAttacker could even provide false information about the user to provide their private keys or passwords using a form/page.\nImpact\nThese wikis should not be publicly editable due to the possibility of abuse through hacktivities such as Phishing, Defacement, etc\nMany companies (even on hackerone) are correcting this issue and removing the \"Edit\" Permissions to the wiki page of public repositories.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1567269120,
+    "report_url": "https://hackerone.com/reports/498878",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the Nextcloud public repository Wiki page: https://github.com/nextcloud/logreader/wiki"
+        ],
+        [
+            2,
+            "Attempt to edit or create a new Wiki page without being a collaborator of the repository"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows public editing of Wiki pages in Nextcloud's public repositories, which should typically be restricted to collaborators. This misconfiguration can lead to phishing, defacement, or spreading false information by unauthorized users.",
+    "reason": "The vulnerability is straightforward to discover as it only requires checking the edit permissions on a public Wiki page, which is a common and well-known security practice. There are no complex interactions or states involved.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

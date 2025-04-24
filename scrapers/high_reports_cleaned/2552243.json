@@ -1,0 +1,42 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "martinvw ",
+    "title": "Subdomain takeover \u2588\u2588\u2588\u2588\u2588\u2588",
+    "content": "\nThe subdomain \u2588\u2588\u2588\u2588\u2588 is pointing to open-elb-prod-277276106.us-east-1.elb-amazonaws.com., the domain elb-amazonaws.com was available for registration\nImpact\nUsing this vulnerability an attacker can:\nhost unwanted/malicious content under your domain\nreceive email on subdomains mentioned above\neffectively execute cross-site scripting attacks\nin some cases, steal cookie data\nin some cases, trick password managers into filling in passwords\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nVisit http://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/proof.e7437329-ab61-4f22-a049-df5b3685313a.txt\nSuggested Mitigation/Remediation Actions\nRemove CNAME record \u2588\u2588\u2588\u2588\u2588\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Violation of Secure Design Principles"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1722020340,
+    "report_url": "https://hackerone.com/reports/2552243",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify the subdomain \u2588\u2588\u2588\u2588\u2588 pointing to open-elb-prod-277276106.us-east-1.elb-amazonaws.com."
+        ],
+        [
+            2,
+            "Verify that the domain elb-amazonaws.com was available for registration."
+        ],
+        [
+            3,
+            "Visit http://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/proof.e7437329-ab61-4f22-a049-df5b3685313a.txt to confirm the vulnerability."
+        ]
+    ],
+    "vuln_description": "The subdomain \u2588\u2588\u2588\u2588\u2588 is pointing to an AWS Elastic Load Balancer (ELB) domain that was available for registration. This allows an attacker to register the domain and take over the subdomain, potentially hosting malicious content, receiving emails, executing cross-site scripting attacks, stealing cookie data, or tricking password managers.",
+    "reason": "The vulnerability involves identifying a misconfigured DNS record pointing to an unregistered domain. The steps are straightforward and do not require complex interactions or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

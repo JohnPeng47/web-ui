@@ -1,0 +1,45 @@
+{
+    "reported_to": "Slack",
+    "reported_by": "co3k ",
+    "title": "The Custom Emoji Page has a Reflected XSS",
+    "content": "\nThe Custom Emoji Page has a Reflected XSS in building flash message.\nThe following is the PoC.\nhttps://{team}.slack.com/customize/emoji?added=1&name=vuln\"><script>alert(0);<%2Fscript>\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 500,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Reflected"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1506249600,
+    "report_url": "https://hackerone.com/reports/258198",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the custom emoji page URL: https://{team}.slack.com/customize/emoji"
+        ],
+        [
+            2,
+            "Append the following query string to the URL: ?added=1&name=vuln\"><script>alert(0);<%2Fscript>"
+        ]
+    ],
+    "vuln_description": "The Custom Emoji Page has a Reflected XSS vulnerability in the building flash message. The vulnerability allows an attacker to inject arbitrary JavaScript code via the 'name' parameter in the URL, which is then executed in the context of the user's browser.",
+    "reason": "The vulnerability is straightforward to discover as it involves a simple reflected XSS attack via URL parameter manipulation. There are no complex interactions or state manipulations required, and the attack vector is a common one in web applications.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "reason": "The vulnerability involves a reflected XSS in the Custom Emoji Page, which is not related to authentication or authorization (AuthN/AuthZ) issues. The proposed methodologies focus on AuthN/AuthZ bypass and IDOR vulnerabilities, not XSS vulnerabilities.",
+        "is_detectable": false
+    }
+}

@@ -1,0 +1,49 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "tess ",
+    "title": "Reflected cross-site scripting vulnerability on a DoD website",
+    "content": "\nHello there !\nI'd like to report a 'XSS' vulnerability on a DoD website *https://\u2588\u2588\u2588/unit/\u2588\u2588\u2588 ,\nHere in the search engine of the website please enter the following payloads <script>alert(document.domain)</script> & you can even use this payload to steal cookies <script>alert(document.cookie)</script> and hit enter and just scroll you're mouse below the Term: <script>alert(document.domain)</script> to the three icons and as soon as you scroll you're mouse over that three icons you will notice the \" pop-up \"\nFOR CLEAR DEMONSTRATION OF THE VULNERABILITY PLEASE REFER TO THE PROOF-OF-CONCEPT ATTACHED TO THIS REPORT.\nThanks,\n\u2588\u2588\u2588\u2588\nImpact\nXSS vulnerabilities can be used to trick a web user into executing a malicious script, potentially revealing a user's web session information or modify web content & even steal cookies.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Reflected"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1589490600,
+    "report_url": "https://hackerone.com/reports/774792",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the DoD website at *https://\u2588\u2588\u2588/unit/\u2588\u2588\u2588"
+        ],
+        [
+            2,
+            "Enter the payload `<script>alert(document.domain)</script>` or `<script>alert(document.cookie)</script>` in the search engine and hit enter"
+        ],
+        [
+            3,
+            "Scroll the mouse below the search term to the three icons and hover over them to trigger the pop-up alert"
+        ]
+    ],
+    "vuln_description": "This is a reflected cross-site scripting (XSS) vulnerability on a DoD website. The vulnerability allows an attacker to inject malicious scripts into the search functionality, which are then executed in the context of the user's browser. This can be used to steal cookies, modify web content, or perform other malicious actions.",
+    "reason": "The vulnerability is straightforward to discover as it involves a simple injection of common XSS payloads into a search field, which is a well-known and commonly tested attack vector. The attack does not require multiple components, complex application states, or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "reason": "The XSS vulnerability reported involves client-side script injection and does not involve authentication or authorization boundaries being crossed. The proposed methodologies focus on testing AuthN/AuthZ and IDOR vulnerabilities by manipulating user sessions and resource IDs, which are not relevant to the reflected XSS vulnerability described.",
+        "is_detectable": false
+    }
+}

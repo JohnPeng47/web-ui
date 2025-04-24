@@ -1,0 +1,38 @@
+{
+    "reported_to": "Internet Bug Bounty",
+    "reported_by": "yakirka ",
+    "title": "Node.js - DLL Hijacking on Windows",
+    "content": "\nFull Node.js Security Releases - summarizing the issue is here:https://nodejs.org/en/blog/vulnerability/july-2022-security-releases/\nThe original Node.js HackerOne report is here: https://hackerone.com/bugs?report_id=1447455\n\nNode.js versions earlier than 16.16.0 (LTS) and 14.20.0 are vulnerable to dynamic link library (DLL) hijacking.\nAttackers can exploit this vulnerability to escalate their privileges and establish persistence in a target environment.\nThe vulnerability can also provide another way to embed malicious code into packages.\nThis vulnerability can be exploited if the victim has the following dependencies on Windows machine:\nOpenSSL has been installed or \u201cC:\\Program Files\\Common Files\\SSL\\openssl.cnf\u201d exists.\nWhenever the above conditions are present, node.exe will search for providers.dll in the current user directory.\nAfter that, node.exe will try to search for providers.dll by the DLL Search Order in Windows.\nIt is possible for an attacker to place the malicious file providers.dll under a variety of paths and exploit this vulnerability.\nThis was fixed in Node.js 16.16.0 and 14.20.0 versions.\nImpact\nA locally unprivileged attacker could perform a local privilege escalation, also It is possible for an attacker to place the malicious file \"providers.dll\" under a variety of paths (or under any other custom name via changing \"Providers=provider_sect\" providers filed to other package name(\nIn addition, the attackers may upload packages containing malicious dlls which run on the victim's windows machine after they download them.\nThe victim will not see any interaction with the dll in package code, so if he doesn't analyze the dll and decides to install the package, then the code will run.\n\n",
+    "severity": [
+        7.2,
+        null
+    ],
+    "bounty": 750,
+    "weaknesses": [
+        "Untrusted Search Path"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1658788200,
+    "report_url": "https://hackerone.com/reports/1636566",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Install Node.js version earlier than 16.16.0 or 14.20.0 on a Windows machine."
+        ],
+        [
+            2,
+            "Place a malicious 'providers.dll' file in a directory where Node.js will search for it, such as the current user directory or any path in the DLL search order."
+        ]
+    ],
+    "vuln_description": "Node.js versions earlier than 16.16.0 (LTS) and 14.20.0 are vulnerable to DLL hijacking on Windows. Attackers can exploit this vulnerability to escalate privileges, establish persistence, or embed malicious code into packages by placing a malicious 'providers.dll' file in a directory that Node.js searches for dependencies.",
+    "reason": "The vulnerability involves understanding the DLL search order in Windows and the specific conditions under which Node.js loads the 'providers.dll' file. While the attack requires knowledge of these components, the steps to exploit it are straightforward once the conditions are known.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

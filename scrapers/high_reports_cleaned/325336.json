@@ -1,0 +1,56 @@
+{
+    "reported_to": "Starbucks",
+    "reported_by": "0xpatrik ",
+    "title": "Subdomain takeover on svcgatewayus.starbucks.com",
+    "content": "\nHello,\nthis is pretty serious security issue in some context, so please act as fast as possible.\nOverview:\nOne of the starbucks.com subdomains is pointing to Azure, which has unclaimed CNAME record. ANYONE is able to own starbucks.com subdomain at the moment.\nThis vulnerability is called subdomain takeover. You can read more about it here:\nhttps://blog.sweepatic.com/subdomain-takeover-principles/\nhttps://hackerone.com/reports/32825\nhttps://hackerone.com/reports/175070\nhttps://hackerone.com/reports/172137\nDetails:\nsvcgatewayus.starbucks.com has CNAME to s00197tmp0crdfulprod0.trafficmanager.net which has CNAME to 1fd05821-7501-40de-9e44-17235e7ab48b.cloudapp.net. However, 1fd05821-7501-40de-9e44-17235e7ab48b.cloudapp.net is not registered in Azure cloud anymore and thus can be registered by anyone. After registering the Cloud App in Azure portal, the person doing so has full control over content on svcgatewayus.starbucks.com.\nPoC:\nhttp://svcgatewayus.starbucks.com\n\u00a0Mitigation:\nRemove the CNAME record from starbucks.com DNS zone completely.\nClaim it back in Azure portal after I release it\nRegards,\nPatrik Hudak\nImpact\nSubdomain takeover is abused for several purposes:\nMalware distribution\nPhishing / Spear phishing\nXSS\nAuthentication bypass\n...\nList goes on and on. Since some certificate authorities (Let's Encrypt) require only domain verification, SSL certificate can be easily generated.\n\n",
+    "severity": [
+        9.3,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Privilege Escalation"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1529967540,
+    "report_url": "https://hackerone.com/reports/325336",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify the subdomain svcgatewayus.starbucks.com and check its DNS records."
+        ],
+        [
+            2,
+            "Verify that the CNAME record points to an unclaimed Azure resource (s00197tmp0crdfulprod0.trafficmanager.net and subsequently to 1fd05821-7501-40de-9e44-17235e7ab48b.cloudapp.net)."
+        ],
+        [
+            3,
+            "Register the unclaimed Azure resource (1fd05821-7501-40de-9e44-17235e7ab48b.cloudapp.net) in the Azure portal."
+        ],
+        [
+            4,
+            "Once registered, gain control over the content served on svcgatewayus.starbucks.com."
+        ]
+    ],
+    "vuln_description": "The subdomain svcgatewayus.starbucks.com has a CNAME record pointing to an unclaimed Azure resource. This allows anyone to register the resource in Azure and take control of the subdomain, leading to potential misuse such as malware distribution, phishing, or other malicious activities.",
+    "reason": "The vulnerability involves checking DNS records and identifying unclaimed cloud resources, which is a straightforward process for someone familiar with DNS and cloud services. The steps are linear and do not require complex interactions or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "32825",
+    "idor_detectable": false,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": true,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": false
+    }
+}

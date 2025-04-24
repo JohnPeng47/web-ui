@@ -1,0 +1,56 @@
+{
+    "reported_to": "Weblate",
+    "reported_by": "h1bountyoverflow ",
+    "title": "Improper access control when an added email address is deleted from authentication",
+    "content": "\nHi team,\nThere is improper access control kind of vulnerability present in your web application.\nSteps to reproduce:\nCreate an account. 2.You will recevie a link on email about confrimation.\nLogin into it and add another email address in authentication tab and You will recevie a link on the new email about confrimation. 3.Remove the the any email address from it authentication tab. (Suppose your old email address got lost or hacked).\nNow suppose I removed old email address from authentication tab because i doubt the my old email id got hacked.\nLogically when user click on the link recived in the step 2 the user should not be allowed to enter in the application because we have removed the email from authentication tab.\nWhen attacker click on the old link recieved in the step 2 will be able to login into the application and the old email id will be automatically added to authentication tab in that account even the we have alredy removed that email address from our account.\nPlease let me know if anything more is required .!\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1495044420,
+    "report_url": "https://hackerone.com/reports/223434",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create an account and confirm it via the email link received."
+        ],
+        [
+            2,
+            "Add another email address in the authentication tab and confirm it via the new email link received."
+        ],
+        [
+            3,
+            "Remove the old email address from the authentication tab."
+        ],
+        [
+            4,
+            "Click on the old confirmation link received in step 2. The attacker can now log in, and the old email address is automatically re-added to the authentication tab."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to regain access to an account by using an old email confirmation link, even after the associated email address has been removed from the authentication tab. This happens because the system fails to invalidate old confirmation links and automatically re-adds the email address upon link usage.",
+    "reason": "The attack involves multiple steps, including account creation, email confirmation, and email removal, but the interaction between these steps is relatively straightforward. The vulnerability arises from a logical flaw in how the system handles old confirmation links and email address management, which is not overly complex or novel.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

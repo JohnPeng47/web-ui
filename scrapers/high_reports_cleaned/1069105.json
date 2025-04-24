@@ -1,0 +1,42 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "0x0luke ",
+    "title": "2x Remote file inclusion within your VMware Instances",
+    "content": "\nSummary:\n2x Remote file inclusion within your VMware Instances\nHosts:\nnmc.vc.mtn.co.ug\nh28a.n1.ips.mtn.co.ug\nSteps To Reproduce:\nNavigate to the URLs given below, /etc/passwd will be displayed.\nhttps://nmc.vc.mtn.co.ug/eam/vib?id=/etc/passwd\nhttps://h28a.n1.ips.mtn.co.ug/eam/vib?id=/etc/passwd\nImpact\nAn attacker is able to view sensitive files on the server hosting this content and could potentially elevate this to a remote code execution.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Remote File Inclusion"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1629418560,
+    "report_url": "https://hackerone.com/reports/1069105",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "steps": [
+        [
+            1,
+            "Navigate to the URL: https://nmc.vc.mtn.co.ug/eam/vib?id=/etc/passwd"
+        ],
+        [
+            2,
+            "Observe that the contents of /etc/passwd are displayed in the response"
+        ]
+    ],
+    "vuln_description": "This is a remote file inclusion vulnerability that allows an attacker to view sensitive files on the server, such as /etc/passwd, by manipulating the 'id' parameter in the URL. This could potentially lead to further exploitation, such as remote code execution.",
+    "reason": "The vulnerability is straightforward to discover as it involves a simple manipulation of a URL parameter to access sensitive files. There are no complex interactions or states involved, and the attack logic is commonly seen in other applications.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The vulnerability involves remote file inclusion by manipulating URL parameters to access sensitive files like /etc/passwd. This is a server-side issue where the application does not properly validate or sanitize input, allowing unauthorized file access. The proposed methodologies focus on authentication and authorization bypasses within the same application context, not server-side file inclusion vulnerabilities.",
+        "is_detectable": false
+    }
+}

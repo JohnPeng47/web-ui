@@ -1,0 +1,64 @@
+{
+    "reported_to": "Reddit",
+    "reported_by": "sateeshn ",
+    "title": "Can use the Reddit android app as usual even though revoking the access of it from reddit.com",
+    "content": "\nSummary:\nHi Team,\nFor the last 4 days, I kept testing reddit web. That time, I revoked app access from the old.reddit.com and i checked my app and as expected i was not able to use the account in my app.\nAfter 2 days I was checking the chat invites feature on the web and after some time I turned on the internet on my mobile and got a Reddit \"invitation accept\" notification. I clicked on that and I was surprised that I was able to use the previously revoked user account again in the Reddit app.\nAfter I tried to reproduce the scenario again. I thought the revoked account get access again after clicking on the app \"chat invite\" notification.\nI again revoked the app access from the old.reddit.com\nI sent a chat invitation link to another test account and replied with the test account so that I get a \"chat accept\" notification in the mobile\nAfter several tries from several test accounts, Finally, I received the \"chat accept\" invitation, only one time on the mobile (Note: this is also an issue)\nI clicked on the notification and I was not able to access anything in the app (it was showing some error)\nI tried to reproduce the issue again, I don't know the reason But this time I was not able to view the chat invite links from any accounts. (it was showing some error)\nIt took my whole day and I stopped testing.\nThe next day again I got a post notification on my mobile. I clicked on that and again I see that the app was working as usual with a previous logged-in user!!!\nFinally, I came to the conclusion that whenever we revoke the app access, it works fine. But if you check the app approximately after 20+ hours you can reuse the previously logged-in account again.\nSteps To Reproduce:\nlog in to your account from both the android mobile app and from the web(reddit.com or old.reddit.com)\nOn the Reddit web go to https://www.reddit.com/account-activity\nNavigate to the \"Apps you have authorized\" section\nFind \"Reddit on Android\" click the revoke access and confirm\nNow open the Reddit app where you have logged in step 1\nYou are no more able to access any info about the user and it will show errors like \"Let's try that again\" or \"uh oh something went wrong but we're not sure what\"\nOpen the app approximately after 20+ hours and see that you can reuse the previously logged-in account without any issue.\nSupporting Material/References:\n<image_0>\nImpact\nUnauthorized access to account even though revoking the access.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Insufficient Session Expiration"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/gjdag9gi8uks7opyzqveaqkfc9sh?response-content-disposition=attachment%3B%20filename%3D%22app-version.jpg%22%3B%20filename%2A%3DUTF-8%27%27app-version.jpg&response-content-type=image%2Fjpeg&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYWVFD757%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T022459Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQDRwqvFOYwbL93ssmdmgz%2BXJhVf8Ly1JXUQFPuS0XbYvQIhAPq0vL2W4IWyCkvmMpjx%2FiVJniU81PtGBSYTnlIolgp1KrsFCPr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQAxoMMDEzNjE5Mjc0ODQ5Igz46voymRkuJBi83osqjwXtKm9fHntEGRAECSs6TiwC73nQZMFPk9FZd%2BmHLD%2FDowJ%2F%2FXX6Wg60voKko6CYYxRA4cEmT7I9zukJ4iuyxwwalrjBXfF59wx0aGUI7qj1y3L9x7dNAdHXcsVDfo1JgoHxpbxKFK67sst6vLDj1k7pnkV8cV%2FCBlITJao%2BnUU0%2BONOox3FiQ1mDcSF%2FK6Vi9TQe9klEpMGCaEHZ0TdXrY2ehb0jNUoItLb3ZZO14suL0FaKyXA59%2BbbOlS1kb13udHgPVxLM2S1tRn0LzvUGl1BSnlt3VrMf9xRsidnJ7g4x%2BYT4dK6RslnOiu9IkC%2F4OhmKDiG4BTaVfqbWZdTIu4UsBvc7atKROTukMa2kCJwJKSXl5pOsW9%2FX5apPSqH3mx%2FsrbPyUHvL8VwdNWeEhr7HQ0Z9hsNaWK9PCDkCl%2F136sdjCxdRjzstGN2XOZ1%2FNu8UcZCwr2koRko7mxFOW1J7MvJ6OAiHMfZR6xWyRohVeGjYoaiBFZ5cS1CgMH7b9rA1ej6zocmccJSSbM8BQRzghgYlb01ntNsQevt5vIbSzyZQbv2KswEM9k5Tq4Y4NMhiFY0Mt0GnaD8j39eZ1y0o85FpI9ILcnxcEpj8dX9BDflwODKDUMaTPirQX%2FFHNFfAm%2BFxLENXoHhk89fvc9cg3BDMwRj6HQ0QMl%2FgoQuCypnafHxEFW1vJN9%2B%2F%2FOmC7BS6XOgu6ZC1ubFda7AZyRC1%2B1hZkQ%2Fp3ErzmOM1dOCklHQSoy9UTdC5jeU%2BvWjD%2BWTJDUgFQldNczrPtR7emjXt2IDGdC9e5CU2oRl9kyqTjF6OtDpYhI%2BuZx4P%2B90%2By9%2F28nNM3WryN6a09FNNsZYk9JntX87YnbxnYxqo1MJiJiL8GOrABrQ%2FSc%2BlP32XviWWXgtjdOT5G62lUCSlYvvomEgN58HjIqE38Gp4FQGgz1RtiYrCnyOYwCAt1mTYjsNi%2BdVT5mUtPwIZVwf9EkKOKAX4U3gtKWkdIPPb2pAu2chxaSnebIRPlCf9xYhxDKyr7CpW2fszwOnV3Qc8M2qeplExZ0ED2kl%2F7fJm%2B%2Bhfb3hJ56c8kfrc%2BDgTQ0zBTGp93t2qnOTsx5IwKfoFVAKUqnVKFHQs%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=bf71273e13428a070ea1ff6c70b8f5f6cd38b09c363ed15790ab1020e413fdad"
+    },
+    "disclosed_date": 1657984200,
+    "report_url": "https://hackerone.com/reports/1632186",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "MOBILE",
+    "steps": [
+        [
+            1,
+            "Log in to your account from both the Android mobile app and from the web (reddit.com or old.reddit.com)"
+        ],
+        [
+            2,
+            "On the Reddit web, go to https://www.reddit.com/account-activity"
+        ],
+        [
+            3,
+            "Navigate to the 'Apps you have authorized' section"
+        ],
+        [
+            4,
+            "Find 'Reddit on Android' and click the revoke access button, then confirm"
+        ],
+        [
+            5,
+            "Open the Reddit app where you logged in during step 1"
+        ],
+        [
+            6,
+            "Observe that you can no longer access any user info and see errors like 'Let's try that again' or 'uh oh something went wrong but we're not sure what'"
+        ],
+        [
+            7,
+            "Wait approximately 20+ hours and open the app again"
+        ],
+        [
+            8,
+            "Observe that you can reuse the previously logged-in account without any issues"
+        ]
+    ],
+    "vuln_description": "After revoking app access from the Reddit web interface, the Android app continues to allow access to the account after approximately 20+ hours, despite the access being revoked. This indicates a failure in proper session invalidation or token revocation mechanisms.",
+    "reason": "The vulnerability involves understanding the session management and token revocation mechanisms between the web and mobile app. The tester had to observe the behavior over an extended period (20+ hours) and notice the subtle interaction where the app regains access despite being revoked. This required persistence and attention to timing, but the core issue is relatively straightforward once observed.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

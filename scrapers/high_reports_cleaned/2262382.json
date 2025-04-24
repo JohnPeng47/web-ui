@@ -1,0 +1,38 @@
+{
+    "reported_to": "HackerOne",
+    "reported_by": "mega7 ",
+    "title": "Server Side Request Forgery (SSRF) via Analytics Reports",
+    "content": "\nHello Gents, I would like to report an issue where attackers are able to read internal files via an SSRF vulnerability.\nProof of concept\n\u2588\u2588\u2588\nImpact\nSSRF.\nThanks and have a nice day!\n\n",
+    "severity": [
+        10.0,
+        null
+    ],
+    "bounty": 25000,
+    "weaknesses": [
+        "Server-Side Request Forgery (SSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1702076940,
+    "report_url": "https://hackerone.com/reports/2262382",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify the analytics reports feature in the application that allows for URL inputs."
+        ],
+        [
+            2,
+            "Craft a malicious URL pointing to an internal file (e.g., file:///etc/passwd) and submit it via the analytics reports feature."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to perform Server Side Request Forgery (SSRF) by manipulating the analytics reports feature to read internal files. This is achieved by inputting a malicious URL that the server processes, leading to unauthorized access to sensitive data.",
+    "reason": "The attack involves a straightforward manipulation of the URL input in the analytics reports feature without requiring complex interactions or state manipulations. The vulnerability is a common SSRF flaw, which is well-documented and does not involve novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

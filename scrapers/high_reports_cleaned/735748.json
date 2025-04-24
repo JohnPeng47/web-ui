@@ -1,0 +1,38 @@
+{
+    "reported_to": "Node.js",
+    "reported_by": "erubinson ",
+    "title": "HTTP request smuggling using malformed Transfer-Encoding header",
+    "content": "\nPlease see the attached PDF for a writeup of this vulnerability.\nImpact\nPlease see the attached PDF for a writeup of this vulnerability.\n\n",
+    "severity": [
+        9.0,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "HTTP Request Smuggling"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1583627580,
+    "report_url": "https://hackerone.com/reports/735748",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Craft an HTTP request with a malformed Transfer-Encoding header."
+        ],
+        [
+            2,
+            "Send the crafted request to the target server to exploit the HTTP request smuggling vulnerability."
+        ]
+    ],
+    "vuln_description": "This vulnerability involves HTTP request smuggling by manipulating the Transfer-Encoding header. The attacker sends a malformed header to confuse the server's request parsing logic, potentially leading to request smuggling where the server interprets the request differently than intended.",
+    "reason": "The attack requires knowledge of HTTP protocol intricacies and the ability to craft a malformed header. However, once the header manipulation is understood, the attack is relatively straightforward to execute.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,52 @@
+{
+    "reported_to": "Automattic",
+    "reported_by": "saurabhb ",
+    "title": "Broken Authentication - Security token gets captured via man in the middle attack",
+    "content": "\nProduct / URL\nhttp://en.instagram-brand.com/register/reset/<the security token here>?email=<email address here>\nDescription and Impact\nThe password reset links issues by Instagram Brand gets delivered to users inbox with a http scheme and NOT https scheme.\nThis causes an attacker stealing those links and performing mass account takeovers and security compromises.\nThe link that gets delivered in inbox is:\nhttp://mandrillapp.com/track/click/30956340/instagram-brand.com?p=<the very long security token here>\nOn requesting the above link in browser, it sends back the password reset token in clear text: http://en.instagram-brand.com/register/reset/<the security token here>?email=<the email of user here>\nSolution:\nThis issues has a very easy solution. I have myself performed this and it worked !!.\nWhenever the code responsible for sending password reset link makes those links, just add https as scheme instead of http. And you will observe that now all the accounts are safe and data cannot be stolen.\nReproduction Instructions / Proof of Concept\nRequest for you password reset link.\nGo to inbox.\nRight click that link and paste it on notepad and observe the scheme.\nYou can also start Wireshark to capture the traffic and observe that security token can be compromised.\nI have attached the screenshot of Wireshark as a proof of concept. InstagramBrandMITM.png (F161119)\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Authentication - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1561227300,
+    "report_url": "https://hackerone.com/reports/206650",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Request a password reset link from Instagram Brand."
+        ],
+        [
+            2,
+            "Inspect the received link in the inbox to observe it uses HTTP instead of HTTPS."
+        ],
+        [
+            3,
+            "Capture the traffic using a tool like Wireshark to observe the security token being transmitted in cleartext."
+        ]
+    ],
+    "vuln_description": "The password reset links issued by Instagram Brand are delivered over HTTP instead of HTTPS, making them susceptible to Man-in-the-Middle (MITM) attacks. An attacker can intercept these links and capture the security token, leading to potential account takeovers.",
+    "reason": "The vulnerability involves a straightforward observation of the protocol used in the password reset link. The attack does not require complex interactions or manipulation of application states. The issue is easily identifiable by inspecting the link or capturing network traffic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": false
+    }
+}

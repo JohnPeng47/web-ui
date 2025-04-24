@@ -1,0 +1,66 @@
+{
+    "reported_to": "UPchieve",
+    "reported_by": "anas_44 ",
+    "title": "Authentication Bypass - Email Verification code bypass in account registration process.",
+    "content": "\nHi Team,\nI was able to bypass Email Verification code in account registration process.\nSummary :\nAuthentication Bypass is a dangerous vulnerability, which is found in Web-Applications. An Attackers can bypass the control mechanisms which are used by the underlying web application like Email verification, OTP, Captcha, 2FA, etc. An Attacker can perform a complete Account takeover of Victim.\nSeverity : High / Critical\nComplexity : Easy\nFrom : Remote / External\nSteps to Reproduce:\n1- First visit your website \"https://hackers.upchieve.org\" and request for the sign up.\n2- In the second step, choose either you want to register as an academic coach or need an academic coach.\n3- In the third step, enter your email and create a password.\n4- In the fourth step, enter name and mobile phone, then sign up.\n5- Then request for verification code on email.\n6- Enter wrong verification code and intercept request using Burp suite.\n7- After intercepting the request, I changed the status from \"False\" to \"True\".\n{\"status\":false to \"status\":true}\n8- Boom!! Verification code bypassed.\n9- Finally, the account was created with the wrong verification code.\nProof of Concept :\nFor better understanding, I have attached screenshots and videos after intercepting the request from Burp Suite.\nRecommendations :\nThe application should protect the sensitive actions and validate the verification process of the web application. Restrict the user for any malicious behavior.\nReferences:\nhttps://hackerone.com/reports/1040047\nhttps://hackerone.com/reports/57764\nhttps://medium.com/@AGNIHACKERS/otp-bypass-through-response-manipulation-beeb467359d8\nImpact\nAn Adversary can carry out Auth Bypass attack and perform an Account Take Over. An attacker can succeed in the account takeover of any user without any privileges.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1638921420,
+    "report_url": "https://hackerone.com/reports/1406471",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Visit the website 'https://hackers.upchieve.org' and initiate the sign-up process."
+        ],
+        [
+            2,
+            "Choose to register as either an academic coach or as someone needing an academic coach."
+        ],
+        [
+            3,
+            "Enter your email and create a password."
+        ],
+        [
+            4,
+            "Provide your name and mobile phone number, then proceed to sign up."
+        ],
+        [
+            5,
+            "Request a verification code via email."
+        ],
+        [
+            6,
+            "Enter an incorrect verification code and intercept the request using Burp Suite."
+        ],
+        [
+            7,
+            "Modify the request by changing the status from 'false' to 'true'."
+        ],
+        [
+            8,
+            "Observe that the verification code bypass is successful."
+        ],
+        [
+            9,
+            "Complete the account creation process with the incorrect verification code."
+        ]
+    ],
+    "vuln_description": "This vulnerability allows an attacker to bypass the email verification step in the account registration process by manipulating the verification status in the intercepted HTTP request. By changing the status from 'false' to 'true', the attacker can create an account without providing the correct verification code, leading to a potential account takeover.",
+    "reason": "The attack involves intercepting and modifying a single HTTP request, which is a straightforward process with tools like Burp Suite. The vulnerability does not require complex interactions between components or manipulation of multiple application states. The logic of changing a status field is a common technique in such bypass attacks.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "1040047"
+}

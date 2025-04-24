@@ -1,0 +1,42 @@
+{
+    "reported_to": "Slack",
+    "reported_by": "imran_hadid ",
+    "title": "Store XSS",
+    "content": "\nHello Team.\nI found a Store XSS. Where the company name is the vulnerable to XSS. If you give this below XSS script as Company name, you will get the XSS pop up after the login in message option where it'll randomly generated at the message room.\n\u201c><IMG SRC=x onerror=javascript:alert(&quot;XSS-by-Imran&quot;)>\nHere is the POC:\nhttps://youtu.be/dqrH2WhIgtk\nThanks\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1483321560,
+    "report_url": "https://hackerone.com/reports/187410",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Enter the XSS payload as the company name: \u201c><IMG SRC=x onerror=javascript:alert(&quot;XSS-by-Imran&quot;)>"
+        ],
+        [
+            2,
+            "After logging in, navigate to the message option where the XSS payload will be executed, triggering a pop-up alert."
+        ]
+    ],
+    "vuln_description": "This is a stored Cross-Site Scripting (XSS) vulnerability where the company name field is vulnerable to XSS attacks. By injecting a malicious script into the company name field, the script is stored and later executed when the message option is accessed, leading to arbitrary JavaScript execution.",
+    "reason": "The vulnerability is straightforward to discover as it involves a common XSS payload in a user-controllable input field. The attack does not require multiple components, complex state manipulation, or novel logic. The interaction is direct and obvious once the input field is identified as vulnerable.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The XSS vulnerability involves injecting malicious scripts into the company name field, which is a stored input. The methodology described focuses on authentication and authorization (AuthN/AuthZ) bypasses and IDOR vulnerabilities, which are different from XSS vulnerabilities. XSS is a client-side vulnerability that does not involve bypassing AuthN/AuthZ or manipulating resource IDs in the way described in the methodology.",
+        "is_detectable": false
+    }
+}

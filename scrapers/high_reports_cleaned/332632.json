@@ -1,0 +1,42 @@
+{
+    "reported_to": "BOHEMIA INTERACTIVE a.s.",
+    "reported_by": "europa ",
+    "title": "(Possible) staff account takeover via reset token bruteforce at helpdesk.bistudio.com",
+    "content": "\nAs stated in a brief exchange with @rvn in my other report ##312433, I might have found a logic flaw in the way https://helpdesk.bistudio.com handles the reset flow and tokens.\nI've asked if it was possible to obtain a test account, but I fully understand that it's something that cannot be done; as such I'll submit a \"blind\" report based on my black-box analysis and wait for your team to verify it. Also note that this flaw seems to also be present in the \"Set out of office email response\" flow, albeit less critical.\nFlow\nThe SYSTEM PASSWORD RESET flow is a 3-steps process:\nthe staff member requests a SMS TOKEN using the first form\nthe 6-digits SMS TOKEN is used in the second form\nthe staff member can now set a new SYSTEM PASSWORD in the third form\nAnalysis and logic\nI was able to go through the process even after providing non-existing usernames and tokens by intercepting the response in BurpSuite and changing the status code from 400 Bad Request to 200 OK and the body from \"status\":\"error\" to \"status\":\"ok\", allowing the AngularJS applet to follow through.\nI then noticed that the API endpoint for verifying the SMS TOKEN and changing the password where open and free of rate-limiting measures, allowing for a quick bruteforce of the 000000-999999 space.\nIt should be therefore possible to perform an account takeover on any staff member, provided the SMS TOKEN really is a 6-digits code\nTheoretical POC\nadversary starts the SYSTEM PASSWORD RESET process for the target victim using a POST request to /api/system/verification-codes (ie: {\"username\":\"admin\"}). The backend generates a SMS TOKEN and sends it to the victim's phone. Meanwhile,\nadversary obtains the securityCode value for the victim by bruteforcing /api/system/verification-codes/[0-9]{6} before the victim can cancel the flow (threat scenario places the attack durin night time)\nadversary can now reset the SYSTEM PASSWORD by sending the complete POST request to /api/system/email-account/password (ie: {\"password\":\"<NEW PASSWORD>\",\"code\":\"<BRUTEFORCED SMS TOKEN>\",\"securityCode\":\"<RETRIEVED SECURITY CODE>\"})\nStep #1 offers a ReCAPTCHA anti-CSRF token but it's not used anywhere in the flow, making the attack possible\nStep #2 is really a matter of resources. Being free of rate-limiting, the API endpoint will be quickly queried for all the possible token combinations in a matter of minutes using a multithreaded approach (ie: using BurpSuite's Intruder).\nAlbeit theoretical, the logic behind the threat scenario seems plausible. It might be worth investigating.\nRecommended actions\nProperly implement the ReCAPTCHA and a strict ratelimiting on the API endpoints\nImpact\nAn adversary might be able to takeover staff accounts, or set their \"out of office\" email replies.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Weak Password Recovery Mechanism for Forgotten Password"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1537382520,
+    "report_url": "https://hackerone.com/reports/332632",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Intercept the password reset flow by changing the response status from 400 Bad Request to 200 OK and the body from 'status':'error' to 'status':'ok' to bypass initial validation."
+        ],
+        [
+            2,
+            "Bruteforce the 6-digit SMS token by sending requests to /api/system/verification-codes/[0-9]{6} without rate-limiting."
+        ],
+        [
+            3,
+            "Use the bruteforced token to reset the password via /api/system/email-account/password with the new password and retrieved security code."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to bypass the password reset flow and bruteforce the 6-digit SMS token due to lack of rate-limiting and improper validation, leading to potential account takeover.",
+    "reason": "The attack involves multiple steps including response manipulation and token bruteforcing, but the logic is straightforward once the initial bypass is discovered. The lack of rate-limiting makes the bruteforce feasible.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "312433"
+}

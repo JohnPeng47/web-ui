@@ -1,0 +1,50 @@
+{
+    "reported_to": "Starbucks",
+    "reported_by": "jackb898 ",
+    "title": "Possible SOP bypass in www.starbucks.com due to insecure crossdomain.xml",
+    "content": "\nHello. I was penetration testing your website, and noticed that your crossdomain.xml file allowed many sites access. I went through and, for all the sites that had *.website.com with them, I scanned them for subdomains.\nI found that a subdomain for \u2588\u2588\u2588\u2588\u2588\u2588\u2588.com (a site in your crossdomain.xml as *\u2588\u2588\u2588\u2588\u2588\u2588\u2588), m\u2588\u2588\u2588\u2588\u2588\u2588\u2588, was vulnerable to takeover.\nI'm not going to take it over since they do not have a white hat hacker program, but if someone were to take it over, they could make flash files on it to retrieve sensitive information from starbucks.com, and do it with no issue. Another factor that makes it even worse is that it's possible to use any headers also (<allow-http-request-headers-from domain=\"*\" headers=\"*\"/>).\nIt's similar to if your site had this line in the crossdomain.xml: <allow-access-from domain=\"*\" />\nSCENARIO:\nThis is a scenario of how it would most likely be exploited\nA black hat is trying to hack into Starbucks\nHe goes to the crossdomain.xml file looking for <allow-access-from domain=\"*\" />, but he notices lots of different websites are allowed access\nHe decides to check the domains with *. before them for vulnerable subdomains\nHe finds m\u2588\u2588\u2588\u2588\u2588\u2588, and notices *\u2588\u2588\u2588\u2588\u2588\u2588\u2588 has access\nHe takes over m\u2588\u2588\u2588\u2588\u2588\u2588 and uploads a malicious flash file to send HTTP requests and see their responses.\nHOW TO FIX THIS\nPretty simple, obvious fix, but you have two routes you can take for it.\nFirst option: You can just remove <allow-access-from domain=\"*\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\" /> from your crossdomain.xml file. (I didn't find any other subdomains vulnerable to takeover that were in there)\nSecond option: You can talk to \u2588\u2588\u2588\u2588\u2588\u2588\u2588, the company that owns \u2588\u2588\u2588\u2588\u2588.com, and tell them to disconnect the DNS records linking m\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 and m\u2588\u2588\u2588\u2588\u2588\u2588.\u2588\u2588\u2588\nMORE INFORMATION\nHere is more information on how it could be exploited: http://resources.infosecinstitute.com/bypassing-csrf-protections-fun-profit/ (read between Abusing CORS via Flash Files down to Bypassing XMLHttpRequest Header Validation)\nThanks,\nJack\n\n",
+    "severity": [
+        7.1,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-Site Request Forgery (CSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1506213360,
+    "report_url": "https://hackerone.com/reports/244504",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Inspect the crossdomain.xml file on www.starbucks.com to identify allowed domains."
+        ],
+        [
+            2,
+            "Identify a domain with a wildcard (*) in the crossdomain.xml file (e.g., *\u2588\u2588\u2588\u2588\u2588\u2588\u2588.com)."
+        ],
+        [
+            3,
+            "Scan the identified domain for vulnerable subdomains (e.g., m\u2588\u2588\u2588\u2588\u2588\u2588)."
+        ],
+        [
+            4,
+            "Verify if the vulnerable subdomain (e.g., m\u2588\u2588\u2588\u2588\u2588\u2588) can be taken over."
+        ],
+        [
+            5,
+            "If takeover is possible, upload a malicious Flash file to the subdomain to exploit the SOP bypass."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves a misconfigured crossdomain.xml file on www.starbucks.com that allows arbitrary domains, including a vulnerable subdomain (m\u2588\u2588\u2588\u2588\u2588\u2588), to make cross-domain requests. An attacker could take over the vulnerable subdomain and use it to host malicious Flash files, bypassing the Same-Origin Policy (SOP) and potentially stealing sensitive information from starbucks.com.",
+    "reason": "The attack involves multiple steps, including identifying the misconfiguration in crossdomain.xml, scanning for vulnerable subdomains, and exploiting the subdomain takeover. However, each step is straightforward and does not involve complex interactions or novel logic.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

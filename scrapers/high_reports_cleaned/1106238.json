@@ -1,0 +1,48 @@
+{
+    "reported_to": "GitLab",
+    "reported_by": "taraszelyk ",
+    "title": "Stored XSS via Mermaid Prototype Pollution vulnerability",
+    "content": "\nPrologue\nGitlab supports Mermaid as part of GFM to allow users to generate diagrams and flowcharts from text.\nIn version 8.6.0, Mermaid added a support of directives to add more controll over styles(themes) applied to the diagrams.\nYou can read more about how this works here: https://mermaid-js.github.io/mermaid/diagrams-and-syntax-and-examples/directives.html\nSyntax for declaring the directive is %%{init: {<JSON_OBJECT>}}%%\nDirectives can be used to overwrite default theme properties like fontFamily or fontSize to the graph.\nBehind the scenes, library takes JSON_OBJECT from directive and merges it with config object. Later that config is used to generate new CSS rules:\nCode 428 Bytes\n1  let userStyles = '';\n2  // user provided theme CSS\n3  if (cnf.themeCSS !== undefined) {\n4    userStyles += `\\n${cnf.themeCSS}`;\n5  }\n6  // user provided theme CSS\n7  if (cnf.fontFamily !== undefined) {\n8    userStyles += `\\n:root { --mermaid-font-family: ${cnf.fontFamily}}`;\n9  }\n10  // user provided theme CSS\n11  if (cnf.altFontFamily !== undefined) {\n12    userStyles += `\\n:root { --mermaid-alt-font-family: ${cnf.altFontFamily}}`;\n13  }\nVulnerability description\nThe issue is that directive JSON_OBJECT is lacking proper sanitization which means we can specify __proto__ attribute to overwrite Object prototype.\nFor example, if we use following payload, it will add attribute polluted to every new object in the application:\nCode 107 Bytes\n1%%{init: { '__proto__': {'polluted': 'asdf'}} }%%\n2sequenceDiagram\n3Alice->>Bob: Hi Bob\n4Bob->>Alice: Hi Alice\nI have tried to use it to overwrite config values or other attributes to achieve XSS, but since a new attribute will be accessible in every object, it just breaks the application.\nSteps to reproduce\nCreate an issue in any repository\nCreate mermaid diagram with following payload:\nCode 107 Bytes\n1%%{init: { '__proto__': {'polluted': 'asdf'}} }%%\n2sequenceDiagram\n3Alice->>Bob: Hi Bob\n4Bob->>Alice: Hi Alice\nSave the issue. Now when you open this page and click anywhere, you will see that nothing works. In Developer Console you can see a lot of exceptions that are triggered by a polluted prototype.\nPoC\nOpen https://gitlab.com/bugbountyuser1/dos/-/issues/1/\nYou will see that you can't comment or perform any action except clicking on the left sidebar links.\n<image_0>\nWhat is the current bug behavior?\nMermaid allows setting __proto__ attribute in the directive which leads to DOS via prototype pollution.\nWhat is the expected correct behavior?\nMermaid doesn't allow __proto__ attributed to being set in the directive and merged with the config.\nOutput of checks\nThis vulnerability was tested on gitlab.com. On a local Gitlab instance with a newer version(same as gitlab.com) of Mermaid, it works too.\nImpact\nAn attacker who can add Mermaid diagram to the page will make this page broken. Users will not be able to add comments, edit comments, etc.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 3000,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/fu11cgg6p5ljpmth60r7ciervn87?response-content-disposition=attachment%3B%20filename%3D%222021-02-18_11-03.png%22%3B%20filename%2A%3DUTF-8%27%272021-02-18_11-03.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ5RYF454L%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T192115Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQCd7xODaAZsWtoVCr0Hzg5Hwov6AVO8ZP1SFX7XpzeEHQIhALJLFfrIXn%2BNwgBsQo6YQcgGUX%2Fvdd6oeXwXo8vgM878KrIFCBsQAxoMMDEzNjE5Mjc0ODQ5IgxANAF6XRv6sKYaxr0qjwWoruKuwZNnidKcXmWiwMAkG%2FihY1uxfm842ygoDkRCjDnyjzTHzMavyVNYiMC94s7xuLIx8Qbpl54QEp%2FWd9JVejypGcN3tcA8%2BbgMrnf9V%2F%2FBfCaw7NBVKe3JDlxGURbnOK9m9LTiF2DLxHuqlJlbUuuh%2Bnaki9BpeQw7DTAE1wdKPGij%2FHXFO2GTM2YQSuTVhGq5RMcCFvogZPPxjJqzACsbiFEsB3acqF72jGmR9hy7AjqJn%2BVu%2F8XsOHZ0X4g8gmuQRyxStK96jupNpCxy903WUCggq6Vff0iV%2BJQuk3%2FsghDaKoK4WOM%2BSCbBPCXAJ%2BkzZkl9l5iw5zCWuFI6tqwJqN%2FnFzbwh8S4ejhHVn3tYJ2pTWKKGIeSUdELqa%2F5MiVKFDnPdPTcHOAIv4E8VC7GwA%2BVQ956Yq%2BWNw7er0YraO8D%2BQiExNtmIJ3%2FGLa2r5glGEab5L395U41hLywRVGs%2BfhWVoWAYwAY7Y%2FkSIgs58ZJe0rTUhTDgTqPtxo7Da2QnMydKywRRxiQiPzjZB6r7GvJNXXXP%2Bq7aSO%2FqHGv4d87wY4uiilU35DAen5RFbb1iHPBK4kYxLAaoOY0Q1bgCgX9ElL9K%2ByXbsDVgOW%2FYDv3WIFgY30%2BfHUyRbDbXDcGMMam5jEcY2mUyuS8sCOg1HA9CLDAUjra5jcnFUk83PD1V2KqEVNwSpbzkDOsVHJA9T354jfN5MefUzTnNY11WmSHAp%2BYREVaSiuQ395v5L7C6LTKE9E%2Bu9JxjEgXKdXHoOEQskbRegUbNzJ8oBzDSamrCK%2FPUkTdhC3y8cVqTxbKVoZPdMQyWY8uYXV%2BpRvP9hLY%2Bq%2FSa94ubwlN9DU5ADwWgG5vr%2FjzVf3TMIbYi78GOrABdg5PLiDP%2F%2F7nLUmHnfL3ZYdT4xgbb43M3MUkRWMreAW17OFNtrHb2uUlva1bydC636hgv%2FjAaXdozMyM9bl%2FOUdp86remWGAxAPrkMrvHi8EPGaH3SUV6V3n46FRwz8a4J0wE1nLJ0In3AwEh24V%2BEA8ooDtsbEP%2FbNrGvyTTaprj%2BbJuXm3s2ORc8026qMwjBCeUPXORjM3XxNz9tu7JpxlZHbkYYZQsHiOq2XDxgU%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=1d654f901dd50b3e0ff266676934a0ead58b3a7ee9326e63f710c880c6acd139"
+    },
+    "disclosed_date": 1626145200,
+    "report_url": "https://hackerone.com/reports/1106238",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create an issue in any repository"
+        ],
+        [
+            2,
+            "Add a Mermaid diagram with the payload: %%{init: { '__proto__': {'polluted': 'asdf'}} }%% followed by a sequence diagram"
+        ],
+        [
+            3,
+            "Save the issue and observe the page becomes unresponsive"
+        ]
+    ],
+    "vuln_description": "The vulnerability is a Stored XSS via Mermaid Prototype Pollution, where an attacker can inject a malicious JSON object in a Mermaid diagram directive to pollute the Object prototype, leading to a Denial of Service (DOS) by breaking the application's functionality.",
+    "reason": "The attack involves understanding Mermaid's directive feature and prototype pollution, but the steps to exploit are straightforward once the vulnerability is known. The interaction between the JSON object and the application's prototype is non-obvious but does not require complex state manipulation or novel logic.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The vulnerability involves prototype pollution in Mermaid's directive handling, which is a client-side issue affecting the application's behavior rather than an authentication or authorization boundary. The described methodology focuses on testing AuthN/AuthZ boundaries through session and resource manipulation, which doesn't apply to this type of vulnerability.",
+        "is_detectable": false
+    }
+}

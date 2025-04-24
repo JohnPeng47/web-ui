@@ -1,0 +1,50 @@
+{
+    "reported_to": "Valve",
+    "reported_by": "hunterstanton ",
+    "title": "Malformed NAV file leads to buffer overflow and code execution in Left4Dead2.exe",
+    "content": "\nSummary\nIn the parsing routines of NAV files (which contain the navigation mesh used by the AI for survivor bots, zombies, and the AI director spawning system) a buffer overflow exists which can be used to control the EIP register and takeover code execution.\nProof-of-Concept\nDownload the attached c1m1_hotel.nav\nPlace it in your <steamapps>/Left 4 Dead 2/left4dead2/maps/ directory\nStart up Left4Dead 2 and attach a debugger\nEnter \"map c1m1_hotel\" into the developer console\nObserve that EIP becomes 0x41414102, indicating that a buffer overflow has occurred and code execution is possible\nOperating Systems Tested\nWindows 10 1809 Build 17763.437\nI have not tried this for MacOS or Linux, however I assume it would work on both of those platforms as well if they all share the same codebase as the Windows executable.\nNotes\nBecause Left4Dead 2 ships on Windows with a non-ASLR enabled module (binkw32.dll), it is much easier to write up a working exploit for this vulnerability as you no longer need an additional infoleak of some kind to do serious damage and can just use ROP.\nImpact\nImpact\nIf an attacker successfully exploits this vulnerability, the attacker can run arbitrary code on the machine of a victim.\nDue to the fact that Source supports sending arbitrary files to clients when connecting to a server, it is possible that you could create a fake dedicated server that does nothing but send the malformed NAV file to clients who are connecting, creating a remote code execution scenario.\nAnother attack scenario would be an attacker uploading a campaign map with a malformed NAV to the Steam Workshop, and convincing other users to download it. When they download it and load the campaign in game, arbitrary code will be executed on their machines.\n\n",
+    "severity": [
+        9.0,
+        null
+    ],
+    "bounty": 10000,
+    "weaknesses": [
+        "Classic Buffer Overflow"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1585188000,
+    "report_url": "https://hackerone.com/reports/542180",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Download the malformed c1m1_hotel.nav file."
+        ],
+        [
+            2,
+            "Place the file in the <steamapps>/Left 4 Dead 2/left4dead2/maps/ directory."
+        ],
+        [
+            3,
+            "Start Left4Dead 2 and attach a debugger."
+        ],
+        [
+            4,
+            "Enter 'map c1m1_hotel' into the developer console."
+        ],
+        [
+            5,
+            "Observe EIP becomes 0x41414102, indicating buffer overflow and potential code execution."
+        ]
+    ],
+    "vuln_description": "A buffer overflow vulnerability exists in the parsing routines of NAV files in Left4Dead 2, which can be exploited to control the EIP register and execute arbitrary code. This can be triggered by loading a malformed NAV file, leading to potential remote code execution scenarios.",
+    "reason": "The vulnerability involves a straightforward buffer overflow in a file parsing routine, which is a common and well-understood type of vulnerability. The steps to reproduce are clear and do not involve complex interactions or state manipulations.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

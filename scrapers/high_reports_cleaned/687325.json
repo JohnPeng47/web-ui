@@ -1,0 +1,38 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "mada_uk ",
+    "title": "Trojan:JS/CoinMiner in npm files",
+    "content": "\nHello,\nI am a front end developer and use Vue.js and Visual Studio Code and have had an issue recently with scripts not running in my terminal so decided to fault find.\nAll programmes that I can think of are up to date, and today I decided to do a full windows defender scan and found the above file.\nI cannot say how to reproduce it as I'm not sure how I got it in the first place.\nThese are my global packages:\nPS C:\\web-dev\\adp-run> npm list -g --depth 0 C:\\Users\\mada7\\AppData\\Roaming\\npm +-- @vue/cli@3.11.0 +-- @vue/cli-upgrade@3.9.0 +-- core-js@3.2.1 +-- eslint@5.7.0 +-- firebase-tools@7.3.0 +-- git@0.1.5 +-- json-server@0.15.0 +-- netlify-cli@2.12.0 +-- npm@6.11.2 -- serve@10.1.1`\nI\u2019ve done some research and cant find what npm package the file came from (if any) so was wondering if :\nI) This file is from a compromised npm package I\u2019ve used?\nII) This file is from node.js? I\u2019ve done a fresh install of node within the last 7 days\nIII) Whether I\u2019m one of many infected with this malware, I am not aware of using the event-stream package that was infected previously\nThanks for any help, Windows Defender tells me the threat is blocked.\nAdam\nImpact\nThis threat can perform a number of actions of a malicious hacker's choice\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Malware"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1570234080,
+    "report_url": "https://hackerone.com/reports/687325",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Run a full Windows Defender scan on your system to detect the presence of the Trojan:JS/CoinMiner."
+        ],
+        [
+            2,
+            "Check the global npm packages installed on your system using the command `npm list -g --depth 0` to identify potential sources of the malware."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the presence of a Trojan:JS/CoinMiner in npm files, which can perform malicious actions as chosen by a hacker. The malware was detected by Windows Defender, but its exact source (whether from a compromised npm package or node.js) is unclear.",
+    "reason": "The discovery difficulty is low because the vulnerability was detected by a standard Windows Defender scan, which is a routine security measure. The malware's presence does not involve complex interactions or multiple components, making it straightforward to identify once the scan is performed.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,56 @@
+{
+    "reported_to": "HackerOne",
+    "reported_by": "the-white-evil ",
+    "title": "Bypassing the victim's phone number OTP in the account recovery process on the https://hackerone.com/settings/auth/setup_account_recovery",
+    "content": "\nHi Team,\nHope everyone is doing well on your end. :)\nWhile conducting research on hackerone.com, I uncovered a critical vulnerability related to account recovery via phone number.\nI found that I could add any phone number without verifying the SMS OTP.\nTo confirm the vulnerability, I enabled 2FA and observed that the OTP was successfully sent to someone else's phone number.\nAllow me to explain the details step by step.\nI halted my exploration at this point without delving into the 2FA OTP process and other aspects. My reason being, I wanted to ensure that I am the first to report this issue.\nProof of concept:\nI have created a video demonstration of the vulnerability and uploaded it to the report and image too.\nYou can review it once.\n\u2588\u2588\u2588\u2588\u2588\nSteps To Reproduce\nFirst, create an account recovery request using your own phone number and successfully enable account recovery with that same number.\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nNow, click on 'Change' and replace the phone number with that of another person. Click 'Next' to initiate the verification process. However, do not verify the OTP, instead, either refresh the page or navigate back to the account recovery page.\n\u2588\u2588\u2588\u2588\u2588\u2588\nI was surprised to find that another person's number was now stored, and the recovery OTP was being sent to that individual's number, even though it had been modified by me. And I do not have access to that number.\nTo confirm the issue, I implemented 2FA (Two-Factor Authentication) and attempted to use the account recovery process via my phone number. Unfortunately, the attempt was unsuccessful. However, I did not let this setback deter me.\nI logged in once more and attempted to change account recovery and got it. Now, the system prompted me to enter an SMS OTP (One-Time Password) sent to the phone number set by the attacker, which happens to be a victim's number I don't have access to.\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nFinally, we identified the issue, which involves exploiting the victim's phone number in the account recovery process without verifying the OTP sent to the victim's phone number.\nImpact\nThe attacker can exploit the victim's phone number in the account recovery process without verifying the victim's phone number OTP, potentially flooding the victim's inbox with spam messages and overwhelming their communication channels.\nSolution:\nAccurately verifying the phone number OTP is crucial to ensuring the security of account recovery processes and preventing unauthorized access by attackers.\nCheers!\nTheWhiteEvil\n\n",
+    "severity": [
+        9.8,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Authentication - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1720724760,
+    "report_url": "https://hackerone.com/reports/2501984",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create an account recovery request using your own phone number and successfully enable account recovery with that same number."
+        ],
+        [
+            2,
+            "Click on 'Change', replace the phone number with another person's number, click 'Next', but do not verify the OTP. Instead, refresh the page or navigate back to the account recovery page."
+        ],
+        [
+            3,
+            "Observe that the victim's number is now stored, and the recovery OTP is sent to that number, despite not verifying the OTP."
+        ],
+        [
+            4,
+            "Enable 2FA and attempt account recovery via the victim's phone number, confirming the OTP is sent to the victim's number without verification."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to bypass the OTP verification in the account recovery process on HackerOne, enabling them to associate a victim's phone number without verification. This can lead to unauthorized account recovery attempts and potential spam flooding the victim's phone.",
+    "reason": "The attack involves manipulating the account recovery flow by interrupting the OTP verification step, which is a subtle interaction. However, the steps are straightforward once the flaw in the verification process is identified.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

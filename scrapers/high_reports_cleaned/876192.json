@@ -1,0 +1,46 @@
+{
+    "reported_to": "Brave Software",
+    "reported_by": "kanytu ",
+    "title": "Cookie steal through content Uri",
+    "content": "\nSummary\nA misconfiguration in a content provider is allowing Brave for Android to download internal files to Downloads folder, making them accessible to other apps. A malicious app could order Brave to download the cookies database and retrieve it afterwards.\nEnvironment\nDevice: HTC M8\nOS version: Android 9\nPackage name: com.brave.browser\nApp version: 1.8.93 (versionCode 410809320)\nProof of concept\nPre-conditions:\nPoc installed with STORAGE permissions\nBrave installed with some cookies saved\nBrave should have STORAGE permission as well\nSteps:\nTap \"Start Exploit\" in PoC app\nBrave will start to download the cookies file\nOpen back PoC app\nResult\nCookies are shown in PoC app\nExpected result\nPrivate files shouldn't be exported\nDetailed explanation\nWhen Start Exploit is tapped, the app is sending an intent to Brave Browser to view a content URI:\nCode 100 Bytes\n1content://com.brave.browser.FileProvider/root/data/data/com.brave.browser/app_chrome/Default/Cookies\nThis content URI will be resolved to ChromeFileProvider. This File Content Provider has the following path configuration:\nCode 525 Bytes\n1<paths>\n2    <root-path name=\"root\" path=\".\" />\n3    <files-path name=\"images\" path=\"images/\" />\n4    <cache-path name=\"cache\" path=\"net-export/\" />\n5    <cache-path name=\"passwords\" path=\"passwords/\" />\n6    <cache-path name=\"traces\" path=\"traces/\" />\n7    <cache-path name=\"webapk\" path=\"webapks/\" />\n8    <cache-path name=\"offline-cache\" path=\"Offline Pages/archives/\" />\n9    <external-path name=\"downloads\" path=\"Download/\" />\n10    <external-path name=\"downloads\" path=\"Android/data/com.brave.browser/files/Download/\" />\n11</paths>\nBecause of the usage of root-path with path ., it is possible to use this provider to point to all files in the Android system.\nBy using the path segment /root/ followed by the absolute path to the internal file, Brave will easily process this URI because it belongs to itself, hence, no need to grant permissions to this URI.\nBrave will then proceed to download this file because of it's mime type (application/octet-stream). The file is saved in /sdcard/Download/. This is a public directory and all files with STORAGE permission can access them.\nThe PoC listens for changes in Downloads directory and when the Cookies file is created there, it will access this database and print all cookies in it.\nRemediation\nBrave should not use root-path point to the root of the file system (./). If this needed for some edge case, Brave should implement path checks to make sure that no internal file is used in this URI.\nAttachments\nPoC.zip - source code of the PoC used in this exploit\npoc.apk - compiled binary to use in this exploit\nvideo.mp4 - a video showing the exploit in action\nImpact\nThis allows a malicious app with STORAGE permission to access all cookies in Brave which has a high confidentiality impact. This requires no user interaction other than a malicious app installed.\nThis works for all internal files but cookies allow the malicious app to potentially access private information from the user, impacting the availability and integrity of their logged in accounts.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": 500,
+    "weaknesses": [
+        "Weak Password Recovery Mechanism for Forgotten Password"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1619129100,
+    "report_url": "https://hackerone.com/reports/876192",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "MOBILE",
+    "steps": [
+        [
+            1,
+            "Install a malicious app with STORAGE permissions on an Android device."
+        ],
+        [
+            2,
+            "The malicious app sends an intent to Brave Browser to view a content URI pointing to the cookies database: 'content://com.brave.browser.FileProvider/root/data/data/com.brave.browser/app_chrome/Default/Cookies'."
+        ],
+        [
+            3,
+            "Brave Browser processes the URI and downloads the cookies file to the public Downloads folder due to misconfigured FileProvider settings."
+        ],
+        [
+            4,
+            "The malicious app, monitoring the Downloads folder, accesses the cookies file and extracts the stored cookies."
+        ]
+    ],
+    "vuln_description": "A misconfiguration in Brave Browser's FileProvider allows any app with STORAGE permissions to access internal files, including the cookies database, by exploiting a content URI that points to the root of the file system. This leads to unauthorized access to sensitive user data.",
+    "reason": "The vulnerability involves understanding the FileProvider configuration and the ability to craft a specific content URI to access internal files. While the steps are straightforward once the misconfiguration is known, discovering the exact URI and the FileProvider's root-path misconfiguration requires some insight into Android's content provider mechanisms.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

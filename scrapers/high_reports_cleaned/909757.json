@@ -1,0 +1,42 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "chalker ",
+    "title": "[is-my-json-valid] ReDoS via 'style' format",
+    "content": "\nI would like to report a ReDoS in is-my-json-valid\nIt allows cause a denial of service if schema uses the built-in style format.\nModule\nmodule name: is-my-json-valid\nversion: 2.20.1\nnpm page: https://www.npmjs.com/package/is-my-json-valid\nModule Description\nA JSONSchema validator that uses code generation to be extremely fast.\nModule Stats\n1 250 253 weekly downloads\nVulnerability\nVulnerability Description\nClassic ReDoS, polynomial time.\nNote that https://www.npmjs.com/package/safe-regex is not free from false positives/negatives (as noted in its Readme) and does not catch this and other polynomial regexps (e.g. /a*a*b/).\nSteps To Reproduce:\nCode 138 Bytes\n1const imjv = require('is-my-json-valid')\n2const validate = imjv({ maxLength: 100, format: 'style' })\n3console.log(validate(' '.repeat(1e4)))\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nDoS if schema uses the style format.\n\n",
+    "severity": [
+        7.5,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Uncontrolled Resource Consumption"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1596229980,
+    "report_url": "https://hackerone.com/reports/909757",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "const imjv = require('is-my-json-valid')"
+        ],
+        [
+            2,
+            "const validate = imjv({ maxLength: 100, format: 'style' })"
+        ],
+        [
+            3,
+            "console.log(validate(' '.repeat(1e4)))"
+        ]
+    ],
+    "vuln_description": "The vulnerability is a ReDoS (Regular Expression Denial of Service) in the 'is-my-json-valid' module, specifically when the 'style' format is used in the schema. This allows an attacker to cause a denial of service by providing a specially crafted input that triggers polynomial time complexity in the regular expression processing.",
+    "reason": "The vulnerability is straightforward to discover as it involves a known pattern of ReDoS attacks and only requires testing the module with a specific format ('style') and a long input string. The attack does not involve multiple components, complex states, or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

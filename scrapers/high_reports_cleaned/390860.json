@@ -1,0 +1,38 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "cris_semmle ",
+    "title": "Prototype Pollution Vulnerability in mpath Package",
+    "content": "\nI would like to report prototype pollution vulnerability in mpath.\nIt allows an attacker to inject arbitrary properties on Object.prototype.\nModule\nmodule name: mpath\nversion: 0.4.1\nnpm page: https://www.npmjs.com/package/mpath\nModule Description\n{G,S}et javascript object values using MongoDB-like path notatio\nModule Stats\n305,874 downloads in the last week\nVulnerability\nVulnerability Description\nAn attacker can specify a path that include the prototype object, and thus overwrite important properties on Object.prototype or add new ones.\nSteps To Reproduce:\nCode 200 Bytes\n1var mpath = require(\"mpath\");\n2var obj = {\n3    comments: [\n4        { title: 'funny' },\n5        { title: 'exciting!' }\n6    ]\n7}\n8mpath.set('__proto__.x', ['hilarious', 'fruity'], obj);\n9console.log({}.x); \nPatch\nN/A validate property names before overwriting them and prevent write to certain paths.\nWrap up\nI contacted the maintainer to let them know: [N\nI opened an issue in the related repository: N\nImpact\nThis may be an intended behaviour of this module, but it needs to be better documented. Moreover, to properly analyse the impact of this vulnerability one must look at the clients of this module, such as mongoose and see if attackers can realistically control the path value.\n\n",
+    "severity": [
+        7.6,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1543576860,
+    "report_url": "https://hackerone.com/reports/390860",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Install the mpath package (version 0.4.1) in a Node.js environment."
+        ],
+        [
+            2,
+            "Execute the provided code snippet to set a prototype pollution payload and observe the pollution in the global Object.prototype."
+        ]
+    ],
+    "vuln_description": "The mpath package is vulnerable to prototype pollution, allowing an attacker to inject arbitrary properties into Object.prototype by manipulating the path parameter in the set function. This can lead to modification of existing properties or addition of new ones, potentially affecting all objects in the application.",
+    "reason": "The vulnerability involves a straightforward manipulation of a single function parameter to achieve prototype pollution, a well-known and documented attack vector in JavaScript. The attack does not require complex interactions or state manipulations, making it relatively easy to discover for anyone familiar with prototype pollution vulnerabilities.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

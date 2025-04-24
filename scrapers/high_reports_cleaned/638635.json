@@ -1,0 +1,50 @@
+{
+    "reported_to": "Trint Ltd",
+    "reported_by": "xh3n1 ",
+    "title": "Insecure Zendesk SSO implementation by generating JWT client-side",
+    "content": "\nSummary:\napp.trint.com implements SSO to Zendesk, it does this by using JWT as described at https://support.zendesk.com/hc/en-us/articles/203663816-Enabling-JWT-JSON-Web-Token-single-sign-on\nThis functionality has not been implemented securely because the JWT generation happens in the client-side. This is done by the Zendesk secret being hardcoded in the JavaScript code.\nThe secret is used to create JSON Web Tokens and then you can use the generated token to impersonate any customer in Zendesk. (therefore potentially getting access to their support tickets)\nWhilst support.trint.com is marked as out of scope for the program, the described vulnerability isn't caused by Zendesk. The vulnerable component is in app.trint.com.\nAssessment\nThe JavaScript source map files are available next to the minified production files. This significantly makes analyzing this issue easier.\nJavaScript file: https://app.trint.com/static/js/app.e984c9df.js\nSourcemap file: https://app.trint.com/static/js/app.e984c9df.js.map\nLooking at some of the UI views, I stumbled upon static/js/modules/auth/pages/ZendeskLoadingPage.js. I've attached a stripped version which shows the JWT generation:\nCode 900 Bytes\n1[snip]\n2import { ZENDESK_DOMAIN } from 'modules/core/constants/index';\n3\n4const { REACT_APP_ZENDESK_SECRET } = process.env;\n5\n6[snip]\n7\n8function RedirectToZendesk(props) {\n9  const { user, history } = props;\n10\n11  function generateZendeskTokenAndRedirect() {\n12    const TIME_NOW_OBJECT = moment(Date.now());\n13    try {\n14      const payload = {\n15        iat: TIME_NOW_OBJECT.unix(),\n16        jti: uuid.v4(),\n17        name: `${user.profile.firstName} ${user.profile.lastName}`,\n18        email: user.username,\n19      };\n20\n21      // encode zendesk token\n22      const zendeskToken = jwt.sign(payload, REACT_APP_ZENDESK_SECRET);\n23      window.location = `${ZENDESK_DOMAIN}/access/jwt?jwt=${zendeskToken}`;\n24    } catch (err) {\n25      history.push('/error');\n26    }\n27  }\n28\n29  useEffect(\n30    () => {\n31      generateZendeskTokenAndRedirect(user);\n32    },\n33    [user],\n34  );\n35\n36  return <Loader />;\n37}\n38\n39[snip]\n40\n41export default ZendeskLoadingPage;\nSearching for REACT_APP_ZENDESK_SECRET in the sourcemap will show the JWT secret:\nCode 82 Bytes\n1var REACT_APP_ZENDESK_SECRET = \"oq1HJ4jXo99Wt41bwvLh9BXBVdgpi52CjkXbThow7UhWQGtJ\";\nGenerating the JWT on the client-side like this allows anyone to mint an arbitrary JWT. It would probably be better to generate this on the server-side.\nReproduction steps\nAs logged-in user press \"Support\" on https://app.trint.com\nIntercept the traffic and see the call to https://trintsupport.zendesk.com/access/jwt?jwt=[JWT_TOKEN]\nLogout of Zendesk\nPut the JWT token from above URI into https://jwt.io and decode it.\nExample:\nCode 229 Bytes\n1eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1NjI3MDk2NTksImp0aSI6IjIxZDAyOTg3LWU3YWItNDQ5MC05N2Q3LTc2YTBmMzJhOTVjOCIsIm5hbWUiOiJUZXN0IFRlc3QiLCJlbWFpbCI6ImIzODcxNjk0QHVyaGVuLmNvbSJ9.mnnx7dbpXbvU7xr5Bp5pad2eHVN01mSsXApmZoFj73c\nCode 128 Bytes\n1{\n2  \"iat\": 1562709659,\n3  \"jti\": \"21d02987-e7ab-4490-97d7-76a0f32a95c8\",\n4  \"name\": \"Test Test\",\n5  \"email\": \"b3871694@urhen.com\"\n6}\nNow we can continue with tampering the JWT\nChange IAT to the current Unix timestamp\nChange JTI to a random UUID v4\nChange email to the victim email address\nInsert oq1HJ4jXo99Wt41bwvLh9BXBVdgpi52CjkXbThow7UhWQGtJ as HMAC secret.\nChange IAT to the current Unix timestamp\nChange JTI to a random UUID v4\nChange email to the victim email address\nInsert oq1HJ4jXo99Wt41bwvLh9BXBVdgpi52CjkXbThow7UhWQGtJ as HMAC secret.\nUse the resulting JWT in a call to https://trintsupport.zendesk.com/access/jwt?jwt=[JWT_TOKEN]. You will be logged in as the victim.\nImpact\nAccess to the Zendesk account of Trint customers. This includes potentially the support history of said user.\nI haven't verified whether the same SSO flow can also be used against Zendesk administrators. If so, the risk would be higher.\n\n",
+    "severity": [
+        8.1,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Password in Configuration File"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1567950900,
+    "report_url": "https://hackerone.com/reports/638635",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Log in to app.trint.com as a user and click on the 'Support' link to initiate the SSO process to Zendesk."
+        ],
+        [
+            2,
+            "Intercept the network traffic to capture the JWT token in the redirect URL to Zendesk."
+        ],
+        [
+            3,
+            "Decode the JWT token using a tool like jwt.io to view its contents."
+        ],
+        [
+            4,
+            "Modify the JWT token by changing the email field to a victim's email and sign it using the hardcoded secret found in the JavaScript source."
+        ],
+        [
+            5,
+            "Use the modified JWT token in a new request to Zendesk's SSO endpoint to impersonate the victim."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to impersonate any user in Zendesk by generating a JWT token client-side using a hardcoded secret. This is due to the insecure implementation of JWT generation in the client-side JavaScript code, which exposes the Zendesk secret.",
+    "reason": "The attack involves identifying the client-side JWT generation, extracting the hardcoded secret from the JavaScript source, and then crafting a malicious JWT. While the steps are straightforward, the discovery requires analyzing client-side code and understanding JWT mechanisms.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

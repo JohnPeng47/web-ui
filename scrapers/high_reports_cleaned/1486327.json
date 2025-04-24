@@ -1,0 +1,38 @@
+{
+    "reported_to": "lemlist",
+    "reported_by": "mr23r0 ",
+    "title": "Security misconfiguration ",
+    "content": "\nDescription :\nWhen we request a magic link to login into the application, and use that same link in multiple browsers, it working there isn't any limit on use of link.\nSteps to reproduce :\ngo to app.lemilist.com\ncreate a magic link\nuse it to login\nnow open another browser or incognito window\nuse that same magic link\nAnd You'll be logged in in your account.\nImpact\nIf Attacker gets the magic link of user he can login into victim's account.\nAccount takeover.\nMitigation :\nAdd a limit to magic link and remove the magic link from database after 1 use.\nonly allow the Requester IP to login using the magic link.\n\n",
+    "severity": [
+        8.8,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Misconfiguration"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1652708460,
+    "report_url": "https://hackerone.com/reports/1486327",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to app.lemilist.com and create a magic link for login."
+        ],
+        [
+            2,
+            "Use the same magic link in another browser or incognito window to login again."
+        ]
+    ],
+    "vuln_description": "The magic link for login can be used multiple times in different browsers or sessions, allowing an attacker to gain unauthorized access if they obtain the link.",
+    "reason": "The vulnerability is straightforward to discover as it only requires testing the reusability of the magic link in different contexts, without any complex interactions or state manipulations.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

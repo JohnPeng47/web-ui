@@ -1,0 +1,38 @@
+{
+    "reported_to": "Slack",
+    "reported_by": "metnew ",
+    "title": "User-assisted RCE in Slack for macOS (from official site) due to improper quarantine meta-attribute handling for downloaded files",
+    "content": "\nSummary\nGateKeeper/Quarantine bypass for downloaded files\nLack of com.apple.quarantine meta-attribute for downloaded files allows a remote attacker to send an executable file that won't be checked by Gatekeeper .\nFile opening doesn't trigger native alerts from GateKeeper/Quarantine\nDownloaded executable files lack com.apple.quarantine meta-attribute => no alerts about launching an executable from the web will appear.\nCode execution after opening\nOpening a downloaded .terminal file in Slack via \"Shift + Click\" (or in Finder) immediately leads to running attacker's code on a target device.\n.terminal file\nOpening leads to command execution.\nLooks safe - XML file.\nDownloaded .terminal file couldn't be opened if application sets quarantine meta-attribute properly. However, Slack (Direct Download) doesn't do that.\nAttack scenario\nAttacker sends exploit.terminal to the victim. File looks like a plaintext file in preview.\nVictim opens exploit.terminal file via \"Shift + Click\" (or via Finder)\nNo alert from Gatekeeper about unsigned executable\nNo alert about running executable file downloaded from the web\nShell commands from exploit.terminal get executed with user-level privileges.\nVersion\nDecribed scenario is reproducible in Slack 3.3.3 Direct Download.\nSlack from AppStore has correct quarantine rules and isn't vulnerable.\nAdditional details\nexploit.terminal attached + Screencast attached.\nQuarantine\nmacOS is build in such way that OS will ask user before opening any downloaded and potentially launchable (in default setup) files. This rule applies to .terminal files too.\nTL;DR:\nno quarantine -> exploit.terminal is launchable in 1 click without warning a user with popups\nquarantine -> no immediate launch for all files (2 popups) + no RCE is possible if GateKeeper level set to \"AppStore only\"\nImpact\nImpact\nAttacker could send a crafted .terminal file to the victim, which will be executed immediately after opening this file via \"Open\" button or in Finder.\nThe attack scenario requires a certain level of user interaction.\nBut the file looks safe and the victim doesn't expect that it'll be launched immediately\nAdditional Impact\nGateKeeper bypass allows running arbitrary apps in environments hardened with Gatekeeper settings set to \"AppStore only\".\n\n",
+    "severity": [
+        7.3,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1568514480,
+    "report_url": "https://hackerone.com/reports/470637",
+    "is_multi_component": false,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Attacker sends a crafted .terminal file to the victim via Slack."
+        ],
+        [
+            2,
+            "Victim opens the .terminal file via 'Shift + Click' or in Finder, executing the attacker's code without GateKeeper warnings."
+        ]
+    ],
+    "vuln_description": "The vulnerability is a GateKeeper/Quarantine bypass in Slack for macOS (Direct Download version), where downloaded files lack the com.apple.quarantine meta-attribute. This allows an attacker to send a .terminal file that executes arbitrary code upon opening, bypassing macOS security warnings.",
+    "reason": "The vulnerability involves understanding macOS's quarantine mechanism and how Slack fails to apply it, but the attack itself is straightforward once this knowledge is acquired. The interaction between Slack's file handling and macOS's security features is subtle but not overly complex.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

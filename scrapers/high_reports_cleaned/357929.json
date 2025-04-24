@@ -1,0 +1,51 @@
+{
+    "reported_to": "Reverb.com",
+    "reported_by": "nadino ",
+    "title": "Items bought for free due to lacks of quantity controls",
+    "content": "\nHi,\nThe server fails to check the quantity of the items that are going to be sell. Values <= 0 are accepted as 1.\nPoC:\nGo here\nhttps://sandbox.reverb.com/fr/item/139897-fender-2-strap-leather-test-2018-leather\nIntercept the response after clicking \"Add to cart\" and put \"quantity: 0\"\n<image_0>\nProceed to checkout\n<image_1>\nPlace order\n<image_2>\n<image_3>\nI used one of the fake credit cards you provide us.\nImpact\nItems are sold gratis\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/302/179/5a8fcf71de98528a0af76bfc8741e0c6e383c5aa/reverb_quantity_0.png?response-content-disposition=attachment%3B%20filename%3D%22reverb_quantity_0.png%22%3B%20filename%2A%3DUTF-8%27%27reverb_quantity_0.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQSAUANJIQ%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T162820Z&X-Amz-Expires=3248&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQDozrOisAuPYm16XL3vBCvZ8E4EqussDxyfb5noZXrPDAIhAP%2FKBdUxdocTqd398q4d5xukm81YkdxzlqcxSDUI5H1NKrIFCCwQAxoMMDEzNjE5Mjc0ODQ5IgylCbw2TeguFsAZNj4qjwXjH4kwlWt6Dn5uuCQsoNoyeBqxMOm6pQtUubQ01l7QmCDywxVABfeS7kjHZKz0pBYZJRDOoviZgrlfZaQqPBrCuuZfdopHUMrIcttHgMJIpggRFgAz%2FmitCfZp601Unjp8zdZs0VgmzleQA6iAUQtXJeQk2Z8QBlrHV4NMx14xh8ozwAaHS1tjt%2B%2FA8lAqol6w%2BvsEDP08Z0xra1ilXIOXOqaik0oi9Nyjeaf5fKQfj83KepzglViZUNhH94dh9w3KLpfxw74COmCFwcUjkiJ5XzPjNe5sVd8bdVjPo8ZNbFErUqFIXaz6ti2gMFSXI7QJo65kYfmo2X%2BVius59fEoWE4yJPqGRXEDRrPQhhlbUZjrVR2ZdRnrrkpggQp8XQCo1B%2BtbYfGd44GD4KhIJfEncJ07H3c2tkTYBpgMDEv8alYLuKD5TQEXpTl%2BPZoGbS1XlyxJRtQrmDuAEKpVKNIGYJZRLLxB1FBpk%2FKqOCRuyJG8qcRpp69vhbBsRa%2FLwU8x6krYoljPc6WT0nW1Yn4K9yRPWq5165m361LLWtmq5GVX8ICBXWe9mTC4UziHJk%2Be0sUVxC%2FPMWYWosP%2B6dJbbJyZC2gKEZlX1rdZbsI%2FYJD0OqsTJ1fSMNhgKBJaChaX1XJvq7C%2F5kTS%2FRcF7mcobVUa2IGWxbG0ADYcHA4ii0qdSJY7%2ByrJtq3DU9T1AlMMisU6NSCtP822%2B6wOda4SrxGTNCsXsvv07lMM%2FTflD1j7yJvxGt8e5aaTeqeD9e4aerVXVop6QTF%2BbEtU46V4663wnrxYPw1ieCoThCTYRQFvWxymptvr4gZkamGlT34L2%2FIqbonTV%2FlYlW6FrcM6YXdH0L9ysDMWFAWUvj6MK7Gj78GOrABKPnZLQBhuUxkEfdQDRZT0DTIKNvDG%2BgvQotlI15jiW8S2HwRBYV9SlSaiGHf6hsDfptzAY3UU%2FlD5SD%2FH95cKxX1WN39wyOXyT0hSo5TD%2B53BNi6K4GH9ffgWrdXsEmt2Jm3aPF9yj6iW9BuAijaJ%2BJ%2B1QJurG1IxgAFUH6ck6jWOC5od9c9JnsU9yoZ8Tm501R9apmeI9uvays5EYDSr3zYlpvxH33nLY91xU%2F7rTM%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=0a9c17e02ea215a3f9ab9d9887923d224076fdbfbf052954693dead81780d800",
+        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/302/180/f649cab5ef898f689e2cd9377a81ad5fdbf37ab4/reverb_0_euros.png?response-content-disposition=attachment%3B%20filename%3D%22reverb_0_euros.png%22%3B%20filename%2A%3DUTF-8%27%27reverb_0_euros.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQSAUANJIQ%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T162820Z&X-Amz-Expires=3248&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQDozrOisAuPYm16XL3vBCvZ8E4EqussDxyfb5noZXrPDAIhAP%2FKBdUxdocTqd398q4d5xukm81YkdxzlqcxSDUI5H1NKrIFCCwQAxoMMDEzNjE5Mjc0ODQ5IgylCbw2TeguFsAZNj4qjwXjH4kwlWt6Dn5uuCQsoNoyeBqxMOm6pQtUubQ01l7QmCDywxVABfeS7kjHZKz0pBYZJRDOoviZgrlfZaQqPBrCuuZfdopHUMrIcttHgMJIpggRFgAz%2FmitCfZp601Unjp8zdZs0VgmzleQA6iAUQtXJeQk2Z8QBlrHV4NMx14xh8ozwAaHS1tjt%2B%2FA8lAqol6w%2BvsEDP08Z0xra1ilXIOXOqaik0oi9Nyjeaf5fKQfj83KepzglViZUNhH94dh9w3KLpfxw74COmCFwcUjkiJ5XzPjNe5sVd8bdVjPo8ZNbFErUqFIXaz6ti2gMFSXI7QJo65kYfmo2X%2BVius59fEoWE4yJPqGRXEDRrPQhhlbUZjrVR2ZdRnrrkpggQp8XQCo1B%2BtbYfGd44GD4KhIJfEncJ07H3c2tkTYBpgMDEv8alYLuKD5TQEXpTl%2BPZoGbS1XlyxJRtQrmDuAEKpVKNIGYJZRLLxB1FBpk%2FKqOCRuyJG8qcRpp69vhbBsRa%2FLwU8x6krYoljPc6WT0nW1Yn4K9yRPWq5165m361LLWtmq5GVX8ICBXWe9mTC4UziHJk%2Be0sUVxC%2FPMWYWosP%2B6dJbbJyZC2gKEZlX1rdZbsI%2FYJD0OqsTJ1fSMNhgKBJaChaX1XJvq7C%2F5kTS%2FRcF7mcobVUa2IGWxbG0ADYcHA4ii0qdSJY7%2ByrJtq3DU9T1AlMMisU6NSCtP822%2B6wOda4SrxGTNCsXsvv07lMM%2FTflD1j7yJvxGt8e5aaTeqeD9e4aerVXVop6QTF%2BbEtU46V4663wnrxYPw1ieCoThCTYRQFvWxymptvr4gZkamGlT34L2%2FIqbonTV%2FlYlW6FrcM6YXdH0L9ysDMWFAWUvj6MK7Gj78GOrABKPnZLQBhuUxkEfdQDRZT0DTIKNvDG%2BgvQotlI15jiW8S2HwRBYV9SlSaiGHf6hsDfptzAY3UU%2FlD5SD%2FH95cKxX1WN39wyOXyT0hSo5TD%2B53BNi6K4GH9ffgWrdXsEmt2Jm3aPF9yj6iW9BuAijaJ%2BJ%2B1QJurG1IxgAFUH6ck6jWOC5od9c9JnsU9yoZ8Tm501R9apmeI9uvays5EYDSr3zYlpvxH33nLY91xU%2F7rTM%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=6e08859b6a783d873154a473b53c1367b1c4a2b527f6894165305bbfe9e174c8",
+        "image_2": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/302/181/4a481be9a7df1abc74978b84a76de5e8ffa7bca5/reverb_final.png?response-content-disposition=attachment%3B%20filename%3D%22reverb_final.png%22%3B%20filename%2A%3DUTF-8%27%27reverb_final.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQSAUANJIQ%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T162820Z&X-Amz-Expires=3248&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQDozrOisAuPYm16XL3vBCvZ8E4EqussDxyfb5noZXrPDAIhAP%2FKBdUxdocTqd398q4d5xukm81YkdxzlqcxSDUI5H1NKrIFCCwQAxoMMDEzNjE5Mjc0ODQ5IgylCbw2TeguFsAZNj4qjwXjH4kwlWt6Dn5uuCQsoNoyeBqxMOm6pQtUubQ01l7QmCDywxVABfeS7kjHZKz0pBYZJRDOoviZgrlfZaQqPBrCuuZfdopHUMrIcttHgMJIpggRFgAz%2FmitCfZp601Unjp8zdZs0VgmzleQA6iAUQtXJeQk2Z8QBlrHV4NMx14xh8ozwAaHS1tjt%2B%2FA8lAqol6w%2BvsEDP08Z0xra1ilXIOXOqaik0oi9Nyjeaf5fKQfj83KepzglViZUNhH94dh9w3KLpfxw74COmCFwcUjkiJ5XzPjNe5sVd8bdVjPo8ZNbFErUqFIXaz6ti2gMFSXI7QJo65kYfmo2X%2BVius59fEoWE4yJPqGRXEDRrPQhhlbUZjrVR2ZdRnrrkpggQp8XQCo1B%2BtbYfGd44GD4KhIJfEncJ07H3c2tkTYBpgMDEv8alYLuKD5TQEXpTl%2BPZoGbS1XlyxJRtQrmDuAEKpVKNIGYJZRLLxB1FBpk%2FKqOCRuyJG8qcRpp69vhbBsRa%2FLwU8x6krYoljPc6WT0nW1Yn4K9yRPWq5165m361LLWtmq5GVX8ICBXWe9mTC4UziHJk%2Be0sUVxC%2FPMWYWosP%2B6dJbbJyZC2gKEZlX1rdZbsI%2FYJD0OqsTJ1fSMNhgKBJaChaX1XJvq7C%2F5kTS%2FRcF7mcobVUa2IGWxbG0ADYcHA4ii0qdSJY7%2ByrJtq3DU9T1AlMMisU6NSCtP822%2B6wOda4SrxGTNCsXsvv07lMM%2FTflD1j7yJvxGt8e5aaTeqeD9e4aerVXVop6QTF%2BbEtU46V4663wnrxYPw1ieCoThCTYRQFvWxymptvr4gZkamGlT34L2%2FIqbonTV%2FlYlW6FrcM6YXdH0L9ysDMWFAWUvj6MK7Gj78GOrABKPnZLQBhuUxkEfdQDRZT0DTIKNvDG%2BgvQotlI15jiW8S2HwRBYV9SlSaiGHf6hsDfptzAY3UU%2FlD5SD%2FH95cKxX1WN39wyOXyT0hSo5TD%2B53BNi6K4GH9ffgWrdXsEmt2Jm3aPF9yj6iW9BuAijaJ%2BJ%2B1QJurG1IxgAFUH6ck6jWOC5od9c9JnsU9yoZ8Tm501R9apmeI9uvays5EYDSr3zYlpvxH33nLY91xU%2F7rTM%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=93c2943bc1f4a09d0dd2cd0ecc98962440d0c73dc3220d5ab949a4dff86a35f0",
+        "image_3": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/302/182/907d091fd51ff18534a5854c05f18553de7fab7d/reverb_gratis.png?response-content-disposition=attachment%3B%20filename%3D%22reverb_gratis.png%22%3B%20filename%2A%3DUTF-8%27%27reverb_gratis.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQSAUANJIQ%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T162820Z&X-Amz-Expires=3248&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQDozrOisAuPYm16XL3vBCvZ8E4EqussDxyfb5noZXrPDAIhAP%2FKBdUxdocTqd398q4d5xukm81YkdxzlqcxSDUI5H1NKrIFCCwQAxoMMDEzNjE5Mjc0ODQ5IgylCbw2TeguFsAZNj4qjwXjH4kwlWt6Dn5uuCQsoNoyeBqxMOm6pQtUubQ01l7QmCDywxVABfeS7kjHZKz0pBYZJRDOoviZgrlfZaQqPBrCuuZfdopHUMrIcttHgMJIpggRFgAz%2FmitCfZp601Unjp8zdZs0VgmzleQA6iAUQtXJeQk2Z8QBlrHV4NMx14xh8ozwAaHS1tjt%2B%2FA8lAqol6w%2BvsEDP08Z0xra1ilXIOXOqaik0oi9Nyjeaf5fKQfj83KepzglViZUNhH94dh9w3KLpfxw74COmCFwcUjkiJ5XzPjNe5sVd8bdVjPo8ZNbFErUqFIXaz6ti2gMFSXI7QJo65kYfmo2X%2BVius59fEoWE4yJPqGRXEDRrPQhhlbUZjrVR2ZdRnrrkpggQp8XQCo1B%2BtbYfGd44GD4KhIJfEncJ07H3c2tkTYBpgMDEv8alYLuKD5TQEXpTl%2BPZoGbS1XlyxJRtQrmDuAEKpVKNIGYJZRLLxB1FBpk%2FKqOCRuyJG8qcRpp69vhbBsRa%2FLwU8x6krYoljPc6WT0nW1Yn4K9yRPWq5165m361LLWtmq5GVX8ICBXWe9mTC4UziHJk%2Be0sUVxC%2FPMWYWosP%2B6dJbbJyZC2gKEZlX1rdZbsI%2FYJD0OqsTJ1fSMNhgKBJaChaX1XJvq7C%2F5kTS%2FRcF7mcobVUa2IGWxbG0ADYcHA4ii0qdSJY7%2ByrJtq3DU9T1AlMMisU6NSCtP822%2B6wOda4SrxGTNCsXsvv07lMM%2FTflD1j7yJvxGt8e5aaTeqeD9e4aerVXVop6QTF%2BbEtU46V4663wnrxYPw1ieCoThCTYRQFvWxymptvr4gZkamGlT34L2%2FIqbonTV%2FlYlW6FrcM6YXdH0L9ysDMWFAWUvj6MK7Gj78GOrABKPnZLQBhuUxkEfdQDRZT0DTIKNvDG%2BgvQotlI15jiW8S2HwRBYV9SlSaiGHf6hsDfptzAY3UU%2FlD5SD%2FH95cKxX1WN39wyOXyT0hSo5TD%2B53BNi6K4GH9ffgWrdXsEmt2Jm3aPF9yj6iW9BuAijaJ%2BJ%2B1QJurG1IxgAFUH6ck6jWOC5od9c9JnsU9yoZ8Tm501R9apmeI9uvays5EYDSr3zYlpvxH33nLY91xU%2F7rTM%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=74b642360bcb759f5472954a9239c5a73861d0436200d42da7575990402254c2"
+    },
+    "disclosed_date": 1535733780,
+    "report_url": "https://hackerone.com/reports/357929",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the item page: https://sandbox.reverb.com/fr/item/139897-fender-2-strap-leather-test-2018-leather"
+        ],
+        [
+            2,
+            "Intercept the network request after clicking 'Add to cart' and modify the quantity to 0"
+        ],
+        [
+            3,
+            "Proceed to checkout and place the order"
+        ],
+        [
+            4,
+            "Observe that the item is purchased for free due to the quantity validation failure"
+        ]
+    ],
+    "vuln_description": "The server fails to validate the quantity of items being sold, accepting values <= 0 as 1. This allows users to purchase items for free by setting the quantity to 0 during the checkout process.",
+    "reason": "The vulnerability involves a straightforward manipulation of a single parameter (quantity) in a network request. The attack does not require understanding of complex application states or interactions between multiple components. It is a common type of input validation flaw.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

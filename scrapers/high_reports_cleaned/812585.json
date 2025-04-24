@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "rootuser ",
+    "title": "Sensitive Information Leaking Through Navy Website. [\u2588\u2588\u2588\u2588\u2588]",
+    "content": "\nSummary:\nWhile performing recon work on websites owned by DoD i came up with a Navy website which is leaking sensitive information.\nDescription:\nThe website is leaking information such as- first name and last name, email address, phone number, location, rank, and other information of trainees in a clear readable pdf document. This is a high severity issue and requires immediate fixation. It is also a clear privacy violation and insufficient protection mechanism involved in data storage.\nStep-by-step Reproduction Instructions\nOpen a web browser of your choice.\nNow open this URL: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/sites/\u2588\u2588\u2588\u2588\u2588\u2588/Documents/health-promotion-wellness/reproductive-and-sexual-health/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\nRemove document from the internet or put applicable authorization mechanism(s) in order to access sensitive documents.\nImpact\nAny person can access this document and cause:\nInformation leakage.\nImpersonation a person.\nCommit crimes under a fake identity.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cleartext Storage of Sensitive Information"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1589493540,
+    "report_url": "https://hackerone.com/reports/812585",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Open a web browser of your choice."
+        ],
+        [
+            2,
+            "Navigate to the URL: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/sites/\u2588\u2588\u2588\u2588\u2588\u2588/Documents/health-promotion-wellness/reproductive-and-sexual-health/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
+        ]
+    ],
+    "vuln_description": "The Navy website is leaking sensitive information such as first name, last name, email address, phone number, location, rank, and other details of trainees in a publicly accessible PDF document. This constitutes a high-severity information disclosure vulnerability and a privacy violation due to insufficient access controls.",
+    "reason": "The vulnerability is straightforward to discover as it involves accessing a publicly exposed URL with no authentication or authorization checks. The sensitive document is directly accessible without any complex steps or manipulation of application states.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

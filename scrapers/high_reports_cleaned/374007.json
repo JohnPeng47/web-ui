@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "alyssa_herrera ",
+    "title": "PII leakage due to caching of Order/Contract ID's on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+    "content": "\nSummary:\nI was able to discover contract numbers which leak out user names/emails/phone numbers nd other sensitive information. I took the time to assure that these contract id's wouldn't/shouldn't be easy guessable or known.\nDescription:\nI discovered through google search query that I was able to access several Order/contract id's that revealed a trove of sensitive data that shouldn't of been easily accessible or cached by google search results.\n## Impact\nHigh\n## Step-by-step Reproduction Instructions\nhttps://\u2588\u2588\u2588/CMT_View/CMT_View_List.cfm?StartRow=31&OrderBy=Email&OrderByCol=4&Sort=DESC&SearchType=CONTRACT&ContractNumber=\u2588\u2588\u2588&Cage=\nhttps://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/CMT_View/CMT_View_List.cfm?OrderBy=FormatedRoleCode&OrderByCol=2&StartRow=1&Sort=ASC&SearchType=CONTRACT&ContractNumber=\u2588\u2588\u2588\u2588\u2588\u2588&Cage=\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588, \u2588\u2588\u2588\u2588\u2588\u2588 D. ACO 1102 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\u2588\u2588\u2588\u2588\u2588@\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588, \u2588\u2588\u2588\u2588 J. CA 1102 \u2588\u2588\u2588\u2588\u2588\u2588\u2588.\u2588\u2588\u2588@\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588, \u2588\u2588\u2588 M. DRPM 0801 \u2588\u2588\u2588\u2588.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588@\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588,\u2588\u2588\u2588\u2588\u2588\u2588\u2588 R. IS 1150 \u2588\u2588\u2588\u2588.\u2588\u2588\u2588\u2588\u2588@\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588, \u2588\u2588\u2588\u2588\u2588\u2588\u2588 R. PA 1103 \u2588\u2588\u2588\u2588.\u2588\u2588\u2588\u2588@\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588, \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 S. PT 1106 \u2588\u2588\u2588\u2588.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588@\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, \u2588\u2588\u2588 E. QAR 1910 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588@\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588, \u2588\u2588\u2588\u2588 M. SUP 0344 \u2588\u2588\u2588\u2588\u2588.\u2588\u2588\u2588\u2588\u2588@\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588,\u2588\u2588\u2588 R. SUP 1150 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\u2588\u2588\u2588@\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588, \u2588\u2588\u2588\u2588\u2588\u2588 D. SUP 1150 \u2588\u2588\u2588\u2588\u2588\u2588.\u2588\u2588\u2588\u2588@\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAdditionally verified that these aren't test data entries by googling one of the emails and resulting found the owner's linkedin account.\n## Product, Version, and Configuration (If applicable)\nN/A\n## Suggested Mitigation/Remediation Actions\nImpact\nAn attacker can gather high priority PII.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1570574880,
+    "report_url": "https://hackerone.com/reports/374007",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Perform a Google search query to find cached Order/Contract IDs on the target domain."
+        ],
+        [
+            2,
+            "Access the discovered URLs containing the Order/Contract IDs to view sensitive PII (names, emails, phone numbers, etc.)."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the leakage of sensitive PII (Personally Identifiable Information) due to the caching of Order/Contract IDs on a public search engine (Google). These IDs, when accessed, reveal user names, emails, phone numbers, and other sensitive data that should not be easily accessible or cached.",
+    "reason": "The discovery difficulty is low because the vulnerability was found using a simple Google search query, which is a common and straightforward method for uncovering cached sensitive data. No complex interactions, application state manipulations, or novel logic were required to identify the issue.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

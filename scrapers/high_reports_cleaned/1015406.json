@@ -1,0 +1,45 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "val_brux ",
+    "title": "SQL Injection in www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+    "content": "\nDescription:\nSQL Injection is a vulnerability which allows interference with the queries performed on a database, to obtain sensitive information which could be really useful to attackers. A web application database is often queried using user-requests parameters, which when are not properly sanitized can be modified injecting malicious code. In this case, the vulnerable endpoint is http://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 and the vulnerable parameter is the POST rnum parameter. Respecting the program guidelines, I performed the minimal amount of testing required to prove that a vulnerability existed, but please tell me if I can bring the exploitation further to give more information.\nReproduction steps\n1 -Repeat the below requests with a interceptor proxy (for example, using Burp).\nCode 609 Bytes\n1POST \u2588\u2588\u2588\u2588 HTTP/1.1\n2Host: www.\u2588\u2588\u2588\u2588\n3Content-Length: 72\n4Cache-Control: max-age=0\n5Upgrade-Insecure-Requests: 1\n6Origin: http://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n7Content-Type: application/x-www-form-urlencoded\n8User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36\n9Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\n10Referer: http://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n11Accept-Encoding: gzip, deflate\n12Accept-Language: en-US,en;q=0.9,it-IT;q=0.8,it;q=0.7\n13Cookie: PHPSESSID=\u2588\u2588\u2588\u2588\u2588\n14Connection: close\n15\n16\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nCode 618 Bytes\n1POST \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/1.1\n2Host: www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3Content-Length: 72\n4Cache-Control: max-age=0\n5Upgrade-Insecure-Requests: 1\n6Origin: http://www.\u2588\u2588\u2588\u2588\u2588\n7Content-Type: application/x-www-form-urlencoded\n8User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36\n9Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\n10Referer: http://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n11Accept-Encoding: gzip, deflate\n12Accept-Language: en-US,en;q=0.9,it-IT;q=0.8,it;q=0.7\n13Cookie: PHPSESSID=\u2588\u2588\u2588\u2588\n14Connection: close\n15\n16\u2588\u2588\u2588\u2588\u2588\nIn the first case, the record obtained from the database is the following:\nCode 6 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\nWhilst in the second case, the record obtained is:\nCode 3 Bytes\n1\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\nThis confirms that the OFFSET clause is concatenated to the original query and there is the possibility to exploit a SQL Injection.\nImpact\nThe vulnerability could allow an attacker to dump sensitive and personal data from the web application database (such as usernames and password hashes) or to perform authentication bypasses.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "SQL Injection"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1610506680,
+    "report_url": "https://hackerone.com/reports/1015406",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "steps": [
+        [
+            1,
+            "Intercept the HTTP POST request to the vulnerable endpoint using a proxy like Burp Suite."
+        ],
+        [
+            2,
+            "Modify the 'rnum' parameter in the POST request to inject SQL code that alters the database query, such as changing the OFFSET clause."
+        ]
+    ],
+    "vuln_description": "SQL Injection vulnerability in the 'rnum' parameter of the POST request, allowing attackers to manipulate database queries and potentially access sensitive data.",
+    "reason": "The vulnerability involves a straightforward SQL injection in a single parameter without complex interactions or state manipulations. The attack is based on well-known SQL injection techniques.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "reason": "The SQL Injection vulnerability involves manipulating database queries through unsanitized input parameters, which is not directly related to authentication or authorization bypass via session or resource manipulation as described in the methodologies. The methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs, whereas SQL Injection is a different class of vulnerability that requires input validation testing.",
+        "is_detectable": false
+    }
+}

@@ -1,0 +1,66 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "wallotry ",
+    "title": "Remove Every User, Admin, And Owner Out Of Their Teams on developers.mtn.com via IDOR + Information Disclosure",
+    "content": "\nHello world,\nThis vulnerability is too involved with regular users, in order for us to prevent any damage, we need 3 different user accounts we own.\nThis gives us specific \"user_id\" and \"team_id\" to work with.\nThere's an Information Disclosure as a side effect of this vulnerability. User and team names are disclosed in the response from the server.\nSteps To Reproduce(POC)\nFirst, let's paint a mental picture of this vulnerability and the required conditions using accounts with imaginary user_id & team_id.\nThe vulnerability and conditions are realistic, the only imaginary thing is the user_id and team_id.\nCreate 3 accounts on developers.mtn.com(Account A, B, and C)\nMy imaginary accounts:\nA: First Account(imaginary user_id=1111 & team_id=0001)\nB: Second Account(imaginary user_id=1112 & team_id=0002)\nC: Third Account(imaginary user_id=1113 & team_id=0003)\nLogin to A, Invite B to your Team A\nLogin to B, Invite C to your team B\nOpen Burp Suite\nLogin to A, Remove B(Please Intercept This Request)\nSend the Intercepted request to the repeater tab\nModify the request(Our Goal is to remove C from Team B, which we don't have access or permissions to.)\nReplace the team_id with Team B's team_id. Replace the user_id with C's user_id.\nSend the Request. (This Request will disclose C's username And Team B's name. Making this an information disclosure. PII)\nC will be removed from B's Team B.\nC will receive an email from MTN telling him/her that he/she has been removed from Team B.\n<image_0>\nSteps To Reproduce(Removing Every User)\nThis can be done with a custom script/code without the need for Burp Suite\nIntercept the request for removing a user, and send it to the Burp Suite intercept tab.\nConfig your settings to brute-force through every team_id and user_id. This part is not that hard because every user_id and team_id has only 4 digits.\nRun the intruder request. When there's a successful user_id and team_id match, the user whose ID has been matched, will be removed.\nIf my calculations are correct, it should take 12 Hours to remove every user from every group they're in, the maximum being 20 Hours. The faster the internet speed, the faster the computer, the shorter the time it'll take to brute-force through every user_id and team_id.\nExploitability\nAnyone with an account on developers.mtn.com can exploit this vulnerability\nAll you need is a user_id and a team_id to remove a user from his/her team.(Their privileges don't matter, even the owner is vulnerable)\nRemediation\nEnsure proper session management and object-level user access control checks.\nApply access control mechanisms such as permissions to certain action.\nValidation of access to a team_id.\nYou should always check if a user submitting the request isn't tampering and isn't submitting any ID's that do not belong to his/her account.\nReference\n#1448475\nImpact\nA low level user can remove his Admin and Owner from the team.\nEvery user will be removed from every team they are in, including owners and admins.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Insecure Direct Object Reference (IDOR)"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/uz3jpt9gl0s61nunel1sxa00lhkz?response-content-disposition=attachment%3B%20filename%3D%22removed_email.png%22%3B%20filename%2A%3DUTF-8%27%27removed_email.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQX5CGUOUZ%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T010751Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKD%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIE4%2BdsYZj8NuOdkk6Y4TlghZvXM%2BZpWd3av0hpGZRkJVAiEAm51AD3I4iCsm5XvHzzoDRyLERqosajjqDpMEYLOzYNgquwUI%2Bf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDBEDfR3XjEJT1yhKrCqPBSNBBVY34q1kDJW6%2BXH9y0t8uQDR6rkXhTCKeBb0ZPdgjvFpaNEim1ps69Llsjdvyme8%2BE632O5oMn1rlYsduNoe%2BVFT04wgdDyBHMrZPGrmQJXJ9WfLBtn%2B6gGNqLIPUJf%2BEKzihMcxjrR7yQkzov2kHg%2B9jM0DA8aUdQ4MRb90yJ3JGbUWDNMqziFFCFIp3yKHjNIZfqMeu%2B%2FCTkSO2vPiqFY61o66kBeHSBFbttxJg1xaNwEeNDxlrCov6Y0o%2BzNTqxq3uAh6QAxDqENoaaZuIJa%2FDGVzsZ0wGe2z0lD7tye9s0f7MEzc5noOhW%2FFLLsGLKkYwg9burTU%2BtZ40qbMpG9pYHFUZPLJFfmTbAY8dz5ORPEXzfDZsdQPigQVzlK8O2G8pgHcVorLgpmo%2FgFtfX3MATfcduVLW7bN93IPBLtULhsCvXap5gE1W1sfN45qOSlNNv7LCI9pgLlXNZsP%2Fdk0TQTn8S89Cs6t6xMcwhC0mSX7tHtSvtDlcZ1uP3TGZSoEY5%2B5lf6%2FEI5pLU%2Bh3Vc4gNfBFoSsEZVgLyBLJrol4kIaQrkkGwndMuOqrdmtaPH9frf5uRckpTdJL0b0OSukAU4x%2BkbJAH%2FStqmiK70z77ZHS8zdUlA5ceNWFxHZlcFDbLAYNUMOnaGxRks8eTTTO2gYg%2BBMvOljbtJsV7naGGZ86OQmWuPlHJPhEwdO1rVSWuA6%2B0%2BAkBGjUP1QjTkNT%2Fg0NOlOJcOjugVjOwmEkamOeuTWNdr7%2B%2FzCz14KbN4yhu6gnXuas6YrVxuWQhBLC37AQ6OBH2M2WaIc%2FVI7F76YmMOJqtwDDxihpH7Q694bI%2FX%2Bg6gfyG8nMvnn8CLXvwUm2MSBooAE5swwruOHvwY6sQGdTiggpgVOaz7DKSKzbDgKdqYrp7KMtYd%2FFsTa5X5jz%2FnYDarzNLp7yJJghfiuRwVc3hggpxKVJOd4GvRdg1ZZgo5yoykgqXXPsIFhOnCEHuFoFDEZRkHq49fmWaOtxXD8k0cQzzwETnP56DLvYYlAGu6zktJrQnKJUrO%2F23MQ%2Fm6oe%2FP66Ew%2F0kkUOyN%2B192D66NGNnVXHpKKUNrFZRf%2BvNuja268WGn9FQ4RP5eBZxE%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=5beddb41316a4d18c929fbae0148a6f9299e82c25c44b44a1f4b005b1a51a349"
+    },
+    "disclosed_date": 1669934040,
+    "report_url": "https://hackerone.com/reports/1448550",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create three accounts (A, B, C) on developers.mtn.com"
+        ],
+        [
+            2,
+            "Login to account A and invite account B to Team A"
+        ],
+        [
+            3,
+            "Login to account B and invite account C to Team B"
+        ],
+        [
+            4,
+            "Intercept the request to remove account B from Team A using Burp Suite"
+        ],
+        [
+            5,
+            "Modify the intercepted request to target account C in Team B by changing user_id and team_id"
+        ],
+        [
+            6,
+            "Send the modified request to remove account C from Team B"
+        ]
+    ],
+    "vuln_description": "This vulnerability allows any user to remove other users, including admins and owners, from their teams by exploiting an Insecure Direct Object Reference (IDOR) issue. Additionally, the response discloses sensitive information such as usernames and team names.",
+    "reason": "The attack involves multiple steps including account creation, team invitations, and request interception/modification. While the steps are straightforward, the interaction between the components (user_id and team_id manipulation) is non-obvious and requires understanding of the application's team management logic.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "1448475",
+    "idor_detectable": true,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": false
+    }
+}

@@ -1,0 +1,48 @@
+{
+    "reported_to": "Starbucks",
+    "reported_by": "parzel ",
+    "title": "Subdomain takeover of datacafe-cert.starbucks.com",
+    "content": "\nSummary:\nThe subdomain datacafe-cert.starbucks.com had an CNAME record pointing to an unclaimed Azure webservice. This is a high severity security issue because an attacker can register the subdomain on Azure and therefore can own the subdomain datacafe-cert.starbucks.com.\nDescription:\nThe dangling CNAME record of datacafe-cert.starbucks.com is pointing to s00397nasv101-datacafe-cert.azurewebsites.net which was not claimed by you. I registered a service with this name and therefore was able to takeover the subdomain. Every attacker doing this has afterwords full control over the contents served on this subdomain.\nPlatform(s) Affected:\nhttp://datacafe-cert.starbucks.com/\nhttps://datacafe-cert.starbucks.com/\nSupporting Material/References:\nview-source:http://datacafe-cert.starbucks.com/\nHow can the system be exploited with this bug?\nThe full domain can be taken over. Arbitrary content can be served under it.\nHow did you come across this bug ?\nI noticed the dangling CNAME record of datacafe-cert.starbucks.com.\nRecommendations for fix\n1) Remove the dangling CNAME record from datacafe-cert.starbucks.com\n2) I release s00397nasv101-datacafe-cert.azurewebsites.net\n3) You can reclaim it if you want\nImpact\nThis issue can be exploited in several ways, for example but not limited to: XSS, Phishing, Session Hijacking due to bypassing of SOP\n\n",
+    "severity": [
+        7.5,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Privilege Escalation"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1567024980,
+    "report_url": "https://hackerone.com/reports/665398",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify the subdomain datacafe-cert.starbucks.com and check its DNS records for a CNAME entry."
+        ],
+        [
+            2,
+            "Verify that the CNAME points to an unclaimed Azure webservice (s00397nasv101-datacafe-cert.azurewebsites.net)."
+        ]
+    ],
+    "vuln_description": "The subdomain datacafe-cert.starbucks.com had a CNAME record pointing to an unclaimed Azure webservice, allowing an attacker to register the service and take over the subdomain. This could lead to serving malicious content, phishing, or other attacks.",
+    "reason": "The vulnerability involves a straightforward check of DNS records and requires no complex interactions or state manipulations. The discovery process is simple and well-documented in security research.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": true,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": false
+    }
+}

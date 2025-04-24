@@ -1,0 +1,47 @@
+{
+    "reported_to": "Informatica",
+    "reported_by": "s_p_q_r ",
+    "title": "[marketplace.informatica.com] Profile stored XSS",
+    "content": "\nThe user name and lastname are inserted into JS with quotes non-escaped:\nCode 89 Bytes\n1var pageNameDTM = \"%name% %lastname%\".replace(/[^a-zA-Z0-9 ]/g, \"\").replace(/  +/g, \" \");\nPoC:\nLog into your account\nSet your name and lastname to \"-alert(document.domain)-\"\nOpen your profile page https://marketplace.informatica.com/people/%email% from another account\nThe script will be executed:\n<image_0>\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Generic"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/142/515/805296262ca4afd6a3ed311bfeda3ab3490d9bd2/inf_mp_xss.png?response-content-disposition=attachment%3B%20filename%3D%22inf_mp_xss.png%22%3B%20filename%2A%3DUTF-8%27%27inf_mp_xss.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ6KKWSDMA%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T222648Z&X-Amz-Expires=2254&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMn%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQCck2AFovk79nItWfm%2FIHydDGHm7wuazWxJF2tW6heRUgIhAPEBFri3I7U4RtW3ecIvFTMs%2Bp6%2BN7hp6Mx4Qav95kYuKrIFCDIQAxoMMDEzNjE5Mjc0ODQ5Igwh0IGBoA4KAERRlHUqjwVyYpAt%2BhfmiTg9lDDPrE%2B7hfhGum%2BJvwvFdfkfz9%2FrEjD%2Fm0STknp02IDTIimbu4Z4d0VN5PmZ12PTqc13UYF0LR7vKAB%2FuQbXwyrrLSBCrnndedaRZZqUBH9WVNRwJXBRWX5IpwiwaGvN5hlryTfjeNv0N1Mm%2FdbVYo1ICfOR69Yif%2BB%2FK20qNLn4sG1i9vHbu38p1ahjn0ppEFN50RIt6LHGymQHVNnSiEOYZnexxcLhUNzm6AOr1Q5W7LG01XHViQ%2F%2FSMOomwQ0dVswb9cTAH3Lc4xv4TCkntqOvpPXujSMutbFDuQQoaMDnbSLCf3YZPNthX0x5J61Y8xTmw9COYu5QjmFfhNbksTY2NKi6r97oi%2BhT5qJdCN%2F5t3G2g2hDEqANz7n3IgBsmKFiboBQYmwjqETjXYFVPcsESbcbm6IMprJNfcLaRVdOVm57zdqONjGAjk8vTyFuGucof%2B9%2BSdoDcmBwyNzu7CZE9eHbi6OYskvjJp16Puf8cctCsgUiDOnUjNm2Lzj3Cs8LUycUwjxUPQlgjztTqoBSCPkPb18rgP8btKzKMa62ysj2Tmnv9FB3ESULT2l%2FuIUpej%2F6vcHD6bV9xvCpCVsGXP41ffCXiVKofFTrpbLX316eYv6yZKahloaaN7eItyKONX%2BKsMC20JkgIN5c3Ip38hFB95WyUT4g%2BAfdc56UR3p5GcUvSKQj6o5ag2Jb97zZqV5XyFzsQlUACurMQuzvMH1kfF4mk%2BrRjL3RUwykJBAi7xoopBiX8aa%2FBeq3Yoxuuw895MopyWhg7jNh8pcbe%2BP5grk9e7T5nVTTk5nIxc374%2Bfv0CXYI0lu4fGYELhDsUIYnkW%2FPI8nm4jrQ77mF4TMNTjkL8GOrABc61WmmWrM2nnujQ72oefEWJp1wmybegRODApSAMyWXMaJ69tHRpX%2FR87Cn6fvgNgpyVOtd%2BiUQulr6E0dwkAivaZzi3vPT%2FWbIhbnXJfJyfFanKHmvjmZevxGewJqsgb7tDDIt9WO7xcDURvnw8fDSlJfI8JcC5ObgjAMVnbeJkalMY%2FURrWNxG2lkWOU9bttUWLZM0d0qtlNfi%2FX8AL61va%2FW%2BSDaEh92lyVRm%2F0EQ%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=71a6ec3bae9501a691f23c8690d0e8583762bb30c17a481af66f5b4280bc737d"
+    },
+    "disclosed_date": 1492637940,
+    "report_url": "https://hackerone.com/reports/190217",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Log into your account and set your name and lastname to \"-alert(document.domain)-\"."
+        ],
+        [
+            2,
+            "Open your profile page from another account at https://marketplace.informatica.com/people/%email% to execute the script."
+        ]
+    ],
+    "vuln_description": "The user name and lastname are inserted into JavaScript without proper escaping, allowing for stored XSS when another user views the profile page.",
+    "reason": "The vulnerability involves a straightforward XSS injection through user profile fields, which is a common and well-documented attack vector. The steps to reproduce are simple and do not require complex interactions or state manipulation.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "reason": "The vulnerability involves stored XSS in user profile fields, which is a client-side injection issue rather than an authentication or authorization bypass. The proposed methodologies focus on testing authorization boundaries by swapping user sessions and resource IDs, not on detecting improper input sanitization or script injection vulnerabilities.",
+        "is_detectable": false
+    }
+}

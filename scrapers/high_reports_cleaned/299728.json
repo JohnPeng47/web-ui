@@ -1,0 +1,45 @@
+{
+    "reported_to": "HackerOne",
+    "reported_by": "dr_dragon ",
+    "title": "Markdown parsing issue enables insertion of malicious tags and event handlers",
+    "content": "\nWhen markdown is being presented as HTML, there seems to be a strange interaction between _ and @ that lets an attacker insert malicious tags.\nProof of Concept :\nCode 21 Bytes\n1</http:<marquee>hello\nis rendered converted to the following HTML:\nCode 112 Bytes\n1<p><a title=\"/http:<marquee\" href=\"/http:%3Cmarquee\" target=\"_blank\">/http:<marquee>hello</p>\n2</marquee></a></p>\nAs you can see, the output includes a </http:<marquee tag that I can add arbitrary attributes (including event handlers).\nImpact\nWhen markdown is being presented as HTML, there seems to be a strange interaction between _ and @ that lets an attacker insert malicious tags.\n\n",
+    "severity": [
+        7.1,
+        null
+    ],
+    "bounty": 5000,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1517261820,
+    "report_url": "https://hackerone.com/reports/299728",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Enter the following markdown text into the vulnerable markdown parser: `1</http:<marquee>hello`"
+        ],
+        [
+            2,
+            "Observe the rendered HTML output which includes unexpected `<marquee>` tags and potential for arbitrary attribute injection"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves a markdown parsing issue where a specific combination of characters (`_` and `@`) allows an attacker to inject malicious HTML tags (like `<marquee>`) and event handlers. The parser incorrectly handles these characters, leading to HTML output that includes unintended and potentially dangerous elements.",
+    "reason": "This vulnerability requires understanding of markdown parsing quirks and the specific interaction between certain characters that trigger the parser's unexpected behavior. While the attack vector is straightforward once known, discovering the exact character combination that triggers the parser's flaw is non-obvious and requires either systematic testing or deep understanding of the parser's implementation.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "reason": "The vulnerability involves markdown parsing leading to HTML injection, which is not directly related to authentication or authorization bypass. The proposed methodologies focus on testing authorization boundaries through session and resource manipulation, not parsing or rendering issues.",
+        "is_detectable": false
+    }
+}

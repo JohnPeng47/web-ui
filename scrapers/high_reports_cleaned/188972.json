@@ -1,0 +1,42 @@
+{
+    "reported_to": "Starbucks",
+    "reported_by": "ddworken ",
+    "title": "Persistent XSS in www.starbucks.com",
+    "content": "\nThere is a persistent XSS in\nCode 57 Bytes\n1https://www.starbucks.com/coffee/espresso/latte-macchiato\nIt is caused by loading scripts from:\nCode 79 Bytes\n1//starbucksmacchiato-prod.elasticbeanstalk.com/scripts/bn-v1.0.0-Release-min.js\nNote that starbucksmacchiato-prod.elasticbeanstalk.com is not registered on elastic beanstalk. You can verify this by looking up the IP address for this subdomain and noting that it does not resolve. Through registering that domain on elastic beanstalk and deploying a webserver that responds to that request with javascript, an attacker could get a persistent XSS on Starbuck's website.\nI have not registered that domain with Elastic Beanstalk since it would give me a large amount of information about the user's of Starbuck's website (and it would incur a large amount of traffic-more than I'd like to pay for on AWS!). If you would like me to do so, let me know but I do not want to go past the bounds of acceptable testing.\nThanks,\nDavid Dworken\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1484708220,
+    "report_url": "https://hackerone.com/reports/188972",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify that the subdomain starbucksmacchiato-prod.elasticbeanstalk.com is not registered on Elastic Beanstalk by checking its DNS resolution."
+        ],
+        [
+            2,
+            "Register the subdomain on Elastic Beanstalk and deploy a webserver that serves malicious JavaScript to exploit the XSS vulnerability when the script is loaded by Starbucks' website."
+        ]
+    ],
+    "vuln_description": "A persistent XSS vulnerability exists on www.starbucks.com due to loading scripts from an unregistered subdomain (starbucksmacchiato-prod.elasticbeanstalk.com). An attacker could register this subdomain and serve malicious JavaScript, leading to persistent XSS on Starbucks' website.",
+    "reason": "The vulnerability involves identifying an unregistered subdomain used by Starbucks' website and exploiting it by registering the domain and serving malicious content. The attack requires understanding DNS resolution and the ability to set up a malicious server, but the steps are straightforward once the unregistered subdomain is identified.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The vulnerability involves a persistent XSS due to loading scripts from an unregistered subdomain. This is not an authentication or authorization issue (AuthN/AuthZ) but rather a client-side security issue (XSS). The proposed methodologies focus on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, which does not apply to this XSS vulnerability.",
+        "is_detectable": false
+    }
+}

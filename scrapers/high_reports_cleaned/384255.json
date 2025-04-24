@@ -1,0 +1,62 @@
+{
+    "reported_to": "GitLab",
+    "reported_by": "8ayac ",
+    "title": "Stored XSS on Issue details page",
+    "content": "\nSummary:\nThe detail page of Issue (the page that provides the content of an Issue) is vulnerable to Stored XSS.\nDescription:\nThe two exploits are via the function of submittin an issue or the function of editing an issue.\nThis vulnerability is reproduced in Firefox andChrome. IE11 andEdge are not. I did not test the reproduction on other browsers.\nSteps To Reproduce:\nSign in to GitLab.\nClick the \"[+]\" icon.\nClick \"New Project\".\nFill out \"Project name\" form with \"PoC\".\nCheck the check box of \"Public\".\nClick \"Issues\"\nClick \"New issue\" button.\nFill out the each form as follows:\nTitle: PoC\nDescription: ![xss\" onload=alert(1);//](a)\nTitle: PoC\nDescription: ![xss\" onload=alert(1);//](a)\nClick \"Submit issue\".\nFurthermore, when editing an already existing issue, you can also reproduce by entering A in the \"Description\" form and saving it.\nImpact\nThe security impact is the same as any typical Stored XSS.\nThank you!\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1540894320,
+    "report_url": "https://hackerone.com/reports/384255",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Sign in to GitLab."
+        ],
+        [
+            2,
+            "Click the '[+]' icon and select 'New Project'."
+        ],
+        [
+            3,
+            "Fill out 'Project name' with 'PoC' and check 'Public'."
+        ],
+        [
+            4,
+            "Navigate to 'Issues' and click 'New issue'."
+        ],
+        [
+            5,
+            "Enter 'PoC' as the title and '![xss\" onload=alert(1);//](a)' as the description."
+        ],
+        [
+            6,
+            "Click 'Submit issue'."
+        ],
+        [
+            7,
+            "Alternatively, edit an existing issue with the same XSS payload in the description."
+        ]
+    ],
+    "vuln_description": "The issue detail page in GitLab is vulnerable to Stored XSS via the issue submission or editing functionality. An attacker can inject malicious JavaScript code in the issue description, which executes when the issue is viewed.",
+    "reason": "The vulnerability involves a straightforward XSS injection in a text field, a common and well-documented attack vector. The steps to reproduce are simple and do not require complex interactions or state manipulation.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The Stored XSS vulnerability involves injecting malicious scripts into the issue description, which is not related to authentication or authorization bypass. The methodology described focuses on AuthN/AuthZ and IDOR vulnerabilities by testing user sessions and resource access controls, not input validation or script injection vulnerabilities.",
+        "is_detectable": false
+    }
+}

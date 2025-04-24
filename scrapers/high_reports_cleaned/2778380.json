@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "todayisnew- ",
+    "title": "Unauthenticated LFI (Local File Inclusion) using the symbol `!` At the target `https://\u2588\u2588\u2588\u2588/`",
+    "content": "\nHi DOD Team,\nSummary:\nWhen accessing the endpoint on https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/jolokia/exec/com.sun.management:type=DiagnosticCommand/compilerDirectivesAdd/ it is possible to path traversal on the machine and reading local files by using ! at every new directory injected allowing an attacker to read local files with even being Unauthenticated leads to a catastrophic impact on the main server.\nSteps to reproduce:\n1. Read the listed users on the instance ---> /etc/passwd:\nhttps://\u2588\u2588\u2588/jolokia/exec/com.sun.management:type=DiagnosticCommand/compilerDirectivesAdd/!/etc!/passwd\n2. Read Crontab jobs on the instance ---> /etc/crontab:\nhttps://\u2588\u2588\u2588\u2588/jolokia/exec/com.sun.management:type=DiagnosticCommand/compilerDirectivesAdd/!/etc!/crontab\nPoC Video:\n\u2588\u2588\u2588\u2588\nMitigation/Fix:\nSanitize user input and don't trust user inputs that come for your server in a GET method after the endpoint /compilerDirectivesAdd/{Attackers_Coming_From_Here_To_Read_Local_Files}, it would be better to maintain a whitelist of acceptable filenames and use a unique corresponding identifier to access the file. Then any request containing an invalid identifier can just be rejected. Additionally, you could also sanitize any path traversal characters that may be present in any GET request.\nImpact\nAn attacker could read local files on the web server that they would normally not have access to, such as the application source code or configuration files containing sensitive information on how the website is configured, etc...\nBest Regards,\nYoussef\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Path Traversal"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1729886580,
+    "report_url": "https://hackerone.com/reports/2778380",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Access the endpoint: https://\u2588\u2588\u2588\u2588/jolokia/exec/com.sun.management:type=DiagnosticCommand/compilerDirectivesAdd/!/etc!/passwd to read /etc/passwd"
+        ],
+        [
+            2,
+            "Access the endpoint: https://\u2588\u2588\u2588\u2588/jolokia/exec/com.sun.management:type=DiagnosticCommand/compilerDirectivesAdd/!/etc!/crontab to read /etc/crontab"
+        ]
+    ],
+    "vuln_description": "An unauthenticated Local File Inclusion (LFI) vulnerability exists in the target endpoint, allowing attackers to read local files on the server by using the `!` symbol for path traversal. This can lead to exposure of sensitive information such as system files and configuration details.",
+    "reason": "The vulnerability is straightforward to exploit once the endpoint and the use of the `!` symbol for path traversal are known. It does not involve complex interactions or state manipulations, and the attack vector is relatively simple and direct.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

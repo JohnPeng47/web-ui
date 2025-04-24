@@ -1,0 +1,54 @@
+{
+    "reported_to": "Automattic",
+    "reported_by": "bugra ",
+    "title": "IDOR when editing users leads to Account Takeover without User Interaction at CrowdSignal",
+    "content": "\nSummary:\n<image_0>\nSteps To Reproduce:\nLog-in to your team account at CrowdSignal\nGo to https://app.crowdsignal.com/users/invite-user.php?id=19920465&popup=1\nYou will see my email, and if you click Update Permissions, you will takeover my account.\nYou can change the user ID to random number with 00010006 - 19920500 range.\nImpact\nIDOR leads to account takeover without user interaction\nThanks,\nBugra\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Insecure Direct Object Reference (IDOR)"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/zBzNaUYEhaG1eeHyDQvTPegQ?response-content-disposition=attachment%3B%20filename%3D%22idor.PNG%22%3B%20filename%2A%3DUTF-8%27%27idor.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ72HSHSM5%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T220609Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIACFIgPJymuvLs04o%2FphkqAZ0Ez2PLmvEd3i0xKi24cVAiEA3kYj3Jo3WWTumqRt16Zf2aUTT5VoLBaR1XwZ6Uzqoq4qsQUIGxADGgwwMTM2MTkyNzQ4NDkiDO%2FDV4Ln249zK5bi6yqOBWpXaujSA7c3UafccP753qZdwjkjabQrQzxvIfaHjPOVrvCuSfqOlksLzQy4UjDhnznIQRFWv4ZufvORCpXVyTWxC9r4tRnhYNP0LfGSW7%2FE0z9ka4mNsYj82%2BIdhPW97yJNOIvVMjxhwZODeOYzcEvsWRa%2F8BiTJbseqc6QnA2AZmSbuJq7xFO5R79VmHPYDWpCLzzekDWfqjFMYeQ085lDlqHBhE9JM9jx%2BC2bPOwWpX9bEup05YzKuXNiE5mr5TsfecbT6O%2F7afjBkGzwQzwcyLQ%2B7eEz9nVotv%2BCquJDz91XZlsHEQsq6b8HTrYdsNiR%2BioyiptlT%2By2kOsD3CI449g5r%2F9%2F3EzrpPHdGJYxBZ7JFxNuxf7kI%2BDY25Fa1hc6dv9DkkzfiE%2FSrVDl32Zfjbh3%2FTvBhKHtFSgzlhO%2BsA%2FwwRRxgPC7Yg43Bgke4x%2Bh1fA4sDEAj3p6ep4%2BAYkrix1sn7VKJd0Cx0y6%2FtrbRB8KV8dKmS9TXf2y6Q0yEGBnK4nNUHpXiio7gy%2FnRZTWe3XMe%2FKutH6GVpy9lQrGrw0Xep4xyg4YibEYBHZwJ02PFlxi2PxBdhvgzaas%2BcT8UeS1wc9sySkCeZollVnW7UHTwsnABsXbsvy9i9tk73XW%2BsVtXvsoQTEKNwCzL1SdazOIJJUXtTP4m%2F3GudOMdv9MVZMreckZldtLqbtgrjmN8poIi7MKytQL3uyhBc6oDpk99unLgCDd5WDmA26ajE62FryFIJRht1girTKbTbNHnadTTwjNpAidOeTx8h%2B8nNaQtbX0RM1d425ZKfkAhvgu9le%2BYvntBJCHHANOIw62Ic3mIQD0rVnxs40Pwc7yylR%2F2znYKbRdLdf7JTCK3Iu%2FBjqxARa%2BdYHRUv8L%2FwW74BhYYgChBDV7FCD%2BxKhQQ%2Bk1Cc2aQ8ROgWd1Yu4j5CmLym%2BMQKp8bgs6xwdGurSDrcS6cXYzMNQiiWPCh0dwqc8vdMkdgnsPAfQslKPiRhObpj5VMM6UrAelpsbauqgqJG%2FaF%2BR1smISimyV0GC9BAn3rE7Hq3hkWrdXdLOZi5CMjtGOuQMtGqST1%2BLXaGJUS8oZGqVIplOhjUWErsBamMGUvDARTA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=72bcfad8ff28b9176204b3e1ad3c9db99c193b3e4c2060676951e2a8250b6490"
+    },
+    "disclosed_date": 1605727380,
+    "report_url": "https://hackerone.com/reports/915114",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Log-in to your team account at CrowdSignal"
+        ],
+        [
+            2,
+            "Navigate to https://app.crowdsignal.com/users/invite-user.php?id=19920465&popup=1 (or modify the ID parameter to a value within the range 00010006 - 19920500)"
+        ],
+        [
+            3,
+            "Observe that you can view and modify another user's permissions, leading to account takeover"
+        ]
+    ],
+    "vuln_description": "This is an Insecure Direct Object Reference (IDOR) vulnerability in CrowdSignal's user invitation system. By manipulating the 'id' parameter in the URL, an attacker can access and modify the permissions of other users without proper authorization, leading to account takeover without any user interaction.",
+    "reason": "The vulnerability is straightforward to discover as it only requires modifying a URL parameter (ID) within a predictable range. There are no complex interactions, state manipulations, or novel logic involved. The attack surface is simple and follows common IDOR patterns.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": true,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": false
+    }
+}

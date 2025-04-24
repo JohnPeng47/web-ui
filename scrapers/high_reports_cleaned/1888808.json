@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "rodriguezjorgex ",
+    "title": "Path traversal leads to reading of local files on \u2588\u2588\u2588\u2588\u2588\u2588\u2588 and \u2588\u2588\u2588\u2588",
+    "content": "\nDescription:\nThe \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 web application has a feature that allows the downloading of files when you first go to the login screen. The endpoint that manages those downloads is the downloadForm endpoint with the filename parameter.\nhttps://\u2588\u2588\u2588/\u2588\u2588\u2588\u2588/login/downloadForm?filename=\u2588\u2588\u2588\u2588\u2588\nThe filename parameter has a directory traversal vulnerability which allows an attacker to add two (2) dots and a backslash (../) to traverse parent directories and view files that are not meant to be viewed.\nPOC:\nViewing /etc/hosts file\nUsing bash, run the following command:\ncurl https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588/login/downloadForm?filename=../../../../../../../../etc/hosts\nOr simply access the POC URL in a web browser, and the hosts file will be downloaded to the workstation.\nInitially, I attempted to read the /etc/passwd file, but I believe there's some form of WAF blocking the request. I didn't attempt to bypass the WAF, but if the WAF is bypassed the /etc/passwd file contains sensitive information about the users in the system. Furthermore, with the user information, an attacker can attempt to view the id_rsa keys of users in the system to gain ssh access to the server.\nReferences\nhttps://portswigger.net/web-security/file-path-traversal\nImpact\nA directory traversal vulnerability that allows an attacker to read files on a system can have serious consequences, depending on the sensitivity of the information that can be accessed. Here are a few examples of the potential impact:\nDisclosure of sensitive information: An attacker who can read files on a system can potentially access sensitive information such as user credentials, financial records, confidential business information, or other sensitive data. This could lead to identity theft, data breaches, or other forms of fraud.\nSystem compromise: In some cases, directory traversal vulnerabilities can be used to read sensitive configuration files or scripts that can be used to gain full access to the system. Once an attacker has access to the system, they can execute arbitrary code, install malware, or take other actions that can compromise the system's security.\nReputation damage: If sensitive information is leaked due to a directory traversal vulnerability, it can damage the reputation of the organization responsible for the system. This can have serious consequences for businesses, particularly those in industries where trust and confidentiality are critical.\nOverall, a directory traversal vulnerability that allows an attacker to read files can be a serious security risk that should be addressed as soon as possible to minimize the potential impact.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588,\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nVisit https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588/login/downloadForm?filename=../../../../../../../../etc/hosts\nSuggested Mitigation/Remediation Actions\nValidate user input: One of the most common causes of directory traversal vulnerabilities is insufficient validation of user input. To prevent this, all user input should be validated to ensure that it is within expected bounds and does not contain characters that could be used to navigate outside of the intended directory.\nSanitize file paths: Before accessing files, all file paths should be sanitized to remove any characters that could be used to navigate outside of the intended directory.\nUse secure coding practices: Developers should follow secure coding practices to prevent common vulnerabilities, such as directory traversal attacks. This includes using functions that are designed to handle file operations safely, such as realpath() or basename(), and avoiding the use of user input to construct file paths.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Path Traversal"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1679693580,
+    "report_url": "https://hackerone.com/reports/1888808",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Visit the URL: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588/login/downloadForm?filename=../../../../../../../../etc/hosts"
+        ],
+        [
+            2,
+            "The hosts file will be downloaded to the workstation, confirming the directory traversal vulnerability"
+        ]
+    ],
+    "vuln_description": "The web application has a directory traversal vulnerability in the downloadForm endpoint, allowing attackers to read local files by manipulating the filename parameter with '../' sequences.",
+    "reason": "The vulnerability involves a straightforward manipulation of the filename parameter with directory traversal sequences, which is a common and well-documented attack vector. There are no complex interactions or states involved, and the attack does not require novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,49 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "sensoyard ",
+    "title": "Unrestricted file upload leads to stored xss on https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/",
+    "content": "\nSummary:\nWhen the user want to upload a \"certificate\", the web app doesn't check the content-type of the file. A user can upload any kind of file (binary,html,...)\nStep-by-step Reproduction Instructions\nCreate an account at https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/app/registration/basic-info\nWhen you are connected, click on \"certification\"\nUpload this file as xss.html and save the modifications:\nCode 230 Bytes\n1<!DOCTYPE html>\n2<html>\n3  <head>\n4    <title>Simple Test</title>\n5    <meta name=\"viewport\" content=\"initial-scale=1.0\">\n6    <meta charset=\"utf-8\">\n7  </head>\n8  <body>\n9    <script>\n10\talert(document.cookie\t)\n11\t</script>\n12  </body>\n13</html>\n3 . Go back to the \"certification tab \" and open the attachement in a new tab\nPOC :https://\u2588\u2588\u2588/\u2588\u2588\u2588\u2588/registration-service/files/\u2588\u2588\u2588\u2588\u2588\u2588\u2588.html\nSuggested Mitigation/Remediation Actions\nRestrict the content-type of the uploaded files\nImpact\nThe unrestricted file upload vulnerability leads to stored xss.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1590603840,
+    "report_url": "https://hackerone.com/reports/854445",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create an account at https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/app/registration/basic-info"
+        ],
+        [
+            2,
+            "When connected, click on 'certification' and upload the provided xss.html file"
+        ],
+        [
+            3,
+            "Go back to the 'certification tab' and open the attachment in a new tab"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows unrestricted file upload, leading to stored XSS. The web app does not validate the content-type of uploaded files, enabling users to upload malicious HTML files that execute JavaScript when opened.",
+    "reason": "The attack is straightforward, involving basic file upload manipulation without complex interactions or state manipulation. The vulnerability is common and well-documented in web security.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "reason": "The vulnerability involves an unrestricted file upload leading to stored XSS, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, whereas this vulnerability is about file content validation and XSS.",
+        "is_detectable": false
+    }
+}

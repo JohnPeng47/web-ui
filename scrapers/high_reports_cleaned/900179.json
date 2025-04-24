@@ -1,0 +1,46 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "5050thepiguy ",
+    "title": "Unrestricted File Upload Leads to XSS & Potential RCE",
+    "content": "\nSummary:\nUnrestricted file upload at\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/request?openform. When the user wants to upload a file the app allows the user to upload a HTML file leading to stored XSS and creation of a simple php script. A user can upload the HTML file and trigger XSS and trigger potential RCE with php shell. Please go to the \u2588\u2588\u2588\u2588\u2588\u2588 Request that I created at -- \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588AllOpenOrders/4F4D0C69EA2B33A58525858A001E2B8C?opendocument and select the file at the bottom \"unsure1.html\" to trigger payload to show XSS and php shell. You can also go directly to the uploaded file at \u2588\u2588\u2588\u25880/4f4d0c69ea2b33a58525858a001e2b8c/$FILE/unsure1.html. Please see the attached PoC video as well. Thanks.\nImpact\nThe unrestricted file upload vulnerability leads to stored XSS and creation of php shell leading to potential RCE, which opens the door to numerous malicious attacks by the attacker.\nStep-by-step Reproduction Instructions\nGo to\u2588\u2588\u2588/request?openform\nEnter in the details for this page and you will automatically be redirected to the next page. Do the same thing here and enter in all the necessary information\nThen, towards the bottom you are given the option to upload files so click \"browse\" and upload your payload\nClick \"submit request\" then go back to \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588ModifyRequest.xsp and enter in the 14 digit Document Number.\nScroll down to the bottom of your request and click the HTML payload.\nObserve that XSS triggers and php shell is seen as well.\nProduct, Version, and Configuration (If applicable)\n\u2588\u2588\u2588\n\u2588\u2588\u2588request?openform\nSuggested Mitigation/Remediation Actions\nRestrict file uploads to only necessary business requirements. If possible restrict uploads to JPG, DOC, DOCX, and PDF. Don't allowed upload of executable files.\nReferences\nPlease see attached PoC video\nPlease see attached PoC HTML page as well used for the payload\nImpact\nThe unrestricted file upload vulnerability leads to stored XSS and creation of php shell leading to potential RCE, which opens the door to numerous malicious attacks by the attacker.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Unrestricted Upload of File with Dangerous Type"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1594244820,
+    "report_url": "https://hackerone.com/reports/900179",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to \u2588\u2588\u2588/request?openform and fill out the form details"
+        ],
+        [
+            2,
+            "Upload an HTML file (e.g., unsure1.html) containing malicious XSS/php shell payload"
+        ],
+        [
+            3,
+            "Submit the request and navigate to the uploaded file via the provided link"
+        ],
+        [
+            4,
+            "Observe the XSS execution and potential RCE via the php shell"
+        ]
+    ],
+    "vuln_description": "Unrestricted file upload vulnerability allowing HTML and PHP files, leading to stored XSS and potential remote code execution (RCE) via PHP shell.",
+    "reason": "The attack involves straightforward file upload exploitation without complex interactions or state manipulation. The vulnerability is common and well-documented in web security contexts.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

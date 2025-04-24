@@ -1,0 +1,42 @@
+{
+    "reported_to": "Starbucks",
+    "reported_by": "hiorws ",
+    "title": "out of date disqus shortname usage in the web app source code",
+    "content": "\nShort definition of bug: Misusage of an third-party web service in http://www.starbucks.com/\nHi Starbucks Bug Bounty Team,\u2028I found a vulnerability on your global website. I think you migrate your blog from http://www.starbucks.com/blog/archive/starbucks to https://1912pike.com/ and the blog path is also active and in-service still. Also the old blog posts are listed from the search in the main page of your website.\nIf we inspect the page source of any blog post page under the path\u2028http://www.starbucks.com/blog/ , we will see the disqus embedding codes still active.\u2028\u2028\ni.e. checkout the page source of this page:\nhttp://www.starbucks.com/blog/starbucks-digital-network-content-highlights/612\nCode 1.16 KiB\n1<script>\n2\t\t\n3\tvar\tdisqus_params = {\tshortname :'\u2588\u2588\u2588\u2588', \n4\t\t\t\t\t\t\tdeveloperMode : false, \n5\t\t\t\t\t\t\thash :'\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588', \n6\t\t\t\t\t\t\tpublicKey :'\u2588\u2588\u2588\u2588\u2588',\n7\t\t\t\t\t\t\tidentifier : 'TEST/blog/starbucks-digital-network-content-highlights/612',\n8\t\t\t\t\t\t\turl :'http://www.starbucks.com/blog/starbucks-digital-network-content-highlights/612',\n9\t\t\t\t\t\t\tssoName : 'Starbucks',\n10\t\t\t\t\t\t\tsigninUrl : '/account/signin?skin=sdn&returnURL=/Disqus/CloseWindow',\n11\t\t\t\t\t\t\tmobileSignInURL : '/account/signin?skin=sdn&returnURL=http://www.starbucks.com/blog/starbucks-digital-network-content-highlights/612',\n12\t\t\t\t\t\t\tsignoutURL : '/account/signout?skin=sdn&returnURL=/blog/starbucks-digital-network-content-highlights/612',\n13\t\t\t\t\t\t\tsignInButton : 'http://www.starbucks.com/static/images/signin.png', \n14\t\t\t\t\t\t\tsignInIcon :'http://www.starbucks.com/static/images/sb-logo-16.gif'\n15\t\t\t\t\t\t};\n16\t\t\t\t\t\t\n17\t\t\t\n18\t\t\t\t\t\t/*TODO: Temp Hack*/\n19\n20if( navigator.userAgent.match(/Android/i)\n21 || navigator.userAgent.match(/webOS/i)\n22 || navigator.userAgent.match(/iPhone/i)\n23 || navigator.userAgent.match(/iPad/i)\n24 || navigator.userAgent.match(/iPod/i)\n25 ){\n26\tdisqus_params.signinUrl=\"/account/signin?skin=sdn&returnURL=\" + window.location.href;\n27}\n28\t\n29</script>\nand also at the end of source code\nCode 67 Bytes\n1<script src=\"/static/resource/disqus_js/1315595364_en-US\"></script>\nhttp://www.starbucks.com/static/resource/disqus_js/1315595364_en-US\u2028\nthe js code is still in the server and in-service.\nas you see in the page source code, the disqus shortname is \u2588\u2588\u2588\u2588 which is deprecated. I wonder and check from the disqus the \u201c\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u201d shortname is not under usage. And i take that shortname as a regular user of disqus.\u2028\u2028\nConsequently whole the administration of \u201c\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u201d discussion board belongs to me. This is the best case. For a company -which is focused on customer pleasure and has total stores: 22,519* (as of June 28, 2015)- this fault can cause lots of impression such as;\nunconfirmed comments on your website\nunpleasant images as a default avatar in comments section\nundesired comments imported with older date can be shown as by name Starbucks etc.\nI recommendation to solve this issue immediately;\nremove the js code in blog post template code\nlet me know the time to transfer the ownership of \u201c\u2588\u2588\u2588\u2588\u2588\u2588\u201d disqus shortname\nI am very pleased to report this issue instantly.\nHave a nice work and thank you so much.\n\n",
+    "severity": [
+        9.3,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Violation of Secure Design Principles"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1502516400,
+    "report_url": "https://hackerone.com/reports/172780",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to any blog post page under http://www.starbucks.com/blog/ (e.g., http://www.starbucks.com/blog/starbucks-digital-network-content-highlights/612)"
+        ],
+        [
+            2,
+            "Inspect the page source to find the Disqus embedding code containing the deprecated shortname"
+        ],
+        [
+            3,
+            "Check the Disqus service to confirm the shortname is not in use and claim it"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the misusage of a deprecated Disqus shortname in the Starbucks blog pages, which allows an attacker to claim the shortname and gain control over the comments section, potentially leading to unverified comments, inappropriate content, and impersonation.",
+    "reason": "The vulnerability was discovered through simple inspection of page source code and verification of the Disqus shortname status, requiring no complex interactions or state manipulations.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,40 @@
+{
+    "reported_to": "GitLab",
+    "reported_by": "youstin ",
+    "title": "Cache poisoning Denial of Service affecting assets.gitlab-static.net",
+    "content": "\nSummary\nHi,\nGitlab.com is hosting JS and CSS on https://assets.gitlab-static.net/ and uses them on gitlab.com/*\nThe static files seem to be stored on a gcp host, which by default accepts the x-http-method-override header. Since the CDN is using Varnish to cache files, I was able to combine the GCP behaviour and poison the cache into returning an empty resource, inherenetly causing a denial of service on gitlab.com and all gitlab assets that use the specific cdn.\nDisclaimer\nNo actual denial of service attack was caused troughout my testing. All the testing used cache-busters, meaning it did not affect the live website in any way.\nSteps to reproduce\nSending a request such as:\nCode 294 Bytes\n1GET /assets/webpack/commons-pages.admin.sessions-pages.groups.omniauth_callbacks-pages.ldap.omniauth_callbacks-pages.omn-c3aaf8c4.3f9d44ba.chunk.js HTTP/1.1\n2Host: assets.gitlab-static.net\n3User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:87.0) Gecko/20100101 Firefox/87.0\n4Connection: close\nwill return the expected js file.\nBy taking a quick look at the response headers, we can see the file is currently cached by varnish because of the following headers:\nCode 96 Bytes\n1Age: 498\n2X-Served-By: cache-dca17752-DCA, cache-osl6520-OSL\n3X-Cache: HIT, HIT\n4X-Cache-Hits: 1, 1\nIn order to test cache poisoning without affecting the live website, we can add random query parameters that will act as cache busters. In order to poison a resource, an attacker would send the following request:\nCode 231 Bytes\n1GET /assets/webpack/commons-pages.admin.sessions-pages.groups.omniauth_callbacks-pages.ldap.omniauth_callbacks-pages.omn-c3aaf8c4.3f9d44ba.chunk.js?cb=youstin-xyz HTTP/1.1\n2Host: assets.gitlab-static.net\n3x-http-method-override: HEAD\nThis will return an empty response, as it is expected from a HEAD request. However since the x-http-method-override header is not included in the cache key and the varnish configuration used does not proccess the x-http-method-override, this empty response will also be forwarded to all other users requesting the file, with normal GET requests.\n<image_0>\nYou can also confirm the cache can be poisoned by visiting the file in your browser, making sure to include the parameter used as a cachebuster. You should notice the empty repsonse, typical to a HEAD request.\nThis vulnerability can be used on files used by the live site even if they are already cached, by making use of the PURGE http method, which clears the cache, allowing for an easily reproducible DoS attack.\nImpact\nSince Gitlab does not forbid unauthorized users from using the PURGE http method, which clears the cache, it is possible for an attacker to clear the cache for actual JS or CSS files used on gitlab.com and poison it with an empty response. Doing so will lead to missing JS and CSS files, making gitlab completely unuseable.\nThis vulnerability affects all instances of gitlab where the cdn is used for JS and CSS files.\n\n",
+    "severity": [
+        7.5,
+        null
+    ],
+    "bounty": 1000,
+    "weaknesses": [
+        "Uncontrolled Resource Consumption"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/c6bhq8c89rrj9ty94x8ixfou71c5?response-content-disposition=attachment%3B%20filename%3D%22Screenshot-20210410223924-532x502.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot-20210410223924-532x502.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQRM3W4RWD%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T164702Z&X-Amz-Expires=3102&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQC8%2B7EZLf%2BbN%2FLZs%2FtQGwISVsLMY7oHUFvxN4oBX8YZdgIhAJVsRfa%2F9lsOmEsysEI0%2FLw9Bx3rS4G42fFvTwOD%2FUABKrEFCBUQAxoMMDEzNjE5Mjc0ODQ5Igw7w9Yoxeq54teciIQqjgUc%2BMa1LeczCFVeb60ABq1qtVTAE8nwVec5qmfwKN%2BxoafNaVLILVChZ4hCxqz3NDhaws73FOQibIJgdEsPLiMRM0srxleThm9s7pVe9AtAUZO15CzUVEm9Br02%2Brlm2%2BnN7MD6PivWwTPz7Ni2ft4frqp3cQWbQpCijnU%2FbRzvUNmTtANcNf%2FMAHmEi2PSAna9MTcWIEb9NcrEN2I7NOZIVBVJBTFLwyRWY5o5dMh8SbV0zLjIqYTdKoOnLlhhFRgRvkbr0NeTGyWKFJsDdCT%2FngU5AXAAX1dqXgJWl4Hf4vtKFaD0U75FEtNnI8fKlpATzAm7RJy20TAtCUQtk3nfQxISChiU53mhkuJ5JgEkiYjGHMV8DBb4Sx%2B%2B4r%2Fz6cMEWNReSG5emhAQ4dRiFca6ylNVHRXdq41EUsjakTGfecbhzGUJkrAIYgZJBjdjES8S1xU0KYRF2rCSq4ppPgs7y3GfCMRKertP9%2Fbb%2F1cIdjEnzYWjqBiwrQTgVDxDsnm%2FthDEyQok16KWwgbB22hqtKyrInHNrVbA5z7%2FgP7VtSFq6EQz3alLT0ehcL4YAPOQyWU%2BaolV%2BJqviH1Cl7AM1eSfjk9Kid7VceWGtCjAGBSrqbIAhRrPCwNwEOydSf4ZEuOk2PWQMO6bDQi1c%2BWDZ%2BexQnP9%2B4iUZ5E1y5B745Nrm%2Bj25eCMBW7oe0jY0P2VPhK1%2FbeHATs8wT39VoVgB3RWgrcCuxAQWayjzhb1vRmKb%2BjOXr52W6hhyt6aYQ30jhxftYtMcJ1fB%2FgLijvAN6xjo5WBmwWcH3bsGX4WLW8rn%2BzA%2BfzR3%2BMxG%2FBCA9TWDw%2F7ViMT09dxGSXiMKFUNF7p1do90ZeBcGT24Nswg6eKvwY6sAGuQM83uUzCTK3q3V7vdXLnPVhj2kmrrlqFQ8qbpOoUfpVPHB1XJgExynR2muJVEOfLIAmzAYPH8xerKbJ9UqSiihL3JQgmnsGSaCjiCoD6XYgS4i6M6Yo0MCDQTi6KUB0HFCPNuUKEs71c%2BOjFt9SthvlVd1y6lKzML63H5HRy8p1uIKPqSRd%2BqwRKAmPLxiFseW8gd0Dw6ektbir3DLZU9OSa04gUiB45%2FTCkpjz8bQ%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=dc7ed00b3c0f8894a9a537ed7ea84f171e950a1b664aa2c54ac16b21f943e3a7"
+    },
+    "disclosed_date": 1640234160,
+    "report_url": "https://hackerone.com/reports/1160407",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Send a GET request to a static JS/CSS file on assets.gitlab-static.net to observe normal caching behavior (X-Cache: HIT in response headers)"
+        ],
+        [
+            2,
+            "Send a GET request with x-http-method-override: HEAD header and a cache-busting parameter to poison the cache with an empty response"
+        ]
+    ],
+    "vuln_description": "Cache poisoning vulnerability in GitLab's CDN (assets.gitlab-static.net) where an attacker can use the x-http-method-override header to cache empty responses for static resources, combined with the ability to PURGE cache entries, leading to a site-wide DoS by breaking JS/CSS loading.",
+    "reason": "The attack requires understanding multiple components (Varnish caching behavior, GCP's x-http-method-override header acceptance, and PURGE method functionality) and their subtle interaction where the override header isn't included in cache keys. However, the components and their interactions are well-documented behaviors in web infrastructure.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

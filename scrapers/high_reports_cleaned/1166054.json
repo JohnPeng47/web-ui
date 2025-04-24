@@ -1,0 +1,38 @@
+{
+    "reported_to": "UPchieve",
+    "reported_by": "mohanad987 ",
+    "title": "User enumeration through forget password",
+    "content": "\nVulnerability:-\n->User enumeration is possible through forgot password feature.\nsteps to reproduce:-\n->Go to the above selected domain and go to forgot password.\n->submit random email and then intercept request by burp suit\n->in response you will get { HTTP/1.1 500 Internal Server Error with {{\"err\":\"No account with that id found.\"} }\nRemediation:-\n->It should display like \"if that mail address exists in our system, then we will send password reset link.\"\nI hope that you will consider this issue as you also welcome the reports of best practices.\nThank you\nImpact\nLeaking users' emails. / Information Disclosure.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1621144740,
+    "report_url": "https://hackerone.com/reports/1166054",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the forgot password page of the target domain."
+        ],
+        [
+            2,
+            "Enter a random email address and intercept the request using Burp Suite."
+        ]
+    ],
+    "vuln_description": "User enumeration is possible through the forgot password feature. The system responds with a 500 Internal Server Error and a message indicating 'No account with that id found,' which allows an attacker to determine valid user emails.",
+    "reason": "The vulnerability involves a straightforward interaction with the forgot password feature and does not require complex application state manipulation or novel logic. The issue is common and easily identifiable with basic testing tools.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,50 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "brumens ",
+    "title": "Cache Posioning leading to denial of service at `\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588` - Bypass fix from report #1198434\t",
+    "content": "\nVulnerability Cache Posioning (CPDoS)\nCache Posioning Denial Of Service (CPDoS) [1] is taking advantage of 301 redirects by storing an false value of either domain, port or header that effect the response in any way. This makes the cache server store the false value and later delivery it to all users that view the domain page.\nThis vulnerability is in fact an Cache poisoning [2] in the ground which makes it possible to not harm the system in any way when testing. This is because it's possible to add random URL path to the domain that make only that path exploited under x time.\nAn attacker will use intruder to update the cache server every x sec, min or hours to make the domain down.\nSummary\nThe vulnerability was discovered when was retesting the vulnerability and discovered that the domain still was vulnerable for cache poisoning. I did some tests and I was able to re poisoning the domains cache server again in different paths. It looks like the fix from report #1198434 only fixed one path in the domain but other paths remain vulnerable.\nProof of concept\nCan be used as step by step if you like\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSupported link\n[1] https://cpdos.org/ - \"What is CPDoS?\", Vulnerability explained\n[2] https://portswigger.net/research/responsible-denial-of-service-with-web-cache-poisoning - \"Responsible denial of service with web cache poisoning\", James Kettle\nBest regards,\nBrumens\nImpact\nAn attacker is able to crash most of the paths related to the domain.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nWARNING! Do not send the request until the step to send the request comes. Otherwise you can by mistage crash the whole domain.\nOpen an browser that is connected to Burp suite\nVisit: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 (More path are vulnerable but this is an example)\nIntercept the request with Burp suite and add it to the repeater.\nIMPORTEN Add an random parameter at the end as example: &CPDoS=1 in the url bar at Repeater. (See image at step 4.)\nAdd an nonexcisting port at the host header domain. Ex: 1234 Your request raw data should look like below:\n\u2588\u2588\u2588\u2588\u2588\nIf an random paramter is added at the end AND the port is added to the host header. You can now send the request in Burp suite repeater tab. The data will look similary to:\nYou will see an 301 that do redirect and reflect the port you gave inside the request.\nIn the request raw data. Delete the port number inside the host header.\nSend the request now one more time. You will see the port you added before is still reflecting in the 301 redirect code. This indicates that it's now cache poisoned and the domain path is down. Try visit the url and you can see you won't be able to load it.\nSuggested Mitigation/Remediation Actions\nConfigure the cache server on all paths and locations on the domain.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Uncontrolled Resource Consumption"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1634177700,
+    "report_url": "https://hackerone.com/reports/1322732",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Open a browser connected to Burp Suite and visit the vulnerable domain path (e.g., https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588)."
+        ],
+        [
+            2,
+            "Intercept the request with Burp Suite, add it to the Repeater, and modify the Host header to include a non-existent port (e.g., 1234)."
+        ],
+        [
+            3,
+            "Add a random parameter to the URL (e.g., &CPDoS=1) and send the request."
+        ],
+        [
+            4,
+            "Observe the 301 redirect reflecting the fake port. Remove the port from the Host header and resend the request."
+        ],
+        [
+            5,
+            "Verify the port is still reflected in the 301 response, indicating cache poisoning. Attempt to visit the URL to confirm it is down."
+        ]
+    ],
+    "vuln_description": "Cache Poisoning Denial of Service (CPDoS) exploits 301 redirects by injecting false domain, port, or header values into cache servers. This causes the cache to store and serve incorrect responses, potentially crashing the domain for all users. The vulnerability persists despite a prior fix, as other paths remain exploitable.",
+    "reason": "The attack involves manipulating HTTP headers and cache behavior, but the steps are straightforward once the tester understands the cache poisoning mechanism. The complexity arises from knowing how to trigger and verify the cache poisoning, but the components (headers, cache, redirects) are well-documented.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "1198434"
+}

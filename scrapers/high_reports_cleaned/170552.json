@@ -1,0 +1,38 @@
+{
+    "reported_to": "HackerOne",
+    "reported_by": "whhackersbr ",
+    "title": "Slack integration setup lacks CSRF protection",
+    "content": "\nDetails:\nSummary:\nCross-site Request Forgery in the Integrations (https://hackerone.com/[YOUR_TEAM]/integrations) feature for teams.\nDescription (Include Impact):\nThe Integrations flow is insecure, because it can be abused by CSRF.\nPoC:\nRequest\nCode 45 Bytes\n1GET https://hackerone.com/auth/slack HTTP/1.1\nResponse\nCode 245 Bytes\n1Location: https://slack.com/oauth/authorize\n2?client_id=2174110321.11522100978\n3&redirect_uri=https%3A%2F%2Fhackerone.com%2Fauth%2Fslack%2Fcallback\n4&response_type=code\n5&scope=incoming-webhook\n6&state=379fd8f1baa8d80516e2f706f025057ad0ce2cca0bbbd56c\nHow can it be bad since you are using state parameter?\nYou are trusting in third-party security that is not under your control.\nAll the attacker needs is an XSS or Login CSRF or Clickjacking in the third-party system and he can compromise your system. With one of the previous mentioned vulnerabilities in the third-party system, the attacker can control the entire OAuth flow and connect his own accounts to the victim's HackerOne account.\nToday, you have just one integration available (Slack).\nIf you implement more integrations in the future, the damage and the attack surface will grow significantly. Worst if you implement someday something like Login with Facebook / Login with Google / etc., because this bug will lead to account takeover.\nFix:\n1) Protection against CSRF at the beginning of the OAuth flow:\ne.g.:\nCode 79 Bytes\n1GET https://hackerone.com/auth/slack?CSRF_TOKEN=bdea53bd9a8c73bd983847 HTTP/1.1\n2) Phabricator approach of OAuth connections (a confirmation dialog after the end of the OAuth flow). Picture attached (F121473).\nP.S.: Are you interested in Login XSRF in HackerOne?\nHow do you protect users against Login XSRF in your SSO flow?\nSorry, I can not fully test SSO because I need approval of SSO configuration every time.\n\n",
+    "severity": [
+        8.2,
+        null
+    ],
+    "bounty": 2500,
+    "weaknesses": [
+        "Cross-Site Request Forgery (CSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1625643540,
+    "report_url": "https://hackerone.com/reports/170552",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify the Slack integration endpoint: https://hackerone.com/auth/slack"
+        ],
+        [
+            2,
+            "Observe that the endpoint lacks CSRF protection and relies solely on the state parameter for security"
+        ]
+    ],
+    "vuln_description": "The Slack integration setup lacks CSRF protection, making it vulnerable to attacks where an attacker could exploit XSS, Login CSRF, or Clickjacking in the third-party system to compromise the HackerOne account by connecting their own accounts.",
+    "reason": "The vulnerability involves understanding the OAuth flow and recognizing the reliance on third-party security, which is not under HackerOne's control. The attack requires knowledge of potential vulnerabilities in the third-party system and how they can be leveraged to compromise the OAuth flow.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

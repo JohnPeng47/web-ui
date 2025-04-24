@@ -1,0 +1,48 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "toannc123 ",
+    "title": "[http-file-server] List any files and sub folders in the folder by using path traversal.",
+    "content": "\nI would like to report Path Traversal in http-file-server. It allows to list any files and sub folders in another folder of web root.\nModule\nmodule name: http-file-server\nversion: 0.2.6\nnpm page: https://www.npmjs.com/package/http-file-server\nVulnerability\nVulnerability Description\nhttp-file-server is simply get the path name of url and add it to the web root. it means if you input ../, it will happy add it to web root and you can list the folder you choose. But the trick is web browser or curl are also to try rebuild the url containing ../. I used the burp to make a raw url and send it to server.\nSteps To Reproduce:\ninstall http-file-server\n$ npm install -g http-file-server\nstart program: go to the folder of the module and run the file\n$ ./http-file-server.js --path=/tmp/ --host=* --port=1234\n<image_0>\nPatch\nfilter .. in the path name.\nSupporting Material/References:\nConfiguration I've used to find this vulnerability:\nkali linux 4.15.0\nnodejs v8.9.3\nnpm 6.4.1\nBurpsuite\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nThis vulnerability allows malicious user to list file in the folder. This might expose vectors to attack system with Remote Code Execution, reveals files with usernames and passwords and many other possibilities.\n\n",
+    "severity": [
+        8.2,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Path Traversal"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/485/870/587a8f834b426c998665e00f2dab16fcc8410d7d/Capture.PNG?response-content-disposition=attachment%3B%20filename%3D%22Capture.PNG%22%3B%20filename%2A%3DUTF-8%27%27Capture.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQZOV47FIN%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T040212Z&X-Amz-Expires=490&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELb%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQCgYKWDKCX9IkJ%2Fn%2F%2FR%2BUGjbHCmZaMH6hXJVxORmsuhSQIhAO99hWiP2CeVp8L5RCXc8YnApZJjS3A60bVJjaDGhHgoKrIFCB8QAxoMMDEzNjE5Mjc0ODQ5IgwOEJOClSL%2BzacuBiMqjwWdKdMgeHdJxBO3DgkzddWGAByaiIqk53B4wcVd10nR9PckZaCyq7%2Fu%2BLrHSwQJJE%2FO48%2BI88fNzPkuK9xU4B1R%2FPFNb%2BpAt3Lj7yq%2BDoY1ZLR1NY3M8K3pX5Yt6ukCfTzjFSXhpyUjnRVTYyIhQYpM4APpJppiCTw0UqGQ1qhNtms6fnf7rxpafApAgqdyAIXj5B5khIE3fizEs85uW8lGNNViX3U3%2Fe6UI3X8nmdI8crbcWPjDyRieyd1brYNYqPTEv2lSTcfE5XhH8bdrO5ac4CtGXwK8GxU7Dt8Zj35Vt5HmKERkuogBRG2uyMwC2rsIRcy2u1MwdCLFZYHJNqsvaJ%2BLKKIfdJBw6Jv%2BAimu7bjEBt%2FBv12fRBlOJt5k3Nm5z8LDpw%2BQ%2FUq%2FLBQsVdw5Q5mzdoyt2RU4JcRB%2FfHeN36tseonWsYu1TfQWB0HsFk326uwb644KKLhFhfr8HwvOzxjsGaMuIm8r949sj3S7xBCU5HknY9LpfeDRcdsDVKjY8ZlVXjFa8jbSmPeB4FyBZ%2FKpcKG8CIWNtJ0AI7RZpopH1K%2FHTjL7Of%2F5G5obqXTC05ROxYOvyCDS4Elu7DFqWeNDrZA8XAHXGDTAVe8K11wyudFP%2FI2d8LsqI8rpT9B8LiAq9JTMiB1MGWuD1YWyPYcOBAXi%2Fp2LpXROn0DBYLJlHCFnDfSedU8qsXIaaWUDKtC3Y1S8lwcW%2FsZIrc%2FLX%2BitrCLOMnRLHRCRGSqDyUlAe2tvM%2FnMyqn%2Bu%2FY3Ui0sTVg3Gh0zXIDR%2BWiig2eRzhq72DQ8MXr7u%2FzO%2BM%2FJe8AOho80bMKY65xz5a6dNP57Bdu7dawqfWWKTYq4y8eM1YHsrEx9xenoUvI9QuMM%2FOjL8GOrABX2h%2FXSlr%2BqQLpFjNCFtKMSNynaVmq8CGxSbUpCeJKL9bYdtJgUdSQmTGbSqv1fmsT8w8UoYd7zHTBM5r%2FT1IxAYgKCs7%2F%2B1TzfL1TShrhd7jYUQ2dcvkYfBpfi%2BhTwLzXShc5NVxnXxHTzIMcPeHDFjl3sENY7WHUvSBYECLpn1Z30fPqCkoH%2FOFRLgkzbhuBdJgKReEaykiG2d0BKlj%2FVzPF29t4AFL6thAkxmVYGU%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=5221be24f5c1eea1254e2151908f53912f37a4208de9b896bc8ed1860263c0ea"
+    },
+    "disclosed_date": 1562763480,
+    "report_url": "https://hackerone.com/reports/570133",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Install http-file-server: npm install -g http-file-server"
+        ],
+        [
+            2,
+            "Start the server with a specified path: ./http-file-server.js --path=/tmp/ --host=* --port=1234"
+        ],
+        [
+            3,
+            "Use a tool like Burp Suite to send a raw HTTP request with path traversal (e.g., GET /../ HTTP/1.1)"
+        ],
+        [
+            4,
+            "Observe the server responds with a directory listing of the parent directory"
+        ]
+    ],
+    "vuln_description": "The http-file-server module is vulnerable to path traversal, allowing an attacker to list files and subfolders outside the web root by manipulating the URL path with '../' sequences. This occurs because the server directly appends user-supplied path inputs to the web root without proper sanitization.",
+    "reason": "The vulnerability is straightforward to exploit once the tester understands the need to bypass URL normalization by sending raw HTTP requests. The attack does not involve complex interactions or state manipulation, and path traversal is a well-known vulnerability pattern.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

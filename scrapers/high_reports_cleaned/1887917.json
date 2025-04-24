@@ -1,0 +1,53 @@
+{
+    "reported_to": "IRCCloud",
+    "reported_by": "lotsofloops ",
+    "title": "XSS from Mastodon embeds",
+    "content": "\nBy default, the IRCCloud web client embeds Mastodon toots when a link to one is sent. Anyone can run a Mastodon server, and so the server from which toot data is fetched might be malicious. It is possible for an attacker to cause a web client user to execute arbitrary JavaScript in the context of the IRCCloud web client by tricking the web client into embedding a javascript: URL.\nPOC:\nEnsure \"Embed social media links\" is enabled in settings under \"Chat & embeds\" (I think this is on by default)\nSend a message with a link to https://sm4.ca/@a/123456789012345678 (the link itself 404s but IRCCloud only tries to use Mastodon API so it doesn't matter)\nWait a few seconds for the embed to load\nLook at your session cookie\nWhen the web client sees what looks like a toot URL, it tries to get canonical toot URL by making a query to [domain]/api/v1/statuses/[toot ID]. Here is what I serve at https://sm4.ca/api/v1/statuses/123456789012345678:\nCode 150 Bytes\n1{\n2  \"account\": {\n3    \"url\": \"https://sm4.ca/@a\"\n4  },\n5  \"url\": \"javascript:top.document.body.innerHTML = \\\"hi your cookie is \\\" + document.cookie;//\"\n6}\n(.account.url is only present because the web client ensures it matches the original link)\nThe web client creates an iframe using .url as the src, which in this case is a javascript: URL. The specified script runs in a seperate document that has access to its parent, and can access anything the parent can. The // is needed at the end since the web client appends /embed to the embed URL.\n(also apart from this particular issue, I don't think Mastodon embeds should be enabled unless \"Embed 3rd party image and video links\" is enabled since even when the Mastodon server isn't malicious your IP address is still leaked to an arbitrary server)\nImpact\nAn attacker who can send a message to an web-client-using IRCCloud user can obtain their session token and act as them. By sending a message with a malicious URL to a large channel an attacker could compromise many users at once.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 500,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1696838400,
+    "report_url": "https://hackerone.com/reports/1887917",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Ensure 'Embed social media links' is enabled in settings under 'Chat & embeds'"
+        ],
+        [
+            2,
+            "Send a message with a link to https://sm4.ca/@a/123456789012345678"
+        ],
+        [
+            3,
+            "Wait a few seconds for the embed to load"
+        ],
+        [
+            4,
+            "Look at your session cookie"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to execute arbitrary JavaScript in the context of the IRCCloud web client by tricking it into embedding a malicious Mastodon toot with a javascript: URL. This can lead to session token theft and account compromise.",
+    "reason": "The attack involves understanding Mastodon API interactions, iframe embedding behavior, and JavaScript URL execution. While the components are standard web technologies, the combination of exploiting Mastodon embeds with JavaScript URLs is non-obvious and requires specific knowledge of how IRCCloud processes these embeds.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "reason": "The vulnerability involves a Mastodon server serving malicious JavaScript via a Mastodon API endpoint, which is then embedded by the IRCCloud web client. The methodology described focuses on testing authentication and authorization boundaries within a single application by swapping user sessions and resource IDs. However, this vulnerability involves cross-application behavior (IRCCloud interacting with a malicious Mastodon server) and does not fit the described methodology, which is scoped to a single application's internal authN/authZ boundaries.",
+        "is_detectable": false
+    }
+}

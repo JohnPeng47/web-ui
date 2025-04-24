@@ -1,0 +1,40 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "n0n4me ",
+    "title": "[simplehttpserver] List any file in the folder by using path traversal.",
+    "content": "\nI would like to report Path Traversal in simplehttpserver. It allows to list any file in another folder of web root.\nModule\nmodule name: simplehttpserver\nversion: 0.1.1\nnpm page: https://www.npmjs.com/package/simplehttpserver\nModule Description\n'simpehttpserver' is an simple imitation of python's SimpleHTTPServer and is intended for testing, development and debugging purposes\nModule Stats\n[444] downloads in the last week\nVulnerability\nVulnerability Description\nsimpehttpserver is simply get the path name of url and add it to the web root. it means if you input ../, it will happy add it to web root and you can list the folder you choose. But the trick is web browser or curl are also to try rebuild the url containing ../. I used the burp to make a raw url and send it to server.\nSteps To Reproduce:\ninstall simplehttpserver\n$ npm install simplehttpserver -g\nstart program\n$ simplehttpserver ./\n<image_0>\nPatch\nfilter .. in the path name.\nSupporting Material/References:\nConfiguration I've used to find this vulnerability:\nkali linux 4.15.0\nnodejs v8.11.2\nnpm 6.1.0\nBurpsuite community\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\nImpact\nThis vulnerability allows malicious user to list file in the folder. This might expose vectors to attack system with Remote Code Execution, reveals files with usernames and passwords and many other possibilites.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Path Traversal"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/301/226/9181d7ba9afda13cd6c92603e513ddfb2718f249/1._POC_simplehttpserver.png?response-content-disposition=attachment%3B%20filename%3D%221._POC_simplehttpserver.png%22%3B%20filename%2A%3DUTF-8%27%271._POC_simplehttpserver.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ6AMDQAYR%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T162922Z&X-Amz-Expires=2154&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIC9emtKCGl3LVIFbG%2B3jG1Rjca5KmItcFh3oaiMbmZC8AiEAmXShTftowUsXM92tfhfsvvmExMoCpbL9KT%2BSNY2GU88qsgUILBADGgwwMTM2MTkyNzQ4NDkiDOOGJh%2BEIo99M2RCJSqPBbK2pvxlHqPEauvRPoQyNZEQ4H%2Ba3Ie9y3SnyX9pieR36RxoZfabXEtIVEswY3vTHkj8Q7ieAXXcw%2B%2BnNCX55dHODar%2BuWi9r5d7otgd5%2FycSJgB0TnzTx7T17HIwatlYixqZOoSAyALjjwuMctsmh3PUr6UFrVnAgGueCU8gB%2Fpx9Qa5LJIs3G7WohtI6Z73OaTe0END%2FV23TCcmXRSv0dzQbPJlP8PzaEYJ6Xj%2BMNTibIE0RAtDPVEdsf%2BClxdxEAXOlZ6fRNRJWtDeIX%2BIZqmriUmUKUI9s%2FaEkNZNdOPRlZK5sfBwaZsC4cSzo4XlNPYnFjj3n8bTPv7npYRChy3hnG%2FWUaE6vaNaZPYml1t%2FArdf6JWs57fYUICe3ZF%2Fg9FtxRcOmBi0dGUux8ndjYGOrIxJnuqy7rPnZgTEDkmTVtYpxVvZoynEcZWbW9deEEwcYWt3UWbPjgSkAKTomgzuTv4RvyGITDlw1nmDVaGYPlq%2FEDUbLt1X2p6HFl8wFqnwzn7ucCBKo9w8Aqs%2BjBpzUnC1s8jcpwNlQlh%2F8F2%2FY9%2B2UC8P50XjSFDUDsAOZq0%2FenZShNiXXbx63X6qyuetNLg9Bo%2BMvh9%2FGr0Q329kLQjQtEEG5uvbRAIKlaH1da%2BtK4BaY8wxlwV2ppJsoyP1L2qh%2FE%2BCWaad9bX%2FWsYIPeZhuKyT%2B82CuHX3LQrrth1LO%2Fz3j24kBtakVnEl4HiMsDaqH89ZSESUQV7MLz60YgQ%2FNxlQSsY9P2CoLQMGzoWllGCFi%2FpgG8Ukwluimqw5ZkXGLvUCqLIWkpXi%2Fju7Vciz2HcPGuuUjY6ps%2BrCn7jPdMNfo4bfScqzQor%2Fco4bc%2B4c%2BabcEp1dsRU464wkrqPvwY6sQEmavGxF5tFpwHLIGs0CBHEXWQKRETlXVPhRS57cU0g7YRRegT05iB%2F26LgQK%2FpskGmjOSO6gK9M52SrHIUy4KekILfOC0MhOEvvuTKqWbSegECfsIvWfKs0bDeu0SyBTKNJu03jrG73z64QHXDbaBmIAdYXxUJrjHhhP2vGwoJfI7r5R0Av7pfHKndshfjn5UM7Ufz7OYwl%2BkU6ihDFiTUm7YJ7G9ucTyDUZZquVak%2Bo4%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=c6c602dec534c268942d2e400c4a3c5d034adff1d375704e8995cf7a07e3cb19"
+    },
+    "disclosed_date": 1535618340,
+    "report_url": "https://hackerone.com/reports/357109",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Install simplehttpserver globally using npm: `npm install simplehttpserver -g`"
+        ],
+        [
+            2,
+            "Start the server with `simplehttpserver ./` and use Burp Suite or similar tool to send a raw HTTP request with path traversal (e.g., `GET /../ HTTP/1.1`)"
+        ]
+    ],
+    "vuln_description": "The simplehttpserver module is vulnerable to path traversal, allowing an attacker to list files outside the web root directory by manipulating the URL path with '../' sequences. This occurs because the server does not properly sanitize path inputs before processing them.",
+    "reason": "The vulnerability is straightforward to discover as it involves a common and well-known attack pattern (path traversal) against a simple server that lacks basic input sanitization. The attack requires no complex interactions or state manipulation, just direct path manipulation that is typically blocked by browsers but can be sent via raw HTTP requests.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

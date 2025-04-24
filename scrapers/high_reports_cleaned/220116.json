@@ -1,0 +1,38 @@
+{
+    "reported_to": "FormAssembly",
+    "reported_by": "pandaonair ",
+    "title": "SSLv3 Poodle Vulnerability",
+    "content": "\nHey there,\nI tested against POODLE MITM and enterprisedemo.formassembly.com is vulnerable, I simply went into terminal and used this command\n\"openssl s_client -connect enterprisedemo.formassembly.com:443 -ssl3\"\nPOC\nHow to fix: Disable SSLv3\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Violation of Secure Design Principles"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1543054920,
+    "report_url": "https://hackerone.com/reports/220116",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Open terminal and run the command: openssl s_client -connect enterprisedemo.formassembly.com:443 -ssl3"
+        ],
+        [
+            2,
+            "Observe the connection establishment, confirming SSLv3 is supported"
+        ]
+    ],
+    "vuln_description": "The target server (enterprisedemo.formassembly.com) supports the outdated SSLv3 protocol, making it vulnerable to the POODLE (Padding Oracle On Downgraded Legacy Encryption) attack. This allows a man-in-the-middle attacker to decrypt sensitive data by exploiting the protocol's weaknesses.",
+    "reason": "The vulnerability is straightforward to discover as it only requires running a single, well-documented command to check for SSLv3 support. There are no complex interactions, state manipulations, or novel logic involved.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

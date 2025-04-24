@@ -1,0 +1,46 @@
+{
+    "reported_to": "GitLab",
+    "reported_by": "sateeshn ",
+    "title": "Able to view hackerone reports attachments",
+    "content": "\nSummary\n(Hi team,\nI accidentally found this bug. While reading one of hackerone public report (https://hackerone.com/reports/446238) about gitlab, I found a link posted by gitlab member which is related to internal tracking of the report. I clicked that link (https://gitlab.com/gitlab-org/gitlab-foss/-/issues/54220) and found one of the attachment. I am able to view all the attachments by directly visiting the attachment domain.)\nSteps to reproduce\nOpen https://h1.sec.gitlab.net/a/ (you will able to view all the attachments) and copy any content key\nPaste key infront of https://h1.sec.gitlab.net/a/ (ex: https://h1.sec.gitlab.net/a/copied_key.jpg) (you will able to view attachment)\nTo view nonpublic hackerone report attachment, find the hackerone report key from the above link > copy and paste infront of https://h1.sec.gitlab.net/a/\nTry to view this hackerone report you will see access denied https://hackerone.com/reports/446237\nbut still you can able to view the report attachment by visiting https://h1.sec.gitlab.net/a/\u2588\u2588\u2588\u2588\u2588\nImpact\nAs attachments consist of researcher attached POC images and videos. So attacker can directly exploit by using these information.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": 1000,
+    "weaknesses": [
+        "Insecure Storage of Sensitive Information"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1657569600,
+    "report_url": "https://hackerone.com/reports/979787",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Open https://h1.sec.gitlab.net/a/ to view all attachments and copy a content key"
+        ],
+        [
+            2,
+            "Paste the key in front of the URL (e.g., https://h1.sec.gitlab.net/a/copied_key.jpg) to view the attachment"
+        ],
+        [
+            3,
+            "For non-public HackerOne report attachments, find the report key from the URL and paste it in front of the same domain"
+        ],
+        [
+            4,
+            "Access restricted attachments (e.g., https://h1.sec.gitlab.net/a/\u2588\u2588\u2588\u2588\u2588) even if the report itself is private (e.g., https://hackerone.com/reports/446237)"
+        ]
+    ],
+    "vuln_description": "This vulnerability allows unauthorized access to attachments from HackerOne reports, including those marked as non-public. By manipulating the URL structure of the attachment domain (h1.sec.gitlab.net/a/), an attacker can view sensitive proof-of-concept (POC) files without proper authorization.",
+    "reason": "The vulnerability involves a straightforward URL manipulation with no complex interactions or state manipulation. The discovery primarily relies on noticing the pattern in the attachment URLs and testing access to non-public reports, which is a common technique for information disclosure vulnerabilities.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "446237"
+}

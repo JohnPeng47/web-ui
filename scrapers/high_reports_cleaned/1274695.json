@@ -1,0 +1,61 @@
+{
+    "reported_to": "PortSwigger Web Security",
+    "reported_by": "mattaustin ",
+    "title": "RCE of Burp  Scanner / Crawler via Clickjacking ",
+    "content": "\nBurp Suite utilizes an embedded Chrome browser for crawling and scanning web applications. The Chrome instance is launched in headless mode, with remote debugging enabled via the remote-debugging websocket port instead of remote-debugging-pipe. As a result, a known XSS vulnerability in Chrome can be leveraged in combination with a JavaScript port sniffing and ClickJacking attack to compromise the WebSocket GUID for the remote debugging channel. Using the provided remote debugging APIs, it\u2019s possible to trigger a file download to the /Applications/Burp Suite Professional.app/Contents/ directory with a new user.vmoptions file. This will provide the -Xmx5m and -XX:OnOutOfMemoryError=open -a Calculator flags to JVM the next time that Burp Suite is launched. Accordingly, Burp Suite will quickly exhaust the available JVM memory and trigger the supplied OS command.\nBased on Google\u2019s security impact guidelines, this issue would typically be considered to have no security impact since Chrome requires additional flags to run (--remote-debugging and --headless) [1]. Additionally, the XSS vector used in this PoC has been public to Chrome since at least 2016 and reported in multiple tickets [2-6]. As a result, we are reporting this as a Burp Suite vulnerability since the named pipe transport could be utilized to mitigate this issue, which is supported by tools like puppeteer (e.g. --remote-debugging-pipe) [7].\nPOC:\nSee attached video.\nSteps to reproduce:\nTo confirm this issue, perform the following steps:\nDownload the attached \u2018burp.html\u2019 exploit, and host it on a web server (e.g. python -m http.server)\nLaunch an instance of Burp Suite, and start a new scan of the web server.\nOpen a Chrome browser and navigate to the hosted exploit page (e.g. http://127.0.0.1:8000/burp.html)\nObserve that a JavaScript port scanner is determining the randomized port listening for Chrome remote debugging. After the port is identified, a clickjacking payload will be rendered on the page.\nAfter clicking the \u2018CLICK ME!!!\u2019 button, restart Burp Suite and observe that the Calculator app has been launched.\nReferences:\n[1] https://chromium.googlesource.com/chromium/src/+/HEAD/docs/security/security-labels.md#TOC-Security_Impact-None\n[2] https://bugs.chromium.org/p/chromium/issues/detail?id=607939\n[3] https://bugs.chromium.org/p/chromium/issues/detail?id=618333\n[4] https://bugs.chromium.org/p/chromium/issues/detail?id=619414\n[5] https://bugs.chromium.org/p/chromium/issues/detail?id=775527\n[6] https://bugs.chromium.org/p/chromium/issues/detail?id=798163\n[7] https://github.com/puppeteer/puppeteer/blob/943477cc1eb4b129870142873b3554737d5ef252/src/node/PipeTransport.ts\nImpact\nAfter successful exploitation an attacker can gain control over victim's computer with the same permissions as the user running the scanner.\n\n",
+    "severity": [
+        7.3,
+        null
+    ],
+    "bounty": 3000,
+    "weaknesses": [
+        "Command Injection - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1696940640,
+    "report_url": "https://hackerone.com/reports/1274695",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Download the attached \u2018burp.html\u2019 exploit and host it on a web server (e.g., python -m http.server)"
+        ],
+        [
+            2,
+            "Launch an instance of Burp Suite and start a new scan of the web server"
+        ],
+        [
+            3,
+            "Open a Chrome browser and navigate to the hosted exploit page (e.g., http://127.0.0.1:8000/burp.html)"
+        ],
+        [
+            4,
+            "Observe that a JavaScript port scanner is determining the randomized port listening for Chrome remote debugging"
+        ],
+        [
+            5,
+            "After the port is identified, a clickjacking payload will be rendered on the page"
+        ],
+        [
+            6,
+            "Click the \u2018CLICK ME!!!\u2019 button, restart Burp Suite, and observe that the Calculator app has been launched"
+        ]
+    ],
+    "vuln_description": "Burp Suite's embedded Chrome browser, used for crawling and scanning, is vulnerable to a combination of XSS, port sniffing, and ClickJacking attacks. This allows an attacker to compromise the WebSocket GUID for the remote debugging channel, manipulate the JVM settings, and execute arbitrary commands with the same permissions as the user running Burp Suite.",
+    "reason": "The attack involves multiple components (XSS, port sniffing, ClickJacking, remote debugging API manipulation) and requires understanding subtle interactions between these components. Additionally, the attacker must manipulate complex application states (e.g., WebSocket GUID, JVM settings) and use novel logic not commonly found in other applications.",
+    "new_complexity": "VERY_HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "reason": "The vulnerability involves exploiting an XSS in Chrome's remote debugging feature combined with ClickJacking to compromise Burp Suite's embedded Chrome instance. This is not a standard authentication or authorization bypass within a single application's context, but rather a client-side attack leveraging browser vulnerabilities and application behavior. The proposed methodologies focus on server-side AuthN/AuthZ issues within a single application's scope, not client-side RCE via browser vulnerabilities.",
+        "is_detectable": false
+    }
+}

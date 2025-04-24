@@ -1,0 +1,48 @@
+{
+    "reported_to": "Starbucks",
+    "reported_by": "k3mlol ",
+    "title": "unuse domain still in using at wechat by Starbucks East China",
+    "content": "\nSummary:\nspcc.mobi is still using at wechat offical account by Starbucks East China. but this domain is on sale.\nDescription:\nI had reported this at report_id=433843\uff0cbu your gays had ignored, because they said the domain is unused.\nIn fact, spcc.mobi still having an interface using at wechat offical account by Starbucks East China\nwechat offical account name is \u661f\u5df4\u514b\u6c5f\u6d59\u6caa\nendponit request below:\nCode 720 Bytes\n1GET /v5/bind.html HTTP/1.1\n2Host: coupon.ec-starbucks.cn\n3User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5 Build/MOB31E; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/57.0.2987.132 MQQBrowser/6.2 TBS/044405 Mobile Safari/537.36 MMWEBID/157 MicroMessenger/6.7.3.1360(0x260703EC) NetType/WIFI Language/zh_CN Process/tools\n4Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,image/wxpic,image/sharpp,image/apng,image/tpg,*/*;q=0.8\n5Accept-Encoding: gzip, deflate\n6Accept-Language: zh-CN,en-US;q=0.8\n7Cookie: PHPSESSID=ip1f71qqak3kvakksu28bensjlapsh9a; Hm_lvt_b7c2e12efc764f8179148ddbece8211f=1545489448; Hm_lpvt_b7c2e12efc764f8179148ddbece8211f=1545489448\n8Connection: close\n9\nreponse is below:\nCode 446 Bytes\n1....\n2<script>\n3\t$(function(){\n4\t\t$.get('http://weixin.spcc.mobi/oauth/_jssdk.html',{url:location.href.split('#')[0]},function(data){\n5\t\t\t wx.config($.extend({\n6\t\t\t    debug: false,\n7\t\t\t    jsApiList: ['onMenuShareTimeline','onMenuShareAppMessage','onMenuShareQQ','onMenuShareWeibo','hideMenuItems','showMenuItems','hideOptionMenu','showOptionMenu',]\n8\t\t\t},data));\n9\t\t},'jsonp');\n10\t})\n11\t\n12\twx.ready(function () {\t\n13\t\twx.hideOptionMenu();\n14\t});\n15\n16</script>\n17....\nPlatform(s) Affected:\ncoupon.ec-starbucks.cn(Starbucks East China in using)\nSteps To Reproduce:\nplan A(easy)\nrequest the endpoint I offer\nyou will find the reponse contain \"weixin.spcc.mobi\"\nvisit the weixin.spcc.mobi you will find that this domain is on sale\nplan B(complicated)\nregister a wechat account(download the app(name is wechat) from app store or play store)\nsearch wechat offical account \u661f\u5df4\u514b\u6c5f\u6d59\u6caa then follow\nclick my card\nyou can find the requests as the I had mention.\nRecommendations for fix\nremove the the unused weixin.spcc.mobi endpoint\nImpact\nthe domain is on sale, if attacker buy this domain, can full control this domain for(Phishing Attack and etc.)\n\n",
+    "severity": [
+        9.7,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1548217020,
+    "report_url": "https://hackerone.com/reports/471265",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Request the endpoint provided in the report (coupon.ec-starbucks.cn/v5/bind.html) and observe the response containing 'weixin.spcc.mobi'."
+        ],
+        [
+            2,
+            "Visit weixin.spcc.mobi to confirm the domain is on sale, indicating potential security risks if acquired by an attacker."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves a domain (weixin.spcc.mobi) that is still in use by Starbucks East China's WeChat official account but is listed for sale. If an attacker purchases this domain, they could potentially conduct phishing attacks or other malicious activities by controlling the domain's content.",
+    "reason": "The discovery involves straightforward steps of inspecting network requests and verifying domain ownership status, without complex interactions or state manipulations.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "433843",
+    "idor_detectable": false,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": false
+    }
+}

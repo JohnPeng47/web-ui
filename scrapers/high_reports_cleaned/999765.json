@@ -1,0 +1,58 @@
+{
+    "reported_to": "Acronis",
+    "reported_by": "sayaanalam ",
+    "title": "Ticket Trick at https://account.acronis.com",
+    "content": "\nSummary\nHello dear team,\nI found a serious issue in Acronis\nThis vulnerability is called ticket trick vulnerability which comes under critical category. Which can allow me to login on websites like atlassian,github,clouflare,choopa,..etc on behalf of support_mobility@acronis.com .\nSteps To Reproduce\nLets take an example to get your github account.\nAs Github send account register verification mails from noreply@github.com\nI registered an account on acronis with same email.\nNow your support system creates ticket of emails sent to support_mobility@acronis.com .\nSo I registered an account on github and logged into my acronis account with email noreply@github.com .\nAs Acronis allowed me to see support tickets without email verification , so I was able to see support tickets easily created by noreply@acronis.com .\nOn support ticket there was an email verification link sent to noreply@github.com .\nIn this way I was able to takeover many account registered with support_mobility@acronis.com and many internal accounts that can be accessed with only @acronis.com\nPOC\nI was able to register a github account on your email address :-\n<image_0>\nResources about this vulnerability:-\nhttps://hackerone.com/reports/498964\nhttps://medium.com/intigriti/how-i-hacked-hundreds-of-companies-through-their-helpdesk-b7680ddc2d4c\nImpact\nCritical Email Takeover\nTicket Trick\nThanks for reading my report.\nBest Regards\nSayaan Alam\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 750,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/MMixF6CEX2xLunkKM6gwq5z5?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_2020-10-06_at_7.03.17_PM.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_2020-10-06_at_7.03.17_PM.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQU77E3XUA%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T221550Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQDPCoAYgsIERYpguPRQbYSmo%2FyLMaIZCjjqO8Y5%2Fy6izgIhANbqty9aD7%2Fv0ospHw02Nmq6ZW4HNwQ1vLjmHcF93XpVKrEFCB4QAxoMMDEzNjE5Mjc0ODQ5IgzK8l1Vf00tjKot4isqjgU8Y7FuJmmZhhTcAIl%2F6SqUP6sVua9dW7pQC4yUCqPkr9ihIV6IjEfQffVOB0LDHxaLg1Y6UdiluHeS5E1rokagRimPnm29WFsmG31U84Znez4vMmf8JHybFRI9zD5pI%2BbQYBJ1EyEeEWLCAjiufZE%2FNukR53KRKI2JW7N5YEGnUY8eIUFoNrzDc2RhkEHj6aSUrRZSdP2o8ZdWyO6Olha80vjOe2RjsWzT5c7OglIMoec0Xib8%2BPwshTBi5LnSCMsVPp%2FZgLqdwYUNBVZvPiijnW83rEqoUiOX20%2FZNoN3TRtdgwoBPqtd%2BC6C2vj1gCvHc55w9ddxC7C6H79g3Ha%2BStdTtySaKxly6JTUMCki5tCiRjwNLuWiVBulK7K2d9c8p%2FCit%2B%2Bsfz3NhDOoXSOymD17xIhocZMaQbviiQLVxyVgKZgd3xyZLHWDvHXlqJ85u86w2XAsEzJeZ3O%2Fz0AFacIjJI6PWpKcaYN8aCUHzpLS1SF8F3vvDiKMmieFqxeZkfmq0NxkckftqsFYxKDDkYLjK5ZuXgc2KLkHma9qLOfpIWNZwKQHV1C6BSJeg3bePEZk3nxyzFopL3Q6wa73yNjIYSkzVOqeLR4u%2FJPEcRBdQpnRFOzDrPkUGfcluWAVr0iPXFS2smXxeUSPEPwii8rMCPnBk9y6875CcV7xBIjEys1ViXm%2B8%2FaW%2FZJAQz7Tlj%2FdNZH8fkgRKztX8aV8i%2FstygAUuEkcaIb5UUmD0bfKrBWspHslUnRY6%2Fpm6BorFUdXqdqDVC8Qs9NE6vb4QK6L8utRdd0HHWV5Dbd0adKq9xW84F5yONg4WYtDj6pUcQ9LbqSa%2F7zu1kXPF9XcNrqVZmqYKqdxnuWx8D4wkKWMvwY6sAETysGUMeDZH8cG495cm1d43TfmQfIPVyXuSLUEhA588Hlqhw70Gf5Sro93JGJgLKeKHvyMlqSbeUWdPcDk0Pd3TiFYSAsVVF8%2BISd5EhiLPAWJhmTgjHEBHW1ZtubZzZBQU6b%2FjbaWEBhbUrPmw89w73IlrewK28TzdCwEo2Zz108BSICjSMEKZURTiVVikQGUjYuAxKPX6vX5V5F7%2FJmGtAGDBlAzEerEFjolHZryMA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=2ac26eb5fb9331ee7fcfd0ac9424f2ade246db73950d6bd240e03880b8fa3c7f"
+    },
+    "disclosed_date": 1605017640,
+    "report_url": "https://hackerone.com/reports/999765",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Register an account on Acronis with the email noreply@github.com."
+        ],
+        [
+            2,
+            "Log into the Acronis account and access the support tickets without email verification."
+        ],
+        [
+            3,
+            "Find the email verification link in the support tickets sent to noreply@github.com."
+        ],
+        [
+            4,
+            "Use the verification link to take over accounts registered with support_mobility@acronis.com."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to register an account on Acronis using an email address that matches the sender of verification emails (e.g., noreply@github.com). By doing so, the attacker can access support tickets sent to support_mobility@acronis.com without email verification, including verification links, enabling account takeover.",
+    "reason": "The attack involves understanding the interaction between email verification processes and support ticket systems, but the steps are straightforward once the initial insight is gained. The vulnerability relies on the non-obvious interaction between registering with a specific email and accessing unverified support tickets.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "498964",
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

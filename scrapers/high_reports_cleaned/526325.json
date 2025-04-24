@@ -1,0 +1,52 @@
+{
+    "reported_to": "GitLab",
+    "reported_by": "ryhmnlfj ",
+    "title": "Stored XSS in Wiki pages",
+    "content": "\nSummary\nI found Stored XSS using Wiki-specific Hierarchical link Markdown in Wiki pages.\nSteps to reproduce\nSign in to GitLab.\nOpen a Project page that you have permission to edit Wiki pages.\nOpen Wiki page.\nClick \"New page\" button.\nFill out \"Page slug\" form with javascript:.\nClick \"Create page\" button.\n<image_0>\nClick \"Create page\" button.\nClick \"XSS\" link in created page.\nWhat is the current bug behavior?\n<image_1>\nDescription In Detail:\nGitLab application converts the Markdown string .alert(1); to the href attribute javascript:alert(1);.\nFurthermore, Wiki-specific Markdown string . is converted to javascript: in this case.\nWhat is the expected correct behavior?\nThe dangerous href attribute javascript:alert(1); should be filtered.\nA safe HTTP/HTTPS link should be rendered instead.\nAdditional Informations:\nIn the above case, another Wiki-specific Markdown string .. is also converted to javascript:.\nUsing Title string such as javascript:STRING_EXPECTED_REMOVING also reproduces this vulnerability.\nFor example, if a wiki page is created with a disguised Title string JavaScript::SubClassName.function_name, GitLab application converts Wiki-specific Markdown string . to JavaScript: in such page.\nIt seems that GitLab application recognizes scheme-like string JavaScript: and removes the rest of Title string :SubClassName.function_name.\nAn attacker can use various schemes by replacing Title string javascript: to other scheme. (e.g. data:, vbscript:, and so on.)\nOutput of checks\nThis bug happens on the official Docker installation of GitLab Enterprise Edition 11.9.4-ee.\nResults of GitLab environment info\nOutput of sudo gitlab-rake gitlab:env:info:\nCode 847 Bytes\n1System information\n2System:\t\t\n3Proxy:\t\tno\n4Current User:\tgit\n5Using RVM:\tno\n6Ruby Version:\t2.5.3p105\n7Gem Version:\t2.7.6\n8Bundler Version:1.16.6\n9Rake Version:\t12.3.2\n10Redis Version:\t3.2.12\n11Git Version:\t2.18.1\n12Sidekiq Version:5.2.5\n13Go Version:\tunknown\n14\n15GitLab information\n16Version:\t11.9.4-ee\n17Revision:\t55be7f0\n18Directory:\t/opt/gitlab/embedded/service/gitlab-rails\n19DB Adapter:\tpostgresql\n20DB Version:\t9.6.11\n21URL:\t\thttp://gitlab.example.com\n22HTTP Clone URL:\thttp://gitlab.example.com/some-group/some-project.git\n23SSH Clone URL:\tgit@gitlab.example.com:some-group/some-project.git\n24Elasticsearch:\tno\n25Geo:\t\tno\n26Using LDAP:\tno\n27Using Omniauth:\tyes\n28Omniauth Providers: \n29\n30GitLab Shell\n31Version:\t8.7.1\n32Repository storage paths:\n33- default: \t/var/opt/gitlab/git-data/repositories\n34GitLab Shell path:\t\t/opt/gitlab/embedded/service/gitlab-shell\n35Git:\t\t/opt/gitlab/embedded/bin/git\nImpact\nIf wiki pages created by using this vulnerability are visible to everyone (Wiki Visibility setting is set to \"Everyone With Access\") in \"Public\" project, there is a possibility that a considerable number of GitLab users and visitors click a malicious link.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/462/086/ca5972f9cb710657a5662225c776f4b935fcf84c/CreatePage.png?response-content-disposition=attachment%3B%20filename%3D%22CreatePage.png%22%3B%20filename%2A%3DUTF-8%27%27CreatePage.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQZOV47FIN%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T033908Z&X-Amz-Expires=1874&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELb%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQCgYKWDKCX9IkJ%2Fn%2F%2FR%2BUGjbHCmZaMH6hXJVxORmsuhSQIhAO99hWiP2CeVp8L5RCXc8YnApZJjS3A60bVJjaDGhHgoKrIFCB8QAxoMMDEzNjE5Mjc0ODQ5IgwOEJOClSL%2BzacuBiMqjwWdKdMgeHdJxBO3DgkzddWGAByaiIqk53B4wcVd10nR9PckZaCyq7%2Fu%2BLrHSwQJJE%2FO48%2BI88fNzPkuK9xU4B1R%2FPFNb%2BpAt3Lj7yq%2BDoY1ZLR1NY3M8K3pX5Yt6ukCfTzjFSXhpyUjnRVTYyIhQYpM4APpJppiCTw0UqGQ1qhNtms6fnf7rxpafApAgqdyAIXj5B5khIE3fizEs85uW8lGNNViX3U3%2Fe6UI3X8nmdI8crbcWPjDyRieyd1brYNYqPTEv2lSTcfE5XhH8bdrO5ac4CtGXwK8GxU7Dt8Zj35Vt5HmKERkuogBRG2uyMwC2rsIRcy2u1MwdCLFZYHJNqsvaJ%2BLKKIfdJBw6Jv%2BAimu7bjEBt%2FBv12fRBlOJt5k3Nm5z8LDpw%2BQ%2FUq%2FLBQsVdw5Q5mzdoyt2RU4JcRB%2FfHeN36tseonWsYu1TfQWB0HsFk326uwb644KKLhFhfr8HwvOzxjsGaMuIm8r949sj3S7xBCU5HknY9LpfeDRcdsDVKjY8ZlVXjFa8jbSmPeB4FyBZ%2FKpcKG8CIWNtJ0AI7RZpopH1K%2FHTjL7Of%2F5G5obqXTC05ROxYOvyCDS4Elu7DFqWeNDrZA8XAHXGDTAVe8K11wyudFP%2FI2d8LsqI8rpT9B8LiAq9JTMiB1MGWuD1YWyPYcOBAXi%2Fp2LpXROn0DBYLJlHCFnDfSedU8qsXIaaWUDKtC3Y1S8lwcW%2FsZIrc%2FLX%2BitrCLOMnRLHRCRGSqDyUlAe2tvM%2FnMyqn%2Bu%2FY3Ui0sTVg3Gh0zXIDR%2BWiig2eRzhq72DQ8MXr7u%2FzO%2BM%2FJe8AOho80bMKY65xz5a6dNP57Bdu7dawqfWWKTYq4y8eM1YHsrEx9xenoUvI9QuMM%2FOjL8GOrABX2h%2FXSlr%2BqQLpFjNCFtKMSNynaVmq8CGxSbUpCeJKL9bYdtJgUdSQmTGbSqv1fmsT8w8UoYd7zHTBM5r%2FT1IxAYgKCs7%2F%2B1TzfL1TShrhd7jYUQ2dcvkYfBpfi%2BhTwLzXShc5NVxnXxHTzIMcPeHDFjl3sENY7WHUvSBYECLpn1Z30fPqCkoH%2FOFRLgkzbhuBdJgKReEaykiG2d0BKlj%2FVzPF29t4AFL6thAkxmVYGU%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=724028ebf917ca4a2fca79d299f72fdb319a4676f29d062f2f660257463f450a",
+        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/462/087/9dd57220bbcbe63042309517d194119268f954c0/Result_Firefox.png?response-content-disposition=attachment%3B%20filename%3D%22Result_Firefox.png%22%3B%20filename%2A%3DUTF-8%27%27Result_Firefox.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQZOV47FIN%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T033908Z&X-Amz-Expires=1874&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELb%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQCgYKWDKCX9IkJ%2Fn%2F%2FR%2BUGjbHCmZaMH6hXJVxORmsuhSQIhAO99hWiP2CeVp8L5RCXc8YnApZJjS3A60bVJjaDGhHgoKrIFCB8QAxoMMDEzNjE5Mjc0ODQ5IgwOEJOClSL%2BzacuBiMqjwWdKdMgeHdJxBO3DgkzddWGAByaiIqk53B4wcVd10nR9PckZaCyq7%2Fu%2BLrHSwQJJE%2FO48%2BI88fNzPkuK9xU4B1R%2FPFNb%2BpAt3Lj7yq%2BDoY1ZLR1NY3M8K3pX5Yt6ukCfTzjFSXhpyUjnRVTYyIhQYpM4APpJppiCTw0UqGQ1qhNtms6fnf7rxpafApAgqdyAIXj5B5khIE3fizEs85uW8lGNNViX3U3%2Fe6UI3X8nmdI8crbcWPjDyRieyd1brYNYqPTEv2lSTcfE5XhH8bdrO5ac4CtGXwK8GxU7Dt8Zj35Vt5HmKERkuogBRG2uyMwC2rsIRcy2u1MwdCLFZYHJNqsvaJ%2BLKKIfdJBw6Jv%2BAimu7bjEBt%2FBv12fRBlOJt5k3Nm5z8LDpw%2BQ%2FUq%2FLBQsVdw5Q5mzdoyt2RU4JcRB%2FfHeN36tseonWsYu1TfQWB0HsFk326uwb644KKLhFhfr8HwvOzxjsGaMuIm8r949sj3S7xBCU5HknY9LpfeDRcdsDVKjY8ZlVXjFa8jbSmPeB4FyBZ%2FKpcKG8CIWNtJ0AI7RZpopH1K%2FHTjL7Of%2F5G5obqXTC05ROxYOvyCDS4Elu7DFqWeNDrZA8XAHXGDTAVe8K11wyudFP%2FI2d8LsqI8rpT9B8LiAq9JTMiB1MGWuD1YWyPYcOBAXi%2Fp2LpXROn0DBYLJlHCFnDfSedU8qsXIaaWUDKtC3Y1S8lwcW%2FsZIrc%2FLX%2BitrCLOMnRLHRCRGSqDyUlAe2tvM%2FnMyqn%2Bu%2FY3Ui0sTVg3Gh0zXIDR%2BWiig2eRzhq72DQ8MXr7u%2FzO%2BM%2FJe8AOho80bMKY65xz5a6dNP57Bdu7dawqfWWKTYq4y8eM1YHsrEx9xenoUvI9QuMM%2FOjL8GOrABX2h%2FXSlr%2BqQLpFjNCFtKMSNynaVmq8CGxSbUpCeJKL9bYdtJgUdSQmTGbSqv1fmsT8w8UoYd7zHTBM5r%2FT1IxAYgKCs7%2F%2B1TzfL1TShrhd7jYUQ2dcvkYfBpfi%2BhTwLzXShc5NVxnXxHTzIMcPeHDFjl3sENY7WHUvSBYECLpn1Z30fPqCkoH%2FOFRLgkzbhuBdJgKReEaykiG2d0BKlj%2FVzPF29t4AFL6thAkxmVYGU%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=31255ff208fc15904715caedbfd5a4db7845c66c255ed0eeb3f493aa041dcbb1"
+    },
+    "disclosed_date": 1567438200,
+    "report_url": "https://hackerone.com/reports/526325",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Sign in to GitLab and open a Project page with Wiki edit permissions"
+        ],
+        [
+            2,
+            "Create a new Wiki page with a slug containing 'javascript:' and save it"
+        ],
+        [
+            3,
+            "Click the created link to trigger the XSS payload"
+        ]
+    ],
+    "vuln_description": "Stored XSS vulnerability in GitLab Wiki pages where hierarchical link Markdown processing improperly converts certain strings into dangerous javascript: links without proper sanitization, allowing execution of arbitrary JavaScript when clicked.",
+    "reason": "The vulnerability requires understanding of both Wiki-specific Markdown processing and URL scheme handling, but follows predictable patterns once the Markdown conversion behavior is observed. The attack vector is straightforward with no complex state manipulation required.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "reason": "The vulnerability involves stored XSS via Wiki page creation, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, whereas this XSS vulnerability stems from improper input sanitization in Wiki page creation and rendering. The detection method does not cover XSS vulnerabilities as it is designed for AuthN/AuthZ testing.",
+        "is_detectable": false
+    }
+}

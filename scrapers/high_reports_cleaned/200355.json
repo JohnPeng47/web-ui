@@ -1,0 +1,44 @@
+{
+    "reported_to": "Zomato",
+    "reported_by": "madrobot ",
+    "title": "MailPoet Newsletters <= 2.7.2 - Authenticated Reflected Cross-Site Scripting (XSS)",
+    "content": "\nHello Team\nAbstract:-\nA Cross-Site Scripting vulnerability was found in the MailPoet Newsletters plugin. This issue allows an attacker to perform a wide variety of actions, such as stealing Administrators' session tokens, or performing arbitrary actions on their behalf. In order to exploit this issue, the attacker has to lure/force a logged on WordPress Administrator into opening a URL provided by an attacker.\nIntroduction:-\nThe MailPoet Newsletters plugin allows a WordPress administrator to create newsletters, automated emails, post notifications and autoresponders. A Cross-Site Scripting vulnerability was found in the MailPoet Newsletters plugin. This issue allows an attacker to perform a wide variety of actions, such as stealing Administrators' session tokens, or performing arbitrary actions on their behalf. In order to exploit this issue, the attacker has to lure/force a logged on WordPress Administrator into opening a URL provided by an attacker.\nProof of concept:-\nHave an authenticated admin visit the URL:-\nhttps://business-blog.zomato.com//?wysija-page=1&controller=subscribers&action=wysija_outter&encodedForm=eyJmb3JtIjoiUHduIiwiYWZ0ZXJfd2lkZ2V0IjoiPHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4ifQ==\nThe encodedForm parameter is the base64 encoded string:\n{\"form\":\"Pwn\",\"after_widget\":\"<script>alert('XSS)</script>\"}\nA pop-up box should appear, meaning the JavaScript contained in the request_id request parameter was executed by the browser.\n<image_0>\nFix:-\nThis issue is resolved in MailPoet Newsletters version 2.7.3.\nRegards,\nSanthosh\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Generic"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/154/227/0fe1d796653ea08dbe86e61bb89efd787c9e1322/zomato_xss.png?response-content-disposition=attachment%3B%20filename%3D%22zomato_xss.png%22%3B%20filename%2A%3DUTF-8%27%27zomato_xss.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQTGHAQXX7%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T211554Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCICd8XsbK%2FlZJzGcmtiEcnnLjGMBQniTSBGv1IEGcDT07AiEA8HVG7Omh8FNM%2B35%2Bg%2FvktQbyv9levLhRYMpyvZeO1aUqsQUIMxADGgwwMTM2MTkyNzQ4NDkiDBFBMAHJ46Cv1STgqSqOBfIZyU0VJvrhygeWOToAnHKROmI%2FU9bw7opIUnsbXL7QqRUbI%2BnQvnnTfrRGvaZdwCw8GN7HGRDjq8%2FBUL46A5vrrGROs6L7soQawxxDDsmf6Rv%2FFuQw3g3qtyKnd5YPTxO0NHcAq1JHN5KPKNfwvIUx2S4HUKKU2cMQI9M%2BLK9p4qwauTQmZVg94jepr85U5MFTxuu%2F6gqBQNkOMP7QVq9IsUnL4VHz%2FxwauXf4GCYSZO8cmitwuUez9uUFuBFWO9sDsNM3%2BRVxDiJ76LVniHf5gs%2Bis97ekOkVExXYvF5qnQjMgmy%2Fs1JhX7plXQSvBpPNBo7Lv0JBYy4UqCv55vuTNIPfdv5B58zwEGvsqlk6l2E8CEKUj1dvbvYkb5eF3LDdqG6ipEPUY0Sp3URWrzuiDqR8Aukd5Ik9Sif%2BFkyt%2F0KJXjZEzF8T7Cd6q6C2z6pb466IFVjKxKkfQcnL2VsdqKDUxKUhZxqS3Eb7UX9qeZRsSXEqw1N9p3Lu%2FZ82ZvoapUWHVYlyFFCnyG1HK9L%2B2GBvX9JXGjljEuNZY2V71XmeVMJ2iwJICZRcynlk6jXZe9H%2F248WSdec2%2FGkCC2exafK9A20pHCE%2B9kcaD7glu7x0cQ9n8YDEroJ60eJLw%2BDd69CMs8JxPizREJlLXYNKQHK6SVRMsjwexGlEtLH4KvZTSvDYzeEOn3Wspae2J1C0UJMc7OGrNtcn11lnybTKxlCEXLzBY4KBhhBvJB%2Fuu10FUfMvWNlBXgJt7kPOXhBABEOIPcdgTt2N9CIbUr0ljM5ZNUm%2Bu3i2u726dsZ7L0MflQ41dkU37APVafUA182TZb9gugydzA%2BrpqARVGnXXWpyaWT3UdBBN6TZjCO9pC%2FBjqxAYwBDKvdrVwATdctOaAgv%2BSd5FYmwghHExktGdYvo5eDCHf1e2ZxIXJGFqCy77XDJ7QzssvcAgyhtFw8UpCMCCNeJTYx5cbNcAzhDOH3N65DzmgJcSIqnT7jMK%2FfHHyFKZ7IL0n1vjDLFCCqTso0YvJnHG8DWDZG2ui74w%2B2%2FPkShC1ok1hDAJIP%2F5LsNkbv5FuDrkqNnOPKT1SYA3oVP9nSg%2FGV5rbiZxgF6YiPV0sf5Q%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=3cb3bc30c88292805a98c35fc706dead224be8b5565e753c7e9720975563c924"
+    },
+    "disclosed_date": 1497736680,
+    "report_url": "https://hackerone.com/reports/200355",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Have an authenticated admin visit the URL: https://business-blog.zomato.com//?wysija-page=1&controller=subscribers&action=wysija_outter&encodedForm=eyJmb3JtIjoiUHduIiwiYWZ0ZXJfd2lkZ2V0IjoiPHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4ifQ=="
+        ],
+        [
+            2,
+            "The encodedForm parameter is the base64 encoded string: {\"form\":\"Pwn\",\"after_widget\":\"<script>alert('XSS)</script>\"}"
+        ]
+    ],
+    "vuln_description": "A Cross-Site Scripting vulnerability in the MailPoet Newsletters plugin allows an attacker to perform actions such as stealing session tokens or performing arbitrary actions on behalf of a logged-in WordPress Administrator by luring them into opening a malicious URL.",
+    "reason": "The vulnerability involves a straightforward reflected XSS attack where the payload is delivered via a URL parameter. The attack does not require complex interactions or state manipulation, and the exploitation method is a common pattern in XSS vulnerabilities.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The vulnerability involves a reflected XSS attack that requires an authenticated admin to visit a malicious URL. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, but does not specifically address reflected XSS vulnerabilities which require user interaction with crafted input. Therefore, the described methodology would not detect this vulnerability.",
+        "is_detectable": false
+    }
+}

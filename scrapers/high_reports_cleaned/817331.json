@@ -1,0 +1,38 @@
+{
+    "reported_to": "MTN Group",
+    "reported_by": "harris0ft ",
+    "title": "Weak/Auto Fill Password",
+    "content": "\nSummary:\nhttps://mtnc-selfservice.mtncameroon.net\nThe following url has admin/admin as user name and password\nSteps To Reproduce:\nopen the url in any browser of your choice\nenter admin as user name and password\nbooom .... full asset to super admin full panel\nSupporting Material/References:\nSee attached screenshots\nImpact\nAttacker can make major configuration changes to the services.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Insufficiently Protected Credentials"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1662178980,
+    "report_url": "https://hackerone.com/reports/817331",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Open the URL https://mtnc-selfservice.mtncameroon.net in any browser"
+        ],
+        [
+            2,
+            "Enter 'admin' as both username and password"
+        ]
+    ],
+    "vuln_description": "The URL https://mtnc-selfservice.mtncameroon.net has a default username and password set to 'admin'/'admin', allowing anyone to gain super admin access without authentication.",
+    "reason": "The vulnerability involves no complex interactions or multiple components. It is a straightforward case of default credentials being left in place, which is a common and easily identifiable issue.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

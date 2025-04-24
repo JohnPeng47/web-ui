@@ -1,0 +1,64 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "cablej_dds ",
+    "title": "\u2588\u2588\u2588\u2588\u2588 - Pre-generation of VIEWSTATE allows CAC bypass",
+    "content": "\nSummary:\nAs of today, \u2588\u2588\u2588 is back online (https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588).\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 allows users to check a box labeled Require CAC for Pick-up. This option requires users to present their CAC in order to download files. As explained by \u2588\u2588\u2588:\nChoosing this option, however, does add a significant degree of assurance that the recipient is in fact who they claim to be by verifying their identity via the CAC.\nHowever, this security control can be bypassed, allowing downloading files without CAC authentication.\n(Note that a CAC bypass was reported in #429000. Since then, \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 has deployed a patch for that report, although a different bypass is possible.)\nDescription:\nThe pickupfiles.aspx page is where recipients of both non-CAC and CAC-enforced files visit to retrieve files. If the file is CAC enforced, the user is redirected to CACPickup.aspx. If not, the user must present their password in order to download the file.\nFor requests that are not CAC enforced, the server generates a MAC enabled VIEWSTATE parameter containing the package ID. This package ID in the viewstate is then checked against the package ID in the request to ensure that the user is downloading the correct file. As the viewstate is MAC enabled, it is not possible to modify the parameter without the server throwing an error.\nThe challenge lies in obtaining a valid viewstate for a CAC-enabled file. The server does not return a viewstate for CAC files, instead immediately redirecting to the CAC pickup page. However, this can be bypassed by pre-generating a viewstate for possible future request IDS (these are incremental). Then, when an attacker wishes to bypass CAC authentication, they can simply lookup the pre-generated viewstate and make a valid request to download the file.\nImpact\nThis allows bypass of CAC authentication for picking up files, a significant security control on \u2588\u2588\u2588\u2588\u2588\u2588\u2588.\nStep-by-step Reproduction Instructions\nSend a test file on https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 to see the most recent package ID.\nUsing a tool such as Burp Intruder, enumerate package IDs in the request to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/safe/pickupfiles.aspx?id=package_id, beginning at the most recent package ID. A large number of viewstates can be computed in advance. For testing, I computed a couple hundred.\nAs a normal user, send a file transfer to yourself, enforcing the CAC required option.\nVisiting the pickupfiles.aspx link in the file transfer email, observe that CAC authentication is enforced.\nLook up the package ID in your table of pre-generated requests. Make a request with the associated viewstate and validation parameter (e.g. in Burp Suite, right click -> show response in browser) and enter the sent password.\nObserve that the validation of the viewstate parameter passes, and you may now download the file.\nSuggested Mitigation/Remediation Actions\nPrevent users from downloading files from pickupfiles.aspx when the file is CAC-enabled.\nImpact\n.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Authentication - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1589229840,
+    "report_url": "https://hackerone.com/reports/496219",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Send a test file to observe the most recent package ID."
+        ],
+        [
+            2,
+            "Enumerate package IDs using a tool like Burp Intruder to pre-generate VIEWSTATEs."
+        ],
+        [
+            3,
+            "Send a file transfer to yourself with CAC required."
+        ],
+        [
+            4,
+            "Visit the pickupfiles.aspx link and observe CAC enforcement."
+        ],
+        [
+            5,
+            "Use a pre-generated VIEWSTATE to make a request with the package ID and password."
+        ],
+        [
+            6,
+            "Download the file without CAC authentication."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows bypassing CAC authentication by pre-generating VIEWSTATEs for incremental package IDs, enabling unauthorized file downloads without presenting a CAC.",
+    "reason": "The attack involves understanding the VIEWSTATE generation mechanism, pre-generating valid VIEWSTATEs for future IDs, and leveraging these to bypass CAC checks. While the components are straightforward, the need to pre-generate and store VIEWSTATEs adds complexity.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "429000",
+    "idor_detectable": false,
+    "authnz_byppass_detectable": true,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": true
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": true
+    }
+}

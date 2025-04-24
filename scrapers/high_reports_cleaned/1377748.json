@@ -1,0 +1,38 @@
+{
+    "reported_to": "Evernote",
+    "reported_by": "hulkvision_ ",
+    "title": "2 click Remote Code execution in Evernote Android",
+    "content": "\nThis vulnerability is similar to my previous reported vulnerability #1362313 , in here also weakness is path transversal vulnerability which helps me to acheive code execution but the root cause is different.\nsome part of this app is written in java and some parts are written in react native.\nIn evernote we can share notes and notebooks with others. In notes we can also add attachments and there is option to rename the added attachment. When renaming i founded that special characters are not restricted,for example file uploaded with name libjnigraphics.so can be renamed to ../../../lib-1/libjnigraphics.so and when the attachment is downloaded it is downloaded with filename ../../../lib-1/libjnigraphics.so.\nThe evernote android app also does not sanitize the received filename, so when user clicks on attachment,instead of attachment getting downloaded in /data/data/com.evernote/cache/preview/:UUID/ this directory it is downloaded into /data/data/com.evernote/lib-1/libjnigraphics.so which results into remote code execution.\n#1362313 report vulnerability root cause was that the app was not sanatizing the value of _display_name from the provider of received content:// uri that resulted into ACE.\nThis report's root cause is that app is extracting attachment filename from content-disposition header eg:- content-disposition: attachment; filename=\"../../../lib-1/libjnigraphics.so\" and the evernote app is not sanatizing the received filename from the response header.\nThe attachment download logic is written in react-native and the source file is compiled into hermes javascript bytecode, so i am not able to show the exact vulnerable code like i did in my last report.\nThe conclusion i reached was that fixing this report #1362313 bug will not fix this vulnerability so i am writing a new report.\nSteps To Reproduce:\n[add details for how we can reproduce the issue]\nAdd the native-library poc file to a note libjnigraphics.so (F1489257)\nRename the attachment to ../../../lib-1/libjnigraphics.\nInvite the victim to your note.\nStep 2 is needed,i don't know why Shareable link feature is not working on evernote android app without sending an invitation\nClick on 3 dots > copy internal link > copy web link OR copy app link(which is android deeplink and can be triggred from websites)\nSend link to victim and open the link (1st click)\nClick on attachment when note is opened (2nd click)\nClose the evernote app and open it again.\nFrom adb shell run nc 127.0.0.1 6666\nuse physical device because i have provided the arm64 architecture native library\nImpact\nremote code execution in evernote android app with 2 clicks.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 50,
+    "weaknesses": [
+        "Path Traversal: '.../...//'"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1648576440,
+    "report_url": "https://hackerone.com/reports/1377748",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "MOBILE",
+    "steps": [
+        [
+            1,
+            "Add a native-library poc file (libjnigraphics.so) to a note and rename the attachment to ../../../lib-1/libjnigraphics.so"
+        ],
+        [
+            2,
+            "Invite the victim to your note, send the link, and have them click on the attachment (2 clicks total)"
+        ]
+    ],
+    "vuln_description": "The vulnerability is a path traversal issue in Evernote Android that allows remote code execution. By manipulating the filename of an attachment to include directory traversal sequences (../../../), an attacker can force the app to write the file to an unintended location (lib-1 directory) instead of the intended cache directory. When the app is reopened, the malicious library is loaded, executing arbitrary code.",
+    "reason": "The attack requires understanding of both path traversal vulnerabilities and native library loading mechanisms in Android. The researcher had to identify that filenames weren't sanitized when extracted from content-disposition headers, and then determine how to leverage this to achieve code execution by placing a library in a directory where it would be loaded. The attack also requires specific knowledge about Evernote's hybrid Java/React Native architecture.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "1362313"
+}

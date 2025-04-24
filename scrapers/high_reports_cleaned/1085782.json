@@ -1,0 +1,52 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "nidens ",
+    "title": "\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 IDOR leads to disclosure of PHI/PII",
+    "content": "\nSummary:\n\u2588\u2588\u2588\u2588 is designed in a way where there is a vulnerable endpoint that allows a non-medical user to view the \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 records of people who are not \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588s of the sponsor.\nDescription:\nI am currently an Active Duty Airman and this vulnerability does require CAC authentication. When browsing the \u2588\u2588\u2588\u2588\u2588\u2588 website with a proxy I noticed that there is a function that allows sponsors (in this case me) to view their \u2588\u2588\u2588\u2588\u2588s shot records in PDF form. After viewing my \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588's shot records, I noticed this functionality lives on the following endpoint https://\u2588\u2588\u2588\u2588=[id]. If you increment or decrement the \u2588\u2588\u2588\u2588\u2588\u2588 parameter by 1 the application will throw an HTTP Status Code 302 and redirect you back to the \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 endpoint which is a good security practice. The issue with this is, that with the 302 redirect the PDF of the incremented ID will be attached in the body of the 302 requests, you are able to extract this when using a proxy like Burp Suite. Obviously, this is concerning because this would allow a user to pull any shot record without being associated with medical.\nStep-by-step Reproduction Instructions\nI have redacted the screenshots as best as possible. The screenshots are of my information, the example for validation.\nNavigate to \u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588 and login with CAC\nOnce you are authenticated browse to this endpoint, https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 and you should be redirected to \u2588\u2588\u2588\u2588\u2588 but the 302 redirect will have the PDF information of my daughter (no actual \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 information is loaded).\nOn the 302 redirects, you can utilize the function Copy to File in burp suite to save this request as a pdf and you will have a PDF version of my \u2588\u2588\u2588\u2588\u2588\u2588 shot record.\nPlease review the attached screenshot, I did not pull use my \u2588\u2588\u2588\u2588\u2588 information for this screenshot because I have authorized to view her information. This request shows me decrementing the \u2588\u2588\u2588\u2588\u2588\u2588 by 1 and showing the PDF is attached to the 302 redirects.\n\u2588\u2588\u2588\u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\nEnforce the same permissions that are used for the \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 and \u2588\u2588\u2588\u2588 functions of the application.\nI am more than willing to speak with the developers about this if they want to e-mail my NIPR email. I took care to not go any further than just validating that the vulnerability exists and immediately stopped and started to write this report.\nImpact\nPHI/PII disclosure which includes, \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Insecure Direct Object Reference (IDOR)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1613693820,
+    "report_url": "https://hackerone.com/reports/1085782",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "steps": [
+        [
+            1,
+            "Navigate to the target website and log in with CAC authentication."
+        ],
+        [
+            2,
+            "Access the endpoint https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 and observe the 302 redirect response containing the PDF data in the body."
+        ],
+        [
+            3,
+            "Use a proxy like Burp Suite to intercept the response and save the PDF file from the 302 redirect."
+        ]
+    ],
+    "vuln_description": "The vulnerability is an Insecure Direct Object Reference (IDOR) that allows a non-medical user to view Protected Health Information (PHI) and Personally Identifiable Information (PII) by manipulating the ID parameter in a URL. Although the application correctly redirects with a 302 status code, the PDF data is still included in the response body, which can be extracted using a proxy.",
+    "reason": "The attack involves manipulating a URL parameter to access unauthorized data, which is a straightforward technique. The subtlety lies in the fact that the PDF data is included in the 302 redirect response, which is not immediately obvious but can be discovered with basic proxy usage.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": true,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": false
+    }
+}

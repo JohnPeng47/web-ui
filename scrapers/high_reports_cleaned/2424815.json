@@ -1,0 +1,40 @@
+{
+    "reported_to": "PortSwigger Web Security",
+    "reported_by": "0xd0m7 ",
+    "title": "[portswigger.net] Path Traversal al /cms/audioitems",
+    "content": "\nPrelude.\nI wasn't going to report it, I thought it was your laboratory but after my first analysis this seems real.\nDescription\nIt's detected a path traversal as root user that allows to remote attackers see internal files as root.\nhttps://portswigger.net/cms/audioitems//etc/networks\nhttps://portswigger.net/cms/audioitems//etc/shadow\n<image_0>\nImpact\nAbilit to read internal files as root\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Path Traversal"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/5vzu6t3b5p3oahu88ox2ausy49wf?response-content-disposition=attachment%3B%20filename%3D%222.png%22%3B%20filename%2A%3DUTF-8%27%272.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQXJGZE35P%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T220010Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIHgDmyUlQ%2FZK1l2L7iuvNkmZ7SLGftPBhWAealaAQAZlAiEA3zyUKwX8U3Oxw5ml9tl5CoO7146tV3otxKWiQkeRSRoquwUI8%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDM1SaM1Z3Bftvp8y1yqPBSYYeDFlqPSz5ki%2BPhBiT7aDVwSsdNfp4d%2B1joy3GFboMUknHP5bR7LxpHLuxkOQLISX6Zi9X%2BCGU3pQDK2UmKLyF1ayfJ2r98NygFesgyd6cUi%2BnteQuq8fOyGvX9ghO2Ts6IBhdkr89ed647eGImtSYYl%2B6jIjueli0McQe%2F0LYObrcGGmEEY7Gmls7B55%2BAlt2ccKlBFxLCvzFqUGgjynIJRzmOFWxz8%2Bbe69SzSdNO66IZcGtwnenwYNwkuv4tlBmKx3DKCK27XYu8BcjpBdZvbtymPDeHTnldI5jfOzNhtpUtUZH8ijLb3hzLdnSd2pjVWFvcagH%2FVT7B%2BIdgnHIbfcEVbmRPEUCwp35Cj3Cm5ii0ryH381dplOHxwpmvEa%2BW8D8ycCvWsnSfCJDvfIFTHBYo9yZbJ%2BUZJWLUgdvF22%2Fh%2B%2BO%2BTOlmrh1y0Ks0aEjeXGjBBWbcDK7YmYPGTELVsi%2F2NzDGpC1zgQ9ql6Kq2BmujZaNi5PwgP8dwcCsN3zxB6JacVBBfjrwTKIBoUfKe2CKLHjfNszj3Qyp6diObgnjQ%2BB52hKfV%2FjeG5EM%2F3E59u9omvgnXJTAPWytiZTrD%2FOjo%2Fkm%2FXMMXp6%2B%2BcQQaMW9v0ppD%2FGh4VwC6yBulCsm69UkmGA57VYG2oD%2FpvS9Kj5ZRDZrayzC7ueA6YsfHn%2BiSiS7xq6FZLWa0crNgqDRMIOkFRKnzy7Qnyxr%2FFF96G1PYuCIOn4UhT3LENU8ddcjG68JxauRrLPoIa3zvF2Tx3F6xx53pHNinBwu6wxMZ7swFU4XRs835hmgHZ2T%2FWNdq%2BlUyBglTKG7qI8RN6X4ZT2tCQZ9IRnapo0v8RQNCCMmfml%2F7n%2ByHmtmowsbmGvwY6sQEGVJiOMAooI7F4F4M2dEwBh3xeLW5pnTadh%2B8nLCSHOQl4%2Ftm007SR3tO0UpKSk9BR8EJZC430uxa2uW1iczcVDnq0EegsyUwTHVXap6%2FiquYtG4QxE2nrvmChd6zxL9%2FgAbwmVppVu2tn2RVoUiFV5bbk591A%2Bnh689%2BRfcIABaNuGfz%2BeHg2OYoIP%2B5EnI5yFklD%2BFjZVTb3ijarNhTGjahK9mNgd8mdwrit%2FI5b%2Fy4%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=7b99067af5e47a2d044bf43a1804092872da9b617095f9e7ac6dc56000c0a931"
+    },
+    "disclosed_date": 1712256660,
+    "report_url": "https://hackerone.com/reports/2424815",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to https://portswigger.net/cms/audioitems//etc/networks or https://portswigger.net/cms/audioitems//etc/shadow"
+        ],
+        [
+            2,
+            "Observe the contents of the internal files (e.g., /etc/networks or /etc/shadow) being displayed"
+        ]
+    ],
+    "vuln_description": "A path traversal vulnerability allows remote attackers to read internal files as root by manipulating the URL to access restricted directories (e.g., /etc/networks or /etc/shadow).",
+    "reason": "The vulnerability involves a straightforward manipulation of the URL path to access restricted files. There are no complex interactions, state manipulations, or novel logic required. The attack is simple and relies on a common misconfiguration.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

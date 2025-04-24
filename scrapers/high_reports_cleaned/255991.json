@@ -1,0 +1,42 @@
+{
+    "reported_to": "Brave Software",
+    "reported_by": "mattaustin ",
+    "title": "URL Spoof / Brave Shield Bypass",
+    "content": "\nSummary:\nImproper URL parsing in Brave allows an attacker to spoof the hostname shield settings are applied to.\nPOC:\nhttps://youtu.be/yz99T_Trfuc\nProducts affected:\nBrave (browser-laptop) 0.18.14 rev ad92d02\nSteps To Reproduce:\nBrowse to http://brave.com\nClick on the Shield icon and toggle the shield from \"up\" to \"down\"\nBrowse to http://brave.com%60x.code-fu.org/ and notice the shield is down for this domain as well.\nI believe this could be used enable flash by spoofing one of the \"whitelisted\" domains.\nThe renderer will load the code-fu.org domain, however I believe when the URL is later parsed in node it uses (non standards compliant?) url.parse. This leads to some confusion:\nCode 230 Bytes\n1> url.parse('http://brave.com%60x.code-fu.org/')\n2Url {\n3  href: 'http://brave.com/%60x.code-fu.org/'\n4  protocol: 'http:',\n5  host: 'brave.com',\n6  hostname: 'brave.com',\n7  pathname: '%60x.code-fu.org/',\n8  path: '%60x.code-fu.org/',\n9}\nvs\nCode 213 Bytes\n1> new url.URL('http://brave.com%60x.code-fu.org/')\n2URL {\n3  href: 'http://brave.com`x.code-fu.org/',\n4  protocol: 'http:',\n5  host: 'brave.com`x.code-fu.org',\n6  hostname: 'brave.com`x.code-fu.org',\n7  pathname: '/',\n8}\nNode now (7+) supports the the WHATWG through the url.URL . This seems to be the same / compatible with the way the render / chrome parses the URL.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 200,
+    "weaknesses": [
+        "Use of Inherently Dangerous Function"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1504230480,
+    "report_url": "https://hackerone.com/reports/255991",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Browse to http://brave.com"
+        ],
+        [
+            2,
+            "Click on the Shield icon and toggle the shield from 'up' to 'down'"
+        ],
+        [
+            3,
+            "Browse to http://brave.com%60x.code-fu.org/ and notice the shield is down for this domain as well."
+        ]
+    ],
+    "vuln_description": "Improper URL parsing in Brave allows an attacker to spoof the hostname shield settings are applied to. By using a specially crafted URL with an encoded backtick, the browser incorrectly parses the hostname, causing shield settings from one domain (brave.com) to be applied to another domain (code-fu.org). This could potentially enable flash or other restricted content by spoofing whitelisted domains.",
+    "reason": "The vulnerability requires understanding of URL parsing inconsistencies between different parsers (Node's url.parse vs WHATWG URL standard) and how Brave applies shield settings based on parsed URLs. The attack involves a subtle interaction between URL encoding and hostname parsing, but doesn't require maintaining complex application state or novel logic.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

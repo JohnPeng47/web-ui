@@ -1,0 +1,53 @@
+{
+    "reported_to": "Automattic",
+    "reported_by": "bugra ",
+    "title": "Site-wide CSRF at Atavist ",
+    "content": "\nSummary:\nHi team,\nI have a Atavist Magazine account. And there are no CSRF tokens on account settings.\nFor example ;\n<image_0>\n<image_1>\nCancelling subscription : https://magazine.atavist.com/cms/ajax/cancel_subscription.php?product_id=com.theatavist.atavist.subscription.membership - this endpoint sends an email with We'll Miss You title, but it doesn't cancel the subscription. (this is not related to CSRF, there is a CSRF but the endpoint is weird :-D)\nI didn't want to create report for each endpoint, because this is a site-wide issue. I think you can add a header for root fix.\nImpact\nSite-wide CSRF\nThanks,\nBugra\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/jKtpSJyRbLfgHq7Tqa7UQHJH?response-content-disposition=attachment%3B%20filename%3D%22req.PNG%22%3B%20filename%2A%3DUTF-8%27%27req.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQU77E3XUA%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T221246Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQDPCoAYgsIERYpguPRQbYSmo%2FyLMaIZCjjqO8Y5%2Fy6izgIhANbqty9aD7%2Fv0ospHw02Nmq6ZW4HNwQ1vLjmHcF93XpVKrEFCB4QAxoMMDEzNjE5Mjc0ODQ5IgzK8l1Vf00tjKot4isqjgU8Y7FuJmmZhhTcAIl%2F6SqUP6sVua9dW7pQC4yUCqPkr9ihIV6IjEfQffVOB0LDHxaLg1Y6UdiluHeS5E1rokagRimPnm29WFsmG31U84Znez4vMmf8JHybFRI9zD5pI%2BbQYBJ1EyEeEWLCAjiufZE%2FNukR53KRKI2JW7N5YEGnUY8eIUFoNrzDc2RhkEHj6aSUrRZSdP2o8ZdWyO6Olha80vjOe2RjsWzT5c7OglIMoec0Xib8%2BPwshTBi5LnSCMsVPp%2FZgLqdwYUNBVZvPiijnW83rEqoUiOX20%2FZNoN3TRtdgwoBPqtd%2BC6C2vj1gCvHc55w9ddxC7C6H79g3Ha%2BStdTtySaKxly6JTUMCki5tCiRjwNLuWiVBulK7K2d9c8p%2FCit%2B%2Bsfz3NhDOoXSOymD17xIhocZMaQbviiQLVxyVgKZgd3xyZLHWDvHXlqJ85u86w2XAsEzJeZ3O%2Fz0AFacIjJI6PWpKcaYN8aCUHzpLS1SF8F3vvDiKMmieFqxeZkfmq0NxkckftqsFYxKDDkYLjK5ZuXgc2KLkHma9qLOfpIWNZwKQHV1C6BSJeg3bePEZk3nxyzFopL3Q6wa73yNjIYSkzVOqeLR4u%2FJPEcRBdQpnRFOzDrPkUGfcluWAVr0iPXFS2smXxeUSPEPwii8rMCPnBk9y6875CcV7xBIjEys1ViXm%2B8%2FaW%2FZJAQz7Tlj%2FdNZH8fkgRKztX8aV8i%2FstygAUuEkcaIb5UUmD0bfKrBWspHslUnRY6%2Fpm6BorFUdXqdqDVC8Qs9NE6vb4QK6L8utRdd0HHWV5Dbd0adKq9xW84F5yONg4WYtDj6pUcQ9LbqSa%2F7zu1kXPF9XcNrqVZmqYKqdxnuWx8D4wkKWMvwY6sAETysGUMeDZH8cG495cm1d43TfmQfIPVyXuSLUEhA588Hlqhw70Gf5Sro93JGJgLKeKHvyMlqSbeUWdPcDk0Pd3TiFYSAsVVF8%2BISd5EhiLPAWJhmTgjHEBHW1ZtubZzZBQU6b%2FjbaWEBhbUrPmw89w73IlrewK28TzdCwEo2Zz108BSICjSMEKZURTiVVikQGUjYuAxKPX6vX5V5F7%2FJmGtAGDBlAzEerEFjolHZryMA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=89b859c35733ee234dd19d0c1038cef7efe7ba811943b3db3f14fe6850533d2d",
+        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/gMAbiciVMoYe1XPzC6D9S4mX?response-content-disposition=attachment%3B%20filename%3D%22reqcard.PNG%22%3B%20filename%2A%3DUTF-8%27%27reqcard.PNG&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQU77E3XUA%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T221246Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQDPCoAYgsIERYpguPRQbYSmo%2FyLMaIZCjjqO8Y5%2Fy6izgIhANbqty9aD7%2Fv0ospHw02Nmq6ZW4HNwQ1vLjmHcF93XpVKrEFCB4QAxoMMDEzNjE5Mjc0ODQ5IgzK8l1Vf00tjKot4isqjgU8Y7FuJmmZhhTcAIl%2F6SqUP6sVua9dW7pQC4yUCqPkr9ihIV6IjEfQffVOB0LDHxaLg1Y6UdiluHeS5E1rokagRimPnm29WFsmG31U84Znez4vMmf8JHybFRI9zD5pI%2BbQYBJ1EyEeEWLCAjiufZE%2FNukR53KRKI2JW7N5YEGnUY8eIUFoNrzDc2RhkEHj6aSUrRZSdP2o8ZdWyO6Olha80vjOe2RjsWzT5c7OglIMoec0Xib8%2BPwshTBi5LnSCMsVPp%2FZgLqdwYUNBVZvPiijnW83rEqoUiOX20%2FZNoN3TRtdgwoBPqtd%2BC6C2vj1gCvHc55w9ddxC7C6H79g3Ha%2BStdTtySaKxly6JTUMCki5tCiRjwNLuWiVBulK7K2d9c8p%2FCit%2B%2Bsfz3NhDOoXSOymD17xIhocZMaQbviiQLVxyVgKZgd3xyZLHWDvHXlqJ85u86w2XAsEzJeZ3O%2Fz0AFacIjJI6PWpKcaYN8aCUHzpLS1SF8F3vvDiKMmieFqxeZkfmq0NxkckftqsFYxKDDkYLjK5ZuXgc2KLkHma9qLOfpIWNZwKQHV1C6BSJeg3bePEZk3nxyzFopL3Q6wa73yNjIYSkzVOqeLR4u%2FJPEcRBdQpnRFOzDrPkUGfcluWAVr0iPXFS2smXxeUSPEPwii8rMCPnBk9y6875CcV7xBIjEys1ViXm%2B8%2FaW%2FZJAQz7Tlj%2FdNZH8fkgRKztX8aV8i%2FstygAUuEkcaIb5UUmD0bfKrBWspHslUnRY6%2Fpm6BorFUdXqdqDVC8Qs9NE6vb4QK6L8utRdd0HHWV5Dbd0adKq9xW84F5yONg4WYtDj6pUcQ9LbqSa%2F7zu1kXPF9XcNrqVZmqYKqdxnuWx8D4wkKWMvwY6sAETysGUMeDZH8cG495cm1d43TfmQfIPVyXuSLUEhA588Hlqhw70Gf5Sro93JGJgLKeKHvyMlqSbeUWdPcDk0Pd3TiFYSAsVVF8%2BISd5EhiLPAWJhmTgjHEBHW1ZtubZzZBQU6b%2FjbaWEBhbUrPmw89w73IlrewK28TzdCwEo2Zz108BSICjSMEKZURTiVVikQGUjYuAxKPX6vX5V5F7%2FJmGtAGDBlAzEerEFjolHZryMA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=5607cab13326873f95e3f2d75bfd8bd53fa4f6bb2dbf59f511ab4877e15a8b6d"
+    },
+    "disclosed_date": 1605727260,
+    "report_url": "https://hackerone.com/reports/951292",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Log in to an Atavist Magazine account."
+        ],
+        [
+            2,
+            "Navigate to the account settings or subscription cancellation page."
+        ],
+        [
+            3,
+            "Observe the absence of CSRF tokens in the requests."
+        ],
+        [
+            4,
+            "Craft a malicious request or form that mimics the account settings or subscription cancellation request."
+        ],
+        [
+            5,
+            "Trick a victim into executing the malicious request (e.g., via a phishing email or malicious site)."
+        ]
+    ],
+    "vuln_description": "The Atavist Magazine website is vulnerable to site-wide CSRF (Cross-Site Request Forgery) attacks due to the absence of CSRF tokens in account settings and subscription cancellation endpoints. This allows an attacker to perform unauthorized actions on behalf of a victim user, such as modifying account settings or canceling subscriptions, without their consent.",
+    "reason": "The vulnerability is straightforward to discover as it involves checking for the absence of CSRF tokens in common endpoints, which is a basic security practice. The attack does not require complex interactions or manipulation of application states.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

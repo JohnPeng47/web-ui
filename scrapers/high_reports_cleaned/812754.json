@@ -1,0 +1,38 @@
+{
+    "reported_to": "Nextcloud",
+    "reported_by": "makerlab ",
+    "title": "Denial of Service by requesting to reset a password",
+    "content": "\nDescription:\nI believe that this is posible due to the brute force protection that makes all request last for 30 seconds which in this case is using all the PHP workers avalible in the pool, so the only way to defend yourself is setting up a limit or having a lot of resources.\nHow to reproduce:\nIn the Nextcloud login screen click the \"Forgot password?\" button and then type something in the textbox (can be anything)\nThen open the developers tools and go to the network tab\nHold the \"enter\" key after pressing the reset password button and in the network tab you will see a lot of request being made\nWith just 1000 request I managed to make the demo server \"https://demo2.nextcloud.com/\" not respond for 1 hour\nImpact\nThe attacker could make an entire nextcloud installation or even the entire server where it is hosted not respond for a very long time\nAlso, this attack can be made by almost anyone\n\n",
+    "severity": [
+        7.5,
+        null
+    ],
+    "bounty": 250,
+    "weaknesses": [
+        "Uncontrolled Resource Consumption"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1611623520,
+    "report_url": "https://hackerone.com/reports/812754",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the Nextcloud login screen and click the 'Forgot password?' button."
+        ],
+        [
+            2,
+            "Type any text in the input field, open developer tools to the network tab, hold the 'Enter' key after pressing the reset password button, and observe the flood of requests."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to perform a Denial of Service (DoS) attack by exploiting the password reset functionality. By sending a large number of reset requests, the attacker can exhaust PHP workers due to the brute force protection mechanism that enforces a 30-second delay per request, rendering the server unresponsive.",
+    "reason": "The attack is straightforward, involving only the password reset feature and observing the server's response to repeated requests. It does not require complex interactions or understanding of multiple components.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

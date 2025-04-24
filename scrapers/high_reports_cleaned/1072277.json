@@ -1,0 +1,40 @@
+{
+    "reported_to": "Logitech",
+    "reported_by": "hammodmt ",
+    "title": "Host Header injection in oslo.io (using X-Forwarded-For header) leading to email spoofing",
+    "content": "\nHello team\nI hope it will be a happy year for you and for me \ud83d\ude07\nSummary:\nI found Host Header injection in oslo.io\n\nI tried to use it to show the security effect on users And I found this\nSteps To Reproduce:\n<image_0>\nSo we will use X-Forwarded-Host: example.com\nImpact\nMany things can be done, including deceiving the user and referring to something else or a login page and stealing their account\nThere is a lot of information about it here :\nhttps://portswigger.net/web-security/host-header\n\n",
+    "severity": [
+        7.1,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/0gnrii3i0d9dj7s0julox9sx4jir?response-content-disposition=attachment%3B%20filename%3D%22osla1.png%22%3B%20filename%2A%3DUTF-8%27%27osla1.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ7TQC2VD6%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T214157Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQCYDwKXk5Alyw%2B6%2BX%2BlVXoBMf4XmCPCsq5EwXvZPLtgCQIgT%2FrZMWp7e3s3CKA3loVFAhhhXbt%2FTaX3S0aqtxP3aDUqsgUIGxADGgwwMTM2MTkyNzQ4NDkiDJScpqQPy3cyUv4zlyqPBSr6nPfyuLwmw45DDK%2FT5zEBZh27hxvsarhrpINU7peZkWTDJ50AHazM%2F7FxK7Ggbk3RO4v9b%2Fix7IHG7vKHYIp88zvv8SDdB5SbN4eAJ3l7oDs6TIKgdD6a1o%2B0Wn95z7oyrL9ybb4BDUp3oG4wGCgJDrKxhE3OrsoQyW38yGPJ2q%2BaEtAom%2BCR6Lzozu48pKS8JZ5yhVqDdBREfR00o8uT%2B5LxjYK0z7B9DbJzaXGzucqw918zU%2FcNCGf7x4tA1P0rPoNKvDyGlNvFahv7K86Rbfy8Vhg2e8mt4eCuTCgHRnFHNIdJ4W0CtKoxmV%2FTDHkGmVhq92S4OO9dH28ap3nBPbEXhl2tot7zwI32u%2FNyqSbaYHwdfgL5oDPoTiacSeyzEgiSvhCZzUJiPdGoyG5kZ%2FmyHekN%2BCsc2J9nlvGoywZD2uNvs1cQ6q4%2BTbf9mNPWgrTwaYHxTv7FtRExNL8NCq5OzhPAgevBkUjclKjv8DXCHvUzOLikoOrfIZ5MacV9MmCficRevsX13eP1qpkmHRsxWKvpIlRLIR1alhcx83TV7ylzbHbnzRCjcw1tfyNndJ3c5pcHuU3pmrax8ETBLR9ZIU1eObuDhaInzn8JM0vK9e7jiA3hC35si1e6UFoAiysum4sB7FTJd6DGETvrjcWf4barRplQ%2BcN%2FH9EFxsBh49gRR52os49H%2FSWCssFiomopx4UKeke9y7rFiLVp9QGrBSs5sttQ%2B6FmN9TlFnBRLiigGw95vpjQh3iLWIbdWrzq2cG8u42hpA7pcVrnVbbdX6mAP4UK6rC733Ld%2BB0y2yXi7CMbs7PxFxEdw8%2BfcFruwatDvlSZIsAMlYPgkWxvOJy7cemU6JKKcNYwr86LvwY6sQHdH5QGntFNiTGshX463%2BxLxFkye8af3crmCWRzuYrGwuWkalhbznlubOWpcKblYQgmaSubcFkeLHGhe1Nj97yMCKMd%2FuF9D79i9ovcfO0PJY%2FFHBNP6Pc8mFsTaDfsId48c8crslltNM1gtyhNOdqzzEPMM2RlA6enaLl4hUC8DbCZRSCvSPmgCVVYknlzADOx92QDmt3EZ%2Fop6BdkyzmOh04tfZ0YAXvLvRyz%2BTchNRk%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=27891936d02999d17f14b12f31ad1581de9b5c3ba7a8690693fd5f6745202008"
+    },
+    "disclosed_date": 1610072280,
+    "report_url": "https://hackerone.com/reports/1072277",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "steps": [
+        [
+            1,
+            "Identify the target website oslo.io and determine it is vulnerable to Host Header injection."
+        ],
+        [
+            2,
+            "Use the X-Forwarded-Host header to manipulate the Host Header, e.g., X-Forwarded-Host: example.com."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves Host Header injection in oslo.io via the X-Forwarded-Host header, which can lead to email spoofing and other malicious activities such as redirecting users to fake login pages to steal credentials.",
+    "reason": "The attack is straightforward and involves a common web vulnerability (Host Header injection) with a well-known exploitation method (using X-Forwarded-Host). There are no complex interactions or novel logic required.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

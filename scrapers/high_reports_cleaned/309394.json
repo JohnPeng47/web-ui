@@ -1,0 +1,52 @@
+{
+    "reported_to": "Node.js third-party modules",
+    "reported_by": "bl4de ",
+    "title": "[anywhere] An iframe element with url to malicious HTML file (with eg. JavaScript malware) can be used as filename and served via anywhere",
+    "content": "\nHi Guys,\nanywhere allows to embed HTML in file names, which (in certain conditions) might lead to execute malicious JavaScript.\nModule:\nRunning static file server anywhere.\nhttps://www.npmjs.com/package/anywhere\nDescription\nTo embed malicious <script> tag with JavaScript code to execute, / character is necessary.\nIn all operating systems, / is not allowed as a character used in file name. This means there is very few option to craft an attack using file name as injection point.\nSteps To Reproduce:\nHowever, if attacker wants to, one can still use some tricks and change one of the filenames into something like following example:\nCode 35 Bytes\n1\"><iframe src=\"malware_frame.html\">\nThen, HTML file with following content have to be saved in the same directory as file with the name changed:\nCode 232 Bytes\n1<html>\n2\n3<head>\n4    <meta charset=\"utf8\" />\n5    <title>Frame embeded with malware :P</title>\n6</head>\n7\n8<body>\n9    <p>iframe element with malicious code</p>\n10    <script type=\"text/javascript\" src=\"malware.js\"></script>\n11</body>\n12\n13</html>\nAn src attribute value I've used here is just for PoC purpose, this can be any external url.\nOn my local machine, malware.js has following content:\nCode 38 Bytes\n1alert('Uh oh, I am very bad malware!')\nNow, if you run anywhere in directory where both file with filename changed and malware_frame.html are saved:\nCode 124 Bytes\n1$ ./node_modules/anywhere/bin/anywhere -p 8080\n2Running at http://192.168.1.1:8080/\n3Also running at https://192.168.1.1:8081/\nand open http://127.0.0.1:8080 in the browser, you can see JavaScript from malware.js is executed:\n<image_0>\nSupporting Material/References:\nConfiguration I've used to find this vulnerability:\nmacOS HighSierra 10.13.3\nnode 8.9.3\nnpm 5.5.1\ncurl 7.54.0\nWrap up\nI hope this report will help to keep Node ecosystem more safe. If you have any questions about any details of this finding, please let me know in comment.\nThank you\nRegards,\nRafal 'bl4de' Janicki\nImpact\nExploitation of this vulnerability in the wild might be hard, however it's not impossible and it depends only on attacker's skills to get into directory on the server, where anywhere is used to serve static content.\n\n",
+    "severity": [
+        9.6,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {
+        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/257/400/4ad79e07ebfe740d475a2ba1bc133f5d0efd6452/1.png?response-content-disposition=attachment%3B%20filename%3D%221.png%22%3B%20filename%2A%3DUTF-8%27%271.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ4GU2M7YZ%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T175308Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMn%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQDIYlR0t7EfYRa%2B15XNsA53ckYJeOxtlQXx05Sey1hUnwIhAK1hz7%2BFGyKFtKE%2F8GyKgS1qUeYCvod4l%2BfchsetUEtWKrIFCDIQAxoMMDEzNjE5Mjc0ODQ5Igzw54GGSEptQf6v9hwqjwXLKs0RM7aKkbyjL8InLMdu4DjLXX%2FsAu%2BlcPBm6o20QLDrvTOdHlsIBYMWBWCD4Th6osOPXbCgiG9wETg3UoF14UDrntIEXzyS52tEshZe4ttzb72486vIifi0oI%2FHnsbYRaj%2BR9C8j3LDwvGxIvJxHHBdiowbIQ0L7Glkx1ynAN5qdcLcdArJF6xNnCqHxn0A%2FMk3%2Boas6oHfuwew%2BubfuyujCnvYyY%2B8NQu0C1kQ3f8nkUWiG93Zi6muAmw0Iuu0frm2yvE8EVCQelomPpWzyYVCCP%2FOM5L1dWnAuJUiyvr5%2FTNJHBmPQVBr6yDzOxhvI%2FqPlCuIJRaTZDlJUd%2BenQAORMTRBlQqAFO8HwtfkF0w8dxivIrc74Ojxk7XN44NxA3zKERD9nXScfoABueYkB3LGBSnRksv6nrCssnXVKsM02O0JmEgZXFbFWJGl6lU4RsVkeuLlTENssv42vIbYbSIc1wJ4%2FUO%2FPcIZjPT0vfNc2o2dYmjyKfdBCx6rlC9mMlutT7rTEYg5YP%2F0maqcpRqQ9CRW4s0%2BYEATnu7ZVv8elLswaNMUQ8j7Yit8J7BEOjAfUjW%2BiwI6AC5rUmwNa718MDun4lP5a5hIdY%2Fc%2FCb0HVBveL73I1YwdUMEiIm%2BJrBs8JApyUAgpLqoxMrnsCrTp8%2FevdxkYcn2%2B%2BEBQg5cxE%2FiZVxCwml4rml1NBhoOI%2FZ9w3ALIYwllGShwYSeFvPyWOgpD5dG8rWZJLePnxI7mE4v6hC2OjETx068oH8qzzxDYctKOs3xb35HmX7%2Fh2myFytO8dHDsYjO8OMj4KgP37DGKru1IZQ3olENpZ1Rp8iXA%2FYJPiRKOpy9YRMpxTk7qhx21S2P3mZsPFMPHVkL8GOrABUv4iH%2Ffl4RlBDus1tIDq5ZlbGnf3lGQqoQ7MBGmHjtvl7gik21VW0n%2Fxs1n1HJVnF3NcPVBGBoVrE71UVzDNo78N5o28t0S6XDcpKh3KNU9EVHizWRX9C51z2a7PY3E6JYR1hX78JXulsRXWGLRE%2FsBd55D1rVYVH9umyFOdLU0CFmZHj2ILQ06flW0cVITaEjyX%2FsacXW964kBteGEbu8cl3pI%2B4s6xXmmgfyjPf%2F4%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=17dd24f1987cb9b598853cb0e029126f8cf8e7e4fa12e572d160f086337e7267"
+    },
+    "disclosed_date": 1519698960,
+    "report_url": "https://hackerone.com/reports/309394",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Create a file with a malicious filename: `1\"><iframe src=\"malware_frame.html\">`"
+        ],
+        [
+            2,
+            "Create a malicious HTML file (`malware_frame.html`) and a JavaScript file (`malware.js`) in the same directory"
+        ],
+        [
+            3,
+            "Run the anywhere static file server in the directory: `./node_modules/anywhere/bin/anywhere -p 8080`"
+        ],
+        [
+            4,
+            "Open the served page in a browser to trigger the malicious JavaScript execution"
+        ]
+    ],
+    "vuln_description": "The vulnerability allows an attacker to embed malicious HTML in file names served by the 'anywhere' static file server, which can lead to the execution of arbitrary JavaScript when the file is accessed. This is possible due to insufficient sanitization of file names when they are rendered in the directory listing.",
+    "reason": "The attack requires multiple components (malicious filename, HTML file, and JavaScript file) and involves a non-obvious interaction where the file name is interpreted as HTML. However, the steps are straightforward once the initial idea of embedding HTML in the filename is conceived.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The vulnerability involves HTML injection via file names in a static file server, which is unrelated to authentication or authorization (AuthN/AuthZ) bypass. The proposed methodologies focus on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, not on file name manipulation or HTML injection.",
+        "is_detectable": false
+    }
+}

@@ -1,0 +1,52 @@
+{
+    "reported_to": "Nextcloud",
+    "reported_by": "warsocks ",
+    "title": "Missing server side controls when editing the board\u2019s sharing permissions per user",
+    "content": "\nAuthor: Silvia V\u00e4li, Clarified Security (https://www.clarifiedsecurity.com/silvia-vali/)\nDate: 24th of March, 2020\nDescription:\nWhen the regular user is visiting the Deck view, all created boards are displayed along with the ones that are shared with the user by others. Available functionality within each of the shared boards depends whether the user has received share, manage, edit permissions.\nSince the access control rules related to user\u2019s permissions have only been applied on the client side and not on the server side, user can specify share/edit/manage permissions to be always true within the response (for example by using a proxy tool) when viewing board information. This way he can gain control over the board so he/she could apply the missing edit/manage permissions to him/herself directly from the UI.\nVersion information:\nNextcloud 18.0.2\nDeck 0.8.0 enabled\nPre-requisites as an admin user to follow the vulnerable path:\ncreate 2 regular users in the next cloud, for example user silvia and user john. Users do not belong to the admin group.\nInstall the Deck app (installed version 0.8.0)\nTo reproduce the vulnerable path:\nUser: silvia\nAuthenticate as user silvia and select Deck from the menu\nCreate new board -> name it (\u201cboard for testing\u201d)\nAdd a new stack (\u201ctest test\u201d)\nClick on \u201cShow board for details\u201d\nAdd the other user john and only give him Share permission. Uncheck Edit and Manage.\nUser: john\nNow authenticate in the application as john -> click Deck from the menu and open the shared board \u201cboard for testing\u201d. Since the board was only Shared and no edit permissions were granted, john cannot do much on the board.\nWhat john can do however is use a proxy tool such as Burp Suite to modify the response body. When john clicks on the Deck from the menu, following request is made:\nCode 79 Bytes\n1GET /apps/deck/boards HTTP/1.1\n2Host: next.yy.ee\n3...\n4Connection: close\n5Cookie: \u2026\nIn the response to that request, you can see that john only been given the permission to share which only allows to read the data and not modify it.\nCode 535 Bytes\n1[{\"title\":\"board for testing\",\n2\"owner\":{\"primaryKey\":\"silvia\",\"uid\":\"silvia\",\"displayname\":\"silvia\"},\"color\":\"0082c9\",\"archived\":false,\"labels\":[],\"acl\":[{\"participant\":{\"primaryKey\":\"john\",\"uid\":\"john\",\"displayname\":\"john\"},\"type\":0,\"boardId\":7,\"permissionEdit\":false,\"permissionShare\":true,\"permissionManage\":false,\"owner\":false,\"id\":4}],\"permissions\":{\"PERMISSION_READ\":true,\"PERMISSION_EDIT\":false,\"PERMISSION_MANAGE\":false,\"PERMISSION_SHARE\":true},\"users\":[],\"shared\":1,\"stacks\":[],\"deletedAt\":0,\"lastModified\":1585045324,\"id\":7}]\njohn however uses a proxy tool such as Burp Suite and applies via proxy -> options -> Match and replace that every time the following line with permissions is seen modify all the options to be equal to true.\nOriginal: \"permissionEdit\":false,\"permissionShare\":true,\"permissionManage\":false,\"owner\":false\nModified: \"permissionEdit\":true,\"permissionShare\":true,\"permissionManage\":true,\"owner\":true\nIf john now refreshes the Deck page and opens the board \u201cboard for testing\u201d -> Show board details -> Sharing -> he can add himself the permissions to Edit, Share, Manage to take over the board which was initially only shared with him.\nImpact\nAttacker would achieve control over the board and its data/attachment uploads etc.\n\n",
+    "severity": [
+        7.3,
+        null
+    ],
+    "bounty": 100,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1601306760,
+    "report_url": "https://hackerone.com/reports/827816",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "User silvia creates a board in Nextcloud Deck and shares it with user john, granting only Share permission."
+        ],
+        [
+            2,
+            "User john uses a proxy tool (e.g., Burp Suite) to modify the response, changing permissions to grant himself Edit, Share, and Manage access."
+        ],
+        [
+            3,
+            "User john refreshes the page and uses the UI to take full control of the board."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows a user to escalate their permissions on a shared board in Nextcloud Deck by manipulating client-side responses, bypassing server-side access controls. This occurs because the application only enforces permissions on the client side, enabling an attacker to modify these permissions via a proxy tool.",
+    "reason": "The attack involves understanding the permission structure and using a proxy tool to manipulate responses, but the core flaw (lack of server-side validation) is a common and well-known issue in web applications. The steps are straightforward once the proxy tool is set up.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": true,
+    "authnz_byppass_detectable": false,
+    "is_simple_payload": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": true,
+        "authnz_byppass_detectable": false
+    }
+}

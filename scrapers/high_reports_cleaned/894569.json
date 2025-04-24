@@ -1,0 +1,54 @@
+{
+    "reported_to": "GitLab",
+    "reported_by": "u3mur4 ",
+    "title": "An attacker can run pipeline jobs as arbitrary user",
+    "content": "\nSummary\nAn attacker can run arbitrary pipeline jobs as a victim user. This means the attacker can access the user private repositories, member only repositories, registry, etc... by using the victim CI_JOB_TOKEN token.\nThis is only my recent research and I wanted to report it as soon as possible. I will update the report with more information later on.\nSteps to reproduce\nVICTIM:\nSign in to a GitLab instance as a Victim user\nCreate an arbitrary private repository with some private files. (We will steal this repo as a poc.)\nATTACKER ACCOUNT 1:\nSign in to a GitLab instance as a Attacker1 user\nCreate a new project using the following settings:\nProject Name: poc\nVisibility Level : public\nCheck the Initialize repository with a README checkbox\nProject Name: poc\nVisibility Level : public\nCheck the Initialize repository with a README checkbox\nAdd a new .gitlab-ci.yml file to the project\nCode 83 Bytes\n1image: \"ruby:2.6\"\n2\n3before_script:\n4  - echo Hello\n5\n6rspec:\n7  script:\n8    - echo Hello\nWe will mirror this repository and update the .gitlab-ci.yml file later on to trigger the CI/CD job.\nATTACKER ACCOUNT 2:\nSign in / Register to a GitLab instance as a Attacker2 user\nCreate a new public group called as test\nCreate a new project inside the test group using the following settings:\nProject Name: poc\nVisibility Level : public\nProject Name: poc\nVisibility Level : public\nGo to Project settings => Repository => Mirroring repositories\nSet Git repository URL to the previously created repository by the Attacker1 user\nSet Mirror direction to Pull\nCheck the Trigger pipelines for mirror updates checkbox\nClick the Mirror repository button\nSet Git repository URL to the previously created repository by the Attacker1 user\nSet Mirror direction to Pull\nCheck the Trigger pipelines for mirror updates checkbox\nClick the Mirror repository button\nGo to the test group Members option and invite the Victim user\nSet the Victim user Choose a role permission to Owner\nGo to the Account Setting => Account and delete this account.\nATTACKER ACCOUNT 1:\nSign in back to the GitLab instance as a Attacker1 user\nGo to the attacker1/poc project and update the .gitlab-ci.yml file using the following content:\nCode 192 Bytes\n1image: \"ruby:2.6\"\n2\n3rspec:\n4  script:\n5    - git clone https://gitlab-ci-token:$CI_JOB_TOKEN@gitlab.com/victim/private_repo_name.git\n6    - cd private_repo_name\n7    - ls -lah .\n8    - cat README.md\nWait half an hour to automatically trigger a mirror update in the test/poc project which owner is the Victim user.\nThe test/poc project will trigger a mirror update which also triggers a pipeline run. The triggerer of the pipeline will be the Victim user.\nThe Attacker1 user controls the attacker/poc/gitlab-ci.yml file which is mirrored to the test/poc project.\nWhat is the current bug behavior?\nIf there is a mirrored project with Trigger pipelines for mirror updates enabled inside a group and the group owner delete its account (need another owner role inside the group) then the trigger of the pipeline will be to other owner account. (I think this only works when the account deleted without removing the account from the group members but I still need to confirm this.)\nWhat is the expected correct behavior?\nrefuse pipeline run in the previously mentioned case\nOutput of checks\nThis bug happens on GitLab.com.\nResults of GitLab environment info\nCode 976 Bytes\n1bundle exec rake gitlab:env:info RAILS_ENV=development\n2System information\n3System:\t\t\n4Proxy:\t\tno\n5Current User:\tu3mur4\n6Using RVM:\tno\n7Ruby Version:\t2.6.6p146\n8Gem Version:\t3.0.3\n9Bundler Version:1.17.3\n10Rake Version:\t12.3.3\n11Redis Version:\t6.0.4\n12Git Version:\t2.27.0\n13Sidekiq Version:5.2.7\n14Go Version:\tgo1.14.4 linux/amd64\n15\n16GitLab information\n17Version:\t13.1.0-pre\n18Revision:\t4bd9f8164e0\n19Directory:\t/home/u3mur4/Hack/gitlab/gitlab-development-kit/gitlab\n20DB Adapter:\tPostgreSQL\n21DB Version:\t12.3\n22URL:\t\thttp://gdk.yoyo.pw:3000\n23HTTP Clone URL:\thttp://gdk.yoyo.pw:3000/some-group/some-project.git\n24SSH Clone URL:\tssh://u3mur4@gdk.yoyo.pw:2222/some-group/some-project.git\n25Elasticsearch:\tno\n26Geo:\t\tno\n27Using LDAP:\tno\n28Using Omniauth:\tyes\n29Omniauth Providers: google_oauth2\n30\n31GitLab Shell\n32Version:\t13.3.0\n33Repository storage paths:\n34- default: \t/home/u3mur4/Hack/gitlab/gitlab-development-kit/repositories\n35GitLab Shell path:\t\t/home/u3mur4/Hack/gitlab/gitlab-development-kit/gitlab-shell\n36Git:\t\t/usr/bin/git\nImpact\nstealing the CI_JOB_TOKEN of any user (access the user private repositories, member only repositories and registry, etc...)\n\n",
+    "severity": [
+        9.6,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Business Logic Errors"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1598465460,
+    "report_url": "https://hackerone.com/reports/894569",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Victim signs in to GitLab and creates a private repository."
+        ],
+        [
+            2,
+            "Attacker1 creates a public project with a basic .gitlab-ci.yml file."
+        ],
+        [
+            3,
+            "Attacker2 creates a public group and project, sets up mirroring from Attacker1's project, and invites the Victim as an Owner."
+        ],
+        [
+            4,
+            "Attacker2 deletes their account."
+        ],
+        [
+            5,
+            "Attacker1 updates the .gitlab-ci.yml file to clone the Victim's private repository using the CI_JOB_TOKEN."
+        ],
+        [
+            6,
+            "Wait for mirror update to trigger the pipeline as the Victim user, executing the malicious script."
+        ]
+    ],
+    "vuln_description": "An attacker can exploit GitLab's mirroring feature and group ownership to run pipeline jobs as an arbitrary user, gaining access to their private repositories and other resources via the CI_JOB_TOKEN.",
+    "reason": "The attack involves multiple components (multiple accounts, mirroring setup, group ownership changes) and subtle interactions (deleting an account while maintaining group ownership, triggering pipelines via mirror updates). The attacker must understand GitLab's CI/CD pipeline behavior, mirroring mechanics, and group ownership transitions.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

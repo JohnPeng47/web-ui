@@ -1,0 +1,42 @@
+{
+    "reported_to": "Informatica",
+    "reported_by": "alyssa_herrera ",
+    "title": "[now.informatica.com] Reflective Xss",
+    "content": "\nhttp://now.informatica.com/en_data-integration-for-dummies_book_2642.html?source=Homepage\nThe issue is located here. I will be including a video demonstrating this vulnerability\nXss vector used: <svg onload=confirm(document.domain)>xs\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1463633220,
+    "report_url": "https://hackerone.com/reports/81191",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the URL: http://now.informatica.com/en_data-integration-for-dummies_book_2642.html?source=Homepage"
+        ],
+        [
+            2,
+            "Inject the XSS vector: <svg onload=confirm(document.domain)>xs into the URL parameters or input fields"
+        ]
+    ],
+    "vuln_description": "The vulnerability is a Reflective Cross-Site Scripting (XSS) issue found on the now.informatica.com website. By injecting a simple XSS vector into the URL parameters, an attacker can execute arbitrary JavaScript in the context of the victim's browser session, as demonstrated by the ability to confirm the document.domain.",
+    "reason": "The attack involves a straightforward injection of a common XSS payload into a URL parameter, which is a well-known and easily testable vulnerability. There are no complex interactions or state manipulations required, and the payload is a standard test vector for XSS vulnerabilities.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The reflective XSS vulnerability involves injecting malicious scripts via user input, which is not directly related to authentication or authorization boundaries. The proposed methodologies focus on testing AuthN/AuthZ bypasses and IDOR by manipulating user sessions and resource IDs, not on detecting XSS vulnerabilities.",
+        "is_detectable": false
+    }
+}

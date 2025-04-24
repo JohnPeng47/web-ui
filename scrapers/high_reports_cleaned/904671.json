@@ -1,0 +1,38 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "un4gi ",
+    "title": "Access to requests and approvals via /\u2588\u2588\u2588\u2588\u2588 allows sensitive information gathering",
+    "content": "\nSummary:\nAn adversary is able to view/modify requests and approvals via \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\nStep-by-step Reproduction Instructions\nBrowse to \u2588\u2588\u2588\u2588\u2588 and create an account or sign in.\nBrowse to \u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588. You can now view current/past requests.\nClicking on these requests seems to allow an adversary to update/create changes/send e-mails, as well as attach files to the requests. I did not test these features as I did not want to impact existing requests, however I believe the ability to view these requests is enough of a security issue by itself as it allows an attacker to identify hardware/software specifications for NIPR/SIPR assets, as well as identifying justifications for the requests (upcoming TDYs, etc.)\nSuggested Mitigation/Remediation Actions\nRestrict access to this endpoint to only allow administrators to view requests as well as allowing users to view their own requests or the requests of users in the same workgroup.\nImpact\nAn adversary can identify hardware/software specifications of NIPRNET/SIPRNET assets. Additionally, an adversary can gather intel based on justification requirements in the requests (upcoming TDYs, deployments, mission posture due to COVID, etc.)\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1613693520,
+    "report_url": "https://hackerone.com/reports/904671",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "LOW",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Browse to the target endpoint and create an account or sign in."
+        ],
+        [
+            2,
+            "Navigate to the requests and approvals section to view current/past requests."
+        ]
+    ],
+    "vuln_description": "An adversary can access and potentially modify requests and approvals via a specific endpoint, allowing them to gather sensitive information such as hardware/software specifications for NIPR/SIPR assets and justification details for requests (e.g., upcoming TDYs, deployments).",
+    "reason": "The vulnerability involves straightforward navigation to an endpoint and viewing requests, without requiring complex interactions or manipulation of application states. The discovery process is simple and does not involve novel or obscure logic.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

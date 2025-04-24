@@ -1,0 +1,58 @@
+{
+    "reported_to": "Bumble",
+    "reported_by": "robertheaton ",
+    "title": "Exfiltrating a victim's exact location (to within 5m)",
+    "content": "\nI used Bumble's distance feature to exfiltrate the exact location (to within approx 5m) of a victim. I did this by using the Bumble API to move my attacker account's location around the approximate area of the victim. I was able to obtain the exact distance between attacker and victim at 3 separate locations, and I then used trilateration (https://gis.stackexchange.com/questions/17344/differences-between-triangulation-and-trilateration) to combine these 3 distances into a single, precise location.\nThis is not a new vulnerability; Tinder was found to be vulnerable to a version of it in 2014 (https://blog.includesecurity.com/2014/02/how-i-was-able-to-track-the-location-of-any-tinder-user/). What is new is the circumvention of Bumble's attempted mitigations for the Tinder attack. Tinder was trivially vulnerable to trilateration because their API returned the exact distance between attacker and victim, to 15 decimal places, and the client was responsible for rounding it. Bumble attempts to mitigate this by rounding the distance on the server, and returning only this rounded distance to the client. Simple trilateration is still possible using these rounded values, but this only gives us an accuracy of the nearest square mile or so.\nHowever, we can massively increase the precision to the nearest few metres by hypothesising that Bumble performs server-side rounding using code like the following:\nCode 153 Bytes\n1def calculate_rounded_distance():\n2  exact_distance = calculate_exact_distance()\n3  rounded_distance = math.floor(exact_distance)\n4  return rounded_distance\nThis means that we can have our attacker slowly \"shuffle\" around the vicinity of the victim, looking for the precise location where a victim's distance from us flips from (say) 1.0 miles to 2.0 miles. We can infer that this is the point at which the victim is exactly 1.0 miles from the attacker. We can find 3 such \"flipping points\" (to within arbitrary precision, say 0.001 miles), and use them to perform trilateration as before.\nTo reproduce:\nCreate 2 accounts - a victim and an attacker. I don't believe that they need to be made to match with each other in order to exploit this vulnerability.\nUse Burp Suite or similar to grab the victim and attacker session IDs so that we can control them programatically via the Bumble API\nUse the Bumble API to put the victim in a fixed, target location\nPut the attacker in a random location in the vicinity of the victim. The attack does not require any special knowledge of the victim's location beyond the summary shown in the UI (eg. \"Lambeth\")\nStep the attacker in a random direction in small increments (smaller increments take longer but give more precise locations). After each step, check the distance between attacker and victim. If it has changed, record the average of the current and previous location as being exactly the smaller of the 2 distances away from the victim.\nIf desired, repeat step 5 with a smaller step size in the vicinity of the known distance flip in order to increase precision\nRepeat steps 4-6 3 times starting in different positions\nDraw 3 circles, 1 for each distance found. The radius should be the distance between victim and attacker, the centre should be the point at which the distance flipped. (KML viewed in Google Earth is convenient for this step)\nConfirm that all 3 circles cross at the same point - you should have been able to identify the victim's location to within approx 5m\nI've included a Python POC with this report, and a screenshot of trilateration results produced using this script where the victim is placed at 10 Downing Street, UK. Depending on precision desired it takes approximately 10 seconds to find a victim's location.\nImpact\nThe Bumble API does not appear to restrict the users about whom an attacker can pull information. This means that an attacker could use this vulnerability to find the exact location of any user whose user ID they know. This includes:\nCurrent matches\nPast matches who have since broken up with them\nAny user whose profile the attacker has been shown in an encounter\nThe only restriction I've found is that sometimes the API does not return the numerical distance between the attacker and victim. I speculate that this occurs when the victim hasn't checked in for a period of time.\nTo mass exfiltrate the locations of a large swathe of Bumble users, an attacker could use multiple accounts with wide filters to cycle through large numbers of encounters, collecting large numbers of user IDs and then using trilateration to find all of their locations.\nRevealing the exact location of Bumble users presents a grave danger to their safety, so I have filed this report with a severity of \"High\".\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1626907260,
+    "report_url": "https://hackerone.com/reports/1234406",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Create two Bumble accounts: a victim and an attacker."
+        ],
+        [
+            2,
+            "Use Burp Suite or similar to grab session IDs for both accounts to control them via the Bumble API."
+        ],
+        [
+            3,
+            "Place the victim in a fixed location using the Bumble API."
+        ],
+        [
+            4,
+            "Move the attacker around the victim's vicinity in small increments, checking the distance after each step."
+        ],
+        [
+            5,
+            "Record locations where the distance 'flips' (e.g., from 1.0 to 2.0 miles)."
+        ],
+        [
+            6,
+            "Repeat steps 4-5 from three different starting positions to collect three 'flipping points.'"
+        ],
+        [
+            7,
+            "Use trilateration with the three recorded distances to pinpoint the victim's exact location."
+        ]
+    ],
+    "vuln_description": "An attacker can exploit Bumble's distance feature to determine a victim's exact location (within ~5m) by using trilateration with rounded distance values obtained from the Bumble API. This bypasses Bumble's mitigations against similar attacks seen in other apps like Tinder.",
+    "reason": "The attack involves multiple components (API manipulation, distance measurement, trilateration) and requires understanding subtle interactions (how rounding affects distance precision). It also involves novel logic to bypass Bumble's mitigations, making it non-trivial to discover.",
+    "new_complexity": "HIGH",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

@@ -1,0 +1,38 @@
+{
+    "reported_to": "RATELIMITED",
+    "reported_by": "yasinylcn17 ",
+    "title": "Hackerone1",
+    "content": "\nNOTE! Thanks for submitting a report! Please replace all the [square] sections below with the pertinent details. Remember, the more detail you provide, the easier it is for us to triage and respond quickly, so be sure to take your time filling out the report!\nSummary: [add summary of the vulnerability]\nDescription: [add more details about this vulnerability]\nSteps To Reproduce:\n(Add details for how we can reproduce the issue)\n[add step]\n[add step]\n[add step]\nSupporting Material/References:\nList any additional material (e.g. screenshots, logs, etc.)\nImpact\nKkx\n\n",
+    "severity": [
+        8.9,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "HTTP Request Smuggling"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1545454140,
+    "report_url": "https://hackerone.com/reports/471087",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Navigate to the vulnerable application or endpoint."
+        ],
+        [
+            2,
+            "Manipulate the input or state to trigger the vulnerability."
+        ]
+    ],
+    "vuln_description": "The vulnerability involves a flaw in the application's logic that allows unauthorized access or manipulation of data. The exact nature of the vulnerability is not specified in the provided report, but it likely involves bypassing security controls or exploiting a misconfiguration.",
+    "reason": "The vulnerability requires understanding the application's logic and identifying a subtle flaw that can be exploited. The attack may involve multiple steps or components, but the exact complexity depends on the specifics of the vulnerability.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

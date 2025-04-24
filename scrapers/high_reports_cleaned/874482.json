@@ -1,0 +1,38 @@
+{
+    "reported_to": "Insulet Corporation",
+    "reported_by": "kumarp16 ",
+    "title": "Subdomain Takeover due to unclaimed domain pointing to Acquia Cloud",
+    "content": "\nssue Details\nThe consultant identified that subdomain http:// or https://qa.myomnipod.com\nWeb Site Not Found\nSorry, we could not find any content for this web address. Please check the URL.\nIf you are an Acquia Cloud customer and expect to see your site at this address, you'll need to add this domain name to your site via the Acquia Network management console.\nError Is displayed.\nHow did you come across this bug ?\nUsing enumeration, I was able to discover this domain and determined it\nNOTE: The hostname was not claimed by me also because i need to pay certain amount to host a website.\nImpact\nSub-domain take over attacks can happen when a company creates a dns entry that points to a third party service, however forgets about the third party application leaving it vulnerable to be hijacked by another party. Hackers can claim subdomains with the help of external services. This attack is practically non-traceable.\n\n",
+    "severity": [
+        7.5,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Misconfiguration"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1610650800,
+    "report_url": "https://hackerone.com/reports/874482",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Use enumeration tools to discover the subdomain qa.myomnipod.com"
+        ],
+        [
+            2,
+            "Observe that the subdomain displays an Acquia Cloud error message indicating it is unclaimed"
+        ]
+    ],
+    "vuln_description": "The subdomain qa.myomnipod.com is vulnerable to subdomain takeover because it points to an unclaimed Acquia Cloud instance. An attacker could claim this subdomain on Acquia Cloud, effectively taking control of the subdomain and potentially using it for malicious purposes such as phishing or malware distribution.",
+    "reason": "The vulnerability is straightforward to discover using common enumeration techniques and does not involve complex interactions or state manipulation. The error message clearly indicates the unclaimed status of the subdomain.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

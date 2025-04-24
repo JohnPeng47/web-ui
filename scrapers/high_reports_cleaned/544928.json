@@ -1,0 +1,42 @@
+{
+    "reported_to": "Ubiquiti Inc.",
+    "reported_by": "b0yd ",
+    "title": "Privilege Escalation From user to SYSTEM via unauthenticated command execution ",
+    "content": "\nThe vulnerability, or feature depending how you look at it, is the ability to execute commands using the\nevostream API interface that is exposed on localhost:7440. Since the evostream service is running as SYSTEM a user can use the launchprocess command, http://docs.evostream.com/2.0/launchProcess.html, to execute any binary with supplied arguments. The only thing that is keeping this \"feature\" from allowing remote code execution is the fact that it listens on localhost only. However, if it were couple with an SSRF, an attacker could achieve full remote code execution.\nImpact\nThe ability to run arbitrary commands as SYSTEM from any user.\n\n",
+    "severity": [
+        9.6,
+        null
+    ],
+    "bounty": 9600,
+    "weaknesses": [
+        "Command Injection - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1573249020,
+    "report_url": "https://hackerone.com/reports/544928",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Identify that the evostream API interface is exposed on localhost:7440."
+        ],
+        [
+            2,
+            "Use the launchprocess command (http://docs.evostream.com/2.0/launchProcess.html) to execute any binary with supplied arguments as SYSTEM."
+        ]
+    ],
+    "vuln_description": "The vulnerability allows a user to execute arbitrary commands as SYSTEM via the evostream API interface exposed on localhost:7440. The evostream service runs as SYSTEM, enabling privilege escalation through the launchprocess command. Although the interface is only accessible locally, coupling it with an SSRF could lead to remote code execution.",
+    "reason": "The vulnerability is straightforward to discover as it involves a single component (the evostream API interface) and a well-documented command (launchprocess). The interaction is obvious, and no complex application state manipulation or novel logic is required.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The vulnerability involves executing commands via the evostream API interface running as SYSTEM on localhost:7440. The methodology described focuses on detecting authorization and authentication bypasses within the same application by swapping user sessions and resource IDs. However, this vulnerability is a local privilege escalation issue that does not involve user sessions or resource IDs in the context of the same application. It is a feature of the evostream service itself, not an authorization boundary crossing within an application's user/resource model.",
+        "is_detectable": false
+    }
+}

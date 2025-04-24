@@ -1,0 +1,51 @@
+{
+    "reported_to": "Top Echelon Software",
+    "reported_by": "lmhu ",
+    "title": "Public and secret api key leaked in JavaScript source",
+    "content": "\nSummary: [Summary the vulnerabilities]\nI am surfing on the bb3jobboard.topechelon.com website. I found a sensitive data including authentication key written in public accessible javascript file.\nURL Vulnerability\nhttps://bb3jobboard.topechelon.com/#!/search?page=1\nSteps To Reproduce:\nOpen bb3jobboard.topechelon.com and add payloads javascript-fuzz\nDirectory sensitive is //job_board.js// parse this json files using jsonparseronline\nand look response bytes In response you can see Sensitive ApiKey Disclosure\nSensitive Information has been leaked on this source page job_board.js\nOpen your network browser , this javascript source has high files can leads to (DoS)\nProof On Concept\nCode 544 Bytes\n1}]), angular.module(\"jb\").config([\"lkGoogleSettingsProvider\", function(e) {\n2    e.configure({\n3        apiKey: \"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\",\n4        clientId: \"\u2588\u2588\u2588\u2588\u2588\u2588t.apps.googleusercontent.com\",\n5        scopes: [\"https://www.googleapis.com/auth/drive.readonly\"],\n6        features: [\"MULTISELECT_DISABLED\"]\n7    })\n8}]), angular.module(\"jb.factories\").factory(\"BoardSettingsFactory\", [\"railsResourceFactory\", \"PathToResourceRoute\", function(e, t) {\n9    var n = e({\n10        url: t.convert(JBRoutes.jobBoardBoardSettingsPath),\n11        name: \"boardSettings\"\n12    });\nScreenshots Proof\n\u2588\u2588\u2588\u2588\nImpact\nInformation disclosure\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Improper Access Control - Generic"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1611105240,
+    "report_url": "https://hackerone.com/reports/1051029",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": false,
+    "complexity": "LOW",
+    "novelty": "LOW",
+    "steps": [
+        [
+            1,
+            "Navigate to the website: https://bb3jobboard.topechelon.com/#!/search?page=1"
+        ],
+        [
+            2,
+            "Inspect the JavaScript files (e.g., job_board.js) using browser developer tools or a network analyzer"
+        ],
+        [
+            3,
+            "Locate and analyze the sensitive data (API keys, client IDs) exposed in the JavaScript source"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves the exposure of sensitive API keys and client IDs in a publicly accessible JavaScript file (job_board.js) on the bb3jobboard.topechelon.com website. This information disclosure could allow attackers to misuse these credentials for unauthorized access or other malicious activities.",
+    "reason": "The vulnerability is straightforward to discover as it only requires inspecting publicly accessible JavaScript files, a common practice in web security testing. There are no complex interactions or state manipulations involved.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "idor_detectable": false,
+    "authnz_byppass_detectable": false,
+    "injection_metadata": {
+        "is_simple_payload": false
+    },
+    "authnz_metadata": {
+        "idor_detectable": false,
+        "authnz_byppass_detectable": false
+    }
+}

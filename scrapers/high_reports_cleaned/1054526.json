@@ -1,0 +1,98 @@
+{
+    "reported_to": "Automattic",
+    "reported_by": "ucuping ",
+    "title": "Stored XSS in wordpress.com",
+    "content": "\nSummary:\nHello Team,\nI found the Stored XSS vulnerability in the Custom Style section, this vulnerability can result in an attacker to execute arbitrary JavaScript in the context of the attacked website and the attacked user. This can be abused to steal session cookies, performing requests in the name of the victim or for phishing attacks, by inviting the victim to become part of the manager or administrator.\nPlatform(s) Affected:\nwordpress.com\nSteps To Reproduce:\nAs an attacker, go to the feedback section, then go to the Polling section.\nAdd a new post or edit an existing post.\nScroll down, click All Styles.\nAdd a new Style.\nNamed the temporary style, click Save Style.\nChange the Style Name with <noscript><p title= \"</noscript><img src=x onerror=alert(document.cookie)>\">, check the checkbox next to Save Style, click Save Style.\nScript will be run.\nInvite the victim in a way, go to manage then users.\nClick invite, enter username or email, and send.\nAs a Victim, accept the attacker's invitation.\nGo to the Feedback section.\nThen go to the Polling section.\nAdd a new post or edit an existing post.\nScroll down, click All Styles.\nEnter the Style that has been created by the previous Attacker.\nScript will be run.\nSupporting Material/References:\nScreenshot_(538).png (F1109567)\nScreenshot_(539).png (F1109568)\n2020-12-09_08-24-14.mp4 (F1109569)\nImpact\nthis vulnerability can result in an attacker to execute arbitrary JavaScript in the context of the attacked website and the attacked user. This can be abused to steal session cookies, performing requests in the name of the victim or for phishing attacks, by inviting the victim to become part of the manager or administrator.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - Stored"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1613573040,
+    "report_url": "https://hackerone.com/reports/1054526",
+    "vuln_category": "WEB_APP",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "steps": [
+        [
+            1,
+            "As an attacker, go to the feedback section, then go to the Polling section."
+        ],
+        [
+            2,
+            "Add a new post or edit an existing post."
+        ],
+        [
+            3,
+            "Scroll down, click 'All Styles'."
+        ],
+        [
+            4,
+            "Add a new Style."
+        ],
+        [
+            5,
+            "Name the temporary style, click 'Save Style'."
+        ],
+        [
+            6,
+            "Change the Style Name with '<noscript><p title=\"</noscript><img src=x onerror=alert(document.cookie)>\">', check the checkbox next to 'Save Style', click 'Save Style'."
+        ],
+        [
+            7,
+            "Script will be run."
+        ],
+        [
+            8,
+            "Invite the victim in a way, go to 'manage' then 'users'."
+        ],
+        [
+            9,
+            "Click 'invite', enter username or email, and send."
+        ],
+        [
+            10,
+            "As a Victim, accept the attacker's invitation."
+        ],
+        [
+            11,
+            "Go to the Feedback section."
+        ],
+        [
+            12,
+            "Then go to the Polling section."
+        ],
+        [
+            13,
+            "Add a new post or edit an existing post."
+        ],
+        [
+            14,
+            "Scroll down, click 'All Styles'."
+        ],
+        [
+            15,
+            "Enter the Style that has been created by the previous Attacker."
+        ],
+        [
+            16,
+            "Script will be run."
+        ]
+    ],
+    "vuln_description": "This is a Stored XSS vulnerability in WordPress.com's Custom Style section. An attacker can inject malicious JavaScript into a style name, which is then executed in the context of the victim's browser when they interact with the affected style. This can lead to session hijacking, unauthorized actions on behalf of the victim, or phishing attacks.",
+    "reason": "The vulnerability involves multiple steps, including style creation, victim invitation, and victim interaction with the malicious style. However, the XSS payload itself is straightforward, and the steps, while numerous, are linear and do not involve complex interactions or novel logic.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The vulnerability involves a stored XSS in the Custom Style section of WordPress.com, which is a client-side issue and not directly related to authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, which does not apply to XSS vulnerabilities. XSS is detected through input validation and output encoding checks, not through session or resource ID manipulation.",
+        "is_detectable": false
+    }
+}

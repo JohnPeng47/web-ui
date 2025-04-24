@@ -1,0 +1,42 @@
+{
+    "reported_to": "Recorded Future",
+    "reported_by": "fornex ",
+    "title": "Dom Xss vulnerability",
+    "content": "\nSummary:\nDom Xss vulnerability\nSteps To Reproduce:\n[add details for how we can reproduce the issue]\nGo to this link: https://api.recordedfuture.com/index.html\nOpen chrome devtool and go to console tab\nType: document.write('...<script>alert(1)</script>...');\nAnd boom! Alert 1!\nImpact\nXSS can have huge implications for a web application and its users. User accounts can be hijacked, credentials could be stolen, sensitive data could be exfiltrated, and lastly, access to your client computers can be obtained.\n\n",
+    "severity": [
+        7.8,
+        null
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Cross-site Scripting (XSS) - DOM"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1642608000,
+    "report_url": "https://hackerone.com/reports/1448616",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "HIGH",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to the link: https://api.recordedfuture.com/index.html"
+        ],
+        [
+            2,
+            "Open Chrome DevTools and go to the console tab, then type: document.write('...<script>alert(1)</script>...');"
+        ]
+    ],
+    "vuln_description": "This is a DOM-based Cross-Site Scripting (XSS) vulnerability where an attacker can inject arbitrary JavaScript code into the webpage by manipulating the DOM through the document.write function. This can lead to various malicious activities such as account hijacking, data theft, and client-side attacks.",
+    "reason": "The vulnerability is straightforward to discover as it only requires basic knowledge of XSS and using the browser's developer tools to execute a simple script. There are no complex interactions or states involved, and the attack vector is commonly known.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null,
+    "authnz_metadata": {
+        "reason": "The DOM XSS vulnerability involves client-side script injection via the DOM, which is not directly related to authentication or authorization (AuthN/AuthZ) boundaries. The proposed methodologies focus on testing AuthN/AuthZ by swapping user sessions or resource IDs within the same application context, not on detecting client-side script injection vulnerabilities.",
+        "is_detectable": false
+    }
+}

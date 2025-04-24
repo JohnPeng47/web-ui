@@ -1,0 +1,38 @@
+{
+    "reported_to": "Internet Bug Bounty",
+    "reported_by": "addisoncrump ",
+    "title": "Regexes with large repetitions on empty sub-expressions take a very long time to parse",
+    "content": "\nRust's regex crate guarantees a linear time complexity with regex length for compilation of untrusted regexes. However, existing mitigations for known malicious regexes are based on memory usage and, as such, do not mitigate repetitions of empty sub-expressions. For example, the following payload triggers such an issue:\nCode 16 Bytes\n1(?:){4294967295}\nThis will cause the regex compiler to attempt to create 4294967295 instances of an empty sub-expression, which will ultimately allocate zero bytes and therefore bypass existing memory-based mitigations. This can be further weaponised to create an exponential time complexity with regex length by using repetitions of repetitions, e.g.:\nCode 28 Bytes\n1(?:){64}{64}{64}{64}{64}{64}\nThis payload would cause the regex compiler to attempt to create 64^6 instances of an empty sub-expression.\nImpact\nAn attacker can induce a CPU time-based denial of service with effectively infinite CPU time, which would cause the service to become entirely unavailable.\n\n",
+    "severity": [
+        7.5,
+        null
+    ],
+    "bounty": 4000,
+    "weaknesses": [
+        "Uncontrolled Resource Consumption"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1648002240,
+    "report_url": "https://hackerone.com/reports/1518036",
+    "is_multi_component": false,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "CODE",
+    "steps": [
+        [
+            1,
+            "Craft a regex pattern with large repetitions on empty sub-expressions, e.g., `1(?:){4294967295}` or `1(?:){64}{64}{64}{64}{64}{64}`"
+        ],
+        [
+            2,
+            "Compile the regex pattern using Rust's regex crate to observe the excessive CPU time consumption"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves crafting regex patterns with large repetitions on empty sub-expressions, which bypass memory-based mitigations and cause exponential time complexity during compilation, leading to a CPU time-based denial of service.",
+    "reason": "The attack requires understanding of regex compilation behavior and the specific bypass of memory-based mitigations, but the components and interactions are relatively straightforward once the behavior is known.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}

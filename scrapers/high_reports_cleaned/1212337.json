@@ -1,0 +1,38 @@
+{
+    "reported_to": "Khan Academy",
+    "reported_by": "wlucenasec ",
+    "title": "Bypass the fix of report #1078283 due to poor validation",
+    "content": "\nHi Khan Academy Team,\nI was able to bypass the fix you implemented for report #1078283.\nThe URL validation you implemented on the endpoint continue checks the presence of khanacademy.org however it doesn't have any boundary checking to ignore domains starting with .org, so if an attacker register a domain starting with org like this one orghacker.com.br and have a subdomain entry of khanacademy the attacker is able to bypass the current implementation and lead the victim to his controlled page.\nSteps to reproduce the issue\nGo to this page https://www.khanacademy.org/signup?isteacher=1&referral=LearnStorm&continue=https://khanacademy.orghacker.com.br\nYou'll be redirected to orghacker.com.br which is not a domain that Khan Academy owns\nImpact\nBypass of current URL validation. Attacker can send a phishing campaign and redirect the request to a server of his control. An attacker might chain the attack to other types of attack too.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Open Redirect"
+    ],
+    "screenshots": {},
+    "disclosed_date": 1625786700,
+    "report_url": "https://hackerone.com/reports/1212337",
+    "is_multi_component": false,
+    "complexity": "MEDIUM",
+    "novelty": "MEDIUM",
+    "vuln_category": "WEB_APP",
+    "steps": [
+        [
+            1,
+            "Go to the page: https://www.khanacademy.org/signup?isteacher=1&referral=LearnStorm&continue=https://khanacademy.orghacker.com.br"
+        ],
+        [
+            2,
+            "Observe that you are redirected to orghacker.com.br, which is not a domain owned by Khan Academy"
+        ]
+    ],
+    "vuln_description": "The vulnerability involves bypassing URL validation by registering a domain that starts with 'org' (e.g., orghacker.com.br) and includes 'khanacademy' as a subdomain. This allows an attacker to redirect victims to a malicious site, bypassing the current validation that only checks for the presence of 'khanacademy.org' without boundary checks.",
+    "reason": "The attack requires understanding of domain registration and subdomain manipulation, but the core vulnerability stems from a straightforward oversight in URL validation logic. The interaction between domain naming and URL validation is subtle but not highly complex.",
+    "new_complexity": "MEDIUM",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": "1078283"
+}

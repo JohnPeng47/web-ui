@@ -1,0 +1,44 @@
+{
+    "reported_to": "U.S. Dept Of Defense",
+    "reported_by": "0r10nh4ck ",
+    "title": "Sensitive Data Exposure at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+    "content": "\nDescription:\nI found in the endpoint https://\u2588\u2588\u2588/api/getEnvVars,\nsensitive data of environment variables containing: AWS S3 credentials, PATH, IP and PORTs.\nReferences\nhttps://www.tenable.com/plugins/was/113164\nhttps://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html\nhttps://docs.aws.amazon.com/general/latest/gr/aws-access-keys-best-practices.html\nImpact\nBy using leaked AWS credentials or abusing credentials with misconfigured permissions,\nan attacker could try to gain access to sensitive information on the AWS account\nor perform arbitrary modification on the AWS resources.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nEnable a HTTP interception proxy, such as Burp Suite or OWASP ZAP\nUse a browser to navigate to: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nFind the HTTP POST to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/api/getEnvVars\nSee the response.\nPOC:\nCode 3.39 KiB\n<image_0>\nSuggested Mitigation/Remediation Actions\nImplement access control.\nProperly configure the API.\nBlock requisition exposure.\n\n",
+    "severity": [
+        7.0,
+        8.9
+    ],
+    "bounty": null,
+    "weaknesses": [
+        "Information Disclosure"
+    ],
+    "screenshots": {
+        "image_0": "1{\"PORT\":\"8080\",\"PATH\":\"/home/vcap/app/node_modules/.bin:/home/vcap/node_modules/.bin:/home/node_modules/.bin:/node_modules/.bin:/home/vcap/deps/0/node/lib/node_modules/npm/node_modules/@npmcli/run-script/lib/node-gyp-bin:/home/vcap/deps/0/bin:/usr/local/bin:/usr/bin:/bin:/home/vcap/app/bin:/home/vcap/deps/0/node_modules/.bin\",\"APP_SUB_DOMAIN\":\"\u2588\u2588\u2588\u2588\u2588\u2588\",\"DEPLOY_ENV\":\"test\",\"CF_INSTANCE_ADDR\":\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588:61069\",\"CF_INSTANCE_IP\":\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\",\"CF_INSTANCE_PORT\":\"61069\",\"HOME\":\"/home/vcap/app\",\"MEMORY_LIMIT\":\"125m\",\"PWD\":\"/home/vcap/app\",\"TMPDIR\":\"/home/vcap/tmp\",\"USER\":\"vcap\",\"VCAP_APP_HOST\":\"0.0.0.0\",\"VCAP_APP_PORT\":\"8080\",\"VCAP_APPLICATION\":\"{\\\"application_id\\\":\\\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\\\",\\\"application_name\\\":\\\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\\\",\\\"application_uris\\\":[\\\"\u2588\u2588\u2588\\\"],\\\"application_version\\\":\\\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\\\",\\\"cf_api\\\":\\\"https://api.system.\u2588\u2588\u2588\u2588\u2588\u2588\\\",\\\"host\\\":\\\"0.0.0.0\\\",\\\"instance_id\\\":\\\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\\\",\\\"instance_index\\\":0,\\\"limits\\\":{\\\"disk\\\":3072,\\\"fds\\\":16384,\\\"mem\\\":125},\\\"name\\\":\\\"\u2588\u2588\u2588\u2588\u2588\\\",\\\"organization_id\\\":\\\"\u2588\u2588\u2588\u2588\u2588\\\",\\\"port\\\":8080,\\\"process_id\\\":\\\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\\\",\\\"process_type\\\":\\\"web\\\",\\\"space_id\\\":\\\"f28c5898-2473-4bf8-90e4-24d77a930603\\\",\\\"space_name\\\":\\\"CDN2-0_test\\\",\\\"uris\\\":[\\\"\u2588\u2588\u2588\u2588\u2588\\\"],\\\"version\\\":\\\"\u2588\u2588\u2588\u2588\\\"}\",\"VCAP_SERVICES\":\"{\\\"aws-s3\\\":[{\\n  \\\"label\\\": \\\"aws-s3\\\",\\n  \\\"provider\\\": null,\\n  \\\"plan\\\": \\\"standard\\\",\\n  \\\"name\\\": \\\"\u2588\u2588\u2588\u2588\u2588\u2588\\\",\\n  \\\"tags\\\": [\\n\\n  ],\\n  \\\"instance_guid\\\": \\\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\\\",\\n  \\\"instance_name\\\": \\\"\u2588\u2588\u2588\u2588\u2588\\\",\\n  \\\"binding_guid\\\": \\\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\\\",\\n  \\\"binding_name\\\": null,\\n  \\\"credentials\\\": {\\n    \\\"access_key_id\\\": \\\"\u2588\u2588\u2588\u2588\u2588\u2588\\\",\\n    \\\"bucket\\\": \\\"\u2588\u2588\u2588-\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\\\",\\n    \\\"region\\\": \\\"\u2588\u2588\u2588\\\",\\n    \\\"secret_access_key\\\": \\\"\u2588\u2588\u2588\u2588\\\"\\n  },\\n  \\\"syslog_drain_url\\\": null,\\n  \\\"volume_mounts\\\": [\\n\\n  ]\\n},{\\n  \\\"label\\\": \\\"aws-s3\\\",\\n  \\\"provider\\\": null,\\n  \\\"plan\\\": \\\"standard\\\",\\n  \\\"name\\\": \\\"\u2588\u2588\u2588\u2588\u2588\\\",\\n  \\\"tags\\\": [\\n\\n  ],\\n  \\\"instance_guid\\\": \\\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\\\",\\n  \\\"instance_name\\\": \\\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\\\",\\n  \\\"binding_guid\\\": \\\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\\\",\\n  \\\"binding_name\\\": null,\\n  \\\"credentials\\\": {\\n    \\\"access_key_id\\\": \\\"\u2588\u2588\u2588\u2588\u2588\\\",\\n    \\\"bucket\\\": \\\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588-\u2588\u2588\u2588\u2588\\\",\\n    \\\"region\\\": \\\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\\\",\\n    \\\"secret_access_key\\\": \\\"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\\\"\\n  },\\n  \\\"syslog_drain_url\\\": null,\\n  \\\"volume_mounts\\\": [\\n\\n  ]\\n}]}\",\"s3_env_params\":{\"s3\":{\"config\":{\"credentials\":{\"expired\":false,\"expireTime\":null,\"refreshCallbacks\":[],\"accessKeyId\":\"\u2588\u2588\u2588\u2588\"},\"credentialProvider\":{\"providers\":[null,null,null,null,null,null,null],\"resolveCallbacks\":[]},\"region\":\"\u2588\u2588\u2588\u2588\",\"logger\":null,\"apiVersions\":{},\"apiVersion\":null,\"endpoint\":\"https://s3.amazonaws.com\",\"httpOptions\":{\"timeout\":120000,\"agent\":null},\"maxRedirects\":10,\"paramValidation\":true,\"sslEnabled\":true,\"s3ForcePathStyle\":false,\"s3BucketEndpoint\":false,\"s3DisableBodySigning\":true,\"s3UsEast1RegionalEndpoint\":\"legacy\",\"computeChecksums\":true,\"convertResponseTypes\":true,\"correctClockSkew\":false,\"customUserAgent\":null,\"dynamoDbCrc32\":true,\"systemClockOffset\":0,\"signatureVersion\":\"v4\",\"signatureCache\":true,\"retryDelayOptions\":{},\"useAccelerateEndpoint\":false,\"clientSideMonitoring\":false,\"endpointDiscoveryEnabled\":false,\"endpointCacheSize\":1000,\"hostPrefixEnabled\":true,\"stsRegionalEndpoints\":\"legacy\",\"useFipsEndpoint\":false,\"useDualstackEndpoint\":false},\"endpoint\":{\"protocol\":\"https:\",\"host\":\"s3.amazonaws.com\",\"port\":443,\"hostname\":\"s3.amazonaws.com\",\"pathname\":\"/\",\"path\":\"/\",\"href\":\"https://s3.amazonaws.com/\"},\"_events\":{\"apiCallAttempt\":[null],\"apiCall\":[null]},\"_clientId\":10},\"s3_bucket\":\"\u2588\u2588\u2588\u2588\u2588\u2588-\u2588\u2588\u2588\",\"user_url\":\"\u2588\u2588\u2588\u2588\"}}"
+    },
+    "disclosed_date": 1677283080,
+    "report_url": "https://hackerone.com/reports/1720278",
+    "is_multi_component": true,
+    "complexity": "HIGH",
+    "novelty": "MEDIUM",
+    "vuln_category": "API",
+    "steps": [
+        [
+            1,
+            "Enable a HTTP interception proxy, such as Burp Suite or OWASP ZAP"
+        ],
+        [
+            2,
+            "Navigate to the endpoint https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/api/getEnvVars using a browser or tool like curl"
+        ],
+        [
+            3,
+            "Inspect the response to find exposed sensitive environment variables (AWS S3 credentials, PATH, IP, and PORTs)"
+        ]
+    ],
+    "vuln_description": "The endpoint https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/api/getEnvVars exposes sensitive environment variables, including AWS S3 credentials, PATH, IP, and PORTs. This could allow attackers to gain unauthorized access to AWS resources or other sensitive systems.",
+    "reason": "The vulnerability is straightforward to discover as it only requires accessing a specific endpoint and inspecting the response. No complex interactions or state manipulations are involved.",
+    "new_complexity": "LOW",
+    "requires_code": false,
+    "requires_CVE": false,
+    "is_ctf": false,
+    "other_report": null
+}
