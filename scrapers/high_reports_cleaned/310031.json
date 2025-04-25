@@ -1,46 +1,50 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "alyssa_herrera ",
-    "title": "SQL injection on \u2588\u2588\u2588\u2588\u2588 due to tech.cfm ",
-    "content": "\nSummary:\nThe website appears to be vulnerable to SQL injection due to inducing an sql error using a single '\nDescription:\nThe following url, https://\u2588\u2588\u2588\u2588\u2588/hro/html/tech.cfm?Sort=Grade&ThisType=2 contains the parameter sort= which is vulnerable to SQLI. We know this due to the error disclosing the SQL query being used.\nSELECT *, tbl_JobInfo.id as TJobID,tbl_JobDocs.id as DocID FROM dbo.tbl_JobInfo left outer join dbo.tbl_JobType on JobTypeID = tbl_JobType.id left outer join tbl_JobDocs on tbl_JobInfo.id = tbl_JobDocs.JobID WHERE JobTypeID = 3 AND JobTypeID > 1 AND Display = 'Y' Order by 'INJECTION' ASC1 We can then demonstrate vulnerability by using time based queries and I opted to instead keep my queries low impact as to not violate the rules.\n## Impact\nHigh\n## Step-by-step Reproduction Instructions\nhttps://\u2588\u2588\u2588/hro/html/tech.cfm?Sort=SLEEP(25)&ThisType=3\nThis will cause the page hang to hang momentarily\nThis won't cause the website to hang, https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/hro/html/tech.cfm?Sort=SLEEP()&ThisType=3\nAdditionally included timing screen shots showing the time between the pages\n## Product, Version, and Configuration (If applicable)\nN/a\n## Suggested Mitigation/Remediation Actions\nSanitize user input and prepare statements\nImpact\nAn attacker could access the Database and harvest potentially sensitive data from the website or even take over the entire website through using certain SQL commands.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "alyssa_herrera ",
+  "title": "SQL injection on \u2588\u2588\u2588\u2588\u2588 due to tech.cfm ",
+  "content": "\nSummary:\nThe website appears to be vulnerable to SQL injection due to inducing an sql error using a single '\nDescription:\nThe following url, https://\u2588\u2588\u2588\u2588\u2588/hro/html/tech.cfm?Sort=Grade&ThisType=2 contains the parameter sort= which is vulnerable to SQLI. We know this due to the error disclosing the SQL query being used.\nSELECT *, tbl_JobInfo.id as TJobID,tbl_JobDocs.id as DocID FROM dbo.tbl_JobInfo left outer join dbo.tbl_JobType on JobTypeID = tbl_JobType.id left outer join tbl_JobDocs on tbl_JobInfo.id = tbl_JobDocs.JobID WHERE JobTypeID = 3 AND JobTypeID > 1 AND Display = 'Y' Order by 'INJECTION' ASC1 We can then demonstrate vulnerability by using time based queries and I opted to instead keep my queries low impact as to not violate the rules.\n## Impact\nHigh\n## Step-by-step Reproduction Instructions\nhttps://\u2588\u2588\u2588/hro/html/tech.cfm?Sort=SLEEP(25)&ThisType=3\nThis will cause the page hang to hang momentarily\nThis won't cause the website to hang, https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/hro/html/tech.cfm?Sort=SLEEP()&ThisType=3\nAdditionally included timing screen shots showing the time between the pages\n## Product, Version, and Configuration (If applicable)\nN/a\n## Suggested Mitigation/Remediation Actions\nSanitize user input and prepare statements\nImpact\nAn attacker could access the Database and harvest potentially sensitive data from the website or even take over the entire website through using certain SQL commands.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1570575420,
+  "report_url": "https://hackerone.com/reports/310031",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to the vulnerable URL: https://\u2588\u2588\u2588\u2588\u2588/hro/html/tech.cfm?Sort=Grade&ThisType=2"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "SQL Injection"
+    [
+      2,
+      "Inject a single quote (') into the Sort parameter to induce an SQL error and reveal the SQL query"
     ],
-    "screenshots": {},
-    "disclosed_date": 1570575420,
-    "report_url": "https://hackerone.com/reports/310031",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Navigate to the vulnerable URL: https://\u2588\u2588\u2588\u2588\u2588/hro/html/tech.cfm?Sort=Grade&ThisType=2"
-        ],
-        [
-            2,
-            "Inject a single quote (') into the Sort parameter to induce an SQL error and reveal the SQL query"
-        ],
-        [
-            3,
-            "Confirm vulnerability by using a time-based query like SLEEP(25) in the Sort parameter: https://\u2588\u2588\u2588/hro/html/tech.cfm?Sort=SLEEP(25)&ThisType=3"
-        ]
-    ],
-    "vuln_description": "The website is vulnerable to SQL injection via the Sort parameter in the tech.cfm page. An attacker can manipulate the SQL query by injecting malicious input, leading to potential unauthorized database access or data exfiltration.",
-    "reason": "The vulnerability is straightforward to discover as it involves a basic SQL injection technique (single quote injection) and the error message directly reveals the SQL query structure. The attack does not require complex interactions or state manipulation.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The SQL injection vulnerability involves direct manipulation of SQL queries through user input, which is a different class of vulnerability from the authN/authZ bypass or IDOR vulnerabilities described in the methodologies. The methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs, not on injecting malicious input to manipulate backend queries.",
-        "is_detectable": false
-    }
+    [
+      3,
+      "Confirm vulnerability by using a time-based query like SLEEP(25) in the Sort parameter: https://\u2588\u2588\u2588/hro/html/tech.cfm?Sort=SLEEP(25)&ThisType=3"
+    ]
+  ],
+  "vuln_description": "The website is vulnerable to SQL injection via the Sort parameter in the tech.cfm page. An attacker can manipulate the SQL query by injecting malicious input, leading to potential unauthorized database access or data exfiltration.",
+  "reason": "The vulnerability is straightforward to discover as it involves a basic SQL injection technique (single quote injection) and the error message directly reveals the SQL query structure. The attack does not require complex interactions or state manipulation.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability involves manipulating the 'Sort' parameter in the URL to inject SQL commands, which is a form of input that would be captured during normal HTTP request logging. The methodology involves analyzing requests and responses to detect unauthorized access or actions, which would include detecting SQL injection attempts through parameter manipulation.",
+    "is_detectable": true
+  },
+  "injection_metadata": {
+    "reasoning": "The SQL injection vulnerability was detected by inducing an error with a single quote (') in the 'Sort' parameter, which generated a visible SQL error in the response. This aligns with the 'Simple Payload' methodology, as the single quote is a basic payload included in common permutation lists, and the error response (same channel) directly indicates the vulnerability. While time-based payloads like SLEEP(25) were used for demonstration, the initial discovery via error leakage requires no custom filter bypass and fits the methodology's criteria for simple payloads and same-channel detection.",
+    "is_simple_injection": true
+  }
 }

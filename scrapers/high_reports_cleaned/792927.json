@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves querying email addresses via a GraphQL mutation by knowing the username, which is an action that can be logged and analyzed. The methodology involves swapping user sessions and resource IDs to test authorization boundaries, which would cover this case by detecting that an unprivileged user can access another user's email via a specific GraphQL query.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing another user's email by manipulating the report_id and username in a GraphQL mutation. This aligns with the IDOR methodology where swapping resource_ids (report_id) and testing with different user sessions can expose authorization flaws. The mutation's improper access control allows unauthorized retrieval of PII, fitting the authZ bypass detection by substituting resource IDs.",
+    "is_simple_authnz": true
   }
 }

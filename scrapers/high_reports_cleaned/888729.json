@@ -54,7 +54,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves a Read-Only user being able to delete users by manipulating the resource_id in a DELETE request. This fits the IDOR vulnerability class where the methodology involves swapping user sessions and resource_ids to test authorization boundaries. The steps involve collecting (user_session, action, resource_id) tuples and testing with different combinations, which would detect this issue.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves a Read-Only user (attacker) exploiting an IDOR by substituting a victim's invitation ID from another organization (h1) into their own organization (h2) context. This matches methodology step e) (substituting resource_ids of the same type with existing users) and methodology a/b (testing authorization boundaries via session/resource_id swaps). The authorization check fails to validate whether the invitation ID belongs to the attacker's current organization, allowing cross-organization resource access.",
+    "is_simple_authnz": true
   }
 }

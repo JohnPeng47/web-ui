@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves a member user accessing a functionality (integrating email to connect calendar) that should be restricted to admin users. This matches the AuthN/AuthZ Bypass methodology where a non-privileged user (member) is able to perform an action (integrating email) that should require higher privileges. The detection method involves swapping the user_session (from admin to member) and testing if the action can still be performed, which is covered by step b) of the methodology.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves a member user (without room permissions) accessing an endpoint that allows integrating an email into the admin's room area by exploiting a missing authorization check on the endpoint. The methodology's AuthZ Bypass detection applies here: swapping a non-privileged user's session (member) into an action (calendar/auth/init) that should require higher privileges (admin) would reveal the authorization boundary violation. The endpoint does not validate the user's role before processing the action, allowing unauthorized access to the 'rooms/add' functionality via the redirect URL.",
+    "is_simple_authnz": true
   }
 }

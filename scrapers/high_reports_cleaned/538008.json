@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an authenticated user (user B) sending a group invite to another user (user A) despite user A's privacy settings restricting such actions to friends only. This fits the IDOR vulnerability class where the action (groups_send_group_invites) is performed with a resource_id (user A's ID) that should be restricted based on user A's settings. The methodology would detect this by swapping user sessions and testing the action with different resource_ids (user IDs in this case).",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves authorization bypass where an attacker's session (User B) sends a group invite to a victim (User A) despite friendship restrictions. The methodology detects this by checking if substituting resource_ids (victim's user ID) and using an attacker's session allows unauthorized action. The authZ check (friendship validation) is missing, making it detectable via IDOR/AuthZ testing patterns described.",
+    "is_simple_authnz": true
   }
 }

@@ -48,7 +48,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an IDOR where a user can edit another user's permissions by changing the user ID in the URL. This fits the methodology where (user_session, action, resource_id) tuples are collected and tested. Specifically, the action is updating permissions, and the resource_id is the user ID. By swapping the user ID with another user's ID, the authorization boundary is crossed, which is covered by test e) in the methodology.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an IDOR where modifying the user ID parameter in the URL allows unauthorized access to edit another user's permissions. The outlined methodology detects such issues by substituting resource IDs (e.g., user IDs) and testing authorization boundaries. Since the attack involves swapping the 'resource_id' (user ID) in the request and validating access with a different user session, it aligns with the IDOR detection method (steps 4e and b). The resource_type::resource_id (user::19920465) is manipulated, and authorization checks are bypassed, fitting the 'simple_authnz' criteria.",
+    "is_simple_authnz": true
   }
 }

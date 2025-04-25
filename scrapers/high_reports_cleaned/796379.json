@@ -66,7 +66,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves modifying the registration request to escalate privileges by injecting specific characters ('<%') into the 'fname' and 'lname' fields and changing the 'user_type' parameter. This falls under the AuthZ Bypass category where a regular user can gain administrative access. The methodology described involves testing (user_session, action, resource_id) tuples and swapping user sessions or resource IDs to detect such vulnerabilities. Since the attack involves modifying parameters in a registration request (an action) to escalate privileges (an authorization boundary), it aligns with the detection method of swapping user sessions or parameters to test for AuthZ bypasses.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves modifying the registration request parameters (user_type=4 and fname/lname with specific strings) to escalate privileges. The proposed methodologies include testing actions with unauthenticated sessions (step d) and substituting parameters. Since registration is an unauthenticated action, tampering with user_type to gain admin access falls under AuthZ bypass detection by modifying parameters in requests, making it detectable via the outlined methods.",
+    "is_simple_authnz": true
   }
 }

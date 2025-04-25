@@ -1,58 +1,62 @@
 {
-    "reported_to": "Brave Software",
-    "reported_by": "nishimunea ",
-    "title": "XSS on internal: privileged origin through reader mode",
-    "content": "\nSummary:\nBrave iOS has two weaknesses described below. By combining them, XSS can be achieved on the privileged origin internal://local.\nExposure of uuidKey through REFERER header\nReader mode in Brave has two HTML templates, Reader.html and ReaderViewLoading.html. The former template defines <meta name=\"referrer\" content=\"never\"> header for preventing referrer leakage, but the latter template does not. Therefore, by opening an external page through ReaderViewLoading.html, the uuidKey contained in the Reader mode page URL is leaked.\nXSS in SessionRestoreHandler\nSessionRestoreHandler is used to restore a previously used tab, but it does not validate an URL to be restored. Therefore, if a javascript: URL is provided, the code is executed on the internal: domain.\nNote that the first vulnerability is not reproduced on iOS 15 because WKWebView's referrer policy has been changed to hostname only. However, according to Apple's report in June 2021, more than 90% of users were using iOS 14.\nProducts affected:\nBrave iOS 1.32.3 and higher (include the latest Nightly) on iOS 14.x and below\nSteps To Reproduce:\nVisit https://csrf.jp/brave/reader_uuid_leakage.php\nOpen the page in Reader mode\nLong tap a hyperlink in the page and choose \"Open in New Private Tab\"\nWait for several seconds and tap \"Load original page\"\nuuidKey in the reader mode URL is stolen through REFERER header\nClick an exploit URL in the page, then XSS is triggered on internal://local\nSupporting Material/References:\nxss_on_internal_origin_through_reader_mode.mov: video of the attack against the vulnerabilities\nreader_uuid_leakage.php: server-side exploit code\nImpact\nAttacker can elevate privileges to internal: origin\n\n",
-    "severity": [
-        7.1,
-        null
+  "reported_to": "Brave Software",
+  "reported_by": "nishimunea ",
+  "title": "XSS on internal: privileged origin through reader mode",
+  "content": "\nSummary:\nBrave iOS has two weaknesses described below. By combining them, XSS can be achieved on the privileged origin internal://local.\nExposure of uuidKey through REFERER header\nReader mode in Brave has two HTML templates, Reader.html and ReaderViewLoading.html. The former template defines <meta name=\"referrer\" content=\"never\"> header for preventing referrer leakage, but the latter template does not. Therefore, by opening an external page through ReaderViewLoading.html, the uuidKey contained in the Reader mode page URL is leaked.\nXSS in SessionRestoreHandler\nSessionRestoreHandler is used to restore a previously used tab, but it does not validate an URL to be restored. Therefore, if a javascript: URL is provided, the code is executed on the internal: domain.\nNote that the first vulnerability is not reproduced on iOS 15 because WKWebView's referrer policy has been changed to hostname only. However, according to Apple's report in June 2021, more than 90% of users were using iOS 14.\nProducts affected:\nBrave iOS 1.32.3 and higher (include the latest Nightly) on iOS 14.x and below\nSteps To Reproduce:\nVisit https://csrf.jp/brave/reader_uuid_leakage.php\nOpen the page in Reader mode\nLong tap a hyperlink in the page and choose \"Open in New Private Tab\"\nWait for several seconds and tap \"Load original page\"\nuuidKey in the reader mode URL is stolen through REFERER header\nClick an exploit URL in the page, then XSS is triggered on internal://local\nSupporting Material/References:\nxss_on_internal_origin_through_reader_mode.mov: video of the attack against the vulnerabilities\nreader_uuid_leakage.php: server-side exploit code\nImpact\nAttacker can elevate privileges to internal: origin\n\n",
+  "severity": [
+    7.1,
+    null
+  ],
+  "bounty": 500,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1687427460,
+  "report_url": "https://hackerone.com/reports/1438028",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "MOBILE",
+  "steps": [
+    [
+      1,
+      "Visit https://csrf.jp/brave/reader_uuid_leakage.php"
     ],
-    "bounty": 500,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Generic"
+    [
+      2,
+      "Open the page in Reader mode"
     ],
-    "screenshots": {},
-    "disclosed_date": 1687427460,
-    "report_url": "https://hackerone.com/reports/1438028",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "vuln_category": "MOBILE",
-    "steps": [
-        [
-            1,
-            "Visit https://csrf.jp/brave/reader_uuid_leakage.php"
-        ],
-        [
-            2,
-            "Open the page in Reader mode"
-        ],
-        [
-            3,
-            "Long tap a hyperlink in the page and choose \"Open in New Private Tab\""
-        ],
-        [
-            4,
-            "Wait for several seconds and tap \"Load original page\""
-        ],
-        [
-            5,
-            "uuidKey in the reader mode URL is stolen through REFERER header"
-        ],
-        [
-            6,
-            "Click an exploit URL in the page, then XSS is triggered on internal://local"
-        ]
+    [
+      3,
+      "Long tap a hyperlink in the page and choose \"Open in New Private Tab\""
     ],
-    "vuln_description": "The vulnerability involves two weaknesses in Brave iOS: exposure of uuidKey through the REFERER header due to missing referrer policy in ReaderViewLoading.html, and XSS in SessionRestoreHandler which does not validate URLs to be restored. Combining these allows XSS on the privileged internal://local origin.",
-    "reason": "The attack requires understanding and combining two distinct vulnerabilities: one related to referrer leakage and another to improper URL validation. The interaction between these components is non-obvious, and the attack involves manipulating the application state through reader mode and session restoration.",
-    "new_complexity": "HIGH",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The vulnerability involves XSS on a privileged origin through reader mode in Brave iOS, which is not directly related to authentication or authorization bypass within the same application context. The methodology described focuses on testing AuthN/AuthZ boundaries within a single application by swapping user sessions and resource IDs, which does not apply to this cross-origin XSS vulnerability.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "Wait for several seconds and tap \"Load original page\""
+    ],
+    [
+      5,
+      "uuidKey in the reader mode URL is stolen through REFERER header"
+    ],
+    [
+      6,
+      "Click an exploit URL in the page, then XSS is triggered on internal://local"
+    ]
+  ],
+  "vuln_description": "The vulnerability involves two weaknesses in Brave iOS: exposure of uuidKey through the REFERER header due to missing referrer policy in ReaderViewLoading.html, and XSS in SessionRestoreHandler which does not validate URLs to be restored. Combining these allows XSS on the privileged internal://local origin.",
+  "reason": "The attack requires understanding and combining two distinct vulnerabilities: one related to referrer leakage and another to improper URL validation. The interaction between these components is non-obvious, and the attack involves manipulating the application state through reader mode and session restoration.",
+  "new_complexity": "HIGH",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves a combination of weaknesses in Brave iOS that allow for privilege escalation to the internal://local origin. The methodology described focuses on authentication and authorization boundaries within a single application by swapping user sessions and resource IDs. However, the XSS vulnerability here is not about crossing authN/authZ boundaries but rather exploiting a chain of weaknesses (referrer leakage and lack of URL validation) to execute code in a privileged context. This falls outside the scope of the described methodology.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The XSS vulnerability in SessionRestoreHandler involves injecting a javascript: URL through improper URL validation, which could theoretically be detected by parameter analysis. However:\n1. The privileged internal://local origin and session restore functionality likely wouldn't be exposed through regular user navigation patterns\n2. The referrer leakage vulnerability involves client-side header behavior rather than server-side parameter injection\n3. The attack requires chaining two vulnerabilities across different components, which wouldn't be detected through simple same-channel payload testing\n4. The methodology focuses on standard web parameters, while these vulnerabilities exist in browser-specific handling of privileged URIs and internal state",
+    "is_simple_injection": false
+  }
 }

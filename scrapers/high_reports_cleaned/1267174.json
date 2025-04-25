@@ -39,10 +39,10 @@
   "authnz_byppass_detectable": true,
   "is_simple_payload": false,
   "injection_metadata": {
-    "is_simple_payload": false
+    "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves default credentials for Apache Tomcat, which is a case of improper authentication. The methodology described focuses on testing authorization and authentication boundaries by swapping user sessions and resource IDs. Since this is a case of default credentials, it doesn't involve swapping sessions or resource IDs but rather using known default credentials to gain access. Therefore, it doesn't fit the described methodology.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves access via default credentials (tomcat:tomcat) to an admin interface. The methodology includes testing AuthN/AuthZ bypass by checking access with unauthenticated or non-privileged sessions. Since this is a direct authentication bypass using well-known default credentials (a classic AuthN flaw), it aligns with the 'AuthN/AuthZ Bypass' detection method (step d: execute actions with unauthenticated sessions). The system would detect this by attempting common default credentials during AuthN checks.",
+    "is_simple_authnz": true
   }
 }

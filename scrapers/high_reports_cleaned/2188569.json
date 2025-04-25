@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an improper access control issue where a low-privileged user can escalate their privileges by making a PUT request to a specific API endpoint without proper validation. This falls under the AuthZ Bypass category, where the methodology involves swapping user sessions and testing actions that should be restricted. The exploit involves using the authenticated session of a low-privileged user to perform an action (privilege escalation) that should be restricted to higher-privileged users, which aligns with the detection method of swapping user sessions and testing actions.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves a PUT request to an API endpoint that does not properly validate the user's privileges. The methodology's step 4b (swapping user sessions and testing actions) and step 4e (substituting resource IDs) would detect this, as the exploit uses a low-privileged session to escalate privileges via an unprotected endpoint, fitting the AuthZ bypass detection criteria.",
+    "is_simple_authnz": true
   }
 }

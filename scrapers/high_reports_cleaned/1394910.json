@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves unauthenticated access to admin panel functions by manipulating HTTP responses (Execution after Redirect). This falls under the AuthN/AuthZ Bypass methodology where the detection method involves testing access to functionality without proper authentication. The methodology would detect this by executing actions with an unauthenticated user session (step d) and observing the unauthorized access.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing the admin panel without authentication by manipulating the HTTP response status code. The methodology includes testing actions with unauthenticated sessions (step d). Since the admin panel functions are accessible without any session, the automated system would detect this by attempting to access admin functions with no session, thereby identifying the authz bypass. The core issue is missing access controls on admin endpoints, which aligns with the AuthN/AuthZ Bypass detection method.",
+    "is_simple_authnz": true
   }
 }

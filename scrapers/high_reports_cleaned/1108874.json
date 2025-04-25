@@ -54,7 +54,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves manipulating the Host header in a password reset request, which is a specific action (sending a password reset link) that can be captured and tested by swapping or manipulating headers. The methodology includes testing actions with different parameters (like headers) and observing the outcomes, which would cover this case.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves manipulating the Host header to poison the password reset link, which is not directly tied to swapping user sessions, resource IDs, or testing authorization boundaries via user privilege escalation. The detection methodologies focus on testing existing (user_session, action, resource_id) tuples and authorization checks, while Host Header Poisoning exploits server-side URL generation logic. This requires header manipulation rather than authorization context substitution.",
+    "is_simple_authnz": false
   }
 }

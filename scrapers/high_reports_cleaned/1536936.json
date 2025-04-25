@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves accessing different NIN records by incrementing the 'message' parameter in the URL. This fits the IDOR pattern where resource_ids (NIN records) are accessed without proper authorization checks. The methodology would detect this by observing the pattern of resource_id substitution and testing access with different user sessions or no session at all.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing sensitive resources (NIN numbers) by incrementing the 'message' parameter without authentication. The methodology's step d) tests actions with unauthenticated sessions, which would detect this IDOR since no session is required. Additionally, step e) involves substituting resource_ids (message values) which aligns with changing the parameter to access different users' data. The automated tests would cycle through resource_ids and detect unauthorized access, making this a simple AuthN/AuthZ bypass.",
+    "is_simple_authnz": true
   }
 }

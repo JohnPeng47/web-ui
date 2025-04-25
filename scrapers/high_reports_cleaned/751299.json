@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an authenticated user (admin) modifying the role of another user (owner) by manipulating the request after enabling a disabled input field. This falls under the AuthZ bypass methodology where the action (changing user role) is tested with different user sessions (admin and owner) and resource_ids (user IDs). The methodology covers this by collecting (user_session, action, resource_id) tuples and testing with different user sessions and resource_ids.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an authenticated admin user modifying authorization roles through direct object reference (user ID) and privilege escalation via UI manipulation. The methodology's step 4e (substituting resource_ids of same type) would detect this as the admin user session could successfully modify the owner's role through the same PUT request pattern captured during normal usage, despite UI controls suggesting this should be restricted.",
+    "is_simple_authnz": true
   }
 }

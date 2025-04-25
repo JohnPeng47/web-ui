@@ -54,7 +54,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves swapping resource_ids (device IDs) with existing (action, resource_id) tuples, which is covered by test e) in the methodology. The attacker uses their own session to perform an action (wipe device) but changes the resource_id to that of the victim's device, which is detectable by the proposed method.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an attacker using their own session to modify the `data-id` parameter to a victim's device ID. The outlined methodologies check for IDOR by substituting resource IDs across user sessions. Since the attack uses the same action (wipe) with a different resource ID (victim's device) under the attacker's session, it fits the IDOR detection method (step 4e). The methodology would capture this by testing if the attacker's session can access the victim's resource ID for the same action, confirming missing ownership checks.",
+    "is_simple_authnz": true
   }
 }

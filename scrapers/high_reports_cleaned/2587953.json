@@ -62,7 +62,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an authenticated user (attacker) changing their email to a victim's email, which is an action that can be captured in the normal flow of HTTP requests. The methodology includes testing actions with different user sessions and resource IDs, which would cover this scenario by swapping the email (resource_id) with an existing victim's email.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an attacker changing their email to the victim's, which maps to the methodology's test case for substituting a resource_id (victim's email) in an existing action (email update) using their own session. The methodology explicitly checks for authorization bypass via resource_id substitution (test e) and session-based authZ checks (test b/c), which would detect this improper authentication on the email change functionality.",
+    "is_simple_authnz": true
   }
 }

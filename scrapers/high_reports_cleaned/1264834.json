@@ -1,53 +1,54 @@
 {
-    "reported_to": "MTN Group",
-    "reported_by": "alimanshester ",
-    "title": "cross site scripting in : mtn.bj",
-    "content": "\nSummary:\nXss vulnerability in mtn.bj in file name\nSteps To Reproduce:\n1.Go to :\nhttps://www.mtn.bj/business/ressources/formulaires/plan-de-localisation-de-compte/?next=https://www.mtn.bj/business/ressources/formulaires/formulaire-de-souscription/\n2 - fill all inputs with any data\n3 - in file upload upload a file with payload file name such as : \"><img src=x onerror=alert(document.cookie);.jpg\n4-the payload will executed in the page .\nSupporting Material/References:\n1 - video showing poc\n2 - screen shot\nImpact\nexecute malicious java script in user browser\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "MTN Group",
+  "reported_by": "alimanshester ",
+  "title": "cross site scripting in : mtn.bj",
+  "content": "\nSummary:\nXss vulnerability in mtn.bj in file name\nSteps To Reproduce:\n1.Go to :\nhttps://www.mtn.bj/business/ressources/formulaires/plan-de-localisation-de-compte/?next=https://www.mtn.bj/business/ressources/formulaires/formulaire-de-souscription/\n2 - fill all inputs with any data\n3 - in file upload upload a file with payload file name such as : \"><img src=x onerror=alert(document.cookie);.jpg\n4-the payload will executed in the page .\nSupporting Material/References:\n1 - video showing poc\n2 - screen shot\nImpact\nexecute malicious java script in user browser\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Reflected"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1659799140,
+  "report_url": "https://hackerone.com/reports/1264834",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Go to: https://www.mtn.bj/business/ressources/formulaires/plan-de-localisation-de-compte/?next=https://www.mtn.bj/business/ressources/formulaires/formulaire-de-souscription/"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Reflected"
+    [
+      2,
+      "Fill all inputs with any data"
     ],
-    "screenshots": {},
-    "disclosed_date": 1659799140,
-    "report_url": "https://hackerone.com/reports/1264834",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Go to: https://www.mtn.bj/business/ressources/formulaires/plan-de-localisation-de-compte/?next=https://www.mtn.bj/business/ressources/formulaires/formulaire-de-souscription/"
-        ],
-        [
-            2,
-            "Fill all inputs with any data"
-        ],
-        [
-            3,
-            "In file upload, upload a file with payload file name such as: \"><img src=x onerror=alert(document.cookie);.jpg"
-        ],
-        [
-            4,
-            "The payload will be executed in the page"
-        ]
+    [
+      3,
+      "In file upload, upload a file with payload file name such as: \"><img src=x onerror=alert(document.cookie);.jpg"
     ],
-    "vuln_description": "Cross-site scripting (XSS) vulnerability in mtn.bj allows execution of malicious JavaScript via a crafted file name during file upload.",
-    "reason": "The vulnerability is straightforward to discover as it involves a common XSS payload in a file name, a well-known attack vector. No complex interactions or state manipulations are required.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "reason": "The XSS vulnerability involves executing malicious JavaScript via a file upload, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, not on input validation or script injection vulnerabilities.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "The payload will be executed in the page"
+    ]
+  ],
+  "vuln_description": "Cross-site scripting (XSS) vulnerability in mtn.bj allows execution of malicious JavaScript via a crafted file name during file upload.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common XSS payload in a file name, a well-known attack vector. No complex interactions or state manipulations are required.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The XSS vulnerability involves injecting a payload into a filename parameter during file upload. The methodology would detect this because: 1) File uploads generate HTTP POST requests with filename as a parameter, which would be logged. 2) The filename field would be identified as injectable. 3) A simple payload like <img src=x onerror=alert()> in filename matches basic XSS patterns from standard payload lists. 4) Execution occurs in the same channel (response page) through regular navigation after upload, meeting same-channel detection requirements. No custom filter bypass was needed as shown in the report.",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves injecting malicious JavaScript via a file upload, which is not directly related to authentication or authorization (AuthN/AuthZ) boundaries. The methodology described focuses on testing AuthN/AuthZ bypasses and IDOR vulnerabilities by swapping user sessions or resource IDs, not on detecting client-side script injection vulnerabilities like XSS.",
+    "is_detectable": false
+  }
 }

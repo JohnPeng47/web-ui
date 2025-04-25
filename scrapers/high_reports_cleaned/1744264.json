@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves manipulating the session parameter to access another user's chat screen and send messages, which falls under the IDOR (Insecure Direct Object Reference) vulnerability class. The methodology described involves swapping user sessions and testing for unauthorized access, which directly applies to this scenario.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves substituting session tokens (user_session parameter) to access another user's chat resource. This directly aligns with Methodology 1 (IDOR) where (user_session, action, resource_id) tuples are tested for authorization boundaries. The automated detection steps (b/c/e) would catch this scenario by swapping sessions and verifying access to the chat endpoint (resource_type::chat_screen). The attack requires no novel authorization bypass technique beyond session substitution, which is explicitly covered by the described IDOR/AuthZ detection framework.",
+    "is_simple_authnz": true
   }
 }

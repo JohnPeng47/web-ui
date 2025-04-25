@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves URI path parsing in curl that allows bypassing security filters through pattern matching in the URI. This is not directly related to authentication or authorization bypass within a single application's context, but rather a protocol handling issue in curl itself. The proposed methodologies focus on detecting authN/authZ issues within application sessions and resources, not protocol-level parsing vulnerabilities in external tools like curl.",
-    "is_detectable": false
+    "reasoning": "The reported vulnerability in curl involves URI parsing errors leading to security filter bypasses, such as accessing local files or scanning ports. The described methodologies focus on detecting authN/authZ issues by manipulating user sessions and resource IDs within an application's authorization framework. However, the curl vulnerability stems from URI interpretation logic allowing unintended protocol/port ranges, which is a client-side parsing flaw rather than a server-side authorization bypass. Since the issue is not related to user sessions, resource permissions, or application-level access controls, it does not fall under the provided authN/authZ detection methodologies.",
+    "is_simple_authnz": false
   }
 }

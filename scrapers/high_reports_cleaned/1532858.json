@@ -1,54 +1,58 @@
 {
-    "reported_to": "Omise",
-    "reported_by": "oblivionlight ",
-    "title": "Cross-site scripting on dashboard2.omise.co",
-    "content": "\nSummary:\nCross-site scripting (XSS) is an attack vector that injects malicious code into a vulnerable web application.\nStored XSS, also known as persistent XSS, is the more damaging of the two. It occurs when a malicious script is injected directly into a vulnerable web application.\nSteps To Reproduce:\nLog in to your account.\nVisit https://dashboard.omise.co/test/settings\nUnder Export - Specify the metadata that you want to include in your export option. Enter <script>alert(2)</script> in all four parameters including Charge, Transfer, Refund, Dispute.\nClick on Update settings.\nClick on Try our new dashboard, XSS will Trigger or log out and log in again, and XSS will Trigger.\nPOC:\nAttached Video.\nImpact\nCode injected into a vulnerable application can exfiltrate data or install malware on the user's machine. Attackers can masquerade as authorized users via session cookies, allowing them to perform any action allowed by the user account.\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "Omise",
+  "reported_by": "oblivionlight ",
+  "title": "Cross-site scripting on dashboard2.omise.co",
+  "content": "\nSummary:\nCross-site scripting (XSS) is an attack vector that injects malicious code into a vulnerable web application.\nStored XSS, also known as persistent XSS, is the more damaging of the two. It occurs when a malicious script is injected directly into a vulnerable web application.\nSteps To Reproduce:\nLog in to your account.\nVisit https://dashboard.omise.co/test/settings\nUnder Export - Specify the metadata that you want to include in your export option. Enter <script>alert(2)</script> in all four parameters including Charge, Transfer, Refund, Dispute.\nClick on Update settings.\nClick on Try our new dashboard, XSS will Trigger or log out and log in again, and XSS will Trigger.\nPOC:\nAttached Video.\nImpact\nCode injected into a vulnerable application can exfiltrate data or install malware on the user's machine. Attackers can masquerade as authorized users via session cookies, allowing them to perform any action allowed by the user account.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 200,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1653407640,
+  "report_url": "https://hackerone.com/reports/1532858",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Log in to your account."
     ],
-    "bounty": 200,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
+    [
+      2,
+      "Visit https://dashboard.omise.co/test/settings."
     ],
-    "screenshots": {},
-    "disclosed_date": 1653407640,
-    "report_url": "https://hackerone.com/reports/1532858",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Log in to your account."
-        ],
-        [
-            2,
-            "Visit https://dashboard.omise.co/test/settings."
-        ],
-        [
-            3,
-            "Under Export - Specify the metadata that you want to include in your export option. Enter `<script>alert(2)</script>` in all four parameters including Charge, Transfer, Refund, Dispute."
-        ],
-        [
-            4,
-            "Click on Update settings."
-        ],
-        [
-            5,
-            "Click on Try our new dashboard, XSS will Trigger or log out and log in again, and XSS will Trigger."
-        ]
+    [
+      3,
+      "Under Export - Specify the metadata that you want to include in your export option. Enter `<script>alert(2)</script>` in all four parameters including Charge, Transfer, Refund, Dispute."
     ],
-    "vuln_description": "Cross-site scripting (XSS) is an attack vector that injects malicious code into a vulnerable web application. Stored XSS, also known as persistent XSS, is the more damaging of the two. It occurs when a malicious script is injected directly into a vulnerable web application. In this case, the script is stored in the export settings and triggers when the dashboard is accessed.",
-    "reason": "The vulnerability involves a straightforward injection of a script into input fields that are not properly sanitized. The steps to reproduce are clear and do not require complex interactions or understanding of multiple components.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The XSS vulnerability involves injecting malicious scripts into input fields, which is not directly related to authentication or authorization bypass. The proposed methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs, not on input validation or script injection.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "Click on Update settings."
+    ],
+    [
+      5,
+      "Click on Try our new dashboard, XSS will Trigger or log out and log in again, and XSS will Trigger."
+    ]
+  ],
+  "vuln_description": "Cross-site scripting (XSS) is an attack vector that injects malicious code into a vulnerable web application. Stored XSS, also known as persistent XSS, is the more damaging of the two. It occurs when a malicious script is injected directly into a vulnerable web application. In this case, the script is stored in the export settings and triggers when the dashboard is accessed.",
+  "reason": "The vulnerability involves a straightforward injection of a script into input fields that are not properly sanitized. The steps to reproduce are clear and do not require complex interactions or understanding of multiple components.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves injecting malicious scripts into input fields, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, not on input validation or script injection.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves injecting a basic <script> payload into form fields which persists through regular user navigation flows. The methodology would identify these parameters as injectable through request/response logging, test them with simple XSS payloads from standard lists, and detect execution when navigating to the new dashboard - a legitimate user flow within the same application. No custom filter bypasses or cross-domain navigation were required.",
+    "is_simple_injection": true
+  }
 }

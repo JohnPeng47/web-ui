@@ -42,7 +42,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The report involves a database dump from a different domain (insideok.ru) and does not involve user sessions, actions, or resource IDs within the same application. The methodology described focuses on testing authorization boundaries within a single application by swapping user sessions and resource IDs, which is not applicable here.",
-    "is_detectable": false
+    "reasoning": "The database dump exposure is due to a publicly accessible file (db.sql) containing admin credentials. This is a server misconfiguration rather than an in-application authorization flaw. The described methodologies focus on testing session/resource swaps during normal application interactions, not detecting improperly exposed files. The vulnerability doesn't involve IDOR or authZ bypass patterns like session manipulation or privilege escalation through normal app endpoints.",
+    "is_simple_authnz": false
   }
 }

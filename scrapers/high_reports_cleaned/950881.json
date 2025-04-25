@@ -60,7 +60,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an IDOR where the user ID in the request can be manipulated to change another user's email address. This fits the methodology's test case e) where substituting the resource_id (user ID) with another user's ID and executing the action with an existing user session would reveal the vulnerability.",
-    "is_detectable": true
+    "reasoning": "The reported IDOR vulnerability involves modifying the 'id' parameter in a request to change another user's email, leading to account takeover. The methodology outlined captures actions and resource_ids during normal navigation. By substituting the resource_id (user ID) in the email update request with another sequential ID (as per step e), the vulnerability would be detected. The attack aligns with the IDOR detection method, where a non-privileged user's session is used to modify a resource_id they shouldn't access, confirming it's a simple authn/z issue.",
+    "is_simple_authnz": true
   }
 }

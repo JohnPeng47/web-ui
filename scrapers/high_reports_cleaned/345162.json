@@ -39,7 +39,7 @@
   "authnz_byppass_detectable": false,
   "is_simple_payload": false,
   "injection_metadata": {
-    "is_simple_payload": true
+    "is_simple_payload": false
   },
   "authnz_metadata": {
     "reason": "The vulnerability involves an IDOR (Insecure Direct Object Reference) where the 'blob_id' parameter can be manipulated to access files that should not be accessible. This fits the methodology's test case e) where new resource_ids (blob_ids) are substituted with existing ones to test for authorization boundaries being crossed. The methodology would capture the (user_session, action, resource_id) tuples during normal navigation and then test for unauthorized access by swapping blob_ids.",

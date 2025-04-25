@@ -52,7 +52,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an attacker manipulating federated share permissions by sending a crafted POST request to the victim's server. This falls under the AuthN/AuthZ Bypass category where the attacker elevates their permissions without proper authorization. The methodology described involves testing authorization boundaries by swapping user sessions and resource IDs, which would include testing unauthorized permission changes like the one described in the report.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an attacker sending an unauthorized POST request to modify share permissions without proper authentication or authorization checks. The described methodology includes testing actions with unauthenticated sessions (step 3d), which could detect this flaw if the endpoint `/ocm/notifications` is tested for AuthN/AuthZ bypasses. The attack does not require session swapping or resource ID substitution but exploits missing server-side checks for anonymous requests, aligning with the AuthZ bypass detection logic.",
+    "is_simple_authnz": true
   }
 }

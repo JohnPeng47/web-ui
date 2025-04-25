@@ -64,7 +64,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves swapping resource_ids (hidBlogID) with an authenticated user session, which is covered by the methodology's test e) for IDOR detection. The attacker uses their session to modify a victim's resource by substituting the resource_id.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves substituting a victim's hidBlogID parameter in an authenticated request while using the attacker's session. This matches methodology step 4e ('substitute resource_id with new resource_id and execute with existing users') as the system would detect the attacker's session has no ownership of the victim's blog ID but can still modify it. The action (Save Settings) and resource_type::resource_id (blog::hidBlogID) are captured in normal navigation flow, making this detectable via automated IDOR testing.",
+    "is_simple_authnz": true
   }
 }

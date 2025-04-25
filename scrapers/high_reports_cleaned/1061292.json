@@ -38,10 +38,10 @@
   "idor_detectable": true,
   "authnz_byppass_detectable": true,
   "injection_metadata": {
-    "is_simple_payload": false
+    "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an unauthenticated endpoint that exposes sensitive user data. The methodology described includes testing actions with unauthenticated user sessions (step d), which would detect this issue by attempting to access the endpoint without authentication.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing sensitive endpoints without authentication by manipulating resource IDs (REGISTRATION_ID, ATTACHMENT_ID). The methodology explicitly checks for unauthenticated access to actions (step d) and substitution of resource IDs (step e), which aligns with the attack vector. Since the vulnerability exists within the same application's authorization boundaries and requires no cross-application context, it fits the described IDOR/AuthZ detection patterns.",
+    "is_simple_authnz": true
   }
 }

@@ -44,7 +44,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an IDOR where an authenticated user can modify another user's social links by swapping the 'username' parameter in the request. This falls under the methodology of testing (user_session, action, resource_id) tuples by substituting resource_ids (usernames in this case) with existing ones to test authorization boundaries. The detection method involves collecting these tuples and automatically testing them with different user sessions and resource_ids, which would catch this type of vulnerability.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves modifying another user's resource (social links) by substituting the resource ID in the request. The methodology's step 4e (substituting resource IDs of the same type) would detect this IDOR, as the attacker's session is used to act on a victim's resource ID extracted from normal usage.",
+    "is_simple_authnz": true
   }
 }

@@ -1,46 +1,50 @@
 {
-    "reported_to": "Brave Software",
-    "reported_by": "paulos__ ",
-    "title": "Command Execution because of extension handling",
-    "content": "\nSummary:\nHello,\nUsing this bug an attacker can execute commands as the current user using brave & gain complete shell capabilities (and all possibilities associated)\nDetails:\nThe issue is in the way the application handles website TLDs. typically in windows, .com represents an application, much similar like .exe - when Brave saves a website (Ctrl+S) - it uses the name of the website.\nFor PoC purpose I used .bat TLDs because they are much easier to show a poc with instead of binary application garbage data.\nSo Assume a user visits http://paulos.bat with the contents of:\nCode 14 Bytes\n1@echo off\n2calc\nAnd saves the page, this will save the website as paulos.bat - which when executed - actually opens batch and executes calculator.\nBypassing Mitigations\nIn Windows, Microsoft warns users when they execute applications that are downloaded, this can simply be bypassed by sending filenames with words like Update or Setup... yeah, I can't believe this works too.\nSo say a user visits https://malicioussetup.com and saves the site - note this site changed its contents from whatever it was to binary-garbage & microsoft will allow executing it - eventually causing code execution.\nThis is clearly a chain of low priority issues that cause command execution. :) (POC\nProducts affected:\nTested in Latest Brave Windows (I suspect OSX, iOS & Android may also be affected)\nRecommended Fix:\nAdd .html/htm to the index page (/index.html) to mitigate this easily\nSupporting Material/References:\nPOC image attached\nPOC video (Private): https://youtu.be/ret4pJArYSU\nI think you should fix this ASAP! as anyone can register .com sites to abuse it.\nThanks,\nPaulos\n\n",
-    "severity": [
-        8.8,
-        null
+  "reported_to": "Brave Software",
+  "reported_by": "paulos__ ",
+  "title": "Command Execution because of extension handling",
+  "content": "\nSummary:\nHello,\nUsing this bug an attacker can execute commands as the current user using brave & gain complete shell capabilities (and all possibilities associated)\nDetails:\nThe issue is in the way the application handles website TLDs. typically in windows, .com represents an application, much similar like .exe - when Brave saves a website (Ctrl+S) - it uses the name of the website.\nFor PoC purpose I used .bat TLDs because they are much easier to show a poc with instead of binary application garbage data.\nSo Assume a user visits http://paulos.bat with the contents of:\nCode 14 Bytes\n1@echo off\n2calc\nAnd saves the page, this will save the website as paulos.bat - which when executed - actually opens batch and executes calculator.\nBypassing Mitigations\nIn Windows, Microsoft warns users when they execute applications that are downloaded, this can simply be bypassed by sending filenames with words like Update or Setup... yeah, I can't believe this works too.\nSo say a user visits https://malicioussetup.com and saves the site - note this site changed its contents from whatever it was to binary-garbage & microsoft will allow executing it - eventually causing code execution.\nThis is clearly a chain of low priority issues that cause command execution. :) (POC\nProducts affected:\nTested in Latest Brave Windows (I suspect OSX, iOS & Android may also be affected)\nRecommended Fix:\nAdd .html/htm to the index page (/index.html) to mitigate this easily\nSupporting Material/References:\nPOC image attached\nPOC video (Private): https://youtu.be/ret4pJArYSU\nI think you should fix this ASAP! as anyone can register .com sites to abuse it.\nThanks,\nPaulos\n\n",
+  "severity": [
+    8.8,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1502356200,
+  "report_url": "https://hackerone.com/reports/188078",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Visit a malicious website with a .bat or .com extension, e.g., http://paulos.bat or https://malicioussetup.com"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Command Injection - Generic"
+    [
+      2,
+      "Save the webpage using Ctrl+S in Brave browser, which will save the file with the website's name (e.g., paulos.bat or malicioussetup.com)"
     ],
-    "screenshots": {},
-    "disclosed_date": 1502356200,
-    "report_url": "https://hackerone.com/reports/188078",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Visit a malicious website with a .bat or .com extension, e.g., http://paulos.bat or https://malicioussetup.com"
-        ],
-        [
-            2,
-            "Save the webpage using Ctrl+S in Brave browser, which will save the file with the website's name (e.g., paulos.bat or malicioussetup.com)"
-        ],
-        [
-            3,
-            "Execute the saved file, which will run the embedded commands (e.g., opening calculator or other malicious code)"
-        ]
-    ],
-    "vuln_description": "The vulnerability involves Brave browser's handling of website TLDs when saving pages. By saving a malicious website with a .bat or .com extension, the saved file can be executed as a script or binary, leading to command execution. Windows' warning for downloaded applications can be bypassed using filenames like 'Update' or 'Setup'.",
-    "reason": "The attack involves understanding how Brave handles file extensions when saving webpages and how Windows executes files with certain extensions. The interaction between the browser's file-saving behavior and the OS's file execution is subtle but not highly complex. The bypass of Windows' security warning adds a minor layer of complexity.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The vulnerability involves command execution due to file extension handling in Brave browser when saving websites, which is unrelated to authentication or authorization (AuthN/AuthZ) issues. The proposed methodologies focus on AuthN/AuthZ bypasses and IDOR vulnerabilities, which are not applicable here.",
-        "is_detectable": false
-    }
+    [
+      3,
+      "Execute the saved file, which will run the embedded commands (e.g., opening calculator or other malicious code)"
+    ]
+  ],
+  "vuln_description": "The vulnerability involves Brave browser's handling of website TLDs when saving pages. By saving a malicious website with a .bat or .com extension, the saved file can be executed as a script or binary, leading to command execution. Windows' warning for downloaded applications can be bypassed using filenames like 'Update' or 'Setup'.",
+  "reason": "The attack involves understanding how Brave handles file extensions when saving webpages and how Windows executes files with certain extensions. The interaction between the browser's file-saving behavior and the OS's file execution is subtle but not highly complex. The bypass of Windows' security warning adds a minor layer of complexity.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves command execution due to file extension handling in Brave browser, which is unrelated to authentication or authorization (AuthN/AuthZ) issues. The proposed methodologies focus on detecting AuthN/AuthZ bypasses and IDOR vulnerabilities by analyzing user sessions, actions, and resource IDs within the same application context. The reported issue does not involve any of these elements and instead deals with file handling and execution in the browser.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability stems from Brave's handling of domain TLDs during file saving, not from injectable parameters in HTTP responses. The methodology focuses on parameter injection in HTTP transactions, while this issue requires direct control over domain names/TLDs (not reflected parameters). Simple payload testing would not detect this as it doesn't involve traditional response parameter injection.",
+    "is_simple_injection": false
+  }
 }

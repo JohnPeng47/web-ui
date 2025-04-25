@@ -52,7 +52,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves the reuse of OTP tokens within the same application (HackerOne) and falls under the category of improper authentication. The methodology described involves testing authentication and authorization boundaries within the same application by swapping user sessions and resource IDs. Since this issue is about OTP reuse within the same application's authentication flow, it fits the scope of the described methodology.",
-    "is_detectable": true
+    "reasoning": "The reported 2FA OTP reuse vulnerability involves temporal validity of authentication tokens rather than authorization boundary testing through session/resource substitution. The methodology focuses on testing cross-user/resource authorization checks, not server-side token lifecycle management. Since OTP reuse depends on server behavior with historical tokens rather than session/resource ID manipulation, it wouldn't be detected through the described (user_session, action, resource_id) substitution patterns.",
+    "is_simple_authnz": false
   }
 }

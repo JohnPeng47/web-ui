@@ -1,57 +1,58 @@
 {
-    "reported_to": "Kaspersky",
-    "reported_by": "abbadeed ",
-    "title": "[Fixed] A vulnerability in KAVKIS 2020 products family allows full disabling of protection",
-    "content": "\nNote! Thank you for your report. For the purposes of the further analysis of the vulnerability, that you kindly report to us, could you please fill all fields [in square brackets]. This information will help us to respond you more quickly and triage your report. Thanks a lot for your assistance.\nI use Translator, T_T Sorry\nSummary\ncan turn off anti-virus functionality in an external process.\nDescription\nUse the SetWindowsHookEx function to inject the DLL. The ClientLoadLibrary was hooked to prevent injection, but dlls with specific file names were injectable(tiptsf.dll). After that, I was able to hook some WinAPIs and turn off antivirus.\nEnvironment\nScope: Application\nProduct name: Kaspersky Internet Security\nProduct version:20.0.14.1085\nOS name and version (incl SP): Windows 10 RS5\nAttack type: Bypass\nMaximum user privileges needed to reproduce your issue: no privileges\nSteps to reproduce\nFindWindow and get hwnd from kaspersky internet security(avpui.exe)\nI have invoked the SetWindowsHookEx function to inject the DLL.\nAfter hooking the TrackPopupMenu function, send a pop-up message through PostMessage.\nWhen self-protection is turned on, it generates a new avpui.exe and then generates a Dialog that asks users to confirm. the generated process also injects dll.\nIn the newly created avpui.exe, hook the IsDialogMessageW function and switch to a message that occurs when you click the OK button.\ndownload ransomware & run.\nImpact\nThe bypass function can be used to turn off the antivirus before the malware is activated.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Kaspersky",
+  "reported_by": "abbadeed ",
+  "title": "[Fixed] A vulnerability in KAVKIS 2020 products family allows full disabling of protection",
+  "content": "\nNote! Thank you for your report. For the purposes of the further analysis of the vulnerability, that you kindly report to us, could you please fill all fields [in square brackets]. This information will help us to respond you more quickly and triage your report. Thanks a lot for your assistance.\nI use Translator, T_T Sorry\nSummary\ncan turn off anti-virus functionality in an external process.\nDescription\nUse the SetWindowsHookEx function to inject the DLL. The ClientLoadLibrary was hooked to prevent injection, but dlls with specific file names were injectable(tiptsf.dll). After that, I was able to hook some WinAPIs and turn off antivirus.\nEnvironment\nScope: Application\nProduct name: Kaspersky Internet Security\nProduct version:20.0.14.1085\nOS name and version (incl SP): Windows 10 RS5\nAttack type: Bypass\nMaximum user privileges needed to reproduce your issue: no privileges\nSteps to reproduce\nFindWindow and get hwnd from kaspersky internet security(avpui.exe)\nI have invoked the SetWindowsHookEx function to inject the DLL.\nAfter hooking the TrackPopupMenu function, send a pop-up message through PostMessage.\nWhen self-protection is turned on, it generates a new avpui.exe and then generates a Dialog that asks users to confirm. the generated process also injects dll.\nIn the newly created avpui.exe, hook the IsDialogMessageW function and switch to a message that occurs when you click the OK button.\ndownload ransomware & run.\nImpact\nThe bypass function can be used to turn off the antivirus before the malware is activated.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1617193980,
+  "report_url": "https://hackerone.com/reports/870615",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "CODE",
+  "steps": [
+    [
+      1,
+      "FindWindow and get hwnd from Kaspersky Internet Security (avpui.exe)"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Code Injection"
+    [
+      2,
+      "Invoke SetWindowsHookEx function to inject the DLL (tiptsf.dll)"
     ],
-    "screenshots": {},
-    "disclosed_date": 1617193980,
-    "report_url": "https://hackerone.com/reports/870615",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "vuln_category": "CODE",
-    "steps": [
-        [
-            1,
-            "FindWindow and get hwnd from Kaspersky Internet Security (avpui.exe)"
-        ],
-        [
-            2,
-            "Invoke SetWindowsHookEx function to inject the DLL (tiptsf.dll)"
-        ],
-        [
-            3,
-            "Hook the TrackPopupMenu function and send a pop-up message through PostMessage"
-        ],
-        [
-            4,
-            "Hook the IsDialogMessageW function in the newly created avpui.exe to simulate clicking the OK button"
-        ],
-        [
-            5,
-            "Download and execute ransomware"
-        ]
+    [
+      3,
+      "Hook the TrackPopupMenu function and send a pop-up message through PostMessage"
     ],
-    "vuln_description": "A vulnerability in Kaspersky Internet Security 2020 allows an attacker to disable antivirus protection by injecting a DLL (tiptsf.dll) via SetWindowsHookEx, hooking critical functions (TrackPopupMenu, IsDialogMessageW), and bypassing self-protection mechanisms to simulate user confirmation.",
-    "reason": "The attack involves multiple non-trivial steps (DLL injection, API hooking, process manipulation) and requires understanding of Kaspersky's self-protection behavior. The need to chain hooking of different functions across processes and bypass confirmation dialogs adds complexity, though the techniques themselves are known in offensive security.",
-    "new_complexity": "HIGH",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "reason": "The vulnerability involves bypassing anti-virus protection through DLL injection and API hooking, which is outside the scope of the proposed methodologies that focus on web-based authentication and authorization issues (AuthN/AuthZ, IDOR). The methodologies are designed for detecting web application vulnerabilities by analyzing HTTP requests and responses, not system-level interactions like DLL injection or API hooking.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "Hook the IsDialogMessageW function in the newly created avpui.exe to simulate clicking the OK button"
+    ],
+    [
+      5,
+      "Download and execute ransomware"
+    ]
+  ],
+  "vuln_description": "A vulnerability in Kaspersky Internet Security 2020 allows an attacker to disable antivirus protection by injecting a DLL (tiptsf.dll) via SetWindowsHookEx, hooking critical functions (TrackPopupMenu, IsDialogMessageW), and bypassing self-protection mechanisms to simulate user confirmation.",
+  "reason": "The attack involves multiple non-trivial steps (DLL injection, API hooking, process manipulation) and requires understanding of Kaspersky's self-protection behavior. The need to chain hooking of different functions across processes and bypass confirmation dialogs adds complexity, though the techniques themselves are known in offensive security.",
+  "new_complexity": "HIGH",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The vulnerability described involves Windows API hooking and DLL injection at the process level rather than web parameter injection. The methodology focuses on HTTP request/response analysis and web parameter injection testing (XSS/SQLi), while this vulnerability requires OS-level process manipulation and API hooking techniques unrelated to web application payload injection. The attack surface and injection mechanisms (desktop application hooks vs web parameters) are fundamentally different domains.",
+    "is_simple_injection": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves bypassing Kaspersky's protection by injecting a DLL and hooking WinAPIs, which is not related to authentication or authorization within a web application. The proposed methodologies focus on detecting IDOR and AuthN/AuthZ bypasses in web applications by analyzing HTTP requests and responses, which does not apply to this low-level system vulnerability.",
+    "is_detectable": false
+  }
 }

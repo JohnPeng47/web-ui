@@ -53,7 +53,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves swapping resource IDs (user IDs) in authenticated requests, which is covered by the methodology's test cases for IDOR (specifically test e). The attacker modifies the victim's account details by changing the user ID in the request, which fits the pattern of (user_session, action, resource_id) tuple manipulation.",
-    "is_detectable": true
+    "reasoning": "The reported IDOR vulnerability involves manipulating the resource_id (user ID) in an authenticated request to perform unauthorized actions (account takeover). This directly aligns with the IDOR detection methodology outlined, which involves swapping resource_ids across user sessions to test authorization boundaries. The attack uses the attacker's session to modify the victim's resource (via their user ID), which would be detected by substituting resource_ids in stored (user_session, action, resource_id) tuples during automated testing (step 4e).",
+    "is_simple_authnz": true
   }
 }

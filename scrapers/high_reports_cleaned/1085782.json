@@ -46,7 +46,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an IDOR where a non-privileged user can access PHI/PII by manipulating the resource_id in the request. This fits the methodology's step e) where substituting the resource_id with a new one and executing it with existing users can detect the authorization boundary being crossed.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an IDOR where modifying the resource_id parameter (e.g., incrementing/decrementing) in an authenticated session allows access to unauthorized PHI/PII data. The described methodology explicitly includes substituting resource_ids of the same type (step 4e) and testing with existing user sessions (step 4b), which would detect this flaw. The authorization check bypass occurs at the resource_id level, aligning with the IDOR detection pattern.",
+    "is_simple_authnz": true
   }
 }

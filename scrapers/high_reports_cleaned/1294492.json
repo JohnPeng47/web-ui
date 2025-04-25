@@ -52,7 +52,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The DNS misconfiguration issue does not involve authentication or authorization boundaries being crossed within an application. It is a infrastructure misconfiguration issue related to DNS records and EC2 instance management, not a vulnerability that can be detected by testing user sessions, actions, or resource IDs within an application.",
-    "is_detectable": false
+    "reasoning": "The DNS misconfiguration leading to subdomain takeover is not an authentication or authorization (AuthN/AuthZ) vulnerability. It stems from infrastructure misconfiguration (dangling DNS records pointing to unclaimed EC2 instances) rather than improper access controls for user sessions, actions, or resource IDs. The proposed methodologies focus on testing AuthN/AuthZ boundaries within the application layer (e.g., user sessions, resource IDs), whereas this issue exists at the DNS/infrastructure layer and does not involve user sessions or application-level authorization checks.",
+    "is_simple_authnz": false
   }
 }

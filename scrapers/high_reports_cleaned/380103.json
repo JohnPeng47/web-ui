@@ -1,50 +1,54 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "ali ",
-    "title": "Stored Xss Vulnerability on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
-    "content": "\nSummary:\nA Xss vulnerability using svg file & html file.\nStep-by-step Reproduction Instructions\nGo to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/SitePages/Register.aspx and register.\nGo to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Profiles/My/#Your Username#/Blog/default.aspx and click Create a Post button.\nClick Body textarea and click Insert button.\nClick Upload File button and choose file (mygf.html or evilsvgfile.svg)\nClick Ok button and wait.\nClick Preview button and you will see xss alert.\nPoC:\nGo to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/_login/default.aspx?ReturnUrl=%2f_layouts%2f15%2fauthenticate.aspx%3fsource%3d%2fConference&source=/Conference and login with this username and password:\nusername: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\npassword: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nGo to https://\u2588\u2588\u2588\u2588\u2588\u2588/Profiles/My/alobaloss/Blog/Lists/Photos/evilsvgfile.svg\nSo, you can see xss alert.\nImpact\nClassic Stored Xss\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "ali ",
+  "title": "Stored Xss Vulnerability on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+  "content": "\nSummary:\nA Xss vulnerability using svg file & html file.\nStep-by-step Reproduction Instructions\nGo to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/SitePages/Register.aspx and register.\nGo to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Profiles/My/#Your Username#/Blog/default.aspx and click Create a Post button.\nClick Body textarea and click Insert button.\nClick Upload File button and choose file (mygf.html or evilsvgfile.svg)\nClick Ok button and wait.\nClick Preview button and you will see xss alert.\nPoC:\nGo to https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/_login/default.aspx?ReturnUrl=%2f_layouts%2f15%2fauthenticate.aspx%3fsource%3d%2fConference&source=/Conference and login with this username and password:\nusername: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\npassword: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nGo to https://\u2588\u2588\u2588\u2588\u2588\u2588/Profiles/My/alobaloss/Blog/Lists/Photos/evilsvgfile.svg\nSo, you can see xss alert.\nImpact\nClassic Stored Xss\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1589493960,
+  "report_url": "https://hackerone.com/reports/380103",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Go to the registration page and create an account."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
+    [
+      2,
+      "Navigate to the blog section and create a new post."
     ],
-    "screenshots": {},
-    "disclosed_date": 1589493960,
-    "report_url": "https://hackerone.com/reports/380103",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Go to the registration page and create an account."
-        ],
-        [
-            2,
-            "Navigate to the blog section and create a new post."
-        ],
-        [
-            3,
-            "Click on the 'Insert' button and upload a malicious SVG or HTML file."
-        ],
-        [
-            4,
-            "Preview the post to trigger the XSS alert."
-        ]
+    [
+      3,
+      "Click on the 'Insert' button and upload a malicious SVG or HTML file."
     ],
-    "vuln_description": "A stored XSS vulnerability exists where an attacker can upload a malicious SVG or HTML file, which when previewed, executes arbitrary JavaScript code.",
-    "reason": "The attack involves uploading a malicious file and triggering it through the preview functionality, which is a straightforward process without complex interactions or state manipulations.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The XSS vulnerability involves uploading malicious files (HTML/SVG) that execute scripts when viewed, which is not related to authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, not on file upload or script execution vulnerabilities.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "Preview the post to trigger the XSS alert."
+    ]
+  ],
+  "vuln_description": "A stored XSS vulnerability exists where an attacker can upload a malicious SVG or HTML file, which when previewed, executes arbitrary JavaScript code.",
+  "reason": "The attack involves uploading a malicious file and triggering it through the preview functionality, which is a straightforward process without complex interactions or state manipulations.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves uploading malicious files (HTML/SVG) that execute scripts when viewed, which is not directly related to authentication or authorization boundaries. The methodology focuses on testing AuthN/AuthZ by swapping user sessions or resource IDs, not file upload and script execution.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The XSS vulnerability involves uploading a file (SVG/HTML) containing a simple payload through a file upload parameter, which is a common injectable parameter. The payload execution occurs when previewing the post, which is part of regular navigation (same channel). The methodology's simple payload list would include basic SVG/HTML XSS vectors, and the trigger mechanism (preview) is part of normal user interaction flow.",
+    "is_simple_injection": true
+  }
 }

@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an IDOR (Insecure Direct Object Reference) where modifying a parameter in a request allows access to different user applications containing PII. This fits the methodology's detection method for IDOR by swapping resource_ids (application IDs) and testing with different user sessions or unauthenticated sessions. The endpoint's lack of proper authorization checks makes it detectable under the described methodology.",
-    "is_detectable": true
+    "reasoning": "The reported IDOR vulnerability involves accessing administrative endpoints without proper authorization by modifying resource IDs. The detection methodology covers this by testing resource_id substitution with different or no user sessions (steps 4d and 4e). Since the administrative endpoint lacks proper session validation and authorization checks, unauthenticated or non-admin sessions could retrieve sensitive data via IDOR, aligning with the described AuthZ/IDOR detection methods.",
+    "is_simple_authnz": true
   }
 }

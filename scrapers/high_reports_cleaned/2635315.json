@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The OTP code is leaked in the API response, which can be detected by analyzing the HTTP responses during normal navigation or authentication flows. The methodology involves logging all HTTP requests/responses and checking for sensitive data like OTP codes in the responses, which aligns with the detection method described.",
-    "is_detectable": true
+    "reasoning": "The OTP leakage in the API response does not involve session/resource_ID substitution or authorization boundary testing as described in the methodologies. The vulnerability stems from sensitive data exposure in server responses, which is not detected by the outlined authN/authZ testing patterns that focus on action/resource access control rather than response content inspection.",
+    "is_simple_authnz": false
   }
 }

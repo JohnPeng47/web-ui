@@ -44,7 +44,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves swapping user sessions and resource IDs to test authorization boundaries, which aligns with the described methodology. The report demonstrates an access control issue where a user can close a report as a duplicate of another program's report, which fits the pattern of testing (user_session, action, resource_id) combinations.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an IDOR where a user can close their report as a duplicate of another program's report by manipulating the `original_report_id` parameter. The proposed methodology detects such issues by substituting resource IDs (e.g., `original_report_id`) across user sessions and verifying authorization checks. Since the exploit hinges on unauthorized access to a resource (another program's report) via parameter manipulation, it aligns with the IDOR detection method (test e: substituting resource IDs of the same type). The system failed to enforce proper authorization on the referenced `original_report_id`, allowing cross-program duplication. This fits the 'simple AuthN/AuthZ' class as it directly involves missing authorization checks on a resource ID.",
+    "is_simple_authnz": true
   }
 }

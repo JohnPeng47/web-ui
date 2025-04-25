@@ -43,10 +43,10 @@
   "authnz_byppass_detectable": true,
   "is_simple_payload": false,
   "injection_metadata": {
-    "is_simple_payload": false
+    "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an authenticated user session (Eavesdropper Account) performing an action (inviting themselves to a private call) on a resource (the call room ID) they should not have access to. This fits the IDOR vulnerability class where the methodology would detect it by swapping user sessions and resource IDs.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an attacker modifying the 'room' (resource_id) and 'responder' (user_id) parameters in a request to join a private Slack call without authorization. This directly aligns with the IDOR methodology's focus on testing unauthorized access by swapping resource IDs and user sessions. The endpoint's lack of proper authorization checks allows the attack, which fits the described detection methods for IDOR/AuthZ issues within the same application context.",
+    "is_simple_authnz": true
   }
 }

@@ -1,53 +1,57 @@
 {
-    "reported_to": "Ubiquiti Inc.",
-    "reported_by": "madrobot ",
-    "title": "Subdomain Takeover (moderator.ubnt.com)",
-    "content": "\nHello Team\nThis report is same as #179110\nOne of your subdomain http://moderator.ubnt.com is pointing towards\nCode 104 Bytes\n1216.58.203.243    moderator.ubnt.com\n2216.58.203.243    ghs.google.com\n3216.58.203.243    ghs.l.google.com\n<image_0>\nWhen I open it\nit is showing\n<image_1>\nImpact :-\nAn attacker can claim this subdomain by requesting a process of registering this abandoned subdomain to his name.\nAnd attacker can fully take over this subdomain and do whatever he wants. this can cause huge damage to the website's main domain as well as to the company.\nI Recommend removing the Cname and DNS connecting to it.\nYou can read about this sort of attacks here : https://www.siteground.com/tutorials/googleapps/google_calendar.htm\nTo clarify your doughs I just added video POC\n1ST Video Is about how I am able to claim it https://youtu.be/51Ku4cGbijE\n2ND Video is proof when trying to claim it for the second time https://youtu.be/GJcWsHJj8aE\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Ubiquiti Inc.",
+  "reported_by": "madrobot ",
+  "title": "Subdomain Takeover (moderator.ubnt.com)",
+  "content": "\nHello Team\nThis report is same as #179110\nOne of your subdomain http://moderator.ubnt.com is pointing towards\nCode 104 Bytes\n1216.58.203.243    moderator.ubnt.com\n2216.58.203.243    ghs.google.com\n3216.58.203.243    ghs.l.google.com\n<image_0>\nWhen I open it\nit is showing\n<image_1>\nImpact :-\nAn attacker can claim this subdomain by requesting a process of registering this abandoned subdomain to his name.\nAnd attacker can fully take over this subdomain and do whatever he wants. this can cause huge damage to the website's main domain as well as to the company.\nI Recommend removing the Cname and DNS connecting to it.\nYou can read about this sort of attacks here : https://www.siteground.com/tutorials/googleapps/google_calendar.htm\nTo clarify your doughs I just added video POC\n1ST Video Is about how I am able to claim it https://youtu.be/51Ku4cGbijE\n2ND Video is proof when trying to claim it for the second time https://youtu.be/GJcWsHJj8aE\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/134/183/0edd056c9cfb1a65e060332a4aa0035acf26d1cc/ubnt_sb1.png?response-content-disposition=attachment%3B%20filename%3D%22ubnt_sb1.png%22%3B%20filename%2A%3DUTF-8%27%27ubnt_sb1.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQTYZ3LV4J%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T232245Z&X-Amz-Expires=1477&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIGpXChDQFzHS618muDfIgrMWVDDHPvBqpPf%2Fc%2FOu4O%2B5AiEA0Lc5OOIvN5JEeVMbvCo8i9zBG4aMZl7ku3Glf1x1TWUqsgUIMxADGgwwMTM2MTkyNzQ4NDkiDBKgVgHqHwECRyOygSqPBbXWTDCabAYWMidOhwYhqZDpA8CPPt2rj2m2jBvhq5OooOPGstdbAQD1ybInW3a7ZcFtXPgu6hpoZkOPILAmDaq8xNdQkaf5Ipi31hre%2BVx%2FyZ3NyLUwN3EMb9iWu%2Fh1NAKu3Ise%2BBRa%2FnrSrq8jmCsgrZe5OY%2Fl4cD53z2BohapYs1SdJmfnjBYHeIUExEGDMsAlEDMjX9b1tv%2Bm1EzKRIv2EjFz9hras5XhDSCByzfK2p18h74EaSu4N%2FL%2FDi%2FKTKKISyp8vl6sXvN3BK107RwEQWIGo4F6ybyjbzmVu5eCEt33Pwo1cO%2FtWyh2ErF%2FoG2iCy0P6O5VQRs5GAJzMHTAkQAPkVI9yJ1dMHcFIMU3WAgCEVq%2BjSb02xMt0wDvxzc1DxROQF6XsnPJxG7pA5FvR4CJIw%2FIqeSUX7qkhXGOCRh91%2Bi7AGzldS3PgzhXD2tyADO64coo1npUzkWHSbGN2s7FHaKBg9buC0Gdcw%2FYqHWXb%2FezH%2BumFAT7wOn0L9HZWpWuFnVewTVxqD%2FwajnWsHA4Nf3ViL4EPEz2z8oF%2Fq9JVO1NWsDnNMaFbhcHuvFA%2FFBg5K%2BFktudUCO349RjYpFiX04SGK2ByrHeYYnuCdViGHCO4eZvWwxZ7ZXp1H674TF5F0IGdHRH65knr2wUjynfT8QbyMRjrNYysWVa4fTzUtNvxxQIc4%2BgH5SapxPuJFnV9O8ZqMcTL5kH5mTI5pWUdjO%2Fcq3hRgtZd3Y1prFQvHQsLDWMeREvGBi8G05%2FXVyQ1%2Fk1y4uk%2F%2FjwHvep9zO5XhO96sv8onQdWWSVaWmGVwW8EH8UlJ9dNmmaP5bou19UxxmmQRzlEaX1kMiS6HH5Wn0Boj2f9rW5uYw7fiQvwY6sQE0IJ2uUF2Lc7t23ItG27YWAX0j%2FTWycvzlo4P02T%2FudRKMFmsP0EvlBIROh%2Bwy53Q%2FCS3XbEWlb1deanSq0wPxiK50Ik5pM024835IE8%2Fx%2B%2B%2BOdjKEvwZ4tgFMAyOogzI8c1egFJjGfvMAsyAArhvnRwOr8XiNIfUDiebY9tZmr7OorRAOxj4vMUoAvWxe%2FIAt0JYhCpx%2FFoWWTLgVisZErrEK53K%2FNI4KKkfMFrAUny8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=94d18280e6e8e3a4176da7bca9f67f3b12afd422310c15f4e37f0f9467273c9d",
+    "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/134/184/6e28ff7818d2a206e77b1b50baa2e3f553b4c605/ubnt_sb2.png?response-content-disposition=attachment%3B%20filename%3D%22ubnt_sb2.png%22%3B%20filename%2A%3DUTF-8%27%27ubnt_sb2.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQTYZ3LV4J%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T232245Z&X-Amz-Expires=1477&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIGpXChDQFzHS618muDfIgrMWVDDHPvBqpPf%2Fc%2FOu4O%2B5AiEA0Lc5OOIvN5JEeVMbvCo8i9zBG4aMZl7ku3Glf1x1TWUqsgUIMxADGgwwMTM2MTkyNzQ4NDkiDBKgVgHqHwECRyOygSqPBbXWTDCabAYWMidOhwYhqZDpA8CPPt2rj2m2jBvhq5OooOPGstdbAQD1ybInW3a7ZcFtXPgu6hpoZkOPILAmDaq8xNdQkaf5Ipi31hre%2BVx%2FyZ3NyLUwN3EMb9iWu%2Fh1NAKu3Ise%2BBRa%2FnrSrq8jmCsgrZe5OY%2Fl4cD53z2BohapYs1SdJmfnjBYHeIUExEGDMsAlEDMjX9b1tv%2Bm1EzKRIv2EjFz9hras5XhDSCByzfK2p18h74EaSu4N%2FL%2FDi%2FKTKKISyp8vl6sXvN3BK107RwEQWIGo4F6ybyjbzmVu5eCEt33Pwo1cO%2FtWyh2ErF%2FoG2iCy0P6O5VQRs5GAJzMHTAkQAPkVI9yJ1dMHcFIMU3WAgCEVq%2BjSb02xMt0wDvxzc1DxROQF6XsnPJxG7pA5FvR4CJIw%2FIqeSUX7qkhXGOCRh91%2Bi7AGzldS3PgzhXD2tyADO64coo1npUzkWHSbGN2s7FHaKBg9buC0Gdcw%2FYqHWXb%2FezH%2BumFAT7wOn0L9HZWpWuFnVewTVxqD%2FwajnWsHA4Nf3ViL4EPEz2z8oF%2Fq9JVO1NWsDnNMaFbhcHuvFA%2FFBg5K%2BFktudUCO349RjYpFiX04SGK2ByrHeYYnuCdViGHCO4eZvWwxZ7ZXp1H674TF5F0IGdHRH65knr2wUjynfT8QbyMRjrNYysWVa4fTzUtNvxxQIc4%2BgH5SapxPuJFnV9O8ZqMcTL5kH5mTI5pWUdjO%2Fcq3hRgtZd3Y1prFQvHQsLDWMeREvGBi8G05%2FXVyQ1%2Fk1y4uk%2F%2FjwHvep9zO5XhO96sv8onQdWWSVaWmGVwW8EH8UlJ9dNmmaP5bou19UxxmmQRzlEaX1kMiS6HH5Wn0Boj2f9rW5uYw7fiQvwY6sQE0IJ2uUF2Lc7t23ItG27YWAX0j%2FTWycvzlo4P02T%2FudRKMFmsP0EvlBIROh%2Bwy53Q%2FCS3XbEWlb1deanSq0wPxiK50Ik5pM024835IE8%2Fx%2B%2B%2BOdjKEvwZ4tgFMAyOogzI8c1egFJjGfvMAsyAArhvnRwOr8XiNIfUDiebY9tZmr7OorRAOxj4vMUoAvWxe%2FIAt0JYhCpx%2FFoWWTLgVisZErrEK53K%2FNI4KKkfMFrAUny8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=115f503c41a3ab63c3302581f9a3fad3131d1e220089ff1d0887e605c8207cbb"
+  },
+  "disclosed_date": 1486387860,
+  "report_url": "https://hackerone.com/reports/181665",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify the subdomain (moderator.ubnt.com) pointing to a non-existent or abandoned service (ghs.google.com)."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Generic"
+    [
+      2,
+      "Verify the subdomain is vulnerable by checking DNS records (CNAME pointing to ghs.google.com) and observing the error page."
     ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/134/183/0edd056c9cfb1a65e060332a4aa0035acf26d1cc/ubnt_sb1.png?response-content-disposition=attachment%3B%20filename%3D%22ubnt_sb1.png%22%3B%20filename%2A%3DUTF-8%27%27ubnt_sb1.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQTYZ3LV4J%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T232245Z&X-Amz-Expires=1477&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIGpXChDQFzHS618muDfIgrMWVDDHPvBqpPf%2Fc%2FOu4O%2B5AiEA0Lc5OOIvN5JEeVMbvCo8i9zBG4aMZl7ku3Glf1x1TWUqsgUIMxADGgwwMTM2MTkyNzQ4NDkiDBKgVgHqHwECRyOygSqPBbXWTDCabAYWMidOhwYhqZDpA8CPPt2rj2m2jBvhq5OooOPGstdbAQD1ybInW3a7ZcFtXPgu6hpoZkOPILAmDaq8xNdQkaf5Ipi31hre%2BVx%2FyZ3NyLUwN3EMb9iWu%2Fh1NAKu3Ise%2BBRa%2FnrSrq8jmCsgrZe5OY%2Fl4cD53z2BohapYs1SdJmfnjBYHeIUExEGDMsAlEDMjX9b1tv%2Bm1EzKRIv2EjFz9hras5XhDSCByzfK2p18h74EaSu4N%2FL%2FDi%2FKTKKISyp8vl6sXvN3BK107RwEQWIGo4F6ybyjbzmVu5eCEt33Pwo1cO%2FtWyh2ErF%2FoG2iCy0P6O5VQRs5GAJzMHTAkQAPkVI9yJ1dMHcFIMU3WAgCEVq%2BjSb02xMt0wDvxzc1DxROQF6XsnPJxG7pA5FvR4CJIw%2FIqeSUX7qkhXGOCRh91%2Bi7AGzldS3PgzhXD2tyADO64coo1npUzkWHSbGN2s7FHaKBg9buC0Gdcw%2FYqHWXb%2FezH%2BumFAT7wOn0L9HZWpWuFnVewTVxqD%2FwajnWsHA4Nf3ViL4EPEz2z8oF%2Fq9JVO1NWsDnNMaFbhcHuvFA%2FFBg5K%2BFktudUCO349RjYpFiX04SGK2ByrHeYYnuCdViGHCO4eZvWwxZ7ZXp1H674TF5F0IGdHRH65knr2wUjynfT8QbyMRjrNYysWVa4fTzUtNvxxQIc4%2BgH5SapxPuJFnV9O8ZqMcTL5kH5mTI5pWUdjO%2Fcq3hRgtZd3Y1prFQvHQsLDWMeREvGBi8G05%2FXVyQ1%2Fk1y4uk%2F%2FjwHvep9zO5XhO96sv8onQdWWSVaWmGVwW8EH8UlJ9dNmmaP5bou19UxxmmQRzlEaX1kMiS6HH5Wn0Boj2f9rW5uYw7fiQvwY6sQE0IJ2uUF2Lc7t23ItG27YWAX0j%2FTWycvzlo4P02T%2FudRKMFmsP0EvlBIROh%2Bwy53Q%2FCS3XbEWlb1deanSq0wPxiK50Ik5pM024835IE8%2Fx%2B%2B%2BOdjKEvwZ4tgFMAyOogzI8c1egFJjGfvMAsyAArhvnRwOr8XiNIfUDiebY9tZmr7OorRAOxj4vMUoAvWxe%2FIAt0JYhCpx%2FFoWWTLgVisZErrEK53K%2FNI4KKkfMFrAUny8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=94d18280e6e8e3a4176da7bca9f67f3b12afd422310c15f4e37f0f9467273c9d",
-        "image_1": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/134/184/6e28ff7818d2a206e77b1b50baa2e3f553b4c605/ubnt_sb2.png?response-content-disposition=attachment%3B%20filename%3D%22ubnt_sb2.png%22%3B%20filename%2A%3DUTF-8%27%27ubnt_sb2.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQTYZ3LV4J%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T232245Z&X-Amz-Expires=1477&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIGpXChDQFzHS618muDfIgrMWVDDHPvBqpPf%2Fc%2FOu4O%2B5AiEA0Lc5OOIvN5JEeVMbvCo8i9zBG4aMZl7ku3Glf1x1TWUqsgUIMxADGgwwMTM2MTkyNzQ4NDkiDBKgVgHqHwECRyOygSqPBbXWTDCabAYWMidOhwYhqZDpA8CPPt2rj2m2jBvhq5OooOPGstdbAQD1ybInW3a7ZcFtXPgu6hpoZkOPILAmDaq8xNdQkaf5Ipi31hre%2BVx%2FyZ3NyLUwN3EMb9iWu%2Fh1NAKu3Ise%2BBRa%2FnrSrq8jmCsgrZe5OY%2Fl4cD53z2BohapYs1SdJmfnjBYHeIUExEGDMsAlEDMjX9b1tv%2Bm1EzKRIv2EjFz9hras5XhDSCByzfK2p18h74EaSu4N%2FL%2FDi%2FKTKKISyp8vl6sXvN3BK107RwEQWIGo4F6ybyjbzmVu5eCEt33Pwo1cO%2FtWyh2ErF%2FoG2iCy0P6O5VQRs5GAJzMHTAkQAPkVI9yJ1dMHcFIMU3WAgCEVq%2BjSb02xMt0wDvxzc1DxROQF6XsnPJxG7pA5FvR4CJIw%2FIqeSUX7qkhXGOCRh91%2Bi7AGzldS3PgzhXD2tyADO64coo1npUzkWHSbGN2s7FHaKBg9buC0Gdcw%2FYqHWXb%2FezH%2BumFAT7wOn0L9HZWpWuFnVewTVxqD%2FwajnWsHA4Nf3ViL4EPEz2z8oF%2Fq9JVO1NWsDnNMaFbhcHuvFA%2FFBg5K%2BFktudUCO349RjYpFiX04SGK2ByrHeYYnuCdViGHCO4eZvWwxZ7ZXp1H674TF5F0IGdHRH65knr2wUjynfT8QbyMRjrNYysWVa4fTzUtNvxxQIc4%2BgH5SapxPuJFnV9O8ZqMcTL5kH5mTI5pWUdjO%2Fcq3hRgtZd3Y1prFQvHQsLDWMeREvGBi8G05%2FXVyQ1%2Fk1y4uk%2F%2FjwHvep9zO5XhO96sv8onQdWWSVaWmGVwW8EH8UlJ9dNmmaP5bou19UxxmmQRzlEaX1kMiS6HH5Wn0Boj2f9rW5uYw7fiQvwY6sQE0IJ2uUF2Lc7t23ItG27YWAX0j%2FTWycvzlo4P02T%2FudRKMFmsP0EvlBIROh%2Bwy53Q%2FCS3XbEWlb1deanSq0wPxiK50Ik5pM024835IE8%2Fx%2B%2B%2BOdjKEvwZ4tgFMAyOogzI8c1egFJjGfvMAsyAArhvnRwOr8XiNIfUDiebY9tZmr7OorRAOxj4vMUoAvWxe%2FIAt0JYhCpx%2FFoWWTLgVisZErrEK53K%2FNI4KKkfMFrAUny8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=115f503c41a3ab63c3302581f9a3fad3131d1e220089ff1d0887e605c8207cbb"
-    },
-    "disclosed_date": 1486387860,
-    "report_url": "https://hackerone.com/reports/181665",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Identify the subdomain (moderator.ubnt.com) pointing to a non-existent or abandoned service (ghs.google.com)."
-        ],
-        [
-            2,
-            "Verify the subdomain is vulnerable by checking DNS records (CNAME pointing to ghs.google.com) and observing the error page."
-        ],
-        [
-            3,
-            "Claim the subdomain by registering it with the service provider (Google in this case)."
-        ],
-        [
-            4,
-            "Demonstrate the takeover by hosting malicious content or phishing pages on the subdomain."
-        ]
+    [
+      3,
+      "Claim the subdomain by registering it with the service provider (Google in this case)."
     ],
-    "vuln_description": "The subdomain moderator.ubnt.com is vulnerable to subdomain takeover due to its CNAME record pointing to ghs.google.com, which is no longer in use. An attacker can claim this subdomain by registering it with Google, allowing them to host malicious content or phishing pages, potentially damaging the main domain's reputation and security.",
-    "reason": "The vulnerability involves identifying a subdomain with a dangling CNAME record and understanding the process of claiming it with the service provider. While the steps are straightforward, the discovery requires knowledge of DNS records and subdomain takeover techniques.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": "179110",
-    "authnz_metadata": {
-        "reason": "The subdomain takeover vulnerability involves DNS misconfiguration and potential domain claiming, which is outside the scope of the AuthN/AuthZ testing methodology described. The methodology focuses on session and resource manipulation within the same application, not external domain or DNS issues.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "Demonstrate the takeover by hosting malicious content or phishing pages on the subdomain."
+    ]
+  ],
+  "vuln_description": "The subdomain moderator.ubnt.com is vulnerable to subdomain takeover due to its CNAME record pointing to ghs.google.com, which is no longer in use. An attacker can claim this subdomain by registering it with Google, allowing them to host malicious content or phishing pages, potentially damaging the main domain's reputation and security.",
+  "reason": "The vulnerability involves identifying a subdomain with a dangling CNAME record and understanding the process of claiming it with the service provider. While the steps are straightforward, the discovery requires knowledge of DNS records and subdomain takeover techniques.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "179110",
+  "authnz_metadata": {
+    "reason": "The subdomain takeover report involves DNS and CNAME configurations rather than authentication or authorization vulnerabilities within an application. The proposed methodologies focus on testing AuthN/AuthZ boundaries within an application by manipulating user sessions, actions, and resource IDs, which are not applicable to DNS misconfigurations.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The reported subdomain takeover vulnerability stems from DNS misconfiguration (CNAME pointing to an unclaimed Google Hosted Service), not from injectable parameters in HTTP requests/responses. The described methodology focuses on finding injection vulnerabilities by analyzing parameters in web requests and testing payloads in those parameters. Since this vulnerability exists at the DNS/domain configuration level rather than in web application input handling, the methodology would not detect it. The attack vector requires domain ownership validation bypass rather than parameter injection.",
+    "is_simple_injection": false
+  }
 }

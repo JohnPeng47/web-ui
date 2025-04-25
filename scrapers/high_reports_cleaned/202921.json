@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves swapping the Facebook ID (resource_id) in the authentication request to gain unauthorized access to another user's account. This matches the IDOR vulnerability class where the resource_id (Facebook ID) is substituted to bypass authorization checks. The methodology described includes testing for such scenarios by substituting resource_ids with existing ones to check for authorization bypass, which would cover this case.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves substituting a Facebook ID (resource_id) in an authentication request without proper validation. The methodology's step 4e explicitly covers substituting resource_ids of the same type (social media IDs) across users. Since the attack requires no session swapping or privilege escalation - just parameter manipulation of a logged resource identifier - it matches the IDOR detection pattern in the described framework.",
+    "is_simple_authnz": true
   }
 }

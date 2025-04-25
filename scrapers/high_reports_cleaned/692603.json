@@ -46,7 +46,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves privilege escalation within a container by installing a malicious package during the build process. This is not an authentication or authorization issue that can be detected by swapping user sessions or resource IDs, as it occurs at the system level during the build phase and does not involve HTTP request/response interactions.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves privilege escalation through a malicious package during the container's build process, not via HTTP request-based authN/authZ boundary testing. The exploit relies on abusing package installation in the build pipeline, which is outside the scope of session/resource-ID swapping or authorization checks on API endpoints. The methodology focuses on web request authZ testing, not build-time container configuration flaws.",
+    "is_simple_authnz": false
   }
 }

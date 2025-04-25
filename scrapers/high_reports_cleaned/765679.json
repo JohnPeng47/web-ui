@@ -1,49 +1,50 @@
 {
-    "reported_to": "Palo Alto Software",
-    "reported_by": "homaa ",
-    "title": "Stored XSS on upload files leads to steal cookie",
-    "content": "\nSummary:\nThere isn't a check mechanism on file format in Inbox which an attacker can send an SVG file as other formats such as png, gif or bmp by rename and change file format leads XSS attack and steal victim cookies.\nSteps To Reproduce:\nYou should create 2 accounts :\nFirst account for the attacker and second one for the victim.\nThe attacker in my scenario: seq@seq.teamoutpost.com\nThe victim in my scenario: seq1@seq1.teamoutpost.com\nPlease log in to the first account via this [link] (https://app.outpost.co/sign-in)\nFrom Inbox create New Conversation and attached following files (Attached on this report) and send These files are an SVG file which changes file format to png, bmp, gif If you want to see payload open file by notepad. you'll see payload like the following code :\nCode 207 Bytes\n1<svg version=\"1.0\" xmlns=\"http://www.w3.org/2000/svg\"\n2 width=\"2560.000000pt\" height=\"1600.000000pt\" viewBox=\"0 0 2560.000000 1600.000000\"\n3 preserveAspectRatio=\"xMidYMid meet\" onload=\"alert(document.cookie)\">\nWhenever victim clicks on each file, open a new tab and XSS attack occurs and steal the victim's cookie.\nSupporting Material/References:\nBrowsers :\nMozilla Firefox 71.0\nGoogle Chrome 79.0.3945.88\n[attachment / reference]\nFor clarification, you can watch POC file (Attached on this report)\nIf you have any questions, let me know.\nBest regards.\nImpact\nAttacker can send malicious files to victims and steals victim's cookie leads to account takeover.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Palo Alto Software",
+  "reported_by": "homaa ",
+  "title": "Stored XSS on upload files leads to steal cookie",
+  "content": "\nSummary:\nThere isn't a check mechanism on file format in Inbox which an attacker can send an SVG file as other formats such as png, gif or bmp by rename and change file format leads XSS attack and steal victim cookies.\nSteps To Reproduce:\nYou should create 2 accounts :\nFirst account for the attacker and second one for the victim.\nThe attacker in my scenario: seq@seq.teamoutpost.com\nThe victim in my scenario: seq1@seq1.teamoutpost.com\nPlease log in to the first account via this [link] (https://app.outpost.co/sign-in)\nFrom Inbox create New Conversation and attached following files (Attached on this report) and send These files are an SVG file which changes file format to png, bmp, gif If you want to see payload open file by notepad. you'll see payload like the following code :\nCode 207 Bytes\n1<svg version=\"1.0\" xmlns=\"http://www.w3.org/2000/svg\"\n2 width=\"2560.000000pt\" height=\"1600.000000pt\" viewBox=\"0 0 2560.000000 1600.000000\"\n3 preserveAspectRatio=\"xMidYMid meet\" onload=\"alert(document.cookie)\">\nWhenever victim clicks on each file, open a new tab and XSS attack occurs and steal the victim's cookie.\nSupporting Material/References:\nBrowsers :\nMozilla Firefox 71.0\nGoogle Chrome 79.0.3945.88\n[attachment / reference]\nFor clarification, you can watch POC file (Attached on this report)\nIf you have any questions, let me know.\nBest regards.\nImpact\nAttacker can send malicious files to victims and steals victim's cookie leads to account takeover.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1587227940,
+  "report_url": "https://hackerone.com/reports/765679",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create two accounts: one for the attacker (e.g., seq@seq.teamoutpost.com) and one for the victim (e.g., seq1@seq1.teamoutpost.com)."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
+    [
+      2,
+      "Log in as the attacker and create a new conversation in the Inbox. Attach a malicious SVG file renamed to a different format (e.g., .png, .gif, .bmp) containing an XSS payload (e.g., `<svg ... onload=\"alert(document.cookie)\">`)."
     ],
-    "screenshots": {},
-    "disclosed_date": 1587227940,
-    "report_url": "https://hackerone.com/reports/765679",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Create two accounts: one for the attacker (e.g., seq@seq.teamoutpost.com) and one for the victim (e.g., seq1@seq1.teamoutpost.com)."
-        ],
-        [
-            2,
-            "Log in as the attacker and create a new conversation in the Inbox. Attach a malicious SVG file renamed to a different format (e.g., .png, .gif, .bmp) containing an XSS payload (e.g., `<svg ... onload=\"alert(document.cookie)\">`)."
-        ],
-        [
-            3,
-            "Send the malicious file to the victim. When the victim clicks on the file, the XSS payload executes, stealing their cookie."
-        ]
-    ],
-    "vuln_description": "A stored XSS vulnerability exists in the file upload functionality, where an attacker can upload a malicious SVG file disguised as another format (e.g., .png, .gif, .bmp). When the victim interacts with the file, the XSS payload executes, allowing the attacker to steal the victim's cookies and potentially take over their account.",
-    "reason": "The vulnerability involves a straightforward exploitation of missing file format validation and a common XSS payload. The steps are simple and do not require complex interactions or novel logic.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "reason": "The stored XSS vulnerability involves file upload and execution of malicious scripts, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing (user_session, action, resource_id) tuples for AuthN/AuthZ and IDOR vulnerabilities, but does not cover file upload validation or script execution scenarios.",
-        "is_detectable": false
-    }
+    [
+      3,
+      "Send the malicious file to the victim. When the victim clicks on the file, the XSS payload executes, stealing their cookie."
+    ]
+  ],
+  "vuln_description": "A stored XSS vulnerability exists in the file upload functionality, where an attacker can upload a malicious SVG file disguised as another format (e.g., .png, .gif, .bmp). When the victim interacts with the file, the XSS payload executes, allowing the attacker to steal the victim's cookies and potentially take over their account.",
+  "reason": "The vulnerability involves a straightforward exploitation of missing file format validation and a common XSS payload. The steps are simple and do not require complex interactions or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves uploading a malicious SVG file through a file upload parameter. The methodology would detect the file upload field as an injectable parameter during request/response analysis. The payload (SVG with onload event) is a simple context-aware XSS payload that doesn't require filter bypass. Execution occurs through regular navigation when viewing the uploaded file, meeting the same-channel requirement as the trigger is part of normal application usage for any user role. The payload's effectiveness can be verified through direct response inspection or victim simulation within the same application context.",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an XSS attack via file upload, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, not on file upload validation or XSS payload execution.",
+    "is_detectable": false
+  }
 }

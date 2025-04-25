@@ -53,7 +53,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves unauthorized access to PII through WordPress REST API endpoints without proper authentication checks. The methodology described includes testing for AuthN/AuthZ bypasses by executing actions with unauthenticated user sessions (test d) and swapping user sessions to test for IDOR (test b). Since the vulnerability involves accessing sensitive user data (email addresses) via unauthenticated API requests, it falls under the scope of the described methodology.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves unauthenticated access to a WordPress REST API endpoint exposing PII (email addresses) and CORS misconfiguration. The described methodology tests for AuthN/AuthZ bypass by executing actions with unauthenticated sessions (step d). Since the endpoint /wp-json/wp/v2/users/15 leaks sensitive data without requiring authentication, it directly fits the 'AuthN bypass' detection pattern. The CORS misconfiguration further enables exploitation but does not require novel detection methods beyond the outlined AuthZ testing (substituting resource IDs and testing unauthenticated access).",
+    "is_simple_authnz": true
   }
 }

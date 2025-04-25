@@ -1,46 +1,50 @@
 {
-    "reported_to": "8x8",
-    "reported_by": "shakhawatpr99 ",
-    "title": "Stored Cross Site Scripting.",
-    "content": "\nHellow team\nI got Stored based XSS on your web :D\nHere Is Step :\nGo to https://www.easycontactnow.com/\nClick \"Try For Free\" (Sign Up)\nIt will told you \"Enter your details to get started\". So Enter your full name like : \"><script>alert(1)</script> Then put all the other details.\nThen Confirm your id and login.\nThen Click dashboard and other thing :)\nTada script executed done :D\nPOC : https://www.youtube.com/watch?v=gYyCAxaB6w0\nSorry for my bad english.\nThanks :)\nImpact\nStored attacks are those where the injected script is permanently stored on the target servers, such as in a database, in a message forum, visitor log, comment field, etc. The victim then retrieves the malicious script from the server when it requests the stored information. Stored XSS is also sometimes referred to as Persistent or Type-I XSS.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "8x8",
+  "reported_by": "shakhawatpr99 ",
+  "title": "Stored Cross Site Scripting.",
+  "content": "\nHellow team\nI got Stored based XSS on your web :D\nHere Is Step :\nGo to https://www.easycontactnow.com/\nClick \"Try For Free\" (Sign Up)\nIt will told you \"Enter your details to get started\". So Enter your full name like : \"><script>alert(1)</script> Then put all the other details.\nThen Confirm your id and login.\nThen Click dashboard and other thing :)\nTada script executed done :D\nPOC : https://www.youtube.com/watch?v=gYyCAxaB6w0\nSorry for my bad english.\nThanks :)\nImpact\nStored attacks are those where the injected script is permanently stored on the target servers, such as in a database, in a message forum, visitor log, comment field, etc. The victim then retrieves the malicious script from the server when it requests the stored information. Stored XSS is also sometimes referred to as Persistent or Type-I XSS.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1595365920,
+  "report_url": "https://hackerone.com/reports/413077",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Go to https://www.easycontactnow.com/ and click 'Try For Free' to sign up."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
+    [
+      2,
+      "Enter a malicious payload (e.g., \"><script>alert(1)</script>) in the 'Full Name' field and complete the registration."
     ],
-    "screenshots": {},
-    "disclosed_date": 1595365920,
-    "report_url": "https://hackerone.com/reports/413077",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Go to https://www.easycontactnow.com/ and click 'Try For Free' to sign up."
-        ],
-        [
-            2,
-            "Enter a malicious payload (e.g., \"><script>alert(1)</script>) in the 'Full Name' field and complete the registration."
-        ],
-        [
-            3,
-            "Confirm your account, log in, and navigate to the dashboard or other pages to trigger the XSS payload."
-        ]
-    ],
-    "vuln_description": "This is a Stored Cross-Site Scripting (XSS) vulnerability where a malicious script is permanently stored on the target server (e.g., in a user profile field) and executed when the victim accesses the affected page. The attack requires no user interaction beyond normal browsing.",
-    "reason": "The vulnerability is straightforward to discover as it involves a common XSS payload in a user-input field (Full Name) without any complex interactions, state manipulation, or novel logic. The steps are simple and follow a typical XSS testing approach.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The Stored XSS vulnerability involves injecting malicious scripts into user input fields (like the full name field during sign-up), which are then stored and executed when other users view the affected page. This vulnerability is detectable using the proposed methodology because it involves normal user interactions (sign-up and viewing the dashboard) that would be logged and analyzed. The methodology includes testing for unauthorized script execution by swapping user sessions and observing the outcomes, which would reveal the XSS vulnerability.",
-        "is_detectable": true
-    }
+    [
+      3,
+      "Confirm your account, log in, and navigate to the dashboard or other pages to trigger the XSS payload."
+    ]
+  ],
+  "vuln_description": "This is a Stored Cross-Site Scripting (XSS) vulnerability where a malicious script is permanently stored on the target server (e.g., in a user profile field) and executed when the victim accesses the affected page. The attack requires no user interaction beyond normal browsing.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common XSS payload in a user-input field (Full Name) without any complex interactions, state manipulation, or novel logic. The steps are simple and follow a typical XSS testing approach.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The stored XSS vulnerability involves injecting a script into a form field (full name) that is then stored and executed when the dashboard or other pages are accessed. This does not involve authentication or authorization bypass, nor does it involve manipulating resource IDs or user sessions. The methodology described focuses on AuthN/AuthZ and IDOR vulnerabilities by testing user sessions and resource IDs, which is not applicable here.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves injecting a basic XSS payload into a user-controllable parameter (full name field during sign-up) which gets stored and executed in the dashboard view. The methodology would detect this because:\n1. The 'full name' parameter would be identified as injectable during request logging\n2. A simple payload like '\"><script>alert(1)</script>' exists in basic XSS payload lists\n3. Execution verification requires only regular post-login navigation to the dashboard (same application context)\n4. No special filter bypass techniques are needed as shown in the POC",
+    "is_simple_injection": true
+  }
 }

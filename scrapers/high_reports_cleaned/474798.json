@@ -39,10 +39,10 @@
   "authnz_byppass_detectable": false,
   "is_simple_payload": false,
   "injection_metadata": {
-    "is_simple_payload": true
+    "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The subdomain takeover vulnerability involves a misconfiguration in DNS pointing to a non-existent S3 bucket, which is not related to authentication or authorization within an application. The proposed methodologies focus on testing AuthN/AuthZ boundaries within an application's user sessions and resource access patterns, not infrastructure misconfigurations.",
-    "is_detectable": false
+    "reasoning": "The subdomain takeover vulnerability does not involve authentication or authorization bypass within the application logic. It stems from DNS misconfiguration and unclaimed cloud infrastructure (S3 bucket). The described methodologies focus on session/resource manipulation within application workflows, not DNS/cloud resource ownership validation.",
+    "is_simple_authnz": false
   }
 }

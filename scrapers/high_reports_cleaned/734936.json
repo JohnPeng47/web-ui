@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves SSO bypass by registering an email with a domain that lacks verification, then using that email to gain unauthorized access to Zendesk. This falls under AuthN/AuthZ bypass as it allows crossing authorization boundaries by exploiting the lack of email verification. The methodology would detect this by executing actions with unauthenticated or newly created user sessions (steps d and e), as the attacker's actions involve creating a new session with an unauthorized email and accessing restricted resources.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves bypassing SSO by registering an unverified email in the trusted domain and obtaining a JWT for Zendesk. The methodologies focus on intra-application session/resource swapping, but this issue stems from inter-service trust (Trint's JWT issuance to Zendesk) and lack of email verification. The attack crosses authorization boundaries between Trint and Zendesk, which isn't covered by the naive IDOR/AuthZ detection methods described.",
+    "is_simple_authnz": false
   }
 }

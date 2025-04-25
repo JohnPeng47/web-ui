@@ -44,7 +44,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The subdomain takeover involves a CNAME record pointing to an unclaimed S3 bucket, which is a configuration issue rather than an authentication or authorization flaw within the application. The methodology described focuses on testing authentication and authorization boundaries within the same application by manipulating user sessions and resource IDs, not on detecting misconfigured DNS records or external services.",
-    "is_detectable": false
+    "reasoning": "The subdomain takeover vulnerability stems from infrastructure misconfiguration (dangling CNAME pointing to unclaimed S3 bucket), not from authorization/authentication logic flaws in application endpoints. The described methodologies focus on testing session/resource ID permutations within authenticated application flows, not DNS record validation or cloud resource ownership verification.",
+    "is_simple_authnz": false
   }
 }

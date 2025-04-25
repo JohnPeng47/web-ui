@@ -54,7 +54,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves unauthorized access to a user's profile management functionality without authentication, which falls under the AuthN/AuthZ Bypass category. The methodology described includes testing actions with unauthenticated user sessions (step d), which would detect this issue by attempting to access the profile management page without authentication.",
-    "is_detectable": true
+    "reasoning": "The reported vulnerability involves unauthorized access to a profile management page and sensitive data exposure without authentication. The methodology's step d) (testing actions with an unauthenticated session) would detect this, as the page does not enforce authentication. The exposure of data and update functionality aligns with the AuthN/AuthZ bypass detection method by testing unauthenticated access to restricted actions.",
+    "is_simple_authnz": true
   }
 }

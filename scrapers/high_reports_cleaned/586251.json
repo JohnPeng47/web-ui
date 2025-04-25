@@ -55,10 +55,10 @@
   "authnz_byppass_detectable": true,
   "is_simple_payload": true,
   "injection_metadata": {
-    "is_simple_payload": false
+    "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves a local privilege escalation where a user can replace a root-executable file in a directory they have write access to. This is not detectable via the proposed HTTP request/response analysis methodology because it occurs at the filesystem level and does not involve web application authentication or authorization boundaries.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves replacing an executable in a directory where the user has write permissions, leading to root escalation when the service restarts. The methodologies described focus on HTTP-based authentication and authorization checks (e.g., session swapping, resource ID substitution). This issue is a local privilege escalation via file system permissions and LaunchDaemon configuration, which does not involve HTTP request/response analysis or session/resource ID manipulation. The detection methods outlined would not identify this vulnerability, as it operates outside the scope of web application authn/authz mechanisms.",
+    "is_simple_authnz": false
   }
 }

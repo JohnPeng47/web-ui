@@ -53,7 +53,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an authenticated user (attacker) modifying another user's (victim) profile by swapping the victim's 'id' and 'email' in the request. This fits the methodology's test case e) where a new resource_id (victim's credentials) is substituted with an existing resource_id (attacker's credentials) and executed with the existing user session (attacker's session). The methodology would detect this as it involves checking authorization boundaries by swapping resource_ids within the same application context.",
-    "is_detectable": true
+    "reasoning": "The reported IDOR vulnerability matches the first methodology's pattern where (user_session, action, resource_id) tuples are analyzed. The attacker uses their authenticated session to send a POST request to /app/updateUser while substituting the victim's resource ID (user ID) in the payload. This directly corresponds to methodology step 4e - substituting resource IDs of the same type (user IDs) across existing sessions. The vulnerability was detected by manipulating the 'id' parameter in requests captured during normal user navigation, which aligns with the described detection method for IDOR vulnerabilities.",
+    "is_simple_authnz": true
   }
 }

@@ -45,7 +45,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves the reset password link being sent over an unsecured HTTP protocol, which is a security misconfiguration rather than an authorization or authentication boundary being crossed. The proposed methodologies focus on testing authorization and authentication boundaries by swapping user sessions and resource IDs, not on detecting protocol-level security misconfigurations.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves the reset password link being sent over HTTP instead of HTTPS. The methodologies described focus on testing authorization boundaries by swapping user sessions or resource IDs. However, this specific issue is about the protocol (HTTP vs HTTPS) used in the link generation, which is not directly covered by the session/resource swapping methods. The methodology does not explicitly check for insecure protocol usage in generated links, making it unrelated to the AuthN/AuthZ bypass or IDOR detection strategies outlined.",
+    "is_simple_authnz": false
   }
 }

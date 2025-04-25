@@ -51,7 +51,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The subdomain takeover vulnerability involves a misconfiguration in DNS records pointing to an AWS S3 bucket that no longer exists, allowing an attacker to claim the bucket. This does not involve authentication or authorization checks within an application, nor does it involve swapping user sessions or resource IDs. The methodology described focuses on detecting AuthN/AuthZ issues within an application's logic, not infrastructure misconfigurations like DNS or cloud service settings.",
-    "is_detectable": false
+    "reasoning": "The subdomain takeover vulnerability occurs due to a misconfigured DNS CNAME record pointing to an unclaimed AWS S3 bucket. This vulnerability does not involve authentication or authorization bypass within the application's user sessions, resource IDs, or actions. It is an infrastructure configuration issue rather than a flaw in the application's AuthN/AuthZ logic. The described methodologies focus on testing authorization boundaries between users and resources within the application, not DNS or cloud resource ownership validation.",
+    "is_simple_authnz": false
   }
 }

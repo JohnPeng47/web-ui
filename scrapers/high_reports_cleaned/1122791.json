@@ -1,57 +1,58 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "cdl ",
-    "title": "[hta3] Remote Code Execution on  https://\u2588\u2588\u2588 via improper access control to SCORM Zip upload/import",
-    "content": "\nSummary:\nThere is a Remote Code Execution vulnerability at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Kview/CustomCodeBehind/base/courseware/scorm/management/scorm2004uploadcourse.aspx which allows any user to upload a SCORM course package. Furthermore, an attacker can add an ASPX shell to the SCORM package which will then get extracted onto the server, where the attacker can then execute commands.\nSteps To Reproduce:\nVisit https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ and log in with the credentials: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nNow download this \"malicious\" SCORM course package: \u2588\u2588\u2588\u2588\u2588\nIf you unzip scorm.zip, you will notice this is a valid SCORM package, and you will also notice that I've included an ASPX file in shared/cdlcdlcdl.aspx which runs the whoami command. Notice I also included that file reference in the Scorm Manifest (imsmanifest.xml)\nVisit https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Kview/CustomCodeBehind/base/courseware/scorm/management/scorm2004uploadcourse.aspx, select the \u2588\u2588\u2588\u2588\u2588\u2588 file. Start intercepting in Burp Suite Repeater.\nForward the POST request to /Kview/CustomCodeBehind/base/courseware/scorm/management/scorm2004uploadcourse.aspx\nNow intercept the request to /Kview/CustomCodeBehind/base/courseware/scorm/management/scorm2004editmetadata.aspx\nRight-Click on it, Hover down to \"Do intercept\" and click \"response to this request\" then forward it. (In your web-browser you might be able to just right-click, inspect-element, and search for strCourseId in there but my browser was being funky).\nOnce you've received the response, search for \"strCourseId\" and grab it.\nFor example, you would grab F6BAC72B45D64B34ACB662BB001D8523 out of the following response:\nCode 783 Bytes\n1<a onclick=\"return&#32;ConfirmBeforeNavigateAway(&#39;Are&#32;you&#32;sure&#32;you&#32;want&#32;to&#32;navigate&#32;away&#32;from&#32;this&#32;page?&#32;\\n\\nYou&#32;made&#32;changes&#32;that&#32;will&#32;not&#32;be&#32;saved&#32;if&#32;you&#32;continue.&#32;\\n\\nClick&#32;OK&#32;to&#32;proceed&#32;or&#32;Cancel&#32;to&#32;return&#32;to&#32;the&#32;page.&#39;);\" id=\"ML.BASE.WF.ReuploadCourse\" class=\"WorkflowButton\" NavigatingURL=\"Courseware/SCORM/Management/SCORM2004ReuploadCourse.aspx\" ItemId=\"&lt;IDTable&gt;&lt;strCourseId&gt;F6BAC72B45D64B34ACB662BB001D8523&lt;/strCourseId&gt;&lt;strVersionId&gt;F6BAC72B45D64B34ACB662BB001D8523&lt;/strVersionId&gt;&lt;/IDTable&gt;\" href=\"javascript:__doPostBack(&#39;ML.BASE.WF.ReuploadCourse&#39;,&#39;&#39;)\"><span>Course Files</span></a>\nNow, visit https://\u2588\u2588\u2588\u2588\u2588/CServer/Courseware/<YOUR_COURSE_ID>/shared/cdlcdlcdl.aspx and you will see the shell executes:\n\u2588\u2588\u2588\nSupporting Material/References:\nhttps://\u2588\u2588\u2588\u2588\u2588/CServer/Courseware/F6BAC72B45D64B34ACB662BB001D8523/shared/cdlcdlcdl.aspx\nProof-of-Concept Video\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nCritical, an attacker can execute commands on this military server, steal sensitive information, pivot to internal systems, etc.\nBest,\n@cdcl\n\n",
-    "severity": [
-        10.0,
-        null
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "cdl ",
+  "title": "[hta3] Remote Code Execution on  https://\u2588\u2588\u2588 via improper access control to SCORM Zip upload/import",
+  "content": "\nSummary:\nThere is a Remote Code Execution vulnerability at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Kview/CustomCodeBehind/base/courseware/scorm/management/scorm2004uploadcourse.aspx which allows any user to upload a SCORM course package. Furthermore, an attacker can add an ASPX shell to the SCORM package which will then get extracted onto the server, where the attacker can then execute commands.\nSteps To Reproduce:\nVisit https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588/ and log in with the credentials: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nNow download this \"malicious\" SCORM course package: \u2588\u2588\u2588\u2588\u2588\nIf you unzip scorm.zip, you will notice this is a valid SCORM package, and you will also notice that I've included an ASPX file in shared/cdlcdlcdl.aspx which runs the whoami command. Notice I also included that file reference in the Scorm Manifest (imsmanifest.xml)\nVisit https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/Kview/CustomCodeBehind/base/courseware/scorm/management/scorm2004uploadcourse.aspx, select the \u2588\u2588\u2588\u2588\u2588\u2588 file. Start intercepting in Burp Suite Repeater.\nForward the POST request to /Kview/CustomCodeBehind/base/courseware/scorm/management/scorm2004uploadcourse.aspx\nNow intercept the request to /Kview/CustomCodeBehind/base/courseware/scorm/management/scorm2004editmetadata.aspx\nRight-Click on it, Hover down to \"Do intercept\" and click \"response to this request\" then forward it. (In your web-browser you might be able to just right-click, inspect-element, and search for strCourseId in there but my browser was being funky).\nOnce you've received the response, search for \"strCourseId\" and grab it.\nFor example, you would grab F6BAC72B45D64B34ACB662BB001D8523 out of the following response:\nCode 783 Bytes\n1<a onclick=\"return&#32;ConfirmBeforeNavigateAway(&#39;Are&#32;you&#32;sure&#32;you&#32;want&#32;to&#32;navigate&#32;away&#32;from&#32;this&#32;page?&#32;\\n\\nYou&#32;made&#32;changes&#32;that&#32;will&#32;not&#32;be&#32;saved&#32;if&#32;you&#32;continue.&#32;\\n\\nClick&#32;OK&#32;to&#32;proceed&#32;or&#32;Cancel&#32;to&#32;return&#32;to&#32;the&#32;page.&#39;);\" id=\"ML.BASE.WF.ReuploadCourse\" class=\"WorkflowButton\" NavigatingURL=\"Courseware/SCORM/Management/SCORM2004ReuploadCourse.aspx\" ItemId=\"&lt;IDTable&gt;&lt;strCourseId&gt;F6BAC72B45D64B34ACB662BB001D8523&lt;/strCourseId&gt;&lt;strVersionId&gt;F6BAC72B45D64B34ACB662BB001D8523&lt;/strVersionId&gt;&lt;/IDTable&gt;\" href=\"javascript:__doPostBack(&#39;ML.BASE.WF.ReuploadCourse&#39;,&#39;&#39;)\"><span>Course Files</span></a>\nNow, visit https://\u2588\u2588\u2588\u2588\u2588/CServer/Courseware/<YOUR_COURSE_ID>/shared/cdlcdlcdl.aspx and you will see the shell executes:\n\u2588\u2588\u2588\nSupporting Material/References:\nhttps://\u2588\u2588\u2588\u2588\u2588/CServer/Courseware/F6BAC72B45D64B34ACB662BB001D8523/shared/cdlcdlcdl.aspx\nProof-of-Concept Video\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nImpact\nCritical, an attacker can execute commands on this military server, steal sensitive information, pivot to internal systems, etc.\nBest,\n@cdcl\n\n",
+  "severity": [
+    10.0,
+    null
+  ],
+  "bounty": 2000,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1663262880,
+  "report_url": "https://hackerone.com/reports/1122791",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Log in to the target system with provided credentials"
     ],
-    "bounty": 2000,
-    "weaknesses": [
-        "Code Injection"
+    [
+      2,
+      "Download and prepare a malicious SCORM package containing an ASPX shell"
     ],
-    "screenshots": {},
-    "disclosed_date": 1663262880,
-    "report_url": "https://hackerone.com/reports/1122791",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Log in to the target system with provided credentials"
-        ],
-        [
-            2,
-            "Download and prepare a malicious SCORM package containing an ASPX shell"
-        ],
-        [
-            3,
-            "Upload the malicious SCORM package via the vulnerable endpoint"
-        ],
-        [
-            4,
-            "Intercept and manipulate the upload process using Burp Suite to obtain the course ID"
-        ],
-        [
-            5,
-            "Access the uploaded ASPX shell via the obtained course ID to execute commands"
-        ]
+    [
+      3,
+      "Upload the malicious SCORM package via the vulnerable endpoint"
     ],
-    "vuln_description": "A Remote Code Execution vulnerability exists due to improper access control in the SCORM course package upload feature. An attacker can upload a malicious SCORM package containing an ASPX shell, which gets extracted and executed on the server.",
-    "reason": "The attack involves multiple steps including preparing a malicious package, intercepting requests, and manipulating the upload process. However, the steps are straightforward once the vulnerability is identified, and the interaction between components is not particularly subtle or complex.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "reason": "The vulnerability involves improper access control to SCORM Zip upload/import functionality, which falls under the AuthZ bypass category. The methodology described involves testing authorization boundaries by swapping user sessions and resource IDs. In this case, the attack involves uploading a malicious SCORM package (a resource) and accessing it, which aligns with the methodology's focus on testing (user_session, action, resource_id) tuples. The steps to reproduce involve intercepting and modifying requests, which can be automated by the described methodology.",
-        "is_detectable": true
-    }
+    [
+      4,
+      "Intercept and manipulate the upload process using Burp Suite to obtain the course ID"
+    ],
+    [
+      5,
+      "Access the uploaded ASPX shell via the obtained course ID to execute commands"
+    ]
+  ],
+  "vuln_description": "A Remote Code Execution vulnerability exists due to improper access control in the SCORM course package upload feature. An attacker can upload a malicious SCORM package containing an ASPX shell, which gets extracted and executed on the server.",
+  "reason": "The attack involves multiple steps including preparing a malicious package, intercepting requests, and manipulating the upload process. However, the steps are straightforward once the vulnerability is identified, and the interaction between components is not particularly subtle or complex.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves uploading a malicious SCORM package with an ASPX shell and extracting the server-generated course ID from an HTTP response parameter (strCourseId). The methodology focuses on parameter injection and same-channel detection via regular navigation. However, the attack requires multi-step interaction (file upload, response interception, and path construction) rather than direct parameter manipulation. The payload execution occurs via a dedicated URL outside the injection flow, and the critical vulnerability (ASPX execution) depends on server behavior not directly observable through simple payloads or same-channel responses. The methodology would likely miss this since it requires file upload exploitation and out-of-band execution detection.",
+    "is_simple_injection": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves improper access control to SCORM Zip upload/import functionality, which can be detected by analyzing (user_session, action, resource_id) tuples. The methodology would capture the unauthorized upload action and subsequent execution of the ASPX shell by testing with different user sessions and resource_ids.",
+    "is_detectable": true
+  }
 }

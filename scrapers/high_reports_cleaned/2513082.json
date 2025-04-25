@@ -42,10 +42,10 @@
   "authnz_byppass_detectable": false,
   "is_simple_payload": false,
   "injection_metadata": {
-    "is_simple_payload": true
+    "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves a program owner being able to mark a report as a duplicate of another report from a different, unrelated program. This falls under the IDOR vulnerability class where the action (marking as duplicate) is performed on a resource (report) that should not be accessible or modifiable by the user in that context. The methodology described involves swapping user sessions and resource IDs to test for such authorization boundaries, which would apply here since the issue is about crossing authorization boundaries within the same application.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves unauthorized duplication of a report to an unrelated program's report. This can be detected by the methodology's step 4e, where substituting a new resource_id (unrelated report ID) in the duplicate action with the same user session tests if the authorization check for resource ownership is bypassed. Since the check involves resource_id substitution within the same resource type (reports), it aligns with IDOR/AuthZ testing.",
+    "is_simple_authnz": true
   }
 }

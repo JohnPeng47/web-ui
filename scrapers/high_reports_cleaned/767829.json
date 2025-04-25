@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an attacker creating a new account with the victim's email address, which changes the password for the victim's account. This action would be captured as a (user_session, action, resource_id) tuple where the action is 'create account' and the resource_id is the victim's email address. The methodology would detect this by executing the action with different user sessions (including unauthenticated sessions) and observing the impact on the resource (the victim's account).",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an attacker creating a new account with a victim's existing email, which overwrites the victim's password. This is a registration flow flaw rather than an IDOR/AuthZ bypass in authenticated actions. The methodology focuses on testing existing (user_session, action, resource_id) tuples from authenticated navigation, but account creation is an unauthenticated action not covered by session/resource_id substitution checks. The root cause is improper email uniqueness validation during registration, which doesn't fit the IDOR/AuthZ test patterns.",
+    "is_simple_authnz": false
   }
 }

@@ -1,42 +1,46 @@
 {
-    "reported_to": "MTN Group",
-    "reported_by": "possowski ",
-    "title": "Reflected xss on videostore.mtnonline.com",
-    "content": "\nSummary:\nHi,\nI found reflected xss vuln on videostore.mtnonline.com\nSteps To Reproduce:\nOpen browser\nGo to https://videostore.mtnonline.com/GL/Default.aspx?PId=126&CId=5&OprId=11&Ctg=OF25MTNNGVS_LapsInTime%22%27testxxx%3E%3Ciframe%20src=%22data:text/html,%3C%73%63%72%69%70%74%3E%61%6C%65%72%74%28%31%29%3C%2F%73%63%72%69%70%74%3E%22%3E%3C/iframe%3E url\nBrowser show alert popup\nImpact\nWe can run javascript code\n\n",
-    "severity": [
-        8.8,
-        null
+  "reported_to": "MTN Group",
+  "reported_by": "possowski ",
+  "title": "Reflected xss on videostore.mtnonline.com",
+  "content": "\nSummary:\nHi,\nI found reflected xss vuln on videostore.mtnonline.com\nSteps To Reproduce:\nOpen browser\nGo to https://videostore.mtnonline.com/GL/Default.aspx?PId=126&CId=5&OprId=11&Ctg=OF25MTNNGVS_LapsInTime%22%27testxxx%3E%3Ciframe%20src=%22data:text/html,%3C%73%63%72%69%70%74%3E%61%6C%65%72%74%28%31%29%3C%2F%73%63%72%69%70%74%3E%22%3E%3C/iframe%3E url\nBrowser show alert popup\nImpact\nWe can run javascript code\n\n",
+  "severity": [
+    8.8,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Reflected"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1664147400,
+  "report_url": "https://hackerone.com/reports/1646248",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Open a browser and navigate to the URL: https://videostore.mtnonline.com/GL/Default.aspx?PId=126&CId=5&OprId=11&Ctg=OF25MTNNGVS_LapsInTime%22%27testxxx%3E%3Ciframe%20src=%22data:text/html,%3C%73%63%72%69%70%74%3E%61%6C%65%72%74%28%31%29%3C%2F%73%63%72%69%70%74%3E%22%3E%3C/iframe%3E"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Reflected"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1664147400,
-    "report_url": "https://hackerone.com/reports/1646248",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Open a browser and navigate to the URL: https://videostore.mtnonline.com/GL/Default.aspx?PId=126&CId=5&OprId=11&Ctg=OF25MTNNGVS_LapsInTime%22%27testxxx%3E%3Ciframe%20src=%22data:text/html,%3C%73%63%72%69%70%74%3E%61%6C%65%72%74%28%31%29%3C%2F%73%63%72%69%70%74%3E%22%3E%3C/iframe%3E"
-        ],
-        [
-            2,
-            "Observe that the browser executes the injected JavaScript code, showing an alert popup"
-        ]
-    ],
-    "vuln_description": "This is a reflected Cross-Site Scripting (XSS) vulnerability on videostore.mtnonline.com. The vulnerability allows an attacker to inject arbitrary JavaScript code via a crafted URL parameter, which is then executed in the context of the victim's browser session.",
-    "reason": "The vulnerability is straightforward to discover as it involves a simple injection of JavaScript code through a URL parameter, a common and well-documented attack vector. The attack does not require multiple components, complex application states, or novel logic.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The reflected XSS vulnerability involves injecting malicious JavaScript code into a URL parameter, which is a client-side issue and not related to authentication or authorization (AuthN/AuthZ). The proposed methodologies focus on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, which does not apply to XSS vulnerabilities.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Observe that the browser executes the injected JavaScript code, showing an alert popup"
+    ]
+  ],
+  "vuln_description": "This is a reflected Cross-Site Scripting (XSS) vulnerability on videostore.mtnonline.com. The vulnerability allows an attacker to inject arbitrary JavaScript code via a crafted URL parameter, which is then executed in the context of the victim's browser session.",
+  "reason": "The vulnerability is straightforward to discover as it involves a simple injection of JavaScript code through a URL parameter, a common and well-documented attack vector. The attack does not require multiple components, complex application states, or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The reflected XSS vulnerability involves injecting malicious JavaScript via URL parameters, which is unrelated to authentication or authorization (AuthN/AuthZ) testing. The proposed methodologies focus on testing access control boundaries (IDOR, AuthZ bypass) by manipulating user sessions and resource IDs, not on input validation or XSS vulnerabilities.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The reflected XSS vulnerability in the report is triggered via URL parameters (Ctg) with a payload that uses basic HTML encoding and context manipulation (iframe + data URI). The methodology would detect this because:\n1. The parameter `Ctg` would be identified as injectable during request/response analysis.\n2. The payload uses simple context-breaking characters (`\"'testxxx><`) and a standard XSS vector (`<iframe src=...>`), matching the 'simple payload' criteria.\n3. The payload execution (alert popup) is directly observable in the HTTP response (same channel) without requiring stored XSS or multi-step navigation.",
+    "is_simple_injection": true
+  }
 }

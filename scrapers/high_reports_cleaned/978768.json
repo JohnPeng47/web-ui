@@ -54,7 +54,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves adding users to a repository without rate limiting, which can be detected by analyzing HTTP requests for project member additions and testing with different user sessions and resource IDs (user IDs in this case). The methodology covers this by checking for authorization boundaries being crossed when different user sessions attempt to perform actions on resources (e.g., adding users to a repository).",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves missing rate limits rather than authorization boundary violations. The methodology focuses on testing (user_session, action, resource_id) authorization checks, but this issue stems from lack of request throttling on an otherwise valid action (inviting users). The attack doesn't require privilege escalation or IDOR - it abuses a missing non-authZ control (rate limiting) against a permitted action.",
+    "is_simple_authnz": false
   }
 }

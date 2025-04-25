@@ -58,7 +58,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an IDOR (Insecure Direct Object Reference) where an attacker can change the email of any account by manipulating the user_id in the request. This falls under the methodology of testing (user_session, action, resource_id) tuples by swapping resource_ids (user_id in this case) with existing actions. The detection method involves collecting these tuples and testing with different user_sessions and resource_ids, which would uncover this vulnerability.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves modifying the user ID parameter in a profile update request to take over another account. This matches the IDOR detection methodology where (user_session, action, resource_id) tuples are analyzed. The attacker's session is used to perform an action (email update) with a substituted resource_id (victim's user ID), crossing authorization boundaries. The methodology's step e) (substituting resource_ids of same type) would detect this by testing different user sessions against collected resource IDs.",
+    "is_simple_authnz": true
   }
 }

@@ -46,7 +46,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an IDOR where an attacker can manipulate attachment IDs and ownership through authenticated requests. The methodology described involves testing (user_session, action, resource_id) tuples by swapping user sessions and resource IDs, which directly applies to this scenario. The attacker's actions of generating predictable attachment IDs, cloning them to their own records, and accessing the files through authenticated requests fall under the IDOR detection method (test e).",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an IDOR where an attacker can manipulate the 'attachmentId' and 'parentId' parameters in an authenticated request to clone and access sensitive Attachment records. The proposed methodology explicitly includes detecting such vulnerabilities by substituting resource IDs (e.g., Attachment IDs) in authenticated actions and testing authorization boundaries. The attacker's ability to switch ownership via these parameters directly aligns with the IDOR detection method (substituting resource IDs in requests with other users' sessions/resource IDs).",
+    "is_simple_authnz": true
   }
 }

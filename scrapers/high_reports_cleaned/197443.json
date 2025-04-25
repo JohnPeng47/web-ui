@@ -1,44 +1,48 @@
 {
-    "reported_to": "Discourse",
-    "reported_by": "skavans ",
-    "title": "XSS in topics because of bandcamp preview engine vulnerability",
-    "content": "\nLoad http://try.discourse.org\nClick \"New topic\"\nEnter this payload https://89.223.28.48/bandcamp.com/album/index.html?XSSa2 to field with placeholder \"Type title or paste a link here\"\nWait for the preview engine to parse the link\nXSS will fire\n<image_0>\nYou should sanitize external data in this engine and replace matches_regexp from\n^https?:\\/\\/.*bandcamp\\.com\\/album\\/\nto\n^https?:\\/\\/.*\\.bandcamp\\.com\\/album\\/\nto fix the issue.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Discourse",
+  "reported_by": "skavans ",
+  "title": "XSS in topics because of bandcamp preview engine vulnerability",
+  "content": "\nLoad http://try.discourse.org\nClick \"New topic\"\nEnter this payload https://89.223.28.48/bandcamp.com/album/index.html?XSSa2 to field with placeholder \"Type title or paste a link here\"\nWait for the preview engine to parse the link\nXSS will fire\n<image_0>\nYou should sanitize external data in this engine and replace matches_regexp from\n^https?:\\/\\/.*bandcamp\\.com\\/album\\/\nto\n^https?:\\/\\/.*\\.bandcamp\\.com\\/album\\/\nto fix the issue.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/151/439/90d35b475ba20f54579aec62721b1f7a6d940aa4/______________2017-01-11___5.23.20.png?response-content-disposition=attachment%3B%20filename%3D%22______________2017-01-11___5.23.20.png%22%3B%20filename%2A%3DUTF-8%27%27______________2017-01-11___5.23.20.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQTYZ3LV4J%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T232922Z&X-Amz-Expires=1080&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIGpXChDQFzHS618muDfIgrMWVDDHPvBqpPf%2Fc%2FOu4O%2B5AiEA0Lc5OOIvN5JEeVMbvCo8i9zBG4aMZl7ku3Glf1x1TWUqsgUIMxADGgwwMTM2MTkyNzQ4NDkiDBKgVgHqHwECRyOygSqPBbXWTDCabAYWMidOhwYhqZDpA8CPPt2rj2m2jBvhq5OooOPGstdbAQD1ybInW3a7ZcFtXPgu6hpoZkOPILAmDaq8xNdQkaf5Ipi31hre%2BVx%2FyZ3NyLUwN3EMb9iWu%2Fh1NAKu3Ise%2BBRa%2FnrSrq8jmCsgrZe5OY%2Fl4cD53z2BohapYs1SdJmfnjBYHeIUExEGDMsAlEDMjX9b1tv%2Bm1EzKRIv2EjFz9hras5XhDSCByzfK2p18h74EaSu4N%2FL%2FDi%2FKTKKISyp8vl6sXvN3BK107RwEQWIGo4F6ybyjbzmVu5eCEt33Pwo1cO%2FtWyh2ErF%2FoG2iCy0P6O5VQRs5GAJzMHTAkQAPkVI9yJ1dMHcFIMU3WAgCEVq%2BjSb02xMt0wDvxzc1DxROQF6XsnPJxG7pA5FvR4CJIw%2FIqeSUX7qkhXGOCRh91%2Bi7AGzldS3PgzhXD2tyADO64coo1npUzkWHSbGN2s7FHaKBg9buC0Gdcw%2FYqHWXb%2FezH%2BumFAT7wOn0L9HZWpWuFnVewTVxqD%2FwajnWsHA4Nf3ViL4EPEz2z8oF%2Fq9JVO1NWsDnNMaFbhcHuvFA%2FFBg5K%2BFktudUCO349RjYpFiX04SGK2ByrHeYYnuCdViGHCO4eZvWwxZ7ZXp1H674TF5F0IGdHRH65knr2wUjynfT8QbyMRjrNYysWVa4fTzUtNvxxQIc4%2BgH5SapxPuJFnV9O8ZqMcTL5kH5mTI5pWUdjO%2Fcq3hRgtZd3Y1prFQvHQsLDWMeREvGBi8G05%2FXVyQ1%2Fk1y4uk%2F%2FjwHvep9zO5XhO96sv8onQdWWSVaWmGVwW8EH8UlJ9dNmmaP5bou19UxxmmQRzlEaX1kMiS6HH5Wn0Boj2f9rW5uYw7fiQvwY6sQE0IJ2uUF2Lc7t23ItG27YWAX0j%2FTWycvzlo4P02T%2FudRKMFmsP0EvlBIROh%2Bwy53Q%2FCS3XbEWlb1deanSq0wPxiK50Ik5pM024835IE8%2Fx%2B%2B%2BOdjKEvwZ4tgFMAyOogzI8c1egFJjGfvMAsyAArhvnRwOr8XiNIfUDiebY9tZmr7OorRAOxj4vMUoAvWxe%2FIAt0JYhCpx%2FFoWWTLgVisZErrEK53K%2FNI4KKkfMFrAUny8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=08a6d69395ea961af2d04002ea50f89501e24d95784a86bf04d243f88e740be5"
+  },
+  "disclosed_date": 1484974200,
+  "report_url": "https://hackerone.com/reports/197443",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to http://try.discourse.org and click 'New topic'."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Generic"
-    ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/151/439/90d35b475ba20f54579aec62721b1f7a6d940aa4/______________2017-01-11___5.23.20.png?response-content-disposition=attachment%3B%20filename%3D%22______________2017-01-11___5.23.20.png%22%3B%20filename%2A%3DUTF-8%27%27______________2017-01-11___5.23.20.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQTYZ3LV4J%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T232922Z&X-Amz-Expires=1080&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIGpXChDQFzHS618muDfIgrMWVDDHPvBqpPf%2Fc%2FOu4O%2B5AiEA0Lc5OOIvN5JEeVMbvCo8i9zBG4aMZl7ku3Glf1x1TWUqsgUIMxADGgwwMTM2MTkyNzQ4NDkiDBKgVgHqHwECRyOygSqPBbXWTDCabAYWMidOhwYhqZDpA8CPPt2rj2m2jBvhq5OooOPGstdbAQD1ybInW3a7ZcFtXPgu6hpoZkOPILAmDaq8xNdQkaf5Ipi31hre%2BVx%2FyZ3NyLUwN3EMb9iWu%2Fh1NAKu3Ise%2BBRa%2FnrSrq8jmCsgrZe5OY%2Fl4cD53z2BohapYs1SdJmfnjBYHeIUExEGDMsAlEDMjX9b1tv%2Bm1EzKRIv2EjFz9hras5XhDSCByzfK2p18h74EaSu4N%2FL%2FDi%2FKTKKISyp8vl6sXvN3BK107RwEQWIGo4F6ybyjbzmVu5eCEt33Pwo1cO%2FtWyh2ErF%2FoG2iCy0P6O5VQRs5GAJzMHTAkQAPkVI9yJ1dMHcFIMU3WAgCEVq%2BjSb02xMt0wDvxzc1DxROQF6XsnPJxG7pA5FvR4CJIw%2FIqeSUX7qkhXGOCRh91%2Bi7AGzldS3PgzhXD2tyADO64coo1npUzkWHSbGN2s7FHaKBg9buC0Gdcw%2FYqHWXb%2FezH%2BumFAT7wOn0L9HZWpWuFnVewTVxqD%2FwajnWsHA4Nf3ViL4EPEz2z8oF%2Fq9JVO1NWsDnNMaFbhcHuvFA%2FFBg5K%2BFktudUCO349RjYpFiX04SGK2ByrHeYYnuCdViGHCO4eZvWwxZ7ZXp1H674TF5F0IGdHRH65knr2wUjynfT8QbyMRjrNYysWVa4fTzUtNvxxQIc4%2BgH5SapxPuJFnV9O8ZqMcTL5kH5mTI5pWUdjO%2Fcq3hRgtZd3Y1prFQvHQsLDWMeREvGBi8G05%2FXVyQ1%2Fk1y4uk%2F%2FjwHvep9zO5XhO96sv8onQdWWSVaWmGVwW8EH8UlJ9dNmmaP5bou19UxxmmQRzlEaX1kMiS6HH5Wn0Boj2f9rW5uYw7fiQvwY6sQE0IJ2uUF2Lc7t23ItG27YWAX0j%2FTWycvzlo4P02T%2FudRKMFmsP0EvlBIROh%2Bwy53Q%2FCS3XbEWlb1deanSq0wPxiK50Ik5pM024835IE8%2Fx%2B%2B%2BOdjKEvwZ4tgFMAyOogzI8c1egFJjGfvMAsyAArhvnRwOr8XiNIfUDiebY9tZmr7OorRAOxj4vMUoAvWxe%2FIAt0JYhCpx%2FFoWWTLgVisZErrEK53K%2FNI4KKkfMFrAUny8%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=08a6d69395ea961af2d04002ea50f89501e24d95784a86bf04d243f88e740be5"
-    },
-    "disclosed_date": 1484974200,
-    "report_url": "https://hackerone.com/reports/197443",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Navigate to http://try.discourse.org and click 'New topic'."
-        ],
-        [
-            2,
-            "Enter the payload 'https://89.223.28.48/bandcamp.com/album/index.html?XSSa2' into the field with placeholder 'Type title or paste a link here' and wait for the preview engine to parse the link, triggering the XSS."
-        ]
-    ],
-    "vuln_description": "The vulnerability is an XSS (Cross-Site Scripting) issue in the Discourse forum software, specifically in the preview engine for Bandcamp links. The preview engine does not properly sanitize external data, allowing an attacker to inject malicious JavaScript via a crafted Bandcamp URL. The suggested fix is to update the URL matching regex to ensure only valid Bandcamp domains are allowed.",
-    "reason": "The attack is straightforward, involving only a single payload injection into a visible input field. The vulnerability does not require complex interactions or state manipulation, and the XSS vector is a well-known issue type. The only minor complexity is the need to craft a URL that bypasses the current regex check, but this is a common technique in XSS attacks.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The XSS vulnerability involves an external link preview engine and does not directly relate to authentication or authorization boundaries within the same application. The methodology focuses on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, which is not applicable here.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Enter the payload 'https://89.223.28.48/bandcamp.com/album/index.html?XSSa2' into the field with placeholder 'Type title or paste a link here' and wait for the preview engine to parse the link, triggering the XSS."
+    ]
+  ],
+  "vuln_description": "The vulnerability is an XSS (Cross-Site Scripting) issue in the Discourse forum software, specifically in the preview engine for Bandcamp links. The preview engine does not properly sanitize external data, allowing an attacker to inject malicious JavaScript via a crafted Bandcamp URL. The suggested fix is to update the URL matching regex to ensure only valid Bandcamp domains are allowed.",
+  "reason": "The attack is straightforward, involving only a single payload injection into a visible input field. The vulnerability does not require complex interactions or state manipulation, and the XSS vector is a well-known issue type. The only minor complexity is the need to craft a URL that bypasses the current regex check, but this is a common technique in XSS attacks.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves a preview engine parsing an external link without proper sanitization, which is not directly related to authentication or authorization (AuthN/AuthZ) boundaries. The proposed methodologies focus on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, not on input sanitization or XSS vulnerabilities.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The XSS vulnerability stems from a URL parameter in the Bandcamp preview engine. The methodology would detect it because:\n1. The URL input field is an injectable parameter logged during regular topic creation\n2. The payload (malicious URL) qualifies as a 'simple payload' since it requires no custom filter bypass\n3. Execution is observable in the same channel via the preview engine's response\n4. Bandcamp URL validation regex flaws are detectable through pattern analysis of HTTP interactions",
+    "is_simple_injection": true
+  }
 }

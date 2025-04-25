@@ -58,7 +58,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves session duplication due to improper validation during API-KEY generation and password reset. The methodology described involves testing for authorization boundaries by swapping user sessions and resource IDs, which would cover the scenario where an attacker can create a parallel session using the victim's email and API-KEY. The steps involve actions that would be captured in the normal flow of the application (account creation, API-KEY generation, password reset), making it detectable by the proposed methodology.",
-    "is_detectable": true
+    "reasoning": "The vulnerability arises from improper validation during account creation and password reset, allowing parallel sessions. The methodology tests by swapping user sessions and resource IDs. Since the attacker uses the victim's email (resource_id) during account creation (action), and the victim's password reset doesn't invalidate the attacker's API key, the automated tests would detect this by substituting emails in registration/reset requests and verifying session validity across users, fitting the AuthN/AuthZ bypass detection method.",
+    "is_simple_authnz": true
   }
 }

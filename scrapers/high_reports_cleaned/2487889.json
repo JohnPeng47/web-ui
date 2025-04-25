@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves accessing private reports by manipulating the organization_id and text_query parameters in a POST request to /bugs.json. This fits the IDOR methodology where an authenticated user can access resources (reports) they shouldn't have access to by manipulating resource identifiers (organization_id and text_query). The methodology involves swapping resource_ids and testing with different user sessions, which would detect this vulnerability.",
-    "is_detectable": true
+    "reasoning": "The IDOR vulnerability reported involves accessing private reports by modifying the organization_id and text_query parameters in a POST request. This aligns with the IDOR detection methodology where resource IDs (organization_id and report IDs via text_query) are substituted. The methodology's step e) involves substituting new resource_ids of existing types (organization_id) and executing with existing users, which would detect this vulnerability. Since the detection relies on swapping resource IDs and testing authorization boundaries within the same application, it fits the simple_authnz criteria.",
+    "is_simple_authnz": true
   }
 }

@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves manipulating the password change request for any user's email by intercepting and modifying the HTTP request. This falls under the AuthZ bypass category where an unprivileged user can perform an action (password change) on another user's account. The methodology described includes testing actions with different user sessions and resource IDs, which would cover this scenario by substituting the victim's email and new password in the request.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves modifying the 'txtEMail' parameter in a password change request to another user's email, which is an instance of an Insecure Direct Object Reference (IDOR). The described methodology tests for such by substituting resource_ids (emails) and checking authorization. Since the password change action with another email is a resource substitution covered by step e) (substituting resource_ids of the same type), this vulnerability fits the methodology.",
+    "is_simple_authnz": true
   }
 }

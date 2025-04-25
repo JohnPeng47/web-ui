@@ -42,7 +42,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an exposed TinyPilot KVM device without authentication, which is a standalone hardware device and not part of a web application where user sessions and resource IDs are managed. The proposed methodologies focus on web application vulnerabilities involving user sessions, actions, and resource IDs within the same application, which does not apply to this hardware exposure scenario.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves a complete lack of authentication (AuthN) on an internet-exposed TinyPilot KVM interface. The described methodology includes testing actions with unauthenticated sessions (step d). Since accessing the KVM's web interface requires no authentication at all, this would be detected under step d ('execute with unauthenticated user session'). However, the root cause is a misconfiguration (no auth mechanism enabled) rather than a classic session/resource-ID substitution flaw. The methodology's scope implicitly covers this case via step d, making it a 'simple_authnz' detection.",
+    "is_simple_authnz": true
   }
 }

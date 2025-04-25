@@ -55,10 +55,10 @@
   "authnz_byppass_detectable": true,
   "is_simple_payload": false,
   "injection_metadata": {
-    "is_simple_payload": true
+    "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The TOTP vulnerability involves the acceptance of expired codes within the same application's authentication flow. The methodology described involves testing authentication and authorization boundaries by swapping user sessions, actions, and resource IDs within the same application. Since the TOTP issue is about the application's handling of time-based codes, it falls under the scope of AuthN/AuthZ bypass detection where the action (submitting an expired TOTP code) is tested with different timing conditions.",
-    "is_detectable": true
+    "reasoning": "The TOTP vulnerability involves the server accepting expired codes, which is related to time window validation rather than user session or resource ID authorization. The described methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs, not time-based code validity. Since the TOTP flaw does not involve unauthorized cross-user/resource access but instead improper validation of time-sensitive codes, it would not be detected by the outlined AuthN/AuthZ/IDOR testing strategies.",
+    "is_simple_authnz": false
   }
 }

@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves intercepting and modifying HTTP responses to bypass authentication checks. This falls under the AuthN/AuthZ Bypass methodology where the authorization boundary is crossed by manipulating the response to appear as if the user is authenticated. The methodology described involves testing with different user sessions and actions, which includes modifying responses to simulate successful authentication.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves modifying HTTP response codes (401 to 200) to bypass authentication checks. The described methodologies focus on testing authorization boundaries via session/resource-ID substitution and unauthenticated access checks, but do not explicitly include response manipulation techniques. This exploit requires altering server responses directly, which falls outside the scope of the automated parameter/session substitution logic in the proposed methodologies.",
+    "is_simple_authnz": false
   }
 }

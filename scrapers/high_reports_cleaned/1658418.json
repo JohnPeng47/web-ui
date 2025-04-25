@@ -49,7 +49,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves accessing mod logs of a subreddit by changing the subredditName parameter without proper authorization checks. This fits the IDOR vulnerability class where (user_session, action, resource_id) tuples are manipulated. The methodology would detect this by swapping the subredditName (resource_id) with another subreddit's name and testing access with the same user session (user_session) and action (fetching mod logs).",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing mod logs by substituting the subredditName (resource_id) in a GraphQL request. The methodology's step 4e explicitly covers substituting resource_ids of existing resource_types (subreddit names) with new ones and testing authorization. Since the attack leverages an IDOR by swapping the subreddit ID without authorization checks, it aligns perfectly with the described detection method for IDOR vulnerabilities.",
+    "is_simple_authnz": true
   }
 }

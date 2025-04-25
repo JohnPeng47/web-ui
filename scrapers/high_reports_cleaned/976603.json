@@ -54,7 +54,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves manipulating SSO entity IDs and authentication flows, which are not covered by the standard IDOR or AuthN/AuthZ bypass methodologies. The issue requires specific knowledge of SSO/SAML behavior and cannot be detected by simply swapping user sessions or resource IDs in HTTP requests.",
-    "is_detectable": false
+    "reasoning": "The vulnerability stems from a logic flaw in how entityIds are processed (trimming during validation but not during organization assignment). The proposed methodologies focus on swapping user sessions and resource IDs within the same application context, but this issue involves manipulating federated identity provider configurations (SAML entityIds) across organizations. The attack vector exploits inconsistent parsing logic rather than direct IDOR or session/authZ boundary violations. While some aspects involve authorization boundaries, the core issue requires understanding of SAML workflow quirks and identifier normalization, which wouldn't be detected through simple session/resource ID substitution testing.",
+    "is_simple_authnz": false
   }
 }

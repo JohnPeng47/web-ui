@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves server-side validation of Facebook access tokens during login. The proposed methodology includes testing authentication and authorization boundaries by swapping user sessions and actions. Since the issue is about bypassing server-side token validation, it falls under AuthN/AuthZ Bypass detection (method d: executing actions with unauthenticated user sessions or invalid tokens). The methodology would detect this by attempting to use invalid or other app's access tokens in the login request.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves the server not validating the Facebook access token's app ID, allowing an attacker to use a token from another app. The methodology's step e) involves substituting resource IDs (e.g., fb_token) in requests. By replacing a valid token with one from a different app, the test would detect the lack of validation, as the server would grant unauthorized access. This aligns with AuthZ bypass detection via resource substitution.",
+    "is_simple_authnz": true
   }
 }

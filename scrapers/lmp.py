@@ -4,13 +4,13 @@ from typing import Optional, List, Tuple
 from enum import Enum
 
 class AuthNZMetadata(BaseModel):
-    reason: str
-    is_detectable: bool
+    reasoning: str
+    is_simple_authnz: bool
 
 class AuthNZStruct(BaseModel):
     authnz_metadata: AuthNZMetadata
 
-class CategorizeInjections(LMP):
+class DetectSimpleAuthNZ(LMP):
     prompt = """
 {{report}}
 
@@ -50,7 +50,7 @@ Steps to Reproduce:
 - swapping resource_ids (the email) with existing (action, resource_id) is covered by test e) 
 </reason>
 
-Detectable: True
+is_simple_authnz: True
 </example_vuln1>
 
 <example_vuln2>
@@ -64,35 +64,49 @@ Steps to Reproduce:
 - since Slack and Github are indenpedent applications, none of the steps would apply since they deal with user_session/user_ids scoped to the same applicaiton
 </reason>
 
-Detectable: False
+is_simple_authnz: False
 </example_vuln2>
 
 Your task is to determine if the report can found using the methodology above
-First respond with your reasoning, then with whether or not you think it's detectable
+First respond with your reasoning, then with whether or not you think it's a simple_authnz
 """
     response_format = AuthNZStruct
 
-
 class InjectionMetadata(BaseModel):
-    is_simple_payload: bool
+    reasoning: str
+    is_simple_injection: bool
 
 class InjectionStruct(BaseModel):
     injection_metadata: InjectionMetadata 
 
-class CategorizeAuthNZ(LMP):
+class DetectSimpleInjection(LMP):
     prompt = """
 {{report}}
 
-Okay here is a proposed methodology for finding a class of bugs. 
-# Simple Payloads
+Okay here is a proposed methodology for finding a class of bugs. Determine if the bug described in the report above can be found using this 
+methodology:
+
+** Injectable Response Discovery Methodology:
+1. User navigates the website *regularly* (without intending to trigger any vulnerable behaviour)
+2. All HTTP requests/responses are logged
+3. A program analyzes the requests and responses to extract all potentially injectable parameters
+4. Then for each parameter, the following "Simple Payload" testing methodology is performed 
+
+** Simple Payloads
 1. Find every injectable parameter on a webpage.
 2. Then using a *simple* payload list that contains common permutations of payloads such as b64 encoding, context positioning for XSS, etc.,
 inject the payload into the parameter and send the request
 -> *simple* means a generic payload that does not include any kind of custom filter bypass
-3. Payload execution can be determined within the same channel ie. for blind SQLi payloads, there is usually some way
+3. Payload execution can be determined within the *same channel* ie. for blind SQLi payloads, there is usually some way
 to detect the response
+-> *same channel* means the same web application, either through inspecting the HTTP response or through navigating the web application in a *regular* manner.
+This is particularly meaningful for stored XSS vectors where the injection site and the trigger site are different; as long as the trigger site
+of the payload remains *on the same application and can be navigated to using regular navigation behaviour*, then this would be considered a simple payload
+as long as the conditions above hold
+-> Note: "using regular navigation behaviour" above means regular navigation for every user role available in the application
 
-Return your answer as a boolean called is_simple_payload
+Your task is to determine if the report can found using the methodology above
+First respond with your reasoning, then with whether or not you think it's a simple_injection
 """
     response_format = InjectionStruct
 

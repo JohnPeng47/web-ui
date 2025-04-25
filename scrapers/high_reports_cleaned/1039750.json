@@ -1,42 +1,46 @@
 {
-    "reported_to": "Automattic",
-    "reported_by": "sodium_ ",
-    "title": "Stored XSS in Intense Debate comment system",
-    "content": "\nHi Team,\nSummary:\nThe Intense Debate comment system is vulnerable to stored xss by users , this would allow for atacking admins/users on the blog ,\nPlatform(s) Affected:\nIntense Debate comment system\n\n\nSteps To Reproduce:\nGo to intensedebate.com/moderate/{{-ID-}}\nGo to comments > allow images in comments\nNow go to your blog and add this payload as comment :\nCode 75 Bytes\n1<img src=\"https://intensedebate.com/images/a-addblog.png\" onload=\"alert()\">\nYou'll notice the alert will pop as result for the \"onload\" attribute ,\n\n\nImpact\nStealing cookie and secter tokens\nEditing html/css/js content for phishing attacks\nThanks for taking your valuable time to read and validate this report\n\n",
-    "severity": [
-        8.2,
-        null
+  "reported_to": "Automattic",
+  "reported_by": "sodium_ ",
+  "title": "Stored XSS in Intense Debate comment system",
+  "content": "\nHi Team,\nSummary:\nThe Intense Debate comment system is vulnerable to stored xss by users , this would allow for atacking admins/users on the blog ,\nPlatform(s) Affected:\nIntense Debate comment system\n\n\nSteps To Reproduce:\nGo to intensedebate.com/moderate/{{-ID-}}\nGo to comments > allow images in comments\nNow go to your blog and add this payload as comment :\nCode 75 Bytes\n1<img src=\"https://intensedebate.com/images/a-addblog.png\" onload=\"alert()\">\nYou'll notice the alert will pop as result for the \"onload\" attribute ,\n\n\nImpact\nStealing cookie and secter tokens\nEditing html/css/js content for phishing attacks\nThanks for taking your valuable time to read and validate this report\n\n",
+  "severity": [
+    8.2,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1613338140,
+  "report_url": "https://hackerone.com/reports/1039750",
+  "vuln_category": "WEB_APP",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "steps": [
+    [
+      1,
+      "Navigate to intensedebate.com/moderate/{{-ID-}} and enable 'Allow images in comments' in the moderation settings."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1613338140,
-    "report_url": "https://hackerone.com/reports/1039750",
-    "vuln_category": "WEB_APP",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "steps": [
-        [
-            1,
-            "Navigate to intensedebate.com/moderate/{{-ID-}} and enable 'Allow images in comments' in the moderation settings."
-        ],
-        [
-            2,
-            "Post a comment containing the XSS payload: `<img src=\"https://intensedebate.com/images/a-addblog.png\" onload=\"alert()\">` on a blog using Intense Debate."
-        ]
-    ],
-    "vuln_description": "The Intense Debate comment system is vulnerable to stored Cross-Site Scripting (XSS) via image tags with malicious 'onload' attributes. This allows attackers to execute arbitrary JavaScript in the context of other users' sessions, potentially leading to cookie theft, session hijacking, or phishing attacks.",
-    "reason": "The vulnerability is straightforward to discover as it involves a basic XSS payload in a common HTML attribute ('onload'). The attack requires no complex application state manipulation or understanding of subtle interactions between components. The only prerequisite (enabling images in comments) is a standard feature with no obfuscation.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The XSS vulnerability involves injecting malicious scripts into comments, which is not directly related to authentication or authorization boundaries. The methodology focuses on testing access control by swapping user sessions or resource IDs, not on detecting script injection vulnerabilities.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Post a comment containing the XSS payload: `<img src=\"https://intensedebate.com/images/a-addblog.png\" onload=\"alert()\">` on a blog using Intense Debate."
+    ]
+  ],
+  "vuln_description": "The Intense Debate comment system is vulnerable to stored Cross-Site Scripting (XSS) via image tags with malicious 'onload' attributes. This allows attackers to execute arbitrary JavaScript in the context of other users' sessions, potentially leading to cookie theft, session hijacking, or phishing attacks.",
+  "reason": "The vulnerability is straightforward to discover as it involves a basic XSS payload in a common HTML attribute ('onload'). The attack requires no complex application state manipulation or understanding of subtle interactions between components. The only prerequisite (enabling images in comments) is a standard feature with no obfuscation.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves stored XSS in the Intense Debate comment system, which is a client-side issue and not directly related to authentication or authorization boundaries. The proposed methodologies focus on testing AuthN/AuthZ bypasses and IDORs by manipulating user sessions and resource IDs, which are server-side concerns. XSS vulnerabilities are typically detected through input validation testing, not session/resource ID manipulation.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves injecting a basic HTML payload (`<img ... onload=alert()>`) into a comment field. The methodology would log HTTP requests during regular navigation (e.g., submitting a comment), identify the comment text as an injectable parameter, and test it with simple payloads like the one provided. Since the payload execution (alert) occurs when viewing the comment via regular navigation (same channel, same application), and the payload does not require custom filter bypasses, it aligns with the 'simple payload' criteria. The stored XSS trigger is within the same application and detectable through standard user/admin workflows.",
+    "is_simple_injection": true
+  }
 }

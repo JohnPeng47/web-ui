@@ -1,54 +1,58 @@
 {
-    "reported_to": "Weblate",
-    "reported_by": "4cad ",
-    "title": "Uploaded XLF files result in External Entity Execution",
-    "content": "\nSummary:\nWeblate users in the Translate group (or those with the ability to upload translation files) can trigger XML External Entity Execution. This is a well known and high/critical vector of attack that often can completely compromise the security of a web application or in some cases lead to Remote Code Execution (although I do not expect it to be an easy RCE in this case).\nDescription:\nThe XML External Entity Execution allows for arbitrary reading of files on the server using a relatively obscure aspect of the XML language. It is generally considered high or critical severity, most notably Google places it at the same severity as remote code execution because of the potential for Server-Side Request Forgery, Remote Code Exection, and arbitrary File Read.\nThe mitigating factors here for you are that some account priveleges are required to upload tranlation files, although by default this gets rolled into the @Translate group. Also because your web server is python based it is not vulnerable to the trivial RCE that PHP servers are commonly vulnerable to.\nThe core of the vulnerability is in how the translate-toolkit processes .XLF files. The XLIFF standard is XML based, and thus supports by default standard XML functionality including external entity execution.\nIn my proof of concept, I dowloaded as .XLF the translations of the \"hello\" project which is being pointed to by my local Weblate instance. A minor modification shown in the steps below results in the /etc/passwd file out through the UI for review as a translation, although much worse things can be done - this is just to prove the vulnerability exists. For more details search for \"XML External Entity Exploit\"\nSee the attached screenshots and exploit XML file for evidence of the vulnerability.\nVersion:\nI tested this against the latest stable source available a couple fo days ago (~May 26) running \"Weblate 2.15-dev\"\nSteps to Reproduce\n(I have included a live exploit testproject-testcomponent-en_GB.xlf that works with the \"hello\" data backing the demo website.)\nLog in as a user that has permission to upload translation files.\nGo to a component, and download its translations as XLF\nAdd the following two lines after the \"<?xml\" tag, and replace one of the translation texts with \"&xxe;\" :\nCode 80 Bytes\n1<!DOCTYPE foo [ <!ELEMENT foo ANY >\n2<!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]>\nUpload the file back to the server\nObserve the contents of the passwd file as a translation\n\n",
-    "severity": [
-        7.1,
-        null
+  "reported_to": "Weblate",
+  "reported_by": "4cad ",
+  "title": "Uploaded XLF files result in External Entity Execution",
+  "content": "\nSummary:\nWeblate users in the Translate group (or those with the ability to upload translation files) can trigger XML External Entity Execution. This is a well known and high/critical vector of attack that often can completely compromise the security of a web application or in some cases lead to Remote Code Execution (although I do not expect it to be an easy RCE in this case).\nDescription:\nThe XML External Entity Execution allows for arbitrary reading of files on the server using a relatively obscure aspect of the XML language. It is generally considered high or critical severity, most notably Google places it at the same severity as remote code execution because of the potential for Server-Side Request Forgery, Remote Code Exection, and arbitrary File Read.\nThe mitigating factors here for you are that some account priveleges are required to upload tranlation files, although by default this gets rolled into the @Translate group. Also because your web server is python based it is not vulnerable to the trivial RCE that PHP servers are commonly vulnerable to.\nThe core of the vulnerability is in how the translate-toolkit processes .XLF files. The XLIFF standard is XML based, and thus supports by default standard XML functionality including external entity execution.\nIn my proof of concept, I dowloaded as .XLF the translations of the \"hello\" project which is being pointed to by my local Weblate instance. A minor modification shown in the steps below results in the /etc/passwd file out through the UI for review as a translation, although much worse things can be done - this is just to prove the vulnerability exists. For more details search for \"XML External Entity Exploit\"\nSee the attached screenshots and exploit XML file for evidence of the vulnerability.\nVersion:\nI tested this against the latest stable source available a couple fo days ago (~May 26) running \"Weblate 2.15-dev\"\nSteps to Reproduce\n(I have included a live exploit testproject-testcomponent-en_GB.xlf that works with the \"hello\" data backing the demo website.)\nLog in as a user that has permission to upload translation files.\nGo to a component, and download its translations as XLF\nAdd the following two lines after the \"<?xml\" tag, and replace one of the translation texts with \"&xxe;\" :\nCode 80 Bytes\n1<!DOCTYPE foo [ <!ELEMENT foo ANY >\n2<!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]>\nUpload the file back to the server\nObserve the contents of the passwd file as a translation\n\n",
+  "severity": [
+    7.1,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "XML External Entities (XXE)"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1496417040,
+  "report_url": "https://hackerone.com/reports/232614",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Log in as a user with permission to upload translation files."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "XML External Entities (XXE)"
+    [
+      2,
+      "Download translations as XLF from a component."
     ],
-    "screenshots": {},
-    "disclosed_date": 1496417040,
-    "report_url": "https://hackerone.com/reports/232614",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Log in as a user with permission to upload translation files."
-        ],
-        [
-            2,
-            "Download translations as XLF from a component."
-        ],
-        [
-            3,
-            "Modify the XLF file by adding XML external entity declarations and replacing a translation text with the entity reference."
-        ],
-        [
-            4,
-            "Upload the modified XLF file back to the server."
-        ],
-        [
-            5,
-            "Observe the contents of the targeted file (e.g., /etc/passwd) displayed as a translation."
-        ]
+    [
+      3,
+      "Modify the XLF file by adding XML external entity declarations and replacing a translation text with the entity reference."
     ],
-    "vuln_description": "The vulnerability involves XML External Entity (XXE) execution in Weblate, allowing users with translation upload privileges to read arbitrary files on the server. This is achieved by exploiting the XML processing in the translate-toolkit when handling .XLF files, which can include external entity references to access local files.",
-    "reason": "The attack requires knowledge of XXE vulnerabilities and the specific XML structure of XLIFF files, but the steps to exploit it are straightforward once the vulnerability is known. The interaction between the XML parser and the file upload feature is a known issue in XML processing, making the discovery less complex.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The vulnerability involves XML External Entity Execution in XLF file uploads, which is a server-side processing issue rather than an authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, which does not apply to this vulnerability as it does not involve crossing user or resource boundaries but rather exploits XML processing.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "Upload the modified XLF file back to the server."
+    ],
+    [
+      5,
+      "Observe the contents of the targeted file (e.g., /etc/passwd) displayed as a translation."
+    ]
+  ],
+  "vuln_description": "The vulnerability involves XML External Entity (XXE) execution in Weblate, allowing users with translation upload privileges to read arbitrary files on the server. This is achieved by exploiting the XML processing in the translate-toolkit when handling .XLF files, which can include external entity references to access local files.",
+  "reason": "The attack requires knowledge of XXE vulnerabilities and the specific XML structure of XLIFF files, but the steps to exploit it are straightforward once the vulnerability is known. The interaction between the XML parser and the file upload feature is a known issue in XML processing, making the discovery less complex.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves XML External Entity Execution in uploaded XLF files, which is a server-side processing issue rather than an authentication or authorization bypass at the HTTP request level. The proposed methodology focuses on testing AuthN/AuthZ boundaries by manipulating user sessions and resource IDs in HTTP requests, but this vulnerability requires specific XML payload manipulation during file upload, which is not covered by the described detection methods.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves injecting an external entity declaration into an XML-based file upload parameter. The methodology would detect this because:\n1. File uploads would be captured as part of HTTP traffic analysis\n2. The XLF file content qualifies as an injectable parameter\n3. The XXE payload is a common XML injection pattern that would appear in simple payload lists\n4. The result appears directly in the UI translation interface (same channel detection)\nNo special filter bypasses or multi-channel analysis are required to trigger/observe this vulnerability.",
+    "is_simple_injection": true
+  }
 }

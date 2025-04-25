@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves bypassing authentication by accessing the Origin IP directly, which is a form of AuthN/AuthZ bypass. The methodology described includes testing with unauthenticated user sessions (step d) and swapping user sessions (step b), which could potentially detect this bypass if the Origin IP is included in the resource types being tested.",
-    "is_detectable": true
+    "reasoning": "The authorization bypass involves accessing the origin server's IP directly, which circumvents the SSO. The described methodologies focus on manipulating user sessions and resource IDs within the application's normal flow. Since the bypass here doesn't require session manipulation or resource ID substitution but rather leverages an alternative entry point (origin IP) not protected by SSO, it wouldn't be detected by the automated methods that rely on logged HTTP requests/responses from regular navigation. The system would not automatically test the origin IP as an entry point unless explicitly included in resource collection, which is not part of the outlined steps.",
+    "is_simple_authnz": false
   }
 }

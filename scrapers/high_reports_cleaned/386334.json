@@ -1,51 +1,52 @@
 {
-    "reported_to": "Chaturbate",
-    "reported_by": "nahamsec ",
-    "title": "CSS Injection on /embed/ via bgcolor parameter leaks user's CSRF token and allows for XSS ",
-    "content": "\nHi there,\nThere's a CSS injection here: https://chaturbate.com/embed/admin/?bgcolor=%7D*%7Bbackground:red&tour=nvfS&disable_sound=0&campaign=iNSGX\nCode 181 Bytes\n1  body, div#main, div.content, div.block, div.section {margin: 0px; padding: 0px;}\n2  body {min-width:800px;}\n3  div.content {width: 100%;}\n4  \n5  body {background: }*{background:red;}\n6\nThis allows an attacker to enumerate the CSRF token. Once the CSRF token is enumerated, we can\nPOC\nGo to http://d0nut.pythonanywhere.com/demo/token_stealing/7GTt5qD1LD273WYkJyaR/reset\nNow go to http://d0nut.pythonanywhere.com/demo/token_stealing/7GTt5qD1LD273WYkJyaR and let it do it's magic :)\n<image_0>\nThere are numerous endpoints like POST /choose_broadcaster_chat_color where it returns Content-Type: text/html; charset=utf-8 that could potentially allow a hacker to combine the two for XSS (I haven't gotten that far yet)\nDo you mind asking your HackerOne contact to allow collaboration on your program, so I can invite another researcher that helped me exploit this fully?\nThanks,\nBen\nImpact\n\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Chaturbate",
+  "reported_by": "nahamsec ",
+  "title": "CSS Injection on /embed/ via bgcolor parameter leaks user's CSRF token and allows for XSS ",
+  "content": "\nHi there,\nThere's a CSS injection here: https://chaturbate.com/embed/admin/?bgcolor=%7D*%7Bbackground:red&tour=nvfS&disable_sound=0&campaign=iNSGX\nCode 181 Bytes\n1  body, div#main, div.content, div.block, div.section {margin: 0px; padding: 0px;}\n2  body {min-width:800px;}\n3  div.content {width: 100%;}\n4  \n5  body {background: }*{background:red;}\n6\nThis allows an attacker to enumerate the CSRF token. Once the CSRF token is enumerated, we can\nPOC\nGo to http://d0nut.pythonanywhere.com/demo/token_stealing/7GTt5qD1LD273WYkJyaR/reset\nNow go to http://d0nut.pythonanywhere.com/demo/token_stealing/7GTt5qD1LD273WYkJyaR and let it do it's magic :)\n<image_0>\nThere are numerous endpoints like POST /choose_broadcaster_chat_color where it returns Content-Type: text/html; charset=utf-8 that could potentially allow a hacker to combine the two for XSS (I haven't gotten that far yet)\nDo you mind asking your HackerOne contact to allow collaboration on your program, so I can invite another researcher that helped me exploit this fully?\nThanks,\nBen\nImpact\n\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 3,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - DOM"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/324/052/12fe6a245e909fd538ad30b99e60f337163ab0ce/cssi.gif?response-content-disposition=attachment%3B%20filename%3D%22cssi.gif%22%3B%20filename%2A%3DUTF-8%27%27cssi.gif&response-content-type=image%2Fgif&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQXBSRKY2D%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T162026Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBjLdF7v3LjH78Xfq78bU%2FrdLRb7kzYtq2C%2BZCEI6rHiAiEAxV%2FRygmQgUTn5yEdeNExn3DuNc56SQRuLSHpVdcwjuoqsgUILRADGgwwMTM2MTkyNzQ4NDkiDI%2Fm7W6vUElGJhP8tiqPBVzxLwaAD5CG2dGnoK6tr80yVbHc4CRci%2FNOyKiCadpQmJkp8qNIQ4gtNf3dy7dEbHnk%2FTMB0AOmT4pwYJ7Rjel%2BmfU%2BBqhen9wjOGqPLwhOWfJApmL5lfWbtqJho1en9BjLamm%2FQgrCfk6CxWxqs6GBcLQOfQmbEo8zAOAxHhglEDY78NPhzHiLa2kegesS19ouSMB3pgwn%2FJOh5cMrUtFh%2Fv1JrVcFv%2Bt2zSON8oFeXZS9ZSBblVKWW6Q8kg2tkjgeJpKXv1ZBOtU7NQYVTSMlwx1DtiyDsjHG7VEl7RBjsLvTy9EJSxNmS5Q0Y0wVZdhaLHK%2Fqe%2BY8sao0mvC16ea5VOpaEkhiZcFwWjl%2F%2F2h%2BJZej8Os3Z6SoDTZE7T5%2B8ZpwubClxZtFwvzq1a7itRDHwO7bNfrqpl4yvFs7m5Jbqjna6%2FgcoKq6DsDcVImizCU5Syn%2B%2BjhBrvdbAM9n0bQKi8WcdbEl8KlXVsACpP4Z6%2B5AZgkfcWz%2FUA9i0n%2BYHGFF56Z9LHf8XhDjy7Uyc3ECcja874fFyPv2bl1tqZOLJp35bYvO10PCTCq4IPujuCvydRrplZB42uLHYfPif9sbDqyH4tiVZRr%2BdDciutFQBYnJSYasZwKDwG%2F3qboqv7fXBJIZWK7VmvDUBijsFAtvgsumrU7s5mfo9R37HeXpgdvWjXHcBEfLJ64Xieh4lBDXJgTaH3E1jzl8eFes6FlPo3SLsgoRAxLrVOVlFltabBCXFOh5Y%2FBWmQTzKjKFa2xwoEOf7AmM9JMrviN%2BzHdcfV9sUF7cjMv7UZxk%2FZDN9Zt0jkfBVepiOIubaAiAMpnfU%2BmcpjlpDlQ%2FoWjJXOcdahYd3UnGAmJxc%2Bn0mgwh8mPvwY6sQFywJP9AkdA7Z31aMrgZ%2FIt58Cb%2FZMITAeGUgghS0tI4mRouKJWoVH%2BPq%2BACgMEkxDsIJlhSdZXHDbaAvpIxr8eTrnfP3eR5gP33WesQDUzTuM9Lfh9XSAD%2BlvocYkw2sUt9NjRrg3FYn1YHP0EU3%2BJw%2BjpgnO%2FCdL%2FnVXVojz7nvjTZiN7eFE6hD%2BnTLBAiiXYqjQhpXZj4VvPPqAeZRTtzEQ6eLk4IVJI1sanGrA1vAY%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=c67576fd96c6567dfdf4ac75c2a55efdf31488bfa7f07cf90728471e96d4a7c6"
+  },
+  "disclosed_date": 1537414620,
+  "report_url": "https://hackerone.com/reports/386334",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to the vulnerable URL with the CSS injection parameter: https://chaturbate.com/embed/admin/?bgcolor=%7D*%7Bbackground:red&tour=nvfS&disable_sound=0&campaign=iNSGX"
     ],
-    "bounty": 3,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - DOM"
+    [
+      2,
+      "Visit the attacker's demo page to extract the CSRF token: http://d0nut.pythonanywhere.com/demo/token_stealing/7GTt5qD1LD273WYkJyaR/reset"
     ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/324/052/12fe6a245e909fd538ad30b99e60f337163ab0ce/cssi.gif?response-content-disposition=attachment%3B%20filename%3D%22cssi.gif%22%3B%20filename%2A%3DUTF-8%27%27cssi.gif&response-content-type=image%2Fgif&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQXBSRKY2D%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T162026Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBjLdF7v3LjH78Xfq78bU%2FrdLRb7kzYtq2C%2BZCEI6rHiAiEAxV%2FRygmQgUTn5yEdeNExn3DuNc56SQRuLSHpVdcwjuoqsgUILRADGgwwMTM2MTkyNzQ4NDkiDI%2Fm7W6vUElGJhP8tiqPBVzxLwaAD5CG2dGnoK6tr80yVbHc4CRci%2FNOyKiCadpQmJkp8qNIQ4gtNf3dy7dEbHnk%2FTMB0AOmT4pwYJ7Rjel%2BmfU%2BBqhen9wjOGqPLwhOWfJApmL5lfWbtqJho1en9BjLamm%2FQgrCfk6CxWxqs6GBcLQOfQmbEo8zAOAxHhglEDY78NPhzHiLa2kegesS19ouSMB3pgwn%2FJOh5cMrUtFh%2Fv1JrVcFv%2Bt2zSON8oFeXZS9ZSBblVKWW6Q8kg2tkjgeJpKXv1ZBOtU7NQYVTSMlwx1DtiyDsjHG7VEl7RBjsLvTy9EJSxNmS5Q0Y0wVZdhaLHK%2Fqe%2BY8sao0mvC16ea5VOpaEkhiZcFwWjl%2F%2F2h%2BJZej8Os3Z6SoDTZE7T5%2B8ZpwubClxZtFwvzq1a7itRDHwO7bNfrqpl4yvFs7m5Jbqjna6%2FgcoKq6DsDcVImizCU5Syn%2B%2BjhBrvdbAM9n0bQKi8WcdbEl8KlXVsACpP4Z6%2B5AZgkfcWz%2FUA9i0n%2BYHGFF56Z9LHf8XhDjy7Uyc3ECcja874fFyPv2bl1tqZOLJp35bYvO10PCTCq4IPujuCvydRrplZB42uLHYfPif9sbDqyH4tiVZRr%2BdDciutFQBYnJSYasZwKDwG%2F3qboqv7fXBJIZWK7VmvDUBijsFAtvgsumrU7s5mfo9R37HeXpgdvWjXHcBEfLJ64Xieh4lBDXJgTaH3E1jzl8eFes6FlPo3SLsgoRAxLrVOVlFltabBCXFOh5Y%2FBWmQTzKjKFa2xwoEOf7AmM9JMrviN%2BzHdcfV9sUF7cjMv7UZxk%2FZDN9Zt0jkfBVepiOIubaAiAMpnfU%2BmcpjlpDlQ%2FoWjJXOcdahYd3UnGAmJxc%2Bn0mgwh8mPvwY6sQFywJP9AkdA7Z31aMrgZ%2FIt58Cb%2FZMITAeGUgghS0tI4mRouKJWoVH%2BPq%2BACgMEkxDsIJlhSdZXHDbaAvpIxr8eTrnfP3eR5gP33WesQDUzTuM9Lfh9XSAD%2BlvocYkw2sUt9NjRrg3FYn1YHP0EU3%2BJw%2BjpgnO%2FCdL%2FnVXVojz7nvjTZiN7eFE6hD%2BnTLBAiiXYqjQhpXZj4VvPPqAeZRTtzEQ6eLk4IVJI1sanGrA1vAY%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=c67576fd96c6567dfdf4ac75c2a55efdf31488bfa7f07cf90728471e96d4a7c6"
-    },
-    "disclosed_date": 1537414620,
-    "report_url": "https://hackerone.com/reports/386334",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Navigate to the vulnerable URL with the CSS injection parameter: https://chaturbate.com/embed/admin/?bgcolor=%7D*%7Bbackground:red&tour=nvfS&disable_sound=0&campaign=iNSGX"
-        ],
-        [
-            2,
-            "Visit the attacker's demo page to extract the CSRF token: http://d0nut.pythonanywhere.com/demo/token_stealing/7GTt5qD1LD273WYkJyaR/reset"
-        ],
-        [
-            3,
-            "Return to the demo page to observe the stolen token: http://d0nut.pythonanywhere.com/demo/token_stealing/7GTt5qD1LD273WYkJyaR"
-        ]
-    ],
-    "vuln_description": "The vulnerability involves a CSS injection on the /embed/ endpoint via the bgcolor parameter, which can be exploited to leak a user's CSRF token. This token can then be used to perform CSRF attacks or potentially combined with other endpoints to achieve XSS.",
-    "reason": "The attack requires understanding and exploiting CSS injection to leak sensitive information (CSRF token), and then leveraging that token in subsequent attacks. The interaction between CSS injection and CSRF token leakage is non-obvious and requires multiple steps to execute effectively.",
-    "new_complexity": "HIGH",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "reason": "The vulnerability involves CSS injection and CSRF token leakage, which are not directly related to the authentication or authorization bypass methodologies described. The methodologies focus on testing access control by swapping user sessions or resource IDs, while this report deals with client-side injection and token leakage.",
-        "is_detectable": false
-    }
+    [
+      3,
+      "Return to the demo page to observe the stolen token: http://d0nut.pythonanywhere.com/demo/token_stealing/7GTt5qD1LD273WYkJyaR"
+    ]
+  ],
+  "vuln_description": "The vulnerability involves a CSS injection on the /embed/ endpoint via the bgcolor parameter, which can be exploited to leak a user's CSRF token. This token can then be used to perform CSRF attacks or potentially combined with other endpoints to achieve XSS.",
+  "reason": "The attack requires understanding and exploiting CSS injection to leak sensitive information (CSRF token), and then leveraging that token in subsequent attacks. The interaction between CSS injection and CSRF token leakage is non-obvious and requires multiple steps to execute effectively.",
+  "new_complexity": "HIGH",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The CSS injection via bgcolor parameter uses a simple payload (closing CSS block with }*{background:red) that would be detected by analyzing parameters and testing with basic CSS syntax permutations. The injection appears directly in the response body's stylesheet, making it detectable through same-channel response inspection without requiring multi-step navigation or custom filter bypasses. Though CSRF token extraction requires additional techniques, the core injection vector fits the 'simple payload' criteria.",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves CSS injection and CSRF token leakage, which are not directly related to the IDOR or AuthN/AuthZ bypass methodologies described. The methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs, whereas this report deals with client-side injection and token leakage.",
+    "is_detectable": false
+  }
 }

@@ -1,50 +1,54 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "manshum12 ",
-    "title": "\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 SQL",
-    "content": "\nhi , i think i find a SQL in https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\nPOST /requestaccount.php? HTTP/1.1\nHost: \u2588\u2588\u2588\u2588\u2588\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:60.0) Gecko/20100101 Firefox/60.0\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,/;q=0.8\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate\nReferer: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/requestaccount.php?\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 98\nCookie: _ga=GA1.2.797825707.1531527624; PHPSESSID=h46aobnksi6rqe0dki7b34thn10qqf7j; TS0136a92d=0141bba1871c30b60b2555c9145e093817841b5f20a39085c1ff77e556280571aa32dcc2ebf57d0d397334f8207e32f1153478dbc7; Hm_lvt_dde6ba2851f3db0ddc415ce0f895822e=1531606739; Hm_lpvt_dde6ba2851f3db0ddc415ce0f895822e=1531623251\nConnection: close\nUpgrade-Insecure-Requests: 1\nfname=&lname=&uname=&email=&phone=&dsn=&cmdName=&title=&rank=&rate=Not+specified&message=&curID=-1\nSQL vulnerable in curID=-1'\nif you puy ' u will see screenshot 49 and 48\nImpact\nSQL injection is a code injection technique, used to attack data-driven applications, in which nefarious SQL statements are inserted into an entry field for execution\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "manshum12 ",
+  "title": "\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 SQL",
+  "content": "\nhi , i think i find a SQL in https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\nPOST /requestaccount.php? HTTP/1.1\nHost: \u2588\u2588\u2588\u2588\u2588\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:60.0) Gecko/20100101 Firefox/60.0\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,/;q=0.8\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate\nReferer: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/requestaccount.php?\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 98\nCookie: _ga=GA1.2.797825707.1531527624; PHPSESSID=h46aobnksi6rqe0dki7b34thn10qqf7j; TS0136a92d=0141bba1871c30b60b2555c9145e093817841b5f20a39085c1ff77e556280571aa32dcc2ebf57d0d397334f8207e32f1153478dbc7; Hm_lvt_dde6ba2851f3db0ddc415ce0f895822e=1531606739; Hm_lpvt_dde6ba2851f3db0ddc415ce0f895822e=1531623251\nConnection: close\nUpgrade-Insecure-Requests: 1\nfname=&lname=&uname=&email=&phone=&dsn=&cmdName=&title=&rank=&rate=Not+specified&message=&curID=-1\nSQL vulnerable in curID=-1'\nif you puy ' u will see screenshot 49 and 48\nImpact\nSQL injection is a code injection technique, used to attack data-driven applications, in which nefarious SQL statements are inserted into an entry field for execution\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1570574820,
+  "report_url": "https://hackerone.com/reports/381771",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to the vulnerable URL: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/requestaccount.php?"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "SQL Injection"
+    [
+      2,
+      "Intercept the POST request to /requestaccount.php? using a tool like Burp Suite or browser developer tools."
     ],
-    "screenshots": {},
-    "disclosed_date": 1570574820,
-    "report_url": "https://hackerone.com/reports/381771",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Navigate to the vulnerable URL: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/requestaccount.php?"
-        ],
-        [
-            2,
-            "Intercept the POST request to /requestaccount.php? using a tool like Burp Suite or browser developer tools."
-        ],
-        [
-            3,
-            "Modify the 'curID' parameter in the POST request to include a single quote: curID=-1'"
-        ],
-        [
-            4,
-            "Observe the SQL error in the response, indicating a SQL injection vulnerability."
-        ]
+    [
+      3,
+      "Modify the 'curID' parameter in the POST request to include a single quote: curID=-1'"
     ],
-    "vuln_description": "The vulnerability is a SQL injection in the 'curID' parameter of the POST request to /requestaccount.php?. By injecting a single quote into the 'curID' parameter, an attacker can cause the application to return an SQL error, demonstrating that the input is not properly sanitized and can be exploited to execute arbitrary SQL commands.",
-    "reason": "The vulnerability is straightforward to discover as it involves a simple manipulation of a single parameter in a POST request. The error response directly indicates the presence of a SQL injection vulnerability, making it easy to identify without complex interactions or state manipulations.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The SQL injection vulnerability is detected through input manipulation (adding a single quote) and observing the system's response, which falls outside the scope of the AuthN/AuthZ and IDOR methodologies described. These methodologies focus on session and resource ID manipulation for authorization testing, not input validation vulnerabilities like SQL injection.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "Observe the SQL error in the response, indicating a SQL injection vulnerability."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a SQL injection in the 'curID' parameter of the POST request to /requestaccount.php?. By injecting a single quote into the 'curID' parameter, an attacker can cause the application to return an SQL error, demonstrating that the input is not properly sanitized and can be exploited to execute arbitrary SQL commands.",
+  "reason": "The vulnerability is straightforward to discover as it involves a simple manipulation of a single parameter in a POST request. The error response directly indicates the presence of a SQL injection vulnerability, making it easy to identify without complex interactions or state manipulations.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability involves manipulating the 'curID' parameter in the request, which is a form of input validation bypass rather than an authentication or authorization issue. The proposed methodologies focus on AuthN/AuthZ bypasses and IDOR vulnerabilities, which are not applicable here.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The SQL injection vulnerability in the 'curID' parameter can be detected via the methodology. The parameter was identified during regular navigation (step 1-3). A simple payload (') triggered an error visible in the same HTTP response (screenshots 48/49), satisfying the 'simple payload' criteria (no filter bypass needed, same-channel detection via direct response inspection). The vulnerability execution and impact are directly observable without requiring complex navigation or role-specific access.",
+    "is_simple_injection": true
+  }
 }

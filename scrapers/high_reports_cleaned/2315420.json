@@ -54,7 +54,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves manipulating cookies (specifically deleting 'bb_refresh') to bypass 2FA, which is an action that can be captured and analyzed by logging HTTP requests/responses during normal navigation. The methodology includes testing with different user sessions and actions, which would cover this scenario if the cookie manipulation is part of the HTTP request flow.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves bypassing 2FA by manipulating a session cookie after initial authentication but before completing the 2FA challenge. The described methodology focuses on testing session/resource substitution and unauthenticated access checks, but doesn't explicitly account for mid-authentication state manipulation via cookie deletion during a multi-step auth flow. While session cookies are tracked, the methodology doesn't specify testing partial authentication states (post-credentials/pre-2FA) by session cookie manipulation.",
+    "is_simple_authnz": false
   }
 }

@@ -60,7 +60,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves swapping resource_ids (content IDs) and testing with different user sessions (free account and team account) to see if authorization boundaries can be crossed. This matches the methodology's steps of collecting (user_session, action, resource_id) tuples and testing with different sessions and resource_ids.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves manipulating the 'actionable[]' parameter (resource_id) in a POST request to move content. The detection methodology involves substituting resource_ids and testing with different user sessions. Since the attack requires changing the resource_id (victim's content ID) and testing with another user (team account), it aligns with the outlined IDOR detection methods (steps a, c, e). The core issue is authorization bypass via resource_id substitution, which fits the 'simple_authnz' criteria as it doesn't involve cross-service interactions or complex auth mechanisms.",
+    "is_simple_authnz": true
   }
 }

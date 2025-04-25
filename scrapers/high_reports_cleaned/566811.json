@@ -47,10 +47,10 @@
   "authnz_byppass_detectable": true,
   "is_simple_payload": false,
   "injection_metadata": {
-    "is_simple_payload": false
+    "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves a password reset functionality that can be exploited by intercepting and modifying HTTP requests with a different username and password. This falls under the AuthN/AuthZ Bypass methodology where the authorization boundary is crossed by manipulating the request parameters. The detection method involves swapping user sessions and testing actions with different resource IDs, which aligns with the described methodology.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves a password reset functionality that only requires a username (no SSN/email verification), allowing account takeover by substituting usernames in requests. This matches the IDOR/AuthZ bypass methodology: an authenticated/unauthenticated user can execute the password reset action (POST /api/session/personalsettings/ForgotPasswordChangeRequest) with any resource_id (username). The methodology's steps d) (testing with unauthenticated sessions) and e) (substituting resource_ids) would detect this, as the endpoint lacks proper authorization checks.",
+    "is_simple_authnz": true
   }
 }

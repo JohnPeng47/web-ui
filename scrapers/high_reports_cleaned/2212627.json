@@ -54,7 +54,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves swapping resource IDs (storage IDs) with existing actions and user sessions, which is covered by the methodology's test cases (AuthZ, IDOR). The standard user can modify the storage ID associated with an admin's storage, leading to unauthorized deletion, which fits the pattern of IDOR vulnerabilities.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an IDOR where a standard user can manipulate the resource_id (storage_id) to affect another user's resources. The methodology checks for IDOR by testing different user sessions against resource_ids. Since the storage_id is auto-incrementing and no authorization check is present, substituting the resource_id with another user's storage_id (e.g., admin's ID) using a standard user's session would trigger this vulnerability, making it detectable via the outlined IDOR detection method.",
+    "is_simple_authnz": true
   }
 }

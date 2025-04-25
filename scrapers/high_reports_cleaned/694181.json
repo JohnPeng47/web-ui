@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves container escape and symlink manipulation, which is outside the scope of the AuthN/AuthZ testing methodology that focuses on user sessions and resource access within the same application. The described methodology does not cover file system manipulation or container escape techniques.",
-    "is_detectable": false
+    "reasoning": "The reported vulnerability involves exploiting symlink handling in a container environment to read host files, which is a filesystem/configuration flaw rather than an authorization or authentication bypass in application logic. The detection methodologies focus on HTTP request/response analysis, session swapping, and resource ID substitution to test AuthN/AuthZ boundaries. This vulnerability does not involve HTTP-level user sessions, resource IDs, or actions that the methodologies target, making it unrelated to AuthN/AuthZ bypass checks.",
+    "is_simple_authnz": false
   }
 }

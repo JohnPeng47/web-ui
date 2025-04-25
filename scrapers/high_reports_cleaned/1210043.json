@@ -42,7 +42,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves enumerating and joining classes via Google dorking, which is outside the scope of the proposed methodologies that focus on HTTP request/response analysis within the same application. The methodology does not account for external enumeration techniques or cross-application interactions.",
-    "is_detectable": false
+    "reasoning": "The vulnerability relies on enumerating class codes through Google indexing (external to application flow) rather than manipulating session/resource IDs within authenticated requests. The methodology focuses on testing authorization boundaries by swapping credentials/resource IDs in captured HTTP requests, but this issue stems from publicly exposed join URLs - a different class of information disclosure not covered by the session/resource substitution methods.",
+    "is_simple_authnz": false
   }
 }

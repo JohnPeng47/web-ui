@@ -42,7 +42,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The subdomain takeover vulnerability involves DNS misconfiguration and Azure resource management, not authentication or authorization bypass within a single application. The methodology described focuses on testing AuthN/AuthZ boundaries within an application by manipulating user sessions, actions, and resource IDs, which does not apply to DNS or cloud resource misconfigurations.",
-    "is_detectable": false
+    "reasoning": "The reported subdomain takeover vulnerability involves DNS misconfiguration (unclaimed CNAME) pointing to an Azure resource. The methodologies described focus on testing authentication and authorization boundaries by manipulating user sessions, actions, and resource IDs within the application context. Subdomain takeover is a infrastructure/configuration issue unrelated to session/resource-based AuthN/AuthZ bypass. The detection methods outlined (e.g., swapping user sessions, testing resource IDs) do not apply to DNS or cloud resource ownership validation.",
+    "is_simple_authnz": false
   }
 }

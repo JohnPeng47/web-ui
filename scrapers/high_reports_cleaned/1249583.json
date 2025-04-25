@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves exploiting authenticated access to Kubernetes resources to retrieve service account tokens and secrets across namespaces. The methodology described focuses on detecting authorization boundaries being crossed within a single application by swapping user sessions and resource IDs. However, this Kubernetes vulnerability involves cross-namespace access and service account token misuse, which is outside the scope of the described methodology as it deals with intra-application authorization checks rather than cross-resource or cross-service authorization in a Kubernetes cluster.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves exploiting permissions of the ingress-nginx serviceaccount via custom configuration snippets, not direct session/resource ID substitution. The attacker creates new resources (ingress/service) to expose the token, which isn't covered by the methodology's focus on parameter swapping in existing requests. Detection requires analyzing resource creation permissions and serviceaccount privileges, not just testing existing actions with altered sessions/IDs.",
+    "is_simple_authnz": false
   }
 }

@@ -44,7 +44,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves unauthenticated access to admin panel functions, which falls under the AuthN/AuthZ Bypass category. The methodology described includes testing actions with unauthenticated user sessions (step d), which would detect this vulnerability by attempting to access admin functions without proper authentication.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing admin panel functions without authentication. The described methodology includes testing actions with unauthenticated sessions (step d). Since the admin panel functions are exposed without session validation, an automated tool following this methodology would detect the lack of authentication checks when attempting to execute privileged actions (e.g., POST to /\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588bulla.php) with no session cookie, triggering an AuthN/AuthZ bypass alert.",
+    "is_simple_authnz": true
   }
 }

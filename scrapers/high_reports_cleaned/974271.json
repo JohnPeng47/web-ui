@@ -1,65 +1,66 @@
 {
-    "reported_to": "Automattic",
-    "reported_by": "ali ",
-    "title": "Stored XSS on https://app.crowdsignal.com/surveys/[Survey-Id]/question - Bypass",
-    "content": "\nHello there,\nI hope all is well!\nI found a stored xss on https://app.crowdsignal.com/\nSteps:\nGo to https://app.crowdsignal.com/dashboard\nCreate a survey.\nGo to https://app.crowdsignal.com/quizzes/{survey-id}/question\nAdd Multiple Choice\nClick Add media button.\nSelect Embed Media\nPaste this: [dailymotion id=x8oma9]\nInsert it.\nOpen Burp Suite and click Save button.\nReturn to burp suite and paste xss payload to media[11111111] parameter: [dailymotion id=x8oma9\"><svg/onload=prompt(document.domain)>]\nForward the request and refresh the page. You will see xss alert.\nThis isn't self xss because I saw users who Team plan can invite other users to their dashboards. So attacker can steal victim's cookies.\nImpact\nStealing cookies.\nBest Regards,\n@mygf\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Automattic",
+  "reported_by": "ali ",
+  "title": "Stored XSS on https://app.crowdsignal.com/surveys/[Survey-Id]/question - Bypass",
+  "content": "\nHello there,\nI hope all is well!\nI found a stored xss on https://app.crowdsignal.com/\nSteps:\nGo to https://app.crowdsignal.com/dashboard\nCreate a survey.\nGo to https://app.crowdsignal.com/quizzes/{survey-id}/question\nAdd Multiple Choice\nClick Add media button.\nSelect Embed Media\nPaste this: [dailymotion id=x8oma9]\nInsert it.\nOpen Burp Suite and click Save button.\nReturn to burp suite and paste xss payload to media[11111111] parameter: [dailymotion id=x8oma9\"><svg/onload=prompt(document.domain)>]\nForward the request and refresh the page. You will see xss alert.\nThis isn't self xss because I saw users who Team plan can invite other users to their dashboards. So attacker can steal victim's cookies.\nImpact\nStealing cookies.\nBest Regards,\n@mygf\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1605727200,
+  "report_url": "https://hackerone.com/reports/974271",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Go to https://app.crowdsignal.com/dashboard and create a survey."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
+    [
+      2,
+      "Navigate to https://app.crowdsignal.com/quizzes/{survey-id}/question and add a Multiple Choice question."
     ],
-    "screenshots": {},
-    "disclosed_date": 1605727200,
-    "report_url": "https://hackerone.com/reports/974271",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Go to https://app.crowdsignal.com/dashboard and create a survey."
-        ],
-        [
-            2,
-            "Navigate to https://app.crowdsignal.com/quizzes/{survey-id}/question and add a Multiple Choice question."
-        ],
-        [
-            3,
-            "Click the 'Add media' button and select 'Embed Media'."
-        ],
-        [
-            4,
-            "Paste the initial payload: [dailymotion id=x8oma9] and insert it."
-        ],
-        [
-            5,
-            "Open Burp Suite, click 'Save', and intercept the request."
-        ],
-        [
-            6,
-            "Modify the 'media[11111111]' parameter in the intercepted request to include the XSS payload: [dailymotion id=x8oma9\"><svg/onload=prompt(document.domain)>]."
-        ],
-        [
-            7,
-            "Forward the request and refresh the page to see the XSS alert."
-        ]
+    [
+      3,
+      "Click the 'Add media' button and select 'Embed Media'."
     ],
-    "vuln_description": "A stored XSS vulnerability exists in the media embedding feature of Crowdsignal surveys. By embedding a manipulated media payload, an attacker can execute arbitrary JavaScript in the context of the survey page, potentially stealing cookies or performing other malicious actions.",
-    "reason": "The vulnerability involves multiple steps including survey creation, media embedding, and request manipulation. However, the steps are straightforward and the XSS payload is a common pattern. The interaction between the media embedding and the parameter manipulation is not particularly subtle or complex.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "reason": "The stored XSS vulnerability involves injecting malicious payloads into a survey's media parameter, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, which does not apply to this XSS vulnerability.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "Paste the initial payload: [dailymotion id=x8oma9] and insert it."
+    ],
+    [
+      5,
+      "Open Burp Suite, click 'Save', and intercept the request."
+    ],
+    [
+      6,
+      "Modify the 'media[11111111]' parameter in the intercepted request to include the XSS payload: [dailymotion id=x8oma9\"><svg/onload=prompt(document.domain)>]."
+    ],
+    [
+      7,
+      "Forward the request and refresh the page to see the XSS alert."
+    ]
+  ],
+  "vuln_description": "A stored XSS vulnerability exists in the media embedding feature of Crowdsignal surveys. By embedding a manipulated media payload, an attacker can execute arbitrary JavaScript in the context of the survey page, potentially stealing cookies or performing other malicious actions.",
+  "reason": "The vulnerability involves multiple steps including survey creation, media embedding, and request manipulation. However, the steps are straightforward and the XSS payload is a common pattern. The interaction between the media embedding and the parameter manipulation is not particularly subtle or complex.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The reported XSS vulnerability involves injecting a payload into the 'media[11111111]' parameter via a stored vector. The methodology would detect this because: (1) The parameter would be identified during regular navigation when embedding media via the UI, (2) The payload uses a basic context-breaking pattern (\\\"><svg/onload=...>) without requiring custom filter bypasses, and (3) The trigger occurs in the same application through normal page refresh navigation after payload insertion. The payload execution is detectable via the same channel (HTTP response/page refresh) without requiring special user roles or navigation paths.",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves injecting a payload into a media parameter, which is not directly related to authentication or authorization boundaries. The methodology described focuses on testing (user_session, action, resource_id) tuples for AuthN/AuthZ bypasses or IDORs, not input validation flaws like XSS.",
+    "is_detectable": false
+  }
 }

@@ -1,46 +1,50 @@
 {
-    "reported_to": "X (Formerly Twitter)",
-    "reported_by": "giddsec ",
-    "title": "Multiple XSS on account settings that can hijack any users in the company. ",
-    "content": "\nNote:\nHello Twitter Team, I just noticed that my report #485748 is already fixed, can you confirm? but my other duplicate reports aren't and still exists. #492444 #492913 are you sure it's on the same root cause? because I think the broad fix is already released but didn't fix the other issues.\nI will make a report here so you'll notice. I will merge #492444 #492913 here. I'm also thinking for Twitter Security. I'm monitoring MoPub since report #485748 was set on triage.\nThe broad fix didn't really fixed all issues, that's why I'm resubmitting these issues.\nDescription:\nAn issue that can be performed vice versa. That a member can hijack a admin or admin hijack a member by injecting a malicious scripts in the accounts settings.\nSteps to reproduce:\nLogin to MoPub: https://app.mopub.com/account/login/\nGo to account settings (almost everything here is vulnerable to XSS)\nInject on currency\nYou can also inject on company's information (every input is vulnerable to XSS)\nCases of injecting on company's name\nWhen the victim go to report's tab XSS will trigger. (even if the victim is on his/her original company, attacker's company still visible on email drop down menu.)\nWhen the victim go to account settings XSS will trigger.\nWhen the victim go to edit user settings XSS will trigger.\nCases of injecting on currency(vice versa attack)\nAdministrator can inject malicious payload in currency can hijack member's session. (XSS triggers on member's end)\nMember can inject malicious payload in currency can hijack administrator's session. (XSS triggers on administrator's end)\nI provided a Full Demonstration of the vulnerability\nFull_PoC.webm (F432851)\nBased on Roles and Permissions:\n(Vice Versa Attack)\nMembers can make changes in the account, but they cannot add new users, change other users' roles or view payment information. pic.PNG (F432849)\nImpact\nThis vulnerability can impact other users invited by the attacker. And it is Stored XSS that every time the victim visits the vulnerable endpoints, XSS will trigger. The impact here is the attacker can hijack the victim's session.\nIt's also a vice versa attack. the attacker could be the administrator or the member.\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "X (Formerly Twitter)",
+  "reported_by": "giddsec ",
+  "title": "Multiple XSS on account settings that can hijack any users in the company. ",
+  "content": "\nNote:\nHello Twitter Team, I just noticed that my report #485748 is already fixed, can you confirm? but my other duplicate reports aren't and still exists. #492444 #492913 are you sure it's on the same root cause? because I think the broad fix is already released but didn't fix the other issues.\nI will make a report here so you'll notice. I will merge #492444 #492913 here. I'm also thinking for Twitter Security. I'm monitoring MoPub since report #485748 was set on triage.\nThe broad fix didn't really fixed all issues, that's why I'm resubmitting these issues.\nDescription:\nAn issue that can be performed vice versa. That a member can hijack a admin or admin hijack a member by injecting a malicious scripts in the accounts settings.\nSteps to reproduce:\nLogin to MoPub: https://app.mopub.com/account/login/\nGo to account settings (almost everything here is vulnerable to XSS)\nInject on currency\nYou can also inject on company's information (every input is vulnerable to XSS)\nCases of injecting on company's name\nWhen the victim go to report's tab XSS will trigger. (even if the victim is on his/her original company, attacker's company still visible on email drop down menu.)\nWhen the victim go to account settings XSS will trigger.\nWhen the victim go to edit user settings XSS will trigger.\nCases of injecting on currency(vice versa attack)\nAdministrator can inject malicious payload in currency can hijack member's session. (XSS triggers on member's end)\nMember can inject malicious payload in currency can hijack administrator's session. (XSS triggers on administrator's end)\nI provided a Full Demonstration of the vulnerability\nFull_PoC.webm (F432851)\nBased on Roles and Permissions:\n(Vice Versa Attack)\nMembers can make changes in the account, but they cannot add new users, change other users' roles or view payment information. pic.PNG (F432849)\nImpact\nThis vulnerability can impact other users invited by the attacker. And it is Stored XSS that every time the victim visits the vulnerable endpoints, XSS will trigger. The impact here is the attacker can hijack the victim's session.\nIt's also a vice versa attack. the attacker could be the administrator or the member.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 700,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1554151200,
+  "report_url": "https://hackerone.com/reports/503298",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Login to MoPub: https://app.mopub.com/account/login/"
     ],
-    "bounty": 700,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
+    [
+      2,
+      "Go to account settings and inject a malicious script in any input field (e.g., currency or company name)"
     ],
-    "screenshots": {},
-    "disclosed_date": 1554151200,
-    "report_url": "https://hackerone.com/reports/503298",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Login to MoPub: https://app.mopub.com/account/login/"
-        ],
-        [
-            2,
-            "Go to account settings and inject a malicious script in any input field (e.g., currency or company name)"
-        ],
-        [
-            3,
-            "When a victim visits the reports tab, account settings, or edit user settings, the XSS payload will trigger"
-        ]
-    ],
-    "vuln_description": "This is a stored Cross-Site Scripting (XSS) vulnerability in MoPub's account settings, allowing attackers to inject malicious scripts that execute in the context of other users (including administrators). The attack is bidirectional (vice versa), meaning both members and admins can exploit it to hijack sessions.",
-    "reason": "The vulnerability involves multiple components (account settings, user roles, and stored XSS triggers) and requires understanding how stored XSS can propagate across different user roles. However, the attack itself is straightforward once the vulnerable inputs are identified.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": "485748",
-    "authnz_metadata": {
-        "reason": "The vulnerability involves stored XSS in account settings where different user roles (admin/member) can inject malicious scripts affecting other users. The methodology described involves testing authorization boundaries by swapping user sessions and actions, which would detect if a user can perform actions or access resources they shouldn't. Since the XSS vulnerability allows session hijacking across different roles by injecting malicious scripts in shared settings, it falls under the authorization boundary testing described in the methodology (specifically steps b and c where user sessions are swapped and actions are tested with different sessions).",
-        "is_detectable": true
-    }
+    [
+      3,
+      "When a victim visits the reports tab, account settings, or edit user settings, the XSS payload will trigger"
+    ]
+  ],
+  "vuln_description": "This is a stored Cross-Site Scripting (XSS) vulnerability in MoPub's account settings, allowing attackers to inject malicious scripts that execute in the context of other users (including administrators). The attack is bidirectional (vice versa), meaning both members and admins can exploit it to hijack sessions.",
+  "reason": "The vulnerability involves multiple components (account settings, user roles, and stored XSS triggers) and requires understanding how stored XSS can propagate across different user roles. However, the attack itself is straightforward once the vulnerable inputs are identified.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "485748",
+  "authnz_metadata": {
+    "reason": "The vulnerability involves stored XSS in account settings where a user can inject malicious scripts that affect other users, including admins. The methodology described involves testing for authorization boundaries by swapping user sessions and resource IDs. Since the XSS vulnerability allows one user's actions to affect another user's session, it aligns with the methodology's focus on cross-user authorization testing. The steps to reproduce involve normal user navigation and actions (e.g., injecting XSS in account settings), which would be logged and analyzed by the methodology.",
+    "is_detectable": true
+  },
+  "injection_metadata": {
+    "reasoning": "The XSS vulnerabilities described in the report involve injectable parameters (e.g., currency field, company name) that would be detected through regular navigation and HTTP logging. The methodology's 'simple payload' approach would identify these fields as injectable, and the stored XSS trigger locations (reports tab, account settings) are part of the same application navigable through regular user behavior. The payload execution is detectable in the same channel without requiring custom filter bypasses, as the report demonstrates stored XSS that triggers automatically upon visiting standard UI components.",
+    "is_simple_injection": true
+  }
 }

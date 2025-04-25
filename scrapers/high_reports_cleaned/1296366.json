@@ -42,7 +42,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves a dangling DNS A record pointing to an EC2 instance that no longer exists, allowing subdomain takeover. This is not related to authentication or authorization within an application but rather a misconfiguration in DNS and cloud resource management. The proposed methodologies focus on detecting authN/authZ issues within an application's logic, not infrastructure misconfigurations.",
-    "is_detectable": false
+    "reasoning": "The EC2 subdomain takeover vulnerability arises from a dangling DNS record pointing to a deprovisioned EC2 instance, not from authentication/authorization boundary violations. The methodology focuses on session/resource ID manipulation within application flows, while this issue relates to infrastructure misconfiguration and cloud resource ownership. No user sessions, resource IDs, or authorization checks are involved in the vulnerability mechanism.",
+    "is_simple_authnz": false
   }
 }

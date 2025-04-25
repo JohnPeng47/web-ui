@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The CORS misconfiguration involves manipulating HTTP headers and crafting a cross-domain request, which is not covered by the methodologies described. The methodologies focus on swapping user sessions, actions, and resource IDs within the same application, whereas this vulnerability involves cross-origin requests and header manipulation.",
-    "is_detectable": false
+    "reasoning": "The CORS misconfiguration vulnerability involves the server allowing arbitrary origins to access sensitive data with credentials. The outlined methodologies focus on testing authorization by swapping user sessions, actions, and resource IDs within the same application context. However, CORS misconfigurations are server-side header misconfigurations that permit cross-origin access, which is not directly related to IDOR or AuthZ bypass via session/resource manipulation. The detection methods described do not include analyzing CORS headers or cross-origin request behaviors, making this vulnerability outside the scope of the proposed methodologies.",
+    "is_simple_authnz": false
   }
 }

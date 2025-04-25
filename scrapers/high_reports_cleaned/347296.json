@@ -58,7 +58,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an exposed Docker Registry HTTP API v2 without authentication, which is a form of AuthN/AuthZ bypass. The methodology described involves testing for AuthN/AuthZ bypasses by swapping user sessions and actions, which would include testing unauthenticated access to sensitive endpoints like the Docker Registry API. Since the Docker Registry API is exposed without authentication, it would be detectable by the methodology as it falls under the category of AuthN/AuthZ bypass where unauthenticated access is granted to a sensitive functionality.",
-    "is_detectable": true
+    "reasoning": "The Docker Registry exposure without authentication is a simple AuthN/AuthZ bypass. The methodology detects vulnerabilities by testing unauthenticated access (step d) and cross-user resource access (steps a-e). Here, the registry lacks any authentication, allowing unauthenticated users to interact with its API (e.g., dumping/uploading images). This aligns with the methodology's focus on AuthZ bypass via missing authentication checks, making it detectable by step d (executing actions with no session).",
+    "is_simple_authnz": true
   }
 }

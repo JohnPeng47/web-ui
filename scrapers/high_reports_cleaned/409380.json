@@ -1,101 +1,102 @@
 {
-    "reported_to": "GitLab",
-    "reported_by": "8ayac ",
-    "title": "Stored XSS in merge request pages",
-    "content": "\nSummary:\nI found a Stored XSS in merge request pages.\nDescription:\nThe exploit is via the parameter merge_request[source_branch] of the request to create a New Merge Request.\nSteps To Reproduce:\nSign ikn to GitLab.\nClick the \"[+]\" icon.\nClick \"New Project\".\nFill out \"Project name\" form with \"test-project\".\nCheck the radio button of \"Public\".\nCheck the \"Initialize repository with a README\".\nClick \"Create project\" button.\nGo to \"http(s)://{GitLab host}/{user id}/test-project/branches/new\".\nFill out each form as follows:\nBranch name: test-branch\nCreate from: master\nClick \"Create branch\" button.\nGo to \"http://{GitLab host}/{user id}/test-project/merge_requests\".\nClick \"Create merge request\" button.\nClick \"Submit merge request\" button.\nIntercept the request.\nChange the merge_request[source_branch] parameter's value to <img/src=x onerror=alert(1)>\nSend the request.\nResult: poc.png\nNote: This behavior can be reproduced on all modern browsers.\nImpact\nThe security impact is the same as any typical Stored XSS.\nThank you.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "GitLab",
+  "reported_by": "8ayac ",
+  "title": "Stored XSS in merge request pages",
+  "content": "\nSummary:\nI found a Stored XSS in merge request pages.\nDescription:\nThe exploit is via the parameter merge_request[source_branch] of the request to create a New Merge Request.\nSteps To Reproduce:\nSign ikn to GitLab.\nClick the \"[+]\" icon.\nClick \"New Project\".\nFill out \"Project name\" form with \"test-project\".\nCheck the radio button of \"Public\".\nCheck the \"Initialize repository with a README\".\nClick \"Create project\" button.\nGo to \"http(s)://{GitLab host}/{user id}/test-project/branches/new\".\nFill out each form as follows:\nBranch name: test-branch\nCreate from: master\nClick \"Create branch\" button.\nGo to \"http://{GitLab host}/{user id}/test-project/merge_requests\".\nClick \"Create merge request\" button.\nClick \"Submit merge request\" button.\nIntercept the request.\nChange the merge_request[source_branch] parameter's value to <img/src=x onerror=alert(1)>\nSend the request.\nResult: poc.png\nNote: This behavior can be reproduced on all modern browsers.\nImpact\nThe security impact is the same as any typical Stored XSS.\nThank you.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1543893300,
+  "report_url": "https://hackerone.com/reports/409380",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Sign in to GitLab."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
+    [
+      2,
+      "Click the \"[+]\" icon."
     ],
-    "screenshots": {},
-    "disclosed_date": 1543893300,
-    "report_url": "https://hackerone.com/reports/409380",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Sign in to GitLab."
-        ],
-        [
-            2,
-            "Click the \"[+]\" icon."
-        ],
-        [
-            3,
-            "Click \"New Project\"."
-        ],
-        [
-            4,
-            "Fill out \"Project name\" form with \"test-project\"."
-        ],
-        [
-            5,
-            "Check the radio button of \"Public\"."
-        ],
-        [
-            6,
-            "Check the \"Initialize repository with a README\"."
-        ],
-        [
-            7,
-            "Click \"Create project\" button."
-        ],
-        [
-            8,
-            "Go to \"http(s)://{GitLab host}/{user id}/test-project/branches/new\"."
-        ],
-        [
-            9,
-            "Fill out each form as follows: Branch name: test-branch, Create from: master."
-        ],
-        [
-            10,
-            "Click \"Create branch\" button."
-        ],
-        [
-            11,
-            "Go to \"http://{GitLab host}/{user id}/test-project/merge_requests\"."
-        ],
-        [
-            12,
-            "Click \"Create merge request\" button."
-        ],
-        [
-            13,
-            "Click \"Submit merge request\" button."
-        ],
-        [
-            14,
-            "Intercept the request."
-        ],
-        [
-            15,
-            "Change the merge_request[source_branch] parameter's value to <img/src=x onerror=alert(1)>."
-        ],
-        [
-            16,
-            "Send the request."
-        ]
+    [
+      3,
+      "Click \"New Project\"."
     ],
-    "vuln_description": "A Stored XSS vulnerability exists in merge request pages via the parameter merge_request[source_branch] of the request to create a New Merge Request. By injecting a malicious payload into this parameter, an attacker can execute arbitrary JavaScript code in the context of the victim's browser when the merge request page is viewed.",
-    "reason": "The attack involves multiple steps to set up the environment (creating a project, branch, and merge request), but the XSS payload injection itself is straightforward once the request is intercepted. The interaction between the components is not particularly subtle or complex, and the vulnerability follows a common pattern of parameter manipulation for XSS.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "reason": "The Stored XSS vulnerability involves manipulating the 'merge_request[source_branch]' parameter during the creation of a merge request, which is an action within the application. The methodology involves testing actions with different user sessions and resource IDs, but does not specifically cover input manipulation for XSS. The vulnerability is more about input validation and sanitization rather than authorization or authentication boundaries.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "Fill out \"Project name\" form with \"test-project\"."
+    ],
+    [
+      5,
+      "Check the radio button of \"Public\"."
+    ],
+    [
+      6,
+      "Check the \"Initialize repository with a README\"."
+    ],
+    [
+      7,
+      "Click \"Create project\" button."
+    ],
+    [
+      8,
+      "Go to \"http(s)://{GitLab host}/{user id}/test-project/branches/new\"."
+    ],
+    [
+      9,
+      "Fill out each form as follows: Branch name: test-branch, Create from: master."
+    ],
+    [
+      10,
+      "Click \"Create branch\" button."
+    ],
+    [
+      11,
+      "Go to \"http://{GitLab host}/{user id}/test-project/merge_requests\"."
+    ],
+    [
+      12,
+      "Click \"Create merge request\" button."
+    ],
+    [
+      13,
+      "Click \"Submit merge request\" button."
+    ],
+    [
+      14,
+      "Intercept the request."
+    ],
+    [
+      15,
+      "Change the merge_request[source_branch] parameter's value to <img/src=x onerror=alert(1)>."
+    ],
+    [
+      16,
+      "Send the request."
+    ]
+  ],
+  "vuln_description": "A Stored XSS vulnerability exists in merge request pages via the parameter merge_request[source_branch] of the request to create a New Merge Request. By injecting a malicious payload into this parameter, an attacker can execute arbitrary JavaScript code in the context of the victim's browser when the merge request page is viewed.",
+  "reason": "The attack involves multiple steps to set up the environment (creating a project, branch, and merge request), but the XSS payload injection itself is straightforward once the request is intercepted. The interaction between the components is not particularly subtle or complex, and the vulnerability follows a common pattern of parameter manipulation for XSS.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves injecting a simple <img> tag XSS payload into a parameter (merge_request[source_branch]) during a normal merge request creation flow. The methodology would log this parameter during regular navigation, detect its injectable nature through payload testing, and observe the stored XSS execution when viewing the merge request page through regular navigation. The payload requires no special encoding/filter bypass and triggers via normal application usage.",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves injecting malicious input into a parameter (merge_request[source_branch]) during the creation of a merge request. This does not involve authentication or authorization checks, but rather input validation and output encoding issues. The methodology described focuses on authN/authZ bypasses and IDORs, not XSS vulnerabilities.",
+    "is_detectable": false
+  }
 }

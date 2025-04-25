@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves improper access control when an email address is deleted from authentication but can still be used to log in. This falls under the AuthN/AuthZ Bypass category where the authorization boundary is crossed by using an old confirmation link. The methodology described can detect this by testing actions with different user sessions and verifying if unauthorized access is possible.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an old confirmation link remaining valid after the associated email is removed, allowing unauthorized access. The described methodology tests authorization by substituting resource IDs (email confirmation tokens) across user sessions. Since the system fails to invalidate the token upon email removal, reusing the old token (resource_id) with a different session (after email removal) would trigger the vulnerability. This aligns with methodology steps e) (substituting resource_ids) and a) (storing actions/resource_ids), making it detectable as an AuthZ bypass.",
+    "is_simple_authnz": true
   }
 }

@@ -41,7 +41,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The subdomain takeover vulnerability involves a misconfiguration in DNS records pointing to a non-existent AWS EC2 instance, allowing an attacker to claim the IP and serve malicious content. This is not related to authentication or authorization within an application, but rather a infrastructure misconfiguration.",
-    "is_detectable": false
+    "reasoning": "The subdomain takeover vulnerability stems from DNS misconfiguration and abandoned cloud infrastructure, not from authorization/authentication logic flaws in application-layer sessions or resource IDs. The described methodology focuses on testing session/resource permutations within an application's auth framework, while this issue exists at the infrastructure/DNS level and doesn't involve user sessions or application resource authorization checks.",
+    "is_simple_authnz": false
   }
 }

@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves accessing authentication tokens for any user via an unauthenticated API endpoint, which falls under the AuthN/AuthZ Bypass category. The methodology described includes testing actions with unauthenticated user sessions (step d), which would cover this case if the API endpoint was part of the logged requests during regular navigation.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing another user's authentication token via an API endpoint by manipulating the user_id (resource_id). The methodology's step e) would substitute resource_ids (user IDs) and step d) tests unauthenticated access. This fits the IDOR detection method as it checks authorization by swapping resource IDs and sessions.",
+    "is_simple_authnz": true
   }
 }

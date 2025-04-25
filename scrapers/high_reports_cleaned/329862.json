@@ -1,49 +1,50 @@
 {
-    "reported_to": "Reverb.com",
-    "reported_by": "sandeep_hodkasia ",
-    "title": "Stored xss in shop name @ lp.reverb.com",
-    "content": "\nhello team,\nThere is a stored xss in lp.reverb.com.\nAttacker can inject malicious script into server while adding shop name as lll\"></script><script>alert('xss');</script>.\nExploit: https://lp.reverb.com/shops/faniyos-boutique/listings\nSteps to reproduce:\nNavogate to https://reverb.com/my/lp_shop/edit\nChange your lp shop name to this: lll\"></script><script>alert('xss')</script>\nSave the changes.\nView your lp shop.\nFix:\nSanitise the given input in the backend and encode the special characters.\nThanks,\nSandeep\nImpact\nAttack can save malicious script directly into the server. Malicious script can be used to gain users session.\nThe hacker selected the Cross-site Scripting (XSS) - Stored weakness. This vulnerability type requires contextual information from the hacker. They provided the following answers:\nURL\nhttps://lp.reverb.com/shops/faniyos-boutique/listings\nVerified\nYes\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Reverb.com",
+  "reported_by": "sandeep_hodkasia ",
+  "title": "Stored xss in shop name @ lp.reverb.com",
+  "content": "\nhello team,\nThere is a stored xss in lp.reverb.com.\nAttacker can inject malicious script into server while adding shop name as lll\"></script><script>alert('xss');</script>.\nExploit: https://lp.reverb.com/shops/faniyos-boutique/listings\nSteps to reproduce:\nNavogate to https://reverb.com/my/lp_shop/edit\nChange your lp shop name to this: lll\"></script><script>alert('xss')</script>\nSave the changes.\nView your lp shop.\nFix:\nSanitise the given input in the backend and encode the special characters.\nThanks,\nSandeep\nImpact\nAttack can save malicious script directly into the server. Malicious script can be used to gain users session.\nThe hacker selected the Cross-site Scripting (XSS) - Stored weakness. This vulnerability type requires contextual information from the hacker. They provided the following answers:\nURL\nhttps://lp.reverb.com/shops/faniyos-boutique/listings\nVerified\nYes\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1538412420,
+  "report_url": "https://hackerone.com/reports/329862",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to https://reverb.com/my/lp_shop/edit"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
+    [
+      2,
+      "Change your LP shop name to: lll\"></script><script>alert('xss')</script> and save the changes"
     ],
-    "screenshots": {},
-    "disclosed_date": 1538412420,
-    "report_url": "https://hackerone.com/reports/329862",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Navigate to https://reverb.com/my/lp_shop/edit"
-        ],
-        [
-            2,
-            "Change your LP shop name to: lll\"></script><script>alert('xss')</script> and save the changes"
-        ],
-        [
-            3,
-            "View your LP shop at https://lp.reverb.com/shops/faniyos-boutique/listings to observe the XSS execution"
-        ]
-    ],
-    "vuln_description": "A stored XSS vulnerability exists in the shop name field at lp.reverb.com, allowing attackers to inject and persist malicious JavaScript code that executes when other users view the affected shop page.",
-    "reason": "The vulnerability is straightforward to discover as it involves a basic XSS payload in a single input field without requiring complex application state manipulation or understanding of subtle interactions between components. The attack follows a common XSS pattern with no novel or application-specific logic required.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "reason": "The stored XSS vulnerability involves injecting malicious scripts into the shop name field, which is a form of input manipulation rather than an authentication or authorization bypass. The methodology described focuses on testing different combinations of user sessions, actions, and resource IDs to detect IDOR and AuthN/AuthZ bypass vulnerabilities, which is not applicable to this XSS vulnerability.",
-        "is_detectable": false
-    }
+    [
+      3,
+      "View your LP shop at https://lp.reverb.com/shops/faniyos-boutique/listings to observe the XSS execution"
+    ]
+  ],
+  "vuln_description": "A stored XSS vulnerability exists in the shop name field at lp.reverb.com, allowing attackers to inject and persist malicious JavaScript code that executes when other users view the affected shop page.",
+  "reason": "The vulnerability is straightforward to discover as it involves a basic XSS payload in a single input field without requiring complex application state manipulation or understanding of subtle interactions between components. The attack follows a common XSS pattern with no novel or application-specific logic required.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves a stored XSS where a simple script tag payload is injected into a shop name parameter. The methodology captures all parameters during regular navigation and tests them with basic payload permutations. Since the payload doesn't require filter bypasses and the XSS execution is observable through regular navigation to the shop page (same application/channel), it aligns with both the injectable parameter discovery and simple payload testing phases of the methodology.",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The stored XSS vulnerability involves injecting malicious scripts into the shop name field, which is a form of input validation issue rather than an authentication or authorization bypass. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, which does not apply to detecting input validation flaws like XSS.",
+    "is_detectable": false
+  }
 }

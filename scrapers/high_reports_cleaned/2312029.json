@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an unauthenticated user accessing a private report's title by knowing its ID, which fits the methodology's test d) (executing actions with unauthenticated user sessions). The methodology would detect this by observing that an action (querying the report title) that should require authentication can be performed without it.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an unauthenticated user accessing a resource (report title) by knowing its ID, which aligns with the IDOR methodology where a resource ID is tested with an unauthenticated session. The detection method's step d) explicitly checks for actions executed with an unauthenticated session, covering this scenario. The authorization boundary is bypassed by leveraging the pending invitation state, making it a simple AuthN/AuthZ bypass.",
+    "is_simple_authnz": true
   }
 }

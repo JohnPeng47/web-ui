@@ -1,17 +1,17 @@
 from pathlib import Path
 
 from .utils import convert_weakness, Weaknesses, process_reports_in_batches
-from .lmp import CategorizeAuthNZ, CategorizeInjections
+from .lmp import DetectSimpleAuthNZ, DetectSimpleInjection
 
 if __name__ == "__main__":
     pairs = [
         (
-            CategorizeAuthNZ,
+            DetectSimpleAuthNZ,
             lambda rpt: convert_weakness(rpt.get("weaknesses", [""])[0])
                         in {Weaknesses.AUTHZ_AUTHN}
         ),
         (
-            CategorizeInjections,
+            DetectSimpleInjection,
             lambda rpt: convert_weakness(rpt.get("weaknesses", ["random"])[0])
                         in {Weaknesses.XSS, Weaknesses.OTHER_INJECTION}
         ),

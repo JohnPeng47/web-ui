@@ -44,7 +44,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves manipulating HTTP response codes (302 to 200) to bypass authentication/authorization checks, which falls under the AuthN/AuthZ Bypass methodology. The steps involve modifying requests and responses, which can be captured and analyzed by the proposed detection method.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves manipulating HTTP response codes (302 to 200) to bypass authorization checks and access admin pages. The outlined methodologies focus on session/resource substitution or unauthenticated access testing, but not direct response code manipulation. This requires intercepting and altering server responses (e.g., via Burp Suite), which isn't covered by the automated session/resource substitution approach described.",
+    "is_simple_authnz": false
   }
 }

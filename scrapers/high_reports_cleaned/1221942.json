@@ -1,57 +1,58 @@
 {
-    "reported_to": "Meredith",
-    "reported_by": "error201 ",
-    "title": "Shop - Reflected  XSS  With  Clickjacking Leads to Steal User's Cookie  In Two Domain",
-    "content": "\nHii \u00a0Security Team ,\nI am S Rahul MCEH(Metaxone Certified Ethical Hacker) and a Security Researcher I just checked your website and found Reflected XSS to Good XSS Clickjacking In Two Domain\nDescription:- As the search parameter is vulnerable to XSS and but the plus point is there is \u00a0no X-Frame-Header or Click-jacking Protection.So by combing this two methods the Attack Easier And Converted it to Well Working XSS on Other User\u2019s .\nVulnerable Urls:- https://marthastewart.com/shop/all.html?s=\n\u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 https://bhg.com/shop/all.html?s=\nSteps to reproduce :-\nNavigate to \u00a0Vulnerable URLS and As we know that ?s= parameter is vulnerable to XSS\n2.As Reflected XSS Occurs on :-\nExample1 :- \u00a0https://bhg.com/shop/all.html?s=%E2%80%98);%3C/script%3E%3Cscript%3Ealert(document.cookie)%3C/script%3E\nExample2 :- \u00a0https://marthastewart.com/shop/all.html?s=%E2%80%98);%3C/script%3E%3Cscript%3Ealert(document.cookie)%3C/script%3E\n3.The attacker can use different Payloads like document.domain etc\n4.Now as we know there is no X-Frame-Header or Click-jacking Protection that can leads to successful attack\n5.Now we will create POC.html to send the victim and steal the cookies of the other users { POC.html is attached below }\n6.Now as the victim opens the POC.html the attacker will get the cookies of the users or victim\nRefernces:-\nhttps://arbazhussain.medium.com/self-xss-to-good-xss-clickjacking-6db43b44777e\nhttps://hackerone.com/reports/470206\nhttps://hackerone.com/reports/892289\nImpact\nImpact\nBy exploiting this Vulnerability\n1.An attacker can force the customer to execute XSS and Steal user's cookie.\n2.Launch advanced phishing attacks by rendering arbitrary HTML forms.\n3.Force users to download malware/viruses.\n4.Execute browser-based attacks etc.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Meredith",
+  "reported_by": "error201 ",
+  "title": "Shop - Reflected  XSS  With  Clickjacking Leads to Steal User's Cookie  In Two Domain",
+  "content": "\nHii \u00a0Security Team ,\nI am S Rahul MCEH(Metaxone Certified Ethical Hacker) and a Security Researcher I just checked your website and found Reflected XSS to Good XSS Clickjacking In Two Domain\nDescription:- As the search parameter is vulnerable to XSS and but the plus point is there is \u00a0no X-Frame-Header or Click-jacking Protection.So by combing this two methods the Attack Easier And Converted it to Well Working XSS on Other User\u2019s .\nVulnerable Urls:- https://marthastewart.com/shop/all.html?s=\n\u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 https://bhg.com/shop/all.html?s=\nSteps to reproduce :-\nNavigate to \u00a0Vulnerable URLS and As we know that ?s= parameter is vulnerable to XSS\n2.As Reflected XSS Occurs on :-\nExample1 :- \u00a0https://bhg.com/shop/all.html?s=%E2%80%98);%3C/script%3E%3Cscript%3Ealert(document.cookie)%3C/script%3E\nExample2 :- \u00a0https://marthastewart.com/shop/all.html?s=%E2%80%98);%3C/script%3E%3Cscript%3Ealert(document.cookie)%3C/script%3E\n3.The attacker can use different Payloads like document.domain etc\n4.Now as we know there is no X-Frame-Header or Click-jacking Protection that can leads to successful attack\n5.Now we will create POC.html to send the victim and steal the cookies of the other users { POC.html is attached below }\n6.Now as the victim opens the POC.html the attacker will get the cookies of the users or victim\nRefernces:-\nhttps://arbazhussain.medium.com/self-xss-to-good-xss-clickjacking-6db43b44777e\nhttps://hackerone.com/reports/470206\nhttps://hackerone.com/reports/892289\nImpact\nImpact\nBy exploiting this Vulnerability\n1.An attacker can force the customer to execute XSS and Steal user's cookie.\n2.Launch advanced phishing attacks by rendering arbitrary HTML forms.\n3.Force users to download malware/viruses.\n4.Execute browser-based attacks etc.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Reflected"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1663186320,
+  "report_url": "https://hackerone.com/reports/1221942",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to the vulnerable URLs: https://marthastewart.com/shop/all.html?s= or https://bhg.com/shop/all.html?s="
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Reflected"
+    [
+      2,
+      "Inject a reflected XSS payload into the 's' parameter, such as: %E2%80%98);%3C/script%3E%3Cscript%3Ealert(document.cookie)%3C/script%3E"
     ],
-    "screenshots": {},
-    "disclosed_date": 1663186320,
-    "report_url": "https://hackerone.com/reports/1221942",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Navigate to the vulnerable URLs: https://marthastewart.com/shop/all.html?s= or https://bhg.com/shop/all.html?s="
-        ],
-        [
-            2,
-            "Inject a reflected XSS payload into the 's' parameter, such as: %E2%80%98);%3C/script%3E%3Cscript%3Ealert(document.cookie)%3C/script%3E"
-        ],
-        [
-            3,
-            "Observe that the payload executes, confirming the XSS vulnerability"
-        ],
-        [
-            4,
-            "Create a POC.html file that embeds the vulnerable URL in an iframe (due to lack of X-Frame-Options header) to perform clickjacking"
-        ],
-        [
-            5,
-            "Send the POC.html to a victim. When opened, it will execute the XSS payload and steal the victim's cookies"
-        ]
+    [
+      3,
+      "Observe that the payload executes, confirming the XSS vulnerability"
     ],
-    "vuln_description": "The vulnerability combines reflected XSS with clickjacking due to missing X-Frame-Options headers. An attacker can craft a malicious page that embeds the vulnerable site in an iframe, tricking users into executing XSS payloads that steal their cookies.",
-    "reason": "The attack requires combining two well-known vulnerabilities (XSS and clickjacking) but doesn't involve complex interactions or novel logic. The steps are straightforward once the basic vulnerabilities are identified.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": "892289",
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "reason": "The vulnerability involves reflected XSS combined with clickjacking, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, not on detecting XSS or clickjacking vulnerabilities.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "Create a POC.html file that embeds the vulnerable URL in an iframe (due to lack of X-Frame-Options header) to perform clickjacking"
+    ],
+    [
+      5,
+      "Send the POC.html to a victim. When opened, it will execute the XSS payload and steal the victim's cookies"
+    ]
+  ],
+  "vuln_description": "The vulnerability combines reflected XSS with clickjacking due to missing X-Frame-Options headers. An attacker can craft a malicious page that embeds the vulnerable site in an iframe, tricking users into executing XSS payloads that steal their cookies.",
+  "reason": "The attack requires combining two well-known vulnerabilities (XSS and clickjacking) but doesn't involve complex interactions or novel logic. The steps are straightforward once the basic vulnerabilities are identified.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "892289",
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves a reflected XSS in the 's' parameter with a payload that closes a script tag and injects another. The methodology's 'simple payload' list likely includes basic script injections and encoding permutations (like URL-encoded characters), which would trigger the XSS. The payload execution is directly observable in the HTTP response (same channel), and no advanced filter bypass is mentioned. The absence of X-Frame-Options is a separate clickjacking issue but doesn't affect the XSS detection via the methodology's parameter/payload testing.",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a reflected XSS combined with clickjacking, which is not directly related to authentication or authorization bypass. The methodology described focuses on IDOR and AuthN/AuthZ bypass scenarios by swapping user sessions or resource IDs within the same application. The XSS and clickjacking vulnerabilities do not fit into these categories as they involve client-side scripting and UI redressing rather than server-side authorization checks.",
+    "is_detectable": false
+  }
 }

@@ -45,7 +45,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The subdomain takeover vulnerability involves a misconfiguration in DNS or service delegation (Mashery service in this case), which is unrelated to authentication or authorization mechanisms within an application. The proposed methodologies focus on testing AuthN/AuthZ boundaries within an application by manipulating user sessions, actions, and resource IDs, not external infrastructure configurations.",
-    "is_detectable": false
+    "reasoning": "The reported subdomain takeover vulnerability involves a misconfigured DNS entry pointing to a service (Mashery) that allows hosting content. The described methodologies focus on authentication and authorization flaws within the application logic, such as IDOR or AuthZ bypass via session/resource manipulation. Subdomain takeovers are infrastructure misconfigurations unrelated to user sessions, resource IDs, or application-level authorization checks. The detection methods outlined (e.g., swapping user sessions or resource IDs) do not apply to DNS/CNAME misconfigurations.",
+    "is_simple_authnz": false
   }
 }

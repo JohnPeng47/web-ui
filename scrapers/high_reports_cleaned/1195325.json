@@ -42,7 +42,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves default credentials for an admin account, which is a static authentication issue rather than a dynamic authorization or IDOR issue. The methodology described focuses on testing authorization boundaries by swapping user sessions or resource IDs, but does not cover testing for default or hardcoded credentials.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves default admin credentials, which is a static misconfiguration rather than an authorization boundary being crossed through session/resource manipulation. The described methodologies focus on testing authorization boundaries through session swapping and parameter substitution, but do not cover checking for default credentials in login forms.",
+    "is_simple_authnz": false
   }
 }

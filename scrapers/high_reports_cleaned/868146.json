@@ -58,7 +58,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves modifying account details by intercepting and altering HTTP requests, which falls under the IDOR (Insecure Direct Object Reference) vulnerability class. The methodology described involves testing (user_session, action, resource_id) tuples by swapping user sessions and resource IDs, which would detect this type of vulnerability. The unauthorized modification of account details can be detected by substituting the resource_id (account details) with another user's details and testing the request with different user sessions.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves modifying account details (nickname, DOB) by altering parameters in a request within the same user session. The proposed methodologies focus on swapping user sessions or resource IDs (IDOR/AuthZ bypass). However, this issue is about server-side validation of allowed parameters for the same user/resource, which isn't directly covered by the automated tests for session/resource_id substitution. Thus, it isn't detected by the naive methodology.",
+    "is_simple_authnz": false
   }
 }

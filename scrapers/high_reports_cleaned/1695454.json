@@ -58,7 +58,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an IDOR where the attacker can access API tokens by manipulating the application ID parameter in a request. This fits the methodology's test case e) where substituting the resource_id (application ID) with a new one and executing it with existing users can reveal authorization issues. The methodology covers this by testing all combinations of (user_session, action, resource_id) and would detect the IDOR when the attacker's session is used to access another user's API credentials.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves substituting resource IDs (application IDs) in API requests while maintaining the same authenticated session. This aligns with methodology step 4e where resource IDs of the same type are substituted and tested. The error response revealing secrets would be detected through response analysis during automated substitution testing. The attack pattern matches IDOR detection via resource_id manipulation under an existing session.",
+    "is_simple_authnz": true
   }
 }

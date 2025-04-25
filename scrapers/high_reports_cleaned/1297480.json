@@ -44,7 +44,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves default credentials on an admin panel, which is a form of authentication bypass. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, but it does not explicitly cover testing for default credentials. However, the methodology could be extended to include testing for common default credentials as part of the authentication bypass checks.",
-    "is_detectable": false
+    "reasoning": "The report involves default credentials allowing access to the admin panel. The methodologies described focus on testing authorization boundaries by swapping user sessions or resource IDs during actions. Default credentials are a static misconfiguration and not tied to dynamic session/resource testing. The detection methods (e.g., swapping sessions, testing unauthenticated access) would not inherently uncover pre-configured credentials unless explicitly part of the 'action' or 'resource_id' substitution process, which is not described here.",
+    "is_simple_authnz": false
   }
 }

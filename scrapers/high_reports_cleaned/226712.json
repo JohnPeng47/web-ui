@@ -50,7 +50,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves session management within the same application, specifically the failure to invalidate sessions across browsers after a password change. This falls under the AuthZ/AuthN methodology as it tests the authorization boundary of session validity after a critical action (password change). The methodology would detect this by observing that the session (user_session) remains valid after the password change action, which violates the expected authorization boundary.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves session invalidation after password changes, which is an authN/authZ control. The proposed methodologies focus on testing authorization boundaries via session/resource substitution. However, this issue requires validating session persistence after credential changes (a stateful session management check), which isn't covered by the resource_id/session swapping methods. The test case uses the same user's sessions across browsers rather than cross-user privilege escalation.",
+    "is_simple_authnz": false
   }
 }

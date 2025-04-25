@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves bypassing SOP (Same-Origin Policy) by opening arbitrary chrome: URLs via Brave News feeds. This is not directly related to authentication or authorization bypass within a single application's user sessions or resource IDs, but rather a browser-specific SOP bypass. The proposed methodologies focus on testing within the same application's context (user sessions, actions, resource IDs) and do not cover browser-level SOP bypasses.",
-    "is_detectable": false
+    "reasoning": "The reported vulnerability involves Brave News feeds allowing navigation to privileged chrome:// URLs, which is a client-side SOP bypass. The proposed methodologies focus on server-side authN/authZ issues by testing session/resource swaps in HTTP requests. This vulnerability does not involve user sessions or resource IDs in HTTP transactions but exploits browser-specific URL handling. The detection methods, which rely on analyzing HTTP logs and substituting user sessions/resource IDs, would not capture this client-side navigation bypass.",
+    "is_simple_authnz": false
   }
 }

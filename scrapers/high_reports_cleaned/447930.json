@@ -46,7 +46,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves querying the GraphQL node interface with incremental IDs to enumerate embedded submission form UUIDs, which can then be used to access sensitive program details. This falls under the IDOR vulnerability class where resource IDs (in this case, the primary key identifiers) can be enumerated and used to bypass authorization checks. The methodology described would detect this by collecting and testing different resource IDs with various user sessions to see if unauthorized access is possible.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves enumerating resource IDs (primary keys) through the node interface without authentication, which aligns with the IDOR detection methodology. By substituting resource IDs (step 4e) and testing with unauthenticated sessions (step 4d), the exposure of UUIDs and sensitive data would be detected. The core issue is improper authorization checks on resource access via incremental IDs, making it a simple AuthN/AuthZ bypass.",
+    "is_simple_authnz": true
   }
 }

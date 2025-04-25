@@ -1,46 +1,50 @@
 {
-    "reported_to": "Khan Academy",
-    "reported_by": "sikn ",
-    "title": "XSS on using the legacy \"Graphie To Png\" API",
-    "content": "\nAn attacker can can upload malicious graphies via (http://graphie-to-png.kasandbox.org/) and (http://graphie-to-png.khanacademy.systems/) that exploit the graphie renderer.\n<image_0>\nProof of concept\nStep 1: Uploading a malicious graphie\n<image_1>\nMalicious SVG: The SVG is modified to include a malicious onload attribute.\nCode 41 Bytes\n1<svg ... onload=\"alert('SIKN')\">...</svg>\nMalicious JSON: A label is modified with typesetAsMath: false, causing the graphie renderer to inject our code to DOM. This is what will target khanacademy.org\nCode 122 Bytes\n1{\n2\t\"labels\": [\n3\t\t{\n4\t\t\t\"content\": \"<script>alert('SIKN')</script>\",\n5\t\t\t\"typesetAsMath\": false,\n6\t\t\t...\n7\t\t},\n8\t\t...\n9\t],\n10\t...\n11}\nCode 258 Bytes\n1var form = new FormData();\n2form.append(\"js\", ORIGINAL_JS);\n3form.append(\"svg\", XSS_SVG);\n4form.append(\"other_data\", JSON.stringify(XSS_JSON));\n5\n6await fetch(\"http://graphie-to-png.kasandbox.org/svg\", {\n7    \"method\": \"POST\",\n8    \"body\": form\n9}).then(r=>r.text())\nStep 2: Wait patiently\nWait until cdn.kastatic.org updates its cache, for this example I had already prepared it by not caching the original graphie (https://cdn.kastatic.org/ka-perseus-graphie/2122427aa8dc4ef2a59058bc1a7a934ba6ca6747.svg)\n<image_2>\nImpact\nXSS on pages that use graphies, potentially leading to account takeovers.\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "Khan Academy",
+  "reported_by": "sikn ",
+  "title": "XSS on using the legacy \"Graphie To Png\" API",
+  "content": "\nAn attacker can can upload malicious graphies via (http://graphie-to-png.kasandbox.org/) and (http://graphie-to-png.khanacademy.systems/) that exploit the graphie renderer.\n<image_0>\nProof of concept\nStep 1: Uploading a malicious graphie\n<image_1>\nMalicious SVG: The SVG is modified to include a malicious onload attribute.\nCode 41 Bytes\n1<svg ... onload=\"alert('SIKN')\">...</svg>\nMalicious JSON: A label is modified with typesetAsMath: false, causing the graphie renderer to inject our code to DOM. This is what will target khanacademy.org\nCode 122 Bytes\n1{\n2\t\"labels\": [\n3\t\t{\n4\t\t\t\"content\": \"<script>alert('SIKN')</script>\",\n5\t\t\t\"typesetAsMath\": false,\n6\t\t\t...\n7\t\t},\n8\t\t...\n9\t],\n10\t...\n11}\nCode 258 Bytes\n1var form = new FormData();\n2form.append(\"js\", ORIGINAL_JS);\n3form.append(\"svg\", XSS_SVG);\n4form.append(\"other_data\", JSON.stringify(XSS_JSON));\n5\n6await fetch(\"http://graphie-to-png.kasandbox.org/svg\", {\n7    \"method\": \"POST\",\n8    \"body\": form\n9}).then(r=>r.text())\nStep 2: Wait patiently\nWait until cdn.kastatic.org updates its cache, for this example I had already prepared it by not caching the original graphie (https://cdn.kastatic.org/ka-perseus-graphie/2122427aa8dc4ef2a59058bc1a7a934ba6ca6747.svg)\n<image_2>\nImpact\nXSS on pages that use graphies, potentially leading to account takeovers.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - DOM"
+  ],
+  "screenshots": {
+    "image_0": "The attack targets any page that has a graphie (khanacademy.org!!), as well as cdn.kastatic.org and ka-perseus-graphie.s3.amazonaws.com",
+    "image_1": "consider the following example where https://ka-perseus-graphie.s3.amazonaws.com/2122427aa8dc4ef2a59058bc1a7a934ba6ca6747.svg is used in an article, we will override it by uploading the same JS but with malicious SVG and JSON data (because the hash is a hash of the JS).",
+    "image_2": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/m1x4ow876pfzkcfqqy07ynthpmg9?response-content-disposition=attachment%3B%20filename%3D%22POC.png%22%3B%20filename%2A%3DUTF-8%27%27POC.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQUMFBJSG5%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T200949Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIFZuqlSX62MWhAr2BKxofV%2BULLbJUGShROYuJwTzwxSHAiABsJuF3X%2BSFrH06L4Cm0FwhT9iXitSnRhmo40I6nd8tyq7BQjz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMPKZSz1zhJ%2BHgQpSGKo8FyQdojXMTrsTk7gorsU9P9opgY1BMpc2s2pcZdb0IzeGoA0JbJ9kgHmT99F4ZKuYbe9pOszMBjS9rXnQDHimGVzsLMRIyiwjsfPW00dA%2B%2BYEHsNwY%2FsFRRcw4%2FxU2MCGlTB%2BcdM4EipVKrCm7E%2FwFvk5Hx1WfV4K8GUGpTA17IwoV%2BhtxxmvZ0CV9PEtZWDIpCr8RT8%2BnQTsHKgMK2kIs%2BEeyedkdK5MHE1tcLzSOsoP7YKJlIn2Q8ugaDePU65CB3DAqGuTTvs3dRm9lXokoig8ZqbQ3bdVwiZ%2B5Oi9VpWuLH5KzV0IELXHUsDIChejbRPmQCZrmT0CNOIhhqzovtswvvU4FwGna6lTeB62A1cNTbgvW2BtdNBKMs7rYOumrI91eiTL351ATJmAYV6q7o417mV9tn9uqSk%2FBEiVZxMD4JUkYPyKaMPQStS%2BFHweJYwg%2FmWGv3otMytmiH2mGaz%2FQ%2FozJZNGJyqr9LKM8WKa4UaLtDSAj%2F8m8Nm0URUoWZnlEunOqteIQqyZowgBa924y%2FIQAvYDQ9G0KS7Sugi9cePAUL%2Bs7NYLr%2FT8QfO4W5xub9xMTNIY80D4Tkd9xe7FfcU8JaKDZlwEZ8WiQVykzqFFPGHY5asHPkJiumQqDiWJLXKvO6gCzI3EOjuwbbXgXL9TSqx5LH0mMuffK3NStibdL9DWLzsXHPrg7W3xUwDmMrDvw2%2FM3qXKS76rRkCoc3X5blQSRMzRcFw7uXpU92bko9wZL4%2F5aiVDlGZjeUCzQaj3i7f8q7P63u%2F10bAFYv4hnpdSVVPbmfXMX3hmGqzjKRPxs1%2FjWgmOWeqmgfedj0XLSy5oV9z6i%2BNEewEMSxJlhMp34t%2FLYtfN4GjDHwoa%2FBjqyAT0SVyRHJU%2FUtwNZn6uXvfp3fv8d0PHp7EbAvFcLYLenK7abBQO%2BFFO2dYtDDnKKf0GmTP7zPSnJd6rbIJd5tKh7xLgpE8ZbhwmRMyp6enZ5cIc5qZrYxv0KpWMx33dg2eVM6bw3Lrs27d5VZsOYqa7ts%2Fgd95uXq4BxzNDIciREtU3McOmr56lveNVNk0rZ3eFyQU54HkSCoXgVzvi5XGQG%2BHfCMmyHVBhIDpBAiDS4f%2Bk%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=b3cc6822a38a80d1c0c56f96084b05e80eb15f5d360dd21824f3cd5400b9dcc8"
+  },
+  "disclosed_date": 1738877160,
+  "report_url": "https://hackerone.com/reports/2846011",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Upload a malicious SVG with an onload attribute and a JSON file with a script in the labels content to the Graphie to PNG API."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - DOM"
-    ],
-    "screenshots": {
-        "image_0": "The attack targets any page that has a graphie (khanacademy.org!!), as well as cdn.kastatic.org and ka-perseus-graphie.s3.amazonaws.com",
-        "image_1": "consider the following example where https://ka-perseus-graphie.s3.amazonaws.com/2122427aa8dc4ef2a59058bc1a7a934ba6ca6747.svg is used in an article, we will override it by uploading the same JS but with malicious SVG and JSON data (because the hash is a hash of the JS).",
-        "image_2": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/m1x4ow876pfzkcfqqy07ynthpmg9?response-content-disposition=attachment%3B%20filename%3D%22POC.png%22%3B%20filename%2A%3DUTF-8%27%27POC.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQUMFBJSG5%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T200949Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIFZuqlSX62MWhAr2BKxofV%2BULLbJUGShROYuJwTzwxSHAiABsJuF3X%2BSFrH06L4Cm0FwhT9iXitSnRhmo40I6nd8tyq7BQjz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMPKZSz1zhJ%2BHgQpSGKo8FyQdojXMTrsTk7gorsU9P9opgY1BMpc2s2pcZdb0IzeGoA0JbJ9kgHmT99F4ZKuYbe9pOszMBjS9rXnQDHimGVzsLMRIyiwjsfPW00dA%2B%2BYEHsNwY%2FsFRRcw4%2FxU2MCGlTB%2BcdM4EipVKrCm7E%2FwFvk5Hx1WfV4K8GUGpTA17IwoV%2BhtxxmvZ0CV9PEtZWDIpCr8RT8%2BnQTsHKgMK2kIs%2BEeyedkdK5MHE1tcLzSOsoP7YKJlIn2Q8ugaDePU65CB3DAqGuTTvs3dRm9lXokoig8ZqbQ3bdVwiZ%2B5Oi9VpWuLH5KzV0IELXHUsDIChejbRPmQCZrmT0CNOIhhqzovtswvvU4FwGna6lTeB62A1cNTbgvW2BtdNBKMs7rYOumrI91eiTL351ATJmAYV6q7o417mV9tn9uqSk%2FBEiVZxMD4JUkYPyKaMPQStS%2BFHweJYwg%2FmWGv3otMytmiH2mGaz%2FQ%2FozJZNGJyqr9LKM8WKa4UaLtDSAj%2F8m8Nm0URUoWZnlEunOqteIQqyZowgBa924y%2FIQAvYDQ9G0KS7Sugi9cePAUL%2Bs7NYLr%2FT8QfO4W5xub9xMTNIY80D4Tkd9xe7FfcU8JaKDZlwEZ8WiQVykzqFFPGHY5asHPkJiumQqDiWJLXKvO6gCzI3EOjuwbbXgXL9TSqx5LH0mMuffK3NStibdL9DWLzsXHPrg7W3xUwDmMrDvw2%2FM3qXKS76rRkCoc3X5blQSRMzRcFw7uXpU92bko9wZL4%2F5aiVDlGZjeUCzQaj3i7f8q7P63u%2F10bAFYv4hnpdSVVPbmfXMX3hmGqzjKRPxs1%2FjWgmOWeqmgfedj0XLSy5oV9z6i%2BNEewEMSxJlhMp34t%2FLYtfN4GjDHwoa%2FBjqyAT0SVyRHJU%2FUtwNZn6uXvfp3fv8d0PHp7EbAvFcLYLenK7abBQO%2BFFO2dYtDDnKKf0GmTP7zPSnJd6rbIJd5tKh7xLgpE8ZbhwmRMyp6enZ5cIc5qZrYxv0KpWMx33dg2eVM6bw3Lrs27d5VZsOYqa7ts%2Fgd95uXq4BxzNDIciREtU3McOmr56lveNVNk0rZ3eFyQU54HkSCoXgVzvi5XGQG%2BHfCMmyHVBhIDpBAiDS4f%2Bk%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=b3cc6822a38a80d1c0c56f96084b05e80eb15f5d360dd21824f3cd5400b9dcc8"
-    },
-    "disclosed_date": 1738877160,
-    "report_url": "https://hackerone.com/reports/2846011",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Upload a malicious SVG with an onload attribute and a JSON file with a script in the labels content to the Graphie to PNG API."
-        ],
-        [
-            2,
-            "Wait for the CDN to update its cache and then access the malicious graphie on a page that uses graphies to trigger the XSS."
-        ]
-    ],
-    "vuln_description": "This vulnerability allows an attacker to perform a Cross-Site Scripting (XSS) attack by uploading a malicious SVG and JSON file to the 'Graphie to PNG' API. The SVG includes an onload attribute that executes JavaScript, and the JSON file contains a script in the labels content that is injected into the DOM when the graphie is rendered. This can lead to account takeovers on pages that use graphies.",
-    "reason": "The attack involves multiple components (SVG, JSON, and API interaction) and requires understanding how the graphie renderer processes these components. The interaction between the SVG's onload attribute and the JSON's labels content is subtle and not immediately obvious. Additionally, the attacker must understand the caching behavior of the CDN to ensure the malicious graphie is served to victims.",
-    "new_complexity": "HIGH",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The XSS vulnerability involves injecting malicious code via SVG and JSON payloads, which is not directly related to authentication or authorization boundaries. The methodology described focuses on testing AuthN/AuthZ bypasses and IDORs by swapping user sessions and resource IDs, not on detecting client-side injection vulnerabilities like XSS.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Wait for the CDN to update its cache and then access the malicious graphie on a page that uses graphies to trigger the XSS."
+    ]
+  ],
+  "vuln_description": "This vulnerability allows an attacker to perform a Cross-Site Scripting (XSS) attack by uploading a malicious SVG and JSON file to the 'Graphie to PNG' API. The SVG includes an onload attribute that executes JavaScript, and the JSON file contains a script in the labels content that is injected into the DOM when the graphie is rendered. This can lead to account takeovers on pages that use graphies.",
+  "reason": "The attack involves multiple components (SVG, JSON, and API interaction) and requires understanding how the graphie renderer processes these components. The interaction between the SVG's onload attribute and the JSON's labels content is subtle and not immediately obvious. Additionally, the attacker must understand the caching behavior of the CDN to ensure the malicious graphie is served to victims.",
+  "new_complexity": "HIGH",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves manipulating SVG and JSON inputs to exploit the graphie renderer, which is not directly related to authentication or authorization boundaries. The methodology described focuses on testing (user_session, action, resource_id) tuples for AuthN/AuthZ bypasses or IDORs, not input validation or rendering vulnerabilities like XSS.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The XSS vulnerability involves two injectable parameters (SVG content and JSON configuration) that accept raw HTML/JS via a POST request. The methodology's 'simple payload' approach could detect this because the payloads (e.g., `<svg onload=alert(...)>` and unescaped `<script>` in JSON) are generic and do not require filter bypasses. However, the XSS trigger depends on the payload being stored and rendered in a different context (via CDN cache and graphie rendering), which may not be directly observable in the same HTTP response or through automated 'regular navigation' unless the testing tool explicitly checks all graphie-rendering pages. The delayed CDN cache update and indirect execution context make it less likely to be detected purely via same-channel inspection of the initial request/response cycle.",
+    "is_simple_injection": false
+  }
 }

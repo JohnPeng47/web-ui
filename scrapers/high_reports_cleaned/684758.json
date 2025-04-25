@@ -46,7 +46,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves default credentials (admin:admin) on an exposed Cisco TelePresence SX80 device. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs within the same application, but this case involves a device with default credentials, which is a different class of vulnerability. The methodology does not cover scanning for default credentials on exposed devices.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves default credentials (admin:admin) allowing authentication bypass. The described methodologies focus on testing authorization boundaries by swapping sessions/resource IDs or testing unauthenticated access. However, this case is a straightforward AuthN bypass due to unchanged default credentials, which would typically be detected via credential brute-forcing or default credential checks rather than session/resource ID manipulation. The methodology's automated tests (e.g., unauthenticated session checks in step d) might detect it if 'admin' sessions are reused, but the root cause (default credentials) isn't directly covered by the IDOR/AuthZ testing logic.",
+    "is_simple_authnz": true
   }
 }

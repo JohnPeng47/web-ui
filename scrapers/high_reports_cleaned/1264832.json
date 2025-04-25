@@ -1,57 +1,58 @@
 {
-    "reported_to": "MTN Group",
-    "reported_by": "alimanshester ",
-    "title": "Reflected Cross-Site scripting in : mtn.bj",
-    "content": "\nHello Team\nI have found a Reflected XSS vulnerability in mtn.jb by file name\nSteps To Reproduce:\n[add details for how we can reproduce the issue]\ngo to :\n\u2588\u2588\u2588\u2588\nenter any email and press Suivant\nfill all the inputs by any data .\nin file upload upload any photo with payload file name : \"><img src=x onerror=alert(document.cookie);.jpg\n5 . the payload executed in the page\nSupporting Material/References:\n1 - video showing poc\n2 - screenshot\nImpact\nAn attacker can use XSS to send a malicious script to an unsuspecting user. The end user\u2019s browser has no way to know that the script should not be trusted, and will execute the script. Because it thinks the script came from a trusted source, the malicious script can access any cookies, session tokens, or other sensitive information retained by the browser and used with that site. These scripts can even rewrite the content of the HTML page\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "MTN Group",
+  "reported_by": "alimanshester ",
+  "title": "Reflected Cross-Site scripting in : mtn.bj",
+  "content": "\nHello Team\nI have found a Reflected XSS vulnerability in mtn.jb by file name\nSteps To Reproduce:\n[add details for how we can reproduce the issue]\ngo to :\n\u2588\u2588\u2588\u2588\nenter any email and press Suivant\nfill all the inputs by any data .\nin file upload upload any photo with payload file name : \"><img src=x onerror=alert(document.cookie);.jpg\n5 . the payload executed in the page\nSupporting Material/References:\n1 - video showing poc\n2 - screenshot\nImpact\nAn attacker can use XSS to send a malicious script to an unsuspecting user. The end user\u2019s browser has no way to know that the script should not be trusted, and will execute the script. Because it thinks the script came from a trusted source, the malicious script can access any cookies, session tokens, or other sensitive information retained by the browser and used with that site. These scripts can even rewrite the content of the HTML page\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Reflected"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1632675540,
+  "report_url": "https://hackerone.com/reports/1264832",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to the target website (mtn.bj)"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Reflected"
+    [
+      2,
+      "Enter any email and press 'Suivant'"
     ],
-    "screenshots": {},
-    "disclosed_date": 1632675540,
-    "report_url": "https://hackerone.com/reports/1264832",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Navigate to the target website (mtn.bj)"
-        ],
-        [
-            2,
-            "Enter any email and press 'Suivant'"
-        ],
-        [
-            3,
-            "Fill all input fields with arbitrary data"
-        ],
-        [
-            4,
-            "Upload a photo with the malicious filename: \"><img src=x onerror=alert(document.cookie);.jpg"
-        ],
-        [
-            5,
-            "Observe the payload execution in the page"
-        ]
+    [
+      3,
+      "Fill all input fields with arbitrary data"
     ],
-    "vuln_description": "A Reflected Cross-Site Scripting (XSS) vulnerability exists in mtn.bj, where an attacker can execute arbitrary JavaScript code by uploading a file with a maliciously crafted filename. This allows the attacker to steal sensitive information such as cookies or session tokens from users who interact with the affected page.",
-    "reason": "The vulnerability involves a straightforward file upload with a malicious filename, which is a common and well-documented attack vector. The steps to reproduce are simple and do not require any complex interactions or state manipulation.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "reason": "The reflected XSS vulnerability involves injecting a malicious script via a file upload, which is not directly related to authentication or authorization boundaries. The described methodology focuses on testing AuthN/AuthZ bypasses and IDOR vulnerabilities by manipulating user sessions, actions, and resource IDs, not on detecting XSS vulnerabilities.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "Upload a photo with the malicious filename: \"><img src=x onerror=alert(document.cookie);.jpg"
+    ],
+    [
+      5,
+      "Observe the payload execution in the page"
+    ]
+  ],
+  "vuln_description": "A Reflected Cross-Site Scripting (XSS) vulnerability exists in mtn.bj, where an attacker can execute arbitrary JavaScript code by uploading a file with a maliciously crafted filename. This allows the attacker to steal sensitive information such as cookies or session tokens from users who interact with the affected page.",
+  "reason": "The vulnerability involves a straightforward file upload with a malicious filename, which is a common and well-documented attack vector. The steps to reproduce are simple and do not require any complex interactions or state manipulation.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves injecting an XSS payload into a filename parameter during file upload - a parameter that would be identified during regular navigation logging. The payload uses basic HTML context positioning without encoding or filter bypasses ('simple' per methodology). Execution occurs in the same HTTP response (reflected XSS), satisfying same-channel detection requirements. This matches both the injectable parameter discovery and simple payload testing phases of the methodology.",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves injecting a malicious script via a file upload, which is not directly related to authentication or authorization boundaries. The methodology described focuses on testing AuthN/AuthZ bypasses and IDOR vulnerabilities by swapping user sessions and resource IDs, which does not apply to this reflected XSS scenario.",
+    "is_detectable": false
+  }
 }

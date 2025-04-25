@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves a non-admin user being able to perform admin actions (uploading and activating apps) by directly accessing admin endpoints. This falls under the AuthZ Bypass methodology where the authorization boundary is crossed by a non-privileged user performing privileged actions. The methodology involves swapping user sessions (non-admin for admin) and testing if the action can be performed, which would detect this vulnerability.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves a non-admin user accessing admin functionality (app installation and activation). The methodology checks for AuthZ bypass by swapping user sessions (non-privileged user sessions) against admin actions. Since app installation via /admin/app/install and activation via POST /api/apps/<ID>/status are admin actions, testing these endpoints with non-admin sessions (methodology step 4b/c) would detect this authorization boundary violation.",
+    "is_simple_authnz": true
   }
 }

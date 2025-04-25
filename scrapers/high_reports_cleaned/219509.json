@@ -1,69 +1,70 @@
 {
-    "reported_to": "Informatica",
-    "reported_by": "alfredsaonoy ",
-    "title": "Store XSS on Informatica University via transcript (informatica.csod.com)",
-    "content": "\nHi,\nVulnerable field: Training Description\nSteps to reproduce:\nLogin to your account and go Informatica University.\nYou can either click on \"My Training\" or \"Universal Profile\" at the upper right hand corner of the page.\nYou will then be redirected to the Universal profile bio page, click on the \"Transcript tab\"\nSelect options on the upper right side then select \"Add external training: on the drop down option.\nFill out the needed information but for the Training Description use the following payload: '\"><img src=x onerror=alert(document.cookie);>\nComplete the rest of the form and click on Submit.\nYou will then be redirected to your training transcript.\nOn the right side of the transcript which has a label withdraw, select from the drop down \"View training details\"\nThe page will be redirected and you will then get the xss pop-up.\nWould be best to sanitize all input on this form to avoid xss.\nWorks on latest versions of chrome, and firefox.\nPlease let me know if you need further information. Thanks!\nCheers,\n@ninjakatz__\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Informatica",
+  "reported_by": "alfredsaonoy ",
+  "title": "Store XSS on Informatica University via transcript (informatica.csod.com)",
+  "content": "\nHi,\nVulnerable field: Training Description\nSteps to reproduce:\nLogin to your account and go Informatica University.\nYou can either click on \"My Training\" or \"Universal Profile\" at the upper right hand corner of the page.\nYou will then be redirected to the Universal profile bio page, click on the \"Transcript tab\"\nSelect options on the upper right side then select \"Add external training: on the drop down option.\nFill out the needed information but for the Training Description use the following payload: '\"><img src=x onerror=alert(document.cookie);>\nComplete the rest of the form and click on Submit.\nYou will then be redirected to your training transcript.\nOn the right side of the transcript which has a label withdraw, select from the drop down \"View training details\"\nThe page will be redirected and you will then get the xss pop-up.\nWould be best to sanitize all input on this form to avoid xss.\nWorks on latest versions of chrome, and firefox.\nPlease let me know if you need further information. Thanks!\nCheers,\n@ninjakatz__\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1504995300,
+  "report_url": "https://hackerone.com/reports/219509",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Login to your account and navigate to Informatica University."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Generic"
+    [
+      2,
+      "Go to 'My Training' or 'Universal Profile' at the upper right corner of the page."
     ],
-    "screenshots": {},
-    "disclosed_date": 1504995300,
-    "report_url": "https://hackerone.com/reports/219509",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Login to your account and navigate to Informatica University."
-        ],
-        [
-            2,
-            "Go to 'My Training' or 'Universal Profile' at the upper right corner of the page."
-        ],
-        [
-            3,
-            "Click on the 'Transcript' tab in the Universal profile bio page."
-        ],
-        [
-            4,
-            "Select 'Add external training' from the options drop-down on the upper right side."
-        ],
-        [
-            5,
-            "Fill out the form, using the payload '\"><img src=x onerror=alert(document.cookie);> in the Training Description field."
-        ],
-        [
-            6,
-            "Submit the form and return to your training transcript."
-        ],
-        [
-            7,
-            "Select 'View training details' from the drop-down next to the training entry."
-        ],
-        [
-            8,
-            "Observe the XSS pop-up when the page redirects."
-        ]
+    [
+      3,
+      "Click on the 'Transcript' tab in the Universal profile bio page."
     ],
-    "vuln_description": "This is a stored Cross-Site Scripting (XSS) vulnerability in Informatica University's training transcript feature. The vulnerability allows an attacker to inject malicious JavaScript code via the Training Description field in the 'Add external training' form. The injected code is then executed when the training details are viewed, potentially leading to session hijacking or other malicious actions.",
-    "reason": "The vulnerability involves a straightforward injection into a form field, with the payload being executed upon viewing the stored data. There are no complex interactions between components or novel logic required to exploit this vulnerability. The steps to reproduce are linear and do not require deep understanding of the application's architecture or state manipulation.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "reason": "The XSS vulnerability involves injecting malicious scripts into a form field, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, not on input validation or script injection vulnerabilities.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "Select 'Add external training' from the options drop-down on the upper right side."
+    ],
+    [
+      5,
+      "Fill out the form, using the payload '\"><img src=x onerror=alert(document.cookie);> in the Training Description field."
+    ],
+    [
+      6,
+      "Submit the form and return to your training transcript."
+    ],
+    [
+      7,
+      "Select 'View training details' from the drop-down next to the training entry."
+    ],
+    [
+      8,
+      "Observe the XSS pop-up when the page redirects."
+    ]
+  ],
+  "vuln_description": "This is a stored Cross-Site Scripting (XSS) vulnerability in Informatica University's training transcript feature. The vulnerability allows an attacker to inject malicious JavaScript code via the Training Description field in the 'Add external training' form. The injected code is then executed when the training details are viewed, potentially leading to session hijacking or other malicious actions.",
+  "reason": "The vulnerability involves a straightforward injection into a form field, with the payload being executed upon viewing the stored data. There are no complex interactions between components or novel logic required to exploit this vulnerability. The steps to reproduce are linear and do not require deep understanding of the application's architecture or state manipulation.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves injecting a basic XSS payload ('\"><img src=x onerror=alert(document.cookie);>) into a visible input field (Training Description) that is stored and later reflected in the application's UI. The methodology would log the HTTP request when submitting the external training form (Step 1-2), identify the 'Training Description' parameter as injectable (Step 3), and test it with simple payloads (Step 4). The payload execution occurs via regular navigation to the training details page (same channel, same role, no filter bypass required), aligning with the 'simple payload' criteria. Detection is straightforward via the pop-up when viewing the training details normally.",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a stored XSS where the payload is injected into a form field (Training Description) and executed when viewing the training details. This does not involve authentication or authorization bypass, nor does it involve swapping user sessions or resource IDs. The methodology described focuses on AuthN/AuthZ and IDOR vulnerabilities, which are not relevant to this XSS vulnerability.",
+    "is_detectable": false
+  }
 }

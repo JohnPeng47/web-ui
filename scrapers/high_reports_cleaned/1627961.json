@@ -70,7 +70,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an authenticated user session (attacker) modifying their own profile to change the email to the victim's email, then brute-forcing the victim's user ID to take over the account. This fits the methodology's test case e) where resource_ids (emails and user IDs) are substituted with existing ones to test for authorization boundaries.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves modifying the email (a resource_id) and user ID (another resource_id) via an authenticated action. The methodology's step 4e covers substituting resource_ids of the same type (e.g., email, user_id) across existing user sessions. The attacker's ability to alter both the email and user_id parameters to reference the victim's account fits the IDOR/AuthZ testing pattern where resource_ids are swapped to bypass authorization checks.",
+    "is_simple_authnz": true
   }
 }

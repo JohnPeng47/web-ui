@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an authentication bypass where a user can still log in with an old email after changing it to a new one. This scenario fits the methodology's test case where swapping resource_ids (emails) with existing (action, resource_id) pairs is covered by test e). The system would detect this by attempting to log in with the old email after the change, which should not be possible if proper authorization checks were in place.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves changing the email but still allowing login with the old email. This falls under AuthN/AuthZ bypass detection methodology (step e), substituting resource_ids of existing types). The email update action is part of normal user flow, and the old email (resource_id) is still accepted post-change. The methodology would detect this by testing if the old email (resource_id) remains valid after substitution, leading to an authentication bypass.",
+    "is_simple_authnz": true
   }
 }

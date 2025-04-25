@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves swapping resource_ids (FTP server IDs) and testing access with different user sessions, which aligns with the methodology's steps for detecting IDOR vulnerabilities. The methodology specifically covers testing actions with different user sessions and resource_ids to see if authorization boundaries can be crossed.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing or modifying resources (FTP server details) by changing the resource ID in the URL without proper authorization checks. The described methodology explicitly covers this scenario via steps like substituting resource IDs of the same type (e.g., step 4e). The attack fits the IDOR class, as it relies on manipulating resource IDs (e.g., `/filepush/ftp/<ID>/`) with an authenticated session, which the methodology detects by testing resource ID substitution across sessions and resource types.",
+    "is_simple_authnz": true
   }
 }

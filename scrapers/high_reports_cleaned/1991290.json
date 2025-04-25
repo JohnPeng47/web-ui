@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an authorization bypass where navigating to a specific page (page 56) grants admin access. This falls under the AuthZ Bypass category where a user can access functionality (admin panel) they should not have access to. The methodology described includes testing navigation and actions with different user sessions, including unauthenticated sessions, which would cover this case if the navigation to page 56 was part of the logged HTTP requests during regular usage.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing an admin page (page 45) via a redirect from page 56 without proper authorization. This aligns with the AuthN/AuthZ Bypass methodology, as it involves accessing restricted functionality (admin portal) via a specific navigation action (page 56). The detection method would flag this by observing that unprivileged/non-admin sessions can trigger a navigation action (page 56) that grants elevated privileges. The substitution of page numbers (resource_type::page_id) and testing with unauthenticated/low-privilege sessions would reveal this bypass.",
+    "is_simple_authnz": true
   }
 }

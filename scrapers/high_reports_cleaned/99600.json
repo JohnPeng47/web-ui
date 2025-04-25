@@ -46,7 +46,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an IDOR attack where the media_id parameter in the HTTP request can be manipulated to access unauthorized media content (direct messages and protected tweets) by substituting different media_ids. This falls under the IDOR vulnerability class where resource_ids (media_ids) are swapped to cross authorization boundaries. The methodology described includes testing for such scenarios by substituting resource_ids with existing ones and executing requests with different user sessions, which would cover this case.",
-    "is_detectable": true
+    "reasoning": "The vulnerability reported is an IDOR where manipulating the media_id parameter allows unauthorized access to media content. The described methodology involves testing different user sessions and resource IDs (like media_id) to detect such authorization flaws. Since the attack involves substituting resource_ids (media_id) across user sessions, it aligns with the methodology's steps 3a and 4e, making it detectable through automated (user_session, action, resource_id) tuple testing. The vulnerability fits the 'simple_authnz' category as it directly relates to authorization bypass via resource ID substitution within the same application context.",
+    "is_simple_authnz": true
   }
 }

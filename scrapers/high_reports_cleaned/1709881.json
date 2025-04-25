@@ -54,7 +54,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves modifying the email parameter in the login request to bypass authentication, which fits the methodology of testing authorization boundaries by swapping resource_ids (emails) with existing actions. This is covered by test e) in the methodology, which involves substituting resource_ids with new ones and executing with existing users.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves modifying the email parameter (resource_id) and a value parameter in the login request. The methodology's step 4e covers substituting resource_ids (emails) of the same type (user) and testing with existing sessions. Since the attack leverages parameter manipulation within a normal authentication flow and resource substitution aligns with the proposed detection method for AuthZ bypass, this qualifies as a simple_authnz case.",
+    "is_simple_authnz": true
   }
 }

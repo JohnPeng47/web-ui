@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves improper access control where unauthenticated or unauthorized users can access and delete tickets. This matches the methodology's focus on testing authorization boundaries by swapping user sessions or using unauthenticated sessions to access resources (steps d and e). The ability to delete tickets and view progress without proper authorization is a clear case of IDOR and AuthZ bypass, which the methodology is designed to detect.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves unauthorized access to ticket data (read/delete) via predictable endpoints and HTTP methods. The described methodology would detect this by: 1) Observing authenticated sessions accessing /latest and /all endpoints (resource_type::ticket), 2) Testing these endpoints with unauthenticated sessions (method d) and other user sessions (method b/c), 3) Discovering the DELETE method lacks authorization checks when swapping sessions (method a/b). This matches the IDOR/AuthZ detection pattern of testing resource access across sessions.",
+    "is_simple_authnz": true
   }
 }

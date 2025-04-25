@@ -44,7 +44,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The subdomain takeover vulnerability involves DNS misconfiguration and hosting provider issues, not authentication or authorization flaws within the application. The proposed methodologies focus on AuthN/AuthZ bypasses and IDORs, which are unrelated to subdomain takeovers.",
-    "is_detectable": false
+    "reasoning": "The reported subdomain takeover vulnerability involves DNS misconfiguration and cloud resource claiming, not authentication/authorization boundary testing. The described methodology focuses on session/resource permutations within application workflows, while subdomain takeovers require infrastructure analysis of DNS records and orphaned cloud resources. There's no user_session or resource_id manipulation involved in this class of vulnerability.",
+    "is_simple_authnz": false
   }
 }

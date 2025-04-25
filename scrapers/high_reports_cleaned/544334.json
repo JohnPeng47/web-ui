@@ -46,7 +46,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves a password reset endpoint that accepts an empty token parameter, allowing an attacker to bypass the token validation by simply guessing the user_id. This falls under the AuthN/AuthZ Bypass category as it allows unauthorized access to a functionality (password reset) without proper authentication. The methodology described would detect this by testing the password reset action with an unauthenticated session (step d) and by substituting the resource_id (user_id) with a guessed one (step e)).",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves bypassing token validation in a password reset endpoint by using an empty token and guessing the incremental user ID. The methodology's step 4d (testing with unauthenticated sessions) and 4e (substituting resource IDs) would detect this if the system tests parameter variations (e.g., omitting the token). Since the user_id is a predictable resource ID and the endpoint doesn't validate the token, automated substitution of user_ids in unauthenticated requests would reveal the flaw.",
+    "is_simple_authnz": true
   }
 }

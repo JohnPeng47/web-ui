@@ -56,7 +56,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves exploiting Zendesk's ticket system and email verification process, which is outside the scope of the proposed methodologies that focus on HTTP request/response analysis within a single application. The attack leverages cross-application interactions (Zendesk, Google, GitLab) and email verification flows, which are not covered by the (user_session, action, resource_id) tuple analysis.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves exploiting Zendesk ticket hash handling and email verification workflows rather than direct session/resource ID manipulation within GitLab's own application. The attack leverages cross-service interactions (Google Account verification + Zendesk ticket visibility) and subdomain discovery, which are outside the scope of automated (user_session, action, resource_id) testing within a single application. The core issue stems from misconfigured email verification processes and ticket visibility controls in Zendesk rather than classic authorization boundary violations in application code.",
+    "is_simple_authnz": false
   }
 }

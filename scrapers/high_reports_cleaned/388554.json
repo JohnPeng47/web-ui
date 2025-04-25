@@ -39,10 +39,10 @@
   "authnz_byppass_detectable": false,
   "is_simple_payload": false,
   "injection_metadata": {
-    "is_simple_payload": false
+    "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an insecure direct object reference (IDOR) where unauthenticated users can access sensitive documents by manipulating the document ID in the URL. This fits the methodology's test case d) (executing actions with an unauthenticated user session) and e) (substituting resource_ids with new ones). The methodology would detect this by observing that unauthenticated requests to /api/document/x succeed and that document IDs can be enumerated.",
-    "is_detectable": true
+    "reasoning": "The reported vulnerability involves insecure direct object references (IDOR) where numerical document IDs are accessible without authentication. This matches methodology 4e (substituting resource_ids of same type with existing users) and 4d (testing with unauthenticated sessions). The attack pattern involves resource_id enumeration without session swapping, which is explicitly covered by the described detection methods for AuthZ/IDOR vulnerabilities.",
+    "is_simple_authnz": true
   }
 }

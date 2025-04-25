@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves symlink manipulation within a container to access host machine files, which is not related to authentication or authorization bypasses. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, which does not apply to container escape or file system manipulation vulnerabilities.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves container escape via symlink manipulation in build files, which is unrelated to authentication or authorization checks between user sessions or resource IDs. The methodology focuses on HTTP-based user/resource swapping, not build process or file system vulnerabilities.",
+    "is_simple_authnz": false
   }
 }

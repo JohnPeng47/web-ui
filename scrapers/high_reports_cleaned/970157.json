@@ -62,7 +62,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves bypassing password authentication by exploiting unrestricted rate limiting during the password update process. This falls under the AuthZ bypass category where an attacker with a hijacked session can perform actions (updating the password) without proper authorization (knowing the old password). The methodology described includes testing actions with existing user sessions and checking for authorization boundaries, which would cover this scenario.",
-    "is_detectable": true
+    "reasoning": "The reported vulnerability involves bypassing password authentication through unrestricted rate limiting during a password change process. The methodology described focuses on testing authorization by swapping user sessions and resource IDs. However, this vulnerability doesn't involve cross-user authorization (IDOR) or functional access control (AuthZ bypass). Instead, it exploits a missing rate limit on a password verification step within the same session. The detection methodologies outlined do not explicitly test for rate-limiting flaws in authentication steps, which are separate from authorization boundary checks. Thus, it would not be caught by the proposed (user_session, action, resource_id) or AuthZ bypass testing methods.",
+    "is_simple_authnz": false
   }
 }

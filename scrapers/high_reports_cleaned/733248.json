@@ -1,53 +1,54 @@
 {
-    "reported_to": "Automattic",
-    "reported_by": "adhamsadaqah ",
-    "title": "Stored XSS in wordpress.com",
-    "content": "\nSummary:\nStored XSS as a comment or as a post (body or title) at\nhttps://wordpress.com/read/feeds/{blog_id}/posts/{post_id}\nhttps://yoursubdomain.wordpress.com\nusing the payload:\nCode 92 Bytes\n1<iframe <><a href=javascript&colon;alert(document.cookie)>Click Here</a>=&gt;&lt;/iframe&gt;\nSteps To Reproduce:\nAs a comment\nLog in to wordpress.com\nChoose a post from the feeds\nAdd a comment with the payload: <iframe <><a href=javascript&colon;alert(document.cookie)>Click Here</a>=&gt;&lt;/iframe&gt;\nLog in to wordpress.com\nChoose a post from the feeds\nAdd a comment with the payload: <iframe <><a href=javascript&colon;alert(document.cookie)>Click Here</a>=&gt;&lt;/iframe&gt;\nBy clicking on Click Here, an alert will fire with cookies of the domain wordpress.com\nAs a post\nLog in to wordpress.com\nCreate a new post or site.\nAdd the payload <iframe <><a href=javascript&colon;alert(document.cookie)>Click Here</a>=&gt;&lt;/iframe&gt; to the body or the title of the blog post\npreview or publish your new blog post\nBy clicking on Click Here, an alert will fire with cookies of the domain yoursubdomain.wordpress.com or wordpress.com if the post is previewed from the WordPress feed.\nLog in to wordpress.com\nCreate a new post or site.\nAdd the payload <iframe <><a href=javascript&colon;alert(document.cookie)>Click Here</a>=&gt;&lt;/iframe&gt; to the body or the title of the blog post\npreview or publish your new blog post\nBy clicking on Click Here, an alert will fire with cookies of the domain yoursubdomain.wordpress.com or wordpress.com if the post is previewed from the WordPress feed.\nIf you add comments to your blog post and using the payload mentioned above as a comment an Stored XSS alert will fire when you click on the link.\nImpact\nPerform arbitrary requests on the behalf of other users with security context of wordpress.com or blogsubdomain.wordpress.com\nRead any data the attacked user has access to.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Automattic",
+  "reported_by": "adhamsadaqah ",
+  "title": "Stored XSS in wordpress.com",
+  "content": "\nSummary:\nStored XSS as a comment or as a post (body or title) at\nhttps://wordpress.com/read/feeds/{blog_id}/posts/{post_id}\nhttps://yoursubdomain.wordpress.com\nusing the payload:\nCode 92 Bytes\n1<iframe <><a href=javascript&colon;alert(document.cookie)>Click Here</a>=&gt;&lt;/iframe&gt;\nSteps To Reproduce:\nAs a comment\nLog in to wordpress.com\nChoose a post from the feeds\nAdd a comment with the payload: <iframe <><a href=javascript&colon;alert(document.cookie)>Click Here</a>=&gt;&lt;/iframe&gt;\nLog in to wordpress.com\nChoose a post from the feeds\nAdd a comment with the payload: <iframe <><a href=javascript&colon;alert(document.cookie)>Click Here</a>=&gt;&lt;/iframe&gt;\nBy clicking on Click Here, an alert will fire with cookies of the domain wordpress.com\nAs a post\nLog in to wordpress.com\nCreate a new post or site.\nAdd the payload <iframe <><a href=javascript&colon;alert(document.cookie)>Click Here</a>=&gt;&lt;/iframe&gt; to the body or the title of the blog post\npreview or publish your new blog post\nBy clicking on Click Here, an alert will fire with cookies of the domain yoursubdomain.wordpress.com or wordpress.com if the post is previewed from the WordPress feed.\nLog in to wordpress.com\nCreate a new post or site.\nAdd the payload <iframe <><a href=javascript&colon;alert(document.cookie)>Click Here</a>=&gt;&lt;/iframe&gt; to the body or the title of the blog post\npreview or publish your new blog post\nBy clicking on Click Here, an alert will fire with cookies of the domain yoursubdomain.wordpress.com or wordpress.com if the post is previewed from the WordPress feed.\nIf you add comments to your blog post and using the payload mentioned above as a comment an Stored XSS alert will fire when you click on the link.\nImpact\nPerform arbitrary requests on the behalf of other users with security context of wordpress.com or blogsubdomain.wordpress.com\nRead any data the attacked user has access to.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1581957240,
+  "report_url": "https://hackerone.com/reports/733248",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Log in to wordpress.com"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
+    [
+      2,
+      "Choose a post from the feeds"
     ],
-    "screenshots": {},
-    "disclosed_date": 1581957240,
-    "report_url": "https://hackerone.com/reports/733248",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Log in to wordpress.com"
-        ],
-        [
-            2,
-            "Choose a post from the feeds"
-        ],
-        [
-            3,
-            "Add a comment with the payload: <iframe <><a href=javascript&colon;alert(document.cookie)>Click Here</a>=&gt;&lt;/iframe&gt;"
-        ],
-        [
-            4,
-            "By clicking on 'Click Here', an alert will fire with cookies of the domain wordpress.com"
-        ]
+    [
+      3,
+      "Add a comment with the payload: <iframe <><a href=javascript&colon;alert(document.cookie)>Click Here</a>=&gt;&lt;/iframe&gt;"
     ],
-    "vuln_description": "Stored XSS vulnerability in WordPress.com allows an attacker to inject malicious JavaScript code via comments or posts, which executes in the context of the victim's session when viewed, potentially leading to session hijacking or other malicious actions.",
-    "reason": "The vulnerability involves a straightforward injection of a well-known XSS payload into comment or post fields, which is a common and well-documented attack vector. The steps to reproduce are simple and do not require complex interactions or state manipulations.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "reason": "The XSS vulnerability involves injecting malicious scripts into comments or posts, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing access control by swapping user sessions and resource IDs, not on detecting script injection vulnerabilities.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "By clicking on 'Click Here', an alert will fire with cookies of the domain wordpress.com"
+    ]
+  ],
+  "vuln_description": "Stored XSS vulnerability in WordPress.com allows an attacker to inject malicious JavaScript code via comments or posts, which executes in the context of the victim's session when viewed, potentially leading to session hijacking or other malicious actions.",
+  "reason": "The vulnerability involves a straightforward injection of a well-known XSS payload into comment or post fields, which is a common and well-documented attack vector. The steps to reproduce are simple and do not require complex interactions or state manipulations.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves injecting a basic XSS payload into comments/posts through regular user inputs. The methodology's parameter discovery phase would identify comment/post body/title fields as injectable parameters. The payload uses minimal encoding (&colon; entity) and standard HTML elements without advanced filter bypass techniques, matching 'simple payload' criteria. Execution verification occurs through normal navigation (viewing posts/comments) within the same application domain, fulfilling 'same channel' detection requirements. The payload persistence and trigger mechanism align with stored XSS patterns detectable through this methodology.",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The Stored XSS vulnerability involves injecting malicious scripts into comments or posts, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing authorization boundaries by swapping user sessions or resource IDs, which does not apply to detecting XSS vulnerabilities.",
+    "is_detectable": false
+  }
 }

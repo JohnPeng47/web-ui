@@ -44,7 +44,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an S3 bucket misconfiguration where any AWS user can write to the bucket. This is detectable by the methodology because it involves testing authorization boundaries (AuthZ) by attempting actions (write/delete) with different user sessions (any AWS user) on a resource (the S3 bucket). The methodology covers such scenarios by testing actions with different user sessions and verifying if unauthorized access is possible.",
-    "is_detectable": true
+    "reasoning": "The reported issue involves an S3 bucket misconfigured to allow write/delete access to any AWS user (via AWS CLI), which is an AuthZ misconfiguration. The methodology focuses on detecting AuthZ bypass via session/resource substitution in HTTP requests. However, this S3 vulnerability stems from AWS S3 bucket policy/ACL misconfiguration, not application-level session/resource manipulation. The detection here would require direct S3 permission testing (e.g., AWS CLI commands like `s3 mv`), not HTTP request substitution, making it outside the scope of the described methodologies.",
+    "is_simple_authnz": false
   }
 }

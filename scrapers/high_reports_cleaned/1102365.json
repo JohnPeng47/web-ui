@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an authenticated user (user_session) performing an action (UpdateSound) on a resource (sound track) identified by a UUID (resource_id). The methodology would detect this by collecting the (user_session, action, resource_id) tuple and then testing with other user_sessions or resource_ids to see if the authorization boundary can be crossed, which matches the described vulnerability.",
-    "is_detectable": true
+    "reasoning": "The reported IDOR vulnerability involves substituting the victim's sound UUID in an authenticated request, which aligns with the proposed methodology's step 4e (substituting resource_ids of the same type with existing users). The methodology would detect this by collecting the (user_session, action, resource_id) tuple during normal usage and testing unauthorized access via session/resource substitution, making it a simple case of authorization bypass.",
+    "is_simple_authnz": true
   }
 }

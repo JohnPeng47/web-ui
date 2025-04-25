@@ -66,7 +66,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves accessing user information (including sensitive security data like password reset hashes) via API endpoints by manipulating user IDs. This falls under the IDOR vulnerability class where a user can access resources (other users' data) they should not have access to by swapping resource IDs (user IDs). The methodology described includes testing for such scenarios by swapping user sessions and resource IDs, which would detect this vulnerability.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an authenticated user accessing another user's sensitive information (email, reset hash) by manipulating the userId parameter in the /api/v1/users.info endpoint. This matches the IDOR detection methodology where resource IDs (user IDs) are substituted across sessions. The automated tests would detect unauthorized access to the resource by parameter manipulation, making it a simple AuthN/AuthZ issue.",
+    "is_simple_authnz": true
   }
 }

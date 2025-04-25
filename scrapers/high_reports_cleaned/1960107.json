@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves manipulating API requests (specifically `/api/setTenderStatus` and `/api/driverrequest`) to force acceptance of a ride and reveal PII. This falls under the IDOR and AuthZ bypass categories as it involves unauthorized actions (changing tender status and accessing passenger details) by manipulating resource IDs (tender_id, order_id) and actions (setTenderStatus, driverrequest). The methodology described would detect this by analyzing the requests and testing with different user sessions and resource IDs.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an attacker manipulating tender_id and order_id parameters to force acceptance of a ride request without proper authorization checks. This directly aligns with the IDOR methodology where (user_session, action, resource_id) tuples are tested by swapping resource_ids (tender_id/order_id) across sessions. The automated methodology would detect this by substituting these IDs and validating unauthorized access to PII/ride acceptance, falling under test case 4e (resource_id substitution).",
+    "is_simple_authnz": true
   }
 }

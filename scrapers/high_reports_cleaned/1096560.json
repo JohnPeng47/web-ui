@@ -55,7 +55,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an IDOR where an authenticated user can modify resources (issues) belonging to other users by changing the resource ID in the request. This fits the methodology's test case e) where new resource_ids of an existing resource_type are substituted and executed with existing users to test for authorization boundaries.",
-    "is_detectable": true
+    "reasoning": "The reported IDOR vulnerability involves manipulating the resource_id (issue ID) in a POST request to modify another user's resource. The detection methodology involves swapping resource_ids and testing with different user sessions. Since the steps involve changing the issue ID (a resource_id) in an authenticated request, this fits the methodology's test case e) (substituting resource_ids of the same type with existing users). The vulnerability is a direct result of missing authorization checks on a resource_id, which the methodology is designed to detect.",
+    "is_simple_authnz": true
   }
 }

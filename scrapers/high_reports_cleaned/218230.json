@@ -54,10 +54,10 @@
   "authnz_byppass_detectable": true,
   "is_simple_payload": false,
   "injection_metadata": {
-    "is_simple_payload": true
+    "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "since Slack and Github are independent applications, none of the steps would apply since they deal with user_session/user_ids scoped to the same application",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves cross-service trust relationships (GitLab issue emails being accepted as Slack verification) rather than within-application authorization checks. The described methodology focuses on testing authorization boundaries within a single application using session/resource substitution, but this vulnerability requires recognizing an email verification loophole between two independent systems (GitLab and Slack). The authorization bypass occurs through abuse of a valid email domain format rather than direct session/resource manipulation within a single application context.",
+    "is_simple_authnz": false
   }
 }

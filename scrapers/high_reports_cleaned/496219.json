@@ -58,7 +58,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves pre-generating VIEWSTATE for incremental package IDs, which can be detected by analyzing requests and responses for unauthorized access patterns. The methodology includes testing with different user sessions and resource IDs, which would catch this bypass if the pre-generated VIEWSTATE is used in a request.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves pre-generating VIEWSTATE parameters for incremental package IDs to bypass CAC authentication. The detection methodology includes substituting resource IDs (package IDs) and testing authorization boundaries. Since the attack relies on guessing/resource ID substitution and valid VIEWSTATE tokens (which are treated as authorized parameters), it aligns with the IDOR/AuthZ bypass detection methods described. The system would detect this by testing different resource IDs with precomputed VIEWSTATE values, falling under test case 4e (substituting resource_ids of existing types).",
+    "is_simple_authnz": true
   }
 }

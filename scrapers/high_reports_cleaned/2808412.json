@@ -42,7 +42,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves AWS Lambda permissions and STS AssumeRole actions, which are not directly tied to user sessions or resource IDs in the context of a web application. The methodology described focuses on HTTP requests and user sessions within a single application, whereas this vulnerability is at the AWS infrastructure level and involves IAM roles and policies.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves overly permissive IAM policies (e.g., sts:AssumeRole with wildcard resources). The described methodologies focus on testing session/resource-ID substitution and functional authorization boundaries. However, this issue stems from misconfigured AWS permissions at the policy level (wildcard resource), not from improper session/resource-ID validation in application logic. The automated methods would not detect this because they test substitution of known resource IDs, not policy configurations. It requires static analysis of IAM policies rather than dynamic session/resource manipulation.",
+    "is_simple_authnz": false
   }
 }

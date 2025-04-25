@@ -1,42 +1,46 @@
 {
-    "reported_to": "Informatica",
-    "reported_by": "albinowax ",
-    "title": "[kb.informatica.com] Stored XSS",
-    "content": "\nkb.informatica.org is vulnerable to stored XSS as it stores user input in users' sessions, then reflects this input back inside a JavaScript block without adequate escaping.\nTo replicate this issue, first store the payload in your session by visiting: https://kb.informatica.com/kbexternal/Pages/KBSearchResults.aspx?k=Support%20Console&fromsource=11171\"%3balert(1)%2f%2f535\nThen visit https://kb.informatica.com/faq/1/Pages/17033.aspx?docid=17033&type=external&isSearch=external\nThis should trigger an alert, due to the following HTML in the second response:\nCode 360 Bytes\n1<script type=\"text/javascript\">\n2//<![CDATA[\n3var isExternal = true; var varSearchResultURL = \"http://kb.informatica.com:7001/kbexternal/Pages/KBSearchResults.aspx?k=Support Console&fromsource=11171\";alert(1)//535\";\n4\n5Replicating this may take a few attempts - it's a bit flaky. I used Firefox but it ought to work in any browser. Let me know if you have trouble.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Informatica",
+  "reported_by": "albinowax ",
+  "title": "[kb.informatica.com] Stored XSS",
+  "content": "\nkb.informatica.org is vulnerable to stored XSS as it stores user input in users' sessions, then reflects this input back inside a JavaScript block without adequate escaping.\nTo replicate this issue, first store the payload in your session by visiting: https://kb.informatica.com/kbexternal/Pages/KBSearchResults.aspx?k=Support%20Console&fromsource=11171\"%3balert(1)%2f%2f535\nThen visit https://kb.informatica.com/faq/1/Pages/17033.aspx?docid=17033&type=external&isSearch=external\nThis should trigger an alert, due to the following HTML in the second response:\nCode 360 Bytes\n1<script type=\"text/javascript\">\n2//<![CDATA[\n3var isExternal = true; var varSearchResultURL = \"http://kb.informatica.com:7001/kbexternal/Pages/KBSearchResults.aspx?k=Support Console&fromsource=11171\";alert(1)//535\";\n4\n5Replicating this may take a few attempts - it's a bit flaky. I used Firefox but it ought to work in any browser. Let me know if you have trouble.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1491754920,
+  "report_url": "https://hackerone.com/reports/170369",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Visit https://kb.informatica.com/kbexternal/Pages/KBSearchResults.aspx?k=Support%20Console&fromsource=11171\"%3balert(1)%2f%2f535 to store the XSS payload in your session."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1491754920,
-    "report_url": "https://hackerone.com/reports/170369",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Visit https://kb.informatica.com/kbexternal/Pages/KBSearchResults.aspx?k=Support%20Console&fromsource=11171\"%3balert(1)%2f%2f535 to store the XSS payload in your session."
-        ],
-        [
-            2,
-            "Visit https://kb.informatica.com/faq/1/Pages/17033.aspx?docid=17033&type=external&isSearch=external to trigger the stored XSS payload, resulting in an alert."
-        ]
-    ],
-    "vuln_description": "kb.informatica.org is vulnerable to stored XSS as it stores user input in users' sessions, then reflects this input back inside a JavaScript block without adequate escaping.",
-    "reason": "The attack involves a straightforward stored XSS vulnerability where the payload is stored in the session and reflected in a JavaScript block. The steps are simple and do not require complex interactions or state manipulation.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The XSS vulnerability involves stored user input being reflected in a JavaScript block without proper escaping, which is not directly related to authentication or authorization boundaries. The methodology described focuses on testing AuthN/AuthZ and IDOR vulnerabilities by swapping user sessions and resource IDs, not on detecting XSS vulnerabilities.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Visit https://kb.informatica.com/faq/1/Pages/17033.aspx?docid=17033&type=external&isSearch=external to trigger the stored XSS payload, resulting in an alert."
+    ]
+  ],
+  "vuln_description": "kb.informatica.org is vulnerable to stored XSS as it stores user input in users' sessions, then reflects this input back inside a JavaScript block without adequate escaping.",
+  "reason": "The attack involves a straightforward stored XSS vulnerability where the payload is stored in the session and reflected in a JavaScript block. The steps are simple and do not require complex interactions or state manipulation.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves stored user input reflected in a JavaScript block without proper escaping, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, not on detecting XSS vulnerabilities.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves injecting a payload into the 'fromsource' parameter, which is reflected in a JavaScript block. The methodology would log this parameter during regular navigation, test it with simple payloads (like the unescaped JS alert), and detect execution via same-channel navigation to the trigger page. The payload doesn't require complex bypasses and the trigger occurs through normal user behavior.",
+    "is_simple_injection": true
+  }
 }

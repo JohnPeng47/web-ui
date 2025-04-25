@@ -51,10 +51,10 @@
   "authnz_byppass_detectable": true,
   "is_simple_payload": false,
   "injection_metadata": {
-    "is_simple_payload": false
+    "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves a chain of two issues: subdomain takeover and SSO session cookie leakage. The methodology described focuses on testing authorization boundaries within a single application by swapping user sessions and resource IDs. However, this report involves cross-domain issues (subdomain takeover affecting SSO cookies) and SSO design flaws, which are outside the scope of the described methodology. The methodology does not account for subdomain takeovers, cookie scoping issues, or SSO token handling across different domains.",
-    "is_detectable": false
+    "reasoning": "The reported vulnerability involves a subdomain takeover leading to session cookie leakage due to shared cookie scoping across *.uber.com. The methodologies described focus on testing AuthN/AuthZ by swapping sessions, actions, or resource IDs within the same application. However, this exploit chain requires a subdomain takeover (infrastructure misconfiguration) and cookie leakage via cross-subdomain cookie sharing (security design flaw), which are not covered by the automated session/resource swapping or IDOR testing methods outlined. The attack leverages external domain control and cookie scope weaknesses rather than direct authorization logic flaws.",
+    "is_simple_authnz": false
   }
 }

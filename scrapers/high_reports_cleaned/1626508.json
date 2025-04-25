@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an unauthenticated user accessing sensitive documents by manipulating the 'id' parameter in the URL. This fits the methodology where the action (accessing documents) is tested with an unauthenticated session (AuthN) and by substituting resource_ids (the 'id' parameter values). The methodology covers this by checking for unauthorized access to resources by manipulating resource_ids and testing with unauthenticated sessions.",
-    "is_detectable": true
+    "reasoning": "The IDOR vulnerability involves unauthenticated access to resources via predictable `id` parameters in URLs. The described methodology includes testing actions with unauthenticated sessions (step d) and substituting resource IDs (step e). Since the attack requires no session and relies purely on iterating `id` values (a resource_id substitution), this fits the automated detection pattern where the system would test unauthenticated access to collected `resource_id` values from other sessions.",
+    "is_simple_authnz": true
   }
 }

@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an IDOR (Insecure Direct Object Reference) where an attacker can modify another user's order by changing the order ID in the request. This fits the methodology's test case e) where substituting the resource_id (order ID) with another user's order ID and executing the action with the attacker's session would reveal the vulnerability. The methodology covers this by testing actions with different user sessions and resource IDs of the same type.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves modifying another user's order by changing the resource ID (order ID) in the request URL while using the attacker's authenticated session. This directly maps to the IDOR detection methodology where (user_session, action, resource_id) tuples are tested by substituting resource IDs. The authorization check for order ownership is missing, allowing cross-user access. The automated methodology would detect this by substituting order IDs and validating responses for unauthorized access, making it a classic IDOR/AuthZ case within the same application scope.",
+    "is_simple_authnz": true
   }
 }

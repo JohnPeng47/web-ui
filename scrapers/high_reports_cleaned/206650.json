@@ -46,7 +46,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves the transmission of security tokens over HTTP instead of HTTPS, which is detectable by analyzing the scheme of the URLs in the requests/responses. The methodology includes checking for insecure transmission of sensitive data, which would cover this case.",
-    "is_detectable": true
+    "reasoning": "The vulnerability stems from insecure transmission of security tokens via HTTP rather than HTTPS. The described methodologies focus on authorization boundary testing through session/resource ID manipulation, but this issue involves protocol-level security misconfiguration (lack of HTTPS) that isn't detected through session swapping or parameter substitution. The detection methods don't include protocol scheme validation or MITM vulnerability checks.",
+    "is_simple_authnz": false
   }
 }

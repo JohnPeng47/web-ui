@@ -39,10 +39,10 @@
   "authnz_byppass_detectable": true,
   "is_simple_payload": false,
   "injection_metadata": {
-    "is_simple_payload": false
+    "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves username enumeration and brute-force attacks on a WordPress admin panel, which are not directly related to the IDOR or AuthN/AuthZ bypass methodologies described. The described methodologies focus on swapping user sessions or resource IDs within the same application context, whereas the reported issue involves external tools (wpscan) and brute-forcing credentials, which are outside the scope of the given methodologies.",
-    "is_detectable": false
+    "reasoning": "The report describes a username enumeration vulnerability leading to brute-force attacks. The methodology outlined focuses on testing authorization boundaries by swapping user sessions and resource IDs within the same application. Username enumeration and brute-forcing involve credential discovery and guessing, which are authentication (AuthN) issues rather than authorization (AuthZ) bypasses or IDOR. The methodology does not directly address credential brute-forcing or enumeration, as these are separate from testing session/resource substitution for AuthZ flaws.",
+    "is_simple_authnz": false
   }
 }

@@ -54,7 +54,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves unauthenticated access to a GraphQL endpoint that should be protected by Okta authentication. The methodology described involves testing actions with unauthenticated user sessions (step d), which would have detected the ability to access the GraphQL endpoint without proper authentication. Additionally, the GraphQL queries and responses are part of the normal flow of the application, and the unauthorized access would be caught by analyzing the requests and responses.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing a GraphQL endpoint without authentication, allowing data retrieval. The methodology includes testing with unauthenticated sessions (step d). Since the endpoint didn't enforce authentication, it fits the AuthN bypass detection method where an unauthenticated user accesses restricted functionality.",
+    "is_simple_authnz": true
   }
 }

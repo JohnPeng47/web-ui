@@ -42,7 +42,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability report pertains to missing SPF and DMARC records, which are DNS configurations and not related to authentication or authorization flaws within the application itself. The proposed methodologies focus on testing AuthN/AuthZ boundaries within the application by manipulating user sessions, actions, and resource IDs, which does not apply to DNS misconfigurations.",
-    "is_detectable": false
+    "reasoning": "The reported vulnerability relates to missing SPF and DMARC records, which are DNS configurations rather than application-level authentication or authorization flaws. The proposed methodologies focus on testing AuthN/AuthZ bypasses via session/resource manipulation within the application, not DNS misconfigurations. SPF/DMARC issues are detected via DNS record analysis, not by swapping user sessions or resource IDs.",
+    "is_simple_authnz": false
   }
 }

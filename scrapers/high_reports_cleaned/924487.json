@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an exposed Docker Registry API without authentication, which is a server-side misconfiguration. The proposed methodologies focus on client-side interactions (user sessions, actions, resource IDs) within a single application context, not server-side API misconfigurations like this one.",
-    "is_detectable": false
+    "reasoning": "The exposed Docker Registry vulnerability stems from a lack of authentication at the service level, not improper authorization checks within an application's user/resource context. The proposed methodologies focus on testing session/resource-ID permutations within application workflows (e.g., swapping user sessions or manipulating resource IDs in requests). This vulnerability requires checking for missing service-layer authentication (HTTP 401 challenges) rather than testing authorization boundaries between users/resources within the same application. While step d) (testing unauthenticated access) could theoretically detect this if registry endpoints were explicitly included in the tested 'actions', the methodology appears focused on application business logic rather than infrastructure service configuration.",
+    "is_simple_authnz": false
   }
 }

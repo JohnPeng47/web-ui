@@ -70,7 +70,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an admin creating a hidden admin account by exploiting the ability to invite the same user with different roles. This behavior can be detected by analyzing the (user_session, action, resource_id) tuples, specifically focusing on the actions related to inviting users and role assignments. The methodology would capture the anomalous behavior of inviting the same user multiple times with different roles and the subsequent administrative actions performed by the hidden account.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves exploiting session token persistence after role revocation and multi-role invitation acceptance. The methodology's automated tests for (user_session, action, resource_id) combinations might detect the POST /invitations action with a preserved admin token after role removal, as it would test stored sessions against privileged endpoints. However, the multi-step workflow (invite-accept-revoke-reuse) and token non-invalidation are implementation-specific behaviors that might not be fully captured by naive session/resource_id substitution testing.",
+    "is_simple_authnz": false
   }
 }

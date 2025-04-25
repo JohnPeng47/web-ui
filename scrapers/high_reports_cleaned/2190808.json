@@ -38,7 +38,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves automatic login as a sys admin user without authentication, which falls under AuthN/AuthZ bypass. The methodology described includes testing with unauthenticated user sessions (step d) and swapping user sessions (step b), which would detect this issue by attempting to access the admin panel without proper authentication.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing an admin URL without any authentication, which would be detected by the methodology's step 3d (testing with unauthenticated user session). The automated system would detect that the /Administration endpoint is accessible without credentials and grants admin privileges, fitting the AuthN/AuthZ bypass pattern.",
+    "is_simple_authnz": true
   }
 }

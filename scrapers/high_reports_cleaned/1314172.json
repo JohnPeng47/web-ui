@@ -58,7 +58,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves bypassing OTP verification by manipulating the response status to 'success' without the correct OTP. This can be detected by analyzing the HTTP requests and responses during the OTP verification process, specifically looking for manipulations in the response status. The methodology involves intercepting and modifying the response, which falls under the AuthN/AuthZ bypass category where the authorization boundary is crossed by altering the response.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves intercepting and modifying the server's response to bypass OTP verification. The described methodologies focus on testing authorization boundaries through user sessions, actions, and resource IDs, not response manipulation. Since the attack alters the server's response status rather than exploiting resource or session misconfigurations, it wouldn't be detected by the outlined IDOR/AuthZ testing methods.",
+    "is_simple_authnz": false
   }
 }

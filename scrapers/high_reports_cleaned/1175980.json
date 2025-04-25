@@ -45,7 +45,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an unauthenticated user accessing sensitive data by manipulating the resource_id (user ID) in the endpoint URL. This fits the methodology's test case d) (execute with unauthenticated user session) and e) (substitute resource_id with new resource_id). The endpoint does not enforce proper authorization checks, allowing data exposure through ID manipulation.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing a resource (user data via an incremental ID) without proper authorization. The methodology's step d) tests actions with an unauthenticated session, which would detect this endpoint's lack of authentication. Additionally, step e) involves substituting resource IDs (e.g., 0-4800), which aligns with brute-forcing the ID parameter to expose all users. Since the detection method directly applies to unauthenticated access and ID substitution, this fits the simple authnz criteria.",
+    "is_simple_authnz": true
   }
 }

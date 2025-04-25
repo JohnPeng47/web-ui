@@ -57,7 +57,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves arbitrary file creation via symlink attack on a privileged service, which is a local privilege escalation issue. The proposed methodologies focus on web-based authentication and authorization vulnerabilities (IDOR and AuthN/AuthZ bypass) by analyzing HTTP requests and responses. The symlink attack does not involve HTTP requests or user sessions, and the vulnerability is not related to web application authorization boundaries. Therefore, it falls outside the scope of the described methodologies.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves a local privilege escalation via symlink attack on a service, which is not related to HTTP request-based authentication or authorization checks. The proposed methodologies focus on web-based authN/authZ issues by manipulating user sessions, actions, and resource IDs in HTTP requests. This vulnerability exploits filesystem symlinks and service behavior, which are outside the scope of the described detection methods that analyze HTTP traffic and user sessions.",
+    "is_simple_authnz": false
   }
 }

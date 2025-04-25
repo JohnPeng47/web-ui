@@ -60,7 +60,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves swapping resource_ids (team_id and user_id) with existing (action, resource_id) tuples, which is covered by test e) in the methodology. The action (removing a user from a team) is executed with a different user_session and resource_ids that the user should not have access to, demonstrating an IDOR vulnerability.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an IDOR where modifying team_id and user_id in a request allows unauthorized removal of users from teams. The methodology's step 4e (substituting resource_ids of the same type) would detect this, as the attack relies on swapping resource_ids (team_id/user_id) in an authenticated action without proper authorization checks. The automated testing of resource_id permutations aligns with the exploit's mechanism, making it detectable via the outlined AuthN/AuthZ methodologies.",
+    "is_simple_authnz": true
   }
 }

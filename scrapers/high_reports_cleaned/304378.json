@@ -46,7 +46,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves cross-domain validation issues in ACME TLS-SNI-01/02 challenges, which are not covered by the proposed methodologies as they focus on session and resource ID manipulation within the same application. The issue here is at the protocol level with domain validation, not within the application's authN/authZ boundaries.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves exploiting the ACME TLS-SNI validation mechanism via shared hosting infrastructure, not user session/resource ID manipulation within an application. The detection methodologies focus on testing authorization boundaries by swapping sessions/resource IDs in HTTP requests, which does not apply here. The issue stems from protocol design and infrastructure routing assumptions, not application-layer AuthNZ flaws.",
+    "is_simple_authnz": false
   }
 }

@@ -1,44 +1,44 @@
 {
-    "reported_to": "Quantopian",
-    "reported_by": "irisrumtub ",
-    "title": "Cross-site scripting on algorithm collaborator ",
-    "content": "\nHi again my favorite VDP team. I bring you 8th bug and 4th cross-site scripting. Currently trying to upload python code via self-serve data, not looking for XSS'es only, but they're a thing still, right?\nSummary:\nBy sending specially crafted websockets request attacker can run javascript in algorithm collaborator's web browser\nDescription:\nThis is actually quite a funny bug. Some time ago when I was testing algo debugger, i noticed that there is a request to /algorithms/algoid/x which usually happens when i try to insert html's <img src=x>. But since some time your cloudflare became more strict and adding inline scripts in request might result in 403 Forbidden, so i remove them and try without them. But at that time i couldn't find the image that caused that request. I sent that to Chris.\nToday i was trying to test against debugger again. The purpose wasn't to find XSS, but i spammed XSS payloads alongside with some different stuff. And again that request to page X. And i noticed that debugger removed part of my payload which contained image. That's it! That should be the vulnerable place.\nHowever typing html entity in it didn't produce anything. And html was injected only on my side, not the other collaborator's. So i decided to take a look at the websocket request that sends it\nIt turned out that HTML's <> and other entities were encoded. So i tried intercepting the websockets request and enter <img src=x onerror=alert(1)> and it worked not only on me, but on collaborator as well.\nSo is it TogetherJS library that is in charge of websockets? I think you might need to encode payloads server-side to avoid this kind of things. I would be glad to help you test the fix for this.\nSteps To Reproduce:\n<image_0>\nReplace value with raw html/javascript\nSend the message. Payload will work in collaborator's browser\nTest account information\nirisrumtub+hackerone@mail.ru\ntvburis+hackerone@gmail.com\nImpact\nRun javascript in victim's browser\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Quantopian",
+  "reported_by": "irisrumtub ",
+  "title": "Cross-site scripting on algorithm collaborator ",
+  "content": "\nHi again my favorite VDP team. I bring you 8th bug and 4th cross-site scripting. Currently trying to upload python code via self-serve data, not looking for XSS'es only, but they're a thing still, right?\nSummary:\nBy sending specially crafted websockets request attacker can run javascript in algorithm collaborator's web browser\nDescription:\nThis is actually quite a funny bug. Some time ago when I was testing algo debugger, i noticed that there is a request to /algorithms/algoid/x which usually happens when i try to insert html's <img src=x>. But since some time your cloudflare became more strict and adding inline scripts in request might result in 403 Forbidden, so i remove them and try without them. But at that time i couldn't find the image that caused that request. I sent that to Chris.\nToday i was trying to test against debugger again. The purpose wasn't to find XSS, but i spammed XSS payloads alongside with some different stuff. And again that request to page X. And i noticed that debugger removed part of my payload which contained image. That's it! That should be the vulnerable place.\nHowever typing html entity in it didn't produce anything. And html was injected only on my side, not the other collaborator's. So i decided to take a look at the websocket request that sends it\nIt turned out that HTML's <> and other entities were encoded. So i tried intercepting the websockets request and enter <img src=x onerror=alert(1)> and it worked not only on me, but on collaborator as well.\nSo is it TogetherJS library that is in charge of websockets? I think you might need to encode payloads server-side to avoid this kind of things. I would be glad to help you test the fix for this.\nSteps To Reproduce:\n<image_0>\nReplace value with raw html/javascript\nSend the message. Payload will work in collaborator's browser\nTest account information\nirisrumtub+hackerone@mail.ru\ntvburis+hackerone@gmail.com\nImpact\nRun javascript in victim's browser\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 2100,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/509/648/f767cd528c2aa7a99dfea57f140ab4c14fb2ba21/WS_message.png?response-content-disposition=attachment%3B%20filename%3D%22WS_message.png%22%3B%20filename%2A%3DUTF-8%27%27WS_message.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYR5AUSRR%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T010518Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBhszpn%2FC5cT0LaGb2DIvkHHnvddIDc9XSepUK2IPPS0AiEA%2FVhayRvMXzsYcqoSuWOlHPX0Sv70ONgQ0M9sjlFi2w0qugUI%2Bf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDJiuI4ewuKSVz99MBiqOBaoZSea7Ch3FWv%2B%2ByWT2YH2elxcTe9eEwmSDoQjt42mtra3UGv0AI5zuCToE2DOuyCE2QhKtEhRG9Qf6SKtgxS1WA85HjibaUr9gLCCbpAaURIQy7RCi7RSS88SzUIpFY0jfr19pureeU6aFN59gtcji1Jghk7xacCSiGRk%2BE9bRuYut11EeBEk7TOe9ERmw%2BztSwBZx5ajdkh78C4SfRPg3Z6S2JQQ8qjom463bHJ0P1%2FVVvcZKRSXdmtwSOCkAQr4yUH0GO2sYNOQZeQa%2BzOCcJHL3brTTxjB5n9m77EcXzjOAXVFVRUV2t1d1HSjejkQv0rvNMiAQSfToZvi9YAjzOBfHanS36R6TnlqKQaQ4h04rKpPqT%2FGFoBIM2GO4qIKp4eFPPpNIXKb9mHW80U2EOs33ukOVozMSkQ0wu4QdGYHgiQs4uuQCye54yiuSzY3oAbp%2FAM9bM8GMe2OV6hYHT%2BaY9g0gFolmlrJ%2BkV%2FvZDdw%2FqS4Ut5oTb8BcSDgEj4oeJrZ41Qto6ZLbu6uM2j8a89QhCRwNdMgB2%2FW4%2FraLi2Usx1juyPt75jN9LTXnfqicPdIH58Sr3K1zZ4I1ZF0htjsczn0LK4U543YbEU4EgFHFAsst%2BU55YlTJwXF%2BIbCIF0zFqSQG0NBljTenE6Bgb%2BGFSuALwWDNRjB7O%2FsCsxtt7BldRetXIZhnIUIYZ36BmsXsjJIxW3Q0byGRw1rdoaGCfDIs3YxvqEHZH%2BvWwHOMucS6uXvoVrZQiv0B1CLI0%2F8mgJkJ6tbIH%2F%2B2WaWH39tLU7Pg%2FxlcqTMlJ3gKecUB%2FFTqGGm%2FubUlv81ts9T30TH%2FsjLodSzimS516VKlNHJMQRaL8GyzuLchjCw7Ye%2FBjqxAWebvKEiBcFzJ2XXixoteV%2B86iTHKDfPAwW7hSiwPlGvj1TK%2Foe%2BIU%2BX4y%2FLTWGE1KZcGfwU0Dwv7fHR1t3HzfuHlE7PXqxzyu4MA5V5CjG0HEGIkyx6GC6x6osvJunU54ajjWpFQQZBBC%2FHNn6u47DnbNXFc9oA8rJoPNuIrLB2dDlfIfe0ncvdy%2FVzRoMw5jKm2oHJT31sutvzBukqKOd1K3ou1CoPO4xPOZ9zfsZmVA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=83901a563791e9a33fd5e675386123e0fa98341f9beb31c94d87212fc6a0e56c"
+  },
+  "disclosed_date": 1671671520,
+  "report_url": "https://hackerone.com/reports/615672",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Intercept the websocket request that sends messages between collaborators in the algorithm debugger."
     ],
-    "bounty": 2100,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
-    ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/509/648/f767cd528c2aa7a99dfea57f140ab4c14fb2ba21/WS_message.png?response-content-disposition=attachment%3B%20filename%3D%22WS_message.png%22%3B%20filename%2A%3DUTF-8%27%27WS_message.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYR5AUSRR%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T010518Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBhszpn%2FC5cT0LaGb2DIvkHHnvddIDc9XSepUK2IPPS0AiEA%2FVhayRvMXzsYcqoSuWOlHPX0Sv70ONgQ0M9sjlFi2w0qugUI%2Bf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgwwMTM2MTkyNzQ4NDkiDJiuI4ewuKSVz99MBiqOBaoZSea7Ch3FWv%2B%2ByWT2YH2elxcTe9eEwmSDoQjt42mtra3UGv0AI5zuCToE2DOuyCE2QhKtEhRG9Qf6SKtgxS1WA85HjibaUr9gLCCbpAaURIQy7RCi7RSS88SzUIpFY0jfr19pureeU6aFN59gtcji1Jghk7xacCSiGRk%2BE9bRuYut11EeBEk7TOe9ERmw%2BztSwBZx5ajdkh78C4SfRPg3Z6S2JQQ8qjom463bHJ0P1%2FVVvcZKRSXdmtwSOCkAQr4yUH0GO2sYNOQZeQa%2BzOCcJHL3brTTxjB5n9m77EcXzjOAXVFVRUV2t1d1HSjejkQv0rvNMiAQSfToZvi9YAjzOBfHanS36R6TnlqKQaQ4h04rKpPqT%2FGFoBIM2GO4qIKp4eFPPpNIXKb9mHW80U2EOs33ukOVozMSkQ0wu4QdGYHgiQs4uuQCye54yiuSzY3oAbp%2FAM9bM8GMe2OV6hYHT%2BaY9g0gFolmlrJ%2BkV%2FvZDdw%2FqS4Ut5oTb8BcSDgEj4oeJrZ41Qto6ZLbu6uM2j8a89QhCRwNdMgB2%2FW4%2FraLi2Usx1juyPt75jN9LTXnfqicPdIH58Sr3K1zZ4I1ZF0htjsczn0LK4U543YbEU4EgFHFAsst%2BU55YlTJwXF%2BIbCIF0zFqSQG0NBljTenE6Bgb%2BGFSuALwWDNRjB7O%2FsCsxtt7BldRetXIZhnIUIYZ36BmsXsjJIxW3Q0byGRw1rdoaGCfDIs3YxvqEHZH%2BvWwHOMucS6uXvoVrZQiv0B1CLI0%2F8mgJkJ6tbIH%2F%2B2WaWH39tLU7Pg%2FxlcqTMlJ3gKecUB%2FFTqGGm%2FubUlv81ts9T30TH%2FsjLodSzimS516VKlNHJMQRaL8GyzuLchjCw7Ye%2FBjqxAWebvKEiBcFzJ2XXixoteV%2B86iTHKDfPAwW7hSiwPlGvj1TK%2Foe%2BIU%2BX4y%2FLTWGE1KZcGfwU0Dwv7fHR1t3HzfuHlE7PXqxzyu4MA5V5CjG0HEGIkyx6GC6x6osvJunU54ajjWpFQQZBBC%2FHNn6u47DnbNXFc9oA8rJoPNuIrLB2dDlfIfe0ncvdy%2FVzRoMw5jKm2oHJT31sutvzBukqKOd1K3ou1CoPO4xPOZ9zfsZmVA%3D%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=83901a563791e9a33fd5e675386123e0fa98341f9beb31c94d87212fc6a0e56c"
-    },
-    "disclosed_date": 1671671520,
-    "report_url": "https://hackerone.com/reports/615672",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Intercept the websocket request that sends messages between collaborators in the algorithm debugger."
-        ],
-        [
-            2,
-            "Replace the message content with a raw HTML/JavaScript payload (e.g., <img src=x onerror=alert(1)>)."
-        ]
-    ],
-    "vuln_description": "A cross-site scripting (XSS) vulnerability exists in the algorithm collaborator's web interface, where specially crafted websocket messages can execute arbitrary JavaScript in the collaborator's browser. The vulnerability arises because HTML entities in websocket messages are not properly encoded server-side, allowing an attacker to inject malicious scripts that execute in the context of the collaborator's session.",
-    "reason": "The vulnerability involves understanding the websocket communication mechanism and realizing that HTML entities are not encoded server-side, which is a subtle interaction. However, the attack itself is straightforward once the websocket interception point is identified.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The vulnerability involves cross-site scripting (XSS) via websockets in the algorithm collaborator's web browser. The methodology described focuses on authentication and authorization (AuthN/AuthZ) bugs, particularly IDOR and AuthZ bypass, by analyzing HTTP requests and responses for (user_session, action, resource_id) tuples. However, the reported XSS vulnerability does not involve AuthN/AuthZ bypass or IDOR; it is a client-side injection vulnerability that requires a different detection approach, such as input validation and output encoding checks for websocket messages.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Replace the message content with a raw HTML/JavaScript payload (e.g., <img src=x onerror=alert(1)>)."
+    ]
+  ],
+  "vuln_description": "A cross-site scripting (XSS) vulnerability exists in the algorithm collaborator's web interface, where specially crafted websocket messages can execute arbitrary JavaScript in the collaborator's browser. The vulnerability arises because HTML entities in websocket messages are not properly encoded server-side, allowing an attacker to inject malicious scripts that execute in the context of the collaborator's session.",
+  "reason": "The vulnerability involves understanding the websocket communication mechanism and realizing that HTML entities are not encoded server-side, which is a subtle interaction. However, the attack itself is straightforward once the websocket interception point is identified.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves cross-site scripting (XSS) via websockets in the algorithm collaborator feature, which is not directly related to authentication or authorization (AuthN/AuthZ) issues. The described methodology focuses on AuthN/AuthZ bypasses and IDOR vulnerabilities by testing user sessions and resource access, not XSS vulnerabilities that arise from improper input sanitization in websocket messages.",
+    "is_detectable": false
+  }
 }

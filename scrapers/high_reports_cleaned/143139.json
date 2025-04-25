@@ -1,45 +1,46 @@
 {
-    "reported_to": "Gratipay",
-    "reported_by": "valievkarim ",
-    "title": "upgrade Aspen on inside.gratipay.com to pick up CR injection fix",
-    "content": "\n1) Using IE11, open DevTools and start network capture\n2) visit the following URL:\nhttp://inside.gratipay.com/assets/%0dSet-Cookie:%20qwe=qwe%0dq\n3) find a 'qwe' cookie set in the response\nThere is a 0x0d character injected, which can be used as a header\ndelimiter in IE.\nTo see this behaviour using Curl, you can use the following command:\ncurl -s -v 'http://inside.gratipay.com/assets/%0dSet-Cookie:%20qwe=qwe%0dq' 2>&1|less\nScreenshots of Curl output and DevTools are attached.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Gratipay",
+  "reported_by": "valievkarim ",
+  "title": "upgrade Aspen on inside.gratipay.com to pick up CR injection fix",
+  "content": "\n1) Using IE11, open DevTools and start network capture\n2) visit the following URL:\nhttp://inside.gratipay.com/assets/%0dSet-Cookie:%20qwe=qwe%0dq\n3) find a 'qwe' cookie set in the response\nThere is a 0x0d character injected, which can be used as a header\ndelimiter in IE.\nTo see this behaviour using Curl, you can use the following command:\ncurl -s -v 'http://inside.gratipay.com/assets/%0dSet-Cookie:%20qwe=qwe%0dq' 2>&1|less\nScreenshots of Curl output and DevTools are attached.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 40,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1490236260,
+  "report_url": "https://hackerone.com/reports/143139",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Using IE11, open DevTools and start network capture"
     ],
-    "bounty": 40,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1490236260,
-    "report_url": "https://hackerone.com/reports/143139",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Using IE11, open DevTools and start network capture"
-        ],
-        [
-            2,
-            "Visit the URL: http://inside.gratipay.com/assets/%0dSet-Cookie:%20qwe=qwe%0dq and observe the 'qwe' cookie set in the response"
-        ]
-    ],
-    "vuln_description": "The vulnerability involves a CR (Carriage Return) injection in the URL, which can be used to set arbitrary cookies in Internet Explorer 11. This occurs due to improper handling of the 0x0d character in the URL, which IE interprets as a header delimiter, allowing the injection of HTTP headers like Set-Cookie.",
-    "reason": "The attack is straightforward and does not involve multiple components or complex interactions. The vulnerability is discovered by simply crafting a URL with a CR injection and observing the response in IE11 or using curl. The interaction is not subtle and does not require manipulating complex application states or novel logic.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "reason": "The vulnerability involves CR injection in a specific URL path, which is not covered by the described methodologies that focus on session, action, and resource_id tuples for AuthN/AuthZ testing. The issue here is a server-side response manipulation rather than an authorization boundary issue.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Visit the URL: http://inside.gratipay.com/assets/%0dSet-Cookie:%20qwe=qwe%0dq and observe the 'qwe' cookie set in the response"
+    ]
+  ],
+  "vuln_description": "The vulnerability involves a CR (Carriage Return) injection in the URL, which can be used to set arbitrary cookies in Internet Explorer 11. This occurs due to improper handling of the 0x0d character in the URL, which IE interprets as a header delimiter, allowing the injection of HTTP headers like Set-Cookie.",
+  "reason": "The attack is straightforward and does not involve multiple components or complex interactions. The vulnerability is discovered by simply crafting a URL with a CR injection and observing the response in IE11 or using curl. The interaction is not subtle and does not require manipulating complex application states or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves injecting a carriage return (CR) character into a URL parameter to set a malicious header. The methodology captures all HTTP requests/responses during regular navigation, identifies injectable parameters (like the URL path here), and tests them with simple payloads (e.g., CR-based header injection). Since the payload is a basic CR character and the injected cookie is visible in the immediate HTTP response (same channel detection), it aligns with the 'Simple Payload' methodology. No custom filter bypass or multi-step navigation is required.",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves CR injection in the response headers, which is a server-side issue rather than an authentication or authorization boundary being crossed via user sessions or resource IDs. The methodology described focuses on testing AuthN/AuthZ boundaries by manipulating user sessions and resource IDs, not on detecting header injection vulnerabilities.",
+    "is_detectable": false
+  }
 }

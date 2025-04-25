@@ -58,7 +58,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The IDOR vulnerability involves swapping resource_ids (user IDs) in the attachment upload functionality, which is covered by the methodology's test e) (substituting resource_ids with existing ones). The race condition aspect would require additional timing analysis but the core IDOR is detectable.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves substituting resource IDs (\u2588\u2588\u2588Id parameter) in authenticated requests to access/modify other users' resources. This directly aligns with the described IDOR detection methodology (checking combinations of user_session + action + resource_id). The attack pattern matches test case e) where new resource_ids of existing types are substituted. The state-dependent aspect (only works when victim has no existing attachments) and race condition potential are implementation-specific nuances, but the core authorization bypass fits the pattern.",
+    "is_simple_authnz": true
   }
 }

@@ -44,7 +44,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an upload functionality that allows unauthorized file types (html/shtml) to be uploaded, which can then be used to read sensitive server information. This falls under the category of AuthZ bypass as it allows unauthorized access to server resources. The methodology described involves testing for AuthZ bypass by swapping user sessions and testing access to resources, which could potentially detect this vulnerability if the upload functionality is tested with different user sessions or without authentication.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves uploading specific file types (html/shtml) to read server configurations, which is an input validation issue rather than an authorization or authentication bypass. The proposed methodologies focus on testing access controls between user sessions and resource IDs, not file upload validation. Thus, this vulnerability wouldn't be detected by the described AuthN/AuthZ/IDOR detection methods.",
+    "is_simple_authnz": false
   }
 }

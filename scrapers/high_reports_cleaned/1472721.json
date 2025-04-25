@@ -58,7 +58,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves swapping user sessions and accessing resources (scorecards) that should be restricted to another user. This matches the IDOR detection methodology where (user_session, action, resource_id) tuples are collected and tested with different user sessions to see if authorization boundaries can be crossed. The steps in the report explicitly demonstrate this by showing how an attacker's session can access and modify a scorecard created by another user.",
-    "is_detectable": true
+    "reasoning": "The reported IDOR vulnerability involves substituting a known resource_id (scorecard name) with another user's session to bypass authorization checks. This directly aligns with methodology step 4b (executing actions with existing user_sessions on resource_ids of the same type). The automated system would detect this by testing the attacker's session against the victim's resource_id collected from normal traffic, fulfilling the IDOR detection pattern.",
+    "is_simple_authnz": true
   }
 }

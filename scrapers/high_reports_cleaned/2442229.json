@@ -62,7 +62,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an unauthenticated user accessing a user management endpoint to create new users and assign administrator roles. This fits the AuthN/AuthZ Bypass methodology where the authorization boundary is crossed at a functional level. The detection method would involve testing the user management endpoint with an unauthenticated session (step d) in the methodology), which would reveal the lack of access controls.",
-    "is_detectable": true
+    "reasoning": "The reported vulnerability involves unauthenticated access to a user management endpoint allowing privilege escalation. The methodology's step d) tests actions with an unauthenticated session, which would detect this issue. The endpoint's lack of access control aligns with AuthN/AuthZ bypass detection (unauthorized action/navigation boundary crossing).",
+    "is_simple_authnz": true
   }
 }

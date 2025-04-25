@@ -54,7 +54,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves bypassing authentication by manipulating URL parameters and exploiting CRLF injection to set cookies, which allows unauthorized access to the dashboard. This falls under the AuthN/AuthZ Bypass methodology where an unauthenticated user gains access to restricted functionality. The methodology includes testing actions with unauthenticated sessions (step d) and swapping resource_ids (step e), which could detect this type of bypass if the application logs and analyzes such requests.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves bypassing authentication via URL parameter manipulation (CRLF injection setting a cookie) to access the dashboard without credentials, which aligns with the AuthN/AuthZ bypass methodology (testing unauthenticated access to restricted actions). The WebSocket info disclosure further indicates AuthZ failure. The automated methodology would detect this if it tested the affected endpoint with an unauthenticated session or manipulated parameters for AuthN bypass (steps d/e). The CRLF injection vector is specific but fits the broader AuthN bypass class covered by the methodologies.",
+    "is_simple_authnz": true
   }
 }

@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an unauthorized person accessing an endpoint to delete user requests by manipulating the request ID. This fits the IDOR (Insecure Direct Object Reference) vulnerability class where the attacker can manipulate the resource_id (request ID) to perform actions they are not authorized to perform. The methodology described includes testing for such scenarios by swapping resource_ids and testing with different user sessions, which would cover this case.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an unauthenticated endpoint allowing deletion of resources via predictable sequential IDs. The described methodology's step d (testing actions with unauthenticated sessions) and e (substituting resource IDs) would detect this, as the attack requires no session context and uses enumerable resource IDs. This matches the IDOR/AuthZ pattern of unauthorized resource manipulation through parameter substitution without session validation.",
+    "is_simple_authnz": true
   }
 }

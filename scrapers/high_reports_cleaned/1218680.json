@@ -55,10 +55,10 @@
   "authnz_byppass_detectable": true,
   "is_simple_payload": false,
   "injection_metadata": {
-    "is_simple_payload": false
+    "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves checking authorization boundaries for a specific API endpoint (/api/as/v1/credentials/) with different user roles. The methodology described involves testing actions with different user sessions and resource IDs, which aligns with the steps to reproduce the issue (testing a Dev Role user with Limited Engine Access accessing an endpoint they shouldn't have access to). The detection method would involve swapping user sessions (from admin to dev user) and verifying if the authorization boundary is crossed, which is exactly what the vulnerability report demonstrates.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves a user with limited access rights (Dev Role with Limited Engine Access) accessing an API endpoint they shouldn't. The methodology involves testing authorization boundaries by swapping user sessions (e.g., admin vs. dev user) and checking access to actions/resources. Here, the dev user's session accessing `/api/as/v1/credentials/` (an action/resource intended for admins) directly maps to the AuthZ Bypass detection method (steps a, b, c). The system would detect this by substituting the dev user's session into the admin's action and observing the improper access.",
+    "is_simple_authnz": true
   }
 }

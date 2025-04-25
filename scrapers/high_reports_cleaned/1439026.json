@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves bypassing privacy settings by manipulating the authentication flow in the Twitter Android client. The methodology described involves testing authorization boundaries by swapping user sessions and resource IDs, which aligns with the steps to reproduce the vulnerability. Specifically, the unauthorized access to user IDs via email/phone number despite privacy settings can be detected by substituting resource IDs (emails/phone numbers) and testing with unauthenticated or different user sessions.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves bypassing authorization checks during the account duplication check flow. The methodology's step d (executing actions with unauthenticated sessions) and step e (substituting resource_ids) would detect this, as the attack uses unauthenticated requests (guest tokens) and substitutes resource_ids (emails/phone numbers) to retrieve user IDs. The authorization boundary (discoverability setting) is bypassed via an unprotected API endpoint, fitting the AuthZ bypass class.",
+    "is_simple_authnz": true
   }
 }

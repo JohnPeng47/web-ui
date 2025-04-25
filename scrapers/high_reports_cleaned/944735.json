@@ -45,7 +45,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves DLL injection via file system manipulation and service restart, which is outside the scope of the described authentication/authorization testing methodology. The methodology focuses on HTTP requests/responses and session/resource manipulation within a single application context, not file system or service-level vulnerabilities.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves exploiting file system permissions to plant a DLL that is loaded by a privileged service. The described methodologies focus on HTTP-based authorization checks (e.g., IDOR, session swapping) rather than local privilege escalation via file system misconfigurations. This attack vector doesn't involve manipulating user sessions, resource IDs in HTTP requests, or authorization boundaries within a web application context, making it outside the scope of the outlined AuthN/AuthZ detection methods.",
+    "is_simple_authnz": false
   }
 }

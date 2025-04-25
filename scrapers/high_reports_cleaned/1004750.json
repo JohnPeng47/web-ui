@@ -54,7 +54,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves unauthenticated access to modify user credentials (UID and password) by manipulating request parameters (UID2 cookie and userName input). This falls under the AuthN/AuthZ bypass methodology where an unauthenticated user can perform actions (password reset) that should require authentication. The methodology described includes testing actions with unauthenticated sessions (step d), which would catch this vulnerability.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an unauthenticated user changing another user's password by manipulating the UID2 cookie and userName parameter. This aligns with the methodology's step d) (executing actions with unauthenticated sessions) and e) (substituting resource IDs). The system would detect the lack of authentication checks and improper authorization when substituting the UID2 and userName values, triggering the vulnerability during automated testing.",
+    "is_simple_authnz": true
   }
 }

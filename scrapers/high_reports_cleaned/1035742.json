@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves accessing an admin panel without proper authentication, which falls under the AuthN/AuthZ Bypass methodology. The detection method involves testing navigation/action boundaries with different user sessions (including unauthenticated sessions), which would catch this issue.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing an admin endpoint (/admin/) which authenticates the user as an administrator without proper authorization checks. This aligns with the AuthN/AuthZ Bypass methodology where a user (authenticated or unauthenticated) accesses a restricted functionality. The detection method involves testing navigation/action with different user sessions (e.g., unprivileged user or no session) to see if the authorization boundary is crossed. Since accessing /admin/ directly grants admin privileges, this would be detected by steps like 4d (testing unauthenticated access) or 4b/4c (testing with non-admin sessions).",
+    "is_simple_authnz": true
   }
 }

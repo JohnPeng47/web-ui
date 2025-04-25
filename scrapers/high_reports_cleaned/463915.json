@@ -1,50 +1,54 @@
 {
-    "reported_to": "Kaspersky",
-    "reported_by": "palant ",
-    "title": "URL Advisor component in KIS products family is vulnerable to Universal XSS",
-    "content": "\nSummary\nIn Microsoft Edge, URL Advisor UI is served as first-party content on every domain. So the XSS vulnerability I found in this UI automatically applies to all websites, it allows running code in the context of any domain.\nDescription\nURL Advisor frame is located under https://www.google.com/<INJECT_ID>/ua/url_advisor_balloon.html and https://www.yahoocom/<INJECT_ID>/ua/url_advisor_balloon.html in Microsoft Edge (always the same INJECT_ID value). It gets its content from a message sent via window.postMessage() without validating message origin. Under some circumstances it will assign that data as link target, so a malicious website can make that link point to a javascript: URL. Clickjacking then allows making the user click that link - while sites like google.com use X-Frame-Options header to disallow framing, no such restrictions are in place for the url_advisor_balloon.html frame.\nEnvironment\nScope: Application\nProduct name: Kaspersky Internet Security\nProduct version: 19.0.0.1088\nOS name and version (incl SP): Windows 10.0.17134\nAttack type: Universal XSS\nMaximum user privileges needed to reproduce your issue: no privileges\nSteps to reproduce\nDownload attached server.py and universal_xss.html to some directory on your computer and run server.py (Python 3 required). This is a very rudimentary HTTP server running on http://localhost:5000/, you could use some other web server as well.\nEdit the file %WINDIR%\\sysnative\\drivers\\etc\\hosts as administrator and add the following line: 127.0.0.1 www.google.example.com. Normally, you would just use a subdomain of a domain you own - the host name has to start with \"www.google.\" for URL Advisor to apply to it.\nOpen Microsoft Edge and go to http://www.google.example.com:5000/universal_xss.html\nAs advised by the page, move your mouse and click somewhere on the page.\nYou will see an alert message saying: \"Hi, this is JavaScript code running on www.google.com.\" That's the result of the code alert('Hi, this JavaScript code is running on ' + document.domain) executing in the context of the Google website. Injecting code into any other domain would have been easily possible as well.\nRecommendation\nThis user interface should never be served as first-party, even once the vulnerability here is fixed. Any XSS vulnerability in Kaspersky code automatically elevates to Universal XSS otherwise, this is too dangerous. Frankly, I don't see why it is done in this way with Microsoft Edge - in Firefox and Internet Explorer the same UI is always served via kis.v2.scr.kaspersky-labs.com, so vulnerabilities here don't affect other websites.\nImpact\nA malicious website can easily make users click by pretending to be a game. And while the user clicks, they will be allowing the attackers to inject code into various internet domains and exfiltrating data in the background.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Kaspersky",
+  "reported_by": "palant ",
+  "title": "URL Advisor component in KIS products family is vulnerable to Universal XSS",
+  "content": "\nSummary\nIn Microsoft Edge, URL Advisor UI is served as first-party content on every domain. So the XSS vulnerability I found in this UI automatically applies to all websites, it allows running code in the context of any domain.\nDescription\nURL Advisor frame is located under https://www.google.com/<INJECT_ID>/ua/url_advisor_balloon.html and https://www.yahoocom/<INJECT_ID>/ua/url_advisor_balloon.html in Microsoft Edge (always the same INJECT_ID value). It gets its content from a message sent via window.postMessage() without validating message origin. Under some circumstances it will assign that data as link target, so a malicious website can make that link point to a javascript: URL. Clickjacking then allows making the user click that link - while sites like google.com use X-Frame-Options header to disallow framing, no such restrictions are in place for the url_advisor_balloon.html frame.\nEnvironment\nScope: Application\nProduct name: Kaspersky Internet Security\nProduct version: 19.0.0.1088\nOS name and version (incl SP): Windows 10.0.17134\nAttack type: Universal XSS\nMaximum user privileges needed to reproduce your issue: no privileges\nSteps to reproduce\nDownload attached server.py and universal_xss.html to some directory on your computer and run server.py (Python 3 required). This is a very rudimentary HTTP server running on http://localhost:5000/, you could use some other web server as well.\nEdit the file %WINDIR%\\sysnative\\drivers\\etc\\hosts as administrator and add the following line: 127.0.0.1 www.google.example.com. Normally, you would just use a subdomain of a domain you own - the host name has to start with \"www.google.\" for URL Advisor to apply to it.\nOpen Microsoft Edge and go to http://www.google.example.com:5000/universal_xss.html\nAs advised by the page, move your mouse and click somewhere on the page.\nYou will see an alert message saying: \"Hi, this is JavaScript code running on www.google.com.\" That's the result of the code alert('Hi, this JavaScript code is running on ' + document.domain) executing in the context of the Google website. Injecting code into any other domain would have been easily possible as well.\nRecommendation\nThis user interface should never be served as first-party, even once the vulnerability here is fixed. Any XSS vulnerability in Kaspersky code automatically elevates to Universal XSS otherwise, this is too dangerous. Frankly, I don't see why it is done in this way with Microsoft Edge - in Firefox and Internet Explorer the same UI is always served via kis.v2.scr.kaspersky-labs.com, so vulnerabilities here don't affect other websites.\nImpact\nA malicious website can easily make users click by pretending to be a game. And while the user clicks, they will be allowing the attackers to inject code into various internet domains and exfiltrating data in the background.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1567029240,
+  "report_url": "https://hackerone.com/reports/463915",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Download and run the provided server.py and universal_xss.html files on a local server."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Generic"
+    [
+      2,
+      "Edit the hosts file to add a line redirecting www.google.example.com to localhost."
     ],
-    "screenshots": {},
-    "disclosed_date": 1567029240,
-    "report_url": "https://hackerone.com/reports/463915",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Download and run the provided server.py and universal_xss.html files on a local server."
-        ],
-        [
-            2,
-            "Edit the hosts file to add a line redirecting www.google.example.com to localhost."
-        ],
-        [
-            3,
-            "Open Microsoft Edge and navigate to http://www.google.example.com:5000/universal_xss.html."
-        ],
-        [
-            4,
-            "Follow the on-screen instructions to move the mouse and click, triggering the XSS payload."
-        ]
+    [
+      3,
+      "Open Microsoft Edge and navigate to http://www.google.example.com:5000/universal_xss.html."
     ],
-    "vuln_description": "The URL Advisor component in Kaspersky Internet Security is vulnerable to Universal XSS due to improper origin validation in message handling. This allows malicious websites to inject JavaScript into the context of any domain, including sensitive ones like google.com, by exploiting the postMessage API and clickjacking.",
-    "reason": "The attack involves understanding and manipulating the postMessage API, exploiting clickjacking, and modifying system files (hosts). However, the components and their interactions are relatively straightforward once the initial setup is complete.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The vulnerability involves a Universal XSS in a first-party context within Microsoft Edge, where the URL Advisor UI is served on every domain. The described methodology focuses on authentication and authorization bugs (IDOR and AuthN/AuthZ bypass) within the same application context by swapping user sessions and resource IDs. However, this XSS vulnerability is a client-side issue involving improper message origin validation and clickjacking, which doesn't fit the scope of the methodology that targets server-side authN/authZ boundaries.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "Follow the on-screen instructions to move the mouse and click, triggering the XSS payload."
+    ]
+  ],
+  "vuln_description": "The URL Advisor component in Kaspersky Internet Security is vulnerable to Universal XSS due to improper origin validation in message handling. This allows malicious websites to inject JavaScript into the context of any domain, including sensitive ones like google.com, by exploiting the postMessage API and clickjacking.",
+  "reason": "The attack involves understanding and manipulating the postMessage API, exploiting clickjacking, and modifying system files (hosts). However, the components and their interactions are relatively straightforward once the initial setup is complete.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a Universal XSS in a Kaspersky component that is served as first-party content on every domain in Microsoft Edge. The methodology described focuses on testing authentication and authorization boundaries within a single application by swapping user sessions and resource IDs. However, this vulnerability is not about crossing authN/authZ boundaries within an application but rather about exploiting a flaw in a browser extension's UI that allows code execution in the context of any domain. The described methodology does not account for testing browser extensions or their interaction with web pages across different domains.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability relies on improper handling of postMessage() data in a first-party UI component, not on injecting payloads into HTTP parameters. The methodology focuses on HTTP request/response analysis and parameter injection, but this XSS vector is triggered via client-side message passing and DOM manipulation (javascript: URI assignment). The attack requires clickjacking and cross-origin message exploitation, which would not be detected through simple payload injection into HTTP parameters or observed via regular navigation patterns.",
+    "is_simple_injection": false
+  }
 }

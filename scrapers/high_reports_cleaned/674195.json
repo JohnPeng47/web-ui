@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an attacker linking their own customers.gitlab.com account to a victim's account by manipulating the 'customer%5Buid%5D' field in an HTTP request. This action is performed within the same application (customers.gitlab.com) and involves swapping the victim's user ID (resource_id) with the attacker's session (user_session). The methodology described would capture this as it involves testing (user_session, action, resource_id) tuples and swapping resource_ids with existing actions, which aligns with test e) in the methodology.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an attacker modifying the `customer%5Buid%5D` parameter in a request to link their account to the victim's account. This is an IDOR (Insecure Direct Object Reference) issue, where the backend fails to validate authorization for updating the UID. The proposed methodology would detect this by testing substitutions of resource IDs (UIDs) across user sessions, as described in steps 3, 4, and e). The attack matches the IDOR vulnerability class and detection method, as it involves unauthorized access via resource ID manipulation.",
+    "is_simple_authnz": true
   }
 }

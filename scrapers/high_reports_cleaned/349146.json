@@ -1,57 +1,58 @@
 {
-    "reported_to": "Node.js third-party modules",
-    "reported_by": "misterch0c ",
-    "title": "Stored XSS in Node-Red",
-    "content": "\nI would like to report a stored XSS in node-red\nIt allows to execute javascript in the user's browser\nModule\nmodule name: node-red\nversion: v0.18.4\nnpm page: https://www.npmjs.com/package/node-red\nModule Description\nA visual tool for wiring the Internet of Things.\nModule Stats\n1,758 downloads in the last day\n10,601 downloads in the last week\n40,000+ downloads in the last month\nVulnerability\nSteps To Reproduce:\nInstall the module\nsudo npm install -g --unsafe-perm node-red\nRun it\nnode-red\nthen access it in http://localhost:1880\nExploit\nThe same payload can be applied in different locations.\nPayload: <script>alert('xss')</script>\nPlaces where you can put the payload:\nDrag & drop any item from the left menu to the center then put the payload in the name field. After clicking \"done\", the xss is triggered. At this point it's only triggered in your browser.\nClick the \"deploy\" button, now any user that will browse to http://localhost:1880 will have the javascript executed.\nSecond one:\nClick the \"+\" button on the top right to create a new \"flaw\". Put the payload in the name field. Again you need to press \"deploy\". After that double clicking on the \"flaw\" will execute the javascript.\nSupporting Material/References:\nArchlinux\nNodeJS 9.4.0\nNPM 5.6.0\nFirefox 57.0.4 & Chromium 64.0.3282.119\nnode-red v0.18.4\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\n\u00af_(\u30c4)_/\u00af\nImpact\nIt allows executing malicious javascript code in the user's browser\nThe hacker selected the Cross-site Scripting (XSS) - Stored weakness. This vulnerability type requires contextual information from the hacker. They provided the following answers:\nURL\nhttp://localhost:1880\nVerified\nYes\n\n",
-    "severity": [
-        8.6,
-        null
+  "reported_to": "Node.js third-party modules",
+  "reported_by": "misterch0c ",
+  "title": "Stored XSS in Node-Red",
+  "content": "\nI would like to report a stored XSS in node-red\nIt allows to execute javascript in the user's browser\nModule\nmodule name: node-red\nversion: v0.18.4\nnpm page: https://www.npmjs.com/package/node-red\nModule Description\nA visual tool for wiring the Internet of Things.\nModule Stats\n1,758 downloads in the last day\n10,601 downloads in the last week\n40,000+ downloads in the last month\nVulnerability\nSteps To Reproduce:\nInstall the module\nsudo npm install -g --unsafe-perm node-red\nRun it\nnode-red\nthen access it in http://localhost:1880\nExploit\nThe same payload can be applied in different locations.\nPayload: <script>alert('xss')</script>\nPlaces where you can put the payload:\nDrag & drop any item from the left menu to the center then put the payload in the name field. After clicking \"done\", the xss is triggered. At this point it's only triggered in your browser.\nClick the \"deploy\" button, now any user that will browse to http://localhost:1880 will have the javascript executed.\nSecond one:\nClick the \"+\" button on the top right to create a new \"flaw\". Put the payload in the name field. Again you need to press \"deploy\". After that double clicking on the \"flaw\" will execute the javascript.\nSupporting Material/References:\nArchlinux\nNodeJS 9.4.0\nNPM 5.6.0\nFirefox 57.0.4 & Chromium 64.0.3282.119\nnode-red v0.18.4\nWrap up\nI contacted the maintainer to let them know: N\nI opened an issue in the related repository: N\n\u00af_(\u30c4)_/\u00af\nImpact\nIt allows executing malicious javascript code in the user's browser\nThe hacker selected the Cross-site Scripting (XSS) - Stored weakness. This vulnerability type requires contextual information from the hacker. They provided the following answers:\nURL\nhttp://localhost:1880\nVerified\nYes\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1531920000,
+  "report_url": "https://hackerone.com/reports/349146",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Install Node-RED: sudo npm install -g --unsafe-perm node-red"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
+    [
+      2,
+      "Run Node-RED and access it at http://localhost:1880"
     ],
-    "screenshots": {},
-    "disclosed_date": 1531920000,
-    "report_url": "https://hackerone.com/reports/349146",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Install Node-RED: sudo npm install -g --unsafe-perm node-red"
-        ],
-        [
-            2,
-            "Run Node-RED and access it at http://localhost:1880"
-        ],
-        [
-            3,
-            "Drag & drop any item from the left menu to the center and insert the XSS payload (<script>alert('xss')</script>) in the name field, then click 'done'"
-        ],
-        [
-            4,
-            "Click the 'deploy' button to make the XSS payload execute for any user browsing to http://localhost:1880"
-        ],
-        [
-            5,
-            "Alternatively, create a new 'flaw' by clicking the '+' button, insert the XSS payload in the name field, deploy, and double-click the 'flaw' to execute the JavaScript"
-        ]
+    [
+      3,
+      "Drag & drop any item from the left menu to the center and insert the XSS payload (<script>alert('xss')</script>) in the name field, then click 'done'"
     ],
-    "vuln_description": "A stored Cross-Site Scripting (XSS) vulnerability in Node-RED allows an attacker to execute arbitrary JavaScript code in the context of any user's browser by injecting malicious scripts into various input fields (e.g., node names, flow names). The payload becomes persistent after deployment, affecting all users who access the Node-RED interface.",
-    "reason": "The vulnerability is straightforward to discover as it involves common XSS payload testing in visible input fields without requiring complex interactions or deep understanding of the application's internal logic. The attack surface is obvious (user-editable fields), and the payload execution is immediate upon deployment.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "reason": "The stored XSS vulnerability in Node-Red involves injecting malicious JavaScript into user-accessible fields, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, which does not apply to XSS vulnerabilities.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "Click the 'deploy' button to make the XSS payload execute for any user browsing to http://localhost:1880"
+    ],
+    [
+      5,
+      "Alternatively, create a new 'flaw' by clicking the '+' button, insert the XSS payload in the name field, deploy, and double-click the 'flaw' to execute the JavaScript"
+    ]
+  ],
+  "vuln_description": "A stored Cross-Site Scripting (XSS) vulnerability in Node-RED allows an attacker to execute arbitrary JavaScript code in the context of any user's browser by injecting malicious scripts into various input fields (e.g., node names, flow names). The payload becomes persistent after deployment, affecting all users who access the Node-RED interface.",
+  "reason": "The vulnerability is straightforward to discover as it involves common XSS payload testing in visible input fields without requiring complex interactions or deep understanding of the application's internal logic. The attack surface is obvious (user-editable fields), and the payload execution is immediate upon deployment.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The vulnerability can be discovered through the methodology because:\n1. The XSS payload is injected into name fields during regular UI interactions (node/flow creation)\n2. Node-RED's HTTP API would log these parameterized inputs\n3. The payload requires no encoding/filter bypass and uses basic <script> tags\n4. Execution is observable through same-channel navigation (viewing flows/nodes post-deploy)\n5. Triggering requires no special user roles - any user viewing the infected flow would execute it",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The stored XSS vulnerability in Node-RED involves injecting malicious JavaScript into fields that are then executed in the browser. This does not involve authentication or authorization checks, nor does it involve swapping user sessions or resource IDs. The methodology described focuses on AuthN/AuthZ bypasses and IDOR vulnerabilities, which are not applicable here.",
+    "is_detectable": false
+  }
 }

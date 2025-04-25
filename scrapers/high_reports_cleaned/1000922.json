@@ -42,7 +42,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The report describes an unsecured Grafana instance that allows public access to dashboards without authentication. This falls under the AuthN/AuthZ Bypass vulnerability class, where no authentication is required to access resources that should be protected. The methodology described involves testing for such vulnerabilities by attempting to access resources with unauthenticated sessions or with sessions from less privileged users. Since the Grafana instance is openly accessible, it would be detected by step d) of the methodology, which tests actions with unauthenticated user sessions.",
-    "is_detectable": true
+    "reasoning": "The Grafana instance is publicly accessible without any authentication, allowing anyone to view dashboards. The methodologies described focus on testing authorization boundaries by swapping user sessions or resource IDs. However, this vulnerability stems from a complete lack of authentication (AuthN), not improper validation of existing sessions or resource ownership. The detection methods (e.g., session substitution) would not apply since no authentication is enforced at all.",
+    "is_simple_authnz": false
   }
 }

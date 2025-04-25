@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves bypassing OTP verification during account recovery by manipulating the phone number without proper validation. This falls under the AuthZ bypass category where an unauthorized action (changing the recovery phone number) is performed without proper verification. The methodology would detect this by swapping user sessions and observing if the action (changing the phone number) can be performed without proper OTP verification.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves modifying the account recovery phone number without verifying the OTP. The described methodology checks for authorization bypass by substituting resource IDs (phone numbers) and testing if actions are allowed without proper validation. Here, the attacker's session (user_a) modifies the phone number (resource_id) to a victim's, and the server accepts it without OTP verification. This aligns with the AuthZ bypass detection method (step 4e), where substituting the resource_id (phone number) and testing with the same user session would reveal the lack of OTP validation.",
+    "is_simple_authnz": true
   }
 }

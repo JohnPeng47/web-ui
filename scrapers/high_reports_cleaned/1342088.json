@@ -46,7 +46,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves changing the email address via AWS Cognito API, which is an action that can be captured in the normal flow of user interactions. The methodology involves swapping resource_ids (emails) and testing with different user sessions, which would cover this scenario. The detection method would capture the (user_session, action, resource_id) tuple when the attacker changes the email address and then test it with the victim's email address.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves changing the email attribute via the AWS Cognito API using an attacker's access token to a victim's email. The methodology's step e) (substituting resource_ids of the same type) applies here, as the email is treated as a resource_id. The tool would detect that the attacker's session can modify their email to a victim's email (same resource_type), bypassing Flickr's UI restrictions. This fits the IDOR/AuthZ testing pattern where resource_id substitution leads to unauthorized access.",
+    "is_simple_authnz": true
   }
 }

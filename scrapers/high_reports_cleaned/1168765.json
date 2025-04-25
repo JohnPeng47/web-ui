@@ -47,10 +47,10 @@
   "authnz_byppass_detectable": true,
   "is_simple_payload": false,
   "injection_metadata": {
-    "is_simple_payload": true
+    "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an RCE hazard in reporting via Chromium, which is not directly related to authentication or authorization bypass. The methodology described focuses on detecting IDOR and AuthN/AuthZ bypass vulnerabilities by swapping user sessions and resource IDs within the same application. The RCE hazard in reporting is a different class of vulnerability that involves exploiting Chromium's --no-sandbox flag and potential HTML/JS injection, which is not covered by the described methodology.",
-    "is_detectable": false
+    "reasoning": "The RCE vulnerability in Kibana's reporting via Chromium is not directly an AuthN/AuthZ bypass. It depends on an HTML-injection/XSS/open-redirect vulnerability to trigger the RCE. The outlined methodologies focus on AuthN/AuthZ boundary testing (e.g., swapping user sessions or resource IDs), which could detect the prerequisite HTML-injection/open-redirect if it involves unauthorized access. However, the RCE itself is a separate code execution flaw enabled by Chromium's --no-sandbox flag, not a direct AuthN/AuthZ bypass. The methodologies might identify the initial vector (e.g., HTML injection via IDOR), but the RCE exploit chain is beyond their scope.",
+    "is_simple_authnz": false
   }
 }

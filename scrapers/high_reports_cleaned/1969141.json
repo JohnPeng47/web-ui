@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves manipulating the campaign_id parameter in a GraphQL mutation to delete campaigns belonging to other users or programs. This fits the IDOR vulnerability class where (user_session, action, resource_id) tuples are tested by swapping resource_ids. The methodology described would capture this by logging the HTTP request, identifying the resource_id (campaign_id), and testing it with different user sessions or modified resource_ids.",
-    "is_detectable": true
+    "reasoning": "The IDOR vulnerability described involves manipulating the campaign_id parameter in an authenticated request to delete arbitrary campaigns. This directly aligns with the first methodology's detection pattern of substituting resource IDs (e.g., step 4e in the methodology). The system would collect the (user_session, 'UpdateCampaign' action, campaign::244) tuple during normal navigation, then automatically test other campaign_ids of the same type with the same user session. Since the authorization check was missing at the resource level, this substitution would be detected as a valid IDOR.",
+    "is_simple_authnz": true
   }
 }

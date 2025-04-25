@@ -54,7 +54,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves swapping the email (resource_id) in the email change functionality, which is covered by test e) in the methodology. The attacker's session is used to perform actions (email change) with a different resource_id (victim's email), which aligns with the detection method for AuthZ/IDOR vulnerabilities.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an attacker modifying their account's email to a victim's email, exploiting the lack of session invalidation and 2FA bypass. The described methodologies check for actions (like email change) with substituted resource IDs (victim's email) using existing sessions. Since the attack leverages authorized actions with unauthorized resource IDs (emails) and the system fails to enforce proper session/ownership checks, it aligns with the AuthN/AuthZ bypass detection method (steps 4a, 4e). The trusted session persistence after email change is an AuthZ boundary bypass, detectable by testing session reuse post-resource modification.",
+    "is_simple_authnz": true
   }
 }

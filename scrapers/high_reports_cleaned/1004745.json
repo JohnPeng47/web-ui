@@ -49,7 +49,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves swapping the UID cookie value to access another user's information, which falls under the IDOR vulnerability class. The methodology described includes testing for such scenarios by swapping resource_ids (in this case, the UID cookie value) with existing (action, resource_id) pairs, which would cover this case.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves modifying the 'UID2' cookie value to access another user's profile. This aligns with the IDOR methodology where a resource_id (UID) is substituted in a request using an authenticated session. The automated methodology would detect this by testing different resource_ids (step 4e) and verifying if the authorization boundary is crossed, making it a simple AuthN/AuthZ bypass case.",
+    "is_simple_authnz": true
   }
 }

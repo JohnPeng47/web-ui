@@ -42,7 +42,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an unauthenticated Jenkins instance exposing sensitive information over HTTP. The methodology described involves testing for authentication and authorization issues by swapping user sessions and resource IDs within the same application. Since the issue here is the lack of any authentication (AuthN) and the exposure of information without any session or resource ID manipulation, it falls under the category of AuthN bypass. The methodology's step d) specifically checks for actions executed with an unauthenticated user session, which would detect this vulnerability.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an unauthenticated Jenkins instance exposing sensitive information. The methodology includes testing with unauthenticated sessions (step 4d), which would detect this issue by accessing the affected URLs without authentication. Since the detection method directly applies to AuthN bypass (no session required to access restricted resources), it aligns with the outlined approach.",
+    "is_simple_authnz": true
   }
 }

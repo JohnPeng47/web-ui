@@ -39,10 +39,10 @@
   "authnz_byppass_detectable": true,
   "is_simple_payload": false,
   "injection_metadata": {
-    "is_simple_payload": true
+    "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves accessing a Nagios dashboard using default credentials (nagiosadmin:nagiosadmin) on a specific host (omon1.fpki.gov, 3.220.248.203). This falls under the AuthN/AuthZ Bypass category where default credentials allow unauthorized access to admin functionality. The methodology described involves testing authentication and authorization boundaries by swapping user sessions and actions, but in this case, the vulnerability is detected by attempting to access the dashboard with default credentials, which is a known weak authentication mechanism.",
-    "is_detectable": true
+    "reasoning": "The reported vulnerability involves accessing a Nagios dashboard using default credentials (nagiosadmin:nagiosadmin). This falls under AuthN/AuthZ bypass, as the methodology includes testing for unauthenticated access (step d). The detection method for AuthN bypass would involve substituting an unauthenticated session and verifying access. Here, the credentials are default, so an attacker bypasses proper authentication via known defaults. The methodology's step d (testing actions with unauthenticated sessions) would detect this if the system allows access with default credentials without requiring proper user authentication.",
+    "is_simple_authnz": true
   }
 }

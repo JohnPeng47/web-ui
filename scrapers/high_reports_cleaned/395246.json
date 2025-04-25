@@ -42,7 +42,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an authenticated user accessing another user's full form by manipulating the resource ID in the URL, which falls under the IDOR vulnerability class. The proposed methodology includes testing for such scenarios by swapping resource IDs and user sessions, which would detect this issue.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an authenticated user accessing another user's resource by manipulating resource IDs in URLs (IDOR pattern). The described methodology explicitly tests for this class of vulnerability through steps 4a/4e - substituting resource IDs while reusing authenticated sessions. Since the attack requires no special privileges beyond basic authentication and relies on predictable resource enumeration, it aligns perfectly with the 'simple authnz' test cases involving session/resource_id substitution.",
+    "is_simple_authnz": true
   }
 }

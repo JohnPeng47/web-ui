@@ -52,7 +52,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves manipulating the OTP verification response on the same application (shop.mtn.ng), which falls under the scope of the methodology. The methodology covers testing with different user sessions and manipulated responses, which aligns with the steps to reproduce the vulnerability.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves manipulating the server's OTP verification response to bypass authentication. The proposed methodologies focus on swapping user sessions, actions, or resource IDs to test authorization boundaries. However, this exploit requires tampering with the server's response (changing the OTP verification status from failure to success), which is not covered by the outlined detection methods. The root issue is insufficient server-side validation of the OTP verification result, not improper authorization checks on resource IDs or actions. The methodologies do not explicitly test for client-side acceptance of forged server responses.",
+    "is_simple_authnz": false
   }
 }

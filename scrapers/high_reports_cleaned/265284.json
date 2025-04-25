@@ -44,10 +44,10 @@
   "authnz_byppass_detectable": false,
   "is_simple_payload": false,
   "injection_metadata": {
-    "is_simple_payload": true
+    "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an unauthenticated user enumerating comments by incrementing the 'cnvID' parameter in POST requests. This falls under the IDOR vulnerability class where the resource_id (cnvID) is directly referenced without proper access control checks. The proposed methodology would detect this by collecting the (user_session, action, resource_id) tuples and testing with unauthenticated sessions (step d) and substituting resource_ids (step e).",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves unauthenticated enumeration of comments via incremental 'cnvID' values. The methodology includes testing actions with unauthenticated sessions (step d) and substituting resource_ids (step e). Since the attack uses direct object reference substitution (cnvID) without authentication/authorization checks, it aligns with the described detection methods for IDOR.",
+    "is_simple_authnz": true
   }
 }

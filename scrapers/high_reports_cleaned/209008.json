@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves username enumeration and brute force attacks on the same application's authentication endpoints. The methodology described includes testing for authentication bypass by swapping user sessions and actions, which would cover the brute force aspect. The username enumeration part could be detected by analyzing the responses from the resend-verify endpoint for differences that indicate valid usernames, which falls under the methodology's scope of analyzing HTTP requests and responses for authorization boundaries.",
-    "is_detectable": true
+    "reasoning": "The report involves username enumeration via an endpoint without rate limiting and login brute force due to missing rate limiting. The methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs. While username enumeration could be detected by probing the resend-verify endpoint with unauthenticated requests (methodology step 3d), the brute force vulnerability relates to rate limiting, which isn't explicitly covered. Since these vulnerabilities rely on response discrepancies and rate limiting rather than session/resource ID manipulation, they don't fully align with the outlined methodologies.",
+    "is_simple_authnz": false
   }
 }

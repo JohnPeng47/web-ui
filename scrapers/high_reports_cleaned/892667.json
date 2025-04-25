@@ -50,7 +50,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The subdomain takeover vulnerability involves a dangling CNAME record pointing to an unclaimed service, which is not directly related to authentication or authorization bypass within the same application. The methodology described focuses on testing AuthN/AuthZ boundaries within a single application by swapping user sessions, actions, and resource IDs. Since this vulnerability is about DNS misconfiguration and external service registration, it falls outside the scope of the described methodologies.",
-    "is_detectable": false
+    "reasoning": "The subdomain takeover vulnerability arises from a dangling CNAME record pointing to an unclaimed third-party service, not from an AuthN/AuthZ bypass within the application's authorization logic. The methodology focuses on testing access controls (e.g., swapping sessions/resource IDs) within the application's context, whereas this vulnerability exploits misconfigured infrastructure (DNS and third-party service registration). The takeover does not involve bypassing application-level authentication or authorization checks but rather leverages external resource ownership gaps.",
+    "is_simple_authnz": false
   }
 }

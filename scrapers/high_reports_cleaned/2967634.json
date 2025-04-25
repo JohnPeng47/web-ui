@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves accessing internal domains through an exposed proxy, which is not directly related to user sessions, actions, or resource IDs within a single application. The methodology focuses on testing authorization boundaries within the same application context, not infrastructure misconfigurations like exposed proxies.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves accessing internal domains through a proxy by manipulating the Host header, which doesn't directly involve user sessions, resource IDs, or privilege escalation between accounts. The methodology focuses on testing authorization boundaries through user session swapping and resource substitution, while this issue requires domain/header manipulation at the infrastructure level.",
+    "is_simple_authnz": false
   }
 }

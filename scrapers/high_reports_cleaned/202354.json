@@ -1,42 +1,46 @@
 {
-    "reported_to": "Ubiquiti Inc.",
-    "reported_by": "inhibitor181 ",
-    "title": "Stored XSS / Bypassing .htaccess protection in http://nodebb.ubnt.com/",
-    "content": "\nHello,\nWhile I was looking at your renewn SSL certificated, I have noticed the following link : http://nodebb.ubnt.com/\nI have seen that this link was protected by htaccess password, but I have decided to run a nmap scan. By running the following :\nCode 50 Bytes\n1sudo nmap -sSV -p- 104.131.159.88 -oA stage_ph -T4\none of the open ports was this : 4567/tcp open tram?\nAnd, to my surprise the ip 104.131.159.88:4567, as well as http://nodebb.ubnt.com:4567/ were available from internet and unprotected.\nHere, I have found a nodeBB instance and I have managed to create a persisted XSS by using the upload API, that does not properly sanitize the file names and automatically sets wrong mime types.\nNormally, it seems that the user is allowed to upload only images, but the stored XSS was possible by injecting malicious html in the exif data and changing the file name to .html.\nI have attached a video with the POC, as well as the exif image.\nI have not managed to RCE, but it is also worth noting that uploading the file with the .php extension and writing php content using exif IS possible.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Ubiquiti Inc.",
+  "reported_by": "inhibitor181 ",
+  "title": "Stored XSS / Bypassing .htaccess protection in http://nodebb.ubnt.com/",
+  "content": "\nHello,\nWhile I was looking at your renewn SSL certificated, I have noticed the following link : http://nodebb.ubnt.com/\nI have seen that this link was protected by htaccess password, but I have decided to run a nmap scan. By running the following :\nCode 50 Bytes\n1sudo nmap -sSV -p- 104.131.159.88 -oA stage_ph -T4\none of the open ports was this : 4567/tcp open tram?\nAnd, to my surprise the ip 104.131.159.88:4567, as well as http://nodebb.ubnt.com:4567/ were available from internet and unprotected.\nHere, I have found a nodeBB instance and I have managed to create a persisted XSS by using the upload API, that does not properly sanitize the file names and automatically sets wrong mime types.\nNormally, it seems that the user is allowed to upload only images, but the stored XSS was possible by injecting malicious html in the exif data and changing the file name to .html.\nI have attached a video with the POC, as well as the exif image.\nI have not managed to RCE, but it is also worth noting that uploading the file with the .php extension and writing php content using exif IS possible.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1506597780,
+  "report_url": "https://hackerone.com/reports/202354",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Discover the NodeBB instance by scanning the IP 104.131.159.88 and identifying the open port 4567/tcp."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1506597780,
-    "report_url": "https://hackerone.com/reports/202354",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Discover the NodeBB instance by scanning the IP 104.131.159.88 and identifying the open port 4567/tcp."
-        ],
-        [
-            2,
-            "Upload a malicious file with injected HTML in the EXIF data and rename it to .html extension to bypass MIME type restrictions."
-        ]
-    ],
-    "vuln_description": "A stored XSS vulnerability exists in the NodeBB instance at http://nodebb.ubnt.com:4567/ due to improper sanitization of file names and incorrect MIME type settings. Attackers can upload malicious files disguised as images but containing HTML/JS payloads in EXIF data, leading to persistent XSS when the file is accessed.",
-    "reason": "The attack involves multiple steps (port discovery, file upload exploitation) and requires understanding of both network scanning techniques and EXIF data manipulation. However, the core vulnerability (XSS via file upload) is a well-known pattern in web security.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The vulnerability involves bypassing .htaccess protection and exploiting a stored XSS via file upload in a NodeBB instance. The methodology described focuses on testing authorization boundaries within the same application by swapping user sessions and resource IDs. However, the reported issue involves discovering an unprotected port and exploiting a misconfiguration in file upload handling, which is not covered by the described methodology.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Upload a malicious file with injected HTML in the EXIF data and rename it to .html extension to bypass MIME type restrictions."
+    ]
+  ],
+  "vuln_description": "A stored XSS vulnerability exists in the NodeBB instance at http://nodebb.ubnt.com:4567/ due to improper sanitization of file names and incorrect MIME type settings. Attackers can upload malicious files disguised as images but containing HTML/JS payloads in EXIF data, leading to persistent XSS when the file is accessed.",
+  "reason": "The attack involves multiple steps (port discovery, file upload exploitation) and requires understanding of both network scanning techniques and EXIF data manipulation. However, the core vulnerability (XSS via file upload) is a well-known pattern in web security.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves bypassing .htaccess protection and exploiting a stored XSS via file upload with improper sanitization. The methodology described focuses on testing authorization boundaries within the same application by swapping user sessions and resource IDs, but does not cover cases where protection mechanisms like .htaccess are bypassed or file upload vulnerabilities are exploited.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves a stored XSS via improper filename sanitization and EXIF data manipulation. The methodology's parameter extraction would identify the filename as an injectable parameter during file upload. Testing with a simple payload (e.g., changing the filename to .html) aligns with the 'simple payload' criteria, as it requires no custom filter bypass. The EXIF data injection, while more nuanced, is not strictly required to trigger the XSS (the filename manipulation alone forces improper MIME handling). Execution verification via regular navigation (accessing the uploaded file) fits the 'same channel' requirement. Thus, the core vulnerability (filename-based XSS) is detectable via the methodology.",
+    "is_simple_injection": true
+  }
 }

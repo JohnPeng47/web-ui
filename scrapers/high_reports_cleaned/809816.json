@@ -54,7 +54,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves privilege escalation within the same application by manipulating membership roles across organizations. The methodology described includes testing actions with different user sessions and resource IDs, which would cover this scenario. Specifically, the steps involve swapping user sessions (from the original organization to the target organization) and modifying resource IDs (membership IDs), which aligns with the detection methods outlined (e.g., steps a, b, c, and e).",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an IDOR where the user modifies their membership role in another organization using their admin privileges from a different organization. The methodology detects this by swapping resource IDs (membership IDs) and testing with different user sessions. The backend's failure to validate the membership's organization against the user's current session allows privilege escalation, fitting the IDOR/AuthZ bypass detection method.",
+    "is_simple_authnz": true
   }
 }

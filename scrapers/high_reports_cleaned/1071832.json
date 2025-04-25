@@ -62,7 +62,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves local privilege escalation via insecure MSI file handling, which is outside the scope of the described methodologies for detecting IDOR and AuthN/AuthZ bypass vulnerabilities in web applications. The described methodologies focus on HTTP requests and user sessions within a single application, whereas this vulnerability involves local system file permissions and MSI execution behavior.",
-    "is_detectable": false
+    "reasoning": "The reported vulnerability involves local privilege escalation through insecure file permissions and MSI repair mechanisms. The outlined methodologies focus on web-based authentication/authorization issues (IDOR, AuthZ bypass via session/resource manipulation). The MSI vulnerability is OS-level, not involving HTTP requests, user sessions, or resource ID substitution in web contexts. Detection methods like session swapping or resource ID testing don't apply to this local file system privilege escalation scenario.",
+    "is_simple_authnz": false
   }
 }

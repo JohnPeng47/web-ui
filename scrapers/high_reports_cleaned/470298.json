@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The CORS misconfiguration allows cross-origin requests with credentials, which can be detected by analyzing HTTP responses for Access-Control-Allow-Credentials and Access-Control-Allow-Origin headers. The methodology involves checking responses for sensitive headers that could indicate misconfigurations, which is covered in the detection method.",
-    "is_detectable": true
+    "reasoning": "The CORS misconfiguration allows cross-origin requests with credentials from arbitrary domains. The described methodology focuses on testing authorization boundaries via session/resource-ID swapping and unauthenticated access checks, but doesn't explicitly test for CORS header configurations. The vulnerability stems from server-side Origin reflection rather than improper resource authorization checks between users.",
+    "is_simple_authnz": false
   }
 }

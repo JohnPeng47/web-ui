@@ -1,55 +1,56 @@
 {
-    "reported_to": "Shopify",
-    "reported_by": "shazadsadiq ",
-    "title": "Stored XSS on activity",
-    "content": "\nHi security team members,\nDescription\nI found a store xss on the activity which allows an attacker to steal admin account cookies.\nStep to reproduce\n1-Create store\n2- Add a member in a store\n3- Member can choose any name\n4- So change the any member name with hunter\"><svg/onload=alert(2)>\n5- Now on admain account make changes\n6- That will create activity with attacker malicious payload\nPOC\n<image_0>\nImpact\nAn attacker(staff member) can takeover admin account.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Shopify",
+  "reported_by": "shazadsadiq ",
+  "title": "Stored XSS on activity",
+  "content": "\nHi security team members,\nDescription\nI found a store xss on the activity which allows an attacker to steal admin account cookies.\nStep to reproduce\n1-Create store\n2- Add a member in a store\n3- Member can choose any name\n4- So change the any member name with hunter\"><svg/onload=alert(2)>\n5- Now on admain account make changes\n6- That will create activity with attacker malicious payload\nPOC\n<image_0>\nImpact\nAn attacker(staff member) can takeover admin account.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 2000,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/329/469/4254fe4e874785d7f024e6b2a7a24be7d7494ecb/Untitled.png?response-content-disposition=attachment%3B%20filename%3D%22Untitled.png%22%3B%20filename%2A%3DUTF-8%27%27Untitled.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ6AMDQAYR%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T163349Z&X-Amz-Expires=1887&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIC9emtKCGl3LVIFbG%2B3jG1Rjca5KmItcFh3oaiMbmZC8AiEAmXShTftowUsXM92tfhfsvvmExMoCpbL9KT%2BSNY2GU88qsgUILBADGgwwMTM2MTkyNzQ4NDkiDOOGJh%2BEIo99M2RCJSqPBbK2pvxlHqPEauvRPoQyNZEQ4H%2Ba3Ie9y3SnyX9pieR36RxoZfabXEtIVEswY3vTHkj8Q7ieAXXcw%2B%2BnNCX55dHODar%2BuWi9r5d7otgd5%2FycSJgB0TnzTx7T17HIwatlYixqZOoSAyALjjwuMctsmh3PUr6UFrVnAgGueCU8gB%2Fpx9Qa5LJIs3G7WohtI6Z73OaTe0END%2FV23TCcmXRSv0dzQbPJlP8PzaEYJ6Xj%2BMNTibIE0RAtDPVEdsf%2BClxdxEAXOlZ6fRNRJWtDeIX%2BIZqmriUmUKUI9s%2FaEkNZNdOPRlZK5sfBwaZsC4cSzo4XlNPYnFjj3n8bTPv7npYRChy3hnG%2FWUaE6vaNaZPYml1t%2FArdf6JWs57fYUICe3ZF%2Fg9FtxRcOmBi0dGUux8ndjYGOrIxJnuqy7rPnZgTEDkmTVtYpxVvZoynEcZWbW9deEEwcYWt3UWbPjgSkAKTomgzuTv4RvyGITDlw1nmDVaGYPlq%2FEDUbLt1X2p6HFl8wFqnwzn7ucCBKo9w8Aqs%2BjBpzUnC1s8jcpwNlQlh%2F8F2%2FY9%2B2UC8P50XjSFDUDsAOZq0%2FenZShNiXXbx63X6qyuetNLg9Bo%2BMvh9%2FGr0Q329kLQjQtEEG5uvbRAIKlaH1da%2BtK4BaY8wxlwV2ppJsoyP1L2qh%2FE%2BCWaad9bX%2FWsYIPeZhuKyT%2B82CuHX3LQrrth1LO%2Fz3j24kBtakVnEl4HiMsDaqH89ZSESUQV7MLz60YgQ%2FNxlQSsY9P2CoLQMGzoWllGCFi%2FpgG8Ukwluimqw5ZkXGLvUCqLIWkpXi%2Fju7Vciz2HcPGuuUjY6ps%2BrCn7jPdMNfo4bfScqzQor%2Fco4bc%2B4c%2BabcEp1dsRU464wkrqPvwY6sQEmavGxF5tFpwHLIGs0CBHEXWQKRETlXVPhRS57cU0g7YRRegT05iB%2F26LgQK%2FpskGmjOSO6gK9M52SrHIUy4KekILfOC0MhOEvvuTKqWbSegECfsIvWfKs0bDeu0SyBTKNJu03jrG73z64QHXDbaBmIAdYXxUJrjHhhP2vGwoJfI7r5R0Av7pfHKndshfjn5UM7Ufz7OYwl%2BkU6ihDFiTUm7YJ7G9ucTyDUZZquVak%2Bo4%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=7216db3e8ec2ff561d99056128d4449adf3443ae53b072201d9f00156d9d00da"
+  },
+  "disclosed_date": 1534292940,
+  "report_url": "https://hackerone.com/reports/391390",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create a store"
     ],
-    "bounty": 2000,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
+    [
+      2,
+      "Add a member to the store"
     ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/329/469/4254fe4e874785d7f024e6b2a7a24be7d7494ecb/Untitled.png?response-content-disposition=attachment%3B%20filename%3D%22Untitled.png%22%3B%20filename%2A%3DUTF-8%27%27Untitled.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQ6AMDQAYR%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T163349Z&X-Amz-Expires=1887&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIC9emtKCGl3LVIFbG%2B3jG1Rjca5KmItcFh3oaiMbmZC8AiEAmXShTftowUsXM92tfhfsvvmExMoCpbL9KT%2BSNY2GU88qsgUILBADGgwwMTM2MTkyNzQ4NDkiDOOGJh%2BEIo99M2RCJSqPBbK2pvxlHqPEauvRPoQyNZEQ4H%2Ba3Ie9y3SnyX9pieR36RxoZfabXEtIVEswY3vTHkj8Q7ieAXXcw%2B%2BnNCX55dHODar%2BuWi9r5d7otgd5%2FycSJgB0TnzTx7T17HIwatlYixqZOoSAyALjjwuMctsmh3PUr6UFrVnAgGueCU8gB%2Fpx9Qa5LJIs3G7WohtI6Z73OaTe0END%2FV23TCcmXRSv0dzQbPJlP8PzaEYJ6Xj%2BMNTibIE0RAtDPVEdsf%2BClxdxEAXOlZ6fRNRJWtDeIX%2BIZqmriUmUKUI9s%2FaEkNZNdOPRlZK5sfBwaZsC4cSzo4XlNPYnFjj3n8bTPv7npYRChy3hnG%2FWUaE6vaNaZPYml1t%2FArdf6JWs57fYUICe3ZF%2Fg9FtxRcOmBi0dGUux8ndjYGOrIxJnuqy7rPnZgTEDkmTVtYpxVvZoynEcZWbW9deEEwcYWt3UWbPjgSkAKTomgzuTv4RvyGITDlw1nmDVaGYPlq%2FEDUbLt1X2p6HFl8wFqnwzn7ucCBKo9w8Aqs%2BjBpzUnC1s8jcpwNlQlh%2F8F2%2FY9%2B2UC8P50XjSFDUDsAOZq0%2FenZShNiXXbx63X6qyuetNLg9Bo%2BMvh9%2FGr0Q329kLQjQtEEG5uvbRAIKlaH1da%2BtK4BaY8wxlwV2ppJsoyP1L2qh%2FE%2BCWaad9bX%2FWsYIPeZhuKyT%2B82CuHX3LQrrth1LO%2Fz3j24kBtakVnEl4HiMsDaqH89ZSESUQV7MLz60YgQ%2FNxlQSsY9P2CoLQMGzoWllGCFi%2FpgG8Ukwluimqw5ZkXGLvUCqLIWkpXi%2Fju7Vciz2HcPGuuUjY6ps%2BrCn7jPdMNfo4bfScqzQor%2Fco4bc%2B4c%2BabcEp1dsRU464wkrqPvwY6sQEmavGxF5tFpwHLIGs0CBHEXWQKRETlXVPhRS57cU0g7YRRegT05iB%2F26LgQK%2FpskGmjOSO6gK9M52SrHIUy4KekILfOC0MhOEvvuTKqWbSegECfsIvWfKs0bDeu0SyBTKNJu03jrG73z64QHXDbaBmIAdYXxUJrjHhhP2vGwoJfI7r5R0Av7pfHKndshfjn5UM7Ufz7OYwl%2BkU6ihDFiTUm7YJ7G9ucTyDUZZquVak%2Bo4%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=7216db3e8ec2ff561d99056128d4449adf3443ae53b072201d9f00156d9d00da"
-    },
-    "disclosed_date": 1534292940,
-    "report_url": "https://hackerone.com/reports/391390",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Create a store"
-        ],
-        [
-            2,
-            "Add a member to the store"
-        ],
-        [
-            3,
-            "Change the member's name to a malicious payload: hunter\"><svg/onload=alert(2)>"
-        ],
-        [
-            4,
-            "Log in to the admin account and make changes to trigger the activity with the malicious payload"
-        ]
+    [
+      3,
+      "Change the member's name to a malicious payload: hunter\"><svg/onload=alert(2)>"
     ],
-    "vuln_description": "A stored XSS vulnerability in the activityDescription field allows a member to inject malicious JavaScript, which executes when an admin views the activity log. This can lead to cookie theft and account takeover.",
-    "reason": "The vulnerability involves a straightforward XSS injection in a user-controllable field (member name) that is reflected in the admin interface. The attack does not require complex interactions or deep understanding of the application's logic.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "reason": "The vulnerability involves a stored XSS where a member can inject malicious payloads into the activity description, which is then executed in the admin's context. This is detectable because the methodology involves testing actions with different user sessions (including admin sessions) and observing if unauthorized actions (like executing malicious scripts) can be performed.",
-        "is_detectable": true
-    }
+    [
+      4,
+      "Log in to the admin account and make changes to trigger the activity with the malicious payload"
+    ]
+  ],
+  "vuln_description": "A stored XSS vulnerability in the activityDescription field allows a member to inject malicious JavaScript, which executes when an admin views the activity log. This can lead to cookie theft and account takeover.",
+  "reason": "The vulnerability involves a straightforward XSS injection in a user-controllable field (member name) that is reflected in the admin interface. The attack does not require complex interactions or deep understanding of the application's logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The stored XSS vulnerability involves injecting a payload into a member name field (a user-controllable parameter) which gets executed when an admin views the activity log. The methodology would detect this because: (1) The member name field would be identified as an injectable parameter during parameter extraction, (2) The payload uses a basic XSS vector without filter bypasses (svg/onload), (3) The trigger occurs through regular admin navigation (viewing activity logs), satisfying same-channel detection requirements. No special navigation or role-specific privileges beyond normal admin access are needed to trigger the payload.",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The stored XSS vulnerability involves a member injecting malicious payload into their name, which is then executed in the admin's context. This is detectable because the methodology involves testing actions with different user sessions (member and admin) and observing the impact of the injected payload on the admin's session.",
+    "is_detectable": true
+  }
 }

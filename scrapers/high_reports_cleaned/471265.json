@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an unused domain still being referenced in a WeChat official account by Starbucks East China. The methodology described focuses on authentication and authorization issues within a single application by swapping user sessions and resource IDs. However, this issue is about an external domain reference and potential phishing risks, which are not covered by the described methodology.",
-    "is_detectable": false
+    "reasoning": "The reported issue involves a domain (spcc.mobi) still referenced in a WeChat official account's code despite being on sale. The proposed methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs. However, this issue is not directly about authorization bypass or IDOR vulnerabilities. Instead, it relates to a misconfiguration (unused domain still referenced in code) that could lead to phishing if the domain is acquired by an attacker. The methodologies do not explicitly cover detecting such misconfigurations, as they rely on analyzing user sessions and resource access patterns rather than auditing domain ownership or endpoint dependencies.",
+    "is_simple_authnz": false
   }
 }

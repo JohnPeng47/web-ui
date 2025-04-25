@@ -46,7 +46,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an IDOR where a guest user can enumerate user information by manipulating the USER_ID parameter in the API endpoint. This fits the methodology of swapping user sessions (guest user) and resource IDs (USER_ID) to test authorization boundaries, which is covered by test e) in the proposed methodology.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an IDOR where substituting resource IDs (user IDs) with sequential values in an authenticated endpoint allows unauthorized access. This directly matches methodology step 4e (substituting resource IDs of same type) and involves authorization checks for resource ownership, making it detectable through the described authz testing pattern.",
+    "is_simple_authnz": true
   }
 }

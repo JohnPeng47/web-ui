@@ -46,7 +46,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an attacker modifying metadata in a file drop system, which is not directly related to the authentication or authorization checks within a single application's session or resource access. The proposed methodologies focus on session and resource ID manipulation within the same application context, not cross-user metadata tampering in a file drop system.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves an attacker modifying the metadata file entry created by another user. This is an authorization issue where the system fails to enforce proper access controls on shared resources. The methodology detects IDOR by testing if a user can modify a resource_id (metadata entry) they shouldn't have access to. Since the attacker uses their own session to alter another user's resource, it fits the IDOR detection method (swapping resource_ids and testing with different sessions).",
+    "is_simple_authnz": true
   }
 }

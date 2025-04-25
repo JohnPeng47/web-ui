@@ -1,49 +1,50 @@
 {
-    "reported_to": "WordPress",
-    "reported_by": "muhammaddaffa ",
-    "title": "Stored XSS on Wordpress 5.3 via Title Post",
-    "content": "\nI have identified a WordPress security vulnerability , a Stored XSS vulnerability that affects latest version of WordPress (5.3)\nPOC:\n1) Login to wordpress website\n2) Make a post with title payload xss like example <script>alert(document.domain);</script>\n3) Publish then open the post, XSS Will trigger\nImpact\nCan stealing cookie user\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "WordPress",
+  "reported_by": "muhammaddaffa ",
+  "title": "Stored XSS on Wordpress 5.3 via Title Post",
+  "content": "\nI have identified a WordPress security vulnerability , a Stored XSS vulnerability that affects latest version of WordPress (5.3)\nPOC:\n1) Login to wordpress website\n2) Make a post with title payload xss like example <script>alert(document.domain);</script>\n3) Publish then open the post, XSS Will trigger\nImpact\nCan stealing cookie user\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1575989880,
+  "report_url": "https://hackerone.com/reports/754352",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Login to the WordPress website"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
+    [
+      2,
+      "Create a new post with a title containing the XSS payload, e.g., <script>alert(document.domain);</script>"
     ],
-    "screenshots": {},
-    "disclosed_date": 1575989880,
-    "report_url": "https://hackerone.com/reports/754352",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Login to the WordPress website"
-        ],
-        [
-            2,
-            "Create a new post with a title containing the XSS payload, e.g., <script>alert(document.domain);</script>"
-        ],
-        [
-            3,
-            "Publish the post and open it to trigger the XSS"
-        ]
-    ],
-    "vuln_description": "A Stored Cross-Site Scripting (XSS) vulnerability in WordPress 5.3 allows an attacker to inject malicious JavaScript code into the title of a post. When the post is viewed, the script executes in the context of the victim's browser, potentially allowing the attacker to steal cookies or perform other malicious actions.",
-    "reason": "The vulnerability is straightforward to discover as it involves a simple injection of a common XSS payload into a visible field (post title) without any need for complex interactions or state manipulation. The attack does not require multiple components or novel logic, making it easy to identify and exploit.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "reason": "The vulnerability involves a stored XSS in WordPress via post title, which is a client-side issue and does not directly involve authentication or authorization boundaries. The proposed methodologies focus on testing AuthN/AuthZ and IDOR vulnerabilities by manipulating user sessions and resource IDs, which are not applicable to this XSS vulnerability.",
-        "is_detectable": false
-    }
+    [
+      3,
+      "Publish the post and open it to trigger the XSS"
+    ]
+  ],
+  "vuln_description": "A Stored Cross-Site Scripting (XSS) vulnerability in WordPress 5.3 allows an attacker to inject malicious JavaScript code into the title of a post. When the post is viewed, the script executes in the context of the victim's browser, potentially allowing the attacker to steal cookies or perform other malicious actions.",
+  "reason": "The vulnerability is straightforward to discover as it involves a simple injection of a common XSS payload into a visible field (post title) without any need for complex interactions or state manipulation. The attack does not require multiple components or novel logic, making it easy to identify and exploit.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves injecting a basic <script> payload into a post title parameter during normal content creation workflow. The methodology would log this POST request parameter during regular post creation navigation. The payload requires no filter bypasses and executes when viewing the post (same application context through regular navigation). Detection occurs through same-channel response inspection of the stored payload's execution.",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a Stored XSS in WordPress 5.3 via the post title, which is a client-side issue and not directly related to authentication or authorization boundaries. The proposed methodologies focus on testing AuthN/AuthZ and IDOR vulnerabilities by swapping user sessions or resource IDs, which does not apply to XSS vulnerabilities.",
+    "is_detectable": false
+  }
 }

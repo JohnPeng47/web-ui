@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an endpoint that allows unauthenticated read/write access, which can be detected by testing the endpoint with an unauthenticated session (part of the methodology's step d). The methodology covers testing actions with unauthenticated sessions, which would reveal this bypass.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing an endpoint without authentication by using a specific URL parameter (?mode=public) and fragment. The proposed methodologies test for AuthN/AuthZ bypass by swapping sessions or testing unauthenticated access. Since the exploit requires modifying URL parameters (not just resource IDs or sessions), and the methodology does not explicitly include parameter fuzzing beyond logged requests, it may not be detected automatically unless the 'public' mode was part of the logged actions. However, if the tool tests unauthenticated access to the endpoint (regardless of parameters), it could identify the bypass, aligning with step 4d of the methodology.",
+    "is_simple_authnz": true
   }
 }

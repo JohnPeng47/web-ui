@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an unauthorized update of merchant information by manipulating the 'merchant_id' and other parameters in a POST request to '/php/merchant_details.php'. This fits the IDOR vulnerability class where the attacker can modify resources they should not have access to by swapping resource IDs (merchant_id in this case) and executing the action with their session. The methodology described would detect this by collecting (user_session, action, resource_id) tuples and testing with different user sessions and resource IDs.",
-    "is_detectable": true
+    "reasoning": "The reported vulnerability involves unauthorized updates to merchant details by manipulating the merchant_id parameter in a POST request to /php/merchant_details.php. The methodology outlined detects IDOR vulnerabilities by testing if swapping user sessions or resource IDs (e.g., merchant_id) allows unauthorized actions. Here, the action (update-merchant) and resource_id (merchant_id) are directly substituted and tested across sessions, aligning with the automated detection steps (e.g., substituting resource_ids and testing with unprivileged user sessions). The lack of proper authorization checks on the merchant_id parameter fits the IDOR/AuthZ bypass detection criteria.",
+    "is_simple_authnz": true
   }
 }

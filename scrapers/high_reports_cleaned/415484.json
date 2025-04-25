@@ -1,57 +1,58 @@
 {
-    "reported_to": "Shopify",
-    "reported_by": "dr_dragon ",
-    "title": "Stored xss",
-    "content": "\nDescription :\nWAF cut html tages but when put <!--> before tages we can bypass it :) .\nStep to reproduce :\n1-Open your store account\n2-Navigate to https://xxx.myshopify.com/admin/settings/general\n3-Put your street address xss payload (xss\"><!--><svg/onload=alert(document.domain)>)\n4-Go to https://xxx.myshopify.com/admin/dashboards/live\n5-XSS alert message\nImpact\nXSS attack\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Shopify",
+  "reported_by": "dr_dragon ",
+  "title": "Stored xss",
+  "content": "\nDescription :\nWAF cut html tages but when put <!--> before tages we can bypass it :) .\nStep to reproduce :\n1-Open your store account\n2-Navigate to https://xxx.myshopify.com/admin/settings/general\n3-Put your street address xss payload (xss\"><!--><svg/onload=alert(document.domain)>)\n4-Go to https://xxx.myshopify.com/admin/dashboards/live\n5-XSS alert message\nImpact\nXSS attack\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 1000,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1541635740,
+  "report_url": "https://hackerone.com/reports/415484",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Open your store account"
     ],
-    "bounty": 1000,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
+    [
+      2,
+      "Navigate to https://xxx.myshopify.com/admin/settings/general"
     ],
-    "screenshots": {},
-    "disclosed_date": 1541635740,
-    "report_url": "https://hackerone.com/reports/415484",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Open your store account"
-        ],
-        [
-            2,
-            "Navigate to https://xxx.myshopify.com/admin/settings/general"
-        ],
-        [
-            3,
-            "Put your street address xss payload (xss\"><!--><svg/onload=alert(document.domain)>)"
-        ],
-        [
-            4,
-            "Go to https://xxx.myshopify.com/admin/dashboards/live"
-        ],
-        [
-            5,
-            "XSS alert message"
-        ]
+    [
+      3,
+      "Put your street address xss payload (xss\"><!--><svg/onload=alert(document.domain)>)"
     ],
-    "vuln_description": "This is a stored XSS vulnerability in Shopify's admin interface where the WAF filters HTML tags but can be bypassed by inserting a specific HTML comment (<!-->) before the tags. This allows an attacker to execute arbitrary JavaScript in the context of the admin dashboard.",
-    "reason": "The vulnerability involves a simple bypass technique (HTML comment) to evade WAF filtering, which is a known method in XSS attacks. The steps to reproduce are straightforward and do not require complex interactions or state manipulation.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "reason": "The stored XSS vulnerability involves bypassing a WAF by manipulating input with HTML comments and tags, which is a client-side issue and not directly related to authentication or authorization. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, which does not apply to this XSS vulnerability.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "Go to https://xxx.myshopify.com/admin/dashboards/live"
+    ],
+    [
+      5,
+      "XSS alert message"
+    ]
+  ],
+  "vuln_description": "This is a stored XSS vulnerability in Shopify's admin interface where the WAF filters HTML tags but can be bypassed by inserting a specific HTML comment (<!-->) before the tags. This allows an attacker to execute arbitrary JavaScript in the context of the admin dashboard.",
+  "reason": "The vulnerability involves a simple bypass technique (HTML comment) to evade WAF filtering, which is a known method in XSS attacks. The steps to reproduce are straightforward and do not require complex interactions or state manipulation.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The methodology involves testing parameters with simple payloads that include context positioning for XSS. The reported payload uses HTML comment context manipulation (<!-->) which is a common XSS bypass technique and falls under 'context positioning' permutations. Since the trigger site (admin dashboard) is navigable through regular user behavior, the stored XSS would be detected by inspecting the response or navigating normally after injection. The WAF bypass here relies on a standard HTML syntax quirk rather than a custom filter bypass.",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The stored XSS vulnerability involves bypassing WAF protections by manipulating HTML tags and comments, which is a client-side issue and not directly related to authentication or authorization boundaries. The methodology described focuses on testing AuthN/AuthZ bypasses and IDORs by swapping user sessions and resource IDs, which does not apply to this XSS vulnerability.",
+    "is_detectable": false
+  }
 }

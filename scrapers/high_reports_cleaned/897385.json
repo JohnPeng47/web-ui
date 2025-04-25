@@ -62,7 +62,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves bypassing 2FA by sending a blank code, which is a failure in null check validation. This can be detected by the methodology as it involves testing authentication flows (AuthN) with unexpected inputs (blank code). The methodology includes testing actions with unauthenticated sessions or malformed inputs, which would cover this case.",
-    "is_detectable": true
+    "reasoning": "The 2FA bypass vulnerability involves sending a blank code parameter during authentication. The described methodology focuses on testing authorization boundaries by swapping user sessions, actions, and resource IDs. However, this vulnerability stems from a missing null/empty value check in the server's code validation logic rather than improper session/resource authorization. The methodology does not explicitly include testing for missing parameters or empty values in critical fields like 2FA codes, which is a distinct class of input validation flaw.",
+    "is_simple_authnz": false
   }
 }

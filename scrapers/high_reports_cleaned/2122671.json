@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves swapping resource IDs (licenses/certifications IDs) in a GraphQL query to delete other users' data. This matches the IDOR detection methodology where (user_session, action, resource_id) tuples are collected and tested by substituting resource_ids with existing ones (test e) in the methodology). The action (CreateOrUpdateHackerCertification) and resource_type (licenses/certifications) are part of the same application context, making it detectable.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an authenticated user (User A) modifying the resource ID (certification ID) in a GraphQL mutation to delete another user's (User B) certifications. This matches the IDOR detection methodology: the system would collect (user_session, action, resource_id) tuples during normal use. By substituting the resource_id (certification ID) with another user's ID and reusing the same authenticated session, the authorization boundary is tested. The methodology explicitly covers this via step 4e (substituting resource_ids of the same type with existing ones). The attack aligns with the basic IDOR class where resource_id substitution bypasses authorization checks.",
+    "is_simple_authnz": true
   }
 }

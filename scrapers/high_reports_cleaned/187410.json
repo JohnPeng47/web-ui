@@ -1,42 +1,46 @@
 {
-    "reported_to": "Slack",
-    "reported_by": "imran_hadid ",
-    "title": "Store XSS",
-    "content": "\nHello Team.\nI found a Store XSS. Where the company name is the vulnerable to XSS. If you give this below XSS script as Company name, you will get the XSS pop up after the login in message option where it'll randomly generated at the message room.\n\u201c><IMG SRC=x onerror=javascript:alert(&quot;XSS-by-Imran&quot;)>\nHere is the POC:\nhttps://youtu.be/dqrH2WhIgtk\nThanks\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Slack",
+  "reported_by": "imran_hadid ",
+  "title": "Store XSS",
+  "content": "\nHello Team.\nI found a Store XSS. Where the company name is the vulnerable to XSS. If you give this below XSS script as Company name, you will get the XSS pop up after the login in message option where it'll randomly generated at the message room.\n\u201c><IMG SRC=x onerror=javascript:alert(&quot;XSS-by-Imran&quot;)>\nHere is the POC:\nhttps://youtu.be/dqrH2WhIgtk\nThanks\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1483321560,
+  "report_url": "https://hackerone.com/reports/187410",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Enter the XSS payload as the company name: \u201c><IMG SRC=x onerror=javascript:alert(&quot;XSS-by-Imran&quot;)>"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1483321560,
-    "report_url": "https://hackerone.com/reports/187410",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Enter the XSS payload as the company name: \u201c><IMG SRC=x onerror=javascript:alert(&quot;XSS-by-Imran&quot;)>"
-        ],
-        [
-            2,
-            "After logging in, navigate to the message option where the XSS payload will be executed, triggering a pop-up alert."
-        ]
-    ],
-    "vuln_description": "This is a stored Cross-Site Scripting (XSS) vulnerability where the company name field is vulnerable to XSS attacks. By injecting a malicious script into the company name field, the script is stored and later executed when the message option is accessed, leading to arbitrary JavaScript execution.",
-    "reason": "The vulnerability is straightforward to discover as it involves a common XSS payload in a user-controllable input field. The attack does not require multiple components, complex state manipulation, or novel logic. The interaction is direct and obvious once the input field is identified as vulnerable.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The XSS vulnerability involves injecting malicious scripts into the company name field, which is a stored input. The methodology described focuses on authentication and authorization (AuthN/AuthZ) bypasses and IDOR vulnerabilities, which are different from XSS vulnerabilities. XSS is a client-side vulnerability that does not involve bypassing AuthN/AuthZ or manipulating resource IDs in the way described in the methodology.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "After logging in, navigate to the message option where the XSS payload will be executed, triggering a pop-up alert."
+    ]
+  ],
+  "vuln_description": "This is a stored Cross-Site Scripting (XSS) vulnerability where the company name field is vulnerable to XSS attacks. By injecting a malicious script into the company name field, the script is stored and later executed when the message option is accessed, leading to arbitrary JavaScript execution.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common XSS payload in a user-controllable input field. The attack does not require multiple components, complex state manipulation, or novel logic. The interaction is direct and obvious once the input field is identified as vulnerable.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves injecting malicious scripts into input fields (company name) that are then stored and executed when rendered. This does not involve authentication or authorization checks, nor does it involve swapping user sessions or resource IDs. The methodology described focuses on AuthN/AuthZ and IDOR vulnerabilities, which are not applicable here.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The reported stored XSS vulnerability involves injecting a payload into the 'company name' parameter, which triggers an alert in the message room after regular navigation (post-login). The methodology involves logging requests/responses, identifying injectable parameters (like 'company name'), and testing with simple payloads. The payload used (\"...onerror=javascript:alert(...)\") is a generic XSS payload without custom filter bypasses. The trigger occurs in the same application via regular navigation (message room access), satisfying the 'same channel' requirement. Thus, the bug aligns with the methodology's criteria.",
+    "is_simple_injection": true
+  }
 }

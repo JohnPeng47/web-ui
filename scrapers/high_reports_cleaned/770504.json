@@ -70,7 +70,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves manipulating the client-server interaction to bypass password authentication for updating sensitive account details. This falls under the AuthN/AuthZ Bypass category where an attacker can perform actions (updating email/phone) without proper authentication. The methodology involves intercepting and modifying server responses, which is detectable by analyzing the requests and responses for unauthorized modifications or bypasses of authentication steps.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves intercepting and modifying server responses to bypass password checks, which is not covered by the described methodologies that focus on swapping user sessions, actions, or resource IDs. The attack requires manipulating JSON responses with valid flow tokens rather than testing authorization boundaries between users/resources.",
+    "is_simple_authnz": false
   }
 }

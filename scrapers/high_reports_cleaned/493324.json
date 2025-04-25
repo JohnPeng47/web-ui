@@ -85,7 +85,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves session swapping and impersonation, which can be detected by analyzing (user_session, action) tuples and testing with different user sessions (methodology b and c). The attacker's ability to switch to the admin's session by manipulating cookies falls under the AuthZ bypass detection method.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an attacker leveraging session cookies from admin impersonation to escalate privileges. The methodology detects AuthZ bypasses by testing session swaps and authorization boundaries. Here, the attacker's ability to adopt the admin's session (via cookie substitution) and trigger 'stop impersonation' fits the AuthZ bypass pattern where session-based privilege checks fail. The automated methodology would capture this by swapping sessions (admin's impersonation session into attacker's context) and verifying elevated access.",
+    "is_simple_authnz": true
   }
 }

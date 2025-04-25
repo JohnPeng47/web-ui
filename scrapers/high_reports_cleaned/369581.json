@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The report involves an HTTP PUT method being enabled, which is a server configuration issue rather than an authentication or authorization boundary being crossed. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, which does not apply to this case.",
-    "is_detectable": false
+    "reasoning": "The reported vulnerability involves an HTTP PUT method being enabled, allowing file uploads without proper authentication or authorization. The described methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs. However, this issue does not require user sessions or resource substitution; it's a server misconfiguration allowing unauthenticated file uploads. The methodologies target user/resource-specific AuthZ checks, not server method configurations.",
+    "is_simple_authnz": false
   }
 }

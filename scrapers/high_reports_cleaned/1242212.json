@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves bypassing rate limits by manipulating the device's local time, which is not directly related to the authentication or authorization boundaries being tested by the proposed methodologies. The methodologies focus on swapping user sessions, actions, and resource IDs within the same application context, whereas this issue involves a side-channel attack on the rate-limiting mechanism.",
-    "is_detectable": false
+    "reasoning": "The vulnerability relies on client-side time manipulation rather than authorization/authentication boundary testing through session/resource substitution. The methodology focuses on HTTP request/response analysis and session/resource ID swapping, but this vulnerability requires physical device time changes which wouldn't be detected through network traffic analysis or session manipulation patterns.",
+    "is_simple_authnz": false
   }
 }

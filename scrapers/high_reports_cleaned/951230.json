@@ -49,7 +49,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an authentication/authorization bypass where a gift subscription can be obtained without proper payment validation. The methodology described involves testing actions with different user sessions and resource IDs, which would include testing the gift subscription functionality with unauthenticated or improperly authenticated sessions. The steps to reproduce involve sending a specific HTTP request that triggers the bypass, which falls under the 'AuthN/AuthZ Bypass' detection method.",
-    "is_detectable": true
+    "reasoning": "The vulnerability exploits a missing payment validation check during gift processing. The described methodology focuses on authorization boundaries through session/resource substitution, but this flaw involves server-side validation bypass where an error response doesn't prevent gift fulfillment. The attack vector doesn't require session swapping or resource ID manipulation, but rather leverages incomplete transaction validation logic that wouldn't be detected by session/action/resource substitution testing.",
+    "is_simple_authnz": false
   }
 }

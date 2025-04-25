@@ -58,7 +58,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an attacker using their own authenticated session to perform actions (opening incidents and viewing PII) on behalf of other users. This fits the IDOR vulnerability class where (user_session, action, resource_id) tuples are manipulated. The methodology would detect this by swapping user sessions and testing authorization boundaries for the incident creation and PII access functionality.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves unauthorized access to functionality (opening incidents for arbitrary users) and PII exposure through improper authorization checks. The proposed methodology would detect this by testing session/resource_id combinations (IDOR methodology) since the attacker manipulates the 'caller' field (resource_id substitution) and gains access to PII/incident monitoring. The detection method involves swapping user sessions and resource_ids to test authorization boundaries, which aligns with the attack vector described.",
+    "is_simple_authnz": true
   }
 }

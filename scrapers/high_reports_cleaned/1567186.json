@@ -60,7 +60,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves cross-origin communication and OAuth token leakage via XSS, which is not covered by the proposed methodologies that focus on session/resource swapping within the same application. The attack relies on manipulating OAuth flow parameters and capturing tokens via postMessage, which is outside the scope of the described detection methods.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves manipulating OAuth parameters (response_type, response_mode) and exploiting XSS via window.name leakage in a sandboxed domain. The detection methodology focuses on swapping sessions/resource IDs in existing HTTP requests, but this attack requires modifying OAuth flow configuration (response_mode=fragment) and cross-domain message passing via postMessage/XSS - which wouldn't be captured by simple (user_session, action, resource_id) substitution checks. The core issue is OAuth implementation flaws + XSS chaining rather than classic IDOR/AuthZ bypass via parameter tampering.",
+    "is_simple_authnz": false
   }
 }

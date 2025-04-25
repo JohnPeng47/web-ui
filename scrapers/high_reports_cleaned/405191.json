@@ -1,44 +1,48 @@
 {
-    "reported_to": "DuckDuckGo",
-    "reported_by": "cujanovic ",
-    "title": "DOM XSS on 50x.html page",
-    "content": "\nHello,\nThe is a DOM XSS vulnerability on https://duckduckgo.com/50x.html, it seems like the sink is DIV.innerHTML and the source is location.search.\nThe PoC url is: https://duckduckgo.com/50x.html?e=&atb=test%22/%3E%3Cimg%20src=x%20onerror=alert(document.domain);%3E\nThe code that is causing this XSS is located in:\nhttps://duckduckgo.com/lib/l110.js\nLine 26, Column 60903\nBelow is the part of the vulnerable code:\nb5.createElement(\"div\")); cg = (m.exec(b7) || [\"\", \"\"])[1].toLowerCase(); b4 = R[cg] || R._default; ce.innerHTML = b4[1] + b7.replace(aB, \"<$1></$2>\") + b4[2]; cb = b4[0]; while (cb--) { ce=ce.lastChild } if(!bI.support.leadingWhitespace&&b2.test(b7))\n<image_0>\nImpact\nThe attacker can execute JS code.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "DuckDuckGo",
+  "reported_by": "cujanovic ",
+  "title": "DOM XSS on 50x.html page",
+  "content": "\nHello,\nThe is a DOM XSS vulnerability on https://duckduckgo.com/50x.html, it seems like the sink is DIV.innerHTML and the source is location.search.\nThe PoC url is: https://duckduckgo.com/50x.html?e=&atb=test%22/%3E%3Cimg%20src=x%20onerror=alert(document.domain);%3E\nThe code that is causing this XSS is located in:\nhttps://duckduckgo.com/lib/l110.js\nLine 26, Column 60903\nBelow is the part of the vulnerable code:\nb5.createElement(\"div\")); cg = (m.exec(b7) || [\"\", \"\"])[1].toLowerCase(); b4 = R[cg] || R._default; ce.innerHTML = b4[1] + b7.replace(aB, \"<$1></$2>\") + b4[2]; cb = b4[0]; while (cb--) { ce=ce.lastChild } if(!bI.support.leadingWhitespace&&b2.test(b7))\n<image_0>\nImpact\nThe attacker can execute JS code.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - DOM"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/342/240/b66c24b92c920b990735569f72f8c6cf2f7f7340/domxss-ddg.png?response-content-disposition=attachment%3B%20filename%3D%22domxss-ddg.png%22%3B%20filename%2A%3DUTF-8%27%27domxss-ddg.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYHHRSVKF%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T155922Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIFUhCprURYuAp1JhIKhmhOndGhEksRK9ZtE3%2FQ4IPNcCAiB4%2BbygAyq8n6PDNPL9mihg3x27kOcL%2FCo3eobrqKs3ayqyBQgsEAMaDDAxMzYxOTI3NDg0OSIMnSguinzv4HZ8X4fOKo8FehKYKW6ACEr0y1S0J%2BkpDswynmEDOLWd8Ght35gjiU3bPiCxbHVmMywpIeCUMgNuvaI%2BZ1kq9AggW0JBY4dsiN2UFD4%2BPirZ71HqhErRnssrb%2FdJZ72fsKVGjJUPzhlFDbfmx6fEe%2BHpWGL5hQzGW3EVgUIg1VyCuW6l7mkvu7kh4KwZTluylwXk3JcmSzZRPPixQ%2BDnCWCyDrSeARUzVGQII%2BrhLRzeGzIeFD5NQlJd%2BYs6c4T0XxvOegZyRWh4OT0LcA9swfc0aIKiGUEVL6uKk8L7zEvXZj2Qy24lo%2B9n%2BWIXnlFb49axBTUSW1mlw6AB9HswldesI78EzWJTEt0HrxAp4KmcjkqCG%2B2NfqlRWFl%2BtYCG7dB00uvOEQRfqvb%2B3D%2FyaDXodherGFcYReGwyE40NEQiGIpAdd6mgD3zUjqBFLpMMFhAGdARTvD0AizbsVFQNrPoqyNziboPwP1jm1YMUXUWToSRTMnLoXhDViV147%2Fgfl0mYWE1ef2oyya2B2fjFQv2hdDCjZOJI65Jb5nSNT0MCO7Zvf5S%2FTtLIgw8A1iWq6ualBnP7ukdtwIkpOJUs96jJFsNWPtku%2FM1VWgbwOoEBK4ggIZzFiCxyvtKIpFc18yUXkufHd2AV5jhz%2BtNVlOAdjQO4%2F4o6eKTJ9fpry2OMO1qaUs8g9vF2nZJ%2BJMF1%2FY84mbhhsd2v4iCpd0ckQ%2BrpCMT1Rr5%2F%2Fx8B6MKnjEp%2FGMrSbZIVFCDNkSGaVtqeLMqvxR2fsW5F%2BjR%2FXdbCpAX9Y9rLKhyoave7J3VwWmb9EMweIP6navd1pr2%2BH4jy%2BfwQOqo11pWDJFBYurZJV3VvoT4nR2KgtDWn9%2FgadhLLwtcSjnaIjCqs4%2B%2FBjqyAf0B4MhyQorg4lWON%2FD48rZQ%2FMKKbrt5EA%2FsFJnPtvl1blNvIyq3RNNMIe73dccY7puTI2xAhuYA4UpZOV0WDxpnNo5pyLiUf52xNItagsmU8t8qjoiwWORUE5rUZYvDOfujGksoCo8SqCvK855BTZO%2BUq645X%2FRvwqGwlm5RYVqWXLBoNW9H5iX7v%2BhyXX%2BdToXOGe%2BGhHmBr%2B0KYUf86lo1geFLAqXhUi6qJb5GPSEPWs%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=5666d5f9505873ae12a83c6b714735eb53b8ac38e919d633e4882ab73bd3433c"
+  },
+  "disclosed_date": 1539727740,
+  "report_url": "https://hackerone.com/reports/405191",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to the URL: https://duckduckgo.com/50x.html?e=&atb=test%22/%3E%3Cimg%20src=x%20onerror=alert(document.domain);%3E"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - DOM"
-    ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/342/240/b66c24b92c920b990735569f72f8c6cf2f7f7340/domxss-ddg.png?response-content-disposition=attachment%3B%20filename%3D%22domxss-ddg.png%22%3B%20filename%2A%3DUTF-8%27%27domxss-ddg.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYHHRSVKF%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T155922Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEMP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIFUhCprURYuAp1JhIKhmhOndGhEksRK9ZtE3%2FQ4IPNcCAiB4%2BbygAyq8n6PDNPL9mihg3x27kOcL%2FCo3eobrqKs3ayqyBQgsEAMaDDAxMzYxOTI3NDg0OSIMnSguinzv4HZ8X4fOKo8FehKYKW6ACEr0y1S0J%2BkpDswynmEDOLWd8Ght35gjiU3bPiCxbHVmMywpIeCUMgNuvaI%2BZ1kq9AggW0JBY4dsiN2UFD4%2BPirZ71HqhErRnssrb%2FdJZ72fsKVGjJUPzhlFDbfmx6fEe%2BHpWGL5hQzGW3EVgUIg1VyCuW6l7mkvu7kh4KwZTluylwXk3JcmSzZRPPixQ%2BDnCWCyDrSeARUzVGQII%2BrhLRzeGzIeFD5NQlJd%2BYs6c4T0XxvOegZyRWh4OT0LcA9swfc0aIKiGUEVL6uKk8L7zEvXZj2Qy24lo%2B9n%2BWIXnlFb49axBTUSW1mlw6AB9HswldesI78EzWJTEt0HrxAp4KmcjkqCG%2B2NfqlRWFl%2BtYCG7dB00uvOEQRfqvb%2B3D%2FyaDXodherGFcYReGwyE40NEQiGIpAdd6mgD3zUjqBFLpMMFhAGdARTvD0AizbsVFQNrPoqyNziboPwP1jm1YMUXUWToSRTMnLoXhDViV147%2Fgfl0mYWE1ef2oyya2B2fjFQv2hdDCjZOJI65Jb5nSNT0MCO7Zvf5S%2FTtLIgw8A1iWq6ualBnP7ukdtwIkpOJUs96jJFsNWPtku%2FM1VWgbwOoEBK4ggIZzFiCxyvtKIpFc18yUXkufHd2AV5jhz%2BtNVlOAdjQO4%2F4o6eKTJ9fpry2OMO1qaUs8g9vF2nZJ%2BJMF1%2FY84mbhhsd2v4iCpd0ckQ%2BrpCMT1Rr5%2F%2Fx8B6MKnjEp%2FGMrSbZIVFCDNkSGaVtqeLMqvxR2fsW5F%2BjR%2FXdbCpAX9Y9rLKhyoave7J3VwWmb9EMweIP6navd1pr2%2BH4jy%2BfwQOqo11pWDJFBYurZJV3VvoT4nR2KgtDWn9%2FgadhLLwtcSjnaIjCqs4%2B%2FBjqyAf0B4MhyQorg4lWON%2FD48rZQ%2FMKKbrt5EA%2FsFJnPtvl1blNvIyq3RNNMIe73dccY7puTI2xAhuYA4UpZOV0WDxpnNo5pyLiUf52xNItagsmU8t8qjoiwWORUE5rUZYvDOfujGksoCo8SqCvK855BTZO%2BUq645X%2FRvwqGwlm5RYVqWXLBoNW9H5iX7v%2BhyXX%2BdToXOGe%2BGhHmBr%2B0KYUf86lo1geFLAqXhUi6qJb5GPSEPWs%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=5666d5f9505873ae12a83c6b714735eb53b8ac38e919d633e4882ab73bd3433c"
-    },
-    "disclosed_date": 1539727740,
-    "report_url": "https://hackerone.com/reports/405191",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Navigate to the URL: https://duckduckgo.com/50x.html?e=&atb=test%22/%3E%3Cimg%20src=x%20onerror=alert(document.domain);%3E"
-        ],
-        [
-            2,
-            "Observe the execution of JavaScript code via the injected payload in the URL parameter."
-        ]
-    ],
-    "vuln_description": "This is a DOM-based XSS vulnerability in the 50x.html page of DuckDuckGo. The vulnerability arises from the insecure handling of the 'location.search' source, which is directly used to set the 'innerHTML' of a DIV element without proper sanitization, allowing JavaScript execution.",
-    "reason": "The vulnerability is straightforward to discover as it involves a direct injection into a DOM sink (innerHTML) from a well-known source (location.search). The attack does not require complex interactions or state manipulation, and the exploitation follows a common pattern for DOM XSS vulnerabilities.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The vulnerability involves DOM XSS, which is a client-side issue and not related to authentication or authorization. The methodology described focuses on AuthN/AuthZ bypasses and IDOR vulnerabilities, which are server-side issues. Therefore, the DOM XSS vulnerability would not be detectable using the proposed methodology.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Observe the execution of JavaScript code via the injected payload in the URL parameter."
+    ]
+  ],
+  "vuln_description": "This is a DOM-based XSS vulnerability in the 50x.html page of DuckDuckGo. The vulnerability arises from the insecure handling of the 'location.search' source, which is directly used to set the 'innerHTML' of a DIV element without proper sanitization, allowing JavaScript execution.",
+  "reason": "The vulnerability is straightforward to discover as it involves a direct injection into a DOM sink (innerHTML) from a well-known source (location.search). The attack does not require complex interactions or state manipulation, and the exploitation follows a common pattern for DOM XSS vulnerabilities.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The DOM XSS vulnerability involves client-side JavaScript execution via manipulated input (location.search) being unsafely inserted into innerHTML. This is not an authentication or authorization issue, but rather a client-side injection vulnerability. The proposed methodologies focus on testing authorization boundaries by swapping user sessions and resource IDs, which doesn't apply to DOM XSS vulnerabilities.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The DOM XSS vulnerability is triggered via the `location.search` parameter (source) being injected into `innerHTML` (sink). The methodology would log requests to `/50x.html` during regular navigation (e.g., server errors). The parameters `e` and `atb` would be identified as injectable. The payload `test\"%3E%3Cimg src=x onerror=alert(...)` is a simple, context-aware XSS payload without custom bypasses. Since the XSS executes on the same page (same channel) and does not require complex navigation or roles to trigger, it aligns with the 'simple payload' criteria.",
+    "is_simple_injection": true
+  }
 }

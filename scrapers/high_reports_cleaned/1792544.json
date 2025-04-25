@@ -44,7 +44,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves multiple tabs of the same extension not being properly synchronized when one tab is locked. This is an authorization boundary issue within the same application context (the wallet extension), where actions in one tab should affect all others. The methodology described can detect such issues by tracking user sessions and actions across multiple tabs or contexts within the same application.",
-    "is_detectable": true
+    "reasoning": "The vulnerability stems from improper session/tab state synchronization within the same user's wallet extension, not cross-user authorization checks. The methodology focuses on testing authorization between different users (user_a vs user_b) and resource access control, while this issue involves a single user's multiple sessions not being invalidated properly after a security action (locking). The detection methods described don't address same-user multi-tab state management.",
+    "is_simple_authnz": false
   }
 }

@@ -45,7 +45,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an S3 bucket with misconfigured permissions allowing authenticated AWS users to write to it. This is detectable by the methodology because it involves an action (writing to the bucket) that can be tested with different user sessions (authenticated AWS users) to see if unauthorized access is possible.",
-    "is_detectable": true
+    "reasoning": "The reported issue involves an S3 bucket misconfiguration allowing write access to any authenticated AWS user, which is a cloud infrastructure permissions issue rather than an application-level IDOR or AuthZ bypass. The methodologies described focus on swapping user sessions and resource IDs within the application's HTTP request/response flow, not analyzing AWS bucket policies. This vulnerability is detected via direct inspection of S3 permissions, not through session/resource substitution in application actions.",
+    "is_simple_authnz": false
   }
 }

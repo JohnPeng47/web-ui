@@ -42,7 +42,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an authenticated user modifying their own apptoken's scope, which falls under the (user_session, action, resource_id) tuple analysis. The methodology would detect this by observing the action of modifying the token scope and testing it with different user sessions and resource IDs.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an apptoken modifying its own scope to escalate privileges, which is an authorization flaw. The methodology's step e) involves substituting resource_ids of the same type. Here, the token ID is the resource, and the attacker iterates through possible IDs (same resource_type). The action (PUT to modify scope) is tested with the same user_session (the apptoken), which should not have permission to escalate its own privileges. This fits the IDOR/AuthZ bypass detection pattern where a low-privileged session alters a resource it should not control.",
+    "is_simple_authnz": true
   }
 }

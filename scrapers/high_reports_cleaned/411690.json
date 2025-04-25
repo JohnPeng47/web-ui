@@ -1,50 +1,54 @@
 {
-    "reported_to": "Alliance of American Football ",
-    "reported_by": "gujjuboy10x00 ",
-    "title": "Stored xss in address field in billing activity at https://shop.aaf.com/Order/step1/index.cfm",
-    "content": "\nDear Team,\nSummary: [add summary of the vulnerability]\nAfter looking into https://shop.aaf.com/Order/step1/index.cfm i get to know that there is address field is vulnerable to stored xss which can lead to steal any user's cookie and can lead to complete account takeover\nDescription: [add more details about this vulnerability]\nSteps To Reproduce:\ngo to https://shop.aaf.com and click on any products , tshirt\nadd that in cart and click on proceed\nenter xss payload (a\"><svg/onload=prompt(1)> ) in every address field and click on OK proceed\nxss will popup\nSupporting Material/References:\nXSS OWASP\nThanks,\nVishal\nImpact\nStored xss in address field in billing activity at https://shop.aaf.com/Order/step1/index.cfm\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "Alliance of American Football ",
+  "reported_by": "gujjuboy10x00 ",
+  "title": "Stored xss in address field in billing activity at https://shop.aaf.com/Order/step1/index.cfm",
+  "content": "\nDear Team,\nSummary: [add summary of the vulnerability]\nAfter looking into https://shop.aaf.com/Order/step1/index.cfm i get to know that there is address field is vulnerable to stored xss which can lead to steal any user's cookie and can lead to complete account takeover\nDescription: [add more details about this vulnerability]\nSteps To Reproduce:\ngo to https://shop.aaf.com and click on any products , tshirt\nadd that in cart and click on proceed\nenter xss payload (a\"><svg/onload=prompt(1)> ) in every address field and click on OK proceed\nxss will popup\nSupporting Material/References:\nXSS OWASP\nThanks,\nVishal\nImpact\nStored xss in address field in billing activity at https://shop.aaf.com/Order/step1/index.cfm\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1558789680,
+  "report_url": "https://hackerone.com/reports/411690",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Go to https://shop.aaf.com and click on any product (e.g., a t-shirt)."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
+    [
+      2,
+      "Add the product to the cart and click on 'Proceed'."
     ],
-    "screenshots": {},
-    "disclosed_date": 1558789680,
-    "report_url": "https://hackerone.com/reports/411690",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Go to https://shop.aaf.com and click on any product (e.g., a t-shirt)."
-        ],
-        [
-            2,
-            "Add the product to the cart and click on 'Proceed'."
-        ],
-        [
-            3,
-            "Enter the XSS payload (e.g., `a\"><svg/onload=prompt(1)>`) in every address field."
-        ],
-        [
-            4,
-            "Click on 'OK' or 'Proceed' to trigger the XSS popup."
-        ]
+    [
+      3,
+      "Enter the XSS payload (e.g., `a\"><svg/onload=prompt(1)>`) in every address field."
     ],
-    "vuln_description": "The address field in the billing activity at https://shop.aaf.com/Order/step1/index.cfm is vulnerable to stored XSS. This allows an attacker to inject malicious scripts that can execute in the context of other users, potentially leading to cookie theft and account takeover.",
-    "reason": "The vulnerability is straightforward to discover as it involves a common XSS payload in a standard input field. The attack does not require multiple components, complex state manipulation, or novel logic. It follows a typical XSS exploitation pattern.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The stored XSS vulnerability involves injecting malicious scripts into input fields that are then executed when other users view the page. This is a client-side vulnerability and does not involve authentication or authorization bypasses. The proposed methodologies focus on testing authentication and authorization boundaries by swapping user sessions and resource IDs, which is not applicable to detecting XSS vulnerabilities.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "Click on 'OK' or 'Proceed' to trigger the XSS popup."
+    ]
+  ],
+  "vuln_description": "The address field in the billing activity at https://shop.aaf.com/Order/step1/index.cfm is vulnerable to stored XSS. This allows an attacker to inject malicious scripts that can execute in the context of other users, potentially leading to cookie theft and account takeover.",
+  "reason": "The vulnerability is straightforward to discover as it involves a common XSS payload in a standard input field. The attack does not require multiple components, complex state manipulation, or novel logic. It follows a typical XSS exploitation pattern.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves a stored XSS in the address field during the billing process, which is a client-side issue rather than an authentication or authorization flaw. The proposed methodologies focus on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, which does not apply to XSS vulnerabilities.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves injecting a basic XSS payload (a\"><svg/onload=prompt(1)>) into address fields during billing. The methodology would log these parameters during regular navigation (step 1-3). The payload is simple, context-agnostic, and does not require filter bypasses (Simple Payload criteria 1-2). Execution is observable in the same channel (step 3 triggers XSS during regular checkout flow). No special navigation or roles are required to observe the payload's effect, satisfying the 'same channel' requirement.",
+    "is_simple_injection": true
+  }
 }

@@ -50,7 +50,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves a backend verification flaw in the authentication process where the system does not confirm if the email provided is confirmed. The methodology described focuses on testing authorization boundaries within the same application by swapping user sessions and resource IDs. However, this specific vulnerability exploits a misconfiguration in Google OneTap and GSuite domain registration, which is outside the scope of the described methodology. The attack requires interaction with external systems (Google's GSuite) and does not involve swapping user sessions or resource IDs within the priceline.com application.",
-    "is_detectable": false
+    "reasoning": "The vulnerability stems from the application not verifying if the email from Google OneTap is confirmed. The detection methodologies focus on swapping sessions/resource IDs within the same application context. However, this attack involves abusing Google's GSuite domain registration to spoof email ownership across systems, which isn't captured by testing (user_session, action, resource_id) permutations within a single application. The core issue is trust in unvalidated 3rd-party claims rather than authorization boundary violations detectable via parameter manipulation.",
+    "is_simple_authnz": false
   }
 }

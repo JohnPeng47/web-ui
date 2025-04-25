@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves swapping the 'personId' parameter in an authenticated request to modify another user's profile image, which falls under the IDOR vulnerability class. The methodology described includes testing for such scenarios by swapping resource_ids (in this case, account IDs) with existing user sessions to check for authorization boundary violations.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves manipulating the 'personId' parameter during a profile image upload. The proposed methodology involves substituting resource_ids (in this case, account IDs) and testing with different user sessions. Since the attack swaps the 'personId' with another user's ID using the same authenticated session, it directly aligns with step 4e of the detection method (substituting resource_ids of the same type). The vulnerability fits the IDOR class where authorization checks on the resource_id are missing, making it detectable via the described AuthZ/IDOR testing approach.",
+    "is_simple_authnz": true
   }
 }

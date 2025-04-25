@@ -42,10 +42,10 @@
   "authnz_byppass_detectable": true,
   "is_simple_payload": false,
   "injection_metadata": {
-    "is_simple_payload": true
+    "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves creating a sub-group under an existing namespace by manipulating the 'target_namespace' parameter during a GitHub repository import. This falls under the IDOR vulnerability class where an unauthorized user can perform actions (creating a sub-group) on a resource (existing namespace) they should not have access to. The methodology described involves testing (user_session, action, resource_id) tuples, which would cover this scenario by swapping user sessions and testing unauthorized access to the namespace resource.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an unauthorized user manipulating the target_namespace parameter during a GitHub repository import to create a subgroup under an existing namespace they do not own. This is an authorization bypass (AuthZ) as the user can perform an action (create a subgroup) under a namespace they lack permissions for. The detection methodology outlined would capture this by substituting the `target_namespace` parameter (a resource_id) and testing with an unauthorized user session, triggering the authorization boundary violation. The steps align with the IDOR/AuthZ detection methods described, where resource substitution and session testing reveal the flaw.",
+    "is_simple_authnz": true
   }
 }

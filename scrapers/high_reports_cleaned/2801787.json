@@ -46,7 +46,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an unauthorized user (non-admin) registering and gaining access to admin functionalities, which fits the AuthN/AuthZ Bypass methodology. The detection method involves swapping user sessions (from non-privileged to privileged) and testing access to restricted actions (admin dashboard and merchant info updates). This aligns with steps b) and c) of the methodology, where new actions are executed with existing user sessions and new user sessions are tested against existing actions.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an unauthorized user accessing the admin dashboard by exploiting an open registration endpoint. The described methodology includes testing actions with unauthenticated sessions (step d) and substituting resource IDs (step e). Since the registration endpoint lacked proper authorization checks, automated detection via unauthenticated session testing (step d) could identify this issue. The ability to sign up as an admin directly bypasses authentication and authorization boundaries, fitting the AuthN/AuthZ Bypass class.",
+    "is_simple_authnz": true
   }
 }

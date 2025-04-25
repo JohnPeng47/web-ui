@@ -42,7 +42,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The dirty_sock vulnerability involves local privilege escalation via the snapd service, which is not related to web-based authentication or authorization mechanisms. The proposed methodologies focus on detecting web-based IDOR and AuthN/AuthZ bypass vulnerabilities by analyzing HTTP requests and responses, which are not applicable to this local system exploit.",
-    "is_detectable": false
+    "reasoning": "The dirty_sock vulnerability involves privilege escalation through a snapd service flaw, not directly related to user_session or resource_id manipulation in HTTP requests. The exploit leverages a local service misconfiguration rather than AuthN/AuthZ bypass via session or resource swapping, making it outside the scope of the described methodologies.",
+    "is_simple_authnz": false
   }
 }

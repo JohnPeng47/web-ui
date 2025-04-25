@@ -1,44 +1,48 @@
 {
-    "reported_to": "MTN Group",
-    "reported_by": "nhx1 ",
-    "title": "DOM Based Reflected Cross Site Scripting",
-    "content": "\nSummary:\nI hope you're doing well. I stumbled upon one of your assets. Upon further inspection I realized that the asset was running an outdated version of Swagger.\nThe outdated version of Swagger is well-known for Cross-Site Scripting vulnerabilities so I went ahead and attempted to test it in https://notification-server-v2.sz-my.mtn.com/. Turns out, it's vulnerable to Cross-Site Scripting. To reproduce it, please follow the steps of reproduction. I have not assessed the full impact of this vulnerability but it is highly probable that a malicious actor could exploit to takeover accounts of applications hosted under *.mtn.com. I hope this gets patched soon. If there's some additional information that you need from my side, please let me know. Thank you.\nSteps To Reproduce:\n[add details for how we can reproduce the issue]\nGo to the following URL https://notification-server-v2.sz-my.mtn.com/index.html?configUrl=https://jumpy-floor.surge.sh/test.json\nObserve the alert pop up like in the screenshot below\n<image_0>\nSupporting Material/References:\n[list any additional material (e.g. screenshots, logs, etc.)]\n[attachment / reference]\nImpact\nA malicious actor could execute arbitrary scripts\n\n",
-    "severity": [
-        7.5,
-        null
+  "reported_to": "MTN Group",
+  "reported_by": "nhx1 ",
+  "title": "DOM Based Reflected Cross Site Scripting",
+  "content": "\nSummary:\nI hope you're doing well. I stumbled upon one of your assets. Upon further inspection I realized that the asset was running an outdated version of Swagger.\nThe outdated version of Swagger is well-known for Cross-Site Scripting vulnerabilities so I went ahead and attempted to test it in https://notification-server-v2.sz-my.mtn.com/. Turns out, it's vulnerable to Cross-Site Scripting. To reproduce it, please follow the steps of reproduction. I have not assessed the full impact of this vulnerability but it is highly probable that a malicious actor could exploit to takeover accounts of applications hosted under *.mtn.com. I hope this gets patched soon. If there's some additional information that you need from my side, please let me know. Thank you.\nSteps To Reproduce:\n[add details for how we can reproduce the issue]\nGo to the following URL https://notification-server-v2.sz-my.mtn.com/index.html?configUrl=https://jumpy-floor.surge.sh/test.json\nObserve the alert pop up like in the screenshot below\n<image_0>\nSupporting Material/References:\n[list any additional material (e.g. screenshots, logs, etc.)]\n[attachment / reference]\nImpact\nA malicious actor could execute arbitrary scripts\n\n",
+  "severity": [
+    7.5,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - DOM"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/9pzg53m949lvf09z18aq8eux42r1?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_from_2024-01-16_13-36-09.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_from_2024-01-16_13-36-09.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQWDNVDTOV%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T202434Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIFfYz76VgKIVelpAyZYrTFyd%2Bv888ECgb3hj5JkFANhaAiBakh4q7w5DF%2BQv%2FfR5eWubo4B2u%2Bo1QPF29kQLxJJCtSq7BQj0%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMaTuljdCxi50w8QUmKo8FD%2BiOVbeXUa7mNlCRPUySpi4kddXYtD2seD5WI2%2F2DmARIyxhjceaM8TKf%2BSYoZzhII3Lo%2BxB9bhtM5mq5GHf8dhuKa6wT1fnf6QzZEKaUgSCbLM07nMLMlW8kqutXY0X59awJLzZ1yQMPBhBi80DLAkNvswgcBRW4v5P7iqkX0ggbzpmcRST%2FVm29J8Y5JKSc3LejY6AEIsv4KP6HB8aQXd%2BfsBH5R%2Bv6nok8pt6DJSaPkv5WA74F1I2%2FsmQsyL3exdqZLhvUP%2B6eTtLSHhdrEDhOIY34aESXhoik3RW%2B8g32NTyeA3P2G9e%2F4F7a3Rx6v%2BE7XMojKylsb5WIGfTy8QvhnCQCH9ukOo6rO5xOtdoQw%2BU4WqZuOTJU74EkFLV6%2FyUVWSq4FVDYEYqrbwizaX9y%2FV2Cy9LgrEtMK6sn8DZ3ViZlKyuxY19GNuJ5sW0c0M4RHngn3EmFJO0aNsL0r%2BbolwLdLRfuYtJe5DmZwCoKEbDaNAUonhneBWF55jLQZHoGAoWZ6qMF%2BevUTo0Jql5kULJryvcc%2FFpS8lTO%2BOZ3fGiS1eQAI2Fz0703T3mmda4haYMEOXNijTbkWhBg5v9JYyT2oqNlXBK7WUSUCkENcoqMjC4Z4VbEGjG4jS2qi%2BTYrhX4S3Sb1T987q8w6MeoXfX6tGmDYwiyj5QpWbUDz7cYSR0EBMdQlqeDG94vE59xzsfUrmstdXm%2FFxukqgG%2B7WWbJ1DxPiM3ia6sOr977IrFajGqovgtqRLgyGpz%2F9TqWE3RwWypLQ084%2FW16SLKEEufJUuPDTkr6LyX%2FDeWbUHVMs85EWTJG9ustt2iOq1%2F11LdHrP2SbFR46XOj69Mtw5xz%2F6iYaqUFV4ejD8yoa%2FBjqyAYwDDYybi7D4pT0wCry5lOVh3Zq%2B8g6G5jdIa7jf8%2FaU312%2BiIcARtKrUoF2Sn0ak6xLhjw%2BJVOcFyXg%2FOHRvGjaHhYmekMQ96U1XkJfdyuitawsi7z%2FEymOHQV%2BY9%2Bfo8XothwNtx6eE%2FG6W1iLa%2BedAtMC1tXYp3IvbXoZrn4jPRRJ5G0BroF0e3VIz4sm1tGxNoieH9VOPyqjIvF8mLhji1Uw2M%2F8ryzZmpR%2Fx4z3q1Q%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=4ab18abc7dded4cafdb05f009775e20391c4aa740d1fa76476f99228f36ad1f7"
+  },
+  "disclosed_date": 1735132320,
+  "report_url": "https://hackerone.com/reports/2321874",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Go to the URL: https://notification-server-v2.sz-my.mtn.com/index.html?configUrl=https://jumpy-floor.surge.sh/test.json"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - DOM"
-    ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/9pzg53m949lvf09z18aq8eux42r1?response-content-disposition=attachment%3B%20filename%3D%22Screenshot_from_2024-01-16_13-36-09.png%22%3B%20filename%2A%3DUTF-8%27%27Screenshot_from_2024-01-16_13-36-09.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQWDNVDTOV%2F20250324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250324T202434Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIFfYz76VgKIVelpAyZYrTFyd%2Bv888ECgb3hj5JkFANhaAiBakh4q7w5DF%2BQv%2FfR5eWubo4B2u%2Bo1QPF29kQLxJJCtSq7BQj0%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDAxMzYxOTI3NDg0OSIMaTuljdCxi50w8QUmKo8FD%2BiOVbeXUa7mNlCRPUySpi4kddXYtD2seD5WI2%2F2DmARIyxhjceaM8TKf%2BSYoZzhII3Lo%2BxB9bhtM5mq5GHf8dhuKa6wT1fnf6QzZEKaUgSCbLM07nMLMlW8kqutXY0X59awJLzZ1yQMPBhBi80DLAkNvswgcBRW4v5P7iqkX0ggbzpmcRST%2FVm29J8Y5JKSc3LejY6AEIsv4KP6HB8aQXd%2BfsBH5R%2Bv6nok8pt6DJSaPkv5WA74F1I2%2FsmQsyL3exdqZLhvUP%2B6eTtLSHhdrEDhOIY34aESXhoik3RW%2B8g32NTyeA3P2G9e%2F4F7a3Rx6v%2BE7XMojKylsb5WIGfTy8QvhnCQCH9ukOo6rO5xOtdoQw%2BU4WqZuOTJU74EkFLV6%2FyUVWSq4FVDYEYqrbwizaX9y%2FV2Cy9LgrEtMK6sn8DZ3ViZlKyuxY19GNuJ5sW0c0M4RHngn3EmFJO0aNsL0r%2BbolwLdLRfuYtJe5DmZwCoKEbDaNAUonhneBWF55jLQZHoGAoWZ6qMF%2BevUTo0Jql5kULJryvcc%2FFpS8lTO%2BOZ3fGiS1eQAI2Fz0703T3mmda4haYMEOXNijTbkWhBg5v9JYyT2oqNlXBK7WUSUCkENcoqMjC4Z4VbEGjG4jS2qi%2BTYrhX4S3Sb1T987q8w6MeoXfX6tGmDYwiyj5QpWbUDz7cYSR0EBMdQlqeDG94vE59xzsfUrmstdXm%2FFxukqgG%2B7WWbJ1DxPiM3ia6sOr977IrFajGqovgtqRLgyGpz%2F9TqWE3RwWypLQ084%2FW16SLKEEufJUuPDTkr6LyX%2FDeWbUHVMs85EWTJG9ustt2iOq1%2F11LdHrP2SbFR46XOj69Mtw5xz%2F6iYaqUFV4ejD8yoa%2FBjqyAYwDDYybi7D4pT0wCry5lOVh3Zq%2B8g6G5jdIa7jf8%2FaU312%2BiIcARtKrUoF2Sn0ak6xLhjw%2BJVOcFyXg%2FOHRvGjaHhYmekMQ96U1XkJfdyuitawsi7z%2FEymOHQV%2BY9%2Bfo8XothwNtx6eE%2FG6W1iLa%2BedAtMC1tXYp3IvbXoZrn4jPRRJ5G0BroF0e3VIz4sm1tGxNoieH9VOPyqjIvF8mLhji1Uw2M%2F8ryzZmpR%2Fx4z3q1Q%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=4ab18abc7dded4cafdb05f009775e20391c4aa740d1fa76476f99228f36ad1f7"
-    },
-    "disclosed_date": 1735132320,
-    "report_url": "https://hackerone.com/reports/2321874",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Go to the URL: https://notification-server-v2.sz-my.mtn.com/index.html?configUrl=https://jumpy-floor.surge.sh/test.json"
-        ],
-        [
-            2,
-            "Observe the alert pop-up indicating the execution of arbitrary JavaScript"
-        ]
-    ],
-    "vuln_description": "The vulnerability is a DOM-based reflected Cross-Site Scripting (XSS) in an outdated version of Swagger used by the notification server. By injecting a malicious script via the 'configUrl' parameter, an attacker can execute arbitrary JavaScript in the context of the victim's browser session.",
-    "reason": "The attack is straightforward, involving only a single parameter manipulation in the URL. The vulnerability is well-documented for the outdated Swagger version, making it easy to discover and exploit without complex interactions or state manipulations.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The vulnerability involves DOM-based reflected XSS in an outdated Swagger UI, which is a client-side issue. The proposed methodologies focus on server-side authentication and authorization issues (IDOR and AuthN/AuthZ bypass) by manipulating user sessions and resource IDs. Since XSS does not involve these server-side authorization checks, the methodology would not detect this vulnerability.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Observe the alert pop-up indicating the execution of arbitrary JavaScript"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a DOM-based reflected Cross-Site Scripting (XSS) in an outdated version of Swagger used by the notification server. By injecting a malicious script via the 'configUrl' parameter, an attacker can execute arbitrary JavaScript in the context of the victim's browser session.",
+  "reason": "The attack is straightforward, involving only a single parameter manipulation in the URL. The vulnerability is well-documented for the outdated Swagger version, making it easy to discover and exploit without complex interactions or state manipulations.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves DOM-based XSS in an outdated Swagger UI, which is a client-side issue. The proposed methodologies focus on server-side authN/authZ issues (like IDOR and session swapping) and do not cover client-side script injection vulnerabilities.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability is triggered via the `configUrl` parameter in the URL, which reflects a payload into the DOM. The methodology would detect this because:\n1. The `configUrl` parameter is part of the initial navigation URL, so it would be logged as an injectable parameter during step 2.\n2. The payload (external JSON containing XSS) is a simple, non-filter-bypass payload that directly executes in the same channel (DOM context) when the page loads.\n3. The execution (alert popup) is observable through regular navigation, satisfying the 'same channel' detection requirement.",
+    "is_simple_injection": true
+  }
 }

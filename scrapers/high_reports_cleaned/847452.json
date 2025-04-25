@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an IDOR where an attacker can modify the recovery email of a victim's account by manipulating the POST request parameters. This fits the methodology of swapping resource_ids (emails) and testing with different user sessions, as outlined in steps a), b), c), and e). The attack involves authenticated sessions and resource manipulation, which are within the scope of the proposed detection methods.",
-    "is_detectable": true
+    "reasoning": "The reported IDOR vulnerability involves manipulating parameters (userName, originalEmail, Email, RecoveryEmail) in a POST request to modify another user's account recovery settings. The detection methodology outlined includes testing resource_id substitution (e.g., victim's email/user ID) across user sessions (attacker vs. victim). Since the attack relies on swapping resource IDs (victim's data) and testing authorization boundaries with different sessions (attacker's valid session), it aligns with steps 4a, 4b, and 4e of the proposed methodology. The system would capture the action (POST /self) and resource_type::resource_id (user account parameters), then test unauthorized access by substituting IDs/sessions, which would reveal the IDOR.",
+    "is_simple_authnz": true
   }
 }

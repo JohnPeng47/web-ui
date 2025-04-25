@@ -54,7 +54,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves swapping user_ids in the logout request to obtain an OTP token for another user, which is then used to login as that user. This fits the methodology of testing (user_session, action, resource_id) tuples where the resource_id (user_id) is swapped with another user's ID. The methodology would detect this by executing the logout action with different user_ids and observing if the server returns a valid OTP token for unauthorized users.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an attacker manipulating the user_id parameter in the logout endpoint to target another user's session. This fits the IDOR/AuthZ bypass methodology because: (1) The logout action is tied to a resource (user_id) that should be session-scoped. (2) The detection methodology's step e) (substituting resource_ids of the same type) would trigger this issue when testing with existing sessions. (3) The server fails to validate ownership of the user_id, allowing cross-user action execution. This matches the pattern of swapping user sessions and resource IDs to test authorization boundaries.",
+    "is_simple_authnz": true
   }
 }

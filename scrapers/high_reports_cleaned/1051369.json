@@ -1,50 +1,54 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "nagli ",
-    "title": "Blind Stored XSS Payload fired at the backend on https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/",
-    "content": "\nSummary:\nI have just gotten an email notification from my XSSHunter payload that my blind stored XSS has been triggered by an administrator on the \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 site, in the following URL:\nCode 18 Bytes\n1https://\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\nAdmin IP address:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nUser-Agent:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nCookies:\nCode 6 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\nInjection Image:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nDB Creds exposed:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\u2588\u2588\u2588\u2588\u2588\\\u2588\u2588\u2588\u2588\u2588a\nSuggested Mitigation/Remediation Actions\nSanitizing the input on the back-end as well\nBest Regards\nnagli\nImpact\nAbility to capture administrator action when preforming activities on the back-end.\nExtractions of DB credentials.\nAccess to private information.\nStealing the cookies of the administrator.\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "nagli ",
+  "title": "Blind Stored XSS Payload fired at the backend on https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/",
+  "content": "\nSummary:\nI have just gotten an email notification from my XSSHunter payload that my blind stored XSS has been triggered by an administrator on the \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 site, in the following URL:\nCode 18 Bytes\n1https://\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\nAdmin IP address:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nUser-Agent:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nCookies:\nCode 6 Bytes\n1\u2588\u2588\u2588\u2588\u2588\u2588\nInjection Image:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nDB Creds exposed:\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\u2588\u2588\u2588\u2588\u2588\\\u2588\u2588\u2588\u2588\u2588a\nSuggested Mitigation/Remediation Actions\nSanitizing the input on the back-end as well\nBest Regards\nnagli\nImpact\nAbility to capture administrator action when preforming activities on the back-end.\nExtractions of DB credentials.\nAccess to private information.\nStealing the cookies of the administrator.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1616632260,
+  "report_url": "https://hackerone.com/reports/1051369",
+  "vuln_category": "WEB_APP",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "steps": [
+    [
+      1,
+      "Identify an input field on the target website (https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/) that does not properly sanitize user input."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
+    [
+      2,
+      "Inject a blind stored XSS payload into the identified input field. The payload should be designed to execute when an administrator views the affected page."
     ],
-    "screenshots": {},
-    "disclosed_date": 1616632260,
-    "report_url": "https://hackerone.com/reports/1051369",
-    "vuln_category": "WEB_APP",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "steps": [
-        [
-            1,
-            "Identify an input field on the target website (https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588/) that does not properly sanitize user input."
-        ],
-        [
-            2,
-            "Inject a blind stored XSS payload into the identified input field. The payload should be designed to execute when an administrator views the affected page."
-        ],
-        [
-            3,
-            "Monitor the XSSHunter service for notifications indicating that the payload has been triggered by an administrator."
-        ],
-        [
-            4,
-            "Once triggered, extract sensitive information such as the administrator's IP address, user-agent, cookies, and potentially exposed database credentials."
-        ]
+    [
+      3,
+      "Monitor the XSSHunter service for notifications indicating that the payload has been triggered by an administrator."
     ],
-    "vuln_description": "This is a blind stored Cross-Site Scripting (XSS) vulnerability that allows an attacker to inject malicious scripts into the backend of the target website. When an administrator views the affected page, the script executes, enabling the attacker to capture sensitive information such as the administrator's actions, cookies, and database credentials.",
-    "reason": "The vulnerability involves injecting a payload that remains dormant until triggered by an administrator, which requires understanding of both XSS and the application's backend behavior. However, the steps to exploit are straightforward once the vulnerable input field is identified.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The blind stored XSS vulnerability involves injecting a malicious payload that gets executed in the context of an administrator's session, which is not directly related to the (user_session, action, resource_id) tuples methodology described. The methodology focuses on AuthN/AuthZ bypasses and IDORs by swapping sessions or resource IDs within the same application, whereas the XSS vulnerability is about injecting and executing arbitrary JavaScript in a different user's context.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "Once triggered, extract sensitive information such as the administrator's IP address, user-agent, cookies, and potentially exposed database credentials."
+    ]
+  ],
+  "vuln_description": "This is a blind stored Cross-Site Scripting (XSS) vulnerability that allows an attacker to inject malicious scripts into the backend of the target website. When an administrator views the affected page, the script executes, enabling the attacker to capture sensitive information such as the administrator's actions, cookies, and database credentials.",
+  "reason": "The vulnerability involves injecting a payload that remains dormant until triggered by an administrator, which requires understanding of both XSS and the application's backend behavior. However, the steps to exploit are straightforward once the vulnerable input field is identified.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The blind stored XSS vulnerability involves injecting a payload that gets executed in the backend when an administrator interacts with the affected page. This is not directly related to the IDOR or AuthN/AuthZ bypass methodologies described, which focus on testing authorization boundaries by swapping user sessions or resource IDs. The XSS vulnerability is more about input sanitization and output encoding issues rather than authorization flaws.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The reported blind stored XSS requires payload execution detection in an admin context inaccessible through regular user navigation. While the methodology's parameter discovery and simple payload injection could identify the injection vector, same-channel verification via regular navigation would fail since the trigger occurs in an admin panel - a privileged context not normally accessible to testers. The external email notification mechanism used for detection falls outside the methodology's 'same channel' requirement for execution confirmation through regular navigation.",
+    "is_simple_injection": false
+  }
 }

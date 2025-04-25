@@ -41,7 +41,7 @@
   "authnz_byppass_detectable": false,
   "is_simple_payload": false,
   "injection_metadata": {
-    "is_simple_payload": true
+    "is_simple_payload": false
   },
   "authnz_metadata": {
     "reason": "The Firebase Database Takeover vulnerability involves a misconfigured Firebase database that is publicly accessible. The methodology described focuses on detecting authorization and authentication vulnerabilities within the same application by swapping user sessions and resource IDs. However, the Firebase misconfiguration is not related to user sessions or resource IDs within the application but rather to the database's security rules being set to public. This type of vulnerability is not detectable by the described methodology because it does not involve the application's authorization or authentication mechanisms but rather the infrastructure's misconfiguration.",

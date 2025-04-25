@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves modifying the response of an API request to bypass authentication controls, which falls under the AuthN/AuthZ Bypass methodology. The methodology involves testing actions with different user sessions and observing if authorization boundaries can be crossed. In this case, modifying the 'status' value in the response to 'true' allows unauthorized access to the admin panel, which would be detectable under step d) of the methodology (executing actions with unauthenticated user sessions).",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves modifying a server response (changing 'status' from false to true) to bypass authorization checks, which isn't covered by the naive methodologies that focus on swapping user sessions or resource IDs in requests. The detection methods outlined do not explicitly include tampering with server responses and leveraging those changes in subsequent actions, making this a more complex authorization bypass.",
+    "is_simple_authnz": false
   }
 }

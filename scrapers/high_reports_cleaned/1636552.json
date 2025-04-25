@@ -53,7 +53,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an email verification bypass within the same application (Khan Academy). The methodology involves swapping email addresses (resource_ids) and observing the authorization boundary being crossed, which aligns with test e) in the proposed methodology. The steps involve normal user actions (signup, email update) and can be detected by analyzing the requests and responses for unauthorized email verification bypass.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves changing the email to a victim's address, then manipulating verification through subsequent email changes. The methodology's step e) tests substituting resource_ids (emails) in existing actions. The email update action, when tested with substituted emails (victim's), would detect that verification is bypassed without proper authorization checks, fitting the simple AuthZ bypass criteria.",
+    "is_simple_authnz": true
   }
 }

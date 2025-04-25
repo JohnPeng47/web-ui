@@ -62,7 +62,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves manipulating email verification and session states within the same application domain (Shopify), which fits the methodology of testing (user_session, action, resource_id) tuples. The steps involve swapping email addresses and verifying them, which aligns with the test cases e) and a) in the methodology.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves substituting the email parameter (treated as a resource ID) during the email confirmation process. The proposed methodology's step e) covers substituting resource IDs of the same type (email) and testing with existing user sessions. This aligns with detecting the parameter tampering and authorization bypass, similar to example_vuln1. The attack leverages session context during confirmation, which the methodology tests by executing actions with swapped sessions/resource IDs.",
+    "is_simple_authnz": true
   }
 }

@@ -54,7 +54,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves container escape via cgroup abuse, which is a host-level privilege escalation rather than an application-level authN/authZ issue. The proposed methodologies focus on HTTP request/response analysis for session/resource manipulation within an application context, not container breakout techniques.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves escaping a container via cgroup manipulation and accessing the host system, which is an infrastructure misconfiguration and privilege escalation rather than an application-level authorization flaw. The proposed methodologies focus on testing AuthN/AuthZ boundaries within application logic (e.g., session/resource ID swaps), while this exploit abuses container isolation mechanisms and host access controls, making it unrelated to user session/resource authorization checks.",
+    "is_simple_authnz": false
   }
 }

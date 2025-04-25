@@ -54,7 +54,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves swapping resource IDs (video IDs) in an authenticated request to delete another user's content, which falls under the IDOR vulnerability class. The methodology described includes testing for such scenarios by substituting resource IDs and executing requests with different user sessions.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves substituting a resource ID (video ID) in a delete request without proper authorization checks. This matches the IDOR detection methodology where the system would capture the (user_session, action, resource_id) tuple during normal usage (steps 1-3) and test resource_id substitution across sessions (step 4e). The attack pattern directly aligns with substituting resource IDs of the same type (SPOTLIGHT_STORY) with unauthorized ones, which the automated methodology would detect by replaying captured requests with modified IDs.",
+    "is_simple_authnz": true
   }
 }

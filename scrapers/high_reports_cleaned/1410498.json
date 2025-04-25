@@ -54,7 +54,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an Insecure Direct Object Reference (IDOR) where an attacker can access buyer information by manipulating the 'comment_id' parameter in a POST request. This fits the methodology's test case e) where substituting the 'resource_id' (comment_id) with another ID and executing it with an existing user session can reveal unauthorized data. The methodology covers this by automatically testing such substitutions.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an IDOR where modifying the `comment_id` parameter in a POST request allows unauthorized access to buyer information and comment curation. This matches the IDOR detection methodology: the action (`curate_comment`) and resource type (`comment_id`) were identified during normal usage. Substituting `comment_id` with another value (step 4e) would reveal the authorization bypass, as the app fails to validate if the user has rights to the substituted resource_id. The methodology's focus on swapping resource_ids and testing with existing sessions directly applies here.",
+    "is_simple_authnz": true
   }
 }

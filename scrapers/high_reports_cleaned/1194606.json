@@ -42,7 +42,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an unauthorized download bypass by manipulating the WOPI endpoint URL and access token, which is a form of IDOR (Insecure Direct Object Reference). The methodology described involves testing (user_session, action, resource_id) combinations, which would include testing different access tokens and file IDs to see if unauthorized access is possible. This fits the IDOR vulnerability class where resource authorization boundaries are crossed by substituting resource IDs (file IDs and access tokens in this case).",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing a resource (file) by manipulating the access token in the URL, bypassing the intended authorization controls. The methodology detects such issues by testing resource ID substitution (e.g., swapping the token) and verifying if unauthenticated or unauthorized users can access the resource. This aligns with the IDOR/AuthZ testing steps outlined, making it a 'simple' AuthN/AuthZ bypass.",
+    "is_simple_authnz": true
   }
 }

@@ -46,7 +46,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves modifying client-side responses to gain unauthorized permissions, which fits the methodology of testing authorization boundaries by manipulating (user_session, action, resource_id) tuples. Specifically, it matches the scenario where a non-privileged user (john) modifies the response to gain permissions (edit/manage) they should not have, which is detectable by the proposed methodology.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves modifying client-side response data (permission flags) to escalate privileges, which bypasses server-side authorization checks. The described methodology tests AuthZ by swapping user sessions and actions but focuses on direct request manipulation rather than response tampering. However, the core issue (missing server validation) could be detected by testing if the server enforces permissions when processing subsequent actions (e.g., updating board details) after client-side state changes. This aligns with methodology steps b) and c), where user sessions and resource IDs are substituted to verify authorization boundaries.",
+    "is_simple_authnz": true
   }
 }

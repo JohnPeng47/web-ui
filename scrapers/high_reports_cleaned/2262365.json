@@ -39,10 +39,10 @@
   "authnz_byppass_detectable": true,
   "is_simple_payload": false,
   "injection_metadata": {
-    "is_simple_payload": false
+    "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves default credentials (username and password) for an admin account, which falls under AuthN/AuthZ bypass. The methodology described involves testing with different user sessions and actions, including unauthenticated sessions (test d). Since the default credentials are a form of authentication, attempting to log in with these credentials would be detectable as part of the AuthN/AuthZ bypass testing.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves default credentials (admin/admin) which would be detected through unauthenticated session testing (methodology step d) or session swapping (steps a-c). The credentials represent a trivial AuthN bypass through predictable credentials rather than complex authorization logic manipulation.",
+    "is_simple_authnz": true
   }
 }

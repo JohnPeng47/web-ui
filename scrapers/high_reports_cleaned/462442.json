@@ -50,7 +50,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves server impersonation by hijacking the port number before the victim starts the RPC server. The methodology described focuses on testing authorization boundaries within the same application by swapping user sessions and resource IDs. However, this attack involves a separate malicious process impersonating the RPC server, which is outside the scope of the described methodology. The methodology does not account for process-level or port hijacking attacks, nor does it test for server impersonation scenarios.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves server impersonation via port hijacking rather than manipulating user sessions or resource IDs in HTTP requests. The detection methodologies focus on swapping user sessions or resource IDs within the same application context, while this attack exploits a system-level port conflict and lacks server authentication (TLS). The authentication mechanism (HTTP digest) only verifies the client, not the server, which is outside the scope of the provided AuthN/AuthZ/IDOR test cases.",
+    "is_simple_authnz": false
   }
 }

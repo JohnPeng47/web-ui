@@ -58,7 +58,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves serializing user objects with authentication tokens in a project export, which can be accessed by any user who can export the project. This falls under the AuthZ bypass category where a less privileged user (attacker) can access sensitive data (admin's authentication token) by performing a normal action (exporting a project). The methodology would detect this by logging the action (project export) and the resource (user objects with tokens) and testing if the sensitive data is exposed to unauthorized users.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves exposure of authentication tokens through a project export feature. The methodologies focus on testing authorization boundaries by swapping user sessions or resource IDs. However, this issue stems from sensitive data (tokens) being included in an export when they shouldn't be, which is a data exposure flaw rather than an authorization bypass. The attack vector (exporting a project with added admins) involves legitimate actions with improper data handling, not unauthorized access to resources or actions. The detection methods outlined check for access control violations, not for sensitive data leaks in authorized responses.",
+    "is_simple_authnz": false
   }
 }

@@ -48,7 +48,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an authentication bypass where a preview link can be generated without authentication, allowing unauthorized access to password-protected content. This fits the AuthN/AuthZ Bypass methodology where an unauthenticated user can access functionality (preview link generation) that should require authentication. The methodology would detect this by executing the preview link generation action with an unauthenticated user session (step d).",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing the /preview_bar endpoint and generating a preview URL without authentication. The described methodology's step 4d explicitly checks for actions executed with an unauthenticated session. Since generating the preview link requires no authentication (bypassing password protection), this would be detected by testing unauthenticated access to the /preview_bar action, aligning with the AuthN/AuthZ Bypass detection method.",
+    "is_simple_authnz": true
   }
 }

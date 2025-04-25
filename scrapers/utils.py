@@ -19,6 +19,7 @@ class VulnCategory(str, Enum):
     API = "API"
 
 class SeverityLevel(str, Enum):
+    CRITICAL = "CRITICAL"
     HIGH = "HIGH"
     MEDIUM = "MEDIUM"
     LOW = "LOW"
@@ -236,7 +237,9 @@ def map_severity_to_level(severity: Union[List[float], None]) -> str:
     # Use the highest severity score
     max_severity = max(valid_scores)
     
-    if max_severity >= 7.0:
+    if max_severity >= 9.0:
+        return SeverityLevel.CRITICAL.value
+    if max_severity >= 7.0 and max_severity < 9.0:
         return SeverityLevel.HIGH.value
     elif max_severity >= 4.0:
         return SeverityLevel.MEDIUM.value
@@ -442,3 +445,5 @@ def process_reports_in_batches(
             processed += len(batch)
             if total_reports is not None and processed >= total_reports:
                 break
+
+

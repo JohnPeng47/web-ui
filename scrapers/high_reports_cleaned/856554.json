@@ -1,44 +1,48 @@
 {
-    "reported_to": "GitLab",
-    "reported_by": "mike12 ",
-    "title": "Stored XSS on the job page",
-    "content": "\nHello Gitlab!\nSteps to reproduce:\nRun Gitlab docker run --detach --hostname gitlab.example.com --publish 443:443 --publish 80:80 --publish 22:22 --name gitlab gitlab/gitlab-ce:latest\nCreate a new project with README.md\nGo to Operations->Kubernetes\nClick on the \"Add Kubernetes cluster\" button\nSelect the \"Add existing cluster\" tab\nKubernetes cluster name: cluster-example\nAPI URL: https://google.com\nService Token: token-example\nUncheck the \"GitLab-managed cluster\" checkbox\nClick on the \"Add Kubernetes cluster\" button\nClick on the \"Add Kubernetes cluster\" button\nSelect the \"Add existing cluster\" tab\nKubernetes cluster name: cluster-example\nAPI URL: https://google.com\nService Token: token-example\nUncheck the \"GitLab-managed cluster\" checkbox\nClick on the \"Add Kubernetes cluster\" button\ndeploy:\n\n<image_0>\nVulnerable code\nAll vulnerable code is in one file environments_block.vue\nLine 125\nLine 156\nLine 251\nAnd other places where %{kubernetesNamespace} is used\nImpact\nAn attacker can:\nPerform any action within the application that a user can perform\nSteal sensitive user data\nSteal user's credentials\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "GitLab",
+  "reported_by": "mike12 ",
+  "title": "Stored XSS on the job page",
+  "content": "\nHello Gitlab!\nSteps to reproduce:\nRun Gitlab docker run --detach --hostname gitlab.example.com --publish 443:443 --publish 80:80 --publish 22:22 --name gitlab gitlab/gitlab-ce:latest\nCreate a new project with README.md\nGo to Operations->Kubernetes\nClick on the \"Add Kubernetes cluster\" button\nSelect the \"Add existing cluster\" tab\nKubernetes cluster name: cluster-example\nAPI URL: https://google.com\nService Token: token-example\nUncheck the \"GitLab-managed cluster\" checkbox\nClick on the \"Add Kubernetes cluster\" button\nClick on the \"Add Kubernetes cluster\" button\nSelect the \"Add existing cluster\" tab\nKubernetes cluster name: cluster-example\nAPI URL: https://google.com\nService Token: token-example\nUncheck the \"GitLab-managed cluster\" checkbox\nClick on the \"Add Kubernetes cluster\" button\ndeploy:\n\n<image_0>\nVulnerable code\nAll vulnerable code is in one file environments_block.vue\nLine 125\nLine 156\nLine 251\nAnd other places where %{kubernetesNamespace} is used\nImpact\nAn attacker can:\nPerform any action within the application that a user can perform\nSteal sensitive user data\nSteal user's credentials\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": 3000,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Stored"
+  ],
+  "screenshots": {
+    "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/YKE5piuPLADoG9Tb3Ung9H1A?response-content-disposition=attachment%3B%20filename%3D%221.png%22%3B%20filename%2A%3DUTF-8%27%271.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQWYPVO5LI%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T213739Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQDokOg5blpzAUObDAZOT15i8HDXH9cq11eFpQbC%2FPGo5wIhAPfSha2z9VHEWf%2BnsGC6sZOUvhPnOW%2FIAFJ2znXvaEqPKrIFCB4QAxoMMDEzNjE5Mjc0ODQ5Igzg0zEpSeVcc8Ox6NcqjwXEVDuxCxuPDMTQckw6lbBaNEJphN8MIAI%2FIqt7GwGkdU7PIjqgUaa%2BWlULyzhJffMtT87bbyMGDGnC4VuA1BJtHcme0w2IKAbrRunGsGvHn6F6LKaPBuU%2FO60BET21yKOQ%2BQOMB5MvZjb2gNyVFTUwUgsli0eND2p%2F%2BM8qPpfISG0ew53Kd4jlbHUx8MEqm%2BXuBX0YqqGw%2BaaEMkQuD9IUcXE1vRfzC3fm%2BgPwDXea0iPuX%2F6cHK6eXAwzsniYxPaw1qeK0c6ZzckKHZnzgBIW8rj%2FiiLkJ0vC%2Bow06m%2F0FEWG0iUBgkaw6Smq3cnmZUVGCi1HT2Vs2bdGtl6vl1pYCOtpPQu7s8DFtODhmdTTy%2BOtifOBwTiX0ePPuwDpsai3TDLvA3AFhmMFhN08InHhDgdivNdnzhTIc38vY9qsG1qIndAVSJEeNHD6PKSciWzq%2F9p32KcvVvbBJYVbLnSGZLUzYODEkbvA%2BiC%2B%2B4REH%2BdcIYrqjF0%2BaaaeKD5EJ2%2Fhj%2FWv1mKimlm0Ockk25eJckJlikmPGcI%2F1LWyzzRUzCI2dExVchH3VN2TS%2F6DIfwvOhFwHxOSztEyopXwNU5OyTMMPUjq6OsaLdsVx9K%2FimDX%2FoNNakWgzesx1urVJOMi90QteHK%2Fnr5oQAz7S2Dma58jgsmQtRfNpoDFQpnUW6%2Fz7T13hylbaakTeUm%2F0kCMTt8DHKFyu6XTpaw6QkgHtLp836ARQNoWQNQ57s4uL3jf99DiQUmvMG%2FxJTl%2B9olIBYbUGml61qBmhZMnQz3VtC0W55KxsGaod9TKmQIQLpELd3D6E8VAup5NaccQjM4IKzMVZ48sywiLzoXaUImKnCC3xcr1evq%2BMPYiOaRrMJayjL8GOrAB5Xu8CfU2srkdnnrQtwmvv7FrSZgLVwspSZ3o7vOE7TztU7AV1KsLVckMPlJqtUdrh23MNs2wwHMD95vXfEs8uRnXmQFHHGh4M3h2Lw4RZyzLzFY%2BK%2BZ1MhMH%2F%2B%2BPmxhqO8cw5N3JjOViyG2vp4GNZzkaYj4leZ2fHKR8IgMfIUQQTvmXASJxj3LWi35VdTlpk4ncn4xWavObyJL9FrMZ1TS%2BCDen4LGntDpUuj0yXfY%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=0f2f35f05890d747c5a5b92bf563b5e44dae72e60bbc20106e9be5a9b6e0be56"
+  },
+  "disclosed_date": 1610156280,
+  "report_url": "https://hackerone.com/reports/856554",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Run GitLab Docker container: `docker run --detach --hostname gitlab.example.com --publish 443:443 --publish 80:80 --publish 22:22 --name gitlab gitlab/gitlab-ce:latest`"
     ],
-    "bounty": 3000,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Stored"
-    ],
-    "screenshots": {
-        "image_0": "https://hackerone-us-west-2-production-attachments.s3.us-west-2.amazonaws.com/YKE5piuPLADoG9Tb3Ung9H1A?response-content-disposition=attachment%3B%20filename%3D%221.png%22%3B%20filename%2A%3DUTF-8%27%271.png&response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAQGK6FURQWYPVO5LI%2F20250325%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250325T213739Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJIMEYCIQDokOg5blpzAUObDAZOT15i8HDXH9cq11eFpQbC%2FPGo5wIhAPfSha2z9VHEWf%2BnsGC6sZOUvhPnOW%2FIAFJ2znXvaEqPKrIFCB4QAxoMMDEzNjE5Mjc0ODQ5Igzg0zEpSeVcc8Ox6NcqjwXEVDuxCxuPDMTQckw6lbBaNEJphN8MIAI%2FIqt7GwGkdU7PIjqgUaa%2BWlULyzhJffMtT87bbyMGDGnC4VuA1BJtHcme0w2IKAbrRunGsGvHn6F6LKaPBuU%2FO60BET21yKOQ%2BQOMB5MvZjb2gNyVFTUwUgsli0eND2p%2F%2BM8qPpfISG0ew53Kd4jlbHUx8MEqm%2BXuBX0YqqGw%2BaaEMkQuD9IUcXE1vRfzC3fm%2BgPwDXea0iPuX%2F6cHK6eXAwzsniYxPaw1qeK0c6ZzckKHZnzgBIW8rj%2FiiLkJ0vC%2Bow06m%2F0FEWG0iUBgkaw6Smq3cnmZUVGCi1HT2Vs2bdGtl6vl1pYCOtpPQu7s8DFtODhmdTTy%2BOtifOBwTiX0ePPuwDpsai3TDLvA3AFhmMFhN08InHhDgdivNdnzhTIc38vY9qsG1qIndAVSJEeNHD6PKSciWzq%2F9p32KcvVvbBJYVbLnSGZLUzYODEkbvA%2BiC%2B%2B4REH%2BdcIYrqjF0%2BaaaeKD5EJ2%2Fhj%2FWv1mKimlm0Ockk25eJckJlikmPGcI%2F1LWyzzRUzCI2dExVchH3VN2TS%2F6DIfwvOhFwHxOSztEyopXwNU5OyTMMPUjq6OsaLdsVx9K%2FimDX%2FoNNakWgzesx1urVJOMi90QteHK%2Fnr5oQAz7S2Dma58jgsmQtRfNpoDFQpnUW6%2Fz7T13hylbaakTeUm%2F0kCMTt8DHKFyu6XTpaw6QkgHtLp836ARQNoWQNQ57s4uL3jf99DiQUmvMG%2FxJTl%2B9olIBYbUGml61qBmhZMnQz3VtC0W55KxsGaod9TKmQIQLpELd3D6E8VAup5NaccQjM4IKzMVZ48sywiLzoXaUImKnCC3xcr1evq%2BMPYiOaRrMJayjL8GOrAB5Xu8CfU2srkdnnrQtwmvv7FrSZgLVwspSZ3o7vOE7TztU7AV1KsLVckMPlJqtUdrh23MNs2wwHMD95vXfEs8uRnXmQFHHGh4M3h2Lw4RZyzLzFY%2BK%2BZ1MhMH%2F%2B%2BPmxhqO8cw5N3JjOViyG2vp4GNZzkaYj4leZ2fHKR8IgMfIUQQTvmXASJxj3LWi35VdTlpk4ncn4xWavObyJL9FrMZ1TS%2BCDen4LGntDpUuj0yXfY%3D&X-Amz-SignedHeaders=host&X-Amz-Signature=0f2f35f05890d747c5a5b92bf563b5e44dae72e60bbc20106e9be5a9b6e0be56"
-    },
-    "disclosed_date": 1610156280,
-    "report_url": "https://hackerone.com/reports/856554",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Run GitLab Docker container: `docker run --detach --hostname gitlab.example.com --publish 443:443 --publish 80:80 --publish 22:22 --name gitlab gitlab/gitlab-ce:latest`"
-        ],
-        [
-            2,
-            "Create a new project with README.md, go to Operations -> Kubernetes, click 'Add Kubernetes cluster', select 'Add existing cluster' tab, and fill in the fields with malicious input (e.g., XSS payload in Kubernetes cluster name, API URL, or Service Token)."
-        ]
-    ],
-    "vuln_description": "A stored XSS vulnerability exists in the Kubernetes cluster configuration page of GitLab. By injecting malicious scripts into fields like cluster name, API URL, or Service Token, an attacker can execute arbitrary JavaScript in the context of other users who view the Kubernetes cluster configuration page. This can lead to session hijacking, data theft, or unauthorized actions.",
-    "reason": "The vulnerability involves a straightforward injection of malicious scripts into input fields, which is a common and well-documented attack vector. The steps to reproduce are simple and do not require deep understanding of complex application states or novel logic.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The vulnerability involves stored XSS in the Kubernetes cluster configuration, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, but this XSS vulnerability does not fit into those categories as it is a client-side injection issue rather than a server-side authorization flaw.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Create a new project with README.md, go to Operations -> Kubernetes, click 'Add Kubernetes cluster', select 'Add existing cluster' tab, and fill in the fields with malicious input (e.g., XSS payload in Kubernetes cluster name, API URL, or Service Token)."
+    ]
+  ],
+  "vuln_description": "A stored XSS vulnerability exists in the Kubernetes cluster configuration page of GitLab. By injecting malicious scripts into fields like cluster name, API URL, or Service Token, an attacker can execute arbitrary JavaScript in the context of other users who view the Kubernetes cluster configuration page. This can lead to session hijacking, data theft, or unauthorized actions.",
+  "reason": "The vulnerability involves a straightforward injection of malicious scripts into input fields, which is a common and well-documented attack vector. The steps to reproduce are simple and do not require deep understanding of complex application states or novel logic.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves stored XSS which is a client-side attack and does not directly involve authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, which is not applicable to XSS vulnerabilities.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The stored XSS vulnerability involves injecting a payload into the Kubernetes cluster name, API URL, or service token parameters during cluster creation. The methodology's step 3 (analyzing requests/responses) would identify these parameters as injectable. Step 4 (testing with simple payloads) would detect the XSS because the payload would execute on the job page, which is part of regular navigation (same channel). No custom filter bypass is required, and the impact is directly observable in the application's UI.",
+    "is_simple_injection": true
+  }
 }

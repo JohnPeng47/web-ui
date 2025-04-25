@@ -44,7 +44,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The subdomain takeover involves claiming an unclaimed subdomain on a third-party service (UptimeRobot), which is outside the scope of the application's user sessions and resource IDs. The methodology focuses on testing authorization boundaries within the same application using existing user sessions and resource IDs, not external service configurations.",
-    "is_detectable": false
+    "reasoning": "The reported subdomain takeover vulnerability involves a misconfigured DNS record pointing to an unclaimed third-party service (Uptimerobot). The described methodologies focus on testing authentication/authorization boundaries within the application itself (e.g., swapping user sessions, manipulating resource IDs). Subdomain takeovers are infrastructure misconfigurations unrelated to application-layer AuthN/AuthZ logic, and thus not detectable via the proposed user-session/resource-ID substitution methods.",
+    "is_simple_authnz": false
   }
 }

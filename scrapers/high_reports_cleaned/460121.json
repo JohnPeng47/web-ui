@@ -42,7 +42,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves publicly editable GitHub wikis, which is a configuration issue rather than an authentication or authorization flaw that can be detected by swapping user sessions or resource IDs. The methodology described focuses on testing authorization boundaries within an application by manipulating user sessions and resource IDs, not on detecting misconfigured repository settings.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves publicly editable GitHub wikis, which is a misconfiguration in GitHub's repository settings rather than an application-specific authentication or authorization flaw. The proposed methodologies focus on testing within the same application by swapping sessions/resource IDs, but this issue stems from GitHub's platform-level permissions (not application logic). The wiki's public editability bypasses GitHub's own authorization controls, which are outside the scope of the described IDOR/AuthZ detection methods.",
+    "is_simple_authnz": false
   }
 }

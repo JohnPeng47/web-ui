@@ -46,7 +46,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves members from a parent group retaining access to a subgroup after transfer, which would be detectable by analyzing (user_session, action, resource_id) tuples. The methodology would capture the unauthorized access when testing with different user sessions against the transferred subgroup's resource_id.",
-    "is_detectable": true
+    "reasoning": "The bug involves inherited permissions not being revoked after transferring a subgroup, which is an authorization issue. The proposed methodologies detect such issues by testing if users retain access post-transfer. Since the detection involves swapping user sessions and checking access to the transferred resource (subgroup), it fits the IDOR/AuthZ testing approach where unauthorized access is identified through session and resource substitution.",
+    "is_simple_authnz": true
   }
 }

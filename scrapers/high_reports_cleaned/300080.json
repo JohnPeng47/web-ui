@@ -1,42 +1,46 @@
 {
-    "reported_to": "Uber",
-    "reported_by": "gregoryvperry ",
-    "title": "SSL-protected Reflected XSS in https://m.uber.com/0-dfffb25d2cf6ceeb0a27.js Endpoint",
-    "content": "\nSummary\nThe _cc request parameter at the https://m.uber.com/0-dfffb25d2cf6ceeb0a27.js mobile endpoint is copied into a javascript string encapsulated in double quotation marks, resulting in SSL-protected payloads being reflected unmodified in the application's response. The script-src whitelist at the endpoint includes a wildcard *.cloudfront.net host, which could be used by any attacker with an Amazon Web Services account to provision an arbitrary cloudfront.net host to serve trusted files from. The endpoint also has a missing base-uri, which allows the injection of base tags. They can be used to set the base URL for all relative (script) URLs to an attacker controlled domain. In addition to the reflected XSS issue, both the script-src and basi-uri issues are considered high severity findings under Content Security Policy 3.\nSecurity Impact\nArbitrary SSL-protected XSS can be reflected unescaped from the https://m.uber.com/0-dfffb25d2cf6ceeb0a27.js mobile endpoint, resulting in the ability for an attacker to generate arbitrary javascript and/or html content.\nReproduction Steps\nhttps://m.uber.com/0-dfffb25d2cf6ceeb0a27.js?_cc=asdf\"}}</script><script>alert(1)</script>\nSpecifics\nThe resulting unescaped content rendered:\nCode 310 Bytes\n1{\"enabled\":true,\"sid\":\"bbc661585c424072\",\"url\":\"www.cdn-net.com\",\"cf\":1022963},\"queryParams\":{\"_cc\":\"asdf\\\"}}</script><script>alert(1)</script>\"},\"useragent\":{\"ua\":\"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/63.0.3239.84 Chrome/63.0.3239.84 Safari/537.36\",\"browser\":\nImpact\nWith a properly crafted javascript and/or html page, an attacker could harvest Uber login and password credentials, credit card payment information etc.\n\n",
-    "severity": [
-        9.1,
-        null
+  "reported_to": "Uber",
+  "reported_by": "gregoryvperry ",
+  "title": "SSL-protected Reflected XSS in https://m.uber.com/0-dfffb25d2cf6ceeb0a27.js Endpoint",
+  "content": "\nSummary\nThe _cc request parameter at the https://m.uber.com/0-dfffb25d2cf6ceeb0a27.js mobile endpoint is copied into a javascript string encapsulated in double quotation marks, resulting in SSL-protected payloads being reflected unmodified in the application's response. The script-src whitelist at the endpoint includes a wildcard *.cloudfront.net host, which could be used by any attacker with an Amazon Web Services account to provision an arbitrary cloudfront.net host to serve trusted files from. The endpoint also has a missing base-uri, which allows the injection of base tags. They can be used to set the base URL for all relative (script) URLs to an attacker controlled domain. In addition to the reflected XSS issue, both the script-src and basi-uri issues are considered high severity findings under Content Security Policy 3.\nSecurity Impact\nArbitrary SSL-protected XSS can be reflected unescaped from the https://m.uber.com/0-dfffb25d2cf6ceeb0a27.js mobile endpoint, resulting in the ability for an attacker to generate arbitrary javascript and/or html content.\nReproduction Steps\nhttps://m.uber.com/0-dfffb25d2cf6ceeb0a27.js?_cc=asdf\"}}</script><script>alert(1)</script>\nSpecifics\nThe resulting unescaped content rendered:\nCode 310 Bytes\n1{\"enabled\":true,\"sid\":\"bbc661585c424072\",\"url\":\"www.cdn-net.com\",\"cf\":1022963},\"queryParams\":{\"_cc\":\"asdf\\\"}}</script><script>alert(1)</script>\"},\"useragent\":{\"ua\":\"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/63.0.3239.84 Chrome/63.0.3239.84 Safari/537.36\",\"browser\":\nImpact\nWith a properly crafted javascript and/or html page, an attacker could harvest Uber login and password credentials, credit card payment information etc.\n\n",
+  "severity": [
+    9.1,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - Reflected"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1514304120,
+  "report_url": "https://hackerone.com/reports/300080",
+  "is_multi_component": false,
+  "complexity": "HIGH",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Navigate to the vulnerable endpoint: https://m.uber.com/0-dfffb25d2cf6ceeb0a27.js?_cc=asdf\"}}</script><script>alert(1)</script>"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - Reflected"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1514304120,
-    "report_url": "https://hackerone.com/reports/300080",
-    "is_multi_component": false,
-    "complexity": "HIGH",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Navigate to the vulnerable endpoint: https://m.uber.com/0-dfffb25d2cf6ceeb0a27.js?_cc=asdf\"}}</script><script>alert(1)</script>"
-        ],
-        [
-            2,
-            "Observe that the payload is reflected unescaped in the response, executing the JavaScript alert(1)"
-        ]
-    ],
-    "vuln_description": "The vulnerability is a reflected XSS in the _cc parameter of the specified Uber endpoint. The parameter value is inserted into a JavaScript string without proper escaping, allowing arbitrary JavaScript execution. Additionally, the CSP policy is weak, allowing scripts from *.cloudfront.net, and there's a missing base-uri directive that enables base tag injection.",
-    "reason": "While the vulnerability involves multiple components (XSS, CSP bypass via cloudfront.net, and base tag injection), each component is relatively straightforward to test for and the interactions between them are standard for XSS vulnerabilities. The attack doesn't require maintaining complex application state or understanding novel application logic.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The vulnerability involves a reflected XSS issue in a specific endpoint, which is not directly related to authentication or authorization bypass. The described methodology focuses on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, but this XSS vulnerability does not fit into those categories as it doesn't involve crossing authorization boundaries or manipulating user sessions/resources in the way the methodology describes.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Observe that the payload is reflected unescaped in the response, executing the JavaScript alert(1)"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a reflected XSS in the _cc parameter of the specified Uber endpoint. The parameter value is inserted into a JavaScript string without proper escaping, allowing arbitrary JavaScript execution. Additionally, the CSP policy is weak, allowing scripts from *.cloudfront.net, and there's a missing base-uri directive that enables base tag injection.",
+  "reason": "While the vulnerability involves multiple components (XSS, CSP bypass via cloudfront.net, and base tag injection), each component is relatively straightforward to test for and the interactions between them are standard for XSS vulnerabilities. The attack doesn't require maintaining complex application state or understanding novel application logic.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves reflected XSS in a JavaScript endpoint, which is not related to authentication or authorization bypass. The methodology described focuses on AuthN/AuthZ and IDOR vulnerabilities by testing user sessions and resource access across different contexts. Since the reported issue is about XSS and CSP misconfigurations, it does not fall under the scope of the described methodologies.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves a reflected XSS through a URL parameter (_cc) that accepts unsanitized input and reflects it directly into a JavaScript context. The methodology's 'simple payload' approach would detect this since: (1) The _cc parameter would be identified as injectable during request/response logging, (2) A basic payload like </script><script>alert(1)</script> requires no custom filter bypass, (3) The injection result is directly observable in the same HTTP response (same-channel detection) without requiring stored payload triggering or multi-role navigation. The CSP misconfigurations (wildcard script-src and missing base-uri) don't affect the methodology's ability to find the core injection vector.",
+    "is_simple_injection": true
+  }
 }

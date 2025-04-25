@@ -54,7 +54,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an attacker accessing private commit titles and team member comments via email, which should be restricted to team members only. This can be detected by the methodology as it involves testing authorization boundaries by swapping user sessions (attacker@gmail.com vs. victim@gmail.com) and verifying access to restricted resources (commit titles and comments). The methodology covers this by testing (user_session, action, resource_id) tuples where the resource_id is the commit and comments, and the action is accessing them via email.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves unauthorized email notifications containing private data sent to non-team members. The detection methodology focuses on HTTP request/response analysis and session/resource ID substitution. Since this issue stems from improper email notification logic (sending sensitive data to external emails) rather than direct API authorization flaws, it wouldn't be caught by testing session swapping or resource ID manipulation in HTTP requests.",
+    "is_simple_authnz": false
   }
 }

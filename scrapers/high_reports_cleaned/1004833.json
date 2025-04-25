@@ -1,45 +1,46 @@
 {
-    "reported_to": "Informatica",
-    "reported_by": "rodntt ",
-    "title": "Cross-site Scripting (XSS) - DOM - iqcard.informatica.com",
-    "content": "\nHello all\nI found a DOM based XSS at iqcard.informatica.com\nDescription\nAfter finding the path iqcard.informatica.com/pub/fujitsu/fm3v2/player/attach.html. I noticed that the code inside attach.html was vulnerable to DOM XSS, due to the fact of the javascript document.location function. search. The code below illustrates the code contained in the attach.html file\nCode 229 Bytes\n1<HTML>\n2<HEAD>\n3<SCRIPT>\n4function GetAttach()\n5{\n6\tvar strSearch = document.location.search\n7\tstrSearch = strSearch.substring(1)\n8\t\n9\tdocument.location.replace(strSearch)\n10}\n11</SCRIPT>\n12</HEAD>\n13<BODY onload='GetAttach()'>\n14\n15\n16</BODY>\n17</HTML>\nAs can be seen through the code above, the variable strSearch receives everything that comes from the URL after the character? and then insert it into the function document.location.replace (). Through this scenario we have some possibilities.\n1 - We can direct the user to any page we want for example:\nCode 76 Bytes\n1https://iqcard.informatica.com/pub/fujitsu/fm3v2/player/attach.html?evil.com\n2 - We can run a DOM Based XSS, running the javascript schema, javascript: alert (1);\nCode 87 Bytes\n1https://iqcard.informatica.com/pub/fujitsu/fm3v2/player/attach.html?javascript:alert(1)\nPoC\nI uploaded a video and an image.\nImpact\nAn attacker can redirect a user to a malicious page or execute XSS attacks against users of the application or use that domain as a phishing vector to attack other users of informatica.com\n\n",
-    "severity": [
-        8.4,
-        null
+  "reported_to": "Informatica",
+  "reported_by": "rodntt ",
+  "title": "Cross-site Scripting (XSS) - DOM - iqcard.informatica.com",
+  "content": "\nHello all\nI found a DOM based XSS at iqcard.informatica.com\nDescription\nAfter finding the path iqcard.informatica.com/pub/fujitsu/fm3v2/player/attach.html. I noticed that the code inside attach.html was vulnerable to DOM XSS, due to the fact of the javascript document.location function. search. The code below illustrates the code contained in the attach.html file\nCode 229 Bytes\n1<HTML>\n2<HEAD>\n3<SCRIPT>\n4function GetAttach()\n5{\n6\tvar strSearch = document.location.search\n7\tstrSearch = strSearch.substring(1)\n8\t\n9\tdocument.location.replace(strSearch)\n10}\n11</SCRIPT>\n12</HEAD>\n13<BODY onload='GetAttach()'>\n14\n15\n16</BODY>\n17</HTML>\nAs can be seen through the code above, the variable strSearch receives everything that comes from the URL after the character? and then insert it into the function document.location.replace (). Through this scenario we have some possibilities.\n1 - We can direct the user to any page we want for example:\nCode 76 Bytes\n1https://iqcard.informatica.com/pub/fujitsu/fm3v2/player/attach.html?evil.com\n2 - We can run a DOM Based XSS, running the javascript schema, javascript: alert (1);\nCode 87 Bytes\n1https://iqcard.informatica.com/pub/fujitsu/fm3v2/player/attach.html?javascript:alert(1)\nPoC\nI uploaded a video and an image.\nImpact\nAn attacker can redirect a user to a malicious page or execute XSS attacks against users of the application or use that domain as a phishing vector to attack other users of informatica.com\n\n",
+  "severity": [
+    8.4,
+    null
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Cross-site Scripting (XSS) - DOM"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1602595320,
+  "report_url": "https://hackerone.com/reports/1004833",
+  "vuln_category": "WEB_APP",
+  "is_multi_component": false,
+  "complexity": "LOW",
+  "novelty": "LOW",
+  "steps": [
+    [
+      1,
+      "Navigate to the URL: https://iqcard.informatica.com/pub/fujitsu/fm3v2/player/attach.html?javascript:alert(1)"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Cross-site Scripting (XSS) - DOM"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1602595320,
-    "report_url": "https://hackerone.com/reports/1004833",
-    "vuln_category": "WEB_APP",
-    "is_multi_component": false,
-    "complexity": "LOW",
-    "novelty": "LOW",
-    "steps": [
-        [
-            1,
-            "Navigate to the URL: https://iqcard.informatica.com/pub/fujitsu/fm3v2/player/attach.html?javascript:alert(1)"
-        ],
-        [
-            2,
-            "Observe that the JavaScript code in the alert() function is executed due to the DOM XSS vulnerability"
-        ]
-    ],
-    "vuln_description": "The vulnerability is a DOM-based XSS in the attach.html page of iqcard.informatica.com. The page takes user input from the URL after the '?' character and passes it directly to document.location.replace() without any sanitization, allowing execution of arbitrary JavaScript code or redirection to malicious sites.",
-    "reason": "The vulnerability is straightforward to discover as it involves a single component (the URL parameter) and the exploitation is direct with no need for complex interactions or state manipulation. The vulnerability follows a common pattern of unsanitized URL parameters being used in JavaScript functions.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "injection_metadata": {
-        "is_simple_payload": true
-    },
-    "authnz_metadata": {
-        "reason": "The XSS vulnerability involves DOM manipulation through URL parameters, which is not directly related to authentication or authorization checks. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, not on detecting DOM-based XSS vulnerabilities.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Observe that the JavaScript code in the alert() function is executed due to the DOM XSS vulnerability"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a DOM-based XSS in the attach.html page of iqcard.informatica.com. The page takes user input from the URL after the '?' character and passes it directly to document.location.replace() without any sanitization, allowing execution of arbitrary JavaScript code or redirection to malicious sites.",
+  "reason": "The vulnerability is straightforward to discover as it involves a single component (the URL parameter) and the exploitation is direct with no need for complex interactions or state manipulation. The vulnerability follows a common pattern of unsanitized URL parameters being used in JavaScript functions.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "injection_metadata": {
+    "reasoning": "The DOM XSS vulnerability described in the report is triggered via the URL's query parameter (document.location.search), which is directly processed and passed to document.location.replace(). The Injectable Response Discovery Methodology would detect this parameter during Step 3 (parameter extraction) since the query string is a standard injectable parameter. The Simple Payload methodology would successfully identify the vulnerability because: (1) the query parameter is injectable, (2) a basic payload like 'javascript:alert(1)' requires no filter bypass (matches the 'simple' criteria), and (3) payload execution occurs in the same channel (the redirect is immediate and observable via HTTP response/navigation behavior). The payload does not require stored XSS-like multi-step navigation.",
+    "is_simple_injection": true
+  },
+  "authnz_metadata": {
+    "reason": "The XSS vulnerability involves manipulating the DOM through URL parameters, which is not directly related to authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, not on DOM manipulation or XSS.",
+    "is_detectable": false
+  }
 }

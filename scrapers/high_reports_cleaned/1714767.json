@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The debug page lacks access control, allowing unauthenticated or unauthorized users to perform actions (upload, read, delete files) that should be restricted. This fits the AuthN/AuthZ Bypass vulnerability class, where the methodology would detect it by testing actions with unauthenticated sessions (step d) or with non-privileged user sessions (step b/c).",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves a debug page with no access control, allowing unauthenticated users to upload, read, and delete files. The outlined methodology detects AuthN/AuthZ bypass by testing actions with unauthenticated sessions (step d) and verifying if authorization boundaries are crossed. Since the debug page lacks authentication/authorization checks entirely, the automated detection of these actions being executable without a valid session would flag this as a simple AuthN/AuthZ bypass.",
+    "is_simple_authnz": true
   }
 }

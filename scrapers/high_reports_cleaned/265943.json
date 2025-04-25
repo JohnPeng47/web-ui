@@ -50,7 +50,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves chaining multiple flaws in the SSO and SnapPublisher tool, including CSRF, token leakage via referrer parameter, and token reuse. The methodology described focuses on testing (user_session, action, resource_id) tuples within the same application, but this attack involves cross-application interactions (accounts.snapchat.com and snappublisher.snapchat.com) and specific SVG-based XSS exploitation, which are not covered by the naive methodology.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves CSRF and token leakage via referrer manipulation, which are AuthZ issues. The methodologies cover CSRF (test a/b) and parameter substitution (test e) for the referrer. However, the XSS via SVG upload and token reuse are beyond the scope. The core AuthZ flaws (CSRF, parameter manipulation) are detectable, but the full chain requires additional steps not covered by the methodologies.",
+    "is_simple_authnz": true
   }
 }

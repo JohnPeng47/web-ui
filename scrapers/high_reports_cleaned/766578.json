@@ -45,7 +45,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves the lack of token expiry and brute-forcing of PINs within the same application context. The methodology described involves testing authentication and authorization boundaries by swapping user sessions and resource IDs, which would apply here. Specifically, the test would involve swapping or reusing tokens (resource_ids) across sessions (user_sessions) to detect the lack of expiry and brute-force vulnerability.",
-    "is_detectable": true
+    "reasoning": "The vulnerability stems from missing token expiration and rate limiting, allowing brute-force attacks on the PIN. The described methodologies focus on authorization checks via session/resource swapping, not on token lifecycle or brute-force prevention. Since the issue isn't about improper authorization between users/resources but missing safeguards in the authentication flow, it wouldn't be detected by the outlined IDOR/AuthZ bypass methods.",
+    "is_simple_authnz": false
   }
 }

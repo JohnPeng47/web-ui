@@ -1,58 +1,62 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "un4gi ",
-    "title": "Dashboard sharing enables code injection into \u2588\u2588\u2588\u2588 emails",
-    "content": "\nSummary:\nAn attacker is able to share their dashboard with other \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 users. When sharing their dashboard, the message is not fully sanitized for HTML characters before sending to the recipient. This allows the attacker to craft a believable spearphishing e-mail coming from an e-mail address owned by the \u2588\u2588\u2588\u2588\u2588\u2588\u2588.\nStep-by-step Reproduction Instructions\nCreate an account or sign into \u2588\u2588\u2588\u2588\u2588\u2588.\nBrowse to \u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\nCreate a dashboard by clicking the dropdown menu and selecting New Dashboard. \u2588\u2588\u2588\u2588\nOnce you create the dashboard, go back to \u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588 and select the dashboard you created.\nYou should see a share icon in the top right. Click this and click Add groups and users. \u2588\u2588\u2588\nIf you start typing in the To: field, a list of names should populate. Select the name of an account you own. \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nCheck the Send an email invitation box. Populate the Message field with your spearphishing attempt (this can contain various HTML elements) and click Share. \u2588\u2588\u2588\u2588\u2588\u2588\nThe victim will receive an e-mail from \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 with the injected HTML. As you can see below, the <img> tag did not work correctly but the other formatting seemed to work fine. This allows the adversary to get very creative.. \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 Note: the message above says \"...shared with you by unagi unagi.\", however an attacker could simply sign up with a first/last name of \"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\" or something similar to make this more believable.\nSuggested Mitigation/Remediation Actions\nSanitize all HTML tags prior to sending the e-mail to the recipient.\nImpact\nAn adversary could conduct a spearphishing campaign from an \u2588\u2588\u2588\u2588\u2588\u2588 mail server - the scale of effects would be dependent on the creativity of the attacker and the gullibility of the victim.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "un4gi ",
+  "title": "Dashboard sharing enables code injection into \u2588\u2588\u2588\u2588 emails",
+  "content": "\nSummary:\nAn attacker is able to share their dashboard with other \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 users. When sharing their dashboard, the message is not fully sanitized for HTML characters before sending to the recipient. This allows the attacker to craft a believable spearphishing e-mail coming from an e-mail address owned by the \u2588\u2588\u2588\u2588\u2588\u2588\u2588.\nStep-by-step Reproduction Instructions\nCreate an account or sign into \u2588\u2588\u2588\u2588\u2588\u2588.\nBrowse to \u2588\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\nCreate a dashboard by clicking the dropdown menu and selecting New Dashboard. \u2588\u2588\u2588\u2588\nOnce you create the dashboard, go back to \u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588 and select the dashboard you created.\nYou should see a share icon in the top right. Click this and click Add groups and users. \u2588\u2588\u2588\nIf you start typing in the To: field, a list of names should populate. Select the name of an account you own. \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\nCheck the Send an email invitation box. Populate the Message field with your spearphishing attempt (this can contain various HTML elements) and click Share. \u2588\u2588\u2588\u2588\u2588\u2588\nThe victim will receive an e-mail from \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 with the injected HTML. As you can see below, the <img> tag did not work correctly but the other formatting seemed to work fine. This allows the adversary to get very creative.. \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 Note: the message above says \"...shared with you by unagi unagi.\", however an attacker could simply sign up with a first/last name of \"\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\" or something similar to make this more believable.\nSuggested Mitigation/Remediation Actions\nSanitize all HTML tags prior to sending the e-mail to the recipient.\nImpact\nAn adversary could conduct a spearphishing campaign from an \u2588\u2588\u2588\u2588\u2588\u2588 mail server - the scale of effects would be dependent on the creativity of the attacker and the gullibility of the victim.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1613693280,
+  "report_url": "https://hackerone.com/reports/904064",
+  "is_multi_component": true,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Create an account or sign into the target platform."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "Code Injection"
+    [
+      2,
+      "Navigate to the dashboard creation section and create a new dashboard."
     ],
-    "screenshots": {},
-    "disclosed_date": 1613693280,
-    "report_url": "https://hackerone.com/reports/904064",
-    "is_multi_component": true,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Create an account or sign into the target platform."
-        ],
-        [
-            2,
-            "Navigate to the dashboard creation section and create a new dashboard."
-        ],
-        [
-            3,
-            "Click the share icon on the dashboard and select 'Add groups and users'."
-        ],
-        [
-            4,
-            "Enter the name of an account you own in the 'To:' field."
-        ],
-        [
-            5,
-            "Check the 'Send an email invitation' box and inject HTML into the 'Message' field."
-        ],
-        [
-            6,
-            "Click 'Share' to send the email with the injected HTML."
-        ]
+    [
+      3,
+      "Click the share icon on the dashboard and select 'Add groups and users'."
     ],
-    "vuln_description": "An attacker can inject HTML into dashboard sharing emails, allowing them to craft spearphishing emails that appear to come from a trusted source within the organization. This is due to insufficient sanitization of HTML tags in the message field before sending the email.",
-    "reason": "The vulnerability involves a straightforward injection of HTML into a message field, which is a common and well-known attack vector. The steps to reproduce are clear and do not require complex interactions or state manipulation.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The vulnerability involves HTML injection in dashboard sharing messages, which is a form of input sanitization issue rather than an authentication or authorization bypass. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions and resource IDs, which does not apply to input sanitization vulnerabilities.",
-        "is_detectable": false
-    }
+    [
+      4,
+      "Enter the name of an account you own in the 'To:' field."
+    ],
+    [
+      5,
+      "Check the 'Send an email invitation' box and inject HTML into the 'Message' field."
+    ],
+    [
+      6,
+      "Click 'Share' to send the email with the injected HTML."
+    ]
+  ],
+  "vuln_description": "An attacker can inject HTML into dashboard sharing emails, allowing them to craft spearphishing emails that appear to come from a trusted source within the organization. This is due to insufficient sanitization of HTML tags in the message field before sending the email.",
+  "reason": "The vulnerability involves a straightforward injection of HTML into a message field, which is a common and well-known attack vector. The steps to reproduce are clear and do not require complex interactions or state manipulation.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves HTML injection in a dashboard sharing feature, which is a specific action (sharing a dashboard) with a resource (the dashboard) and involves user sessions. The methodology described involves testing actions with different user sessions and resource IDs, which would include testing the dashboard sharing functionality with different users and messages. Since the issue is within the same application and involves user sessions and resources, it falls under the scope of the described methodologies.",
+    "is_detectable": true
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves unsanitized HTML injection into a message parameter during dashboard sharing, which is reflected in emails. The methodology would log the HTTP request containing the message parameter during regular use. Simple payloads (e.g., <b>test</b>) injected into this parameter would be detected if the email's HTML rendering is checked. However, since the payload execution occurs in an external email (not the same web channel), it violates the 'same channel' detection requirement. Thus, the methodology might miss it unless email content is explicitly monitored as part of the application's regular navigation flow.",
+    "is_simple_injection": false
+  }
 }

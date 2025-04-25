@@ -54,7 +54,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves unauthorized access to sensitive data (resumes/CVs) through a misconfigured Salesforce instance, which can be detected by analyzing HTTP requests and responses for improper access controls. The methodology involves testing for IDOR and AuthN/AuthZ bypass by swapping user sessions and resource IDs, which would reveal the unauthorized access to files without authentication.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing sensitive files without authentication by manipulating requests to the Salesforce endpoint. The methodology's step d) tests actions with unauthenticated sessions, which would detect this AuthN bypass. The attack doesn't require session swapping but exploits missing AuthZ checks on the endpoint, aligning with the 'AuthN/AuthZ Bypass' detection method.",
+    "is_simple_authnz": true
   }
 }

@@ -49,7 +49,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves bypassing authentication and authorization controls by manipulating SOAP requests to access admin functionality without proper credentials. The methodology described involves testing authorization boundaries by swapping user sessions and resource IDs, which aligns with the steps needed to detect this vulnerability (e.g., executing actions with unauthenticated sessions or different user sessions to test for access control failures).",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves bypassing authentication/authorization controls on SOAP endpoints by removing required security headers and exploiting exposed WSDL metadata. This matches methodology steps d (test actions with unauthenticated sessions) and a/b (test privileged actions with unprivileged sessions). The attack surface is directly covered by the described AuthZ testing pattern of executing sensitive actions (GetAdministratorList/GetAccessAdministrator) without proper authentication.",
+    "is_simple_authnz": true
   }
 }

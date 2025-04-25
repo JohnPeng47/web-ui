@@ -56,7 +56,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves manipulating the password reset request by adding an additional email in the JSON body, which results in both emails receiving the same reset token. This falls under the AuthZ bypass category where an unauthorized user (attacker) can perform actions (password reset) on a resource (victim's account) they should not have access to. The methodology would detect this by analyzing the request and response for the password reset action and identifying that the same token is issued for multiple emails, which violates the authorization boundary.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves manipulating the password reset endpoint's input parameters (emails array) to receive a shared token. The described methodology includes testing parameter substitution (resource_ids) across sessions. Since the attack modifies a resource identifier (email address) in an existing password reset action, it aligns with step 4e of the methodology where resource_ids are substituted. The system would detect this by testing different email values in the password reset request.",
+    "is_simple_authnz": true
   }
 }

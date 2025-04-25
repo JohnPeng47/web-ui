@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an IDOR where unauthenticated requests can access payment data by manipulating the 'user_id' parameter in a POST request. This fits the methodology's test case d) (executing actions with unauthenticated user sessions) and e) (substituting resource_ids with new ones). The methodology would detect this by observing that unauthenticated requests can access sensitive data by simply changing the 'user_id' parameter.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an unauthenticated POST request where the 'user_id' parameter can be altered to access different users' payment data. The methodology's step d) (execute actions with unauthenticated sessions) directly applies here, as no session is required. Additionally, step e) (substitute resource_ids) is relevant since changing the 'user_id' allows unauthorized access to other users' resources. This fits the IDOR detection pattern via parameter manipulation without authentication checks.",
+    "is_simple_authnz": true
   }
 }

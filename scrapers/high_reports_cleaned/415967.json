@@ -1,42 +1,46 @@
 {
-    "reported_to": "Brave Software",
-    "reported_by": "qab ",
-    "title": "chrome://brave navigation from web",
-    "content": "\nSummary:\nIt's possible to navigate to the infamous 'chrome://brave' (and all other) privileged page from web, requiring only a single click. This is possible by opening popups with the 'noopener' attribute.\nProducts affected:\nBrave: 0.24.0\nV8: 6.9.427.23\nrev: f657f15bf7e0e0c50a2b854c6b05edb59bfc556c\nMuon: 8.1.6\nOS Release: 10.0.17134\nUpdate Channel: Release\nOS Architecture: x64\nOS Platform: Microsoft Windows\nNode.js: 7.9.0\nBrave Sync: v1.4.2\nlibchromiumcontent: 69.0.3497.100\nSteps To Reproduce:\nHost attached PoC from web\nClick button\nImpact\nThis is a direct violation of SOP, we can open any URL of which chrome://brave is the worst as it could lead to RCE.\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "Brave Software",
+  "reported_by": "qab ",
+  "title": "chrome://brave navigation from web",
+  "content": "\nSummary:\nIt's possible to navigate to the infamous 'chrome://brave' (and all other) privileged page from web, requiring only a single click. This is possible by opening popups with the 'noopener' attribute.\nProducts affected:\nBrave: 0.24.0\nV8: 6.9.427.23\nrev: f657f15bf7e0e0c50a2b854c6b05edb59bfc556c\nMuon: 8.1.6\nOS Release: 10.0.17134\nUpdate Channel: Release\nOS Architecture: x64\nOS Platform: Microsoft Windows\nNode.js: 7.9.0\nBrave Sync: v1.4.2\nlibchromiumcontent: 69.0.3497.100\nSteps To Reproduce:\nHost attached PoC from web\nClick button\nImpact\nThis is a direct violation of SOP, we can open any URL of which chrome://brave is the worst as it could lead to RCE.\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": 650,
+  "weaknesses": [
+    "Code Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1540336380,
+  "report_url": "https://hackerone.com/reports/415967",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Host the provided Proof of Concept (PoC) on a web server."
     ],
-    "bounty": 650,
-    "weaknesses": [
-        "Code Injection"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1540336380,
-    "report_url": "https://hackerone.com/reports/415967",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Host the provided Proof of Concept (PoC) on a web server."
-        ],
-        [
-            2,
-            "Click the button in the PoC to trigger the navigation to 'chrome://brave'."
-        ]
-    ],
-    "vuln_description": "The vulnerability allows navigation to privileged pages like 'chrome://brave' from a web context by exploiting the 'noopener' attribute in popups, violating the Same-Origin Policy (SOP) and potentially leading to Remote Code Execution (RCE).",
-    "reason": "The attack involves a single, straightforward step (clicking a button) and leverages a known attribute ('noopener') in a common web context. There are no complex interactions or state manipulations required.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The vulnerability involves navigating to privileged pages (like chrome://brave) from the web, which is a violation of the Same-Origin Policy (SOP). The proposed methodologies focus on testing authorization boundaries within the same application by swapping user sessions and resource IDs, but this issue is about bypassing browser security controls rather than application-level authN/authZ. The detection methods described do not cover browser-specific navigation or SOP violations.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Click the button in the PoC to trigger the navigation to 'chrome://brave'."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows navigation to privileged pages like 'chrome://brave' from a web context by exploiting the 'noopener' attribute in popups, violating the Same-Origin Policy (SOP) and potentially leading to Remote Code Execution (RCE).",
+  "reason": "The attack involves a single, straightforward step (clicking a button) and leverages a known attribute ('noopener') in a common web context. There are no complex interactions or state manipulations required.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves navigating to privileged pages from a web context, which is a violation of the Same Origin Policy (SOP). The methodology described focuses on testing authorization boundaries within the same application by swapping user sessions and resource IDs. However, this specific issue involves cross-origin navigation to privileged chrome:// URLs, which is outside the scope of the described methodology as it doesn't involve user sessions or resource IDs within the same application.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves privileged chrome:// URL navigation via popup window manipulation rather than traditional injection into HTTP parameters. The methodology focuses on analyzing HTTP request/response parameters for injection points, while this issue stems from client-side JavaScript navigation logic that doesn't require parameter manipulation. The attack vector uses built-in browser navigation features (window.open with noopener) rather than exploiting server-side parameter injection vulnerabilities.",
+    "is_simple_injection": false
+  }
 }

@@ -52,7 +52,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an authenticated user (attacker) performing an action (inviting an existing email) and accessing a resource (victim's account) without proper authorization. This fits the IDOR vulnerability class where the attacker's session is used to perform an action that should require the victim's authorization. The methodology would detect this by swapping the attacker's session with the victim's session and observing the unauthorized access.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an AuthZ bypass where the confirmation link does not validate the email ownership, allowing an attacker to take over an account by using their own session to confirm another user's email. The described methodology would detect this by testing actions (confirmation link) with different user sessions (attacker's session) and resource IDs (victim's email), revealing the authorization failure.",
+    "is_simple_authnz": true
   }
 }

@@ -42,7 +42,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an API endpoint (`/api/as/v1/credentials/`) that improperly authorizes access to sensitive data (API keys) for any authenticated user, regardless of their role. This fits the AuthZ Bypass methodology where a less privileged user (Analyst or Editor) can access functionality (listing all API keys) that should be restricted to higher-privileged users. The methodology involves swapping user sessions (from admin to limited user) and testing access to the same action (querying the credentials endpoint), which would reveal the authorization boundary being crossed.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves an authenticated user accessing an API endpoint (/api/as/v1/credentials/) without proper authorization checks based on their role. The described methodology explicitly tests AuthZ boundaries by swapping user sessions and verifying access to actions/endpoints. Since the endpoint does not validate the user's role during authorization, the automated session-swapping tests (methodology step 4b/c) would detect this flaw by observing that a low-privileged user session can successfully access the credentials endpoint.",
+    "is_simple_authnz": true
   }
 }

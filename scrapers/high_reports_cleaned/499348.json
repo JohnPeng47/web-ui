@@ -46,7 +46,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an exported activity in the Twitter Lite Android app that doesn't validate intent data, allowing local file access, JavaScript injection, and open redirects. This is a client-side issue specific to Android's intent handling and doesn't involve traditional server-side authentication or authorization checks that the methodology focuses on. The methodology is designed for web-based AuthN/AuthZ issues within a single application's context, not for Android intent handling vulnerabilities.",
-    "is_detectable": false
+    "reasoning": "The reported vulnerabilities in Twitter Lite (local file steal, JavaScript injection, open redirect) stem from improper intent validation in an exported Android Activity. The methodologies described focus on HTTP request/response analysis and session/resource-ID manipulation for web-based AuthN/AuthZ issues. This vulnerability operates at the Android component level (intent handling) rather than web session/resource authorization boundaries. The attack vector involves malicious apps sending crafted intents, not HTTP request manipulation within the same application's auth context.",
+    "is_simple_authnz": false
   }
 }

@@ -58,7 +58,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves an authenticated user (user2) performing actions on another user's (user1) resources by manipulating the user UUID in API requests. This fits the IDOR detection methodology where (user_session, action, resource_id) tuples are tested by swapping user sessions and resource IDs. The methodology would capture the unauthorized update of user preferences and the subsequent cookie theft and account takeover via password reset.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves a USER role member modifying another user's preferences via an API endpoint by substituting the target user's UUID. The described methodology would detect this by collecting the (user_session, action, resource_id) tuple during normal navigation (user2 updating their own preferences), then substituting the resource_id (user1's UUID) while retaining user2's session. This directly aligns with methodology step e) (substituting resource IDs of the same type). The attack also involves email/password reset hijacking through the modified email field, which could be detected via parameter substitution in the collected action (methodology step a/e). The vulnerability exists entirely within the same application's authorization context, making it detectable via session/resource ID swapping.",
+    "is_simple_authnz": true
   }
 }

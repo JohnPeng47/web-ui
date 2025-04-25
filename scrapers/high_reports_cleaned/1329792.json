@@ -42,7 +42,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The AWS subdomain takeover vulnerability involves DNS records pointing to an unclaimed bucket, which is not directly related to authentication or authorization within a single application. The methodology described focuses on testing AuthN/AuthZ boundaries within an application by swapping user sessions or resource IDs, not on detecting misconfigured DNS records or cloud storage buckets.",
-    "is_detectable": false
+    "reasoning": "The reported AWS subdomain takeover vulnerability stems from DNS misconfiguration pointing to an unclaimed S3 bucket, not from authorization/authentication flaws in application logic. The described methodologies focus on testing session/resource permutations within application workflows, while subdomain takeover requires infrastructure configuration analysis (DNS records, cloud resource ownership) rather than manipulating user sessions or resource IDs in HTTP requests.",
+    "is_simple_authnz": false
   }
 }

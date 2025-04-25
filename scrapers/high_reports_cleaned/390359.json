@@ -1,42 +1,46 @@
 {
-    "reported_to": "U.S. Dept Of Defense",
-    "reported_by": "websecnl ",
-    "title": "SOAP WSDL Parser SQL Code Execution",
-    "content": "\nSummary:\nSOAP WSDL Parser SQL Code Execution\nDescription:\nIt was possible to parse WSDL resources and read all functions from the SOAP Admin Panel, therefor i was able to repeat the sql query with a tampered request with my own custom SQL command.\ni was able to extract all the database names for PoC, there is no doubt in my mind that i could login to the admin panel and compromise the entire DoD Information System.\nImpact\nRemote Code Execution\nStep-by-step Reproduction Instructions\nVisit:\u2588\u2588\u2588 and go to the staff links 'CIMScan' Image: \u2588\u2588\u2588\u2588\u2588/34570b2eaa899ae001e1bc666be3546a.png\n\u2588\u2588\u2588\u2588/c400bc1369bddeca580646b14c38a562.png\n\u2588\u2588\u2588\u2588/32e085f593bfbf8599359d968cf52dc0.png\nProduct, Version, and Configuration (If applicable)\nWeb Application\nSuggested Mitigation/Remediation Actions\nI will report it to CIMScan since i am not sure if this affect's your code, it might very well be the code of CIMScan which in that case you will need to remove it from your website to prevent employees from being compromised.\nImpact\nRemote Code Execution\n\n",
-    "severity": [
-        9.0,
-        10.0
+  "reported_to": "U.S. Dept Of Defense",
+  "reported_by": "websecnl ",
+  "title": "SOAP WSDL Parser SQL Code Execution",
+  "content": "\nSummary:\nSOAP WSDL Parser SQL Code Execution\nDescription:\nIt was possible to parse WSDL resources and read all functions from the SOAP Admin Panel, therefor i was able to repeat the sql query with a tampered request with my own custom SQL command.\ni was able to extract all the database names for PoC, there is no doubt in my mind that i could login to the admin panel and compromise the entire DoD Information System.\nImpact\nRemote Code Execution\nStep-by-step Reproduction Instructions\nVisit:\u2588\u2588\u2588 and go to the staff links 'CIMScan' Image: \u2588\u2588\u2588\u2588\u2588/34570b2eaa899ae001e1bc666be3546a.png\n\u2588\u2588\u2588\u2588/c400bc1369bddeca580646b14c38a562.png\n\u2588\u2588\u2588\u2588/32e085f593bfbf8599359d968cf52dc0.png\nProduct, Version, and Configuration (If applicable)\nWeb Application\nSuggested Mitigation/Remediation Actions\nI will report it to CIMScan since i am not sure if this affect's your code, it might very well be the code of CIMScan which in that case you will need to remove it from your website to prevent employees from being compromised.\nImpact\nRemote Code Execution\n\n",
+  "severity": [
+    9.0,
+    10.0
+  ],
+  "bounty": null,
+  "weaknesses": [
+    "SQL Injection"
+  ],
+  "screenshots": {},
+  "disclosed_date": 1547684160,
+  "report_url": "https://hackerone.com/reports/390359",
+  "is_multi_component": true,
+  "complexity": "HIGH",
+  "novelty": "HIGH",
+  "vuln_category": "WEB_APP",
+  "steps": [
+    [
+      1,
+      "Visit the target website and navigate to the staff links labeled 'CIMScan'."
     ],
-    "bounty": null,
-    "weaknesses": [
-        "SQL Injection"
-    ],
-    "screenshots": {},
-    "disclosed_date": 1547684160,
-    "report_url": "https://hackerone.com/reports/390359",
-    "is_multi_component": true,
-    "complexity": "HIGH",
-    "novelty": "HIGH",
-    "vuln_category": "WEB_APP",
-    "steps": [
-        [
-            1,
-            "Visit the target website and navigate to the staff links labeled 'CIMScan'."
-        ],
-        [
-            2,
-            "Use the SOAP Admin Panel to parse WSDL resources and extract functions, then tamper with the SQL query to execute custom SQL commands."
-        ]
-    ],
-    "vuln_description": "The vulnerability allows an attacker to parse WSDL resources via the SOAP Admin Panel, extract functions, and manipulate SQL queries to execute arbitrary SQL commands. This can lead to remote code execution and compromise of the entire DoD Information System.",
-    "reason": "The attack involves understanding and manipulating SOAP WSDL parsing and SQL query execution, which requires knowledge of both SOAP and SQL injection techniques. However, once the initial access to the SOAP Admin Panel is achieved, the steps to exploit the vulnerability are relatively straightforward.",
-    "new_complexity": "MEDIUM",
-    "requires_code": false,
-    "requires_CVE": false,
-    "is_ctf": false,
-    "other_report": null,
-    "authnz_metadata": {
-        "reason": "The vulnerability involves SQL injection through SOAP WSDL parsing, which is not directly related to authentication or authorization bypass via session or resource manipulation. The methodology described focuses on testing AuthN/AuthZ boundaries by swapping user sessions or resource IDs, not on detecting SQL injection vulnerabilities.",
-        "is_detectable": false
-    }
+    [
+      2,
+      "Use the SOAP Admin Panel to parse WSDL resources and extract functions, then tamper with the SQL query to execute custom SQL commands."
+    ]
+  ],
+  "vuln_description": "The vulnerability allows an attacker to parse WSDL resources via the SOAP Admin Panel, extract functions, and manipulate SQL queries to execute arbitrary SQL commands. This can lead to remote code execution and compromise of the entire DoD Information System.",
+  "reason": "The attack involves understanding and manipulating SOAP WSDL parsing and SQL query execution, which requires knowledge of both SOAP and SQL injection techniques. However, once the initial access to the SOAP Admin Panel is achieved, the steps to exploit the vulnerability are relatively straightforward.",
+  "new_complexity": "MEDIUM",
+  "requires_code": false,
+  "requires_CVE": false,
+  "is_ctf": false,
+  "other_report": null,
+  "authnz_metadata": {
+    "reason": "The vulnerability involves SQL injection through SOAP WSDL parsing, which is a server-side issue unrelated to authentication or authorization boundaries being crossed by swapping user sessions or resource IDs. The methodology described focuses on AuthN/AuthZ and IDOR vulnerabilities by manipulating user sessions and resource access patterns, not on server-side injection vulnerabilities.",
+    "is_detectable": false
+  },
+  "injection_metadata": {
+    "reasoning": "The vulnerability involves SQL injection via tampered SOAP/WSDL requests. The methodology would detect it if: (1) WSDL parsing occurs during regular navigation (e.g., SOAP Admin Panel access), (2) SQL parameters are identified as injectable during analysis, and (3) simple SQLi payloads (e.g., `UNION SELECT`) trigger database leaks in the same response channel. The report implies no advanced filter bypass was needed, and database names were directly extractable via HTTP responses, aligning with the methodology's 'simple payload' criteria.",
+    "is_simple_injection": true
+  }
 }

@@ -46,7 +46,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves weak session signing in Flask, which allows session forgery. The methodology described involves testing authorization boundaries by swapping user sessions and resource IDs. Since the issue is about session forgery (AuthN bypass) and not about testing existing sessions against resources, it falls outside the scope of the described methodology. The methodology assumes valid sessions are being tested, not forged ones.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves forging session cookies by exploiting a weak secret key, allowing authorization boundary crossing. The methodology's step (e) covers substituting resource_ids (user_id in session) and testing authorization. Since session manipulation via weak secrets directly maps to swapping authenticated user contexts in the detection flow, this qualifies as a simple AuthN/AuthZ bypass.",
+    "is_simple_authnz": true
   }
 }

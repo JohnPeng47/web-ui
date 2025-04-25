@@ -52,7 +52,7 @@
     "is_simple_payload": false
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves cross-application email verification and ticket access, which is not scoped within the same application's user_session and resource_ids. The methodology focuses on intra-application authorization checks and does not account for inter-application dependencies or email verification flows.",
-    "is_detectable": false
+    "reasoning": "The vulnerability involves exploiting email registration and support ticket visibility without proper verification. The described methodologies focus on testing authorization boundaries within the same application by swapping sessions/resource_ids. However, this issue relies on cross-service email impersonation (e.g., registering noreply@github.com in Acronis to intercept GitHub verification links) and domain trust (@acronis.com internal access). These inter-service trust relationships and email-based authorization flaws would not be detected by intra-application session/resource_id testing as outlined in the methodology.",
+    "is_simple_authnz": false
   }
 }

@@ -50,7 +50,7 @@
     "is_simple_payload": true
   },
   "authnz_metadata": {
-    "reason": "The vulnerability involves bypassing authorization by intercepting and modifying HTTP responses to access restricted content. This falls under the AuthN/AuthZ Bypass methodology where the authorization boundary is crossed by manipulating the response to avoid redirection to the login page. The methodology described includes testing for such bypasses by swapping user sessions and analyzing responses, which would cover this scenario.",
-    "is_detectable": true
+    "reasoning": "The vulnerability involves accessing authorized content by intercepting and modifying responses to remove redirects, which exposes the authorized page's HTML. The methodology's step d) tests actions with unauthenticated sessions. Accessing the URLs without authentication triggers a redirect but leaks the authorized content in the response body. Automated testing with unauthenticated sessions (step d) could detect this if it checks response bodies even when redirects are present, indicating an AuthN bypass.",
+    "is_simple_authnz": true
   }
 }
