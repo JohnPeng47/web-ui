@@ -90,6 +90,8 @@ def init_root_logger():
     print("Initializing root logger")
     
     root_logger = logging.getLogger()  # Get root logger by passing no name
-    root_logger.setLevel(logging.INFO)
+    # TODO: should set all logging to DEBUG instead of INFO so we cant stop fucking logging LITELLM
+    # or altneratively export logger instead of configuring global logger
+    root_logger.setLevel(logging.DEBUG)
     root_logger.addHandler(get_incremental_file_handler(file_prefix="main"))
     root_logger.addHandler(get_console_handler())

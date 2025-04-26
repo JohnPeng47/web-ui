@@ -24,6 +24,26 @@ PROVIDER_DISPLAY_NAMES = {
     "moonshot": "MoonShot"
 }
 
+def extract_state_from_history(history):
+    """
+    Extract all current_state keys from the history dictionary and return as a list.
+    
+    Args:
+        history (dict): A dictionary containing history data with model_output entries
+        
+    Returns:
+        list: A list of all current_state dictionaries found in the history
+    """
+    states = []
+    
+    if not history or "history" not in history:
+        return states
+    
+    for entry in history["history"]:
+        if "model_output" in entry and "current_state" in entry["model_output"]:
+            states.append(entry["model_output"]["current_state"])
+    
+    return states
 
 def get_llm_model(provider: str, **kwargs):
     """

@@ -452,7 +452,8 @@ async def run_custom_agent(
                 max_input_tokens=max_input_tokens,
                 generate_gif=True,
                 system_prompt_class=CustomSystemPrompt,
-                agent_prompt_class=CustomAgentMessagePrompt
+                agent_prompt_class=CustomAgentMessagePrompt,
+                history_file="history.json",
             )
 
         history = await _global_agent.run(max_steps=max_steps)

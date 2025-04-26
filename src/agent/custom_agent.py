@@ -172,7 +172,9 @@ class CustomAgent(Agent):
             # Inject state
             injected_agent_state: Optional[AgentState] = None,
             context: Context | None = None,
+            history_file: Optional[str] = None,
     ):
+        self.history_file = history_file
         self.http_handler = HTTPHandler()
         self.http_history = HTTPHistory(
             exclude_patterns=[], 
@@ -550,6 +552,9 @@ class CustomAgent(Agent):
                     self.state.history.history[-1].result[-1].extracted_content = step_info.memory
                 else:
                     self.state.history.history[-1].result[-1].extracted_content = self.state.extracted_content
+
+            if self.history_file:
+                self.state.history.save_to_file(self.history_file)
 
             return self.state.history
 
