@@ -8,6 +8,13 @@ pydantic==2.10.6
 pytest
 pytest-asyncio
 flask
+sqlalchemy
+sqlmodel
+fastapi
+asgi_lifespan
+aioqsqlite
+pytest-asyncio
+
 -e ./submodules/browser-use
 -e ./submodules/johnllm
 -e ./submodules/opik/sdks/python
