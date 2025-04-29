@@ -1,7 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel, UUID4
 from datetime import datetime
-from .http import HTTPMessage
+from httplib import HTTPMessage
 
 
 class ApplicationBase(BaseModel):
@@ -36,6 +36,8 @@ class AgentOut(BaseModel):
     class Config:
         from_attributes = True
 
+class AgentMessage(BaseModel):
+    agent_id: UUID4
 
-class PushMessages(BaseModel):
+class PushMessages(AgentMessage):
     messages: List[HTTPMessage]

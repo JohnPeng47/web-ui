@@ -5,9 +5,11 @@ from uuid import UUID
 
 from schemas.application import AgentRegister, AgentOut, PushMessages
 from database.session import get_session
+from database.models import Agent
+
 from services import agent as agent_service
 from services.queue import queues
-from database.models import Agent
+from schemas.http import EnrichAuthNZMessage
 
 router = APIRouter()
 
@@ -50,14 +52,25 @@ async def push_messages(
     db: AsyncSession = Depends(get_session),
 ):
     """Push HTTP messages to the system for processing."""
-    try:
-        # Store messages in the database
-        await agent_service.store_messages(db, agent.id, payload.messages)
-        
-        # Fan-out to queue for processing
-        for msg in payload.messages:
-            await queues.get("raw_http_msgs").publish(msg)
-        
-        return {"accepted": len(payload.messages)}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    # try:
+    # Store messages in the database
+    # await agent_service.store_messages(db, agent.id, payload.messages)
+    agent = await agent_service.get_agent(db, payload.agent_id)
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    
+    print("AGENT: ", agent)
+
+    # Fan-out to queue for processing
+    for msg in payload.messages:
+        await queues.get("raw_http_msgs").publish(
+            EnrichAuthNZMessage(
+                http_msg=msg,
+                username=agent.user_name,
+                role=agent.role,
+            )
+        )
+    
+    return {"accepted": len(payload.messages)}
+    # except Exception as e:
+    #     raise HTTPException(status_code=500, detail=str(e))

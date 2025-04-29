@@ -6,8 +6,9 @@ from sqlmodel import select
 
 from helpers.uuid import generate_uuid
 from schemas.application import ApplicationCreate, AgentRegister
-from schemas.http import HTTPMessage
 from database.models import Application, Agent, HTTPMessageDB, AuthSession
+
+from httplib import HTTPMessage
 
 
 async def create_application(
@@ -78,8 +79,8 @@ async def store_http_messages(
             url=str(msg.request.url),
             headers=msg.request.headers,
             post_data=msg.request.post_data,
-            redirected_from_url=str(msg.request.redirected_from_url) if msg.request.redirected_from_url else None,
-            redirected_to_url=str(msg.request.redirected_to_url) if msg.request.redirected_to_url else None,
+            redirected_from_url=str(msg.request.redirected_from) if msg.request.redirected_from else None,
+            redirected_to_url=str(msg.request.redirected_to) if msg.request.redirected_to else None,
             is_iframe_request=msg.request.is_iframe,
         )
         
@@ -87,8 +88,8 @@ async def store_http_messages(
             db_msg.response_status = msg.response.status
             db_msg.response_headers = msg.response.headers
             db_msg.response_is_iframe = msg.response.is_iframe
-            db_msg.response_body_b64 = msg.response.body_b64
-            db_msg.response_body_error = msg.response.body_error
+            # db_msg.response_body_b64 = msg.response.body_b64
+            # db_msg.response_body_error = msg.response.body_error
         
         db_messages.append(db_msg)
         db.add(db_msg)

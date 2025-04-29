@@ -2,6 +2,7 @@ import base64
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from typing import List, Optional, Dict, Any
+from pydantic import BaseModel, Field, model_validator
 
 from playwright.sync_api import Request, Response
 
@@ -9,106 +10,103 @@ DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text"]
 DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
 MAX_PAYLOAD_SIZE = 4000
 
-@dataclass
-class HTTPRequestData:
+# TODO: support for CSRF tokens
+class AuthSession(BaseModel):
+    headers: Dict[str, str]
+    body: Optional[Dict[str, str]] = None
+
+class HTTPRequestData(BaseModel):
     """Internal representation of HTTP request data"""
     method: str
     url: str
     headers: Dict[str, str]
-    post_data: Optional[str]
+    post_data: Optional[Dict] = None
     redirected_from_url: Optional[str] = ""
     redirected_to_url: Optional[str] = ""
     is_iframe: bool = False
 
-# TODO: support for CSRF tokens
-class AuthSession:
-    """An authenticated user session that represents keys in the body or headers"""
-    def __init__(self, headers: Dict[str, str], body: Optional[Dict[str, str]] = None):
-        self.headers = headers
-        self.body = body
-
-# TODO: we need to log the user role
-class HTTPRequest:
+class HTTPRequest(BaseModel):
     """HTTP request class with unified implementation"""
-    def __init__(self, data: HTTPRequestData):
-        self._data = data
-        self._auth_session = AuthSession(self._data.headers, {})
+    data: HTTPRequestData
+    auth_session: Optional[Any] = Field(default=None, exclude=True)
+
+    @model_validator(mode='after')
+    def init_auth_session(self):
+        if self.auth_session is None:
+            self.auth_session = AuthSession(
+                headers=self.headers,
+                body=None
+            )
+        return self
 
     @property
     def method(self) -> str:
-        return self._data.method
+        return self.data.method
 
     @property
     def url(self) -> str:
-        return self._data.url
+        return self.data.url
 
     @property
     def headers(self) -> Dict[str, str]:
-        return self._data.headers
+        return self.data.headers
 
     @property
     def post_data(self) -> Optional[str]:
-        return self._data.post_data
+        return self.data.post_data
 
     @property
     def redirected_from(self) -> Optional["HTTPRequest"]:
-        if self._data.redirected_from_url:
+        if self.data.redirected_from_url:
             # Create minimal request object for redirect
             data = HTTPRequestData(
                 method="",
-                url=self._data.redirected_from_url,
+                url=self.data.redirected_from_url,
                 headers={},
                 post_data=None,
                 redirected_from_url=None,
                 redirected_to_url=None,
                 is_iframe=False
             )
-            return HTTPRequest(data)
+            return HTTPRequest(data=data)
         return None
 
     @property
     def redirected_to(self) -> Optional["HTTPRequest"]:
-        if self._data.redirected_to_url:
+        if self.data.redirected_to_url:
             # Create minimal request object for redirect
             data = HTTPRequestData(
                 method="",
-                url=self._data.redirected_to_url,
+                url=self.data.redirected_to_url,
                 headers={},
                 post_data=None,
                 redirected_from_url=None,
                 redirected_to_url=None,
                 is_iframe=False
             )
-            return HTTPRequest(data)
+            return HTTPRequest(data=data)
         return None
 
     @property
     def is_iframe(self) -> bool:
-        return self._data.is_iframe
+        return self.data.is_iframe
 
     def to_json(self) -> Dict[str, Any]:
-        return {
-            "method": self.method,
-            "url": self.url,
-            "headers": self.headers,
-            "post_data": self.post_data,
-            "redirected_from": self._data.redirected_from_url,
-            "redirected_to": self._data.redirected_to_url,
-            "is_iframe": self.is_iframe
-        }
+        # return {
+        #     "method": self.method,
+        #     "url": self.url,
+        #     "headers": self.headers,
+        #     "post_data": self.post_data,
+        #     "redirected_from": self.data.redirected_from_url,
+        #     "redirected_to": self.data.redirected_to_url,
+        #     "is_iframe": self.is_iframe
+        # }
+        return self.model_dump()
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "HTTPRequest":
-        request_data = HTTPRequestData(
-            method=data["method"],
-            url=data["url"],
-            headers=data["headers"],
-            post_data=data["post_data"],
-            redirected_from_url=data["redirected_from"],
-            redirected_to_url=data["redirected_to"],
-            is_iframe=data["is_iframe"]
-        )
-        return cls(request_data)
+        request_data = HTTPRequestData(**data)
+        return cls(data=request_data)
 
     @classmethod
     def from_pw(cls, request: Request) -> "HTTPRequest":
@@ -141,8 +139,7 @@ class HTTPRequest:
         req_str += str(self.post_data)
         return req_str
 
-@dataclass
-class HTTPResponseData:
+class HTTPResponseData(BaseModel):
     """Internal representation of HTTP response data"""
     url: str
     status: int
@@ -151,33 +148,32 @@ class HTTPResponseData:
     body: Optional[bytes] = None
     body_error: Optional[str] = None
 
-class HTTPResponse:
+class HTTPResponse(BaseModel):
     """HTTP response class with unified implementation"""
-    def __init__(self, data: HTTPResponseData):
-        self._data = data
+    data: HTTPResponseData
 
     @property
     def url(self) -> str:
-        return self._data.url
+        return self.data.url
 
     @property
     def status(self) -> int:
-        return self._data.status
+        return self.data.status
 
     @property
     def headers(self) -> Dict[str, str]:
-        return self._data.headers
+        return self.data.headers
 
     @property
     def is_iframe(self) -> bool:
-        return self._data.is_iframe
+        return self.data.is_iframe
 
     async def get_body(self) -> bytes:
-        if self._data.body_error:
-            raise Exception(self._data.body_error)
-        if self._data.body is None:
+        if self.data.body_error:
+            raise Exception(self.data.body_error)
+        if self.data.body is None:
             raise Exception("Response body not available")
-        return self._data.body
+        return self.data.body
 
     def get_content_type(self) -> str:
         """Get content type from response headers"""
@@ -212,12 +208,14 @@ class HTTPResponse:
         }
 
         if not (300 <= self.status < 400):
-            if self._data.body_error:
-                json_data["body_error"] = self._data.body_error
-            elif self._data.body:
-                json_data["body"] = str(self._data.body)
+            if self.data.body_error:
+                json_data["body_error"] = self.data.body_error
+            elif self.data.body:
+                json_data["body"] = str(self.data.body)
 
-        return json_data
+        return {
+            "data": json_data
+        }
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "HTTPResponse":
@@ -229,7 +227,7 @@ class HTTPResponse:
             body=data.get("body", "").encode() if "body" in data else None,
             body_error=data.get("body_error")
         )
-        return cls(response_data)
+        return cls(data=response_data)
 
     @classmethod
     def from_pw(cls, response: Response) -> "HTTPResponse":
@@ -239,7 +237,7 @@ class HTTPResponse:
             headers=dict(response.headers),
             is_iframe=bool(response.frame.parent_frame)
         )
-        return cls(response_data)
+        return cls(data=response_data)
 
     async def to_str(self) -> str:
         """String representation of HTTP response"""
@@ -261,11 +259,10 @@ class HTTPResponse:
             
         return resp_str
 
-@dataclass
-class HTTPMessage:
+class HTTPMessage(BaseModel):
     """Encapsulates a request/response pair"""
     request: HTTPRequest 
-    response: Optional[HTTPResponse]
+    response: Optional[HTTPResponse] = None
 
     @property
     def url(self):
@@ -290,12 +287,21 @@ class HTTPMessage:
 
     async def to_json(self) -> Dict[str, Any]:
         json_data = {
-            "request": await self.request.to_json()
+            "request": self.request.to_json()
         }
         if self.response:
             json_data["response"] = await self.response.to_json()
         return json_data
+    
+    async def to_payload(self):
+        payload = {
+            "request": self.request.to_json()
+        }
+        if self.response:
+            payload["response"] = await self.response.to_json()
 
+        return payload  
+          
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "HTTPMessage":
         request = HTTPRequest.from_json(data["request"])
@@ -352,31 +358,26 @@ def parse_burp_request(request_text: str, is_base64: bool, url: str, method: str
         redirected_to_url=None,    # No redirect info in Burp export
         is_iframe=False            # No iframe info in Burp export
     )
-    
-    return HTTPRequest(request_data)
+    return HTTPRequest(data=request_data)
 
 def parse_burp_response(response_text: str, is_base64: bool, url: str, status: int) -> HTTPResponse:
     """Parse raw HTTP response data into a HTTPResponse object"""
     body = None
     body_error = None
     
-    try:
-        if is_base64:
-            decoded_text = base64.b64decode(response_text)
-            # Find the empty line that separates headers from body
-            headers_end = decoded_text.find(b'\r\n\r\n')
-            if headers_end != -1:
-                headers_text = decoded_text[:headers_end].decode('utf-8', errors='replace')
-                body = decoded_text[headers_end + 4:]  # Skip \r\n\r\n
-            else:
-                headers_text = decoded_text.decode('utf-8', errors='replace')
+    if is_base64:
+        decoded_text = base64.b64decode(response_text)
+        # Find the empty line that separates headers from body
+        headers_end = decoded_text.find(b'\r\n\r\n')
+        if headers_end != -1:
+            headers_text = decoded_text[:headers_end].decode('utf-8', errors='replace')
+            body = decoded_text[headers_end + 4:]  # Skip \r\n\r\n
         else:
-            parts = response_text.split('\n\n', 1)
-            headers_text = parts[0]
-            body = parts[1].encode('utf-8') if len(parts) > 1 else None
-    except Exception as e:
-        headers_text = ""
-        body_error = f"Error processing response: {str(e)}"
+            headers_text = decoded_text.decode('utf-8', errors='replace')
+    else:
+        parts = response_text.split('\n\n', 1)
+        headers_text = parts[0]
+        body = parts[1].encode('utf-8') if len(parts) > 1 else None
     
     headers = parse_burp_headers(headers_text)
     
@@ -390,7 +391,7 @@ def parse_burp_response(response_text: str, is_base64: bool, url: str, status: i
         body_error=body_error
     )
     
-    return HTTPResponse(response_data)
+    return HTTPResponse(data=response_data)
 
 def parse_burp_xml(filepath: str) -> List[HTTPMessage]:
     """Parse a Burp Suite XML export file into an HTTPMessageList"""
@@ -408,31 +409,27 @@ def parse_burp_xml(filepath: str) -> List[HTTPMessage]:
     messages = []
     
     for item in root.findall(".//item"):
-        try:
-            # Extract basic information
-            url = item.find("url").text
-            method = item.find("method").text
-            status_elem = item.find("status")
-            status = int(status_elem.text) if status_elem is not None else 0
-            
-            # Parse request
-            request_elem = item.find("request")
-            is_request_base64 = request_elem.get("base64") == "true"
-            request = parse_burp_request(request_elem.text, is_request_base64, url, method)
-            
-            # Parse response
-            response = None
-            response_elem = item.find("response")
-            if response_elem is not None and response_elem.text:
-                is_response_base64 = response_elem.get("base64") == "true"
-                response = parse_burp_response(response_elem.text, is_response_base64, url, status)
-            
-            # Create HTTP message
-            message = HTTPMessage(request=request, response=response)
-            messages.append(message)
+        # Extract basic information
+        url = item.find("url").text
+        method = item.find("method").text
+        status_elem = item.find("status")
+        status = int(status_elem.text) if status_elem is not None else 0
         
-        except Exception as e:
-            print(f"Error parsing item: {e}")
-            continue
+        # Parse request
+        request_elem = item.find("request")
+        is_request_base64 = request_elem.get("base64") == "true"
+        request = parse_burp_request(request_elem.text, is_request_base64, url, method)
+        
+        # Parse response
+        response = None
+        response_elem = item.find("response")
+        if response_elem is not None and response_elem.text:
+            is_response_base64 = response_elem.get("base64") == "true"
+            response = parse_burp_response(response_elem.text, is_response_base64, url, status)
+        
+        # Create HTTP message
+        message = HTTPMessage(request=request, response=response)
+        messages.append(message)
+    
     
     return messages

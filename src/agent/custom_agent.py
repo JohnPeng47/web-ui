@@ -381,7 +381,7 @@ class CustomAgent(Agent):
         step_start_time = time.time() 
         tokens = 0
 
-        try:
+        try:    
             # Agent: 
             # add the response/requests results from executing action to 
             # the agent state
@@ -584,3 +584,89 @@ class CustomAgent(Agent):
                     output_path = self.settings.generate_gif
 
                 create_history_gif(task=self.task, history=self.state.history, output_path=output_path)
+
+    async def shutdown(self, reason: str = "Premature shutdown requested") -> None:
+        """Shuts down the agent prematurely and performs cleanup."""
+        # Check if already stopped to prevent duplicate shutdown calls
+        if hasattr(self.state, 'stopped') and self.state.stopped:
+            logger.warning("Shutdown already in progress or completed.")
+            return
+
+        logger.info(f"Initiating premature shutdown: {reason}")
+        # Ensure state has 'stopped' attribute before setting
+        if hasattr(self.state, 'stopped'):
+             self.state.stopped = True
+        else:
+             # If AgentState doesn't have stopped, we might need another way
+             # to signal termination or handle this case.
+             logger.warning("Agent state does not have 'stopped' attribute. Cannot signal stop.")
+
+
+        # Perform cleanup similar to the finally block in run()
+        try:
+            # Capture Telemetry for Shutdown Event
+            # Check existence of attributes before accessing due to potential type issues
+            agent_id = getattr(self.state, 'agent_id', 'unknown_id')
+            steps = getattr(self.state, 'n_steps', 0)
+            history = getattr(self.state, 'history', None)
+            errors = (history.errors() if history else []) + [f"Shutdown: {reason}"]
+            input_tokens = history.total_input_tokens() if history else 0
+            duration_seconds = history.total_duration_seconds() if history else 0.0
+
+            self.telemetry.capture(
+                AgentEndTelemetryEvent(
+                    agent_id=agent_id,
+                    is_done=False, # Task was not completed normally
+                    success=False, # Assume failure on shutdown
+                    steps=steps,
+                    max_steps_reached=False,
+                    errors=errors,
+                    total_input_tokens=input_tokens,
+                    total_duration_seconds=duration_seconds,
+                )
+            )
+
+            # Save History
+            if self.history_file and history:
+                try:
+                    history.save_to_file(self.history_file)
+                    logger.info(f"Saved agent history to {self.history_file} during shutdown.")
+                except Exception as e:
+                    logger.error(f"Failed to save history during shutdown: {e}")
+
+            # Close Browser Context
+            if not self.injected_browser_context and self.browser_context:
+                try:
+                    await self.browser_context.close()
+                    logger.info("Closed browser context during shutdown.")
+                except Exception as e:
+                    logger.error(f"Error closing browser context during shutdown: {e}")
+
+            # Close Browser
+            if not self.injected_browser and self.browser:
+                try:
+                    await self.browser.close()
+                    logger.info("Closed browser during shutdown.")
+                except Exception as e:
+                    logger.error(f"Error closing browser during shutdown: {e}")
+
+            # Generate GIF
+            if self.settings.generate_gif and history:
+                try:
+                    output_path: str = 'agent_history_shutdown.gif' # Default name
+                    if isinstance(self.settings.generate_gif, str):
+                        # Create a shutdown-specific name based on config
+                        base, ext = os.path.splitext(self.settings.generate_gif)
+                        output_path = f"{base}_shutdown{ext}"
+
+                    logger.info(f"Generating shutdown GIF at {output_path}")
+                    create_history_gif(task=f"{self.task} (Shutdown)", history=history, output_path=output_path)
+                except Exception as e:
+                     logger.error(f"Failed to generate GIF during shutdown: {e}")
+
+        except Exception as e:
+            # Catch errors during the shutdown cleanup process itself
+            logger.error(f"Error during agent shutdown cleanup: {e}")
+            logger.error(traceback.format_exc())
+        finally:
+             logger.info("Agent shutdown process complete.")

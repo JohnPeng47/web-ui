@@ -48,7 +48,7 @@ class HTTPRequest:
                 redirected_to_url=None,
                 is_iframe=False
             )
-            return HTTPRequest(data)
+            return HTTPRequest(data=data)
         return None
 
     @property
@@ -64,7 +64,7 @@ class HTTPRequest:
                 redirected_to_url=None,
                 is_iframe=False
             )
-            return HTTPRequest(data)
+            return HTTPRequest(data=data)
         return None
 
     @property
@@ -177,7 +177,7 @@ def parse_burp_request(request_text: str, is_base64: bool, url: str, method: str
         is_iframe=False            # No iframe info in Burp export
     )
     
-    return HTTPRequest(request_data)
+    return HTTPRequest(data=request_data)
 
 def parse_burp_response(response_text: str, is_base64: bool, url: str, status: int) -> HTTPResponse:
     """Parse raw HTTP response data into a HTTPResponse object"""

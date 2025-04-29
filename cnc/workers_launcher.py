@@ -27,15 +27,15 @@ async def start_workers():
         )
     )
     
-    authz_task = asyncio.create_task(
-        start_authz_attacker(
-            queue_id="enriched_requests_authz"
-        )
-    )
+    # authz_task = asyncio.create_task(
+    #     start_authz_attacker(
+    #         queue_id="enriched_requests_authz"
+    #     )
+    # )
     
     # Wait for both workers to complete (they run indefinitely)
-    await asyncio.gather(enrichment_task, authz_task)
-
+    # await asyncio.gather(enrichment_task, authz_task)
+    await asyncio.gather(enrichment_task)
 
 if __name__ == "__main__":
     try:

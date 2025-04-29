@@ -22,8 +22,6 @@ async def lifespan(app: FastAPI):
     
     # App is now ready
     yield
-    
-    # Cleanup code would go here (if needed)
 
 
 def create_app() -> FastAPI:
@@ -41,9 +39,7 @@ def create_app() -> FastAPI:
     
     return app
 
-
 app = create_app()
-
 
 async def start_api_server():
     """Start the FastAPI server using uvicorn."""
@@ -51,14 +47,9 @@ async def start_api_server():
     server = uvicorn.Server(config)
     await server.serve()
 
-
 async def main():
     """Start both workers and API server concurrently."""
     await asyncio.gather(
         start_workers(),
         start_api_server()
     )
-
-
-if __name__ == "__main__":
-    asyncio.run(main())

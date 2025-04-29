@@ -22,14 +22,12 @@ from src.agent.custom_prompts import CustomSystemPrompt, CustomAgentMessagePromp
 
 from tests.server import PORT
 from logger import init_root_logger
-from src.utils import utils
 from johnllm import LLMModel
 
 HISTORY_PATH = Path(__file__).parent / "history.json"
 
 @pytest.mark.asyncio
 async def test_browser_login():
-    print("USING PYTHON: ", sys.executable)
     # Start the Flask server in a subprocess
     server_process = subprocess.Popen([sys.executable, "tests/server.py"])
     # Give the server a moment to start

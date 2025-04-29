@@ -4,9 +4,9 @@ from uuid import UUID
 
 from database import crud
 from schemas.application import AgentRegister
-from schemas.http import HTTPMessage
 from database.models import Agent
 
+from httplib import HTTPMessage
 
 async def register(db: AsyncSession, app_id: UUID, agent_data: AgentRegister) -> Agent:
     """Register a new agent for an application."""

@@ -370,7 +370,7 @@ class AuthzTester:
         # Use the new-style ingest with the extracted information
         self.ingest(
             user=user_id,
-            request=request._data,  # Access the underlying HTTPRequestData
+            request=request.data,  # Access the underlying HTTPRequestData
             resource_locators=resource_locators,
             session=session
         )
@@ -437,7 +437,7 @@ class IntruderRequest(HTTPRequest):
                   user_id: Optional[str] = None,
                   auth_info: Optional[RequestResources] = None) -> "IntruderRequest":
         http_request = super().from_json(data)
-        return cls(http_request._data, user_id, auth_info)
+        return cls(http_request.data, user_id, auth_info)
 
     @classmethod
     def from_pw(
@@ -447,7 +447,7 @@ class IntruderRequest(HTTPRequest):
         auth_info: Optional[RequestResources] = None
     ) -> "IntruderRequest":
         http_request = super().from_pw(request)
-        return cls(http_request._data, user_id, auth_info)
+        return cls(http_request.data, user_id, auth_info)
 
 
 # ---------------------------------------------------------------------------

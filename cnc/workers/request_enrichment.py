@@ -1,4 +1,4 @@
-from services.enrichment import SimpleEnrichmentWorker
+from services.enrichment import EnrichAuthNZWorker
 from services.queue import queues
 from database.session import get_session
 import asyncio
@@ -19,7 +19,7 @@ async def start_enrichment_worker(
     if not db_session:
         raise RuntimeError("Failed to acquire database session")
     
-    worker = SimpleEnrichmentWorker(
+    worker = EnrichAuthNZWorker(
         sub_queue_id=sub_queue_id,
         pub_queue_id=pub_queue_id,
         db_session=db_session
