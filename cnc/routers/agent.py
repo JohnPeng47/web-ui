@@ -8,69 +8,78 @@ from database.session import get_session
 from database.models import Agent
 
 from services import agent as agent_service
-from services.queue import queues
+from services.queue import BroadcastChannel
 from schemas.http import EnrichAuthNZMessage
-
-router = APIRouter()
-
-
-async def require_registered_agent(
-    app_id: UUID,
-    x_username: str = Header(...),
-    x_role: str = Header(...),
-    db: AsyncSession = Depends(get_session)
-) -> Agent:
-    """Dependency that ensures the agent is registered for the application."""
-    agent = await agent_service.verify_agent(db, app_id, x_username, x_role)
-    if not agent:
-        raise HTTPException(
-            status_code=401,
-            detail=f"Agent with username {x_username} and role {x_role} not registered for this application",
-        )
-    return agent
+from httplib import HTTPMessage
 
 
-@router.post("/application/{app_id}/agents/register", response_model=AgentOut)
-async def register_agent(
-    app_id: UUID, payload: AgentRegister, db: AsyncSession = Depends(get_session)
-):
-    """Register a new agent for an application."""
-    try:
-        agent = await agent_service.register(db, app_id, payload)
-        return agent
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/application/{app_id}/agents/push", status_code=202)
-async def push_messages(
-    app_id: UUID,
-    payload: PushMessages,
-    agent: Agent = Depends(require_registered_agent),
-    db: AsyncSession = Depends(get_session),
-):
-    """Push HTTP messages to the system for processing."""
-    # try:
-    # Store messages in the database
-    # await agent_service.store_messages(db, agent.id, payload.messages)
-    agent = await agent_service.get_agent(db, payload.agent_id)
-    if not agent:
-        raise HTTPException(status_code=404, detail="Agent not found")
+def make_agent_router(raw_channel: BroadcastChannel[HTTPMessage]) -> APIRouter:
+    """
+    Create the agent router with injected dependencies.
     
-    print("AGENT: ", agent)
-
-    # Fan-out to queue for processing
-    for msg in payload.messages:
-        await queues.get("raw_http_msgs").publish(
-            EnrichAuthNZMessage(
-                http_msg=msg,
-                username=agent.user_name,
-                role=agent.role,
+    Args:
+        raw_channel: Channel for publishing raw HTTP messages
+        
+    Returns:
+        Configured APIRouter instance
+    """
+    router = APIRouter()
+    
+    async def require_registered_agent(
+        app_id: UUID,
+        x_username: str = Header(...),
+        x_role: str = Header(...),
+        db: AsyncSession = Depends(get_session)
+    ) -> Agent:
+        """Dependency that ensures the agent is registered for the application."""
+        agent = await agent_service.verify_agent(db, app_id, x_username, x_role)
+        if not agent:
+            raise HTTPException(
+                status_code=401,
+                detail=f"Agent with username {x_username} and role {x_role} not registered for this application",
             )
-        )
+        return agent
     
-    return {"accepted": len(payload.messages)}
-    # except Exception as e:
-    #     raise HTTPException(status_code=500, detail=str(e))
+    
+    @router.post("/application/{app_id}/agents/register", response_model=AgentOut)
+    async def register_agent(
+        app_id: UUID, payload: AgentRegister, db: AsyncSession = Depends(get_session)
+    ):
+        """Register a new agent for an application."""
+        try:
+            agent = await agent_service.register(db, app_id, payload)
+            return agent
+        except ValueError as e:
+            raise HTTPException(status_code=404, detail=str(e))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @router.post("/application/{app_id}/agents/push", status_code=202)
+    async def push_messages(
+        app_id: UUID,
+        payload: PushMessages,
+        agent: Agent = Depends(require_registered_agent),
+        db: AsyncSession = Depends(get_session),
+    ):
+        """Push HTTP messages to the system for processing."""
+        try:
+            # Verify agent exists
+            agent = await agent_service.get_agent(db, payload.agent_id)
+            if not agent:
+                raise HTTPException(status_code=404, detail="Agent not found")
+            
+            # Fan-out to channel for processing
+            for msg in payload.messages:
+                # Publish directly to the injected channel
+                await raw_channel.publish(msg)
+                
+            return {"accepted": len(payload.messages)}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    return router
+
+
+# Legacy support - for backward compatibility during transition
+router = make_agent_router(None)  # type: ignore

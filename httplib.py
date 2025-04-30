@@ -3,12 +3,19 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field, model_validator
-
 from playwright.sync_api import Request, Response
+
+from src.llm import RequestPart
 
 DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text"]
 DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
 MAX_PAYLOAD_SIZE = 4000
+
+class ResourceLocator(BaseModel):
+    """How to locate a particular resource id in a template request."""
+    id: str
+    request_part: RequestPart
+    type_name: str
 
 # TODO: support for CSRF tokens
 class AuthSession(BaseModel):
@@ -214,7 +221,7 @@ class HTTPResponse(BaseModel):
                 json_data["body"] = str(self.data.body)
 
         return {
-            "data": json_data
+            "data": json_data,
         }
 
     @classmethod

@@ -30,6 +30,14 @@ async def get_application(db: AsyncSession, app_id: UUID) -> Optional[Applicatio
     return result.scalars().first()
 
 
+async def update_application(db: AsyncSession, app: Application) -> Application:
+    """Update an application with new data."""
+    db.add(app)
+    await db.commit()
+    await db.refresh(app)
+    return app
+
+
 async def register_agent(
     db: AsyncSession, app_id: UUID, agent_data: AgentRegister
 ) -> Agent:
@@ -78,7 +86,7 @@ async def store_http_messages(
             method=msg.request.method,
             url=str(msg.request.url),
             headers=msg.request.headers,
-            post_data=msg.request.post_data,
+            post_data=msg.request.post_data if isinstance(msg.request.post_data, dict) else None,
             redirected_from_url=str(msg.request.redirected_from) if msg.request.redirected_from else None,
             redirected_to_url=str(msg.request.redirected_to) if msg.request.redirected_to else None,
             is_iframe_request=msg.request.is_iframe,

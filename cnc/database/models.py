@@ -10,6 +10,7 @@ class Application(SQLModel, table=True):
     name: str
     description: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    findings: Optional[List[Dict[str, Any]]] = Field(default=None, sa_column=Column(JSON))
     
     agents: List["Agent"] = Relationship(back_populates="application")
 

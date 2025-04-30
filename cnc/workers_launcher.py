@@ -1,41 +1,70 @@
 import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from fastapi import FastAPI
+from typing import Optional
 
 from database.session import create_db_and_tables, engine
-from services.queue import queues
-from workers.request_enrichment import start_enrichment_worker
-from workers.authz_attacker import start_authz_attacker
+from services.queue import BroadcastChannel
+from services.enrichment import RequestEnrichmentWorker
+from services.attack import AuthzAttacker
+from httplib import HTTPMessage
+from schemas.http import EnrichedRequest
 
 
-async def start_workers():
-    """Launch all worker processes."""
+async def start_workers(app: Optional[FastAPI] = None):
+    """
+    Launch all worker processes.
+    
+    Args:
+        app: FastAPI application instance with channels in app.state.
+             If provided, workers will use these channels.
+             If None, new channels will be created.
+    """
     print("Starting worker launcher...")
     
     # Initialize database
     await create_db_and_tables()
     
-    # Initialize queues
-    queues.get("raw_http_msgs")
-    queues.get("enriched_requests_authz")
+    # Get or create channels
+    if app and hasattr(app.state, "raw_channel") and hasattr(app.state, "enriched_channel"):
+        # Use channels from app.state
+        raw_channel = app.state.raw_channel
+        enriched_channel = app.state.enriched_channel
+        print("Using channels from FastAPI app.state")
+    else:
+        # Create new channels if not available from app
+        raw_channel = BroadcastChannel[HTTPMessage]()
+        enriched_channel = BroadcastChannel[EnrichedRequest]()
+        print("Created new standalone channels")
     
-    # Start workers
-    print("Starting workers...")
-    enrichment_task = asyncio.create_task(
-        start_enrichment_worker(
-            sub_queue_id="raw_http_msgs",
-            pub_queue_id="enriched_requests_authz"
+    # Create session factory
+    async_session = async_sessionmaker(engine, expire_on_commit=False)
+    
+    # Create the DB session
+    async with async_session() as session:
+        # Start workers with DI channels
+        print("Starting workers with dependency injection...")
+        
+        # Create workers with injected dependencies
+        enrichment_worker = RequestEnrichmentWorker(
+            inbound=raw_channel,
+            outbound=enriched_channel,
+            db_session=session
         )
-    )
-    
-    # authz_task = asyncio.create_task(
-    #     start_authz_attacker(
-    #         queue_id="enriched_requests_authz"
-    #     )
-    # )
-    
-    # Wait for both workers to complete (they run indefinitely)
-    # await asyncio.gather(enrichment_task, authz_task)
-    await asyncio.gather(enrichment_task)
+        
+        # authz_worker = AuthzAttacker(
+        #     inbound=enriched_channel,
+        #     db_session=session
+        # )
+        
+        # # Run all workers concurrently
+        # await asyncio.gather(
+        #     enrichment_worker.run(),
+        #     authz_worker.run()
+        # )
+        await asyncio.gather(
+            enrichment_worker.run(),
+        )
 
 if __name__ == "__main__":
     try:

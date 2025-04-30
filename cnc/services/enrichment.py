@@ -4,38 +4,55 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from dataclasses import dataclass
 from schemas.http import EnrichedRequest, EnrichAuthNZMessage
-from services.queue import queues
+from services.queue import BroadcastChannel
 
 from httplib import HTTPMessage
+from johnllm import LMP, LLMModel
+from src.llm import RequestResources, EXTRACT_REQUESTS_PROMPT
+
+class ExtractResources(LMP):
+    prompt = EXTRACT_REQUESTS_PROMPT
+    response_format = RequestResources
 
 class BaseRequestEnrichmentWorker(ABC):
-    def __init__(self, *, sub_queue_id: str, pub_queue_id: str):
-        self.sub_id = sub_queue_id
-        self.pub_id = pub_queue_id
+    """Base class for request enrichment workers"""
     
     @abstractmethod
     async def run(self):
+        """Run the worker processing loop"""
         pass
     
     @abstractmethod
     async def _enrich(self, message: HTTPMessage) -> EnrichedRequest:
+        """Enrich a raw HTTP message with additional metadata"""
         pass
 
-class EnrichAuthNZWorker(BaseRequestEnrichmentWorker):
-    def __init__(self, *, sub_queue_id: str, pub_queue_id: str, db_session: AsyncSession):
-        super().__init__(sub_queue_id=sub_queue_id, pub_queue_id=pub_queue_id)
+class RequestEnrichmentWorker(BaseRequestEnrichmentWorker):
+    """
+    Worker that processes raw HTTP messages and enriches them with 
+    metadata like authentication info, session data, etc.
+    """
+    def __init__(
+        self,
+        *,
+        inbound: BroadcastChannel[HTTPMessage],
+        outbound: BroadcastChannel[EnrichedRequest],
+        db_session: Optional[AsyncSession] = None
+    ):
+        self._sub_q = inbound.subscribe()
+        self._outbound = outbound
         self.db = db_session
+        self.llm = LLMModel()
     
+    # TODO: blocking async calls
     async def run(self):
-        sub_q = queues.get(self.sub_id).subscribe()
-        pub_ch = queues.get(self.pub_id)
-        
+        """Process incoming HTTP messages and publish enriched versions"""
         while True:
-            msg: EnrichAuthNZMessage = await sub_q.get()
-            enr = await self._enrich(msg)
-            await pub_ch.publish(enr)
-    
-    async def _enrich(self, message: EnrichAuthNZMessage) -> EnrichedRequest:
+            raw_msg = await self._sub_q.get()
+            enr_msg = await self._enrich(raw_msg)
+            await self._outbound.publish(enr_msg)
+
+    async def _enrich(self, message: HTTPMessage) -> EnrichedRequest:
         """
         Enriches an HTTP message by extracting authentication/session information.
         
@@ -44,10 +61,17 @@ class EnrichAuthNZWorker(BaseRequestEnrichmentWorker):
         2. Authorization headers (Bearer tokens, Basic auth)
         3. Form-based auth in POST data (username/password fields)
         """
-        request = message.http_msg.request
+        request = message.request
+        resources = ExtractResources().invoke(
+            model=self.llm,
+            model_name="gpt-4o",
+            prompt_args={"request": message.request.to_str()}
+        )
+        print(f"Extracted resources for {request.url}")
+        print(resources)
         enriched = EnrichedRequest(request=request)
 
-        print(">>>> RECEIVED ENRICHED MESSAGE")
+        print(">>>> RECEIVED HTTP MESSAGE FOR ENRICHMENT")
         print(enriched)
         
         return enriched

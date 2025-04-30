@@ -5,11 +5,12 @@ import traceback
 from datetime import datetime
 
 from src.agent.client import AgentClient
-from httplib import parse_burp_xml, HTTPMessage
+from httplib import parse_burp_xml
 
 
-BURP_REQUEST_FILE = "tests/integration/cross_tenant_requests"
+BURP_REQUEST_FILE = "tests/integration/cross_tenant_idor"
 http_msgs = parse_burp_xml(BURP_REQUEST_FILE)
+
 
 async def main():
     try:

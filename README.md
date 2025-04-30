@@ -231,3 +231,39 @@ CHROME_PERSISTENT_SESSION=true docker compose up --build
 - [x] **2025/01/26:** Thanks to @vvincent1234. Now browser-use-webui can combine with DeepSeek-r1 to engage in deep thinking!
 - [x] **2025/01/10:** Thanks to @casistack. Now we have Docker Setup option and also Support keep browser open between tasks.[Video tutorial demo](https://github.com/browser-use/web-ui/issues/1#issuecomment-2582511750).
 - [x] **2025/01/06:** Thanks to @richard-devbot. A New and Well-Designed WebUI is released. [Video tutorial demo](https://github.com/warmshao/browser-use-webui/issues/1#issuecomment-2573393113).
+
+# Security Findings Store
+
+The system now supports storing security findings in the Application model. This allows security findings from the AuthzTester to be associated with applications and accessed via the API.
+
+## Using the ApplicationFindingsStore
+
+Here's how to set up and use the ApplicationFindingsStore:
+
+```python
+from uuid import UUID
+from services.attack import AuthzAttacker, ApplicationFindingsStore
+
+# Initialize with application ID
+app_id = UUID("12345678-1234-5678-1234-567812345678")
+
+# Method 1: Direct initialization of FindingsStore
+findings_store = ApplicationFindingsStore(app_id=app_id)
+findings_store.start()  # Start the background task
+
+# Method 2: Initialize through AuthzAttacker
+attacker = AuthzAttacker(app_id=app_id)
+
+# The attacker will now automatically send findings to the application API
+```
+
+## Retrieving Findings
+
+Findings can be retrieved through the application API:
+
+```bash
+# Get application with findings
+curl -X GET http://localhost:8000/application/12345678-1234-5678-1234-567812345678
+```
+
+The response will include a `findings` field containing all security findings associated with the application.

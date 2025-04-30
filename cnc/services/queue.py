@@ -1,22 +1,23 @@
-from typing import Dict, Any
-from collections import defaultdict
-from helpers.queue import Channel
+from typing import TypeVar, Generic, List
+import asyncio
 
-class QueueRegistry:
-    def __init__(self, reset: bool = False):
-        if reset:
-            self.channels = defaultdict(Channel)
-        else:
-            # Singleton pattern
-            if not hasattr(QueueRegistry, "_instance"):
-                QueueRegistry._instance = self
-                self.channels: Dict[str, Channel[Any]] = defaultdict(Channel)
-            else:
-                self.channels = QueueRegistry._instance.channels
+T = TypeVar("T")
 
-    def get(self, name: str) -> Channel[Any]:
-        return self.channels[name]
+class BroadcastChannel(Generic[T]):
+    """
+    A tiny pub/sub primitive:
+      • publish(item): copies `item` into every subscriber queue
+      • subscribe(): returns an asyncio.Queue from which the subscriber
+                     continuously reads.
+    """
+    def __init__(self):
+        self._subs: List[asyncio.Queue[T]] = []
 
+    def subscribe(self) -> asyncio.Queue[T]:
+        q: asyncio.Queue[T] = asyncio.Queue()
+        self._subs.append(q)
+        return q
 
-# Importable singleton
-queues = QueueRegistry()
+    async def publish(self, item: T):
+        for q in self._subs:
+            await q.put(item)

@@ -7,19 +7,14 @@ import json # Added import
 import httpx # Added import
 import logging
 from dataclasses import replace
+from abc import ABC, abstractmethod
+from pydantic import BaseModel
 
 from playwright.sync_api import Request
-from httplib import HTTPRequest, HTTPRequestData, AuthSession
+from httplib import HTTPRequest, HTTPRequestData, AuthSession, ResourceLocator
 from src.llm import RequestResources, Resource, ResourceType, RequestPart
 
 log = logging.getLogger(__name__)
-
-@dataclass(frozen=True, slots=True)
-class ResourceLocator:
-    """How to locate a particular resource id in a template request."""
-    id: str
-    request_part: RequestPart
-    type_name: str
 
 class NetworkError(RuntimeError):
     """Raised for transport‑level issues (DNS, TLS, timeout…)."""
@@ -219,7 +214,6 @@ class TestPlanner:
                     yield from self._dedup(new_user, rl.id, action, rl.type_name)
 
     # helpers
-
     def _actions_for_type(self, type_name: str) -> Iterable[str]:
         """Yields actions associated with a given resource type."""
         for action in self._templates.actions():
@@ -237,12 +231,10 @@ class TestPlanner:
             self._executed.add(sig)
             yield PlannedTest(user, resource_id, action, type_name)
 
-@dataclass(slots=True)
-class TestResult:
+class TestResult(BaseModel):
     user: str
     resource_id: str
     action: str
-
 
 class TestExecutor:
     """Handles mutation + HTTP send – no scheduling logic here."""
@@ -301,10 +293,17 @@ class TestExecutor:
             action=test.action,
         )
 
+class FindingsStore(ABC):
+    @abstractmethod
+    def append(self, finding: Union[TestResult, str]):
+        pass
+
 class AuthzTester:
     """High level orchestrator: ingest traffic then automatically test perms."""
 
-    def __init__(self, http_client: Optional[HTTPClient] = None):
+    def __init__(self, 
+                 http_client: Optional[HTTPClient] = None,
+                 findings_log: Optional[FindingsStore] = None) -> None:
         self._client = http_client or HTTPClient()
         self._graph = AccessGraph()
         self._templates = TemplateRegistry()
@@ -313,7 +312,7 @@ class AuthzTester:
         self._executor = TestExecutor(
             client=self._client, templates=self._templates, sessions=self._sessions
         )
-        self.findings: List[Union[TestResult, str]] = []
+        self.findings: List[Union[TestResult, str]] = [] if not findings_log else findings_log
 
     # Convert from IntruderRequest to ResourceLocator
     def _convert_resource_to_locator(self, resource: Resource) -> Optional[ResourceLocator]:
@@ -339,46 +338,10 @@ class AuthzTester:
             type_name=resource.type.name
         )
 
-    # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
-    
-    # Add a compatibility method to maintain existing interface
-    def ingest_request(self, request: "IntruderRequest") -> None:
-        """Legacy method to ingest IntruderRequest objects."""
-        user_id = request.user_id
-        if not user_id:
-            log.warning("Request %s lacks user_id. Skipping.", request.url)
-            return
-            
-        # Extract resource locators from request
-        resource_locators: List[ResourceLocator] = []
-        auth_info = request.attack_info.get("AUTH")
-        if auth_info and auth_info.resources:
-            for res in auth_info.resources:
-                locator = self._convert_resource_to_locator(res)
-                if locator:
-                    resource_locators.append(locator)
-                    
-        if not resource_locators:
-            log.warning("Request %s lacks resource information. Skipping.", request.url)
-            return
-            
-        # Get session if available
-        session = getattr(request, "_auth_session", None)
-        
-        # Use the new-style ingest with the extracted information
-        self.ingest(
-            user=user_id,
-            request=request.data,  # Access the underlying HTTPRequestData
-            resource_locators=resource_locators,
-            session=session
-        )
-
     def ingest(
         self,
         *,
-        user: str,
+        username: str,
         request: HTTPRequestData,
         resource_locators: Sequence[ResourceLocator],
         session: Optional[AuthSession] = None,
@@ -387,19 +350,19 @@ class AuthzTester:
         action = request.url  # naive – could be method+url later
 
         # Check if user is new *before* recording them in the graph
-        is_truly_new_user = user not in self._graph._graph
+        is_truly_new_user = username not in self._graph._graph
 
         # Persist structures
         self._templates.add(action, RequestTemplate(request, resource_locators))
         if session:
-            self._sessions[user] = session
+            self._sessions[username] = session
         for rl in resource_locators:
-            self._graph.record(user=user, type_name=rl.type_name, resource_id=rl.id)
+            self._graph.record(user=username, type_name=rl.type_name, resource_id=rl.id)
 
         # Plan tests
         new_types = [(rl.type_name, rl.id) for rl in resource_locators]
         for test in self._planner.schedule_from_ingest(
-            new_user=user, new_types=new_types, new_action=action, is_new_user=is_truly_new_user
+            new_user=username, new_types=new_types, new_action=action, is_new_user=is_truly_new_user
         ):
             res = self._executor.execute(test)
             self.findings.append(res)
@@ -408,47 +371,8 @@ class AuthzTester:
     def close(self) -> None:
         self._client.shutdown()
 
-
-# ---------------------------------------------------------------------------
-# Compatibility with IntruderRequest
-# ---------------------------------------------------------------------------
-
-# Keep IntruderRequest class from the original file for compatibility
-# This class definition should remain as is from the original file
-
-class IntruderRequest(HTTPRequest):
-    def __init__(self,
-                 data: HTTPRequestData,
-                 user_id: Optional[str] = None,
-                 auth_info: Optional[RequestResources] = None) -> None:
-        """Represents an HTTP request for the Intruder tool."""
-        super().__init__(data)
-
-        self.user_id = user_id
-        self.attack_info = {
-            "AUTH": auth_info, # Store under attack_info
-        }
-        # Store the AuthSession directly if possible, might need adjustment
-        self._auth_session: Optional[AuthSession] = AuthSession(data.headers) if data.headers else None # Basic session from headers
-
-    @classmethod
-    def from_json(cls,
-                  data: Dict[str, Any],
-                  user_id: Optional[str] = None,
-                  auth_info: Optional[RequestResources] = None) -> "IntruderRequest":
-        http_request = super().from_json(data)
-        return cls(http_request.data, user_id, auth_info)
-
-    @classmethod
-    def from_pw(
-        cls,
-        request: Request,
-        user_id: Optional[str] = None,
-        auth_info: Optional[RequestResources] = None
-    ) -> "IntruderRequest":
-        http_request = super().from_pw(request)
-        return cls(http_request.data, user_id, auth_info)
-
+    def get_findings(self):
+        return self.findings
 
 # ---------------------------------------------------------------------------
 # __all__ for * import hygiene

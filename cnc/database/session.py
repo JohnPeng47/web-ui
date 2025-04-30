@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 import os
 from typing import AsyncGenerator
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///./pentest_hub.db")
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///./cnc/pentest_hub.db")
 
 engine = create_async_engine(DATABASE_URL, echo=False)
 
@@ -29,6 +29,7 @@ async def override_db(db_url: str):
     global engine
     original_engine = engine
     
+
     engine = create_async_engine(db_url, echo=False)
     
     try:

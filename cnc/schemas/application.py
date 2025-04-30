@@ -1,7 +1,8 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, UUID4
 from datetime import datetime
 from httplib import HTTPMessage
+from uuid import UUID
 
 
 class ApplicationBase(BaseModel):
@@ -14,8 +15,9 @@ class ApplicationCreate(ApplicationBase):
 
 
 class ApplicationOut(ApplicationBase):
-    id: UUID4
+    id: UUID
     created_at: datetime
+    findings: Optional[List[Dict[str, Any]]] = None
 
     class Config:
         from_attributes = True
@@ -41,3 +43,12 @@ class AgentMessage(BaseModel):
 
 class PushMessages(AgentMessage):
     messages: List[HTTPMessage]
+
+class Finding(BaseModel):
+    user: str
+    resource_id: str
+    action: str
+    additional_info: Optional[Dict[str, Any]] = None
+
+class AddFindingRequest(BaseModel):
+    finding: Finding

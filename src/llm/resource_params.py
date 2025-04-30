@@ -150,3 +150,85 @@ NOTE: SEPARATOR = "$%&" ie. /post/$%&user1234$%&/comments
 If you did not identify any resources, make sure to return [] and not null for the resources field
 Now give your response
 """
+
+EXTRACT_REQUESTS_PROMPT_V2 = """
+{{request}}
+
+You are given an HTTP request.
+Your task is to extract resource identifiers from the request:
+
+These request parameters represent a resource used in the application, that is not just a configuration parameter for the API call. In thinking of a request as an action,
+a request can be seen to perform some action on a resource. It is important to note that some requests will not have resource identifiers
+For example:
+- A request to "/api/posts/456/comments" likely represents a comment resource related to post "456"
+- A request to "/api/update/tweet" with JSON payload {"tweet": 1234, "message": "hello world", "picture": "https://pic.png"} has ONLY the valid resource tweet:1234
+- A request to "/api/list/tweets" HAS no resource identifiers, as it is just an action to list of tweets
+
+If you did not identify any resources, make sure to return [] and not null for the resources field 
+
+{% if resource_types %}
+Does the resource match any of the existing resource types? If so then select that type
+{% endif %}
+
+If this is a new resource, then create it
+
+When returning the identified resource_ids, please identify where in the request the resource is located by the following steps:
+Identify whether its in the URL, BODY, or HEADERS.
+
+Here are some examples:
+1. GET http://localhost:8000/tweets/list/
+{
+    "resources": []
+}
+
+2. GET http://localhost:8000/messages/
+{
+    "resources": []
+}
+
+3. GET http://twitter.com/api/tweets/2/replies/
+{
+    "resources": [
+        {
+            "id": "2",
+            "type": {
+                "name": "tweet_reply",
+                "description": "This represents replies to a tweet, determined by the endpoint '/api/tweets/{tweet_id}/replies/'.",
+                "requests": []
+            },
+            "request_part": "URL"
+        }
+    ]
+}
+
+4. POST http://twitter.com/reply/
+{'csrfmiddlewaretoken': 'h0EclP8OYE80II6kTnXGYgTqiyFPhTBxl3FPTOat7YxJuc9tnjV4qV2g37zmFle1', 'tweet': 'tw121345', 'hashtags': '#twitter', 'media_id': '', 'reply_to': '11', 'visibility': 'public', 'location': '1', 'notes': 'test tweet'}
+{
+    "resources": [
+        {
+            "id": "tw121345",
+            "type": {
+                "name": "tweet",
+                "description": "Represents a tweet being created",
+                "requests": []
+            },
+            "request_part": "BODY"
+        }
+    ]
+}
+
+First give an overall description of the request and what it is trying to accomplish
+Use this section to think aloud on the purpose of the request, what parameters are being used,
+and most crucially, which ones are the resource identifiers and which ones are simply regular parameters
+
+To reiterate:
+Your task is to extract resource identifiers from the request:
+
+These request parameters represent a resource used in the application, that is not just a configuration parameter for the API call. In thinking of a request as an action,
+a request can be seen to perform some action on a resource
+
+When returning the identified resource_ids, please identify where in the request the resource is located (URL, BODY, or HEADERS).
+
+If you did not identify any resources, make sure to return [] and not null for the resources field
+Now give your response
+"""
