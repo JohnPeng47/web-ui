@@ -7,7 +7,6 @@ class EnrichAuthNZMessage(BaseModel):
     username: str
     role: Optional[str] = ""
 
-
 class EnrichedRequest(BaseModel):
     request: HTTPRequest
     username: Optional[str] = None

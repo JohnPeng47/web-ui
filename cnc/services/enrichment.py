@@ -69,18 +69,11 @@ class RequestEnrichmentWorker(BaseRequestEnrichmentWorker):
         2. Authorization headers (Bearer tokens, Basic auth)
         3. Form-based auth in POST data (username/password fields)
         """
-        log.info("HELLO???")
         request = message.request
         resources = ExtractResources().invoke(
             model=self.llm,
             model_name="gpt-4o",
             prompt_args={"request": message.request.to_str()}
         )
-        log.info(f"Extracted resources for {request.url}")
-        log.info(resources)
-        enriched = EnrichedRequest(request=request)
-
-        log.info(">>>> RECEIVED HTTP MESSAGE FOR ENRICHMENT")
-        log.info(enriched)
-        
+        enriched = EnrichedRequest(request=request)        
         return enriched

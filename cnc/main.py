@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 import uvicorn
-from typing import Dict, Any
 from httplib import HTTPMessage
 from schemas.http import EnrichedRequest
 
@@ -12,7 +11,6 @@ from cnc.services.queue import BroadcastChannel
 import asyncio
 from workers_launcher import start_workers
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan context manager for FastAPI application."""
@@ -21,7 +19,6 @@ async def lifespan(app: FastAPI):
     
     # App is now ready
     yield
-
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""

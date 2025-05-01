@@ -140,10 +140,7 @@ class AuthzAttacker(BaseAttackWorker):
         request: HTTPRequestData,
         resource_locators: Sequence[ResourceLocator]
     ) -> None:
-        """Process a single request for authorization vulnerabilities"""
-        log.info("ATTACKER INGESTING")
-        log.info(request)
-        
+        """Process a single request for authorization vulnerabilities"""        
         self._authz_tester.ingest(
             username=username,
             request=request,

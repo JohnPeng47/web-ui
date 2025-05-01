@@ -6,9 +6,10 @@ from typing import Optional
 from database.session import create_db_and_tables, engine
 from cnc.services.queue import BroadcastChannel
 from services.enrichment import RequestEnrichmentWorker
+from services.attack import AuthzAttacker
 from httplib import HTTPMessage
 from schemas.http import EnrichedRequest
-    
+
 async def start_workers(app: Optional[FastAPI] = None):
     """
     Launch all worker processes.
@@ -47,20 +48,20 @@ async def start_workers(app: Optional[FastAPI] = None):
             db_session=session
         )
         
-        # authz_worker = AuthzAttacker(
-        #     inbound=enriched_channel,
-        #     db_session=session
-        # )
+        authz_worker = AuthzAttacker(
+            inbound=enriched_channel,
+            db_session=session
+        )
         
-        # # Run all workers concurrently
-        # await asyncio.gather(
-        #     enrichment_worker.run(),
-        #     authz_worker.run()
-        # )
-
+        # Run all workers concurrently
         await asyncio.gather(
             enrichment_worker.run(),
+            authz_worker.run()
         )
+
+        # await asyncio.gather(
+        #     enrichment_worker.run(),
+        # )
 
 if __name__ == "__main__":
     try:

@@ -250,18 +250,54 @@ class TestExecutor:
         self._templates = templates
         self._sessions = sessions
 
+    # def execute(self, test: PlannedTest) -> TestResult:
+    #     template = self._templates.template(test.action)
+    #     try:
+    #         req = template.mutate_for_resource(
+    #             target=test.resource_id, type_name=test.type_name
+    #         )
+    #     except Exception as exc:
+    #         return TestResult(
+    #             user=test.user,
+    #             resource_id=test.resource_id,
+    #             action=test.action,
+    #         )
+
+    #     session = self._sessions.get(test.user)
+    #     if session is None:
+    #         return TestResult(
+    #             user=test.user,
+    #             resource_id=test.resource_id,
+    #             action=test.action,
+    #         )
+
+    #     try:
+    #         resp = self._client.send(req, auth_session=session)
+    #     except NetworkError as exc:
+    #         return TestResult(
+    #             user=test.user,
+    #             resource_id=test.resource_id,
+    #             action=test.action,
+    #         )
+    #     except Exception as exc:
+    #         # Catch other exceptions that might happen
+    #         return TestResult(
+    #             user=test.user,
+    #             resource_id=test.resource_id,
+    #             action=test.action,
+    #         )
+
+    #     return TestResult(
+    #         user=test.user,
+    #         resource_id=test.resource_id,
+    #         action=test.action,
+    #     )
+
     def execute(self, test: PlannedTest) -> TestResult:
         template = self._templates.template(test.action)
-        try:
-            req = template.mutate_for_resource(
-                target=test.resource_id, type_name=test.type_name
-            )
-        except Exception as exc:
-            return TestResult(
-                user=test.user,
-                resource_id=test.resource_id,
-                action=test.action,
-            )
+        req = template.mutate_for_resource(
+            target=test.resource_id, type_name=test.type_name
+        )
 
         session = self._sessions.get(test.user)
         if session is None:
@@ -271,22 +307,7 @@ class TestExecutor:
                 action=test.action,
             )
 
-        try:
-            resp = self._client.send(req, auth_session=session)
-        except NetworkError as exc:
-            return TestResult(
-                user=test.user,
-                resource_id=test.resource_id,
-                action=test.action,
-            )
-        except Exception as exc:
-            # Catch other exceptions that might happen
-            return TestResult(
-                user=test.user,
-                resource_id=test.resource_id,
-                action=test.action,
-            )
-
+        resp = self._client.send(req, auth_session=session)
         return TestResult(
             user=test.user,
             resource_id=test.resource_id,
@@ -309,6 +330,8 @@ class AuthzTester:
         self._templates = TemplateRegistry()
         self._sessions: Dict[str, AuthSession] = {}
         self._planner = TestPlanner(self._graph, self._templates)
+        # TODO: build an abstraction over this to capture attacks
+        # this will be part of logging/tracing framework 
         self._executor = TestExecutor(
             client=self._client, templates=self._templates, sessions=self._sessions
         )
@@ -366,6 +389,8 @@ class AuthzTester:
         ):
             res = self._executor.execute(test)
             self.findings.append(res)
+
+            log.info(f"Finding: {res}")
 
     # Convenience helper – call at shutdown
     def close(self) -> None:
