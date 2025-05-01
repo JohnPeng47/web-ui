@@ -1,6 +1,7 @@
 from typing import TypeVar, Generic, List
 import asyncio
 
+
 T = TypeVar("T")
 
 class BroadcastChannel(Generic[T]):
@@ -11,7 +12,12 @@ class BroadcastChannel(Generic[T]):
                      continuously reads.
     """
     def __init__(self):
+        self._id = id(self)
         self._subs: List[asyncio.Queue[T]] = []
+
+    @property
+    def id(self) -> int:
+        return self._id
 
     def subscribe(self) -> asyncio.Queue[T]:
         q: asyncio.Queue[T] = asyncio.Queue()

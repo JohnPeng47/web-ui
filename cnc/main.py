@@ -8,7 +8,7 @@ from schemas.http import EnrichedRequest
 from routers.application import make_application_router
 from routers.agent import make_agent_router
 from database.session import create_db_and_tables
-from services.queue import BroadcastChannel
+from cnc.services.queue import BroadcastChannel
 import asyncio
 from workers_launcher import start_workers
 
@@ -42,7 +42,7 @@ def create_app() -> FastAPI:
     app.state.enriched_channel = enriched_channel
     
     # Create routers with injected dependencies
-    application_router = make_application_router(raw_channel)
+    application_router = make_application_router()
     agent_router = make_agent_router(raw_channel)
     
     # Include routers
@@ -53,9 +53,9 @@ def create_app() -> FastAPI:
 
 app = create_app()
 
-async def start_api_server():
+async def start_api_server(app):
     """Start the FastAPI server using uvicorn."""
-    config = uvicorn.Config("main:app", host="0.0.0.0", port=8000, reload=True)
+    config = uvicorn.Config(app=app, host="0.0.0.0", port=8000)
     server = uvicorn.Server(config)
     await server.serve()
 
@@ -63,7 +63,7 @@ async def main():
     """Start both workers and API server concurrently."""
     await asyncio.gather(
         start_workers(app),
-        start_api_server()
+        start_api_server(app)
     )
 
 if __name__ == "__main__":

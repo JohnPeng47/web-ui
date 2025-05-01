@@ -1,7 +1,7 @@
 import pytest
 import asyncio
 from typing import List, Dict, Any
-from services.queue import BroadcastChannel
+from cnc.services.queue import BroadcastChannel
 from services.enrichment import RequestEnrichmentWorker
 from services.attack import AuthzAttacker
 from httplib import HTTPMessage, HTTPRequest, HTTPRequestData

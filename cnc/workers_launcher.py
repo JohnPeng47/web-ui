@@ -4,13 +4,11 @@ from fastapi import FastAPI
 from typing import Optional
 
 from database.session import create_db_and_tables, engine
-from services.queue import BroadcastChannel
+from cnc.services.queue import BroadcastChannel
 from services.enrichment import RequestEnrichmentWorker
-from services.attack import AuthzAttacker
 from httplib import HTTPMessage
 from schemas.http import EnrichedRequest
-
-
+    
 async def start_workers(app: Optional[FastAPI] = None):
     """
     Launch all worker processes.
@@ -32,10 +30,7 @@ async def start_workers(app: Optional[FastAPI] = None):
         enriched_channel = app.state.enriched_channel
         print("Using channels from FastAPI app.state")
     else:
-        # Create new channels if not available from app
-        raw_channel = BroadcastChannel[HTTPMessage]()
-        enriched_channel = BroadcastChannel[EnrichedRequest]()
-        print("Created new standalone channels")
+        raise Exception("No channels found in FastAPI app.state. Please provide an app instance.")
     
     # Create session factory
     async_session = async_sessionmaker(engine, expire_on_commit=False)
@@ -62,6 +57,7 @@ async def start_workers(app: Optional[FastAPI] = None):
         #     enrichment_worker.run(),
         #     authz_worker.run()
         # )
+
         await asyncio.gather(
             enrichment_worker.run(),
         )

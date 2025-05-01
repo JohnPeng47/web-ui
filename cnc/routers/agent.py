@@ -8,7 +8,7 @@ from database.session import get_session
 from database.models import Agent
 
 from services import agent as agent_service
-from services.queue import BroadcastChannel
+from cnc.services.queue import BroadcastChannel
 from schemas.http import EnrichAuthNZMessage
 from httplib import HTTPMessage
 
@@ -24,6 +24,7 @@ def make_agent_router(raw_channel: BroadcastChannel[HTTPMessage]) -> APIRouter:
         Configured APIRouter instance
     """
     router = APIRouter()
+    print("Initializing agent router with raw channel: ", raw_channel.id)
     
     async def require_registered_agent(
         app_id: UUID,
@@ -71,6 +72,7 @@ def make_agent_router(raw_channel: BroadcastChannel[HTTPMessage]) -> APIRouter:
             
             # Fan-out to channel for processing
             for msg in payload.messages:
+                print("Pushing message")
                 # Publish directly to the injected channel
                 await raw_channel.publish(msg)
                 
@@ -79,7 +81,3 @@ def make_agent_router(raw_channel: BroadcastChannel[HTTPMessage]) -> APIRouter:
             raise HTTPException(status_code=500, detail=str(e))
     
     return router
-
-
-# Legacy support - for backward compatibility during transition
-router = make_agent_router(None)  # type: ignore

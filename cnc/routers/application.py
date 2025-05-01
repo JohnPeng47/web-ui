@@ -6,17 +6,14 @@ from uuid import UUID
 from schemas.application import ApplicationCreate, ApplicationOut, AddFindingRequest
 from database.session import get_session
 from services import application as app_service
-from services.queue import BroadcastChannel
+from cnc.services.queue import BroadcastChannel
 from httplib import HTTPMessage
 
 
-def make_application_router(raw_channel: BroadcastChannel[HTTPMessage]) -> APIRouter:
+def make_application_router() -> APIRouter:
     """
     Create the application router with injected dependencies.
     
-    Args:
-        raw_channel: Channel for publishing raw HTTP messages
-        
     Returns:
         Configured APIRouter instance
     """
@@ -59,4 +56,4 @@ def make_application_router(raw_channel: BroadcastChannel[HTTPMessage]) -> APIRo
 
 
 # Legacy support - for backward compatibility during transition
-router = make_application_router(None)  # type: ignore
+router = make_application_router()  # type: ignore

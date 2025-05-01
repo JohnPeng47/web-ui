@@ -7,7 +7,7 @@ import asyncio
 
 from schemas.http import EnrichedRequest
 from schemas.application import Finding
-from services.queue import BroadcastChannel
+from cnc.services.queue import BroadcastChannel
 from database.models import AuthSession as DBAuthSession
 
 from intruder import (
@@ -20,6 +20,9 @@ from intruder import (
     AuthSession as IntruderAuthSession
 )
 from httplib import HTTPRequest, HTTPRequestData
+from logger import init_file_logger
+
+log = init_file_logger(__name__)
 
 class BaseAttackWorker(ABC):
     """Base class for attack workers that analyze requests for vulnerabilities"""
@@ -76,10 +79,10 @@ class ApplicationFindingsStore(FindingsStore):
             async with httpx.AsyncClient() as client:
                 response = await client.post(url, json=payload)
                 if response.status_code != 200:
-                    print(f"Error sending finding: {response.text}")
+                    log.info(f"Error sending finding: {response.text}")
         
         except Exception as e:
-            print(f"Error processing finding: {e}")
+            log.info(f"Error processing finding: {e}")
 
 
 class AuthzAttacker(BaseAttackWorker):
@@ -138,8 +141,8 @@ class AuthzAttacker(BaseAttackWorker):
         resource_locators: Sequence[ResourceLocator]
     ) -> None:
         """Process a single request for authorization vulnerabilities"""
-        print("ATTACKER INGESTING")
-        print(request)
+        log.info("ATTACKER INGESTING")
+        log.info(request)
         
         self._authz_tester.ingest(
             username=username,
