@@ -4,7 +4,7 @@ from uuid import UUID
 
 from database import crud
 from schemas.application import AgentRegister
-from database.models import Agent
+from cnc.database.models import Agent
 
 from httplib import HTTPMessage
 

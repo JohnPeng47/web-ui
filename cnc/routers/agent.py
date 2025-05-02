@@ -5,7 +5,7 @@ from uuid import UUID
 
 from schemas.application import AgentRegister, AgentOut, PushMessages
 from database.session import get_session
-from database.models import Agent
+from cnc.database.models import Agent
 
 from services import agent as agent_service
 from cnc.services.queue import BroadcastChannel
@@ -26,6 +26,7 @@ def make_agent_router(raw_channel: BroadcastChannel[HTTPMessage]) -> APIRouter:
     router = APIRouter()
     print("Initializing agent router with raw channel: ", raw_channel.id)
     
+    # TODO: test this format of request and see how well cascades
     async def require_registered_agent(
         app_id: UUID,
         x_username: str = Header(...),

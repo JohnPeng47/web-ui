@@ -1,28 +1,30 @@
-import pytest
-import pytest_asyncio
-import httpx
-from httpx import AsyncClient
-from contextlib import asynccontextmanager
-from fastapi import FastAPI
+import asyncio
 import os
 import uuid
+from contextlib import asynccontextmanager
+from uuid import uuid4, UUID
 
-from database.session import override_db
-from main import create_app
+import httpx
+import pytest
+import pytest_asyncio
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,          # preferred helper in SQLAlchemy 2.0+
+)
+from sqlmodel import SQLModel
+from typing import Any, Dict, List, Optional, Tuple, Union, AsyncGenerator
 
+# ── App-side imports ──────────────────────────────────────────────────────────
+from src.agent.client import AgentClient
+from cnc.main import create_app
+from cnc.services.queue import BroadcastChannel
+from cnc.database.models import Agent as AgentModel, Application
+from cnc.database.session import override_db, create_db_and_tables, engine
 
-@pytest_asyncio.fixture
-async def test_client(tmp_path):
-    """Create a test client with a temporary database."""
-    db_url = f"sqlite+aiosqlite:///{tmp_path}/test.db"
-    
-    async with override_db(db_url):
-        app = create_app()
-        
-        # Use the app's lifespan
-        async with httpx.ASGITransport(app=app) as transport:
-            async with AsyncClient(transport=transport, base_url="http://test") as ac:
-                yield ac  # Database will be deleted on context exit
+from httplib import HTTPMessage, HTTPRequest, HTTPResponse, HTTPRequestData, HTTPResponseData
 
 
 @pytest.fixture
@@ -44,25 +46,46 @@ def test_agent_data():
 
 
 @pytest.fixture
-def test_http_message():
-    """Sample HTTP message for testing."""
-    return {
-        "request": {
-            "method": "GET",
-            "url": "https://example.com/api/v1/users/123",
-            "headers": {
-                "User-Agent": "Mozilla/5.0",
-                "Cookie": "sessionid=abc123"
-            },
-            "is_iframe": False
+def test_http_message():    
+    request_data = HTTPRequestData(
+        method="GET",
+        url="https://example.com/api/v1/users/123",
+        headers={
+            "User-Agent": "Mozilla/5.0",
+            "Cookie": "sessionid=abc123"
         },
-        "response": {
-            "url": "https://example.com/api/v1/users/123",
-            "status": 200,
-            "headers": {
-                "Content-Type": "application/json"
-            },
-            "is_iframe": False,
-            "body_b64": "eyJ1c2VybmFtZSI6ICJ0ZXN0X3VzZXIiLCAicm9sZSI6ICJ1c2VyIn0="  # {"username": "test_user", "role": "user"}
-        }
-    }
+        is_iframe=False
+    )
+    
+    response_data = HTTPResponseData(
+        url="https://example.com/api/v1/users/123",
+        status=200,
+        headers={
+            "Content-Type": "application/json"
+        },
+        is_iframe=False,
+    )
+    
+    return HTTPMessage(
+        request=HTTPRequest(data=request_data),
+        response=HTTPResponse(data=response_data)
+    ).model_dump(mode="json")
+
+TEST_DB_URL = (
+    "sqlite+aiosqlite:///./cnc/test_db.sqlite"  # file-based keeps the schema
+)
+
+# ── Helper: one shared *async* session maker bound to the overridden engine ───
+def _sessionmaker() -> async_sessionmaker[AsyncSession]:
+    return async_sessionmaker(engine, expire_on_commit=False)
+
+
+# ── FIXTURE: FastAPI app + HTTPX AsyncClient on an isolated DB ────────────────
+@pytest_asyncio.fixture(scope="function")
+async def test_app_client() -> AsyncGenerator:
+    async with override_db(TEST_DB_URL):
+        await create_db_and_tables()           # schema lives on disk
+        app = create_app()                     # routes import the models
+
+        async with AsyncClient(app=app, base_url="http://test") as ac:
+            yield AgentClient(client=ac), app           # hand them to the test

@@ -22,6 +22,10 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
+    # configure_relationships() # Ensure it's called if not called at module level
+
+    print("Creating FastAPI app...")
+    
     # Create the FastAPI app without routers initially
     app = FastAPI(
         title="Pentest Hub",
@@ -48,19 +52,19 @@ def create_app() -> FastAPI:
     
     return app
 
-app = create_app()
-
-async def start_api_server(app):
+async def start_api_server(app_instance: FastAPI):
     """Start the FastAPI server using uvicorn."""
-    config = uvicorn.Config(app=app, host="0.0.0.0", port=8000)
+    config = uvicorn.Config(app=app_instance, host="0.0.0.0", port=8000)
     server = uvicorn.Server(config)
     await server.serve()
 
 async def main():
     """Start both workers and API server concurrently."""
+    # Create the app instance inside main
+    app_instance = create_app()
     await asyncio.gather(
-        start_workers(app),
-        start_api_server(app)
+        start_workers(app_instance),
+        start_api_server(app_instance)
     )
 
 if __name__ == "__main__":

@@ -4,8 +4,10 @@ from sqlmodel import Field, SQLModel, JSON, Column, Relationship
 from uuid import UUID
 import json
 
-
 class Application(SQLModel, table=True):
+    # Tell SQLModel to use our specific metadata
+    # metadata = db_metadata
+
     id: UUID = Field(primary_key=True)
     name: str
     description: Optional[str] = None
@@ -16,17 +18,23 @@ class Application(SQLModel, table=True):
 
 
 class Agent(SQLModel, table=True):
+    # Tell SQLModel to use our specific metadata
+    # metadata = db_metadata
+
     id: UUID = Field(primary_key=True)
     user_name: str
     role: str
     application_id: UUID = Field(foreign_key="application.id")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
-    application: Application = Relationship(back_populates="agents")
+    application: "Application" = Relationship(back_populates="agents")
     http_messages: List["HTTPMessageDB"] = Relationship(back_populates="agent")
 
 
 class AuthSession(SQLModel, table=True):
+    # Tell SQLModel to use our specific metadata
+    # metadata = db_metadata
+
     id: UUID = Field(primary_key=True)
     session_id: str
     username: str
@@ -36,6 +44,9 @@ class AuthSession(SQLModel, table=True):
     
 
 class HTTPMessageDB(SQLModel, table=True):
+    # Tell SQLModel to use our specific metadata
+    # metadata = db_metadata
+
     id: UUID = Field(primary_key=True)
     agent_id: UUID = Field(foreign_key="agent.id")
     application_id: UUID
@@ -57,4 +68,4 @@ class HTTPMessageDB(SQLModel, table=True):
     response_body_b64: Optional[str] = None
     response_body_error: Optional[str] = None
     
-    agent: Agent = Relationship(back_populates="http_messages")
+    agent: "Agent" = Relationship(back_populates="http_messages")

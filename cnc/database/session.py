@@ -5,15 +5,19 @@ from sqlalchemy.orm import sessionmaker
 import os
 from typing import AsyncGenerator
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///./cnc/pentest_hub.db")
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///./pentest_hub.db")
 
 engine = create_async_engine(DATABASE_URL, echo=False)
 
-
 async def create_db_and_tables():
-    async with engine.begin() as conn:
-        await conn.run_sync(SQLModel.metadata.create_all)
+    async with engine.begin() as conn:            
+        tables = await conn.run_sync(
+            lambda c: c.exec_driver_sql("SELECT name FROM sqlite_master").fetchall()
+        )
+        print("SQLite tables:", tables)
 
+        await conn.run_sync(SQLModel.metadata.create_all)
+        
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     async_session = sessionmaker(
@@ -22,16 +26,12 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session() as session:
         yield session
 
-
 @asynccontextmanager
 async def override_db(db_url: str):
     """Context manager for testing to override the default database URL."""
     global engine
     original_engine = engine
-    
-
     engine = create_async_engine(db_url, echo=False)
-    
     try:
         async with engine.begin() as conn:
             await conn.run_sync(SQLModel.metadata.create_all)

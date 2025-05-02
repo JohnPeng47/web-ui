@@ -8,7 +8,7 @@ import asyncio
 from schemas.http import EnrichedRequest
 from schemas.application import Finding
 from cnc.services.queue import BroadcastChannel
-from database.models import AuthSession as DBAuthSession
+from cnc.database.models import AuthSession as DBAuthSession
 
 from intruder import (
     AuthzTester, 

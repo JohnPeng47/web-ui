@@ -6,7 +6,7 @@ from sqlmodel import select
 
 from helpers.uuid import generate_uuid
 from schemas.application import ApplicationCreate, AgentRegister
-from database.models import Application, Agent, HTTPMessageDB, AuthSession
+from cnc.database.models import Application, Agent, HTTPMessageDB, AuthSession
 
 from httplib import HTTPMessage
 

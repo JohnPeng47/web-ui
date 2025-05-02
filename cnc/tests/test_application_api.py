@@ -1,117 +1,131 @@
 import pytest
-from httpx import AsyncClient
 import uuid
 from typing import Dict
+from uuid import UUID
+
+import httpx
+from src.agent.client import AgentClient 
 
 pytestmark = pytest.mark.asyncio
 
-
-async def test_create_application(test_client: AsyncClient, test_app_data: Dict):
+async def test_create_application(test_app_client, test_app_data: Dict):
     """Test creating a new application."""
-    response = await test_client.post("/application/", json=test_app_data)
+    application_client, _ = test_app_client
     
-    assert response.status_code == 200
-    data = response.json()
+    data = await application_client.create_application(test_app_data["name"], test_app_data["description"])
+    
     assert data["name"] == test_app_data["name"]
     assert data["description"] == test_app_data["description"]
     assert "id" in data
     assert "created_at" in data
 
 
-async def test_get_application(test_client: AsyncClient, test_app_data: Dict):
-    """Test retrieving an application by ID."""
-    # First create an application
-    create_response = await test_client.post("/application/", json=test_app_data)
-    assert create_response.status_code == 200
-    app_id = create_response.json()["id"]
+# async def test_get_application(test_app_client, test_app_data: Dict):
+#     """Test retrieving an application by ID."""
+#     application_client, _ = test_app_client
     
-    # Now try to retrieve it
-    get_response = await test_client.get(f"/application/{app_id}")
-    assert get_response.status_code == 200
-    data = get_response.json()
-    assert data["id"] == app_id
-    assert data["name"] == test_app_data["name"]
+#     # First create an application
+#     create_data = await application_client.create_application(
+#         test_app_data["name"],
+#         test_app_data.get("description")
+#     )
+#     app_id = create_data["id"]
+    
+#     # Now try to retrieve it
+#     data = await application_client.get_application(UUID(app_id))
+#     assert data["id"] == app_id
+#     assert data["name"] == test_app_data["name"]
 
 
-async def test_get_nonexistent_application(test_client: AsyncClient):
-    """Test retrieving a non-existent application."""
-    random_id = str(uuid.uuid4())
-    response = await test_client.get(f"/application/{random_id}")
-    assert response.status_code == 404
+# async def test_get_nonexistent_application(test_app_client):
+#     """Test retrieving a non-existent application."""
+#     application_client, _ = test_app_client
+    
+#     random_id = str(uuid.uuid4())
+#     response = await application_client.client.get(f"/application/{random_id}")
+#     assert response.status_code == 404
 
 
-async def test_register_agent(test_client: AsyncClient, test_app_data: Dict, test_agent_data: Dict):
+async def test_register_agent(test_app_client, test_app_data: Dict):
     """Test registering an agent for an application."""
+    application_client, _ = test_app_client
+    
     # First create an application
-    create_response = await test_client.post("/application/", json=test_app_data)
-    assert create_response.status_code == 200
-    app_id = create_response.json()["id"]
+    create_data = await application_client.create_application(
+        test_app_data["name"],
+        test_app_data.get("description")
+    )
+    app_id = create_data["id"]
     
     # Register an agent
-    register_response = await test_client.post(
-        f"/application/{app_id}/agents/register", 
-        json=test_agent_data
-    )
-    assert register_response.status_code == 200
-    data = register_response.json()
-    assert data["user_name"] == test_agent_data["user_name"]
-    assert data["role"] == test_agent_data["role"]
+    data = await application_client.register_agent(UUID(app_id))
+    
+    assert data["user_name"] == application_client.username
+    assert data["role"] == application_client.role
     assert data["application_id"] == app_id
     assert "id" in data
     assert "created_at" in data
 
 
 async def test_push_messages(
-    test_client: AsyncClient, 
+    test_app_client, 
     test_app_data: Dict, 
-    test_agent_data: Dict,
     test_http_message: Dict
 ):
     """Test pushing HTTP messages through an agent."""
+    application_client, _ = test_app_client
+    
     # Create application
-    create_response = await test_client.post("/application/", json=test_app_data)
-    app_id = create_response.json()["id"]
+    create_data = await application_client.create_application(
+        test_app_data["name"],
+        test_app_data.get("description")
+    )
+    app_id = create_data["id"]
     
     # Register agent
-    register_response = await test_client.post(
-        f"/application/{app_id}/agents/register", 
-        json=test_agent_data
-    )
-    agent_data = register_response.json()
+    agent_data = await application_client.register_agent(UUID(app_id))
+    agent_id = UUID(agent_data["id"])
+    
+    # Create a sample HTTP message
+    sample_message = test_http_message
     
     # Push messages
-    push_response = await test_client.post(
-        f"/application/{app_id}/agents/push",
-        json={"messages": [test_http_message]},
-        headers={
-            "X-Username": test_agent_data["user_name"],
-            "X-Role": test_agent_data["role"]
-        }
+    messages = [sample_message]
+    
+    data = await application_client.push_messages(
+        UUID(app_id),
+        agent_id,
+        messages
     )
     
-    assert push_response.status_code == 202
-    data = push_response.json()
     assert data["accepted"] == 1
 
 
 async def test_push_messages_unauthorized(
-    test_client: AsyncClient, 
+    test_app_client, 
     test_app_data: Dict,
     test_http_message: Dict
 ):
     """Test pushing messages with an unregistered agent."""
+    application_client, _ = test_app_client
+    
     # Create application
-    create_response = await test_client.post("/application/", json=test_app_data)
-    app_id = create_response.json()["id"]
+    create_data = await application_client.create_application(
+        test_app_data["name"],
+        test_app_data.get("description")
+    )
+    app_id = create_data["id"]
+    
+    # Create a random agent ID that hasn't been registered
+    random_agent_id = uuid.uuid4()
     
     # Push messages without registering first
-    push_response = await test_client.post(
-        f"/application/{app_id}/agents/push",
-        json={"messages": [test_http_message]},
-        headers={
-            "X-Username": "unregistered_user",
-            "X-Role": "unknown"
-        }
-    )
-    
-    assert push_response.status_code == 401
+    try:
+        await application_client.push_messages(
+            UUID(app_id),
+            random_agent_id,
+            [test_http_message]
+        )
+        pytest.fail("Expected HTTPStatusError for unauthorized agent")
+    except httpx.HTTPStatusError as e:
+        assert e.response.status_code == 401

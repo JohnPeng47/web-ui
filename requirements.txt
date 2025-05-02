@@ -12,8 +12,9 @@ sqlalchemy
 sqlmodel
 fastapi
 asgi_lifespan
-aioqsqlite
-pytest-asyncio
+aiosqlite
+alembic
+httpx==0.22.0
 
 -e ./submodules/browser-use
 -e ./submodules/johnllm

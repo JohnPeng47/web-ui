@@ -18,10 +18,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 # Import after setting sys.path
 from sqlmodel import SQLModel
 # Import all models to ensure they're registered with SQLModel metadata
-from database.models import Application, Agent, AuthSession, HTTPMessageDB
+from cnc.database.models import Application, Agent, AuthSession, HTTPMessageDB
 
 # Import your database URL
-from database.session import DATABASE_URL
+from cnc.database.session import DATABASE_URL
 
 # Convert async URL to sync URL for Alembic
 sync_DATABASE_URL = DATABASE_URL.replace("sqlite+aiosqlite:", "sqlite:")

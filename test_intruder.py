@@ -3,7 +3,7 @@ import sys
 import asyncio
 import traceback
 from datetime import datetime
-
+import httpx
 from src.agent.client import AgentClient
 from httplib import parse_burp_xml
 
@@ -16,9 +16,9 @@ async def main():
     try:
         # Create the client - replace with actual server URL in production
         client = AgentClient(
-            base_url="http://localhost:8000",  # Replace with actual server URL
             username="intruder_agent",
-            role="scanner"
+            role="scanner",
+            client=httpx.AsyncClient(base_url="http://localhost:8000"),
         )
         
         # Create a new application

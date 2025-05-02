@@ -22,7 +22,7 @@ async def start_workers(app: Optional[FastAPI] = None):
     print("Starting worker launcher...")
     
     # Initialize database
-    await create_db_and_tables()
+    # await create_db_and_tables()
     
     # Get or create channels
     if app and hasattr(app.state, "raw_channel") and hasattr(app.state, "enriched_channel"):

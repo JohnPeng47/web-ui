@@ -4,7 +4,7 @@ from typing import Dict, List, Any
 
 from database import crud
 from schemas.application import ApplicationCreate, ApplicationOut, Finding
-from database.models import Application
+from cnc.database.models import Application
 
 
 async def create_app(db: AsyncSession, app_data: ApplicationCreate) -> Application:
