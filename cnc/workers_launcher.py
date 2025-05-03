@@ -4,9 +4,9 @@ from fastapi import FastAPI
 from typing import Optional
 
 from database.session import create_db_and_tables, engine
-from cnc.services.queue import BroadcastChannel
-from services.enrichment import RequestEnrichmentWorker
-from services.attack import AuthzAttacker
+from services.queue import BroadcastChannel
+from services.enrichment import RequestEnrichmentWorker 
+from workers.attackers.authnz.attacker import AuthzAttacker
 from httplib import HTTPMessage
 from schemas.http import EnrichedRequest
 

@@ -251,7 +251,7 @@ class TestAuthzTester:
         # Create and ingest the first request
         req1 = self.create_req1(mock_setup)
         tester.ingest(
-            user=req1["user"],
+            username=req1["user"],
             request=req1["request_data"],
             resource_locators=req1["resource_locators"],
             session=req1["session"]
@@ -267,7 +267,7 @@ class TestAuthzTester:
         # Create and ingest the first request
         req1 = self.create_req1(mock_setup)
         tester.ingest(
-            user=req1["user"],
+            username=req1["user"],
             request=req1["request_data"],
             resource_locators=req1["resource_locators"],
             session=req1["session"]
@@ -276,7 +276,7 @@ class TestAuthzTester:
         # Create and ingest the second request
         req2 = self.create_req2(mock_setup)
         tester.ingest(
-            user=req2["user"],
+            username=req2["user"],
             request=req2["request_data"],
             resource_locators=req2["resource_locators"],
             session=req2["session"]
@@ -294,7 +294,7 @@ class TestAuthzTester:
         # Set up the initial state with the first two requests
         req1 = self.create_req1(mock_setup)
         tester.ingest(
-            user=req1["user"],
+            username=req1["user"],
             request=req1["request_data"],
             resource_locators=req1["resource_locators"],
             session=req1["session"]
@@ -302,7 +302,7 @@ class TestAuthzTester:
         
         req2 = self.create_req2(mock_setup)
         tester.ingest(
-            user=req2["user"],
+            username=req2["user"],
             request=req2["request_data"],
             resource_locators=req2["resource_locators"],
             session=req2["session"]
@@ -311,7 +311,7 @@ class TestAuthzTester:
         # Create and ingest the third request
         req3 = self.create_req3(mock_setup)
         tester.ingest(
-            user=req3["user"],
+            username=req3["user"],
             request=req3["request_data"],
             resource_locators=req3["resource_locators"],
             session=req3["session"]
@@ -330,7 +330,7 @@ class TestAuthzTester:
         # Set up the initial state with the first three requests
         req1 = self.create_req1(mock_setup)
         tester.ingest(
-            user=req1["user"],
+            username=req1["user"],
             request=req1["request_data"],
             resource_locators=req1["resource_locators"],
             session=req1["session"]
@@ -338,7 +338,7 @@ class TestAuthzTester:
         
         req2 = self.create_req2(mock_setup)
         tester.ingest(
-            user=req2["user"],
+            username=req2["user"],
             request=req2["request_data"],
             resource_locators=req2["resource_locators"],
             session=req2["session"]
@@ -346,7 +346,7 @@ class TestAuthzTester:
         
         req3 = self.create_req3(mock_setup)
         tester.ingest(
-            user=req3["user"],
+            username=req3["user"],
             request=req3["request_data"],
             resource_locators=req3["resource_locators"],
             session=req3["session"]
@@ -355,7 +355,7 @@ class TestAuthzTester:
         # Create and ingest the fourth request
         req4 = self.create_req4(mock_setup)
         tester.ingest(
-            user=req4["user"],
+            username=req4["user"],
             request=req4["request_data"],
             resource_locators=req4["resource_locators"],
             session=req4["session"]
@@ -377,7 +377,7 @@ class TestAuthzTester:
         # Set up the initial state with the first four requests
         req1 = self.create_req1(mock_setup)
         tester.ingest(
-            user=req1["user"],
+            username=req1["user"],
             request=req1["request_data"],
             resource_locators=req1["resource_locators"],
             session=req1["session"]
@@ -385,7 +385,7 @@ class TestAuthzTester:
         
         req2 = self.create_req2(mock_setup)
         tester.ingest(
-            user=req2["user"],
+            username=req2["user"],
             request=req2["request_data"],
             resource_locators=req2["resource_locators"],
             session=req2["session"]
@@ -393,7 +393,7 @@ class TestAuthzTester:
         
         req3 = self.create_req3(mock_setup)
         tester.ingest(
-            user=req3["user"],
+            username=req3["user"],
             request=req3["request_data"],
             resource_locators=req3["resource_locators"],
             session=req3["session"]
@@ -401,7 +401,7 @@ class TestAuthzTester:
         
         req4 = self.create_req4(mock_setup)
         tester.ingest(
-            user=req4["user"],
+            username=req4["user"],
             request=req4["request_data"],
             resource_locators=req4["resource_locators"],
             session=req4["session"]
@@ -413,7 +413,7 @@ class TestAuthzTester:
         # Create and ingest the fifth request
         req5 = self.create_req5(mock_setup)
         tester.ingest(
-            user=req5["user"],
+            username=req5["user"],
             request=req5["request_data"],
             resource_locators=req5["resource_locators"],
             session=req5["session"]
@@ -449,7 +449,7 @@ class TestAuthzTester:
         # Set up the initial state with the first two requests
         req1 = self.create_req1(mock_setup)
         tester.ingest(
-            user=req1["user"],
+            username=req1["user"],
             request=req1["request_data"],
             resource_locators=req1["resource_locators"],
             session=req1["session"]
@@ -457,7 +457,7 @@ class TestAuthzTester:
         
         req2 = self.create_req2(mock_setup)
         tester.ingest(
-            user=req2["user"],
+            username=req2["user"],
             request=req2["request_data"],
             resource_locators=req2["resource_locators"],
             session=req2["session"]
@@ -466,7 +466,7 @@ class TestAuthzTester:
         # Create and ingest the sixth request (new resource type)
         req6 = self.create_req6(mock_setup)
         tester.ingest(
-            user=req6["user"],
+            username=req6["user"],
             request=req6["request_data"],
             resource_locators=req6["resource_locators"],
             session=req6["session"]
@@ -487,7 +487,7 @@ class TestAuthzTester:
         # Create and ingest all requests in sequence
         req1 = self.create_req1(mock_setup)
         tester.ingest(
-            user=req1["user"],
+            username=req1["user"],
             request=req1["request_data"],
             resource_locators=req1["resource_locators"],
             session=req1["session"]
@@ -496,7 +496,7 @@ class TestAuthzTester:
         
         req2 = self.create_req2(mock_setup)
         tester.ingest(
-            user=req2["user"],
+            username=req2["user"],
             request=req2["request_data"],
             resource_locators=req2["resource_locators"],
             session=req2["session"]
@@ -508,7 +508,7 @@ class TestAuthzTester:
         
         req3 = self.create_req3(mock_setup)
         tester.ingest(
-            user=req3["user"],
+            username=req3["user"],
             request=req3["request_data"],
             resource_locators=req3["resource_locators"],
             session=req3["session"]
@@ -520,7 +520,7 @@ class TestAuthzTester:
         
         req4 = self.create_req4(mock_setup)
         tester.ingest(
-            user=req4["user"],
+            username=req4["user"],
             request=req4["request_data"],
             resource_locators=req4["resource_locators"],
             session=req4["session"]
@@ -534,7 +534,7 @@ class TestAuthzTester:
         
         req5 = self.create_req5(mock_setup)
         tester.ingest(
-            user=req5["user"],
+            username=req5["user"],
             request=req5["request_data"],
             resource_locators=req5["resource_locators"],
             session=req5["session"]

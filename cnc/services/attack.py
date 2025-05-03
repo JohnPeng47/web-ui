@@ -3,6 +3,7 @@ from typing import Sequence, Dict, Any, Optional, Set, List, Tuple, Union
 from sqlalchemy.ext.asyncio import AsyncSession
 import httpx
 from uuid import UUID
+from pydantic import BaseModel
 import asyncio
 
 from schemas.http import EnrichedRequest
@@ -83,66 +84,3 @@ class ApplicationFindingsStore(FindingsStore):
         
         except Exception as e:
             log.info(f"Error processing finding: {e}")
-
-
-class AuthzAttacker(BaseAttackWorker):
-    """
-    Worker that analyzes requests for authorization vulnerabilities.
-    
-    It detects:
-    1. URL patterns that suggest resource access that might be protected
-    2. Differences between requests from different roles
-    3. Sequential access patterns that might indicate IDOR vulnerabilities
-    """
-    
-    def __init__(self, 
-                 inbound: BroadcastChannel[EnrichedRequest],
-                 db_session: Optional[AsyncSession] = None,
-                 app_id: Optional[UUID] = None):
-        super().__init__(db_session)
-        # Subscribe to inbound channel
-        self._sub_q = inbound.subscribe()
-        
-        # Track URLs accessed by each role
-        self.role_access_map: Dict[str, Set[str]] = {}
-        
-        # Set up findings store if app_id is provided
-        findings_store = None
-        if app_id:
-            findings_store = ApplicationFindingsStore(app_id)
-        
-        # Initialize AuthzTester with findings store
-        self._authz_tester = AuthzTester(
-            http_client=HTTPClient(timeout=5),
-            findings_log=findings_store
-        )
-  
-    async def run(self):
-        """Process incoming enriched requests for authz vulnerabilities"""
-        while True:
-            enr: EnrichedRequest = await self._sub_q.get()
-            await self.ingest(**self._explode(enr))
-    
-    def _explode(self, enriched: EnrichedRequest) -> Dict[str, Any]:
-        """Convert EnrichedRequest into kwargs for ingest method."""
-        return {
-            "request": enriched.request,
-            "username": enriched.username,
-            "role": enriched.role,
-            # Session would be fetched separately if needed
-            "session": None
-        }
-
-    def ingest(
-        self,
-        *,
-        username: str,
-        request: HTTPRequestData,
-        resource_locators: Sequence[ResourceLocator]
-    ) -> None:
-        """Process a single request for authorization vulnerabilities"""        
-        self._authz_tester.ingest(
-            username=username,
-            request=request,
-            resource_locators=resource_locators
-        )
