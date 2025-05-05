@@ -45,12 +45,12 @@ from langchain_core.messages import (
 )
 from browser_use.browser.views import BrowserState, BrowserStateHistory
 from browser_use.agent.prompts import PlannerPrompt
-from browser_use.http import HTTPMessage, HTTPRequest, HTTPResponse
 from playwright.sync_api import Request, Response
 from dataclasses import dataclass
 
 from json_repair import repair_json
 from src.utils.agent_state import AgentState
+from src.agent.client import AgentClient
 
 # Exceptions
 from google.api_core.exceptions import ResourceExhausted
@@ -58,6 +58,7 @@ from openai import RateLimitError
 from pydantic import ValidationError
 
 from johnllm import LLMModel
+from httplib import HTTPRequest, HTTPResponse, HTTPMessage
 
 # from .state import CustomAgentOutput
 from .custom_views import CustomAgentOutput
@@ -173,6 +174,8 @@ class CustomAgent(Agent):
             injected_agent_state: Optional[AgentState] = None,
             context: Context | None = None,
             history_file: Optional[str] = None,
+            agent_client: Optional[AgentClient] = None,
+            app_id: Optional[str] = None
     ):
         self.history_file = history_file
         self.http_handler = HTTPHandler()
@@ -180,6 +183,12 @@ class CustomAgent(Agent):
             exclude_patterns=[], 
             http_filter=DEFAULT_HTTP_FILTER
         )
+        self.agent_client = agent_client
+        self.app_id = app_id
+        self.agent_id = None
+        if agent_client and not app_id:
+            raise ValueError("app_id must be provided when agent_client is set")
+
         if browser_context:
             browser_context.req_handler = self.http_handler.handle_request
             browser_context.res_handler = self.http_handler.handle_response
@@ -391,6 +400,14 @@ class CustomAgent(Agent):
             msgs = self.http_handler.flush()
             filtered_msgs = self.http_history.filter_http_messages(msgs)
             state = await self.browser_context.get_state()
+
+            if self.agent_client and not self.agent_id:
+                agent_info = await self.agent_client.register_agent(self.app_id)
+                self.agent_id = agent_info["id"]
+            
+            await self.agent_client.update_server_state(self.app_id, self.agent_id, [
+                await msg.to_json() for msg in filtered_msgs
+            ])
 
             pentest_prompt = await get_pentest_message(state, self.state.last_action, self.state.last_result, step_info, filtered_msgs)
             if pentest_prompt.content[0]:

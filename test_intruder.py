@@ -27,14 +27,9 @@ async def main():
         app_description = f"Automated test application created at {timestamp}"
         
         print(f"Creating application: {app_name}")
-        app_info = await client.create_application(app_name, app_description)
-        app_id = app_info["id"]
-        print(f"Application created successfully:")
+        app_id = await client.create_application(app_name, app_description)
         print(f"  ID: {app_id}")
-        print(f"  Name: {app_info['name']}")
-        print(f"  Description: {app_info['description']}")
-        print(f"  Created at: {app_info['created_at']}")
-        
+
         # Register the agent with the newly created application
         print(f"\nRegistering agent for application ID: {app_id}")
         agent_info = await client.register_agent(app_id)
@@ -49,8 +44,6 @@ async def main():
         result = await client.push_messages(app_id, agent_info["id"], [await msg.to_payload() for msg in http_msgs])
         print(f"Successfully pushed {result['accepted']} HTTP messages")
         
-        await client.close()
-        return 0
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         print("\nTraceback (most recent call last):", file=sys.stderr)

@@ -4,15 +4,14 @@ from datetime import datetime
 from httplib import HTTPMessage
 from uuid import UUID
 
+from common.agent import UserCreds
 
 class ApplicationBase(BaseModel):
     name: str
     description: Optional[str] = None
 
-
 class ApplicationCreate(ApplicationBase):
     pass
-
 
 class ApplicationOut(ApplicationBase):
     id: UUID
@@ -22,11 +21,8 @@ class ApplicationOut(ApplicationBase):
     class Config:
         from_attributes = True
 
-
-class AgentRegister(BaseModel):
-    user_name: str
-    role: str
-
+class AgentRegister(UserCreds):
+    pass
 
 class AgentOut(BaseModel):
     id: UUID4

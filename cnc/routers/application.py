@@ -54,7 +54,5 @@ def make_application_router() -> APIRouter:
             
     return router
 
-
-
 # Legacy support - for backward compatibility during transition
 router = make_application_router()  # type: ignore

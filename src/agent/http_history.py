@@ -1,5 +1,4 @@
-from browser_use.http import HTTPMessage
-
+from httplib import HTTPMessage
 from typing import List, Dict, Callable, Optional
 from dataclasses import dataclass
 
