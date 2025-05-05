@@ -91,24 +91,31 @@ class HTTPHandler:
         self._request_queue: List[HTTPRequest] = []
         
     async def handle_request(self, request: Request):
-        http_request = HTTPRequest.from_pw(request)
-        self._request_queue.append(http_request)
+        try:
+            http_request = HTTPRequest.from_pw(request)
+            self._request_queue.append(http_request)
+        except Exception as e:
+            logger.error("Error handling request: ", e)
 
     async def handle_response(self, response: Response):
-        if not response:
-            return
-        req_match = HTTPRequest.from_pw(response.request)
-        http_response = HTTPResponse.from_pw(response)
-        matching_request = next(
-            (req for req in self._request_queue if req.url == response.request.url and req.method == response.request.method),
-            None
-        )
-        if matching_request:
-            self._request_queue.remove(matching_request)
+        try:
+            if not response:
+                return
 
-        self._step_messages.append(
-            HTTPMessage(request=req_match, response=http_response)
-        )
+            req_match = HTTPRequest.from_pw(response.request)
+            http_response = HTTPResponse.from_pw(response)
+            matching_request = next(
+                (req for req in self._request_queue if req.url == response.request.url and req.method == response.request.method),
+                None
+            )
+            if matching_request:
+                self._request_queue.remove(matching_request)
+
+            self._step_messages.append(
+                HTTPMessage(request=req_match, response=http_response)
+            )
+        except Exception as e:
+            logger.error("Error handling response: ", e)
 
     def flush(self) -> List[HTTPMessage]:
         """Called by agent to flush current messages and reset state"""
@@ -176,23 +183,7 @@ class CustomAgent(Agent):
             history_file: Optional[str] = None,
             agent_client: Optional[AgentClient] = None,
             app_id: Optional[str] = None
-    ):
-        self.history_file = history_file
-        self.http_handler = HTTPHandler()
-        self.http_history = HTTPHistory(
-            exclude_patterns=[], 
-            http_filter=DEFAULT_HTTP_FILTER
-        )
-        self.agent_client = agent_client
-        self.app_id = app_id
-        self.agent_id = None
-        if agent_client and not app_id:
-            raise ValueError("app_id must be provided when agent_client is set")
-
-        if browser_context:
-            browser_context.req_handler = self.http_handler.handle_request
-            browser_context.res_handler = self.http_handler.handle_response
-        
+    ):        
         super(CustomAgent, self).__init__(
             task=task,
             llm=llm,
@@ -225,6 +216,23 @@ class CustomAgent(Agent):
             injected_agent_state=injected_agent_state,
             context=context,
         )
+        self.history_file = history_file
+        self.http_handler = HTTPHandler()
+        self.http_history = HTTPHistory(
+            exclude_patterns=[], 
+            http_filter=DEFAULT_HTTP_FILTER
+        )
+        self.agent_client = agent_client
+        self.app_id = app_id
+        self.agent_id = None
+        if agent_client and not app_id:
+            raise ValueError("app_id must be provided when agent_client is set")
+
+        if browser_context:
+            logger.info("Registering HTTP handlers")
+            browser_context.req_handler = self.http_handler.handle_request
+            browser_context.res_handler = self.http_handler.handle_response
+
         self.state = injected_agent_state or CustomAgentState()
         self.add_infos = add_infos
         self._message_manager = CustomMessageManager(
@@ -397,17 +405,21 @@ class CustomAgent(Agent):
             # TODO: consider adding timeout here to wait for all responses to return
             # TODO: alternatively, we can consider encapsulating res/req in promises, and adding belated pairs to
             # future state
+
+            print("REQUST HANLDER::: ", self.browser_context.req_handler)
+
             msgs = self.http_handler.flush()
             filtered_msgs = self.http_history.filter_http_messages(msgs)
             state = await self.browser_context.get_state()
 
-            if self.agent_client and not self.agent_id:
-                agent_info = await self.agent_client.register_agent(self.app_id)
-                self.agent_id = agent_info["id"]
+            if self.agent_client:
+                if not self.agent_id:
+                    agent_info = await self.agent_client.register_agent(self.app_id)
+                    self.agent_id = agent_info["id"]
             
-            await self.agent_client.update_server_state(self.app_id, self.agent_id, [
-                await msg.to_json() for msg in filtered_msgs
-            ])
+                await self.agent_client.update_server_state(self.app_id, self.agent_id, [
+                    await msg.to_json() for msg in filtered_msgs
+                ])
 
             pentest_prompt = await get_pentest_message(state, self.state.last_action, self.state.last_result, step_info, filtered_msgs)
             if pentest_prompt.content[0]:
@@ -435,6 +447,9 @@ class CustomAgent(Agent):
 
             logger.info(f"📨 Input messages: {len(input_messages )}")
             try:
+                for msg in input_messages:
+                    msg.type = ""
+
                 model_output = await self.get_next_action(input_messages)
                 self.update_step_info(model_output, step_info)
                 self.state.n_steps += 1

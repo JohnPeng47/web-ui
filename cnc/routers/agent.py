@@ -71,6 +71,8 @@ def make_agent_router(raw_channel: BroadcastChannel[HTTPMessage]) -> APIRouter:
             if not agent:
                 raise HTTPException(status_code=404, detail="Agent not found")
             
+            print(payload)
+
             # Fan-out to channel for processing
             for msg in payload.messages:
                 print("Pushing message")

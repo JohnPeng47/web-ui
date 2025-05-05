@@ -51,3 +51,23 @@ class VulnAppClient(AgentClient):
         return [ 
             Vulnerability(**vuln) for vuln in response.json()["data"]
         ]
+    
+    async def update_server_state(self, 
+                                  app_id: UUID, 
+                                  agent_id: UUID,
+                                  messages: List[Dict[str, Any]]) -> Dict[str, int]:
+        """
+        Push HTTP messages to the system for processing.
+        
+        Args:
+            app_id: UUID of the application
+            agent_id: UUID of the agent
+            messages: List of HTTP messages to push
+            
+        Returns:
+            Dictionary with number of accepted messages
+            
+        Raises:
+            httpx.HTTPStatusError: If the server returns an error response
+        """
+        return await self.push_messages(app_id, agent_id, messages)

@@ -126,7 +126,7 @@ class HTTPRequest(BaseModel):
             redirected_to_url=request.redirected_to.url if request.redirected_to else None,
             is_iframe=bool(request.frame.parent_frame)
         )
-        return cls(request_data)
+        return cls(data=request_data)
 
     def to_str(self) -> str:
         """String representation of HTTP request"""

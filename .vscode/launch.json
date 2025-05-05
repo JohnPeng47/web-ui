@@ -4,8 +4,6 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-    
-
         {
             "name": "Python: WebUI",
             "type": "debugpy",
@@ -33,6 +31,20 @@
             "request": "launch",
             "program": "start_cnc.py",
             "console": "integratedTerminal"
-        }
+        },
+        {
+            "name": "Python: Test Intruder",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "test_agent_intruder.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Test Browsing",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "tests/test_browsing.py",
+            "console": "integratedTerminal"
+        },
     ]
 }

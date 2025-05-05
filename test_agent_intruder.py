@@ -59,10 +59,10 @@ async def main():
         use_vision = False
         browser = Browser(
             config=BrowserConfig(
-                headless=True,
+                headless=False,
                 disable_security=True,
                 extra_chromium_args=[f"--window-size={window_w},{window_h} --incognito"],
-                # chrome_instance_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe"
+                chrome_instance_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe"
             )
         )
         
@@ -91,8 +91,14 @@ async def main():
 Navigate to the following URL:
 {url}
 
-Make sure that you explicity visit the login page and loging with the following credentials
+Make sure that you explicity visit the login page and log in with the following credentials
 {creds}
+
+Do not attempt any other actions until you have either:
+1. logged in successfully *USING THE ABOVE CREDENTIALS*
+2. confirmed that you are already logged in with the account above
+
+If you detect a popup screen, then first dismiss it before continuing with your actions
 
 After logging in successfully using the above creds complete the following task:
 1. Add 3 items to your basket
@@ -136,4 +142,7 @@ Exit after you have successfully completed the above steps
     return 0
 
 if __name__ == "__main__":
+    from logger import init_root_logger
+
+    # init_root_logger()
     sys.exit(asyncio.run(main()))
