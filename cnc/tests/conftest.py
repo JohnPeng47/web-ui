@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from uuid import uuid4, UUID
 
 import httpx
+import json
 import pytest
 import pytest_asyncio
 from fastapi import FastAPI
@@ -23,6 +24,8 @@ from cnc.main import create_app
 from cnc.services.queue import BroadcastChannel
 from cnc.database.models import Agent as AgentModel, Application
 from cnc.database.session import override_db, create_db_and_tables, engine
+from cnc.schemas.http import EnrichedRequest
+from httplib import ResourceLocator, RequestPart
 
 from httplib import HTTPMessage, HTTPRequest, HTTPResponse, HTTPRequestData, HTTPResponseData
 
@@ -70,6 +73,52 @@ def test_http_message():
         request=HTTPRequest(data=request_data),
         response=HTTPResponse(data=response_data)
     ).model_dump(mode="json")
+
+@pytest.fixture
+def test_enriched_requests():    
+    request_data1 = HTTPRequestData(
+        method="GET",
+        url="https://example.com/api/v1/users/123",
+        headers={
+            "User-Agent": "Mozilla/5.0",
+            "Cookie": "sessionid=abc123"
+        },
+        is_iframe=False
+    )
+    http_request1 = HTTPRequest(data=request_data1)
+    
+    request_data2 = HTTPRequestData(
+        method="POST",
+        url="https://example.com/api/v1/products",
+        headers={
+            "User-Agent": "Mozilla/5.0",
+            "Content-Type": "application/json",
+            "Authorization": "Bearer token123"
+        },
+        post_data=json.loads('{"product_id": "123", "price": 10.99}'),
+        is_iframe=False
+    )
+    http_request2 = HTTPRequest(data=request_data2)
+    
+    enriched_request1 = EnrichedRequest(
+        request=http_request1,
+        username="user1",
+        role="admin",
+        resource_locators=[
+            ResourceLocator(id="123", request_part=RequestPart.URL, type_name="user")
+        ]
+    )
+    enriched_request2 = EnrichedRequest(
+        request=http_request2,
+        username="user2",
+        role="customer",
+        resource_locators=[
+            ResourceLocator(id="123", request_part=RequestPart.BODY, type_name="product")
+        ]
+    )
+    
+    return [enriched_request1, enriched_request2]
+
 
 TEST_DB_URL = (
     "sqlite+aiosqlite:///./cnc/test_db.sqlite"  # file-based keeps the schema

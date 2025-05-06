@@ -10,18 +10,27 @@ from schemas.http import EnrichedRequest
 from schemas.application import Finding
 from cnc.services.queue import BroadcastChannel
 from cnc.database.models import AuthSession as DBAuthSession
-
-from intruder import (
-    AuthzTester, 
-    HTTPClient, 
-    FindingsStore, 
-    TestResult,
-    ResourceLocator, 
-    RequestPart,
-    AuthSession as IntruderAuthSession
-)
 from httplib import HTTPRequest, HTTPRequestData
 from logger import init_file_logger
+
+
+class AttackResult(BaseModel):
+    success: bool
+    result: Optional[str]
+    description: Optional[str]
+
+# TODO: check during ingestion later that result is set
+class Attack(BaseModel):
+    type: str
+    description: str
+    attack_info: BaseModel
+    sub_type: Optional[str] = None
+    result: Optional[AttackResult] = None
+
+class FindingsStore(ABC):
+    @abstractmethod
+    def append(self, finding: Union[Attack, str]):
+        pass
 
 log = init_file_logger(__name__)
 
@@ -54,7 +63,7 @@ class ApplicationFindingsStore(FindingsStore):
         self.app_id = app_id
         self.base_url = base_url
     
-    def append(self, finding: Union[TestResult, str]):
+    def append(self, finding: Union[Attack, str]):
         """Add a finding by sending it directly to the API."""
         if isinstance(finding, str):
             # Skip string findings for now, could log them separately

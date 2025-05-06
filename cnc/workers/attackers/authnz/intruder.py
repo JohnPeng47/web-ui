@@ -1,5 +1,3 @@
-import xml.etree.ElementTree as ET
-from collections import defaultdict
 from dataclasses import dataclass, field, replace # Use field for default_factory
 from typing import List, Optional, Dict, Any, Set, Tuple, Type, Iterable, Protocol, Sequence, Union
 from enum import Enum
@@ -7,15 +5,20 @@ import json # Added import
 import httpx # Added import
 import logging
 from abc import ABC, abstractmethod
-from pydantic import BaseModel
-from itertools import product, chain
 
 from playwright.sync_api import Request
 from httplib import HTTPRequest, HTTPRequestData, AuthSession, ResourceLocator
 from src.llm import RequestResources, Resource, ResourceType, RequestPart
 
-from .models import AuthNZAttack, PlannedTest, HorizontalUserAuthz, VerticalUserAuthz, HorizontalResourceAuthz, VerticalResourceAuthz
-
+from cnc.services.attack import FindingsStore
+from .models import (
+    AuthNZAttack, 
+    PlannedTest, 
+    HorizontalUserAuthz, 
+    VerticalUserAuthz, 
+    HorizontalResourceAuthz, 
+    VerticalResourceAuthz
+)   
 
 log = logging.getLogger(__name__)
 
@@ -341,11 +344,6 @@ class TestExecutor:
 
         self._client.send(req, auth_session=sess)
         return attack  # Return the AuthNZAttack directly
-
-class FindingsStore(ABC):
-    @abstractmethod
-    def append(self, finding: Union[AuthNZAttack, str]):
-        pass
 
 class AuthzTester:
     """

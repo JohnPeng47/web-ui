@@ -46,8 +46,12 @@ class AuthzAttacker(BaseAttackWorker):
         
         # Set up findings store if app_id is provided
         findings_store = None
-        if app_id:
-            findings_store = ApplicationFindingsStore(app_id)
+        # NOTE:
+        # rename findings to attacks 
+        # enable this afterwards, should keep record of attacks
+        
+        # if app_id:
+        #     findings_store = ApplicationFindingsStore(app_id)
         
         # Initialize AuthzTester with findings store
         self._authz_tester = AuthzTester(
@@ -64,24 +68,29 @@ class AuthzAttacker(BaseAttackWorker):
     def _explode(self, enriched: EnrichedRequest) -> Dict[str, Any]:
         """Convert EnrichedRequest into kwargs for ingest method."""
         return {
-            "request": enriched.request,
+            "request": enriched.request.data,
             "username": enriched.username,
             "role": enriched.role,
             # Session would be fetched separately if needed
-            "session": None
+            "resource_locators": enriched.resource_locators,
+            "session": enriched.session
         }
 
-    def ingest(
+    # TODO: tmrw -> should work..
+    async def ingest(
         self,
         *,
         username: str,
         role: str,
         request: HTTPRequestData,
-        resource_locators: Sequence[ResourceLocator]
+        resource_locators: Sequence[ResourceLocator],
+        session: Optional[AuthSession] = None
     ) -> None:
         """Process a single request for authorization vulnerabilities"""        
         self._authz_tester.ingest(
             username=username,
+            role=role,
             request=request,
-            resource_locators=resource_locators
+            resource_locators=resource_locators,
+            session=session
         )

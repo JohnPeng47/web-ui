@@ -1,6 +1,5 @@
 from pydantic import BaseModel
-
-from ..models import Attack
+from cnc.services.attack import Attack
 
 class PlannedTest(BaseModel):
     user: str
