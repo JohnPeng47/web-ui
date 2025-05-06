@@ -27,11 +27,17 @@ def make_agent_router(raw_channel: BroadcastChannel[EnrichAuthNZMessage]) -> API
     # TODO: test this format of request and see how well cascades
     async def require_registered_agent(
         app_id: UUID,
-        x_username: str = Header(...),
-        x_role: str = Header(...),
+        x_username: str = Header(None),
+        x_role: str = Header(None),
         db: AsyncSession = Depends(get_session)
     ) -> Agent:
         """Dependency that ensures the agent is registered for the application."""
+        if not x_username or not x_role:
+            raise HTTPException(
+                status_code=400,
+                detail="Both X-Username and X-Role headers are required"
+            )
+            
         agent = await agent_service.verify_agent(db, app_id, x_username, x_role)
         if not agent:
             raise HTTPException(
@@ -39,7 +45,6 @@ def make_agent_router(raw_channel: BroadcastChannel[EnrichAuthNZMessage]) -> API
                 detail=f"Agent with username {x_username} and role {x_role} not registered for this application",
             )
         return agent
-    
     
     @router.post("/application/{app_id}/agents/register", response_model=AgentOut)
     async def register_agent(

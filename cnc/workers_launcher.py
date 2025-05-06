@@ -8,7 +8,7 @@ from services.queue import BroadcastChannel
 from services.enrichment import RequestEnrichmentWorker 
 from workers.attackers.authnz.attacker import AuthzAttacker
 from httplib import HTTPMessage
-from schemas.http import EnrichedRequest
+from cnc.schemas.http import EnrichedRequest
 
 async def start_enrichment_worker(raw_channel: BroadcastChannel, enriched_channel: BroadcastChannel, session: AsyncSession):
     """

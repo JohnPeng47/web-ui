@@ -9,7 +9,7 @@ class EnrichAuthNZMessage(BaseModel):
 
 class EnrichedRequest(BaseModel):
     request: HTTPRequest
-    username: Optional[str] = None
-    role: Optional[str] = None
+    username: str
+    role: str
     session: Optional[AuthSession] = None
     resource_locators: Optional[List[ResourceLocator]] = None

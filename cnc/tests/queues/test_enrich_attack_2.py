@@ -8,7 +8,7 @@ import pytest
 
 from cnc.services.queue import BroadcastChannel
 from cnc.services.enrichment import RequestEnrichmentWorker
-from schemas.http import EnrichedRequest
+from cnc.schemas.http import EnrichedRequest
 
 pytestmark = pytest.mark.asyncio
 

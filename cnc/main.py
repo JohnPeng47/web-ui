@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 import uvicorn
 from httplib import HTTPMessage
-from schemas.http import EnrichedRequest
+from cnc.schemas.http import EnrichedRequest
 
 from routers.application import make_application_router
 from routers.agent import make_agent_router

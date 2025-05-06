@@ -18,7 +18,7 @@ from cnc.services.attack import (
 from cnc.services.queue import BroadcastChannel
 from httplib import HTTPRequest, HTTPRequestData, AuthSession, ResourceLocator
 from playwright.sync_api import Request
-from schemas.http import EnrichedRequest
+from cnc.schemas.http import EnrichedRequest
 from src.llm import RequestResources, Resource, ResourceType, RequestPart
 
 from .intruder import AuthzTester, HTTPClient

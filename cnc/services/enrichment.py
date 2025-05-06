@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from schemas.http import EnrichedRequest, EnrichAuthNZMessage
+from cnc.schemas.http import EnrichedRequest, EnrichAuthNZMessage
 from cnc.services.queue import BroadcastChannel
 
 from httplib import HTTPMessage, ResourceLocator
