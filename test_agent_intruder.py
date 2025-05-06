@@ -67,15 +67,15 @@ async def main():
         )
         
         # Initialize browser context
-        browser_context = await browser.new_context(
-            config=BrowserContextConfig(
-                no_viewport=False,
-                browser_window_size=BrowserContextWindowSize(
-                    width=window_w, height=window_h
-                ),
-            )
-        )
-
+        # CHATGPT: this doesnt call aenter? 
+        # browser_context = await browser.new_context(
+        #     config=BrowserContextConfig(
+        #         no_viewport=False,
+        #         browser_window_size=BrowserContextWindowSize(
+        #             width=window_w, height=window_h
+        #         ),
+        #     )
+        # )
         shared_config = {
             "llm": llm,
             "use_vision": use_vision,
@@ -83,24 +83,37 @@ async def main():
             "system_prompt_class": CustomSystemPrompt,
             "agent_prompt_class": CustomAgentMessagePrompt,
             "app_id": app_id,
-            "browser_context": browser_context,
+            "context_cfg": BrowserContextConfig(no_viewport=False),
         }
         creds = USERS["admin"]
 
+#         AGENT_PROMPT = """
+# Navigate to the following URL:
+# {url}
+
+# Make sure that you explicity visit the login page and log in with the following credentials
+# {creds}
+
+# Do not attempt any other actions until you have either:
+# 1. logged in successfully *USING THE ABOVE CREDENTIALS*
+# 2. confirmed that you are already logged in with the account above
+
+# If you detect a popup screen, then first dismiss it before continuing with your actions
+
+# After logging in successfully using the above creds complete the following task:
+# 1. Add 3 items to your basket
+# 2. Then view your basket
+# 3. For one item try to increase its count
+# 4. For another item try to decrease its count
+# 5. For the last item try to remove it from the basket
+
+# Exit after you have successfully completed the above steps
+# """.format(url=VULN_APP_URL, creds=str(creds))
         AGENT_PROMPT = """
 Navigate to the following URL:
 {url}
 
-Make sure that you explicity visit the login page and log in with the following credentials
-{creds}
-
-Do not attempt any other actions until you have either:
-1. logged in successfully *USING THE ABOVE CREDENTIALS*
-2. confirmed that you are already logged in with the account above
-
-If you detect a popup screen, then first dismiss it before continuing with your actions
-
-After logging in successfully using the above creds complete the following task:
+Complete the following task:
 1. Add 3 items to your basket
 2. Then view your basket
 3. For one item try to increase its count
@@ -108,8 +121,7 @@ After logging in successfully using the above creds complete the following task:
 5. For the last item try to remove it from the basket
 
 Exit after you have successfully completed the above steps
-""".format(url=VULN_APP_URL, creds=str(creds))
-        
+""".format(url=VULN_APP_URL)        
         agent_config = [
             {
                 "task": AGENT_PROMPT,
@@ -117,6 +129,7 @@ Exit after you have successfully completed the above steps
             }
         ]
         harness = AgentHarness(
+            browser=browser,
             agents_config=agent_config,
             common_kwargs=shared_config,
         )
@@ -130,8 +143,8 @@ Exit after you have successfully completed the above steps
         finally:
             # Clean up
             await harness.kill_all("Test completed")
-            await browser_context.close()
-            await browser.close()
+            # await browser_context.close()
+            # await browser.close()
             
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
@@ -144,5 +157,5 @@ Exit after you have successfully completed the above steps
 if __name__ == "__main__":
     from logger import init_root_logger
 
-    # init_root_logger()
+    init_root_logger()
     sys.exit(asyncio.run(main()))

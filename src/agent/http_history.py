@@ -2,6 +2,9 @@ from httplib import HTTPMessage
 from typing import List, Dict, Callable, Optional
 from dataclasses import dataclass
 
+from logging import getLogger
+logger = getLogger(__name__)
+
 @dataclass
 class HTTPFilter:
     """Configuration class for HTTP message filtering"""
@@ -37,7 +40,7 @@ class HTTPHistory:
     # MIME type filters
     MIME_FILTERS: Dict[str, Callable[[str], bool]] = {
         "html": lambda ct: "text/html" in ct,
-        "script": lambda ct: "javascript" in ct or "application/json" in ct,
+        # "script": lambda ct: "javascript" in ct or "application/json" in ct,
         "xml": lambda ct: "xml" in ct,
         "flash": lambda ct: "application/x-shockwave-flash" in ct,
         "other_text": lambda ct: "text/" in ct and not any(x in ct for x in ["html", "xml", "css"]),
@@ -76,7 +79,7 @@ class HTTPHistory:
         
         for msg in messages:
             if not msg.response:
-                print(f"[FILTER] Excluding {msg.request.url} - No response")
+                logger.info(f"[FILTER] Excluding {msg.request.url} - No response")
                 continue
                 
             content_type = msg.response.get_content_type()
@@ -91,7 +94,7 @@ class HTTPHistory:
                     break
             
             if not mime_match:
-                print(f"[FILTER] Excluding {msg.request.url} - MIME type {content_type} not in allowed types")
+                logger.info(f"[FILTER] Excluding {msg.request.url} - MIME type {content_type} not in allowed types")
                 continue
                 
             # Check status code filter
@@ -102,12 +105,12 @@ class HTTPHistory:
                     break
             
             if not status_match:
-                print(f"[FILTER] Excluding {msg.request.url} - Status code {status_code} not in allowed ranges")
+                logger.info(f"[FILTER] Excluding {msg.request.url} - Status code {status_code} not in allowed ranges")
                 continue
                 
             # Check payload size filter
             if self.http_filter.max_payload_size is not None and payload_size > self.http_filter.max_payload_size:
-                print(f"[FILTER] Excluding {msg.request.url} - Payload size {payload_size} exceeds max {self.http_filter.max_payload_size}")
+                logger.info(f"[FILTER] Excluding {msg.request.url} - Payload size {payload_size} exceeds max {self.http_filter.max_payload_size}")
                 continue
                 
             filtered_messages.append(msg)

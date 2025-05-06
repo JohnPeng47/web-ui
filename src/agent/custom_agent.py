@@ -229,7 +229,7 @@ class CustomAgent(Agent):
             raise ValueError("app_id must be provided when agent_client is set")
 
         if browser_context:
-            logger.info("Registering HTTP handlers")
+            # logger.info("Registering HTTP handlers")
             browser_context.req_handler = self.http_handler.handle_request
             browser_context.res_handler = self.http_handler.handle_response
 
@@ -405,12 +405,12 @@ class CustomAgent(Agent):
             # TODO: consider adding timeout here to wait for all responses to return
             # TODO: alternatively, we can consider encapsulating res/req in promises, and adding belated pairs to
             # future state
-
-            print("REQUST HANLDER::: ", self.browser_context.req_handler)
-
             msgs = self.http_handler.flush()
             filtered_msgs = self.http_history.filter_http_messages(msgs)
             state = await self.browser_context.get_state()
+
+            # logger.info(f"")
+            logger.info(f"Captured {len(msgs)} HTTP Messages")
 
             if self.agent_client:
                 if not self.agent_id:

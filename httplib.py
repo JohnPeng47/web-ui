@@ -11,6 +11,39 @@ DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text"]
 DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
 MAX_PAYLOAD_SIZE = 4000
 
+def post_data_to_dict(post_data: str | None):
+    """Convert post data to dictionary format.
+    
+    Args:
+        post_data: Raw post data string
+        
+    Returns:
+        Dictionary of post data parameters
+    """
+    if not post_data:
+        return {}
+    
+    result = {}
+    
+    # Handle URL-encoded form data (param1=value1&param2=value2)
+    if isinstance(post_data, str):
+        if "&" in post_data:
+            pairs = post_data.split("&")
+            for pair in pairs:
+                if "=" in pair:
+                    key, value = pair.split("=", 1)
+                    result[key] = value
+        # Try to parse as JSON
+        elif post_data.strip().startswith("{") and post_data.strip().endswith("}"):
+            try:
+                import json
+                result = json.loads(post_data)
+            except json.JSONDecodeError:
+                # Not valid JSON, return as is
+                pass
+    
+    return result
+
 class ResourceLocator(BaseModel):
     """How to locate a particular resource id in a template request."""
     id: str
@@ -121,7 +154,7 @@ class HTTPRequest(BaseModel):
             method=request.method,
             url=request.url,
             headers=dict(request.headers),
-            post_data=request.post_data,
+            post_data=post_data_to_dict(request.post_data),
             redirected_from_url=request.redirected_from.url if request.redirected_from else None,
             redirected_to_url=request.redirected_to.url if request.redirected_to else None,
             is_iframe=bool(request.frame.parent_frame)

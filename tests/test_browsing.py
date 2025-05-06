@@ -14,9 +14,6 @@ import time
 import pytest
 from pathlib import Path
 
-from browser_use import Agent
-from browser_use.agent.views import AgentHistoryList
-
 from src.agent.custom_agent import CustomAgent
 from src.agent.custom_prompts import CustomSystemPrompt, CustomAgentMessagePrompt
 
