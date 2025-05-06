@@ -10,6 +10,46 @@ from workers.attackers.authnz.attacker import AuthzAttacker
 from httplib import HTTPMessage
 from schemas.http import EnrichedRequest
 
+async def start_enrichment_worker(raw_channel: BroadcastChannel, enriched_channel: BroadcastChannel, session: AsyncSession):
+    """
+    Start the enrichment worker.
+    
+    Args:
+        raw_channel: Channel for raw HTTP messages
+        enriched_channel: Channel for enriched requests
+        session: Database session
+    """
+    print("Starting enrichment worker...")
+    
+    # Create worker with injected dependencies
+    enrichment_worker = RequestEnrichmentWorker(
+        inbound=raw_channel,
+        outbound=enriched_channel,
+        db_session=session
+    )
+    
+    # Run the worker
+    await enrichment_worker.run()
+
+async def start_attacker_worker(enriched_channel: BroadcastChannel, session: AsyncSession):
+    """
+    Start the authorization attacker worker.
+    
+    Args:
+        enriched_channel: Channel for enriched requests
+        session: Database session
+    """
+    print("Starting authorization attacker worker...")
+    
+    # Create worker with injected dependencies
+    authz_worker = AuthzAttacker(
+        inbound=enriched_channel,
+        db_session=session
+    )
+    
+    # Run the worker
+    await authz_worker.run()
+
 async def start_workers(app: Optional[FastAPI] = None):
     """
     Launch all worker processes.
@@ -41,27 +81,11 @@ async def start_workers(app: Optional[FastAPI] = None):
         # Start workers with DI channels
         print("Starting workers with dependency injection...")
         
-        # Create workers with injected dependencies
-        enrichment_worker = RequestEnrichmentWorker(
-            inbound=raw_channel,
-            outbound=enriched_channel,
-            db_session=session
-        )
-        
-        authz_worker = AuthzAttacker(
-            inbound=enriched_channel,
-            db_session=session
-        )
-        
         # Run all workers concurrently
         await asyncio.gather(
-            enrichment_worker.run(),
-            authz_worker.run()
+            start_enrichment_worker(raw_channel, enriched_channel, session),
+            start_attacker_worker(enriched_channel, session)
         )
-
-        # await asyncio.gather(
-        #     enrichment_worker.run(),
-        # )
 
 if __name__ == "__main__":
     try:

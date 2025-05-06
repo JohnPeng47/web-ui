@@ -240,21 +240,25 @@ class TestPlanner:
     def schedule_from_ingest(
         self,
         *,
-        new_user: str,
+        new_username: str,
+        new_role: str,
         new_resources: Sequence[tuple[str, str]],
         new_action: str,
         is_new_user: bool,
     ) -> Iterable[AuthNZAttack]:
 
-        new_uid, new_role = self._split_role(new_user)
+        # Construct the combined user key for internal use (graph interaction)
+        combined_new_user = f"{new_username}:{new_role}"
+
+        # Removed: new_uid, new_role = self._split_role(new_user)
         new_types = [r[0] for r in new_resources]
         new_rids = [r[1] for r in new_resources]
 
         # 1) New action  →  try it with existing users (no ID swap)
-        for u in self._graph.other_users(new_user):
-            _, role = self._split_role(u)
+        for u in self._graph.other_users(combined_new_user): # Iterate over combined keys
+            _, other_role = self._split_role(u) # Split the combined key from the graph
             variant = (
-                HorizontalUserAuthz if role == new_role else VerticalUserAuthz
+                HorizontalUserAuthz if other_role == new_role else VerticalUserAuthz
             )
             print("From cond1: ", (variant.__name__, u, None, new_action, None))
             yield from self._dedup(
@@ -267,10 +271,10 @@ class TestPlanner:
                 # Avoid re-testing the exact triggering request combination immediately
                 if action == new_action:
                     continue
-                for u in self._graph.other_users(new_user):
-                    _, role = self._split_role(u)
+                for u in self._graph.other_users(combined_new_user): # Iterate over combined keys
+                    _, other_role = self._split_role(u) # Split the combined key from the graph
                     variant = (
-                        HorizontalUserAuthz if role == new_role else VerticalUserAuthz
+                        HorizontalUserAuthz if other_role == new_role else VerticalUserAuthz
                     )
                     print("From cond2: ", (variant.__name__, u, res_id, action, type_name))
                     yield from self._dedup(
@@ -304,10 +308,10 @@ class TestPlanner:
                             if new_role in prior_roles
                             else VerticalResourceAuthz
                         )
-                        print("From cond3: ", (variant.__name__, new_user, rid, action, type_name))
+                        print("From cond3: ", (variant.__name__, combined_new_user, rid, action, type_name))
                         yield from self._dedup(
                             variant,
-                            user=new_user,
+                            user=combined_new_user, # Use combined user string here
                             resource_id=rid,
                             action=action,
                             type_name=type_name,
@@ -392,6 +396,7 @@ class AuthzTester:
         self,
         *,
         username: str,
+        role: str,
         request: HTTPRequestData,
         resource_locators: Sequence[ResourceLocator],
         session: AuthSession | None = None,
@@ -400,17 +405,18 @@ class AuthzTester:
         Observe one live request and enqueue all static‑AuthZ permutations.
         """
         action_key = f"{request.method.upper()} {request.url}"
+        combined_user = f"{username}:{role}" # Construct the key used internally
 
-        is_new_user = username not in self._graph._graph
+        is_new_user = combined_user not in self._graph._graph
         
-        uid, role = TestPlanner._split_role(username)
+        # Removed uid, role = TestPlanner._split_role(username) as role is now explicit
 
         self._templates.add(action_key, RequestTemplate(request, resource_locators))
         if session:
-            self._sessions[username] = session
+            self._sessions[combined_user] = session # Use combined_user as key
         for rl in resource_locators:
             self._graph.record(
-                user=username,
+                user=combined_user, # Pass combined_user to graph
                 role=role,
                 type_name=rl.type_name,
                 resource_id=rl.id,
@@ -419,7 +425,8 @@ class AuthzTester:
         new_types = [(rl.type_name, rl.id) for rl in resource_locators]
         new_resources_for_planning: Sequence[tuple[str, str]] = new_types if new_types else [("", "")]
         for attack in self._planner.schedule_from_ingest(
-            new_user=username,
+            new_username=username,
+            new_role=role,
             new_resources=new_resources_for_planning,
             new_action=action_key,
             is_new_user=is_new_user,

@@ -28,6 +28,7 @@ class UserID(BaseModel):
     request_part: RequestPart
     selected_slice: Dict[RequestPart, str] = Field(default_factory=dict)
 
+# TODO: switch this output to ResourceLocator
 # TODO: roll user_ids into resource_ids
 # Improving parameter extraction
 # 1. add description to request

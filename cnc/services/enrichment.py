@@ -2,11 +2,10 @@ from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from dataclasses import dataclass
 from schemas.http import EnrichedRequest, EnrichAuthNZMessage
 from cnc.services.queue import BroadcastChannel
 
-from httplib import HTTPMessage
+from httplib import HTTPMessage, ResourceLocator
 from johnllm import LMP, LLMModel
 from src.llm import RequestResources, EXTRACT_REQUESTS_PROMPT
 
@@ -39,7 +38,7 @@ class RequestEnrichmentWorker(BaseRequestEnrichmentWorker):
     def __init__(
         self,
         *,
-        inbound: BroadcastChannel[HTTPMessage],
+        inbound: BroadcastChannel[EnrichAuthNZMessage],
         outbound: BroadcastChannel[EnrichedRequest],
         db_session: Optional[AsyncSession] = None
     ):
@@ -57,10 +56,13 @@ class RequestEnrichmentWorker(BaseRequestEnrichmentWorker):
             log.info("Waiting for raw HTTP message...")
 
             raw_msg = await self._sub_q.get()
-            enr_msg = await self._enrich(raw_msg)
+            enr_msg = await self._enrich(raw_msg.http_msg, raw_msg.username, role=raw_msg.role)
             await self._outbound.publish(enr_msg)
 
-    async def _enrich(self, message: HTTPMessage) -> EnrichedRequest:
+    async def _enrich(self, 
+                      message: HTTPMessage,
+                      username: str,
+                      role: str | None = None) -> EnrichedRequest:
         """
         Enriches an HTTP message by extracting authentication/session information.
         
@@ -75,5 +77,17 @@ class RequestEnrichmentWorker(BaseRequestEnrichmentWorker):
             model_name="gpt-4o",
             prompt_args={"request": message.request.to_str()}
         )
-        enriched = EnrichedRequest(request=request)        
+        enriched = EnrichedRequest(
+            request=request,
+            username=username,
+            role=role,
+            session=request.auth_session,
+            resource_locators=[
+                ResourceLocator(
+                    id=r.id,
+                    request_part=r.request_part,
+                    type_name=r.type.name
+                ) for r in resources.resources
+            ],
+        ) 
         return enriched

@@ -10,10 +10,8 @@ from cnc.database.models import Agent
 from services import agent as agent_service
 from cnc.services.queue import BroadcastChannel
 from schemas.http import EnrichAuthNZMessage
-from httplib import HTTPMessage
 
-
-def make_agent_router(raw_channel: BroadcastChannel[HTTPMessage]) -> APIRouter:
+def make_agent_router(raw_channel: BroadcastChannel[EnrichAuthNZMessage]) -> APIRouter:
     """
     Create the agent router with injected dependencies.
     
@@ -71,13 +69,16 @@ def make_agent_router(raw_channel: BroadcastChannel[HTTPMessage]) -> APIRouter:
             if not agent:
                 raise HTTPException(status_code=404, detail="Agent not found")
             
-            print(payload)
-
             # Fan-out to channel for processing
             for msg in payload.messages:
-                print("Pushing message")
                 # Publish directly to the injected channel
-                await raw_channel.publish(msg)
+                await raw_channel.publish(
+                    EnrichAuthNZMessage(
+                        http_msg=msg, 
+                        username=agent.user_name, 
+                        role=agent.role
+                    )
+                )
                 
             return {"accepted": len(payload.messages)}
         except Exception as e:

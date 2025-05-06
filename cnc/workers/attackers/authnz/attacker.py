@@ -75,6 +75,7 @@ class AuthzAttacker(BaseAttackWorker):
         self,
         *,
         username: str,
+        role: str,
         request: HTTPRequestData,
         resource_locators: Sequence[ResourceLocator]
     ) -> None:

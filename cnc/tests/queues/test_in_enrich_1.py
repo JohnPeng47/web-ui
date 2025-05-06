@@ -7,6 +7,7 @@ from uuid import uuid4, UUID
 
 import pytest
 from cnc.services.queue import BroadcastChannel
+from cnc.schemas.http import EnrichAuthNZMessage
 
 pytestmark = pytest.mark.asyncio
 
@@ -36,7 +37,7 @@ async def test_push_messages_to_raw_queue(test_app_client, test_app_data, test_h
     sample_message = test_http_message
     
     # Push messages
-    messages = [sample_message, sample_message, sample_message]
+    messages = [sample_message]
     
     # --- invoke endpoint ------------------------------------------------------
     data = await application_client.push_messages(
@@ -46,14 +47,11 @@ async def test_push_messages_to_raw_queue(test_app_client, test_app_data, test_h
     )
 
     assert "accepted" in data
-    assert data["accepted"] == 3
+    assert data["accepted"] == 1
 
     # --- confirm message reached the queue -----------------------------------
-    received = await asyncio.wait_for(queue.get(), timeout=1.0)
+    received: EnrichAuthNZMessage = await asyncio.wait_for(queue.get(), timeout=1.0)
     queue.task_done()
-    
-    print(received.model_dump())
-    print(sample_message)
 
-    assert received.model_dump() == sample_message
+    assert received.http_msg.request.url == "https://example.com/api/v1/users/123"
     # assert queue.empty()

@@ -1,6 +1,6 @@
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel
-from httplib import HTTPRequest, HTTPMessage
+from httplib import HTTPRequest, HTTPMessage, ResourceLocator, AuthSession
 
 class EnrichAuthNZMessage(BaseModel):
     http_msg: HTTPMessage
@@ -11,4 +11,5 @@ class EnrichedRequest(BaseModel):
     request: HTTPRequest
     username: Optional[str] = None
     role: Optional[str] = None
-    session_id: Optional[str] = None
+    session: Optional[AuthSession] = None
+    resource_locators: Optional[List[ResourceLocator]] = None
