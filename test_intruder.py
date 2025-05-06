@@ -43,7 +43,6 @@ async def main():
         print(f"\nPushing HTTP messages to application ID: {app_id}")
         result = await client.push_messages(app_id, agent_info["id"], [await msg.to_payload() for msg in http_msgs])
         print(f"Successfully pushed {result['accepted']} HTTP messages")
-        
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         print("\nTraceback (most recent call last):", file=sys.stderr)

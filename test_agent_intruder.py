@@ -113,15 +113,36 @@ async def main():
 Navigate to the following URL:
 {url}
 
+There are 3 parts to this task:
+<part1>
+1. Check if you are logged in
+if logged_in == True:
+    logout()
+
+2. Then login with the following credentials    
+{creds}
+</part1>
+
+<part2>
 Complete the following task:
 1. Add 3 items to your basket
 2. Then view your basket
 3. For one item try to increase its count
 4. For another item try to decrease its count
 5. For the last item try to remove it from the basket
+</part2>
 
-Exit after you have successfully completed the above steps
-""".format(url=VULN_APP_URL)        
+<part3>
+Log out
+</part3>
+
+Here is some extra info:
+- the login page is found at http://localhost:3000/#/login
+- the logout button is found under accounts
+
+Exit after you have successfully completed the above steps. You must complete the parts in order:
+part1 -> part2 -> part3
+""".format(url=VULN_APP_URL, creds=USERS["customer"])
         agent_config = [
             {
                 "task": AGENT_PROMPT,
