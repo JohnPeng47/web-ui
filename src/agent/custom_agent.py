@@ -223,6 +223,8 @@ class CustomAgent(Agent):
             http_filter=DEFAULT_HTTP_FILTER
         )
         self.agent_client = agent_client
+        self.agent_client.set_shutdown(self.shutdown)
+
         self.app_id = app_id
         self.agent_id = None
         if agent_client and not app_id:

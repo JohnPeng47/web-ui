@@ -1,5 +1,5 @@
 import httpx
-from typing import List, Dict, Any, Optional, Union, Protocol
+from typing import List, Dict, Any, Optional, Callable
 from uuid import UUID
 
 class AgentClient:
@@ -32,7 +32,14 @@ class AgentClient:
         }
         self.client = client
         self.client.headers.update(headers)
-    
+        self._shutdown = None
+
+    def set_shutdown(self, shutdown: Callable) -> None:
+        """
+        Set a shutdown function to be called when the agent is done.
+        """
+        self._shutdown = shutdown
+
     async def create_application(self, name: str, description: Optional[str] = None) -> UUID:
         """
         Create a new application.
