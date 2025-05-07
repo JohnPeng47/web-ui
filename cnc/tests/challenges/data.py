@@ -45,18 +45,26 @@ JUICESHOP_AUTHNZ_CHALLENGES_TEST = {
     ],
 }
 
-USERS = {
-    "admin": {
+USERS = [
+    {
         "username": "bjoern@juice-sh.op",
         "email": "bjoern@juice-sh.op",
+        "role": "admin",
         "password": "monkey summer birthday are all bad passwords but work just fine in a long passphrase"
     },
-    "customer": {
+    {
         "username": "john@juice-sh.op",
         "email": "john@juice-sh.op",
+        "role": "customer",
         "password": "y&x5Z#f6W532Z4445#Ae2HkwZVyDb7&oCUaDzFU"
+    },
+    {
+        "username": "jim@juice-sh.op",
+        "email": "jim@juice-sh.op",
+        "role": "customer",
+        "password": "ncc-1701"
     }
-}
+]
 
 def get_challenges(challenges):
     return [v for vuln in challenges.values() for v in vuln]

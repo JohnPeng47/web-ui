@@ -1,20 +1,22 @@
 import sys
 import traceback
 import httpx
-from pathlib import Path
 from datetime import datetime
 from browser_use.browser.browser import Browser, BrowserConfig
 from browser_use.browser.context import (
     BrowserContextConfig,
 )
 import asyncio
+from pathlib import Path
 from johnllm import LLMModel
+
 from src.agent.harness import AgentHarness
 from src.agent.custom_prompts import CustomAgentMessagePrompt, CustomSystemPrompt
 from src.agent.client import AgentClient
 
 from test_client import VulnAppClient
 from cnc.tests.challenges.data import (
+    USERS,
     JUICESHOP_AUTHNZ_CHALLENGES_FULL, 
     JUICESHOP_AUTHNZ_CHALLENGES_TEST, 
     get_challenges
@@ -26,7 +28,7 @@ VULN_APP_URL = "http://localhost:3000"
 CNC_URL = "http://localhost:8000"
 DATA_DIR_PATH = Path("tmp/profiles").resolve()
 
-async def main(user):
+async def main():
     try:
         # Create the client
         main_client = AgentClient(
@@ -42,30 +44,10 @@ async def main(user):
         app_id = await main_client.create_application(app_name, app_description)
         print(f"Application created successfully:")
         print(f"  ID: {app_id}")
-
-        # Create the client
-        vuln_test_client = VulnAppClient(
-            username=user["username"],
-            role=user["role"],
-            client=httpx.AsyncClient(base_url=CNC_URL),
-            vuln_client=httpx.AsyncClient(base_url=VULN_APP_URL),
-            targeted_vulns=TARGETED_VULNS,
-            all_vulns=ALL_VULNS
-        )
         
         # Setup browser
         llm = LLMModel()
-        window_w, window_h = 1920, 1080
         use_vision = False
-        browser = Browser(
-            config=BrowserConfig(
-                headless=False,
-                disable_security=True,
-                user_data_dir=str(DATA_DIR_PATH / user["username"]),
-                extra_chromium_args=[f"--window-size={window_w},{window_h} --incognito"],
-                chrome_instance_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe"
-            )
-        )
         shared_config = {
             "llm": llm,
             "use_vision": use_vision,
@@ -75,7 +57,6 @@ async def main(user):
             "app_id": app_id,
             "context_cfg": BrowserContextConfig(no_viewport=False),
         }
-
         AGENT_PROMPT = """
 Navigate to the following URL:
 {url}
@@ -109,20 +90,37 @@ Here is some extra info:
 
 Exit after you have successfully completed the above steps. You must complete the parts in order:
 part1 -> part2 -> part3
-""".format(url=VULN_APP_URL, creds=str(user))
-        
+"""
+        # horiztonal testing on customers
+        window_w, window_h = 1920, 1080
         agent_config = [
             {
-                "task": AGENT_PROMPT,
-                "agent_client": vuln_test_client,
-            }
+                "task": AGENT_PROMPT.format(url=VULN_APP_URL, creds=str(user)),
+                "agent_client": VulnAppClient(
+                    username=user["username"],
+                    role=user["role"],
+                    client=httpx.AsyncClient(base_url=CNC_URL),
+                    vuln_client=httpx.AsyncClient(base_url=VULN_APP_URL),
+                    targeted_vulns=TARGETED_VULNS,
+                    all_vulns=ALL_VULNS
+                ),
+                "browser": Browser(
+                    config=BrowserConfig(
+                        headless=False,
+                        disable_security=True,
+                        user_data_dir=str(DATA_DIR_PATH / user["username"]),
+                        extra_chromium_args=[f"--window-size={window_w},{window_h}"],
+                        chrome_instance_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe"
+                    )
+                )
+            # TODO: in factory we just pass in users wihtout having to apply the filter
+            } for user in USERS if user["role"] == "customer"
         ]
         harness = AgentHarness(
-            browser=browser,
             agents_config=agent_config,
             common_kwargs=shared_config,
         )
-        
+
         try:
             # Start agent
             print(f"\nLaunching agent for application ID: {app_id}")
@@ -132,7 +130,8 @@ part1 -> part2 -> part3
         finally:
             # Clean up
             await harness.kill_all("Test completed")
-            await browser.close()
+            # await browser_context.close()
+            # await browser.close()
             
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
@@ -144,29 +143,6 @@ part1 -> part2 -> part3
 
 if __name__ == "__main__":
     from logger import init_root_logger
-    import sys
 
-    USERS = [
-        # {
-        #     "username": "bjoern@juice-sh.op",
-        #     "email": "bjoern@juice-sh.op",
-        #     "role": "admin",
-        #     "password": "monkey summer birthday are all bad passwords but work just fine in a long passphrase"
-        # },
-        {
-            "username": "john@juice-sh.op",
-            "email": "john@juice-sh.op",
-            "role": "customer",
-            "password": "y&x5Z#f6W532Z4445#Ae2HkwZVyDb7&oCUaDzFU"
-        },
-        {
-            "username": "jim@juice-sh.op",
-            "email": "jim@juice-sh.op",
-            "role": "customer",
-            "password": "ncc-1701"
-        }
-    ]
-    user = int(sys.argv[1])
-    
     init_root_logger()
-    sys.exit(asyncio.run(main(USERS[user])))
+    sys.exit(asyncio.run(main()))

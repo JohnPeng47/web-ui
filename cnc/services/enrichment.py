@@ -90,4 +90,6 @@ class RequestEnrichmentWorker(BaseRequestEnrichmentWorker):
                 ) for r in resources.resources
             ],
         ) 
+        log.info(f"Enriched resources: {resources.resources}")
+        print(f"Enriched resources: {resources.resources}")
         return enriched

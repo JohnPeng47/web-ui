@@ -1,8 +1,8 @@
-from dataclasses import dataclass, field, replace # Use field for default_factory
+from dataclasses import dataclass, field, replace  # Use field for default_factory
 from typing import List, Optional, Dict, Any, Set, Tuple, Type, Iterable, Protocol, Sequence, Union
 from enum import Enum
-import json # Added import
-import httpx # Added import
+import json  # Added import
+import httpx  # Added import
 import logging
 from abc import ABC, abstractmethod
 
@@ -12,18 +12,20 @@ from src.llm import RequestResources, Resource, ResourceType, RequestPart
 
 from cnc.services.attack import FindingsStore
 from .models import (
-    AuthNZAttack, 
-    PlannedTest, 
-    HorizontalUserAuthz, 
-    VerticalUserAuthz, 
-    HorizontalResourceAuthz, 
-    VerticalResourceAuthz
-)   
+    AuthNZAttack,
+    PlannedTest,
+    HorizontalUserAuthz,
+    VerticalUserAuthz,
+    HorizontalResourceAuthz,
+    VerticalResourceAuthz,
+)
 
 log = logging.getLogger(__name__)
 
+
 class NetworkError(RuntimeError):
     """Raised for transport‑level issues (DNS, TLS, timeout…)."""
+
 
 class HTTPClient:
     """Thin wrapper around *one* httpx.Client for connection reuse."""
@@ -52,9 +54,8 @@ class HTTPClient:
 
         # Decide whether to treat body as JSON
         kwargs: Dict[str, Any] = {}
-        # Adapt to the existing HTTPRequestData interface which uses post_data instead of body
         post_data = getattr(request, "post_data", None)
-        
+
         if post_data is not None:
             ctype = headers.get("content-type", "").lower()
             if "application/json" in ctype:
@@ -65,6 +66,10 @@ class HTTPClient:
                     kwargs["content"] = post_data
             else:
                 kwargs["content"] = post_data
+
+        # ── TRACE: outbound request ────────────────────────────
+        print(f"[SEND ] {request.method} {request.url}")
+        # ───────────────────────────────────────────────────────
 
         try:
             resp = self._client.request(
@@ -77,15 +82,19 @@ class HTTPClient:
         except httpx.RequestError as exc:
             raise NetworkError("%s %s failed: %s" % (request.method, request.url, exc)) from exc
 
+        # ── TRACE: response line ───────────────────────────────
+        print(f"[SEND ] ← {resp.status_code} ({len(resp.content)} bytes)")
+        # ───────────────────────────────────────────────────────
+
         # Let session refresh itself
         if auth_session:
-            # Adapt to the existing AuthSession interface
             update_method = getattr(auth_session, "update_session", None)
             if update_method:
                 update_method(resp.headers)
             else:
                 log.warning("AuthSession for user has no 'update_session' method")
         return resp
+
 
 class TemplateRegistry:
     """Store the canonical request for each distinct *action* (URL)."""
@@ -103,9 +112,11 @@ class TemplateRegistry:
     def actions(self) -> Iterable[str]:
         return self._templates.keys()
 
+
 @dataclass(slots=True)
 class RequestTemplate:
     """Frozen request + its ResourceLocators."""
+
     data: HTTPRequestData
     resource_locators: Sequence[ResourceLocator]
 
@@ -120,7 +131,6 @@ class RequestTemplate:
         If either `target` or `type_name` is None, return the request untouched.
         """
         if not target or not type_name:
-            # Create a new instance with the same attributes
             return HTTPRequestData(
                 method=self.data.method,
                 url=self.data.url,
@@ -135,7 +145,7 @@ class RequestTemplate:
         if rl is None:
             raise ValueError(f"{type_name=} absent from template")
 
-        new_url       = self.data.url
+        new_url = self.data.url
         new_post_data = getattr(self.data, "post_data", None)
         if rl.request_part == RequestPart.URL:
             new_url = new_url.replace(rl.id, target, 1)
@@ -151,7 +161,8 @@ class RequestTemplate:
             redirected_from_url=getattr(self.data, "redirected_from_url", None),
             redirected_to_url=getattr(self.data, "redirected_to_url", None),
         )
-    
+
+
 class AccessGraph:
     """
     user  →  { resource_type → {resource_id, …} }
@@ -189,16 +200,18 @@ class AccessGraph:
         """Return every role that has touched (type,id) so far."""
         return self._resource_roles.get((type_name, resource_id), set())
 
+
 class TestPlanner:
     """
     Given one newly‑observed request, yield **AuthNZAttack** instances that
     exercise all user / role / resource permutations (static only).
     """
+
     def __init__(self, graph: AccessGraph, templates: TemplateRegistry):
-        self._graph     = graph
+        self._graph = graph
         self._templates = templates
         self._executed: set[tuple[str, str, str, str]] = set()
-                       # (variant, user, action, type_name)
+        # (variant, user, action, type_name)
 
     # ── helpers ----------------------------------------------------------
     @staticmethod
@@ -211,7 +224,7 @@ class TestPlanner:
             parts = u.split(":", 1)
             return (parts[0], parts[1])
         return (u, "")  # empty role if not encoded
-    
+
     def _actions_for_type(self, type_name: str) -> Iterable[str]:
         """Yields actions associated with a given resource type."""
         for action in self._templates.actions():
@@ -233,6 +246,13 @@ class TestPlanner:
             return
         self._executed.add(sig)
 
+        # ── TRACE: attack scheduled ────────────────────────────
+        print(
+            f"[PLAN ] {variant.__name__:<22} → user={user} "
+            f"action={action} type={type_name or '-'} id={resource_id or '-'}"
+        )
+        # ───────────────────────────────────────────────────────
+
         yield variant(
             attack_info=PlannedTest(
                 user=user, resource_id=resource_id, action=action, type_name=type_name
@@ -249,21 +269,18 @@ class TestPlanner:
         new_action: str,
         is_new_user: bool,
     ) -> Iterable[AuthNZAttack]:
-
-        # Construct the combined user key for internal use (graph interaction)
         combined_new_user = f"{new_username}:{new_role}"
 
-        # Removed: new_uid, new_role = self._split_role(new_user)
         new_types = [r[0] for r in new_resources]
         new_rids = [r[1] for r in new_resources]
 
         # 1) New action  →  try it with existing users (no ID swap)
-        for u in self._graph.other_users(combined_new_user): # Iterate over combined keys
-            _, other_role = self._split_role(u) # Split the combined key from the graph
-            variant = (
-                HorizontalUserAuthz if other_role == new_role else VerticalUserAuthz
-            )
-            print("From cond1: ", (variant.__name__, u, None, new_action, None))
+        for u in self._graph.other_users(combined_new_user):
+            _, other_role = self._split_role(u)
+            variant = HorizontalUserAuthz if other_role == new_role else VerticalUserAuthz
+            
+            print("[FINDING-1 | UserSub]: ", (variant.__name__, u, None, new_action, None))
+
             yield from self._dedup(
                 variant, user=u, resource_id=None, action=new_action, type_name=None
             )
@@ -271,15 +288,16 @@ class TestPlanner:
         # 2) Same action(s) → try them with new *resource* for all other users
         for type_name, res_id in new_resources:
             for action in self._actions_for_type(type_name):
-                # Avoid re-testing the exact triggering request combination immediately
                 if action == new_action:
                     continue
-                for u in self._graph.other_users(combined_new_user): # Iterate over combined keys
-                    _, other_role = self._split_role(u) # Split the combined key from the graph
+                for u in self._graph.other_users(combined_new_user):
+                    _, other_role = self._split_role(u)
                     variant = (
                         HorizontalUserAuthz if other_role == new_role else VerticalUserAuthz
                     )
-                    print("From cond2: ", (variant.__name__, u, res_id, action, type_name))
+
+                    print("[FINDING-2 | ResourceSub]: ", (variant.__name__, u, res_id, action, type_name))
+
                     yield from self._dedup(
                         variant,
                         user=u,
@@ -292,33 +310,30 @@ class TestPlanner:
         if is_new_user:
             for action in self._templates.actions():
                 tpl = self._templates.template(action)
-                
                 for type_name in tpl.get_resource_types():
                     for rid in self._graph.resources_of_type(type_name):
-                        # Iterate over every *resource type* referenced in *any* template
-                        # for type_name in tpl.get_resource_types():
-                        #     for rid in self._graph.resources_of_type(type_name):
                         if rid in new_rids:
-                            print("SKipping: ", rid)
                             continue
 
                         prior_roles = self._graph.roles_of_resource(
                             type_name=type_name, resource_id=rid
                         )
 
+                        print("[FINDING-3 | NewUserSub]: ", (variant.__name__, combined_new_user, rid, action, type_name))
+
                         variant = (
                             HorizontalResourceAuthz
                             if new_role in prior_roles
                             else VerticalResourceAuthz
                         )
-                        print("From cond3: ", (variant.__name__, combined_new_user, rid, action, type_name))
                         yield from self._dedup(
                             variant,
-                            user=combined_new_user, # Use combined user string here
+                            user=combined_new_user,
                             resource_id=rid,
                             action=action,
                             type_name=type_name,
                         )
+
 
 class TestExecutor:
     def __init__(
@@ -326,7 +341,7 @@ class TestExecutor:
         *,
         client: HTTPClient,
         templates: TemplateRegistry,
-        sessions: dict[str, AuthSession],
+        sessions: Dict[str, AuthSession],
     ) -> None:
         self._client = client
         self._templates = templates
@@ -340,20 +355,22 @@ class TestExecutor:
         )
         sess = self._sessions.get(attack_info.user)
         if not sess:
-            return attack  # Return the AuthNZAttack directly
+            return attack
 
         self._client.send(req, auth_session=sess)
-        return attack  # Return the AuthNZAttack directly
+        return attack
+
 
 class AuthzTester:
     """
     Attack module that is used to brute-force all *static* authorization permutations of:
     (user, role) x (verb, url) x (resource_id, resource_type)
     """
-
-    def __init__(self, 
-                 http_client: Optional[HTTPClient] = None,
-                 findings_log: Optional[FindingsStore] = None) -> None:
+    def __init__(
+        self,
+        http_client: Optional[HTTPClient] = None,
+        findings_log: Optional[FindingsStore] = None,
+    ) -> None:
         self._client = http_client or HTTPClient()
         self._graph = AccessGraph()
         self._templates = TemplateRegistry()
@@ -363,17 +380,14 @@ class AuthzTester:
             client=self._client, templates=self._templates, sessions=self._sessions
         )
         self._findings_log = findings_log
-        # Update findings type annotation
         self.findings: List[Union[AuthNZAttack, str]] = []
 
     # Convert from IntruderRequest to ResourceLocator
     def _convert_resource_to_locator(self, resource: Resource) -> Optional[ResourceLocator]:
         if not resource.id or not resource.type or not hasattr(resource.type, "name"):
             return None
-            
-        # Convert the imported RequestPart to our local RequestPart
+
         resource_part = resource.request_part
-        # Use direct enum comparison instead of string conversion
         if resource_part == RequestPart.URL:
             local_part = RequestPart.URL
         elif resource_part == RequestPart.BODY:
@@ -383,12 +397,8 @@ class AuthzTester:
         else:
             log.warning("Unknown RequestPart type: %s", resource_part)
             return None
-        
-        return ResourceLocator(
-            id=resource.id,
-            request_part=local_part,
-            type_name=resource.type.name
-        )
+
+        return ResourceLocator(id=resource.id, request_part=local_part, type_name=resource.type.name)
 
     def ingest(
         self,
@@ -402,26 +412,30 @@ class AuthzTester:
         """
         Observe one live request and enqueue all static‑AuthZ permutations.
         """
+        # ── TRACE: live request observed ───────────────────────
+        print(f"[INGEST] {request.method} {request.url}  user={username}  role={role}")
+        # ───────────────────────────────────────────────────────
+
         action_key = f"{request.method.upper()} {request.url}"
-        combined_user = f"{username}:{role}" # Construct the key used internally
+        combined_user = f"{username}:{role}"
 
         is_new_user = combined_user not in self._graph._graph
-        
-        # Removed uid, role = TestPlanner._split_role(username) as role is now explicit
 
         self._templates.add(action_key, RequestTemplate(request, resource_locators))
         if session:
-            self._sessions[combined_user] = session # Use combined_user as key
+            self._sessions[combined_user] = session
         for rl in resource_locators:
             self._graph.record(
-                user=combined_user, # Pass combined_user to graph
+                user=combined_user,
                 role=role,
                 type_name=rl.type_name,
                 resource_id=rl.id,
             )
 
         new_types = [(rl.type_name, rl.id) for rl in resource_locators]
-        new_resources_for_planning: Sequence[tuple[str, str]] = new_types if new_types else [("", "")]
+        new_resources_for_planning: Sequence[tuple[str, str]] = (
+            new_types if new_types else [("", "")]
+        )
         for attack in self._planner.schedule_from_ingest(
             new_username=username,
             new_role=role,
@@ -429,7 +443,6 @@ class AuthzTester:
             new_action=action_key,
             is_new_user=is_new_user,
         ):
-            # Store the AuthNZAttack directly
             attack_result = self._executor.execute(attack)
             self.findings.append(attack_result)
             if self._findings_log:
@@ -442,6 +455,7 @@ class AuthzTester:
 
     def get_findings(self):
         return self.findings
+
 
 __all__ = [
     "AuthzTester",
