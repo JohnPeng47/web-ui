@@ -66,22 +66,21 @@ from .custom_message_manager import CustomMessageManager, CustomMessageManagerSe
 from .custom_views import CustomAgentStepInfo, CustomAgentState
 from .http_history import HTTPHistory, HTTPFilter, DEFAULT_HTTP_FILTER
 from .pentest_prompts import get_pentest_message
+from .logger import AgentLogger
 
 import json
 import logging
 import os
-
-# Configure logging to write to both file and console
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 Context = TypeVar('Context')
 
 DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text"]
 DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
 MAX_PAYLOAD_SIZE = 4000
+MODEL_NAME = "gpt-4.1"
 
-MODEL_NAME = "gpt-4o"
+# TODO: LOGGING QUESTION:
+# how to handle logging in functions not defined as part of class
 
 class HTTPHandler:
     def __init__(self):
@@ -95,7 +94,7 @@ class HTTPHandler:
             http_request = HTTPRequest.from_pw(request)
             self._request_queue.append(http_request)
         except Exception as e:
-            logger.error("Error handling request: ", e)
+            print("Error handling request: ", e)
 
     async def handle_response(self, response: Response):
         try:
@@ -115,7 +114,7 @@ class HTTPHandler:
                 HTTPMessage(request=req_match, response=http_response)
             )
         except Exception as e:
-            logger.error("Error handling response: ", e)
+            print("Error handling response: ", e)
 
     def flush(self) -> List[HTTPMessage]:
         """Called by agent to flush current messages and reset state"""
@@ -149,7 +148,7 @@ class CustomAgent(Agent):
             # Agent settings
             use_vision: bool = True,
             use_vision_for_planner: bool = False,
-            save_conversation_path: Optional[str] = None,
+            save_conversatiosn_path: Optional[str] = None,
             save_conversation_path_encoding: Optional[str] = 'utf-8',
             max_failures: int = 3,
             retry_delay: int = 10,
@@ -219,7 +218,6 @@ class CustomAgent(Agent):
         self.history_file = history_file
         self.http_handler = HTTPHandler()
         self.http_history = HTTPHistory(
-            exclude_patterns=[], 
             http_filter=DEFAULT_HTTP_FILTER
         )
         self.agent_client = agent_client
@@ -235,6 +233,7 @@ class CustomAgent(Agent):
             browser_context.req_handler = self.http_handler.handle_request
             browser_context.res_handler = self.http_handler.handle_response
 
+        self.log = AgentLogger(name=self.agent_client.username)
         self.state = injected_agent_state or CustomAgentState()
         self.add_infos = add_infos
         self._message_manager = CustomMessageManager(
@@ -263,12 +262,12 @@ class CustomAgent(Agent):
         else:
             emoji = "🤷"
 
-        logger.info(f"{emoji} Eval: {response.current_state.evaluation_previous_goal}")
-        logger.info(f"🧠 New Memory: {response.current_state.important_contents}")
-        logger.info(f"🤔 Thought: {response.current_state.thought}")
-        logger.info(f"🎯 Next Goal: {response.current_state.next_goal}")
+        self.log.action.info(f"{emoji} Eval: {response.current_state.evaluation_previous_goal}")
+        self.log.action.info(f"🧠 New Memory: {response.current_state.important_contents}")
+        self.log.action.info(f"🤔 Thought: {response.current_state.thought}")
+        self.log.action.info(f"🎯 Next Goal: {response.current_state.next_goal}")
         for i, action in enumerate(response.action):
-            logger.info(
+            self.log.action.info(
                 f"🛠️  Action {i + 1}/{len(response.action)}: {action.model_dump_json(exclude_unset=True)}"
             )
 
@@ -297,7 +296,7 @@ class CustomAgent(Agent):
         ):
             step_info.memory += important_contents + "\n"
 
-        logger.info(f"🧠 All Memory: \n{step_info.memory}")
+        self.log.action.info(f"🧠 All Memory: \n{step_info.memory}")
 
     @time_execution_async("--get_next_action")
     async def get_next_action(self, input_messages: list[BaseMessage]) -> AgentOutput:
@@ -315,9 +314,9 @@ class CustomAgent(Agent):
         self.message_manager._add_message_with_tokens(converted_msg)
 
         # if ai_message.reasoning_content:
-        #     logger.info("🤯 Start Deep Thinking: ")
-        #     logger.info(ai_message.reasoning_content)
-        #     logger.info("🤯 End Deep Thinking")
+        #     self.log.context.info("🤯 Start Deep Thinking: ")
+        #     self.log.context.info(ai_message.reasoning_content)
+        #     self.log.context.info("🤯 End Deep Thinking")
 
         ai_content = ai_message.replace("```json", "").replace("```", "")
         ai_content = repair_json(ai_content)
@@ -325,7 +324,7 @@ class CustomAgent(Agent):
         parsed: AgentOutput = self.AgentOutput(**parsed_json)
 
         if parsed is None:
-            logger.debug(ai_message.content)
+            self.log.context.debug(ai_message.content)
             raise ValueError('Could not parse response.')
 
         # cut the number of actions to max_actions_per_step if needed
@@ -376,24 +375,24 @@ class CustomAgent(Agent):
 
         try:
             plan_json = json.loads(plan.replace("```json", "").replace("```", ""))
-            logger.info(f'📋 Plans:\n{json.dumps(plan_json, indent=4)}')
+            self.log.context.info(f'📋 Plans:\n{json.dumps(plan_json, indent=4)}')
 
             if hasattr(response, "reasoning_content"):
-                logger.info("🤯 Start Planning Deep Thinking: ")
-                logger.info(response.reasoning_content)
-                logger.info("🤯 End Planning Deep Thinking")
+                self.log.context.info("🤯 Start Planning Deep Thinking: ")
+                self.log.context.info(response.reasoning_content)
+                self.log.context.info("🤯 End Planning Deep Thinking")
 
         except json.JSONDecodeError:
-            logger.info(f'📋 Plans:\n{plan}')
+            self.log.context.info(f'📋 Plans:\n{plan}')
         except Exception as e:
-            logger.debug(f'Error parsing planning analysis: {e}')
-            logger.info(f'📋 Plans: {plan}')
+            self.log.context.debug(f'Error parsing planning analysis: {e}')
+            self.log.context.info(f'📋 Plans: {plan}')
         return plan
 
     @time_execution_async("--step")
     async def step(self, step_info: Optional[CustomAgentStepInfo] = None) -> None:
         """Execute one step of the task"""
-        logger.info(f"\n📍 Step {self.state.n_steps}")
+        self.log.action.info(f"Step {self.state.n_steps}")
         state = None
         model_output = None
         result: list[ActionResult] = []
@@ -411,8 +410,10 @@ class CustomAgent(Agent):
             filtered_msgs = self.http_history.filter_http_messages(msgs)
             state = await self.browser_context.get_state()
 
-            # logger.info(f"")
-            logger.info(f"Captured {len(msgs)} HTTP Messages")
+            # self.log.context.info(f"")
+            self.log.context.info(f"Captured {len(filtered_msgs)} HTTP Messages")
+            for msg in filtered_msgs:
+                self.log.context.info(f"[Agent] {msg.request.url}")
 
             if self.agent_client:
                 if not self.agent_id:
@@ -423,15 +424,15 @@ class CustomAgent(Agent):
                     await msg.to_json() for msg in filtered_msgs
                 ])
 
-            pentest_prompt = await get_pentest_message(state, self.state.last_action, self.state.last_result, step_info, filtered_msgs)
-            if pentest_prompt.content[0]:
-                pentest_messages = self.llm.invoke([pentest_prompt], model_name=MODEL_NAME)
-                pentest_analysis = pentest_messages
-            else:
-                pentest_analysis = ""
+            # pentest_prompt = await get_pentest_message(state, self.state.last_action, self.state.last_result, step_info, filtered_msgs)
+            # if pentest_prompt.content[0]:
+            #     pentest_messages = self.llm.invoke([pentest_prompt], model_name=MODEL_NAME)
+            #     pentest_analysis = pentest_messages
+            # else:
+            #     pentest_analysis = ""
             
-            logger.info(f"[Pentest Prompt]: {pentest_prompt.content}")
-            logger.info(f"[Pentest Analysis]: {pentest_analysis}")
+            # self.log.context.info(f"[Pentest Prompt]: {pentest_prompt.content}")
+            # self.log.context.info(f"[Pentest Analysis]: {pentest_analysis}")
 
             await self._raise_if_stopped_or_paused()
             self.message_manager.add_state_message(
@@ -439,7 +440,7 @@ class CustomAgent(Agent):
                 self.state.last_action, 
                 self.state.last_result, 
                 step_info, 
-                pentest_analysis, 
+                "",
                 use_vision=self.settings.use_vision
             )
             if self.settings.planner_llm and self.state.n_steps % self.settings.planner_interval == 0:
@@ -447,7 +448,7 @@ class CustomAgent(Agent):
             input_messages = self.message_manager.get_messages()
             tokens = self._message_manager.state.history.current_tokens
 
-            logger.info(f"📨 Input messages: {len(input_messages )}")
+            self.log.context.info(f"📨 Input messages: {len(input_messages )}")
             try:
                 for msg in input_messages:
                     msg.type = ""
@@ -487,12 +488,12 @@ class CustomAgent(Agent):
                 if not self.state.extracted_content:
                     self.state.extracted_content = step_info.memory
                 result[-1].extracted_content = self.state.extracted_content
-                logger.info(f"📄 Result: {result[-1].extracted_content}")
+                self.log.context.info(f"📄 Result: {result[-1].extracted_content}")
 
             self.state.consecutive_failures = 0
 
         except InterruptedError:
-            logger.debug("Agent paused")
+            self.log.context.debug("Agent paused")
             self.state.last_result = [
                 ActionResult(
                     error="The agent was paused - now continuing actions might need to be repeated",
@@ -506,8 +507,8 @@ class CustomAgent(Agent):
         #     self.state.last_result = result
 
         except Exception as e:
-            logger.error(f"Error in step {self.state.n_steps}: {e}")
-            logger.error(traceback.format_exc())
+            self.log.context.error(f"Error in step {self.state.n_steps}: {e}")
+            self.log.context.error(traceback.format_exc())
             step_info.step_number = step_info.max_steps
 
             raise e
@@ -558,12 +559,12 @@ class CustomAgent(Agent):
             for step in range(max_steps):
                 # Check if we should stop due to too many failures
                 if self.state.consecutive_failures >= self.settings.max_failures:
-                    logger.error(f'❌ Stopping due to {self.settings.max_failures} consecutive failures')
+                    self.log.context.error(f'❌ Stopping due to {self.settings.max_failures} consecutive failures')
                     break
 
                 # Check control flags before each step
                 if self.state.stopped:
-                    logger.info('Agent stopped')
+                    self.log.context.info('Agent stopped')
                     break
 
                 while self.state.paused:
@@ -581,7 +582,7 @@ class CustomAgent(Agent):
                     await self.log_completion()
                     break
             else:
-                logger.info("❌ Failed to complete task in maximum steps")
+                self.log.context.info("❌ Failed to complete task in maximum steps")
                 if not self.state.extracted_content:
                     self.state.history.history[-1].result[-1].extracted_content = step_info.memory
                 else:
@@ -623,17 +624,17 @@ class CustomAgent(Agent):
         """Shuts down the agent prematurely and performs cleanup."""
         # Check if already stopped to prevent duplicate shutdown calls
         if hasattr(self.state, 'stopped') and self.state.stopped:
-            logger.warning("Shutdown already in progress or completed.")
+            self.log.context.warning("Shutdown already in progress or completed.")
             return
 
-        logger.info(f"Initiating premature shutdown: {reason}")
+        self.log.context.info(f"Initiating premature shutdown: {reason}")
         # Ensure state has 'stopped' attribute before setting
         if hasattr(self.state, 'stopped'):
              self.state.stopped = True
         else:
              # If AgentState doesn't have stopped, we might need another way
              # to signal termination or handle this case.
-             logger.warning("Agent state does not have 'stopped' attribute. Cannot signal stop.")
+             self.log.context.warning("Agent state does not have 'stopped' attribute. Cannot signal stop.")
 
 
         # Perform cleanup similar to the finally block in run()
@@ -664,25 +665,25 @@ class CustomAgent(Agent):
             if self.history_file and history:
                 try:
                     history.save_to_file(self.history_file)
-                    logger.info(f"Saved agent history to {self.history_file} during shutdown.")
+                    self.log.context.info(f"Saved agent history to {self.history_file} during shutdown.")
                 except Exception as e:
-                    logger.error(f"Failed to save history during shutdown: {e}")
+                    self.log.context.error(f"Failed to save history during shutdown: {e}")
 
             # Close Browser Context
             if not self.injected_browser_context and self.browser_context:
                 try:
                     await self.browser_context.close()
-                    logger.info("Closed browser context during shutdown.")
+                    self.log.context.info("Closed browser context during shutdown.")
                 except Exception as e:
-                    logger.error(f"Error closing browser context during shutdown: {e}")
+                    self.log.context.error(f"Error closing browser context during shutdown: {e}")
 
             # Close Browser
             if not self.injected_browser and self.browser:
                 try:
                     await self.browser.close()
-                    logger.info("Closed browser during shutdown.")
+                    self.log.context.info("Closed browser during shutdown.")
                 except Exception as e:
-                    logger.error(f"Error closing browser during shutdown: {e}")
+                    self.log.context.error(f"Error closing browser during shutdown: {e}")
 
             # Generate GIF
             if self.settings.generate_gif and history:
@@ -693,14 +694,14 @@ class CustomAgent(Agent):
                         base, ext = os.path.splitext(self.settings.generate_gif)
                         output_path = f"{base}_shutdown{ext}"
 
-                    logger.info(f"Generating shutdown GIF at {output_path}")
+                    self.log.context.info(f"Generating shutdown GIF at {output_path}")
                     create_history_gif(task=f"{self.task} (Shutdown)", history=history, output_path=output_path)
                 except Exception as e:
-                     logger.error(f"Failed to generate GIF during shutdown: {e}")
+                     self.log.context.error(f"Failed to generate GIF during shutdown: {e}")
 
         except Exception as e:
             # Catch errors during the shutdown cleanup process itself
-            logger.error(f"Error during agent shutdown cleanup: {e}")
-            logger.error(traceback.format_exc())
+            self.log.context.error(f"Error during agent shutdown cleanup: {e}")
+            self.log.context.error(traceback.format_exc())
         finally:
-             logger.info("Agent shutdown process complete.")
+             self.log.context.info("Agent shutdown process complete.")
