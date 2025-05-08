@@ -148,7 +148,7 @@ class CustomAgent(Agent):
             # Agent settings
             use_vision: bool = True,
             use_vision_for_planner: bool = False,
-            save_conversatiosn_path: Optional[str] = None,
+            save_conversation_path: Optional[str] = None,
             save_conversation_path_encoding: Optional[str] = 'utf-8',
             max_failures: int = 3,
             retry_delay: int = 10,
@@ -488,7 +488,7 @@ class CustomAgent(Agent):
                 if not self.state.extracted_content:
                     self.state.extracted_content = step_info.memory
                 result[-1].extracted_content = self.state.extracted_content
-                self.log.context.info(f"📄 Result: {result[-1].extracted_content}")
+                self.log.action.info(f"📄 Result: {result[-1].extracted_content}")
 
             self.state.consecutive_failures = 0
 

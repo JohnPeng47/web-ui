@@ -26,19 +26,15 @@ class _MultiStreamAdapter:
 
     # Dynamically proxy any logging method (debug, info, warning, …)
     def __getattr__(self, name):
-        if name in logging._levelToName.values() or name in (
-            "log",
-            "exception",
-        ):
+        attr = getattr(self._base, name, None)
+        if callable(attr):
             def _wrapper(msg, *args, **kwargs):
-                # Preserve original kwargs but do NOT mutate the caller’s dict
                 orig_extra = kwargs.pop("extra", {})
                 for s in self._streams:
                     extra = {**orig_extra, "stream": s}
-                    getattr(self._base, name)(msg, *args, extra=extra, **kwargs)
+                    attr(msg, *args, extra=extra, **kwargs)
             return _wrapper
-        # Fallback to the underlying logger’s attributes (setLevel, addFilter, …)
-        return getattr(self._base, name)
+        return attr
 
 
 class AgentLogger:
