@@ -20,29 +20,28 @@ from cnc.tests.challenges.data import (
     get_challenges
 )
 
+from logging import getLogger
+logger = getLogger(__name__)
+
 ALL_VULNS = get_challenges(JUICESHOP_AUTHNZ_CHALLENGES_FULL)
 TARGETED_VULNS = get_challenges(JUICESHOP_AUTHNZ_CHALLENGES_TEST)
 VULN_APP_URL = "http://localhost:3000"
 CNC_URL = "http://localhost:8000"
 DATA_DIR_PATH = Path("tmp/profiles").resolve()
 
-async def main(user):
-    try:
-        # Create the client
-        main_client = AgentClient(
-            client=httpx.AsyncClient(base_url=CNC_URL), 
-        )
-        
-        # Create a new application
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        app_name = f"AgentIntruderTest_{timestamp}"
-        app_description = f"Automated test application created at {timestamp}"
-        
-        print(f"Creating application: {app_name}")
-        app_id = await main_client.create_application(app_name, app_description)
-        print(f"Application created successfully:")
-        print(f"  ID: {app_id}")
+# CREATE REVIEW
+CREATE_REVIEW_PROMPT = """
+<task>
+1. Navigate to the homepage
+2. Click on a product and write a review
+3. Submit the review 
+</task>
+"""
 
+
+
+async def main(user, app_id):
+    try:
         # Create the client
         vuln_test_client = VulnAppClient(
             username=user["username"],
@@ -53,6 +52,9 @@ async def main(user):
             all_vulns=ALL_VULNS
         )
         
+        logger.info(f"Launching browser for [{user['username']}]")
+        logger.info(f"User datadir: {str(DATA_DIR_PATH / user['username'])}")
+        
         # Setup browser
         llm = LLMModel()
         window_w, window_h = 1920, 1080
@@ -61,9 +63,9 @@ async def main(user):
             config=BrowserConfig(
                 headless=False,
                 disable_security=True,
-                user_data_dir=str(DATA_DIR_PATH / user["username"]),
+                # user_data_dir=str(DATA_DIR_PATH / user["username"]),
                 extra_chromium_args=[f"--window-size={window_w},{window_h} --incognito"],
-                chrome_instance_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe"
+                # chrome_instance_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe"
             )
         )
         shared_config = {
@@ -80,35 +82,22 @@ async def main(user):
 Navigate to the following URL:
 {url}
 
-There are 3 parts to this task:
+There are 2 parts to this task:
 <part1>
-1. Check if you are logged in
-if logged_in == True:
-    logout()
-
-2. Then login with the following credentials    
+1. Dismiss the popup window by clicking on the "Dismiss" button
+2. Then login with the following credentials at http://localhost:3000/#/login
 {creds}
 </part1>
 
 <part2>
-Complete the following task:
-1. Add 3 items to your basket
-2. Then view your basket
-3. For one item try to increase its count
-4. For another item try to decrease its count
-5. For the last item try to remove it from the basket
+1. Once you are logged in, add the first item to your basket
+2. Then view your basket 
+3. Modify the quantity of an item in your basket
+4. Make an observation about the state of your basket
 </part2>
 
-<part3>
-Log out
-</part3>
-
-Here is some extra info:
-- the login page is found at http://localhost:3000/#/login
-- the logout button is found under accounts
-
 Exit after you have successfully completed the above steps. You must complete the parts in order:
-part1 -> part2 -> part3
+part1 -> part2 -> EXIT
 """.format(url=VULN_APP_URL, creds=str(user))
         
         agent_config = [
@@ -143,7 +132,7 @@ part1 -> part2 -> part3
     return 0
 
 if __name__ == "__main__":
-    from logger import init_root_logger
+    from logger import init_file_logger
     import sys
 
     USERS = [
@@ -167,6 +156,7 @@ if __name__ == "__main__":
         }
     ]
     user = int(sys.argv[1])
+    log_prefix = USERS[user]["username"] + "_" + "AGENT"
     
-    init_root_logger()
-    sys.exit(asyncio.run(main(USERS[user])))
+    init_file_logger(log_prefix)
+    sys.exit(asyncio.run(main(USERS[user], "3cde654a-8754-4d6c-9f8c-6a491abe3ef6")))

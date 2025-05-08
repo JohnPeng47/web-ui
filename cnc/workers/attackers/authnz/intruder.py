@@ -59,16 +59,24 @@ class HTTPClient:
         if post_data is not None:
             ctype = headers.get("content-type", "").lower()
             if "application/json" in ctype:
-                try:
-                    kwargs["json"] = json.loads(post_data)
-                except (json.JSONDecodeError, TypeError):
-                    log.warning("Could not decode JSON for %s – sending raw", request.url)
-                    kwargs["content"] = post_data
+                # Check if post_data is already a dict/JSON object or a string
+                if isinstance(post_data, dict):
+                    kwargs["json"] = post_data
+                else:
+                    try:
+                        kwargs["json"] = json.loads(post_data)
+                    except (json.JSONDecodeError, TypeError):
+                        log.warning("Could not decode JSON for %s – sending raw", request.url)
+                        log.warning("Sending raw data: %s", post_data)
+                        kwargs["content"] = post_data.encode("utf-8") if isinstance(post_data, str) else post_data
             else:
-                kwargs["content"] = post_data
+                if isinstance(post_data, str):
+                    kwargs["content"] = post_data.encode("utf-8")
+                else:
+                    kwargs["content"] = post_data
 
         # ── TRACE: outbound request ────────────────────────────
-        print(f"[SEND ] {request.method} {request.url}")
+        log.info(f"[SEND ] {request.method} {request.url}")
         # ───────────────────────────────────────────────────────
 
         try:
@@ -83,7 +91,7 @@ class HTTPClient:
             raise NetworkError("%s %s failed: %s" % (request.method, request.url, exc)) from exc
 
         # ── TRACE: response line ───────────────────────────────
-        print(f"[SEND ] ← {resp.status_code} ({len(resp.content)} bytes)")
+        log.info(f"[SEND ] ← {resp.status_code} ({len(resp.content)} bytes)")
         # ───────────────────────────────────────────────────────
 
         # Let session refresh itself
@@ -150,7 +158,13 @@ class RequestTemplate:
         if rl.request_part == RequestPart.URL:
             new_url = new_url.replace(rl.id, target, 1)
         elif rl.request_part == RequestPart.BODY and new_post_data:
-            new_post_data = new_post_data.replace(rl.id, target, 1)
+            # Handle both string and JSON formats
+            if isinstance(new_post_data, str):
+                new_post_data = new_post_data.replace(rl.id, target, 1)
+            elif isinstance(new_post_data, dict):
+                post_data_str = json.dumps(new_post_data)
+                post_data_str = post_data_str.replace(rl.id, target, 1)
+                new_post_data = json.loads(post_data_str)
 
         return HTTPRequestData(
             method=self.data.method,
@@ -247,7 +261,7 @@ class TestPlanner:
         self._executed.add(sig)
 
         # ── TRACE: attack scheduled ────────────────────────────
-        print(
+        log.info(
             f"[PLAN ] {variant.__name__:<22} → user={user} "
             f"action={action} type={type_name or '-'} id={resource_id or '-'}"
         )
@@ -279,7 +293,7 @@ class TestPlanner:
             _, other_role = self._split_role(u)
             variant = HorizontalUserAuthz if other_role == new_role else VerticalUserAuthz
             
-            print("[FINDING-1 | UserSub]: ", (variant.__name__, u, None, new_action, None))
+            log.info(f"[FINDING-1 | UserSub]: {(variant.__name__, u, None, new_action, None)}")
 
             yield from self._dedup(
                 variant, user=u, resource_id=None, action=new_action, type_name=None
@@ -296,7 +310,7 @@ class TestPlanner:
                         HorizontalUserAuthz if other_role == new_role else VerticalUserAuthz
                     )
 
-                    print("[FINDING-2 | ResourceSub]: ", (variant.__name__, u, res_id, action, type_name))
+                    log.info(f"[FINDING-2 | ResourceSub]: {(variant.__name__, u, res_id, action, type_name)}")
 
                     yield from self._dedup(
                         variant,
@@ -319,7 +333,7 @@ class TestPlanner:
                             type_name=type_name, resource_id=rid
                         )
 
-                        print("[FINDING-3 | NewUserSub]: ", (variant.__name__, combined_new_user, rid, action, type_name))
+                        log.info(f"[FINDING-3 | NewUserSub]: {(variant.__name__, combined_new_user, rid, action, type_name)}")
 
                         variant = (
                             HorizontalResourceAuthz
@@ -413,7 +427,7 @@ class AuthzTester:
         Observe one live request and enqueue all static‑AuthZ permutations.
         """
         # ── TRACE: live request observed ───────────────────────
-        print(f"[INGEST] {request.method} {request.url}  user={username}  role={role}")
+        log.info(f"[INGEST] {request.method} {request.url}  user={username}  role={role}")
         # ───────────────────────────────────────────────────────
 
         action_key = f"{request.method.upper()} {request.url}"

@@ -24,7 +24,7 @@ class HTTPFilter:
         self.include_status_codes = include_status_codes or self.DEFAULT_STATUS_CODES
         self.max_payload_size = max_payload_size
 
-DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text"]
+DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text", "application/json"]
 DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
 MAX_PAYLOAD_SIZE = 4000
 
@@ -46,7 +46,8 @@ class HTTPHistory:
         "other_text": lambda ct: "text/" in ct and not any(x in ct for x in ["html", "xml", "css"]),
         "css": lambda ct: "text/css" in ct,
         "images": lambda ct: "image/" in ct,
-        "other_binary": lambda ct: not any(x in ct for x in ["text/", "image/", "application/json", "application/javascript"])
+        "other_binary": lambda ct: not any(x in ct for x in ["text/", "image/", "application/javascript"]),
+        "application/json": lambda ct: "application/json" in ct
     }
 
     # Status code filters
@@ -57,12 +58,15 @@ class HTTPHistory:
         "5xx": lambda code: 500 <= code < 600
     }
 
+    # URL filters - empty list for patterns to exclude
+    URL_FILTERS: List[str] = [
+        "socket.io"
+    ]
+
     def __init__(
         self, 
-        exclude_patterns: List[str], 
         http_filter: Optional[HTTPFilter] = None
     ):
-        self.exclude_patterns = exclude_patterns
         self.http_filter = http_filter or HTTPFilter()
 
     def filter_http_messages(self, messages: List[HTTPMessage]) -> List[HTTPMessage]:
@@ -85,6 +89,12 @@ class HTTPHistory:
             content_type = msg.response.get_content_type()
             payload_size = msg.response.get_response_size()
             status_code = msg.response.status
+            url = msg.request.url
+            
+            # Check URL filters if any exist
+            if self.URL_FILTERS and any(pattern in url for pattern in self.URL_FILTERS):
+                logger.info(f"[FILTER] Excluding {url} - URL matched URL_FILTERS pattern")
+                continue
             
             # Check MIME type filter
             mime_match = False
@@ -116,5 +126,3 @@ class HTTPHistory:
             filtered_messages.append(msg)
 
         return filtered_messages
-
-

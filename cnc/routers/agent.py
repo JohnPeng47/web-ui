@@ -76,6 +76,8 @@ def make_agent_router(raw_channel: BroadcastChannel[EnrichAuthNZMessage]) -> API
             
             # Fan-out to channel for processing
             for msg in payload.messages:
+                print(f"[Route] received {msg.request.url}")
+
                 # Publish directly to the injected channel
                 await raw_channel.publish(
                     EnrichAuthNZMessage(

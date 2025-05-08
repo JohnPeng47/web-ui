@@ -1,6 +1,7 @@
 import httpx
 from typing import List, Dict, Any, Optional, Callable
 from uuid import UUID
+import asyncio
 
 class AgentClient:
     """
@@ -11,7 +12,7 @@ class AgentClient:
                  username: str = "test", 
                  role: str = "Tester", 
                  timeout: int = 30, 
-                 client: httpx.AsyncClient = None):
+                 client: Optional[httpx.AsyncClient] = None):
         """
         Initialize the agent client.
         
@@ -24,13 +25,13 @@ class AgentClient:
         self.username = username
         self.role = role
         self.timeout = timeout
+        self.client = client if client else httpx.AsyncClient()
 
         headers ={
             "Content-Type": "application/json",
             "X-Username": username,
             "X-Role": role
         }
-        self.client = client
         self.client.headers.update(headers)
         self._shutdown = None
 
@@ -111,14 +112,14 @@ class AgentClient:
             "messages": messages
         }
         
-        response = await self.client.post(path, json=payload)
+        response = await self.client.post(path, json=payload, timeout=None)
         response.raise_for_status()
         return response.json()
     
     async def update_server_state(self, 
                                   app_id: UUID, 
                                   agent_id: UUID,
-                                  messages: List[Dict[str, Any]]) -> Dict[str, int]:
+                                  messages: List[Dict[str, Any]]) -> None:
         """
         Push HTTP messages to the system for processing.
         
@@ -133,4 +134,4 @@ class AgentClient:
         Raises:
             httpx.HTTPStatusError: If the server returns an error response
         """
-        return await self.push_messages(app_id, agent_id, messages)
+        asyncio.create_task(self.push_messages(app_id, agent_id, messages))

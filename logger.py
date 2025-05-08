@@ -77,19 +77,47 @@ def get_logfile_id(log_dir=LOG_DIR, file_prefix: str = "") -> tuple[str, int]:
     
     return timestamp, current_index
 
-def get_incremental_file_handler(log_dir=LOG_DIR, file_prefix: str = ""):
+def get_incremental_logdir(log_dir=LOG_DIR, file_prefix: str = ""):
     """
     Returns a file handler that creates logs in timestamped directories with incremental filenames.
     Directory structure: log_dir/file_prefix/YYYY-MM-DD/0.log, 1.log, etc.
     """
     timestamp, next_number = get_logfile_id(log_dir, file_prefix)
-    log_subdir = os.path.join(log_dir, file_prefix, timestamp)
+    return os.path.join(log_dir, file_prefix, timestamp), next_number
+    
+def get_incremental_file_handler(log_dir=LOG_DIR, file_prefix: str = ""):
+    """
+    Returns a file handler that creates logs in timestamped directories with incremental filenames.
+    Directory structure: log_dir/file_prefix/YYYY-MM-DD/0.log, 1.log, etc.
+    """
+    log_subdir, next_number = get_incremental_logdir(log_dir, file_prefix)
     
     # Create new log file with incremental number
     file_name = f"{next_number}.log"
     file_handler = logging.FileHandler(os.path.join(log_subdir, file_name), encoding="utf-8")
     file_handler.setFormatter(formatter)
     return file_handler
+
+# TODO: DEEMO change back
+def init_file_logger(name):  
+    root_logger = logging.getLogger()  # Get root logger by passing no name
+    # TODO: should set all logging to DEBUG instead of INFO so we cant stop fucking logging LITELLM
+    # or altneratively export logger instead of configuring global logger
+    root_logger.setLevel(logging.INFO)
+    root_logger.addHandler(get_incremental_file_handler(file_prefix=name))
+    root_logger.addHandler(get_console_handler())
+
+    logging.getLogger("litellm").setLevel(logging.WARNING)
+
+    # logger = logging.getLogger(name)  # Get root logger by passing no name
+    # # TODO: should set all logging to DEBUG instead of INFO so we cant stop fucking logging LITELLM
+    # # or altneratively export logger instead of configuring global logger
+    # logger.setLevel(logging.INFO)
+    # logger.addHandler(get_incremental_file_handler(file_prefix=name))
+    # logger.addHandler(get_console_handler())
+
+    return root_logger
+
 
 def init_root_logger():
     print("Initializing root logger")
@@ -100,16 +128,6 @@ def init_root_logger():
     root_logger.setLevel(logging.INFO)
     root_logger.addHandler(get_incremental_file_handler(file_prefix="main"))
     root_logger.addHandler(get_console_handler())
-
-def init_file_logger(name):    
-    logger = logging.getLogger(name)  # Get root logger by passing no name
-    # TODO: should set all logging to DEBUG instead of INFO so we cant stop fucking logging LITELLM
-    # or altneratively export logger instead of configuring global logger
-    logger.setLevel(logging.INFO)
-    logger.addHandler(get_incremental_file_handler(file_prefix=name))
-    logger.addHandler(get_console_handler())
-
-    return logger
 
 # TODO: definitely get rid of this once we move to remote queue/workers implementation
 class StderrProxy:

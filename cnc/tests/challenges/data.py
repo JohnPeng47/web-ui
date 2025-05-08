@@ -19,7 +19,6 @@ JUICESHOP_AUTHNZ_CHALLENGES_FULL = {
     ],
     "brokenAccessControl": [
         Vulnerability(id=3, key="registerAdminChallenge", name="Admin Registration"),
-        Vulnerability(id=4, key="adminSectionChallenge", name="Admin Section"),
         Vulnerability(id=11, key="web3SandboxChallenge", name="Web3 Sandbox"),
         Vulnerability(id=22, key="easterEggLevelOneChallenge", name="Easter Egg"),
         Vulnerability(id=29, key="feedbackChallenge", name="Five-Star Feedback"),
@@ -40,8 +39,19 @@ JUICESHOP_AUTHNZ_CHALLENGES_FULL = {
 
 JUICESHOP_AUTHNZ_CHALLENGES_TEST = {
     "brokenAccessControl": [
+        Vulnerability(id=86, key="basketAccessChallenge", name="View Basket"),
+    ],
+}
+
+JUICESHOP_AUTHNZ_CHALLENGES_DEMO = {
+    "brokenAccessControl": [
         Vulnerability(id=51, key="basketManipulateChallenge", name="Manipulate Basket"),
         Vulnerability(id=86, key="basketAccessChallenge", name="View Basket"),
+        Vulnerability(id=32, key="forgedReviewChallenge", name="Forged Review"),
+        Vulnerability(id=29, key="feedbackChallenge", name="Five-Star Feedback"),
+        Vulnerability(id=31, key="forgedFeedbackChallenge", name="Forged Feedback"),
+        Vulnerability(id=64, key="changeProductChallenge", name="Product Tampering"),
+        Vulnerability(id=4, key="adminSectionChallenge", name="Admin Section"),
     ],
 }
 

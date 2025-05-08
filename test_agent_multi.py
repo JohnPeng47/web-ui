@@ -35,7 +35,6 @@ async def main():
             client=httpx.AsyncClient(base_url=CNC_URL), 
         )
         
-        # Create a new application
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         app_name = f"AgentIntruderTest_{timestamp}"
         app_description = f"Automated test application created at {timestamp}"

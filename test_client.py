@@ -63,7 +63,6 @@ class VulnAppClient(AgentClient):
 
         # Internal solved flags — initially False
         self._completed: Dict[int, bool] = {v.id: False for v in targeted_vulns}
-
         self._shutdown: Callable = None
     
         # Sanity check: every target must exist in the global list
@@ -96,19 +95,16 @@ class VulnAppClient(AgentClient):
     # Completion tracking
     # ---------------------------------------------------------------------
 
-    def _update_completion_flags(self, challenges: Dict[str, Any]) -> None:
-        """
-        Inspect the JSON returned from `/api/Challenges` and set
-        `self._completed[id] = True` for every solved target.
-        """
-        solved_by_id = {
-            item["id"]: item["solved"] for item in challenges.get("data", [])
-        }
+    def _update_completion_flags(self, challenges: Dict[str, Any]) -> List[Vulnerability]:
+        solved_by_id = {item["id"]: item["solved"]
+                        for item in challenges.get("data", [])}
+
+        newly_solved: List[Vulnerability] = []
         for vuln in self._targeted_vulns:
-            if solved_by_id.get(vuln.id):
-                if not self._completed[vuln.id]:
-                    logger.info("✓ Challenge %s (%s) solved", vuln.id, vuln.name)
+            if solved_by_id.get(vuln.id) and not self._completed[vuln.id]:
                 self._completed[vuln.id] = True
+                newly_solved.append(vuln)          # collect delta
+        return newly_solved
 
     def all_targets_solved(self) -> bool:
         """True iff every targeted vulnerability has `completed == True`."""
@@ -117,41 +113,33 @@ class VulnAppClient(AgentClient):
     # ---------------------------------------------------------------------
     # Public API used by test harness / agents
     # ---------------------------------------------------------------------
+    async def update_server_state(self,
+                                app_id: UUID,
+                                agent_id: UUID,
+                                messages: List[Dict[str, Any]]) -> Dict[str, int]:
+        # 1. fire‑and‑forget – don’t wait for the push
+        asyncio.create_task(self.push_messages(app_id, agent_id, messages))
 
-    async def update_server_state(
-        self,
-        app_id: UUID,
-        agent_id: UUID,
-        messages: List[Dict[str, Any]],
-    ) -> None:
-        """
-        1. Push collected HTTP messages to the central pentest server
-           (via the inherited `push_messages()`).
-        2. Pull `/api/Challenges` from the vulnerable app.
-        3. Update completion flags & return a short status dict.
-
-        Returns
-        -------
-        {"accepted": int, "solved_targets": int, "remaining": int}
-        """
-        # Step 1 — push messages to the pentest orchestrator
-        push_res = await self.push_messages(app_id, agent_id, messages)
-
-        # Step 2 — fetch latest challenge statuses from the vulnerable app
+        # 2. pull latest challenge data
         challenges = await self.get_challenges()
 
-        # Step 3 — refresh local state
-        self._update_completion_flags(challenges)
+        # 3. refresh flags and get the *new* ones
+        newly_solved = self._update_completion_flags(challenges)
 
-        solved = sum(self._completed.values())
-        remaining = len(self._completed) - solved
+        # --- progress & highlight logs --------------------------------------
+        for vuln in newly_solved:
+            logger.info("### NEWLY SOLVED TARGET %s – %s ###", vuln.id, vuln.name)
 
-        test_status = {
-            "solved_targets": solved,
-            "remaining": remaining,
-        }
+        solved     = sum(self._completed.values())
+        remaining  = len(self._completed) - solved
+        logger.info("Progress: %d / %d targets solved (%d remaining)",
+                    solved, len(self._completed), remaining)
 
-        logger.info(f"##### Vuln test status: {test_status}")
-
+        # 4. graceful shutdown when done
         if remaining == 0:
-            await self._shutdown(reason=f"All tests passed: {test_status}")
+            logger.info("All targeted vulnerabilities solved – shutting down.")
+            if callable(self._shutdown):
+                await self._shutdown()
+
+        # 5. short status dict for callers
+        return {"solved_targets": solved, "remaining": remaining}

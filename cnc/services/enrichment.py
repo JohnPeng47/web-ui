@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+import asyncio
+from contextlib import suppress
 from typing import Optional, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -50,14 +52,49 @@ class RequestEnrichmentWorker(BaseRequestEnrichmentWorker):
         self.llm = LLMModel()
     
     # TODO: blocking async calls
-    async def run(self):
-        """Process incoming HTTP messages and publish enriched versions"""
+    async def run(self) -> None:
+        """
+        Listen for raw messages forever.  Each message is handed off to its own
+        asyncio.Task so the loop can keep listening immediately.
+        """
+        self._tasks: set[asyncio.Task] = set()
         while True:
-            log.info("Waiting for raw HTTP message...")
-
+            log.info("Waiting for raw HTTP message…")
             raw_msg = await self._sub_q.get()
-            enr_msg = await self._enrich(raw_msg.http_msg, raw_msg.username, role=raw_msg.role)
+
+            # Fire‑and‑forget, but keep a reference so we can introspect / cancel.
+            task = asyncio.create_task(self._handle_message(raw_msg))
+            self._tasks.add(task)
+            task.add_done_callback(self._tasks.discard)
+
+    async def _handle_message(self, raw_msg) -> None:
+        """
+        Worker for a *single* HTTPMessage.  Runs in its own task.
+        All exceptions are caught so they don’t kill the whole process.
+        """
+        try:
+            enr_msg = await self._enrich(
+                raw_msg.http_msg,
+                raw_msg.username,
+                role=raw_msg.role,
+            )
             await self._outbound.publish(enr_msg)
+        except asyncio.CancelledError:
+            # Task was cancelled during shutdown; just propagate.
+            raise
+        except Exception as exc:
+            log.exception("Enrichment task failed: %s", exc)
+            # Decide: retry? drop? send to DLQ? For now we just log & swallow.
+
+    async def shutdown(self) -> None:
+        """
+        Call this from your application’s shutdown hook to allow tasks to finish
+        gracefully.
+        """
+        for task in self._tasks:
+            task.cancel()
+        with suppress(asyncio.CancelledError):
+            await asyncio.gather(*self._tasks, return_exceptions=True)
 
     async def _enrich(self, 
                       message: HTTPMessage,
@@ -74,7 +111,7 @@ class RequestEnrichmentWorker(BaseRequestEnrichmentWorker):
         request = message.request
         resources = ExtractResources().invoke(
             model=self.llm,
-            model_name="gpt-4o",
+            model_name="gpt-4.1",
             prompt_args={"request": message.request.to_str()}
         )
         enriched = EnrichedRequest(
