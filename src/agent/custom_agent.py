@@ -415,6 +415,16 @@ class CustomAgent(Agent):
             for msg in filtered_msgs:
                 self.log.context.info(f"[Agent] {msg.request.url}")
 
+            pentest_prompt = await get_pentest_message(state, self.state.last_action, self.state.last_result, step_info, filtered_msgs)
+            # if pentest_prompt.content[0]:
+            #     pentest_messages = self.llm.invoke([pentest_prompt], model_name=MODEL_NAME)
+            #     pentest_analysis = pentest_messages
+            # else:
+            #     pentest_analysis = ""
+            
+            self.log.context.info(f"[Context]: {pentest_prompt.content}")
+            # self.log.context.info(f"[Pentest Analysis]: {pentest_analysis}")
+
             if self.agent_client:
                 if not self.agent_id:
                     agent_info = await self.agent_client.register_agent(self.app_id)
@@ -423,16 +433,6 @@ class CustomAgent(Agent):
                 await self.agent_client.update_server_state(self.app_id, self.agent_id, [
                     await msg.to_json() for msg in filtered_msgs
                 ])
-
-            # pentest_prompt = await get_pentest_message(state, self.state.last_action, self.state.last_result, step_info, filtered_msgs)
-            # if pentest_prompt.content[0]:
-            #     pentest_messages = self.llm.invoke([pentest_prompt], model_name=MODEL_NAME)
-            #     pentest_analysis = pentest_messages
-            # else:
-            #     pentest_analysis = ""
-            
-            # self.log.context.info(f"[Pentest Prompt]: {pentest_prompt.content}")
-            # self.log.context.info(f"[Pentest Analysis]: {pentest_analysis}")
 
             await self._raise_if_stopped_or_paused()
             self.message_manager.add_state_message(

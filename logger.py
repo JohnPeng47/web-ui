@@ -9,7 +9,6 @@ from contextlib import contextmanager
 
 _current_err = contextvars.ContextVar("task_stderr", default=sys.__stderr__)
 
-
 LOG_DIR = "logs"
 
 def converter(timestamp):
@@ -23,7 +22,15 @@ formatter = logging.Formatter(
 formatter.converter = converter
 console_formatter = logging.Formatter("%(message)s")
 
-def get_file_handler(log_dir=LOG_DIR, file_prefix: str = ""):
+def get_file_handler(log_file: str):
+    """
+    Returns a file handler for logging.
+    """
+    file_handler = logging.FileHandler(log_file, encoding="utf-8")
+    file_handler.setFormatter(formatter)
+    return file_handler
+
+def get_file_handler_with_id(log_num: int, log_dir=LOG_DIR, file_prefix: str = ""):
     """
     Returns a file handler for logging.
     """

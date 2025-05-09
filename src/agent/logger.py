@@ -1,7 +1,14 @@
 import logging
+import os
 from pathlib import Path
+from datetime import datetime
 from typing import Dict, List, Sequence, Set
-from logger import get_incremental_logdir, get_console_handler, get_file_handler
+from logger import (
+    LOG_DIR, 
+    get_incremental_logdir, 
+    get_console_handler, 
+    get_file_handler
+)
 
 class _StreamFilter(logging.Filter):
     """
@@ -62,19 +69,21 @@ class AgentLogger:
     }
 
     def __init__(self, name: str = "agentlog") -> None:
-        logdir, _ = get_incremental_logdir(file_prefix=name)
+        timestamp = datetime.now().strftime("%Y-%m-%d")
+        log_dir = os.path.join(LOG_DIR, name, timestamp)
+        os.makedirs(log_dir, exist_ok=True)        
 
         self._base = logging.getLogger(name)
         self._base.setLevel(logging.INFO)
         self._base.addHandler(get_console_handler())
-
+        
         # Unique set of stream tags across every mapping value
         all_streams = {stream for streams in self.LOG_STREAMS.values()
                                  for stream in streams}
 
         # one file per *stream* tag
         for stream in all_streams:
-            fh = get_file_handler(log_dir=logdir, file_prefix=stream)
+            fh = self._get_incremental_fhandler(log_dir, stream)
             fh.addFilter(_StreamFilter([stream]))  # single‑stream filter
             self._base.addHandler(fh)
 
@@ -83,6 +92,30 @@ class AgentLogger:
             adapter = _MultiStreamAdapter(self._base, streams)
             setattr(self, public, adapter)
 
+    def _get_incremental_fhandler(self, log_dir: str, file_prefix: str) -> logging.FileHandler:
+        """
+        Returns a file handler for logging with incremental file naming.
+        Creates files like 0.log, 1.log, 2.log in the specified directory.
+        """
+        # Create directory if it doesn't exist
+        log_subdir = os.path.join(log_dir, file_prefix)
+        os.makedirs(log_subdir, exist_ok=True)
+        
+        # Get list of existing log files and determine next number
+        existing_logs = [f for f in os.listdir(log_subdir) if f.endswith(".log")]
+        next_number = 0
+        
+        if existing_logs:
+            # Extract numbers from filenames and find the highest
+            log_numbers = [int(f.split(".")[0]) for f in existing_logs if f.split(".")[0].isdigit()]
+            if log_numbers:
+                next_number = max(log_numbers) + 1
+        
+        # Create new log file with incremental number
+        file_name = f"{next_number}.log"
+        log_file = os.path.join(log_subdir, file_name)
+        return get_file_handler(log_file)
+        
     # Optional: pretty repr() for debugging
     def __repr__(self) -> str:
         return f"<AgentLogger streams={list(self.LOG_STREAMS.keys())}>"
