@@ -1,3 +1,4 @@
+import textwrap
 import logging
 import os
 from pathlib import Path
@@ -9,6 +10,53 @@ from logger import (
     get_console_handler, 
     get_file_handler
 )
+
+INDENT_LEN   = 100                # max printable chars per *logical* line
+INDENT_STR   = ""             # 4‑space indent for wrapped continuations
+
+class IndentFormatter(logging.Formatter):
+    """
+    • Treat every *original* line in record.getMessage() separately.
+    • If its length > INDENT_LEN, wrap with textwrap.wrap(
+          width=INDENT_LEN, subsequent_indent=INDENT_STR, …).
+    • Join the wrapped chunks with “\n” so the logger prints them on
+      distinct physical lines.
+    """
+
+    def __init__(self,
+                 fmt: str,
+                 datefmt: str | None = None,
+                 indent_len: int = INDENT_LEN,
+                 indent_str: str = INDENT_STR):
+        super().__init__(fmt, datefmt)
+        self.indent_len = indent_len
+        self.indent_str = indent_str
+
+    # NB: we *override* format() so we can inject a new attribute
+    def format(self, record: logging.LogRecord) -> str:
+        original_msg = record.getMessage()
+        wrapped_lines: list[str] = []
+
+        # ----- key requirement -------------------------------------------------
+        # Treat each ORIGINAL \n‑delimited line as a fresh paragraph.
+        # Example:  L1\nL2         => wrap(L1) + wrap(L2)  (no leakage)
+        # ----------------------------------------------------------------------
+        for original_line in original_msg.splitlines() or [""]:
+            # textwrap takes care of the “subsequent indent” for us
+            wrapped_lines.extend(
+                textwrap.wrap(
+                    original_line,
+                    width=self.indent_len,
+                    subsequent_indent=self.indent_str,
+                    break_long_words=False,
+                    replace_whitespace=False,
+                )
+            )
+
+        # Install the wrapped version on the record so the %-format string
+        # can use it instead of plain %(message)s
+        record.wrapped_msg = "\n".join(wrapped_lines) if wrapped_lines else ""
+        return super().format(record)
 
 class _StreamFilter(logging.Filter):
     """
@@ -114,8 +162,17 @@ class AgentLogger:
         # Create new log file with incremental number
         file_name = f"{next_number}.log"
         log_file = os.path.join(log_subdir, file_name)
-        return get_file_handler(log_file)
-        
+        file_handler = get_file_handler(log_file)
+        file_handler.setFormatter(
+            IndentFormatter(
+                "%(asctime)s - %(name)s:%(levelname)s: "
+                "%(filename)s:%(lineno)s - %(wrapped_msg)s",
+                datefmt="%Y-%m-%d %H:%M:%S",
+            )
+
+        )
+        return file_handler
+
     # Optional: pretty repr() for debugging
     def __repr__(self) -> str:
         return f"<AgentLogger streams={list(self.LOG_STREAMS.keys())}>"
