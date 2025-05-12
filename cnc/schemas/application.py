@@ -4,7 +4,7 @@ from datetime import datetime
 from httplib import HTTPMessage
 from uuid import UUID
 
-from common.agent import UserCreds
+from common.agent import UserCreds, BrowserActions
 
 class ApplicationBase(BaseModel):
     name: str
@@ -38,7 +38,11 @@ class AgentMessage(BaseModel):
     agent_id: UUID4
 
 class PushMessages(AgentMessage):
-    messages: List[HTTPMessage]
+    http_msgs: List[HTTPMessage]
+    browser_actions: List[BrowserActions]
+
+    class Config:
+        arbitrary_types_allowed = True  # Allows non-Pydantic models
 
 class Finding(BaseModel):
     user: str

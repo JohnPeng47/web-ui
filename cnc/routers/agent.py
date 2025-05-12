@@ -75,7 +75,7 @@ def make_agent_router(raw_channel: BroadcastChannel[EnrichAuthNZMessage]) -> API
                 raise HTTPException(status_code=404, detail="Agent not found")
             
             # Fan-out to channel for processing
-            for msg in payload.messages:
+            for msg in payload.http_msgs:
                 print(f"[Route] received {msg.request.url}")
 
                 # Publish directly to the injected channel
@@ -86,8 +86,11 @@ def make_agent_router(raw_channel: BroadcastChannel[EnrichAuthNZMessage]) -> API
                         role=agent.role
                     )
                 )
-                
-            return {"accepted": len(payload.messages)}
+            
+            for action in payload.browser_actions:
+                print(f"Received action: {action}")
+
+            return {"accepted": len(payload.http_msgs)}
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
     

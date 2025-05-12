@@ -125,6 +125,8 @@ def init_file_logger(name):
 
     return root_logger
 
+def disable_litellm_logging():
+    logging.getLogger("litellm").setLevel(logging.WARNING)
 
 def init_root_logger():
     print("Initializing root logger")

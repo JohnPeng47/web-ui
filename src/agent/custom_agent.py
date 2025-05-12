@@ -15,6 +15,7 @@ from browser_use.agent.service import Agent
 from browser_use.agent.message_manager.utils import convert_input_messages, extract_json_from_model_output, \
     save_conversation
 from browser_use.agent.views import (
+    ActionModel,
     ActionResult,
     AgentError,
     AgentHistory,
@@ -52,15 +53,11 @@ from json_repair import repair_json
 from src.utils.agent_state import AgentState
 from src.agent.client import AgentClient
 
-# Exceptions
-from google.api_core.exceptions import ResourceExhausted
-from openai import RateLimitError
-from pydantic import ValidationError
-
 from johnllm import LLMModel
 from httplib import HTTPRequest, HTTPResponse, HTTPMessage
 
 # from .state import CustomAgentOutput
+from common.agent import BrowserActions
 from .custom_views import CustomAgentOutput
 from .custom_message_manager import CustomMessageManager, CustomMessageManagerSettings
 from .custom_views import CustomAgentStepInfo, CustomAgentState
@@ -78,10 +75,9 @@ DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text"]
 DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
 MAX_PAYLOAD_SIZE = 4000
 MODEL_NAME = "gpt-4.1"
-
+        
 # TODO: LOGGING QUESTION:
 # how to handle logging in functions not defined as part of class
-
 class HTTPHandler:
     def __init__(self):
         self._messages = []
@@ -398,6 +394,7 @@ class CustomAgent(Agent):
         result: list[ActionResult] = []
         step_start_time = time.time() 
         tokens = 0
+        browser_actions: Optional[BrowserActions] = None
 
         try:    
             # Agent: 
@@ -430,10 +427,16 @@ class CustomAgent(Agent):
                     agent_info = await self.agent_client.register_agent(self.app_id)
                     self.agent_id = agent_info["id"]
             
-                await self.agent_client.update_server_state(self.app_id, self.agent_id, [
-                    await msg.to_json() for msg in filtered_msgs
-                ])
+                await self.agent_client.update_server_state(
+                    self.app_id, 
+                    self.agent_id, 
+                    [
+                        await msg.to_json() for msg in filtered_msgs
+                    ],
+                    browser_actions
+                )
 
+            browser_actions = BrowserActions()
             await self._raise_if_stopped_or_paused()
             self.message_manager.add_state_message(
                 state, 
@@ -453,7 +456,7 @@ class CustomAgent(Agent):
                 for msg in input_messages:
                     msg.type = ""
 
-                model_output = await self.get_next_action(input_messages)
+                model_output = await self.get_next_action(input_messages)                
                 self.update_step_info(model_output, step_info)
                 self.state.n_steps += 1
 
@@ -476,6 +479,16 @@ class CustomAgent(Agent):
                 raise e
  
             result: list[ActionResult] = await self.multi_act(model_output.action)
+            # TODO: error handling is questionable here
+            # ideally, we should be assigning ID to browser_actions and checking against
+            # server for dedup
+            browser_actions = BrowserActions(
+                actions=model_output.action,
+                thought=model_output.current_state.thought,
+                goal=model_output.current_state.next_goal, 
+            )
+            self.log.context.info(f"Actions: {browser_actions}")
+
             for ret_ in result:
                 if ret_.extracted_content and "Extracted page" in ret_.extracted_content:
                     # record every extracted page

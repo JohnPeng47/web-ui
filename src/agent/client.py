@@ -3,6 +3,8 @@ from typing import List, Dict, Any, Optional, Callable
 from uuid import UUID
 import asyncio
 
+from common.agent import BrowserActions
+
 class AgentClient:
     """
     HTTP client for interacting with the agent API endpoints defined in cnc/routers/agent.py.
@@ -91,7 +93,8 @@ class AgentClient:
     async def push_messages(self, 
                             app_id: UUID, 
                             agent_id: UUID,
-                            messages: List[Dict[str, Any]]) -> Dict[str, int]:
+                            messages: List[Dict[str, Any]],
+                            browser_actions: Optional[List[BrowserActions]]) -> Dict[str, int]:
         """
         Push HTTP messages to the system for processing.
         
@@ -106,10 +109,16 @@ class AgentClient:
         Raises:
             httpx.HTTPStatusError: If the server returns an error response
         """
+        print("Pushing to server. ...")
+        print(browser_actions)        
+
         path = f"/application/{app_id}/agents/push"
         payload = {
             "agent_id": str(agent_id),
-            "messages": messages
+            "http_msgs": messages,
+            "browser_actions": [
+                action.dict() for action in browser_actions
+            ] if browser_actions else []
         }
         
         response = await self.client.post(path, json=payload, timeout=None)
@@ -119,7 +128,8 @@ class AgentClient:
     async def update_server_state(self, 
                                   app_id: UUID, 
                                   agent_id: UUID,
-                                  messages: List[Dict[str, Any]]) -> None:
+                                  messages: List[Dict[str, Any]],
+                                  browser_actions: Optional[List[BrowserActions]]) -> None:
         """
         Push HTTP messages to the system for processing.
         
@@ -134,4 +144,4 @@ class AgentClient:
         Raises:
             httpx.HTTPStatusError: If the server returns an error response
         """
-        asyncio.create_task(self.push_messages(app_id, agent_id, messages))
+        asyncio.create_task(self.push_messages(app_id, agent_id, messages, browser_actions))

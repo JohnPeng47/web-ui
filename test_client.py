@@ -10,6 +10,8 @@ from httpx import AsyncClient
 from src.agent.client import AgentClient  # ↖ adjust if your path differs
 from cnc.tests.challenges.vulnerability import Vulnerability
 
+from common.agent import BrowserActions
+
 logger = logging.getLogger(__name__)
 
 class AgentTestComplete(Exception):
@@ -116,9 +118,10 @@ class VulnAppClient(AgentClient):
     async def update_server_state(self,
                                 app_id: UUID,
                                 agent_id: UUID,
-                                messages: List[Dict[str, Any]]) -> Dict[str, int]:
+                                messages: List[Dict[str, Any]],
+                                browser_actions: Optional[List[BrowserActions]] ) -> Dict[str, int]:
         # 1. fire‑and‑forget – don’t wait for the push
-        asyncio.create_task(self.push_messages(app_id, agent_id, messages))
+        asyncio.create_task(self.push_messages(app_id, agent_id, messages, browser_actions))
 
         # 2. pull latest challenge data
         challenges = await self.get_challenges()

@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from contextlib import asynccontextmanager
 import uvicorn
 from httplib import HTTPMessage
@@ -10,6 +11,8 @@ from database.session import create_db_and_tables
 from cnc.services.queue import BroadcastChannel
 import asyncio
 from workers_launcher import start_workers
+
+from logger import disable_litellm_logging
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -42,6 +45,12 @@ def create_app() -> FastAPI:
     app.state.raw_channel = raw_channel
     app.state.enriched_channel = enriched_channel
     
+    # Add exception handler for validation errors (422)
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request: Request, exc: RequestValidationError):
+        print(f"Validation error: {exc.errors()}")
+
+    
     # Create routers with injected dependencies
     application_router = make_application_router()
     agent_router = make_agent_router(raw_channel)
@@ -68,4 +77,5 @@ async def main():
     )
 
 if __name__ == "__main__":
+    disable_litellm_logging()
     asyncio.run(main())
