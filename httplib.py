@@ -178,6 +178,10 @@ class HTTPRequest(BaseModel):
             
         req_str += str(self.post_data)
         return req_str
+    
+    def __hash__(self):
+        """Hash function for HTTPRequest"""
+        return hash((self.method, self.url, str(self.post_data), str(self.headers)))
 
 class HTTPResponseData(BaseModel):
     """Internal representation of HTTP response data"""
@@ -298,6 +302,10 @@ class HTTPResponse(BaseModel):
             resp_str += f"[Error getting response body: {str(e)}]"
             
         return resp_str
+
+    def __hash__(self):
+        """Hash function for HTTPResponse"""
+        return hash((self.url, self.status, str(self.headers), str(self.data.body)))
 
 class HTTPMessage(BaseModel):
     """Encapsulates a request/response pair"""

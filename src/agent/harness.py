@@ -32,8 +32,6 @@ from pydantic import BaseModel
 
 from src.agent.custom_agent import CustomAgent  # adjust import to your tree
 
-from test_client import AgentTestComplete
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -141,7 +139,5 @@ class AgentHarness:
             await agent.run(max_steps=max_steps)
         except asyncio.CancelledError:
             logger.info("Agent cancelled")
-        except AgentTestComplete as e:
-            logger.info(f"Task completed: {e.complete_status}")
         except Exception as e:
             logger.exception("Agent crashed: %s", e)

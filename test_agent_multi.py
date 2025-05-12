@@ -12,9 +12,8 @@ from johnllm import LLMModel
 
 from src.agent.harness import AgentHarness
 from src.agent.custom_prompts import CustomAgentMessagePrompt, CustomSystemPrompt
-from src.agent.client import AgentClient
+from src.agent.client import AgentClient, VulnAppClient
 
-from test_client import VulnAppClient
 from cnc.tests.challenges.data import (
     USERS,
     JUICESHOP_AUTHNZ_CHALLENGES_FULL, 

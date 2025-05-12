@@ -2,7 +2,6 @@ import sys
 import traceback
 import httpx
 from pathlib import Path
-from datetime import datetime
 from browser_use.browser.browser import Browser, BrowserConfig
 from browser_use.browser.context import (
     BrowserContextConfig,
@@ -28,13 +27,9 @@ VULN_APP_URL = "http://localhost:3000"
 CNC_URL = "http://localhost:8000"
 DATA_DIR_PATH = Path("tmp/profiles").resolve()
 
-# CREATE REVIEW
-CREATE_REVIEW_PROMPT = """
-<task>
-1. Navigate to the homepage
-2. Click on a product and write a review
-3. Submit the review 
-</task>
+TASK = """
+1. Navigate to the login page again
+2. Explore every functionality on the page
 """
 
 async def main(user, app_id):
@@ -79,7 +74,7 @@ async def main(user, app_id):
 Navigate to the following URL:
 {url}
 
-There are 2 parts to this task:
+There are multiple parts to this task:
 <part1>
 1. Dismiss the popup window by clicking on the "Dismiss" button
 2. Then login with the following credentials at http://localhost:3000/#/login
@@ -87,15 +82,11 @@ There are 2 parts to this task:
 </part1>
 
 <part2>
-1. Once you are logged in, add the first item to your basket
-2. Then view your basket 
-3. Modify the quantity of an item in your basket
-4. Make an observation about the state of your basket
+{{task}}
 </part2>
 
-Exit after you have successfully completed the above steps. You must complete the parts in order:
-part1 -> part2 -> EXIT
-""".format(url=VULN_APP_URL, creds=str(user))
+After you have completed each part above, in order, then EXIT.
+""".format(url=VULN_APP_URL, creds=str(user), task=TASK)
         
         agent_config = [
             {
@@ -133,12 +124,6 @@ if __name__ == "__main__":
     import sys
 
     USERS = [
-        # {
-        #     "username": "bjoern@juice-sh.op",
-        #     "email": "bjoern@juice-sh.op",
-        #     "role": "admin",
-        #     "password": "monkey summer birthday are all bad passwords but work just fine in a long passphrase"
-        # },
         {
             "username": "john@juice-sh.op",
             "email": "john@juice-sh.op",
@@ -152,8 +137,7 @@ if __name__ == "__main__":
             "password": "ncc-1701"
         }
     ]
-    user = int(sys.argv[1])
-    log_prefix = USERS[user]["username"] + "_" + "AGENT"
+    log_prefix = USERS[0]["username"] + "_" + "AGENT"
     
-    init_file_logger(log_prefix)
-    sys.exit(asyncio.run(main(USERS[user], "3cde654a-8754-4d6c-9f8c-6a491abe3ef6")))
+    init_file_logger("test_agent", log_name="navigation")
+    sys.exit(asyncio.run(main(USERS[0], "3cde654a-8754-4d6c-9f8c-6a491abe3ef6")))

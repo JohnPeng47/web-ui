@@ -4,8 +4,10 @@ from datetime import datetime
 import pytz
 import sys
 import logging
+import re
 import sys, contextvars, logging
 from contextlib import contextmanager
+
 
 _current_err = contextvars.ContextVar("task_stderr", default=sys.__stderr__)
 
@@ -39,7 +41,7 @@ def get_console_handler():
     console_handler.setFormatter(console_formatter)
     return console_handler
 
-def get_logfile_id(log_dir=LOG_DIR, file_prefix: str = "") -> tuple[str, int]:
+def get_logfile_id(log_dir=LOG_DIR, file_prefix: str = "", log_name: str = "") -> tuple[str, int]:
     """
     Returns a tuple of (timestamp, next_id) for `file_prefix` log files.
     Also checks for empty log files and removes them, renaming subsequent files 
@@ -51,7 +53,7 @@ def get_logfile_id(log_dir=LOG_DIR, file_prefix: str = "") -> tuple[str, int]:
     os.makedirs(log_subdir, exist_ok=True)
     
     existing_logs = [f for f in os.listdir(log_subdir) if f.endswith(".log")]
-    existing_logs.sort(key=lambda x: int(x.split(".")[0]))
+    existing_logs.sort(key=lambda x: int(re.search(r"(\d+)", x.split(".")[0]).group(1)))
     
     # Check for and remove empty files, shifting other files down
     current_index = 0
@@ -62,7 +64,7 @@ def get_logfile_id(log_dir=LOG_DIR, file_prefix: str = "") -> tuple[str, int]:
             continue
             
         # Rename file if its index doesn't match current_index
-        expected_name = f"{current_index}.log"
+        expected_name = f"{current_index}.log" if not log_name else f"{log_name}_{current_index}.log"
         if log_file != expected_name:
             os.rename(
                 file_path,
@@ -72,42 +74,35 @@ def get_logfile_id(log_dir=LOG_DIR, file_prefix: str = "") -> tuple[str, int]:
     
     return timestamp, current_index
 
-def get_incremental_logdir(log_dir=LOG_DIR, file_prefix: str = ""):
+def get_incremental_logdir(log_dir=LOG_DIR, file_prefix: str = "", log_name: str = "") -> tuple[str, int]:
     """
     Returns a file handler that creates logs in timestamped directories with incremental filenames.
     Directory structure: log_dir/file_prefix/YYYY-MM-DD/0.log, 1.log, etc.
     """
-    timestamp, next_number = get_logfile_id(log_dir, file_prefix)
+    timestamp, next_number = get_logfile_id(log_dir, file_prefix, log_name=log_name)
     return os.path.join(log_dir, file_prefix, timestamp), next_number
     
-def get_incremental_file_handler(log_dir=LOG_DIR, file_prefix: str = ""):
+def get_incremental_file_handler(log_dir=LOG_DIR, file_prefix: str = "", log_name: str = ""):
     """
     Returns a file handler that creates logs in timestamped directories with incremental filenames.
     Directory structure: log_dir/file_prefix/YYYY-MM-DD/0.log, 1.log, etc.
     """
-    log_subdir, next_number = get_incremental_logdir(log_dir, file_prefix)
+    log_subdir, next_number = get_incremental_logdir(log_dir, file_prefix, log_name=log_name)
     
     # Create new log file with incremental number
-    file_name = f"{next_number}.log"
+    file_name = f"{next_number}.log" if not log_name else f"{log_name}_{next_number}.log"
     file_handler = logging.FileHandler(os.path.join(log_subdir, file_name), encoding="utf-8")
     file_handler.setFormatter(formatter)
     return file_handler
 
 # TODO: DEEMO change back
-def init_file_logger(name):  
+def init_file_logger(name, log_name: str = ""):  
     root_logger = logging.getLogger("pentestbot")  # Get root logger by passing no name
     # TODO: should set all logging to DEBUG instead of INFO so we cant stop fucking logging LITELLM
     # or altneratively export logger instead of configuring global logger
     root_logger.setLevel(logging.INFO)
-    root_logger.addHandler(get_incremental_file_handler(file_prefix=name))
+    root_logger.addHandler(get_incremental_file_handler(file_prefix=name, log_name=log_name))
     root_logger.addHandler(get_console_handler())
-
-    # logger = logging.getLogger(name)  # Get root logger by passing no name
-    # # TODO: should set all logging to DEBUG instead of INFO so we cant stop fucking logging LITELLM
-    # # or altneratively export logger instead of configuring global logger
-    # logger.setLevel(logging.INFO)
-    # logger.addHandler(get_incremental_file_handler(file_prefix=name))
-    # logger.addHandler(get_console_handler())
 
     return root_logger
 

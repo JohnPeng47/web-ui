@@ -9,7 +9,7 @@ import base64
 import io
 import asyncio
 import time
-import platform
+from enum import Enum
 from browser_use.agent.prompts import SystemPrompt, AgentMessagePrompt
 from browser_use.agent.service import Agent
 from browser_use.agent.message_manager.utils import convert_input_messages, extract_json_from_model_output, \
@@ -62,7 +62,7 @@ from .custom_views import CustomAgentOutput
 from .custom_message_manager import CustomMessageManager, CustomMessageManagerSettings
 from .custom_views import CustomAgentStepInfo, CustomAgentState
 from .http_history import HTTPHistory, HTTPFilter, DEFAULT_HTTP_FILTER
-from .pentest_prompts import get_pentest_message
+from .pentest_prompts import get_agent_prompt
 from .logger import AgentLogger
 
 import json
@@ -74,7 +74,14 @@ Context = TypeVar('Context')
 DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text"]
 DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
 MAX_PAYLOAD_SIZE = 4000
+DEFAULT_PER_REQUEST_TIMEOUT = 5.0     # seconds to wait for *each* unmatched request
+DEFAULT_SETTLE_TIMEOUT      = 1.0     # seconds of network “silence” after the *last* response
+POLL_INTERVAL               = 0.05    # how often we poll internal state
+
 MODEL_NAME = "gpt-4.1"
+
+class AgentObservations(str, Enum):
+    SITE_STRUCTURE = "site_structure"
         
 # TODO: LOGGING QUESTION:
 # how to handle logging in functions not defined as part of class
@@ -112,14 +119,75 @@ class HTTPHandler:
         except Exception as e:
             print("Error handling response: ", e)
 
-    def flush(self) -> List[HTTPMessage]:
-        """Called by agent to flush current messages and reset state"""
-        unmatched = [HTTPMessage(request=req, response=None) for req in self._request_queue]
+    async def flush(
+        self,
+        *,
+        per_request_timeout: float = DEFAULT_PER_REQUEST_TIMEOUT,
+        settle_timeout: float      = DEFAULT_SETTLE_TIMEOUT,
+    ) -> List["HTTPMessage"]:
+        """
+        Waits until either
+          • every outstanding request has been answered **or**
+          • `per_request_timeout` elapsed for that request,
+        *and* the network has been quiet for `settle_timeout` seconds after the
+        very last response captured.
 
-        session_msgs = self._step_messages 
-        self._request_queue = []
-        self._step_messages = []
-        self._messages.extend(unmatched)    
+        Returns the list of (request, response) pairs collected *since the last
+        flush*, exactly like the old synchronous version.
+        """
+        loop = asyncio.get_running_loop()
+
+        # ────────────────────────────────────────────────────────────────────
+        # Book‑keeping helpers
+        # ────────────────────────────────────────────────────────────────────
+        # Timestamp when we first saw each unmatched request
+        req_start: Dict["HTTPRequest", float] = {
+            req: loop.time() for req in self._request_queue
+        }
+
+        # Index of the last response we have observed; used for the “quiet”
+        # timer.  We *only* reset the quiet timer when a new response arrives.
+        last_seen_response_idx = len(self._step_messages)
+        last_response_time     = loop.time()              # seed with *now*
+
+        # ────────────────────────────────────────────────────────────────────
+        # Main wait‑loop
+        # ────────────────────────────────────────────────────────────────────
+        while True:
+            await asyncio.sleep(POLL_INTERVAL)
+            now = loop.time()
+
+            # 1️⃣  Discard requests that have exceeded the per‑request timeout
+            for req in list(self._request_queue):
+                if now - req_start.get(req, now) >= per_request_timeout:
+                    # promote “timed‑out” requests to unmatched messages
+                    self._messages.append(HTTPMessage(request=req, response=None))
+                    self._request_queue.remove(req)
+
+            # 2️⃣  Check if new responses came in since last iteration
+            if len(self._step_messages) != last_seen_response_idx:
+                last_seen_response_idx = len(self._step_messages)
+                last_response_time     = now          # reset quiet timer
+
+            # 3️⃣  Exit conditions
+            queue_empty     = not self._request_queue
+            quiet_enough    = (now - last_response_time) >= settle_timeout
+
+            if queue_empty and quiet_enough:
+                break
+
+        # ────────────────────────────────────────────────────────────────────
+        # Finalize flush – exactly like the original version
+        # ────────────────────────────────────────────────────────────────────
+        # any *still* unmatched requests → turn them into messages
+        unmatched = [
+            HTTPMessage(request=req, response=None) for req in self._request_queue
+        ]
+
+        session_msgs         = self._step_messages
+        self._request_queue  = []
+        self._step_messages  = []
+        self._messages.extend(unmatched)
         self._messages.extend(session_msgs)
 
         return session_msgs
@@ -211,6 +279,7 @@ class CustomAgent(Agent):
             injected_agent_state=injected_agent_state,
             context=context,
         )
+        self.curr_page = None
         self.history_file = history_file
         self.http_handler = HTTPHandler()
         self.http_history = HTTPHistory(
@@ -223,13 +292,16 @@ class CustomAgent(Agent):
         self.agent_id = None
         if agent_client and not app_id:
             raise ValueError("app_id must be provided when agent_client is set")
-
+        
+        # TODO: probably not a good idea to use none global logging solution
+        self.log = AgentLogger(name=self.agent_client.username)
+        self.observations = {title.value: "" for title in AgentObservations}
         if browser_context:
             # logger.info("Registering HTTP handlers")
             browser_context.req_handler = self.http_handler.handle_request
             browser_context.res_handler = self.http_handler.handle_response
+            browser_context.page_handler = self.handle_page
 
-        self.log = AgentLogger(name=self.agent_client.username)
         self.state = injected_agent_state or CustomAgentState()
         self.add_infos = add_infos
         self._message_manager = CustomMessageManager(
@@ -248,8 +320,16 @@ class CustomAgent(Agent):
             ),
             state=self.state.message_manager_state,
         )
+        
+    def handle_page(self, page):
+        self.log.context.info(f"[PLAYWRIGHT] >>>>>>>>>>>")
+        self.log.context.info(f"[PLAYWRIGHT] Frame {page}")
+        self.curr_page = page
 
-    def _log_response(self, response: CustomAgentOutput) -> None:
+    def _log_response(self, 
+                      http_msgs: List[HTTPMessage],
+                      current_msg: BaseMessage,
+                      response: CustomAgentOutput) -> None:
         """Log the model's response"""
         if "Success" in response.current_state.evaluation_previous_goal:
             emoji = "✅"
@@ -266,6 +346,10 @@ class CustomAgent(Agent):
             self.log.action.info(
                 f"🛠️  Action {i + 1}/{len(response.action)}: {action.model_dump_json(exclude_unset=True)}"
             )
+        self.log.context.info(f"[Prev Messages]: {current_msg.content}")
+        self.log.context.info(f"Captured {len(http_msgs)} HTTP Messages")
+        for msg in http_msgs:
+            self.log.context.info(f"[Agent] {msg.request.url}")
 
     def _setup_action_models(self) -> None:
         """Setup dynamic action models from controller's registry"""
@@ -326,64 +410,43 @@ class CustomAgent(Agent):
         # cut the number of actions to max_actions_per_step if needed
         if len(parsed.action) > self.settings.max_actions_per_step:
             parsed.action = parsed.action[: self.settings.max_actions_per_step]
-        self._log_response(parsed)
         return parsed
     
-    async def _run_planner(self) -> Optional[str]:
-        """Run the planner to analyze state and suggest next steps"""
-        # Skip planning if no planner_llm is set
-        if not self.settings.planner_llm:
-            return None
+    async def _update_server(self, 
+                             http_msgs: List[HTTPMessage], 
+                             browser_actions: BrowserActions) -> None:
+        """Executed after the agent takes action and browser state is updated"""
+        if self.agent_client:
+            if not self.agent_id:
+                agent_info = await self.agent_client.register_agent(self.app_id)
+                self.agent_id = agent_info["id"]
 
-        # Create planner message history using full message history
-        planner_messages = [
-            PlannerPrompt(self.controller.registry.get_prompt_description()).get_system_message(),
-            *self.message_manager.get_messages()[1:],  # Use full message history except the first
-        ]
+            await self.agent_client.update_server_state(
+                self.app_id, 
+                self.agent_id, 
+                [
+                    await msg.to_json() for msg in http_msgs
+                ],
+                browser_actions
+            )
 
-        if not self.settings.use_vision_for_planner and self.settings.use_vision:
-            last_state_message: HumanMessage = planner_messages[-1]
-            # remove image from last state message
-            new_msg = ''
-            if isinstance(last_state_message.content, list):
-                for msg in last_state_message.content:
-                    if msg['type'] == 'text':
-                        new_msg += msg['text']
-                    elif msg['type'] == 'image_url':
-                        continue
-            else:
-                new_msg = last_state_message.content
+    def _update_state(self, result, model_output, step_info):
+        """Update agent state with results from actions"""
+        for ret_ in result:
+            if ret_.extracted_content and "Extracted page" in ret_.extracted_content:
+                # record every extracted page
+                if ret_.extracted_content[:100] not in self.state.extracted_content:
+                    self.state.extracted_content += ret_.extracted_content
 
-            planner_messages[-1] = HumanMessage(content=new_msg)
+        self.state.last_result = result
+        self.state.last_action = model_output.action
+        if len(result) > 0 and result[-1].is_done:
+            if not self.state.extracted_content:
+                self.state.extracted_content = step_info.memory
+            result[-1].extracted_content = self.state.extracted_content
+            self.log.action.info(f"📄 Result: {result[-1].extracted_content}")
 
-        # Get planner output
-        response = await self.settings.planner_llm.ainvoke(planner_messages)
-        plan = str(response.content)
-        last_state_message = self.message_manager.get_messages()[-1]
-        if isinstance(last_state_message, HumanMessage):
-            # remove image from last state message
-            if isinstance(last_state_message.content, list):
-                for msg in last_state_message.content:
-                    if msg['type'] == 'text':
-                        msg['text'] += f"\nPlanning Agent outputs plans:\n {plan}\n"
-            else:
-                last_state_message.content += f"\nPlanning Agent outputs plans:\n {plan}\n "
-
-        try:
-            plan_json = json.loads(plan.replace("```json", "").replace("```", ""))
-            self.log.context.info(f'📋 Plans:\n{json.dumps(plan_json, indent=4)}')
-
-            if hasattr(response, "reasoning_content"):
-                self.log.context.info("🤯 Start Planning Deep Thinking: ")
-                self.log.context.info(response.reasoning_content)
-                self.log.context.info("🤯 End Planning Deep Thinking")
-
-        except json.JSONDecodeError:
-            self.log.context.info(f'📋 Plans:\n{plan}')
-        except Exception as e:
-            self.log.context.debug(f'Error parsing planning analysis: {e}')
-            self.log.context.info(f'📋 Plans: {plan}')
-        return plan
+        self.state.consecutive_failures = 0
 
     @time_execution_async("--step")
     async def step(self, step_info: Optional[CustomAgentStepInfo] = None) -> None:
@@ -397,80 +460,27 @@ class CustomAgent(Agent):
         browser_actions: Optional[BrowserActions] = None
 
         try:    
-            # Agent: 
-            # add the response/requests results from executing action to 
-            # the agent state
-            # TODO: consider adding timeout here to wait for all responses to return
-            # TODO: alternatively, we can consider encapsulating res/req in promises, and adding belated pairs to
-            # future state
-            msgs = self.http_handler.flush()
-            filtered_msgs = self.http_history.filter_http_messages(msgs)
             state = await self.browser_context.get_state()
-
-            # self.log.context.info(f"")
-            self.log.context.info(f"Captured {len(filtered_msgs)} HTTP Messages")
-            for msg in filtered_msgs:
-                self.log.context.info(f"[Agent] {msg.request.url}")
-
-            pentest_prompt = await get_pentest_message(state, self.state.last_action, self.state.last_result, step_info, filtered_msgs)
-            # if pentest_prompt.content[0]:
-            #     pentest_messages = self.llm.invoke([pentest_prompt], model_name=MODEL_NAME)
-            #     pentest_analysis = pentest_messages
-            # else:
-            #     pentest_analysis = ""
-            
-            self.log.context.info(f"[Context]: {pentest_prompt.content}")
-            # self.log.context.info(f"[Pentest Analysis]: {pentest_analysis}")
-
-            if self.agent_client:
-                if not self.agent_id:
-                    agent_info = await self.agent_client.register_agent(self.app_id)
-                    self.agent_id = agent_info["id"]
-            
-                await self.agent_client.update_server_state(
-                    self.app_id, 
-                    self.agent_id, 
-                    [
-                        await msg.to_json() for msg in filtered_msgs
-                    ],
-                    browser_actions
-                )
-
             browser_actions = BrowserActions()
+
             await self._raise_if_stopped_or_paused()
             self.message_manager.add_state_message(
                 state, 
                 self.state.last_action, 
                 self.state.last_result, 
                 step_info, 
-                "",
+                "", # TODO: pentest prompt, consider removing this
                 use_vision=self.settings.use_vision
             )
-            if self.settings.planner_llm and self.state.n_steps % self.settings.planner_interval == 0:
-                await self._run_planner()
             input_messages = self.message_manager.get_messages()
             tokens = self._message_manager.state.history.current_tokens
-
-            self.log.context.info(f"📨 Input messages: {len(input_messages )}")
             try:
+                # HACK
                 for msg in input_messages:
                     msg.type = ""
-
                 model_output = await self.get_next_action(input_messages)                
                 self.update_step_info(model_output, step_info)
                 self.state.n_steps += 1
-
-                if self.register_new_step_callback:
-                    await self.register_new_step_callback(state, model_output, self.state.n_steps)
-
-                if self.settings.save_conversation_path:
-                    target = self.settings.save_conversation_path + f'_{self.state.n_steps}.txt'
-                    save_conversation(input_messages, model_output, target,
-                                      self.settings.save_conversation_path_encoding)
-
-                if self.model_name != "deepseek-reasoner":
-                    # remove prev message
-                    self.message_manager._remove_state_message_by_index(-1)
                 await self._raise_if_stopped_or_paused()
 
             except Exception as e:
@@ -482,28 +492,23 @@ class CustomAgent(Agent):
             # TODO: error handling is questionable here
             # ideally, we should be assigning ID to browser_actions and checking against
             # server for dedup
+            http_msgs = await self.http_handler.flush()
+            filtered_msgs = self.http_history.filter_http_messages(http_msgs)
             browser_actions = BrowserActions(
                 actions=model_output.action,
                 thought=model_output.current_state.thought,
                 goal=model_output.current_state.next_goal, 
             )
-            self.log.context.info(f"Actions: {browser_actions}")
-
-            for ret_ in result:
-                if ret_.extracted_content and "Extracted page" in ret_.extracted_content:
-                    # record every extracted page
-                    if ret_.extracted_content[:100] not in self.state.extracted_content:
-                        self.state.extracted_content += ret_.extracted_content
-
-            self.state.last_result = result
-            self.state.last_action = model_output.action
-            if len(result) > 0 and result[-1].is_done:
-                if not self.state.extracted_content:
-                    self.state.extracted_content = step_info.memory
-                result[-1].extracted_content = self.state.extracted_content
-                self.log.action.info(f"📄 Result: {result[-1].extracted_content}")
-
-            self.state.consecutive_failures = 0
+            
+            if self.agent_client:
+                await self._update_server(filtered_msgs, browser_actions)
+            
+            self._update_state(result, model_output, step_info)
+            self._log_response(
+                filtered_msgs,
+                current_msg=input_messages[-1],
+                response=model_output
+            )
 
         except InterruptedError:
             self.log.context.debug("Agent paused")

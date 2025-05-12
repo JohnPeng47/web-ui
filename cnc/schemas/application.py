@@ -39,7 +39,7 @@ class AgentMessage(BaseModel):
 
 class PushMessages(AgentMessage):
     http_msgs: List[HTTPMessage]
-    browser_actions: List[BrowserActions]
+    browser_actions: Optional[BrowserActions]
 
     class Config:
         arbitrary_types_allowed = True  # Allows non-Pydantic models

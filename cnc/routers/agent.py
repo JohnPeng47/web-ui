@@ -79,16 +79,16 @@ def make_agent_router(raw_channel: BroadcastChannel[EnrichAuthNZMessage]) -> API
                 print(f"[Route] received {msg.request.url}")
 
                 # Publish directly to the injected channel
-                await raw_channel.publish(
-                    EnrichAuthNZMessage(
-                        http_msg=msg, 
-                        username=agent.user_name, 
-                        role=agent.role
-                    )
-                )
+                # await raw_channel.publish(
+                #     EnrichAuthNZMessage(
+                #         http_msg=msg, 
+                #         username=agent.user_name, 
+                #         role=agent.role
+                #     )
+                # )
             
-            for action in payload.browser_actions:
-                print(f"Received action: {action}")
+            # for action in payload.browser_actions:
+            #     print(f"Received action: {action}")
 
             return {"accepted": len(payload.http_msgs)}
         except Exception as e:
