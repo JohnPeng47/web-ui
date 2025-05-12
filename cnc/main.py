@@ -12,8 +12,6 @@ from cnc.services.queue import BroadcastChannel
 import asyncio
 from workers_launcher import start_workers
 
-from logger import disable_litellm_logging
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan context manager for FastAPI application."""
@@ -77,5 +75,4 @@ async def main():
     )
 
 if __name__ == "__main__":
-    disable_litellm_logging()
     asyncio.run(main())

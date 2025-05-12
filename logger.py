@@ -30,18 +30,6 @@ def get_file_handler(log_file: str):
     file_handler.setFormatter(formatter)
     return file_handler
 
-def get_file_handler_with_id(log_num: int, log_dir=LOG_DIR, file_prefix: str = ""):
-    """
-    Returns a file handler for logging.
-    """
-    log_subdir = os.path.join(log_dir, file_prefix)
-    os.makedirs(log_subdir, exist_ok=True)
-    timestamp = datetime.now().strftime("%Y-%m-%d")
-    file_name = f"{file_prefix}_{timestamp}.log"
-    file_handler = logging.FileHandler(os.path.join(log_subdir, file_name), encoding="utf-8")
-    file_handler.setFormatter(formatter)
-    return file_handler
-
 def get_console_handler():
     """
     Returns a console handler for logging.
@@ -107,14 +95,12 @@ def get_incremental_file_handler(log_dir=LOG_DIR, file_prefix: str = ""):
 
 # TODO: DEEMO change back
 def init_file_logger(name):  
-    root_logger = logging.getLogger()  # Get root logger by passing no name
+    root_logger = logging.getLogger("pentestbot")  # Get root logger by passing no name
     # TODO: should set all logging to DEBUG instead of INFO so we cant stop fucking logging LITELLM
     # or altneratively export logger instead of configuring global logger
     root_logger.setLevel(logging.INFO)
     root_logger.addHandler(get_incremental_file_handler(file_prefix=name))
     root_logger.addHandler(get_console_handler())
-
-    logging.getLogger("litellm").setLevel(logging.WARNING)
 
     # logger = logging.getLogger(name)  # Get root logger by passing no name
     # # TODO: should set all logging to DEBUG instead of INFO so we cant stop fucking logging LITELLM
@@ -125,13 +111,10 @@ def init_file_logger(name):
 
     return root_logger
 
-def disable_litellm_logging():
-    logging.getLogger("litellm").setLevel(logging.WARNING)
-
 def init_root_logger():
     print("Initializing root logger")
     
-    root_logger = logging.getLogger()  # Get root logger by passing no name
+    root_logger = logging.getLogger("pentestbot")  # Get root logger by passing no name
     # TODO: should set all logging to DEBUG instead of INFO so we cant stop fucking logging LITELLM
     # or altneratively export logger instead of configuring global logger
     root_logger.setLevel(logging.INFO)
@@ -139,17 +122,17 @@ def init_root_logger():
     root_logger.addHandler(get_console_handler())
 
 # TODO: definitely get rid of this once we move to remote queue/workers implementation
-class StderrProxy:
-    def write(self, m): _current_err.get().write(m)
-    def flush(self):   _current_err.get().flush()
+# class StderrProxy:
+#     def write(self, m): _current_err.get().write(m)
+#     def flush(self):   _current_err.get().flush()
 
-sys.stderr = StderrProxy()           # global install once
+# sys.stderr = StderrProxy()           # global install once
 
-@contextmanager
-def stderr_to_logger(logger: logging.Logger):
-    class _W:                         # task-local writer
-        def write(self, m): logger.error(m.rstrip())
-        def flush(self): pass
-    tok = _current_err.set(_W())
-    try:  yield
-    finally: _current_err.reset(tok)
+# @contextmanager
+# def stderr_to_logger(logger: logging.Logger):
+#     class _W:                         # task-local writer
+#         def write(self, m): logger.error(m.rstrip())
+#         def flush(self): pass
+#     tok = _current_err.set(_W())
+#     try:  yield
+#     finally: _current_err.reset(tok)
