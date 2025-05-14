@@ -28,8 +28,9 @@ CNC_URL = "http://localhost:8000"
 DATA_DIR_PATH = Path("tmp/profiles").resolve()
 
 TASK = """
-1. Navigate to the login page again
-2. Explore every functionality on the page
+1. Note down every application functionality you see on this page in memory
+2. For each of the functionality noted in memory, explore it fully by triggering every interaction in the user flow
+for that functionality
 """
 
 async def main(user, app_id):
@@ -77,17 +78,15 @@ Navigate to the following URL:
 There are multiple parts to this task:
 <part1>
 1. Dismiss the popup window by clicking on the "Dismiss" button
-2. Then login with the following credentials at http://localhost:3000/#/login
 {creds}
 </part1>
 
 <part2>
-{{task}}
+{task}
 </part2>
 
 After you have completed each part above, in order, then EXIT.
 """.format(url=VULN_APP_URL, creds=str(user), task=TASK)
-        
         agent_config = [
             {
                 "task": AGENT_PROMPT,

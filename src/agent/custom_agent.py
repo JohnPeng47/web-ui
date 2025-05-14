@@ -573,12 +573,12 @@ class CustomAgent(Agent):
             page_str_after_actions = state_after_actions.element_tree.clickable_elements_to_string()
             url_after_actions = (await self.browser_context.get_current_page()).url
 
-            is_new_page = self._is_new_page(
-                old_page=self.cross_step_prev_page_str if self.cross_step_prev_page_str is not None else page_str_before_action,
-                new_page=page_str_after_actions
-            )
-
-            self.log.context.info(f"Curr_url:{url_after_actions}, prev_url: {self.cross_step_prev_url or url_before_action}, is_new_page: {is_new_page}")
+            # TODO: needs to account new_page in general not just new_page from last navigation
+            # is_new_page = self._is_new_page(
+            #     old_page=self.cross_step_prev_page_str if self.cross_step_prev_page_str is not None else page_str_before_action,
+            #     new_page=page_str_after_actions
+            # ) 
+            # self.log.context.info(f"Curr_url:{url_after_actions}, prev_url: {self.cross_step_prev_url or url_before_action}, is_new_page: {is_new_page}")
 
             # Update instance variables to carry state to the next step
             self.cross_step_prev_url = url_after_actions
@@ -603,7 +603,8 @@ class CustomAgent(Agent):
                     "page_content": page_str_after_actions,
                     "page_url": url_after_actions,
                     "page_observations": self.page_observations.get(url_after_actions, "[no current on page]"),
-                    "browser_action": str(browser_actions)
+                    "browser_action": str(browser_actions),
+                    "http_msgs": [str(msg) for msg in filtered_msgs]
                 },
                 logger=self.log
             )
