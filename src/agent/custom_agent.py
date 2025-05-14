@@ -76,7 +76,7 @@ DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text"]
 DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
 MAX_PAYLOAD_SIZE = 4000
 DEFAULT_PER_REQUEST_TIMEOUT = 5.0     # seconds to wait for *each* unmatched request
-DEFAULT_SETTLE_TIMEOUT      = 1.0     # seconds of network “silence” after the *last* response
+DEFAULT_SETTLE_TIMEOUT      = 1.0     # seconds of network "silence" after the *last* response
 POLL_INTERVAL               = 0.05    # how often we poll internal state
 
 MODEL_NAME = "gpt-4.1"
@@ -106,6 +106,33 @@ different webpages and the same webpage with a slightly changed view (ie. popup,
 Now answer, has the page changed?
 """
     response_format = NewPage
+
+class PageObservation(BaseModel):
+    observation: str
+
+class MakePageObservation(LMP):
+    prompt = """
+You are conducting a web browser navigation of a particular application, on this page. 
+You are responsible for generating a wiki of the page {{page_url}} and its features and interactions with the backend
+
+Here is the page:
+{{page_content}}
+
+Here are your previous observations on this page:
+{{page_observations}}
+
+A new action has been taken on this page:
+{{browser_action}}
+
+For the executed agent action, decide whether or not to make an observation
+Only do so when the *action has exercised some novel functionality* not yet covered under existing observations
+Here are some additional rules/styles for writing your observations:
+- focus on terse descriptions that involve tying backend http requests/responses to browser actions
+- make a note of features that span multiple pages, and describe the partial feature implemented on this page
+
+Now make your observation
+"""
+    response_format = PageObservation
 
 # TODO: LOGGING QUESTION:
 # how to handle logging in functions not defined as part of class
@@ -169,7 +196,7 @@ class HTTPHandler:
             req: loop.time() for req in self._request_queue
         }
 
-        # Index of the last response we have observed; used for the “quiet”
+        # Index of the last response we have observed; used for the "quiet"
         # timer.  We *only* reset the quiet timer when a new response arrives.
         last_seen_response_idx = len(self._step_messages)
         last_response_time     = loop.time()              # seed with *now*
@@ -184,7 +211,7 @@ class HTTPHandler:
             # 1️⃣  Discard requests that have exceeded the per‑request timeout
             for req in list(self._request_queue):
                 if now - req_start.get(req, now) >= per_request_timeout:
-                    # promote “timed‑out” requests to unmatched messages
+                    # promote "timed‑out" requests to unmatched messages
                     self._messages.append(HTTPMessage(request=req, response=None))
                     self._request_queue.remove(req)
 
@@ -317,6 +344,8 @@ class CustomAgent(Agent):
         if agent_client and not app_id:
             raise ValueError("app_id must be provided when agent_client is set")
         
+        self.page_observations = {}
+        
         # TODO: probably not a good idea to use none global logging solution
         self.log = AgentLogger(name=self.agent_client.username)
         self.observations = {title.value: "" for title in AgentObservations}
@@ -325,6 +354,11 @@ class CustomAgent(Agent):
             browser_context.req_handler = self.http_handler.handle_request
             browser_context.res_handler = self.http_handler.handle_response
             browser_context.page_handler = self.handle_page
+
+        # STEP STATE VARIABLES:
+        # put variables that need to hold state between  step() here
+        self.cross_step_prev_page_str: Optional[str] = None
+        self.cross_step_prev_url: Optional[str] = None
 
         self.state = injected_agent_state or CustomAgentState()
         self.add_infos = add_infos
@@ -494,26 +528,22 @@ class CustomAgent(Agent):
     async def step(self, step_info: Optional[CustomAgentStepInfo] = None) -> None:
         """Execute one step of the task"""
         self.log.action.info(f"Step {self.state.n_steps}")
-        state = None
+        state_before_actions = None
         model_output = None
         result: list[ActionResult] = []
-        step_start_time = time.time() 
+        step_start_time = time.time()
         tokens = 0
-        browser_actions: Optional[BrowserActions] = None
-        prev_page: str = ""
-        prev_url: str = ""
-        curr_page: str = ""
-        curr_url: str = ""
+        browser_actions = None
 
-        try:    
-            state = await self.browser_context.get_state()
-            prev_url = (await self.browser_context.get_current_page()).url
-            prev_page = state.element_tree.clickable_elements_to_string()
+        try:
+            state_before_actions = await self.browser_context.get_state()
+            url_before_action = (await self.browser_context.get_current_page()).url
+            page_str_before_action = state_before_actions.element_tree.clickable_elements_to_string()
             browser_actions = BrowserActions()
 
             await self._raise_if_stopped_or_paused()
             self.message_manager.add_state_message(
-                state, 
+                state_before_actions, 
                 self.state.last_action, 
                 self.state.last_result, 
                 step_info, 
@@ -537,17 +567,22 @@ class CustomAgent(Agent):
                 raise e
  
             result: list[ActionResult] = await self.multi_act(model_output.action)
-            # TODO: error handling is questionable here
-            # ideally, we should be assigning ID to browser_actions and checking against
-            # server for dedup
-            curr_page = state.element_tree.clickable_elements_to_string()
-            is_new_page = self._is_new_page(prev_page, curr_page)
 
-            curr_url = (await self.browser_context.get_current_page()).url
-            self.log.context.info(f"Curr_url:{curr_url}, prev_url: {prev_url}, is_new_page: {is_new_page}")
-            
-            prev_url = curr_url
-            prev_page = curr_page
+            # NOTE: here we execute analysis on the browser state after executing actions
+            state_after_actions = await self.browser_context.get_state() # Ensure fresh state
+            page_str_after_actions = state_after_actions.element_tree.clickable_elements_to_string()
+            url_after_actions = (await self.browser_context.get_current_page()).url
+
+            is_new_page = self._is_new_page(
+                old_page=self.cross_step_prev_page_str if self.cross_step_prev_page_str is not None else page_str_before_action,
+                new_page=page_str_after_actions
+            )
+
+            self.log.context.info(f"Curr_url:{url_after_actions}, prev_url: {self.cross_step_prev_url or url_before_action}, is_new_page: {is_new_page}")
+
+            # Update instance variables to carry state to the next step
+            self.cross_step_prev_url = url_after_actions
+            self.cross_step_prev_page_str = page_str_after_actions
 
             http_msgs = await self.http_handler.flush()
             filtered_msgs = self.http_history.filter_http_messages(http_msgs)
@@ -560,6 +595,19 @@ class CustomAgent(Agent):
             if self.agent_client:
                 await self._update_server(filtered_msgs, browser_actions)
 
+            # update page observations
+            obs = MakePageObservation().invoke(
+                model=self.llm,
+                model_name=MODEL_NAME,
+                prompt_args={
+                    "page_content": page_str_after_actions,
+                    "page_url": url_after_actions,
+                    "page_observations": self.page_observations.get(url_after_actions, "[no current on page]"),
+                    "browser_action": str(browser_actions)
+                }
+            )
+            self.page_observations[url_after_actions] = obs.observation
+            
             self._update_state(result, model_output, step_info)
             self._log_response(
                 filtered_msgs,
@@ -577,10 +625,6 @@ class CustomAgent(Agent):
             ]
             return
 
-        # except (ValidationError, ValueError, RateLimitError, ResourceExhausted) as e:
-        #     result = await self._handle_step_error(e)
-        #     self.state.last_result = result
-
         except Exception as e:
             self.log.context.error(f"Error in step {self.state.n_steps}: {e}")
             self.log.context.error(traceback.format_exc())
@@ -597,13 +641,13 @@ class CustomAgent(Agent):
                     step=self.state.n_steps,
                     actions=actions,
                     consecutive_failures=self.state.consecutive_failures,
-                    step_error=[r.error for r in result if r.error] if result else ['No result'],
+                    step_error=[r.error for r in result if r.error] if result else ["No result"],
                 )
             )
             if not result:
                 return
 
-            if state:
+            if state_before_actions: # Use state_before_actions for history item, as it's what LLM saw
                 metadata = StepMetadata(
                     step_number=self.state.n_steps,
                     step_start_time=step_start_time,
@@ -611,7 +655,12 @@ class CustomAgent(Agent):
                     input_tokens=tokens,
                 )
                 json_msgs = [await msg.to_json() for msg in filtered_msgs]
-                self._make_history_item(model_output, state, result, json_msgs, metadata=metadata)
+                self._make_history_item(model_output, state_before_actions, result, json_msgs, metadata=metadata)
+            
+            for page, obs in self.page_observations.items():
+                print("Page observations for page:", page)
+                print(obs)
+
 
     async def run(self, max_steps: int = 100) -> AgentHistoryList:
         """Execute the task with maximum number of steps"""
