@@ -604,7 +604,8 @@ class CustomAgent(Agent):
                     "page_url": url_after_actions,
                     "page_observations": self.page_observations.get(url_after_actions, "[no current on page]"),
                     "browser_action": str(browser_actions)
-                }
+                },
+                logger=self.log
             )
             self.page_observations[url_after_actions] = obs.observation
             
@@ -657,10 +658,10 @@ class CustomAgent(Agent):
                 json_msgs = [await msg.to_json() for msg in filtered_msgs]
                 self._make_history_item(model_output, state_before_actions, result, json_msgs, metadata=metadata)
             
+            self.log.context.info("[OBSERVATIONS]")
             for page, obs in self.page_observations.items():
-                print("Page observations for page:", page)
-                print(obs)
-
+                self.log.context.info(f"[PAGE]: {page}")
+                self.log.context.info(obs)
 
     async def run(self, max_steps: int = 100) -> AgentHistoryList:
         """Execute the task with maximum number of steps"""
