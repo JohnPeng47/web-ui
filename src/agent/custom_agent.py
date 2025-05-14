@@ -10,6 +10,7 @@ import io
 import asyncio
 import time
 from enum import Enum
+from pydantic import BaseModel
 from browser_use.agent.prompts import SystemPrompt, AgentMessagePrompt
 from browser_use.agent.service import Agent
 from browser_use.agent.message_manager.utils import convert_input_messages, extract_json_from_model_output, \
@@ -53,7 +54,7 @@ from json_repair import repair_json
 from src.utils.agent_state import AgentState
 from src.agent.client import AgentClient
 
-from johnllm import LLMModel
+from johnllm import LLMModel, LMP
 from httplib import HTTPRequest, HTTPResponse, HTTPMessage
 
 # from .state import CustomAgentOutput
@@ -82,7 +83,30 @@ MODEL_NAME = "gpt-4.1"
 
 class AgentObservations(str, Enum):
     SITE_STRUCTURE = "site_structure"
+
+class NewPage(BaseModel):
+    is_new_page: bool
         
+class IsNewPage(LMP):
+    prompt = """
+You are tasked with determining if the current DOM state of a browser is the same or different page from the previous one,
+indicating that the browser has executed a navigational action between the two states. Be careful to differentiate between
+different webpages and the same webpage with a slightly changed view (ie. popup, menu dropdown, etc.)
+
+Here is the new page:
+{{new_page}}
+
+Here is the previous page:
+{{old_page}}
+
+You are tasked with determining if the current DOM state of a browser is the same or different page from the previous one,
+indicating that the browser has executed a navigational action between the two states. Be careful to differentiate between
+different webpages and the same webpage with a slightly changed view (ie. popup, menu dropdown, etc.)
+
+Now answer, has the page changed?
+"""
+    response_format = NewPage
+
 # TODO: LOGGING QUESTION:
 # how to handle logging in functions not defined as part of class
 class HTTPHandler:
@@ -326,6 +350,22 @@ class CustomAgent(Agent):
         self.log.context.info(f"[PLAYWRIGHT] Frame {page}")
         self.curr_page = page
 
+    def _is_new_page(self, old_page: str, new_page: str) -> bool:
+        """Check if the new page is different from the old page"""
+        try:
+            is_new_page = IsNewPage().invoke(
+                model=self.llm,
+                model_name=MODEL_NAME,
+                prompt_args={
+                    "new_page": new_page,
+                    "old_page": old_page,
+                }
+            )
+            return is_new_page.is_new_page
+        except Exception as e:
+            self.log.context.error(f"Error in _is_new_page: {e}")
+            return False
+        
     def _log_response(self, 
                       http_msgs: List[HTTPMessage],
                       current_msg: BaseMessage,
@@ -432,6 +472,8 @@ class CustomAgent(Agent):
 
     def _update_state(self, result, model_output, step_info):
         """Update agent state with results from actions"""
+       
+        # random state update stuff ...
         for ret_ in result:
             if ret_.extracted_content and "Extracted page" in ret_.extracted_content:
                 # record every extracted page
@@ -458,9 +500,15 @@ class CustomAgent(Agent):
         step_start_time = time.time() 
         tokens = 0
         browser_actions: Optional[BrowserActions] = None
+        prev_page: str = ""
+        prev_url: str = ""
+        curr_page: str = ""
+        curr_url: str = ""
 
         try:    
             state = await self.browser_context.get_state()
+            prev_url = (await self.browser_context.get_current_page()).url
+            prev_page = state.element_tree.clickable_elements_to_string()
             browser_actions = BrowserActions()
 
             await self._raise_if_stopped_or_paused()
@@ -492,6 +540,15 @@ class CustomAgent(Agent):
             # TODO: error handling is questionable here
             # ideally, we should be assigning ID to browser_actions and checking against
             # server for dedup
+            curr_page = state.element_tree.clickable_elements_to_string()
+            is_new_page = self._is_new_page(prev_page, curr_page)
+
+            curr_url = (await self.browser_context.get_current_page()).url
+            self.log.context.info(f"Curr_url:{curr_url}, prev_url: {prev_url}, is_new_page: {is_new_page}")
+            
+            prev_url = curr_url
+            prev_page = curr_page
+
             http_msgs = await self.http_handler.flush()
             filtered_msgs = self.http_history.filter_http_messages(http_msgs)
             browser_actions = BrowserActions(
@@ -502,7 +559,7 @@ class CustomAgent(Agent):
             
             if self.agent_client:
                 await self._update_server(filtered_msgs, browser_actions)
-            
+
             self._update_state(result, model_output, step_info)
             self._log_response(
                 filtered_msgs,
