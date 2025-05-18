@@ -66,7 +66,7 @@ If redirected to a login page, use the following creds to login;
 
 After logging in successfully, confirm that you have been redirected to the lab page
 Make a note of the URL in your memory
-You can now exit
+Once this is done, you can exit 
 """.format(url=PORTSWIGGER_URL + lab_url, creds=str(PORTSWIGGER_CREDS))
         
         agent_config = [
