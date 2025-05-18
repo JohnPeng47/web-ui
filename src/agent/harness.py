@@ -61,6 +61,7 @@ class AgentHarness:
         self._agents: List[CustomAgent] = []
         self._tasks: List[asyncio.Task] = []
         self._contexts: List[BrowserContext] = []   # contexts we own
+        self._history: List[Dict] = []
 
     # ---------- public API -------------------------------------------------
 
@@ -90,8 +91,9 @@ class AgentHarness:
 
                 self._contexts.append(browser_context)   # keep track
                 cfg["browser_context"] = browser_context
-                cfg["agent_client"].set_shutdown(self.kill_all)
-                
+                if cfg.get("agent_client"):
+                    cfg["agent_client"].set_shutdown(self.kill_all)
+
             # 2. Instantiate and launch the agent
             agent = self.agent_cls(**cfg)
             self._agents.append(agent)
@@ -136,8 +138,15 @@ class AgentHarness:
 
     async def _run_agent(self, agent: CustomAgent, max_steps: int):
         try:
-            await agent.run(max_steps=max_steps)
+            history = await agent.run(max_steps=max_steps)
+            self._history.append(history.model_dump())
         except asyncio.CancelledError:
             logger.info("Agent cancelled")
         except Exception as e:
             logger.exception("Agent crashed: %s", e)
+
+    def get_history(self) -> List[Dict]:
+        """
+        Returns the history of all agents.
+        """
+        return self._history

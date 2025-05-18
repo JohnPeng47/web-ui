@@ -310,15 +310,17 @@ class CustomAgent(Agent):
             http_filter=DEFAULT_HTTP_FILTER
         )
         self.agent_client = agent_client
-        self.agent_client.set_shutdown(self.shutdown)
+        if self.agent_client:
+            self.agent_client.set_shutdown(self.shutdown)
 
         self.app_id = app_id
         self.agent_id = None
         if agent_client and not app_id:
             raise ValueError("app_id must be provided when agent_client is set")
         
+        username = self.agent_client.username if self.agent_client else "default"
         # TODO: probably not a good idea to use none global logging solution
-        self.log = AgentLogger(name=self.agent_client.username)
+        self.log = AgentLogger(name=username)
         self.observations = {title.value: "" for title in AgentObservations}
         if browser_context:
             # logger.info("Registering HTTP handlers")
