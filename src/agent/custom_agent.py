@@ -57,6 +57,8 @@ from src.agent.client import AgentClient
 from johnllm import LLMModel, LMP
 from httplib import HTTPRequest, HTTPResponse, HTTPMessage
 
+from playwright._impl._errors import TargetClosedError
+
 # from .state import CustomAgentOutput
 from common.agent import BrowserActions
 from .custom_views import CustomAgentOutput
@@ -269,7 +271,8 @@ class CustomAgent(Agent):
             context: Context | None = None,
             history_file: Optional[str] = None,
             agent_client: Optional[AgentClient] = None,
-            app_id: Optional[str] = None
+            app_id: Optional[str] = None,
+            close_browser: bool = False
     ):
         print("[CONTROLLER]", controller)
         
@@ -305,6 +308,7 @@ class CustomAgent(Agent):
             injected_agent_state=injected_agent_state,
             context=context,
         )
+        self.close_browser = close_browser
         self.curr_page = None
         self.history_file = history_file
         self.http_handler = HTTPHandler()
@@ -324,11 +328,13 @@ class CustomAgent(Agent):
         # TODO: probably not a good idea to use none global logging solution
         self.log = AgentLogger(name=username)
         self.observations = {title.value: "" for title in AgentObservations}
+
         if browser_context:
+            pass
             # logger.info("Registering HTTP handlers")
-            browser_context.req_handler = self.http_handler.handle_request
-            browser_context.res_handler = self.http_handler.handle_response
-            browser_context.page_handler = self.handle_page
+            # browser_context.req_handler = self.http_handler.handle_request
+            # browser_context.res_handler = self.http_handler.handle_response
+            # browser_context.page_handler = self.handle_page
 
         self.state = injected_agent_state or CustomAgentState()
         self.add_infos = add_infos
@@ -545,10 +551,10 @@ class CustomAgent(Agent):
             # ideally, we should be assigning ID to browser_actions and checking against
             # server for dedup
             curr_page = state.element_tree.clickable_elements_to_string()
-            is_new_page = self._is_new_page(prev_page, curr_page)
+            # is_new_page = self._is_new_page(prev_page, curr_page)
 
             curr_url = (await self.browser_context.get_current_page()).url
-            self.log.context.info(f"Curr_url:{curr_url}, prev_url: {prev_url}, is_new_page: {is_new_page}")
+            # self.log.context.info(f"Curr_url:{curr_url}, prev_url: {prev_url}, is_new_page: {is_new_page}")
             
             prev_url = curr_url
             prev_page = curr_page
@@ -686,11 +692,16 @@ class CustomAgent(Agent):
                 )
             )
 
-            if not self.injected_browser_context:
-                await self.browser_context.close()
+            try:
+                if not self.injected_browser_context or self.close_browser:
+                    self.log.context.info("Closing browser context")
+                    await self.browser_context.close()
 
-            if not self.injected_browser and self.browser:
-                await self.browser.close()
+                if (not self.injected_browser and self.browser) or (self.close_browser and self.browser):
+                    self.log.context.info("Closing browser")
+                    await self.browser.close()
+            except TargetClosedError as e:
+                pass
 
             if self.settings.generate_gif:
                 output_path: str = 'agent_history.gif'
@@ -698,6 +709,8 @@ class CustomAgent(Agent):
                     output_path = self.settings.generate_gif
 
                 create_history_gif(task=self.task, history=self.state.history, output_path=output_path)
+            
+            self.log.context.info("Graceful exit!")
 
     async def shutdown(self, reason: str = "Premature shutdown requested") -> None:
         """Shuts down the agent prematurely and performs cleanup."""
@@ -757,7 +770,7 @@ class CustomAgent(Agent):
                     self.log.context.error(f"Error closing browser context during shutdown: {e}")
 
             # Close Browser
-            if not self.injected_browser and self.browser:
+            if self.browser:
                 try:
                     await self.browser.close()
                     self.log.context.info("Closed browser during shutdown.")

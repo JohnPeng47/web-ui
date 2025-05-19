@@ -91,8 +91,13 @@ class AgentHarness:
 
                 self._contexts.append(browser_context)   # keep track
                 cfg["browser_context"] = browser_context
+                
                 if cfg.get("agent_client"):
                     cfg["agent_client"].set_shutdown(self.kill_all)
+
+            # so agent can kill browser
+            if self.browser:
+                cfg["browser"] = self.browser
 
             # 2. Instantiate and launch the agent
             agent = self.agent_cls(**cfg)
