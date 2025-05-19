@@ -35,7 +35,7 @@ class LabURLObservation(ObservationModel):
     def to_msg(self):
         return self.lab_url
 
-async def portswigger_labstart_agent(lab_url):
+async def portswigger_labstart_agent(lab_href):
     """Launches portswigger agent to start the lab"""
     try:                
         # Setup browser
@@ -62,7 +62,7 @@ async def portswigger_labstart_agent(lab_url):
             "context_cfg": BrowserContextConfig(no_viewport=False),
         }
 
-        print("Starting lab: ", PORTSWIGGER_URL + lab_url)
+        print("Starting lab: ", PORTSWIGGER_URL + lab_href)
 
         AGENT_PROMPT = """
 Navigate to the following URL:
@@ -77,7 +77,7 @@ After logging in successfully, confirm that you have been redirected to the lab 
 After being redirected, use the record_observation tool to record the post-redirect lab URL
 </important>
 Once this is done, you can exit 
-""".format(url=PORTSWIGGER_URL + lab_url, creds=str(PORTSWIGGER_CREDS))
+""".format(url=PORTSWIGGER_URL + lab_href, creds=str(PORTSWIGGER_CREDS))
         
         agent_config = [
             {
@@ -112,6 +112,8 @@ Once this is done, you can exit
     return 0
 
 async def start_lab(vuln_category, lab_num, labs):
+    print("Starting lab...", vuln_category, lab_num)
+
     labs = labs.get(vuln_category)
     if not labs:
         print(f"{vuln_category} is not a valid category")
@@ -121,16 +123,19 @@ async def start_lab(vuln_category, lab_num, labs):
         print(f"{lab_num} is not a valid lab number")
         return
     
-    lab_url_match = await portswigger_labstart_agent(labs[lab_num])
+    lab_url_match = await portswigger_labstart_agent(labs[lab_num]["link"])
+
+    print("Lab URL: ", lab_url_match)
     return lab_url_match
 
-def check_lab_url(lab_url_match):
+async def check_lab_url(lab_url_match):
     """Check if the lab URL is accessible"""
     if not lab_url_match:
         print("Failed to get lab URL", file=sys.stderr)
         sys.exit(1)
         
     try:
+        # Use aiohttp or httpx here if you want true async
         response = requests.get(lab_url_match)
         if response.status_code != 200:
             print(f"Lab URL returned status code {response.status_code}", file=sys.stderr)
@@ -141,9 +146,7 @@ def check_lab_url(lab_url_match):
     
     return True
 
-if __name__ == "__main__":
-    from logger import init_file_logger
-    
+async def main():
     parser = argparse.ArgumentParser(description="Start PortSwigger lab")
     parser.add_argument("vuln_category", nargs="?", help="Vulnerability category")
     parser.add_argument("lab_num", type=int, nargs="?", help="Lab number (0-indexed)")
@@ -156,7 +159,7 @@ if __name__ == "__main__":
         print("Available vulnerability categories:")
         for category in labs.keys():
             print(f"- {category}")
-        sys.exit(0)
+        return
 
     if args.vuln_category not in labs:
         print(f"Error: {args.vuln_category} is not a valid category", file=sys.stderr)
@@ -166,8 +169,12 @@ if __name__ == "__main__":
         print(f"Labs in category '{args.vuln_category}':")
         for i, lab in enumerate(labs[args.vuln_category]):
             print(f"[{i}] {lab['name']}")
-        sys.exit(0)
+        return
 
     init_file_logger("test_agent", log_name="navigation")
-    lab_url_match = asyncio.run(start_lab(args.vuln_category, args.lab_num, labs))
-    check_lab_url(lab_url_match)   
+    lab_url_match = await start_lab(args.vuln_category, args.lab_num, labs)
+    await check_lab_url(lab_url_match)
+    return lab_url_match
+
+if __name__ == "__main__":
+    asyncio.run(main())   

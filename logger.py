@@ -6,10 +6,7 @@ import sys
 import logging
 import re
 import sys, contextvars, logging
-from contextlib import contextmanager
-
-
-_current_err = contextvars.ContextVar("task_stderr", default=sys.__stderr__)
+from pathlib import Path
 
 LOG_DIR = "logs"
 
@@ -24,7 +21,7 @@ formatter = logging.Formatter(
 formatter.converter = converter
 console_formatter = logging.Formatter("%(message)s")
 
-def get_file_handler(log_file: str):
+def get_file_handler(log_file: str | Path):
     """
     Returns a file handler for logging.
     """

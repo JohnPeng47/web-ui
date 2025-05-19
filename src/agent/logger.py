@@ -172,6 +172,41 @@ class AgentLogger:
 
         )
         return file_handler
+    
+    def close(self):
+        """
+        Close the logger, remove all handlers, and clean up global references.
+        This helps prevent memory leaks and ensures proper cleanup when the logger
+        is no longer needed.
+        """
+        # Get a copy of handlers since we'll be modifying the list
+        handlers = self._base.handlers.copy()
+        
+        # Close and remove each handler
+        for handler in handlers:
+            # Flush and close the handler
+            handler.flush()
+            handler.close()
+            
+            # Remove the handler from the logger
+            self._base.removeHandler(handler)
+        
+        # Remove any filters
+        self._base.filters.clear()
+        
+        # If needed, remove logger from logging manager to fully cleanup global references
+        # This is optional and depends on whether you want to completely remove the logger
+        # or potentially reuse the name later
+        if self._base.name in logging.Logger.manager.loggerDict:
+            logging.Logger.manager.loggerDict.pop(self._base.name)
+        
+        # Clear any references to the adapters
+        for public in self.LOG_STREAMS.keys():
+            if hasattr(self, public):
+                delattr(self, public)
+        
+        # Help garbage collection by breaking circular references
+        # self._base = None
 
     # Optional: pretty repr() for debugging
     def __repr__(self) -> str:

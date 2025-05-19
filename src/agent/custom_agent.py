@@ -711,6 +711,7 @@ class CustomAgent(Agent):
                 create_history_gif(task=self.task, history=self.state.history, output_path=output_path)
             
             self.log.context.info("Graceful exit!")
+            self.log.close()
 
     async def shutdown(self, reason: str = "Premature shutdown requested") -> None:
         """Shuts down the agent prematurely and performs cleanup."""
@@ -790,7 +791,8 @@ class CustomAgent(Agent):
                     create_history_gif(task=f"{self.task} (Shutdown)", history=history, output_path=output_path)
                 except Exception as e:
                      self.log.context.error(f"Failed to generate GIF during shutdown: {e}")
-
+            
+            self.log.close()
         except Exception as e:
             # Catch errors during the shutdown cleanup process itself
             self.log.context.error(f"Error during agent shutdown cleanup: {e}")
