@@ -1,5 +1,5 @@
 {
-  "SQL injection": [
+  "sql_injection": [
     {
       "link": "/web-security/sql-injection/lab-retrieve-hidden-data",
       "name": "SQL injection vulnerability in WHERE clause allowing retrieval of hidden data"
@@ -73,7 +73,7 @@
       "name": "SQL injection with filter bypass via XML encoding"
     }
   ],
-  "Cross-site scripting": [
+  "cross_site_scripting": [
     {
       "link": "/web-security/cross-site-scripting/reflected/lab-html-context-nothing-encoded",
       "name": "Reflected XSS into HTML context with nothing encoded"
@@ -195,7 +195,7 @@
       "name": "Reflected XSS protected by CSP, with CSP bypass"
     }
   ],
-  "Cross-site request forgery (CSRF)": [
+  "cross_site_request_forgery": [
     {
       "link": "/web-security/csrf/lab-no-defenses",
       "name": "CSRF vulnerability with no defenses"
@@ -245,7 +245,7 @@
       "name": "CSRF with broken Referer validation"
     }
   ],
-  "Clickjacking": [
+  "clickjacking": [
     {
       "link": "/web-security/clickjacking/lab-basic-csrf-protected",
       "name": "Basic clickjacking with CSRF token protection"
@@ -267,7 +267,7 @@
       "name": "Multistep clickjacking"
     }
   ],
-  "DOM-based vulnerabilities": [
+  "dom_based_vulnerabilities": [
     {
       "link": "/web-security/dom-based/controlling-the-web-message-source/lab-dom-xss-using-web-messages",
       "name": "DOM XSS using web messages"
@@ -297,7 +297,7 @@
       "name": "Clobbering DOM attributes to bypass HTML filters"
     }
   ],
-  "Cross-origin resource sharing (CORS)": [
+  "cross_origin_resource_sharing": [
     {
       "link": "/web-security/cors/lab-basic-origin-reflection-attack",
       "name": "CORS vulnerability with basic origin reflection"
@@ -311,7 +311,7 @@
       "name": "CORS vulnerability with trusted insecure protocols"
     }
   ],
-  "XML external entity (XXE) injection": [
+  "xml_external_entity_injection": [
     {
       "link": "/web-security/xxe/lab-exploiting-xxe-to-retrieve-files",
       "name": "Exploiting XXE using external entities to retrieve files"
@@ -349,7 +349,7 @@
       "name": "Exploiting XXE to retrieve data by repurposing a local DTD"
     }
   ],
-  "Server-side request forgery (SSRF)": [
+  "server_side_request_forgery": [
     {
       "link": "/web-security/ssrf/lab-basic-ssrf-against-localhost",
       "name": "Basic SSRF against the local server"
@@ -379,7 +379,7 @@
       "name": "SSRF with whitelist-based input filter"
     }
   ],
-  "HTTP request smuggling": [
+  "http_request_smuggling": [
     {
       "link": "/web-security/request-smuggling/finding/lab-confirming-cl-te-via-differential-responses",
       "name": "HTTP request smuggling, confirming a CL.TE vulnerability via differential responses"
@@ -465,7 +465,7 @@
       "name": "Server-side pause-based request smuggling"
     }
   ],
-  "OS command injection": [
+  "os_command_injection": [
     {
       "link": "/web-security/os-command-injection/lab-simple",
       "name": "OS command injection, simple case"
@@ -487,7 +487,7 @@
       "name": "Blind OS command injection with out-of-band data exfiltration"
     }
   ],
-  "Server-side template injection": [
+  "server_side_template_injection": [
     {
       "link": "/web-security/server-side-template-injection/exploiting/lab-server-side-template-injection-basic",
       "name": "Basic server-side template injection"
@@ -517,7 +517,7 @@
       "name": "Server-side template injection with a custom exploit"
     }
   ],
-  "Path traversal": [
+  "path_traversal": [
     {
       "link": "/web-security/file-path-traversal/lab-simple",
       "name": "File path traversal, simple case"
@@ -543,7 +543,7 @@
       "name": "File path traversal, validation of file extension with null byte bypass"
     }
   ],
-  "Access control vulnerabilities": [
+  "access_control_vulnerabilities": [
     {
       "link": "/web-security/access-control/lab-unprotected-admin-functionality",
       "name": "Unprotected admin functionality"
@@ -597,13 +597,13 @@
       "name": "Referer-based access control"
     }
   ],
-  "Authentication": [
+  "authentication": [
     {
       "link": "/web-security/authentication/password-based/lab-username-enumeration-via-different-responses",
       "name": "Username enumeration via different responses"
     },
     {
-      "link": "/web-security/authentication/multi-factor/lab-2fa-simple-bypass",
+      "link": "/web-security/authentication/multi-factor/lab-2fa-simple-bypass", 
       "name": "2FA simple bypass"
     },
     {
@@ -655,7 +655,7 @@
       "name": "2FA bypass using a brute-force attack"
     }
   ],
-  "WebSockets": [
+  "web_sockets": [
     {
       "link": "/web-security/websockets/lab-manipulating-messages-to-exploit-vulnerabilities",
       "name": "Manipulating WebSocket messages to exploit vulnerabilities"
@@ -669,7 +669,7 @@
       "name": "Manipulating the WebSocket handshake to exploit vulnerabilities"
     }
   ],
-  "Web cache poisoning": [
+  "web_cache_poisoning": [
     {
       "link": "/web-security/web-cache-poisoning/exploiting-design-flaws/lab-web-cache-poisoning-with-an-unkeyed-header",
       "name": "Web cache poisoning with an unkeyed header"
@@ -723,7 +723,7 @@
       "name": "Internal cache poisoning"
     }
   ],
-  "Insecure deserialization": [
+  "insecure_deserialization": [
     {
       "link": "/web-security/deserialization/exploiting/lab-deserialization-modifying-serialized-objects",
       "name": "Modifying serialized objects"
@@ -765,7 +765,7 @@
       "name": "Using PHAR deserialization to deploy a custom gadget chain"
     }
   ],
-  "Information disclosure": [
+  "information_disclosure": [
     {
       "link": "/web-security/information-disclosure/exploiting/lab-infoleak-in-error-messages",
       "name": "Information disclosure in error messages"
@@ -787,7 +787,7 @@
       "name": "Information disclosure in version control history"
     }
   ],
-  "Business logic vulnerabilities": [
+  "business_logic_vulnerabilities": [
     {
       "link": "/web-security/logic-flaws/examples/lab-logic-flaws-excessive-trust-in-client-side-controls",
       "name": "Excessive trust in client-side controls"
@@ -837,7 +837,7 @@
       "name": "Bypassing access controls using email address parsing discrepancies"
     }
   ],
-  "HTTP Host header attacks": [
+  "http_host_header_attacks": [
     {
       "link": "/web-security/host-header/exploiting/password-reset-poisoning/lab-host-header-basic-password-reset-poisoning",
       "name": "Basic password reset poisoning"
@@ -867,7 +867,7 @@
       "name": "Password reset poisoning via dangling markup"
     }
   ],
-  "OAuth authentication": [
+  "oauth_authentication": [
     {
       "link": "/web-security/oauth/lab-oauth-authentication-bypass-via-oauth-implicit-flow",
       "name": "Authentication bypass via OAuth implicit flow"
@@ -893,7 +893,7 @@
       "name": "Stealing OAuth access tokens via a proxy page"
     }
   ],
-  "File upload vulnerabilities": [
+  "file_upload_vulnerabilities": [
     {
       "link": "/web-security/file-upload/lab-file-upload-remote-code-execution-via-web-shell-upload",
       "name": "Remote code execution via web shell upload"
@@ -923,7 +923,7 @@
       "name": "Web shell upload via race condition"
     }
   ],
-  "JWT": [
+  "jwt": [
     {
       "link": "/web-security/jwt/lab-jwt-authentication-bypass-via-unverified-signature",
       "name": "JWT authentication bypass via unverified signature"
@@ -957,7 +957,7 @@
       "name": "JWT authentication bypass via algorithm confusion with no exposed key"
     }
   ],
-  "Essential skills": [
+  "essential_skills": [
     {
       "link": "/web-security/essential-skills/using-burp-scanner-during-manual-testing/lab-discovering-vulnerabilities-quickly-with-targeted-scanning",
       "name": "Discovering vulnerabilities quickly with targeted scanning"
@@ -967,7 +967,7 @@
       "name": "Scanning non-standard data structures"
     }
   ],
-  "Prototype pollution": [
+  "prototype_pollution": [
     {
       "link": "/web-security/prototype-pollution/client-side/browser-apis/lab-prototype-pollution-client-side-prototype-pollution-via-browser-apis",
       "name": "Client-side prototype pollution via browser APIs"
@@ -1009,7 +1009,7 @@
       "name": "Exfiltrating sensitive data via server-side prototype pollution"
     }
   ],
-  "GraphQL API vulnerabilities": [
+  "graphql_api_vulnerabilities": [
     {
       "link": "/web-security/graphql/lab-graphql-reading-private-posts",
       "name": "Accessing private GraphQL posts"
@@ -1031,7 +1031,7 @@
       "name": "Performing CSRF exploits over GraphQL"
     }
   ],
-  "Race conditions": [
+  "race_conditions": [
     {
       "link": "/web-security/race-conditions/lab-race-conditions-limit-overrun",
       "name": "Limit overrun race conditions"
@@ -1057,7 +1057,7 @@
       "name": "Partial construction race conditions"
     }
   ],
-  "NoSQL injection": [
+  "nosql_injection": [
     {
       "link": "/web-security/nosql-injection/lab-nosql-injection-detection",
       "name": "Detecting NoSQL injection"
@@ -1075,7 +1075,7 @@
       "name": "Exploiting NoSQL operator injection to extract unknown fields"
     }
   ],
-  "API testing": [
+  "api_testing": [
     {
       "link": "/web-security/api-testing/lab-exploiting-api-endpoint-using-documentation",
       "name": "Exploiting an API endpoint using documentation"
@@ -1097,7 +1097,7 @@
       "name": "Exploiting server-side parameter pollution in a REST URL"
     }
   ],
-  "Web LLM attacks": [
+  "web_llm_attacks": [
     {
       "link": "/web-security/llm-attacks/lab-exploiting-llm-apis-with-excessive-agency",
       "name": "Exploiting LLM APIs with excessive agency"
@@ -1115,7 +1115,7 @@
       "name": "Exploiting insecure output handling in LLMs"
     }
   ],
-  "Web cache deception": [
+  "web_cache_deception": [
     {
       "link": "/web-security/web-cache-deception/lab-wcd-exploiting-path-mapping",
       "name": "Exploiting path mapping for web cache deception"

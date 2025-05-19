@@ -145,8 +145,15 @@ class AgentHarness:
         except Exception as e:
             logger.exception("Agent crashed: %s", e)
 
-    def get_history(self) -> List[Dict]:
+    def get_history(self):
         """
         Returns the history of all agents.
         """
-        return self._history
+        def remove_screenshots(d):
+            if isinstance(d, dict):
+                return {k: remove_screenshots(v) for k, v in d.items() if k != "screenshot"}
+            elif isinstance(d, list):
+                return [remove_screenshots(x) for x in d]
+            return d
+            
+        return remove_screenshots(self._history)

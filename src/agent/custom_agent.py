@@ -225,7 +225,7 @@ class CustomAgent(Agent):
             # Optional parameters
             browser: Browser | None = None,
             browser_context: BrowserContext | None = None,
-            controller: Controller[Context] = Controller(),
+            controller: Controller[Context] | None = None,
             # Initial agent run parameters
             sensitive_data: Optional[Dict[str, str]] = None,
             initial_actions: Optional[List[Dict[str, Dict[str, Any]]]] = None,
@@ -270,13 +270,15 @@ class CustomAgent(Agent):
             history_file: Optional[str] = None,
             agent_client: Optional[AgentClient] = None,
             app_id: Optional[str] = None
-    ):        
+    ):
+        print("[CONTROLLER]", controller)
+        
         super(CustomAgent, self).__init__(
             task=task,
             llm=llm,
             browser=browser,
             browser_context=browser_context,
-            controller=controller,
+            controller=controller or Controller(),
             sensitive_data=sensitive_data,
             initial_actions=initial_actions,
             register_new_step_callback=register_new_step_callback,
