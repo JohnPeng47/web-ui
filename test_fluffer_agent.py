@@ -41,9 +41,9 @@ async def portswigger_labstart_agent(lab_url, instructions):
             config=BrowserConfig(
                 headless=False,
                 disable_security=True,
-                user_data_dir=str(DATA_DIR_PATH / "browser"),
+                # user_data_dir=str(DATA_DIR_PATH / "browser"),
                 extra_chromium_args=[f"--window-size={window_w},{window_h} --incognito"],
-                chrome_instance_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe"
+                # chrome_instance_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe"
             )
         )
         shared_config = {
@@ -106,7 +106,7 @@ Once you have identified this request, then *EXIT*
 if __name__ == "__main__":
     import asyncio
 
-    LAB_URL = "https://0a8b003703dcd08282b7a10d00ac00f8.web-security-academy.net"
+    LAB_URL = "https://0ae80064045d428482ce839e00540024.web-security-academy.net"
     INSTRUCTIONS = """
 This lab contains a path traversal vulnerability in the display of product images. 
 """

@@ -559,8 +559,6 @@ class CustomAgent(Agent):
                 self.update_step_info(model_output, step_info)
                 self.state.n_steps += 1
                 await self._raise_if_stopped_or_paused()
-
-                logger.info("hello1")
             except Exception as e:
                 # model call failed, remove last state message from history
                 self._message_manager._remove_state_message_by_index(-1)
@@ -575,7 +573,6 @@ class CustomAgent(Agent):
 
             curr_url = (await self.browser_context.get_current_page()).url
             # logger.info(f"Curr_url:{curr_url}, prev_url: {prev_url}, is_new_page: {is_new_page}")
-            logger.info("hello1")
 
             prev_url = curr_url
             prev_page = curr_page
@@ -590,8 +587,6 @@ class CustomAgent(Agent):
             if self.agent_client:
                 await self._update_server(self.step_http_msgs, browser_actions)
             
-            logger.info("hello1")
-
             self._update_state(result, model_output, step_info)
             self._log_response(
                 self.step_http_msgs,
@@ -813,7 +808,6 @@ class CustomAgent(Agent):
                 except Exception as e:
                      logger.error(f"Failed to generate GIF during shutdown: {e}")
             
-            self.log.close()
         except Exception as e:
             # Catch errors during the shutdown cleanup process itself
             logger.error(f"Error during agent shutdown cleanup: {e}")

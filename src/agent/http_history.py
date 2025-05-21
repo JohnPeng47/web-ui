@@ -18,9 +18,7 @@ BAN_LIST = [
     "play.google.com/log", "google.internal.waa.v1.Waa/GenerateIT", "jnn-pa.googleapis.com/$rpc",
     # 5 LinkedIn / StackAdapt / Piwik
     "px.ads.linkedin.com/", "linkedin.com/attribution_trigger", "stackadapt.com/", "tags.srv.stackadapt.com/",
-    "ps.piwik.pro/", "/ppms.php",
-    # 6 Optional static media
-    ".svg", ".png", ".jpg", ".ico", "/cast_sender.js",
+    "ps.piwik.pro/", "/ppms.php"
 ]
 
 def is_uninteresting(url: str) -> bool:
@@ -45,7 +43,7 @@ class HTTPFilter:
         self.include_status_codes = include_status_codes or self.DEFAULT_STATUS_CODES
         self.max_payload_size = max_payload_size
 
-DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text", "application/json"]
+DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text", "application/json", "images"]
 DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
 MAX_PAYLOAD_SIZE = 4000
 
