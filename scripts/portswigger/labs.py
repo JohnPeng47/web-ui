@@ -84,6 +84,27 @@ class PortSwiggerLabRunner:
         with open(PORTSWIGGER_JSON, "r", encoding="utf-8") as fh:
             self._labs_catalog = json.load(fh)
 
+        self._validate_labs_to_start()
+
+    def _validate_labs_to_start(self):
+        """
+        Verify that all labs_to_start exist in the catalog; if not, raise Exception and error out.
+        """
+        missing = []
+        for spec in self._labs_to_start:
+            vuln = spec.get("vuln_name")
+            labs = spec.get("labs", [])
+            if vuln not in self._labs_catalog:
+                missing.append(f"Vulnerability category '{vuln}' not found in catalog")
+                continue
+            available_labs = self._labs_catalog[vuln]
+            for idx in labs:
+                if not isinstance(idx, int) or idx < 0 or idx >= len(available_labs):
+                    missing.append(
+                        f"Lab index {idx} for category '{vuln}' is invalid (available: 0-{len(available_labs)-1})"
+                    )
+        if missing:
+            raise Exception("Invalid labs_to_start configuration:\n" + "\n".join(missing))
     # ────────────────────────────────────────
     # Public API
     # ────────────────────────────────────────
@@ -162,7 +183,7 @@ class PortSwiggerLabRunner:
             except Exception as exc:
                 status = f"ERROR – {exc!s}"
 
-            print(f"[{vuln} #{idx}] {url} → {status}")
+            print(f"[{vuln},{idx}] {url} → {status}")
             await asyncio.sleep(self._poll_interval)
 
     # ────────────────────────────────────────
@@ -267,6 +288,8 @@ if __name__ == "__main__":
     """
     spec = [
         # {"vuln_name": "path_traversal", "labs": [0,1,2,3,4,5]},
-        {"vuln_name": "path_traversal", "labs": [0]}
+        {"vuln_name": "sql_injection", "labs": [2,5,6,17]},
+        {"vuln_name": "path_traversal", "labs": [2,3]},
+        {"vuln_name": "server_side_request_forgery", "labs": [1]}
     ]
     PortSwiggerLabRunner(spec, poll_interval=15, headless=False).run()

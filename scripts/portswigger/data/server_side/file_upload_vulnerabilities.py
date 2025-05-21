@@ -1,4 +1,4 @@
-[
+FILE_UPLOAD_VULNERABILITIES = [
     {
         "name": "Remote code execution via web shell upload",
         "link": "/web-security/file-upload/lab-file-upload-remote-code-execution-via-web-shell-upload",
