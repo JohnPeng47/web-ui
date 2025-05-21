@@ -121,6 +121,8 @@ class AgentLogger:
         log_dir = os.path.join(LOG_DIR, name, timestamp)
         os.makedirs(log_dir, exist_ok=True)        
 
+        print(f"[AGENTLOGGER] Using {name} as logger")
+
         self._base = logging.getLogger(name)
         self._base.setLevel(logging.INFO)
         self._base.addHandler(get_console_handler())

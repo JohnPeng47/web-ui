@@ -31,9 +31,9 @@ class ObservationController(Controller, Generic[ObservationType]):
         """Register all custom browser actions"""
         
         if self.observation_model:
-            @self.registry.action('Record the lab', param_model=self.observation_model)
+            @self.registry.action('Record the observation', param_model=self.observation_model)
             async def record_observation(params: ObservationType):
-                msg = f"Lab URL: {params.to_msg()}"
+                msg = f"Recorded observation: {params.to_msg()}"
                 return ActionResult(
                     extracted_content=msg, 
                     include_in_memory=True,

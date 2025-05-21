@@ -266,6 +266,7 @@ if __name__ == "__main__":
         runner.run()
     """
     spec = [
-        {"vuln_name": "path_traversal", "labs": [0,1,2,3,4,5]},
+        # {"vuln_name": "path_traversal", "labs": [0,1,2,3,4,5]},
+        {"vuln_name": "path_traversal", "labs": [0]}
     ]
     PortSwiggerLabRunner(spec, poll_interval=15, headless=False).run()

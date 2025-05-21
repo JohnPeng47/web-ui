@@ -7,6 +7,7 @@ from browser_use.browser.views import BrowserState
 from langchain_core.messages import HumanMessage, SystemMessage
 from datetime import datetime
 import importlib
+from httplib import HTTPMessage
 
 from .custom_views import CustomAgentStepInfo
 
@@ -30,16 +31,15 @@ class CustomAgentMessagePrompt(AgentMessagePrompt):
             actions: List[ActionModel],
             result: List[ActionResult], 
             include_attributes: list[str],
-            step_info: CustomAgentStepInfo,
-            pentest_analysis: str
+            http_msgs: List[HTTPMessage],
+            step_info: Optional[CustomAgentStepInfo],
     ):
         super(CustomAgentMessagePrompt, self).__init__(state=state,
                                                        result=result,
                                                        include_attributes=include_attributes,
-                                                       step_info=step_info
-                                                       )
+                                                       step_info=step_info)
         self.actions = actions
-        self.pentest_analysis = pentest_analysis
+        self.http_msgs = http_msgs
 
     def get_user_message(self, use_vision: bool = True) -> HumanMessage:
         if self.step_info:
@@ -81,8 +81,6 @@ class CustomAgentMessagePrompt(AgentMessagePrompt):
 4. Current url: {self.state.url}
 5. Available tabs:
 {self.state.tabs}
-6. Pentest Analysis:
-{self.pentest_analysis}
 7. Interactive elements:
 {elements_text}
         """
@@ -102,6 +100,10 @@ class CustomAgentMessagePrompt(AgentMessagePrompt):
                 if result.include_in_memory:
                     if result.extracted_content:
                         state_description += f"Result of previous action {i + 1}/{len(self.result)}: {result.extracted_content}\n"
+
+        state_description += "\n **HTTP Requests**\n"
+        for msg in self.http_msgs:
+            state_description += f"[Request]: {msg.request.method} {msg.request.url}\n"
 
         if self.state.screenshot and use_vision == True:
             # Format message for vision model

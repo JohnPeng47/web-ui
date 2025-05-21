@@ -1,42 +1,35 @@
 from __future__ import annotations
 
 import logging
-from typing import List, Optional, Type, Dict
+from typing import List, Type, Optional
 
 from browser_use.agent.message_manager.service import MessageManager
-from browser_use.agent.message_manager.views import MessageHistory
-from browser_use.agent.prompts import SystemPrompt, AgentMessagePrompt
-from browser_use.agent.views import ActionResult, AgentStepInfo, ActionModel
+from browser_use.agent.views import ActionResult, ActionModel
 from browser_use.browser.views import BrowserState
 from browser_use.agent.message_manager.service import MessageManagerSettings
-from browser_use.agent.views import ActionResult, AgentOutput, AgentStepInfo, MessageManagerState
-from langchain_core.language_models import BaseChatModel
-from langchain_anthropic import ChatAnthropic
-from langchain_core.language_models import BaseChatModel
+from browser_use.agent.views import ActionResult, MessageManagerState
 from langchain_core.messages import (
-    AIMessage,
-    BaseMessage,
     HumanMessage,
-    ToolMessage,
     SystemMessage
 )
-from langchain_openai import ChatOpenAI
-from ..utils.llm import DeepSeekR1ChatOpenAI
+from httplib import HTTPMessage
+
+from .custom_prompts import CustomAgentMessagePrompt
+from .custom_views import CustomAgentStepInfo
 from .custom_prompts import CustomAgentMessagePrompt
 
 logger = logging.getLogger(__name__)
 
 
 class CustomMessageManagerSettings(MessageManagerSettings):
-    agent_prompt_class: Type[AgentMessagePrompt] = AgentMessagePrompt
-
+    agent_prompt_class: Type[CustomAgentMessagePrompt] = CustomAgentMessagePrompt
 
 class CustomMessageManager(MessageManager):
     def __init__(
             self,
             task: str,
             system_message: SystemMessage,
-            settings: MessageManagerSettings = MessageManagerSettings(),
+            settings: CustomMessageManagerSettings = CustomMessageManagerSettings(),
             state: MessageManagerState = MessageManagerState(),
     ):
         super().__init__(
@@ -45,6 +38,7 @@ class CustomMessageManager(MessageManager):
             settings=settings,
             state=state
         )
+        self.settings: CustomMessageManagerSettings
 
     def _init_messages(self) -> None:
         """Initialize the message history with system message, context, task, and other initial messages"""
@@ -76,13 +70,15 @@ class CustomMessageManager(MessageManager):
             self.state.history.remove_message(min_message_len)  # always remove the oldest message
             diff = self.state.history.current_tokens - self.settings.max_input_tokens
 
+    # AFTER DINNER:
+    # - wire up HTTP_msgs everywhere
     def add_state_message(
             self,
             state: BrowserState,
-            actions: Optional[List[ActionModel]],
-            result: Optional[List[ActionResult]],
-            step_info: Optional[AgentStepInfo],
-            pentest_analysis: Optional[str],            
+            actions: List[ActionModel],
+            result: List[ActionResult],
+            http_msgs: List[HTTPMessage],
+            step_info: Optional[CustomAgentStepInfo] = None,
             use_vision=True,
     ) -> None:
         """Add browser state as human message"""
@@ -92,8 +88,8 @@ class CustomMessageManager(MessageManager):
             actions,
             result,
             self.settings.include_attributes,
+            http_msgs,
             step_info,
-            pentest_analysis
         ).get_user_message(use_vision)
         self._add_message_with_tokens(state_message)
 

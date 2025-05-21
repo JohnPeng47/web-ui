@@ -1,54 +1,34 @@
 import json
-import logging
-import pdb
 import traceback
 from typing import Any, Awaitable, Callable, Dict, Generic, List, Optional, Type, TypeVar
-from PIL import Image, ImageDraw, ImageFont
 import os
-import base64
-import io
 import asyncio
 import time
 from enum import Enum
 from pydantic import BaseModel
 from browser_use.agent.prompts import SystemPrompt, AgentMessagePrompt
 from browser_use.agent.service import Agent
-from browser_use.agent.message_manager.utils import convert_input_messages, extract_json_from_model_output, \
-    save_conversation
 from browser_use.agent.views import (
-    ActionModel,
     ActionResult,
-    AgentError,
-    AgentHistory,
     AgentHistoryList,
     AgentOutput,
-    AgentSettings,
     AgentState,
-    AgentStepInfo,
     StepMetadata,
     ToolCallingMethod,
 )
 from browser_use.agent.gif import create_history_gif
 from browser_use.browser.browser import Browser
 from browser_use.browser.context import BrowserContext
-from browser_use.browser.views import BrowserStateHistory
 from browser_use.controller.service import Controller
 from browser_use.telemetry.views import (
     AgentEndTelemetryEvent,
-    AgentRunTelemetryEvent,
     AgentStepTelemetryEvent,
 )
 from browser_use.utils import time_execution_async
 from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_core.messages import (
-    BaseMessage,
-    HumanMessage,
-    AIMessage
-)
-from browser_use.browser.views import BrowserState, BrowserStateHistory
-from browser_use.agent.prompts import PlannerPrompt
+from langchain_core.messages import BaseMessage
+from browser_use.browser.views import BrowserState
 from playwright.sync_api import Request, Response
-from dataclasses import dataclass
 
 from json_repair import repair_json
 from src.utils.agent_state import AgentState
@@ -64,13 +44,9 @@ from common.agent import BrowserActions
 from .custom_views import CustomAgentOutput
 from .custom_message_manager import CustomMessageManager, CustomMessageManagerSettings
 from .custom_views import CustomAgentStepInfo, CustomAgentState
-from .http_history import HTTPHistory, HTTPFilter, DEFAULT_HTTP_FILTER
-from .pentest_prompts import get_agent_prompt
+from .http_history import HTTPHistory
 from .logger import AgentLogger
 
-import json
-import logging
-import os
 
 Context = TypeVar('Context')
 
@@ -272,10 +248,9 @@ class CustomAgent(Agent):
             history_file: Optional[str] = None,
             agent_client: Optional[AgentClient] = None,
             app_id: Optional[str] = None,
-            close_browser: bool = False
+            close_browser: bool = False,
+            agent_name: str = ""
     ):
-        print("[CONTROLLER]", controller)
-        
         super(CustomAgent, self).__init__(
             task=task,
             llm=llm,
@@ -305,16 +280,16 @@ class CustomAgent(Agent):
             page_extraction_llm=page_extraction_llm,
             planner_llm=planner_llm,
             planner_interval=planner_interval,
-            injected_agent_state=injected_agent_state,
+            injected_agent_state=None,
             context=context,
         )
+        self.llm: LLMModel
+        self.agent_name = agent_name
         self.close_browser = close_browser
         self.curr_page = None
         self.history_file = history_file
         self.http_handler = HTTPHandler()
-        self.http_history = HTTPHistory(
-            http_filter=DEFAULT_HTTP_FILTER
-        )
+        self.http_history = HTTPHistory()
         self.agent_client = agent_client
         if self.agent_client:
             self.agent_client.set_shutdown(self.shutdown)
@@ -324,19 +299,20 @@ class CustomAgent(Agent):
         if agent_client and not app_id:
             raise ValueError("app_id must be provided when agent_client is set")
         
-        username = self.agent_client.username if self.agent_client else "default"
+        # username = self.agent_client.username if self.agent_client else "default"
+        username = self.agent_name if self.agent_name else "default"
+        
         # TODO: probably not a good idea to use none global logging solution
         self.log = AgentLogger(name=username)
         self.observations = {title.value: "" for title in AgentObservations}
 
         if browser_context:
-            pass
-            # logger.info("Registering HTTP handlers")
-            # browser_context.req_handler = self.http_handler.handle_request
-            # browser_context.res_handler = self.http_handler.handle_response
+            self.log.context.info("Registering HTTP handlers")
+            browser_context.req_handler = self.http_handler.handle_request
+            browser_context.res_handler = self.http_handler.handle_response
             # browser_context.page_handler = self.handle_page
 
-        self.state = injected_agent_state or CustomAgentState()
+        self.state = CustomAgentState()
         self.add_infos = add_infos
         self._message_manager = CustomMessageManager(
             task=task,
@@ -354,7 +330,10 @@ class CustomAgent(Agent):
             ),
             state=self.state.message_manager_state,
         )
-        
+
+        # State variables used for step()
+        self.step_http_msgs = []
+
     def handle_page(self, page):
         self.log.context.info(f"[PLAYWRIGHT] >>>>>>>>>>>")
         self.log.context.info(f"[PLAYWRIGHT] Frame {page}")
@@ -409,7 +388,7 @@ class CustomAgent(Agent):
         self.AgentOutput = CustomAgentOutput.type_with_custom_actions(self.ActionModel)
 
     def update_step_info(
-        self, model_output: CustomAgentOutput, step_info: CustomAgentStepInfo = None
+        self, model_output: CustomAgentOutput, step_info: Optional[CustomAgentStepInfo] = None
     ):
         """
         update step info
@@ -429,9 +408,8 @@ class CustomAgent(Agent):
         self.log.action.info(f"🧠 All Memory: \n{step_info.memory}")
 
     @time_execution_async("--get_next_action")
-    async def get_next_action(self, input_messages: list[BaseMessage]) -> AgentOutput:
+    async def get_next_action(self, input_messages: List[BaseMessage]) -> CustomAgentOutput:
         """Get next action from LLM based on current state"""
-
         ai_message: str = self.llm.invoke(
             input_messages, 
             model_name=MODEL_NAME, 
@@ -441,12 +419,7 @@ class CustomAgent(Agent):
             content=ai_message,
             type="user"
         )
-        self.message_manager._add_message_with_tokens(converted_msg)
-
-        # if ai_message.reasoning_content:
-        #     self.log.context.info("🤯 Start Deep Thinking: ")
-        #     self.log.context.info(ai_message.reasoning_content)
-        #     self.log.context.info("🤯 End Deep Thinking")
+        self._message_manager._add_message_with_tokens(converted_msg)
 
         ai_content = ai_message.replace("```json", "").replace("```", "")
         ai_content = repair_json(ai_content)
@@ -462,6 +435,9 @@ class CustomAgent(Agent):
             parsed.action = parsed.action[: self.settings.max_actions_per_step]
         return parsed
     
+    async def execute_ancillary_actions(self, input_messages: List[BaseMessage]):
+        pass
+
     async def _update_server(self, 
                              http_msgs: List[HTTPMessage], 
                              browser_actions: BrowserActions) -> None:
@@ -510,40 +486,40 @@ class CustomAgent(Agent):
         step_start_time = time.time() 
         tokens = 0
         browser_actions: Optional[BrowserActions] = None
-        prev_page: str = ""
-        prev_url: str = ""
         curr_page: str = ""
         curr_url: str = ""
 
         try:    
             state = await self.browser_context.get_state()
-            prev_url = (await self.browser_context.get_current_page()).url
-            prev_page = state.element_tree.clickable_elements_to_string()
             browser_actions = BrowserActions()
 
             await self._raise_if_stopped_or_paused()
-            self.message_manager.add_state_message(
+            self._message_manager.add_state_message(
                 state, 
                 self.state.last_action, 
                 self.state.last_result, 
-                step_info, 
-                "", # TODO: pentest prompt, consider removing this
+                self.step_http_msgs,
+                step_info=step_info, 
                 use_vision=self.settings.use_vision
             )
-            input_messages = self.message_manager.get_messages()
+            input_messages = self._message_manager.get_messages()
             tokens = self._message_manager.state.history.current_tokens
             try:
                 # HACK
                 for msg in input_messages:
                     msg.type = ""
-                model_output = await self.get_next_action(input_messages)                
+                model_output = await self.get_next_action(input_messages)
+
+                # TODO: execute ancillary actions
+                await self.execute_ancillary_actions(input_messages)
+                        
                 self.update_step_info(model_output, step_info)
                 self.state.n_steps += 1
                 await self._raise_if_stopped_or_paused()
 
             except Exception as e:
                 # model call failed, remove last state message from history
-                self.message_manager._remove_state_message_by_index(-1)
+                self._message_manager._remove_state_message_by_index(-1)
                 raise e
  
             result: list[ActionResult] = await self.multi_act(model_output.action)
@@ -560,19 +536,19 @@ class CustomAgent(Agent):
             prev_page = curr_page
 
             http_msgs = await self.http_handler.flush()
-            filtered_msgs = self.http_history.filter_http_messages(http_msgs)
+            self.step_http_msgs = self.http_history.filter_http_messages(http_msgs)
+
             browser_actions = BrowserActions(
                 actions=model_output.action,
                 thought=model_output.current_state.thought,
                 goal=model_output.current_state.next_goal, 
             )
-            
             if self.agent_client:
-                await self._update_server(filtered_msgs, browser_actions)
+                await self._update_server(self.step_http_msgs, browser_actions)
 
             self._update_state(result, model_output, step_info)
             self._log_response(
-                filtered_msgs,
+                self.step_http_msgs,
                 current_msg=input_messages[-1],
                 response=model_output
             )
@@ -620,7 +596,7 @@ class CustomAgent(Agent):
                     step_end_time=step_end_time,
                     input_tokens=tokens,
                 )
-                json_msgs = [await msg.to_json() for msg in filtered_msgs]
+                json_msgs = [await msg.to_json() for msg in self.step_http_msgs]
                 self._make_history_item(model_output, state, result, json_msgs, metadata=metadata)
 
     async def run(self, max_steps: int = 100) -> AgentHistoryList:

@@ -3,8 +3,9 @@ from typing import List, Dict, Callable, Optional
 from dataclasses import dataclass
 
 from logging import getLogger
-logger = getLogger(__name__)
+logger = getLogger("fluffer")
 
+# TODO: http exclude list is actually pretty important, need to get logging fixed here asap
 @dataclass
 class HTTPFilter:
     """Configuration class for HTTP message filtering"""
@@ -24,15 +25,9 @@ class HTTPFilter:
         self.include_status_codes = include_status_codes or self.DEFAULT_STATUS_CODES
         self.max_payload_size = max_payload_size
 
-DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text", "application/json"]
+DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text", "application/json", "images"]
 DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
 MAX_PAYLOAD_SIZE = 4000
-
-DEFAULT_HTTP_FILTER = HTTPFilter(
-    include_mime_types=DEFAULT_INCLUDE_MIME,
-    include_status_codes=DEFAULT_INCLUDE_STATUS,
-    max_payload_size=MAX_PAYLOAD_SIZE
-)
 
 class HTTPHistory:
     """Manages the HTTP history and filters out requests"""
@@ -67,7 +62,11 @@ class HTTPHistory:
         self, 
         http_filter: Optional[HTTPFilter] = None
     ):
-        self.http_filter = http_filter or HTTPFilter()
+        self.http_filter = http_filter or HTTPFilter(
+            include_mime_types=DEFAULT_INCLUDE_MIME,
+            include_status_codes=DEFAULT_INCLUDE_STATUS,
+            max_payload_size=MAX_PAYLOAD_SIZE
+        )
 
     def filter_http_messages(self, messages: List[HTTPMessage]) -> List[HTTPMessage]:
         """

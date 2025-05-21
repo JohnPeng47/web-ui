@@ -2,19 +2,23 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Literal, Optional, Type
 import uuid
 
-from browser_use.agent.views import AgentOutput, AgentState, ActionResult, AgentHistoryList, MessageManagerState
+from browser_use.agent.views import (
+    AgentStepInfo,
+    AgentOutput,  
+    ActionResult, 
+    AgentHistoryList, 
+    MessageManagerState
+)
 from browser_use.controller.registry.views import ActionModel
-from pydantic import BaseModel, ConfigDict, Field, create_model
-
+from pydantic import BaseModel, Field, create_model
 
 @dataclass
-class CustomAgentStepInfo:
+class CustomAgentStepInfo(AgentStepInfo):
     step_number: int
     max_steps: int
     task: str
     add_infos: str
     memory: str
-
 
 class CustomAgentBrain(BaseModel):
     """Current state of the agent"""
@@ -55,7 +59,7 @@ class CustomAgentState(BaseModel):
     agent_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     n_steps: int = 1
     consecutive_failures: int = 0
-    last_result: Optional[List['ActionResult']] = Field(default_factory=list)
+    last_result: List['ActionResult'] = Field(default_factory=list)
     history: AgentHistoryList = Field(default_factory=lambda: AgentHistoryList(history=[]))
     last_plan: Optional[str] = None
     paused: bool = False
@@ -63,5 +67,5 @@ class CustomAgentState(BaseModel):
 
     message_manager_state: MessageManagerState = Field(default_factory=MessageManagerState)
 
-    last_action: Optional[List['ActionModel']] = None
+    last_action: List['ActionModel'] = Field(default_factory=list)
     extracted_content: str = ''
