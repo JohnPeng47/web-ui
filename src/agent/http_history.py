@@ -3,9 +3,29 @@ from typing import List, Dict, Callable, Optional
 from dataclasses import dataclass
 
 from logging import getLogger
-logger = getLogger("fluffer")
+logger = getLogger(__name__)
 
-# TODO: http exclude list is actually pretty important, need to get logging fixed here asap
+BAN_LIST = [
+    # 1 Google / DoubleClick
+    "doubleclick.net/", "googleads.g.doubleclick.net/", "googleadservices.com/",
+    "/pagead/", "/instream/ad_status.js", "/td.doubleclick.net/", "/collect?tid=", "/gtag.",
+    # 2 Tag Manager / reCAPTCHA / Cast
+    "googletagmanager.com/", "google.com/recaptcha/", "recaptcha/api", "recaptcha/api2",
+    "gstatic.com/recaptcha/", "gstatic.com/cv/js/sender/",
+    # 3 YouTube
+    "youtube.com/embed/", "youtubei/v1/log_event", "youtube.com/iframe_api", "youtube.com/youtubei/",
+    # 4 Play / WAA
+    "play.google.com/log", "google.internal.waa.v1.Waa/GenerateIT", "jnn-pa.googleapis.com/$rpc",
+    # 5 LinkedIn / StackAdapt / Piwik
+    "px.ads.linkedin.com/", "linkedin.com/attribution_trigger", "stackadapt.com/", "tags.srv.stackadapt.com/",
+    "ps.piwik.pro/", "/ppms.php",
+    # 6 Optional static media
+    ".svg", ".png", ".jpg", ".ico", "/cast_sender.js",
+]
+
+def is_uninteresting(url: str) -> bool:
+    return any(part in url for part in BAN_LIST)
+
 @dataclass
 class HTTPFilter:
     """Configuration class for HTTP message filtering"""
@@ -25,9 +45,15 @@ class HTTPFilter:
         self.include_status_codes = include_status_codes or self.DEFAULT_STATUS_CODES
         self.max_payload_size = max_payload_size
 
-DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text", "application/json", "images"]
+DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text", "application/json"]
 DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
 MAX_PAYLOAD_SIZE = 4000
+
+DEFAULT_HTTP_FILTER = HTTPFilter(
+    include_mime_types=DEFAULT_INCLUDE_MIME,
+    include_status_codes=DEFAULT_INCLUDE_STATUS,
+    max_payload_size=MAX_PAYLOAD_SIZE
+)
 
 class HTTPHistory:
     """Manages the HTTP history and filters out requests"""
@@ -58,11 +84,8 @@ class HTTPHistory:
         "socket.io"
     ]
 
-    def __init__(
-        self, 
-        http_filter: Optional[HTTPFilter] = None
-    ):
-        self.http_filter = http_filter or HTTPFilter(
+    def __init__(self):
+        self.http_filter = HTTPFilter(
             include_mime_types=DEFAULT_INCLUDE_MIME,
             include_status_codes=DEFAULT_INCLUDE_STATUS,
             max_payload_size=MAX_PAYLOAD_SIZE
@@ -90,6 +113,10 @@ class HTTPHistory:
             status_code = msg.response.status
             url = msg.request.url
             
+            if is_uninteresting(msg.request.url):
+                logger.info(f"[FILTER] Excluding {url} - BANNNED!!")
+                continue
+
             # Check URL filters if any exist
             if self.URL_FILTERS and any(pattern in url for pattern in self.URL_FILTERS):
                 logger.info(f"[FILTER] Excluding {url} - URL matched URL_FILTERS pattern")

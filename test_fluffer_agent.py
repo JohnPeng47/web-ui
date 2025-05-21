@@ -58,14 +58,17 @@ async def portswigger_labstart_agent(lab_url, instructions):
             "context_cfg": BrowserContextConfig(no_viewport=False),
         }
 
+        # TODO:
+        # problem with http_history not logging requests that occur on first page load
         AGENT_PROMPT = """
 Navigate to the following URL:
 {url}
+Upon first navigating to the page, refresh, before continuing with the rest of the steps
 
 Your goal is to identify the location of the vulnerability as described here:
 {description}
-
-Once you have found vulnerability *and* triggered the HTTP request associated with it, then *EXIT*
+You are looking a HTTP request that triggers the vulnerability
+Once you have identified this request, then *EXIT*
 """.format(url=lab_url, description=instructions)
         
         agent_config = [
@@ -105,6 +108,6 @@ if __name__ == "__main__":
 
     LAB_URL = "https://0a8b003703dcd08282b7a10d00ac00f8.web-security-academy.net"
     INSTRUCTIONS = """
-Lab: File path traversal, traversal sequences stripped non-recursively   This lab contains a path traversal vulnerability in the display of product images. The application strips path traversal sequences from the user-supplied filename before using it. To solve the lab, retrieve the contents of the /etc/passwd file.    ACCESS THE LAB   <p class=\"no-script-lab-warning\">Launching labs may take some time, please hold on while we build your environment.</p>
+This lab contains a path traversal vulnerability in the display of product images. 
 """
     asyncio.run(portswigger_labstart_agent(LAB_URL, INSTRUCTIONS))

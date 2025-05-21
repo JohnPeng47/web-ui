@@ -1,11 +1,12 @@
 import json
 import traceback
-from typing import Any, Awaitable, Callable, Dict, Generic, List, Optional, Type, TypeVar
+from typing import Any, Awaitable, Callable, Dict, Generic, List, Optional, Type, TypeVar, Set, Deque
 import os
 import asyncio
 import time
 from enum import Enum
 from pydantic import BaseModel
+from collections import deque, defaultdict
 from browser_use.agent.prompts import SystemPrompt, AgentMessagePrompt
 from browser_use.agent.service import Agent
 from browser_use.agent.views import (
@@ -38,24 +39,28 @@ from johnllm import LLMModel, LMP
 from httplib import HTTPRequest, HTTPResponse, HTTPMessage
 
 from playwright._impl._errors import TargetClosedError
+from logging import getLogger
+from logger import init_root_logger
 
 # from .state import CustomAgentOutput
 from common.agent import BrowserActions
 from .custom_views import CustomAgentOutput
 from .custom_message_manager import CustomMessageManager, CustomMessageManagerSettings
 from .custom_views import CustomAgentStepInfo, CustomAgentState
-from .http_history import HTTPHistory
+from .http_history import HTTPHistory, BAN_LIST
 from .logger import AgentLogger
 
+logger = getLogger(__name__)
 
 Context = TypeVar('Context')
 
 DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text"]
 DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
 MAX_PAYLOAD_SIZE = 4000
-DEFAULT_PER_REQUEST_TIMEOUT = 5.0     # seconds to wait for *each* unmatched request
+DEFAULT_FLUSH_TIMEOUT       = 5.0    # seconds to wait for all requests to be flushed
+DEFAULT_PER_REQUEST_TIMEOUT = 2.0     # seconds to wait for *each* unmatched request
 DEFAULT_SETTLE_TIMEOUT      = 1.0     # seconds of network “silence” after the *last* response
-POLL_INTERVAL               = 0.05    # how often we poll internal state
+POLL_INTERVAL               = 0.5    # how often we poll internal state
 
 MODEL_NAME = "gpt-4.1"
 
@@ -86,113 +91,151 @@ Now answer, has the page changed?
     response_format = NewPage
 
 # TODO: LOGGING QUESTION:
+# TODO: really need to simplify logic here
 # how to handle logging in functions not defined as part of class
 class HTTPHandler:
-    def __init__(self):
-        self._messages = []
-        # track messages at each agent step
+    def __init__(
+        self,
+        *,
+        banlist: List[str] | None = None,
+    ):
+        self._messages: List[HTTPMessage]      = []
         self._step_messages: List[HTTPMessage] = []
         self._request_queue: List[HTTPRequest] = []
-        
+        self._req_start: Dict[HTTPRequest, float] = {}
+
+        # URL filter  ───────────────────────────────────────────────────────
+        # A simple substring-based ban list imported from a shared module.
+        self._ban_substrings: List[str] = banlist or BAN_LIST
+        self._ban_list: Set[str]        = set()   # concrete URLs flagged at run-time
+
+    # ─────────────────────────────────────────────────────────────────────
+    # Helper
+    # ─────────────────────────────────────────────────────────────────────
+    def _is_banned(self, url: str) -> bool:
+        """Return True if the URL matches any ban-substring or was added at runtime."""
+        if url in self._ban_list:
+            return True
+        for s in self._ban_substrings:
+            if s in url:
+                self._ban_list.add(url)      # cache for fast positive lookup next time
+                return True
+        return False
+
+    # ─────────────────────────────────────────────────────────────────────
+    # Browser-callback handlers
+    # ─────────────────────────────────────────────────────────────────────
     async def handle_request(self, request: Request):
         try:
             http_request = HTTPRequest.from_pw(request)
+            url          = http_request.url
+
+            if self._is_banned(url):
+                logger.debug(f"Dropped banned URL: {url}")
+                return
+
             self._request_queue.append(http_request)
+            self._req_start[http_request] = asyncio.get_running_loop().time()
         except Exception as e:
-            print("Error handling request: ", e)
+            logger.exception("Error handling request: %s", e)
 
     async def handle_response(self, response: Response):
         try:
             if not response:
                 return
 
-            req_match = HTTPRequest.from_pw(response.request)
-            http_response = HTTPResponse.from_pw(response)
+            req_match      = HTTPRequest.from_pw(response.request)
+            http_response  = HTTPResponse.from_pw(response)
+
             matching_request = next(
-                (req for req in self._request_queue if req.url == response.request.url and req.method == response.request.method),
+                (req for req in self._request_queue
+                 if req.url == response.request.url and req.method == response.request.method),
                 None
             )
             if matching_request:
                 self._request_queue.remove(matching_request)
+                self._req_start.pop(matching_request, None)
 
             self._step_messages.append(
                 HTTPMessage(request=req_match, response=http_response)
             )
         except Exception as e:
-            print("Error handling response: ", e)
+            logger.exception("Error handling response: %s", e)
 
+    # ─────────────────────────────────────────────────────────────────────
+    # Flush logic with hard timeout
+    # ─────────────────────────────────────────────────────────────────────
     async def flush(
         self,
         *,
         per_request_timeout: float = DEFAULT_PER_REQUEST_TIMEOUT,
-        settle_timeout: float      = DEFAULT_SETTLE_TIMEOUT,
+        settle_timeout:      float = DEFAULT_SETTLE_TIMEOUT,
+        flush_timeout:       float = DEFAULT_FLUSH_TIMEOUT,
     ) -> List["HTTPMessage"]:
         """
-        Waits until either
-          • every outstanding request has been answered **or**
-          • `per_request_timeout` elapsed for that request,
-        *and* the network has been quiet for `settle_timeout` seconds after the
-        very last response captured.
-
-        Returns the list of (request, response) pairs collected *since the last
-        flush*, exactly like the old synchronous version.
+        Block until either:
+          • all outstanding requests are answered / timed out and the network
+            has been quiet for `settle_timeout` seconds, **or**
+          • `flush_timeout` seconds have elapsed in total.
         """
-        loop = asyncio.get_running_loop()
+        logger.info("Starting HTTP flush")
+        loop        = asyncio.get_running_loop()
+        start_time  = loop.time()
 
-        # ────────────────────────────────────────────────────────────────────
-        # Book‑keeping helpers
-        # ────────────────────────────────────────────────────────────────────
-        # Timestamp when we first saw each unmatched request
-        req_start: Dict["HTTPRequest", float] = {
-            req: loop.time() for req in self._request_queue
-        }
-
-        # Index of the last response we have observed; used for the “quiet”
-        # timer.  We *only* reset the quiet timer when a new response arrives.
         last_seen_response_idx = len(self._step_messages)
-        last_response_time     = loop.time()              # seed with *now*
+        last_response_time     = start_time
 
-        # ────────────────────────────────────────────────────────────────────
-        # Main wait‑loop
-        # ────────────────────────────────────────────────────────────────────
         while True:
             await asyncio.sleep(POLL_INTERVAL)
             now = loop.time()
 
-            # 1️⃣  Discard requests that have exceeded the per‑request timeout
-            for req in list(self._request_queue):
-                if now - req_start.get(req, now) >= per_request_timeout:
-                    # promote “timed‑out” requests to unmatched messages
-                    self._messages.append(HTTPMessage(request=req, response=None))
-                    self._request_queue.remove(req)
-
-            # 2️⃣  Check if new responses came in since last iteration
-            if len(self._step_messages) != last_seen_response_idx:
-                last_seen_response_idx = len(self._step_messages)
-                last_response_time     = now          # reset quiet timer
-
-            # 3️⃣  Exit conditions
-            queue_empty     = not self._request_queue
-            quiet_enough    = (now - last_response_time) >= settle_timeout
-
-            if queue_empty and quiet_enough:
+            # 0️⃣  Hard timeout check
+            if now - start_time >= flush_timeout:
+                logger.warning(
+                    "Flush hit hard timeout of %.1f s; returning immediately", flush_timeout
+                )
                 break
 
-        # ────────────────────────────────────────────────────────────────────
-        # Finalize flush – exactly like the original version
-        # ────────────────────────────────────────────────────────────────────
-        # any *still* unmatched requests → turn them into messages
+            # 1️⃣  Per-request time-outs
+            for req in list(self._request_queue):
+                started_at = self._req_start.get(req, now)
+                if now - started_at >= per_request_timeout:
+                    logger.info("Request timed out: %s", req.url)
+                    self._messages.append(HTTPMessage(request=req, response=None))
+                    self._request_queue.remove(req)
+                    self._req_start.pop(req, None)
+                else:
+                    logger.debug("[REQUEST STAY] %s stay: %.2f s", req.url, now - started_at)
+
+            # 2️⃣  Quiet-period tracking
+            if len(self._step_messages) != last_seen_response_idx:
+                last_seen_response_idx = len(self._step_messages)
+                last_response_time     = now
+
+            # 3️⃣  Exit conditions
+            queue_empty  = not self._request_queue
+            quiet_enough = (now - last_response_time) >= settle_timeout
+            if queue_empty and quiet_enough:
+                logger.info("Flush complete")
+                break
+
+        # ────────────────────────────────────────────────────────────────
+        # Finalise
+        # ────────────────────────────────────────────────────────────────
         unmatched = [
             HTTPMessage(request=req, response=None) for req in self._request_queue
         ]
+        self._req_start.clear()
 
-        session_msgs         = self._step_messages
-        self._request_queue  = []
-        self._step_messages  = []
+        session_msgs        = self._step_messages
+        self._request_queue = []
+        self._step_messages = []
         self._messages.extend(unmatched)
         self._messages.extend(session_msgs)
 
+        logger.info("Returning %d messages from flush", len(session_msgs))
         return session_msgs
+
 
 class CustomAgent(Agent):
     def __init__(
@@ -303,11 +346,11 @@ class CustomAgent(Agent):
         username = self.agent_name if self.agent_name else "default"
         
         # TODO: probably not a good idea to use none global logging solution
-        self.log = AgentLogger(name=username)
+        init_root_logger(username)
         self.observations = {title.value: "" for title in AgentObservations}
 
         if browser_context:
-            self.log.context.info("Registering HTTP handlers")
+            logger.info("Registering HTTP handlers")
             browser_context.req_handler = self.http_handler.handle_request
             browser_context.res_handler = self.http_handler.handle_response
             # browser_context.page_handler = self.handle_page
@@ -335,8 +378,8 @@ class CustomAgent(Agent):
         self.step_http_msgs = []
 
     def handle_page(self, page):
-        self.log.context.info(f"[PLAYWRIGHT] >>>>>>>>>>>")
-        self.log.context.info(f"[PLAYWRIGHT] Frame {page}")
+        logger.info(f"[PLAYWRIGHT] >>>>>>>>>>>")
+        logger.info(f"[PLAYWRIGHT] Frame {page}")
         self.curr_page = page
 
     def _is_new_page(self, old_page: str, new_page: str) -> bool:
@@ -352,7 +395,7 @@ class CustomAgent(Agent):
             )
             return is_new_page.is_new_page
         except Exception as e:
-            self.log.context.error(f"Error in _is_new_page: {e}")
+            logger.error(f"Error in _is_new_page: {e}")
             return False
         
     def _log_response(self, 
@@ -367,18 +410,18 @@ class CustomAgent(Agent):
         else:
             emoji = "🤷"
 
-        self.log.action.info(f"{emoji} Eval: {response.current_state.evaluation_previous_goal}")
-        self.log.action.info(f"🧠 New Memory: {response.current_state.important_contents}")
-        self.log.action.info(f"🤔 Thought: {response.current_state.thought}")
-        self.log.action.info(f"🎯 Next Goal: {response.current_state.next_goal}")
+        logger.info(f"{emoji} Eval: {response.current_state.evaluation_previous_goal}")
+        logger.info(f"🧠 New Memory: {response.current_state.important_contents}")
+        logger.info(f"🤔 Thought: {response.current_state.thought}")
+        logger.info(f"🎯 Next Goal: {response.current_state.next_goal}")
         for i, action in enumerate(response.action):
-            self.log.action.info(
+            logger.info(
                 f"🛠️  Action {i + 1}/{len(response.action)}: {action.model_dump_json(exclude_unset=True)}"
             )
-        self.log.context.info(f"[Prev Messages]: {current_msg.content}")
-        self.log.context.info(f"Captured {len(http_msgs)} HTTP Messages")
+        logger.info(f"[Prev Messages]: {current_msg.content}")
+        logger.info(f"Captured {len(http_msgs)} HTTP Messages")
         for msg in http_msgs:
-            self.log.context.info(f"[Agent] {msg.request.url}")
+            logger.info(f"[Agent] {msg.request.url}")
 
     def _setup_action_models(self) -> None:
         """Setup dynamic action models from controller's registry"""
@@ -405,7 +448,7 @@ class CustomAgent(Agent):
         ):
             step_info.memory += important_contents + "\n"
 
-        self.log.action.info(f"🧠 All Memory: \n{step_info.memory}")
+        logger.info(f"🧠 All Memory: \n{step_info.memory}")
 
     @time_execution_async("--get_next_action")
     async def get_next_action(self, input_messages: List[BaseMessage]) -> CustomAgentOutput:
@@ -427,7 +470,7 @@ class CustomAgent(Agent):
         parsed: AgentOutput = self.AgentOutput(**parsed_json)
 
         if parsed is None:
-            self.log.context.debug(ai_message.content)
+            logger.debug(ai_message.content)
             raise ValueError('Could not parse response.')
 
         # cut the number of actions to max_actions_per_step if needed
@@ -472,14 +515,14 @@ class CustomAgent(Agent):
             if not self.state.extracted_content:
                 self.state.extracted_content = step_info.memory
             result[-1].extracted_content = self.state.extracted_content
-            self.log.action.info(f"📄 Result: {result[-1].extracted_content}")
+            logger.info(f"📄 Result: {result[-1].extracted_content}")
 
         self.state.consecutive_failures = 0
 
     @time_execution_async("--step")
     async def step(self, step_info: Optional[CustomAgentStepInfo] = None) -> None:
         """Execute one step of the task"""
-        self.log.action.info(f"Step {self.state.n_steps}")
+        logger.info(f"Step {self.state.n_steps}")
         state = None
         model_output = None
         result: list[ActionResult] = []
@@ -511,12 +554,13 @@ class CustomAgent(Agent):
                 model_output = await self.get_next_action(input_messages)
 
                 # TODO: execute ancillary actions
-                await self.execute_ancillary_actions(input_messages)
+                # await self.execute_ancillary_actions(input_messages)
                         
                 self.update_step_info(model_output, step_info)
                 self.state.n_steps += 1
                 await self._raise_if_stopped_or_paused()
 
+                logger.info("hello1")
             except Exception as e:
                 # model call failed, remove last state message from history
                 self._message_manager._remove_state_message_by_index(-1)
@@ -530,14 +574,14 @@ class CustomAgent(Agent):
             # is_new_page = self._is_new_page(prev_page, curr_page)
 
             curr_url = (await self.browser_context.get_current_page()).url
-            # self.log.context.info(f"Curr_url:{curr_url}, prev_url: {prev_url}, is_new_page: {is_new_page}")
-            
+            # logger.info(f"Curr_url:{curr_url}, prev_url: {prev_url}, is_new_page: {is_new_page}")
+            logger.info("hello1")
+
             prev_url = curr_url
             prev_page = curr_page
 
             http_msgs = await self.http_handler.flush()
             self.step_http_msgs = self.http_history.filter_http_messages(http_msgs)
-
             browser_actions = BrowserActions(
                 actions=model_output.action,
                 thought=model_output.current_state.thought,
@@ -545,6 +589,8 @@ class CustomAgent(Agent):
             )
             if self.agent_client:
                 await self._update_server(self.step_http_msgs, browser_actions)
+            
+            logger.info("hello1")
 
             self._update_state(result, model_output, step_info)
             self._log_response(
@@ -554,7 +600,7 @@ class CustomAgent(Agent):
             )
 
         except InterruptedError:
-            self.log.context.debug("Agent paused")
+            logger.debug("Agent paused")
             self.state.last_result = [
                 ActionResult(
                     error="The agent was paused - now continuing actions might need to be repeated",
@@ -568,8 +614,8 @@ class CustomAgent(Agent):
         #     self.state.last_result = result
 
         except Exception as e:
-            self.log.context.error(f"Error in step {self.state.n_steps}: {e}")
-            self.log.context.error(traceback.format_exc())
+            logger.error(f"Error in step {self.state.n_steps}: {e}")
+            logger.error(traceback.format_exc())
             step_info.step_number = step_info.max_steps
 
             raise e
@@ -620,12 +666,12 @@ class CustomAgent(Agent):
             for step in range(max_steps):
                 # Check if we should stop due to too many failures
                 if self.state.consecutive_failures >= self.settings.max_failures:
-                    self.log.context.error(f'❌ Stopping due to {self.settings.max_failures} consecutive failures')
+                    logger.error(f'❌ Stopping due to {self.settings.max_failures} consecutive failures')
                     break
 
                 # Check control flags before each step
                 if self.state.stopped:
-                    self.log.context.info('Agent stopped')
+                    logger.info('Agent stopped')
                     break
 
                 while self.state.paused:
@@ -643,7 +689,7 @@ class CustomAgent(Agent):
                     await self.log_completion()
                     break
             else:
-                self.log.context.info("❌ Failed to complete task in maximum steps")
+                logger.info("❌ Failed to complete task in maximum steps")
                 if not self.state.extracted_content:
                     self.state.history.history[-1].result[-1].extracted_content = step_info.memory
                 else:
@@ -670,11 +716,11 @@ class CustomAgent(Agent):
 
             try:
                 if not self.injected_browser_context or self.close_browser:
-                    self.log.context.info("Closing browser context")
+                    logger.info("Closing browser context")
                     await self.browser_context.close()
 
                 if (not self.injected_browser and self.browser) or (self.close_browser and self.browser):
-                    self.log.context.info("Closing browser")
+                    logger.info("Closing browser")
                     await self.browser.close()
             except TargetClosedError as e:
                 pass
@@ -686,24 +732,23 @@ class CustomAgent(Agent):
 
                 create_history_gif(task=self.task, history=self.state.history, output_path=output_path)
             
-            self.log.context.info("Graceful exit!")
-            self.log.close()
+            logger.info("Graceful exit!")
 
     async def shutdown(self, reason: str = "Premature shutdown requested") -> None:
         """Shuts down the agent prematurely and performs cleanup."""
         # Check if already stopped to prevent duplicate shutdown calls
         if hasattr(self.state, 'stopped') and self.state.stopped:
-            self.log.context.warning("Shutdown already in progress or completed.")
+            logger.warning("Shutdown already in progress or completed.")
             return
 
-        self.log.context.info(f"Initiating premature shutdown: {reason}")
+        logger.info(f"Initiating premature shutdown: {reason}")
         # Ensure state has 'stopped' attribute before setting
         if hasattr(self.state, 'stopped'):
              self.state.stopped = True
         else:
              # If AgentState doesn't have stopped, we might need another way
              # to signal termination or handle this case.
-             self.log.context.warning("Agent state does not have 'stopped' attribute. Cannot signal stop.")
+             logger.warning("Agent state does not have 'stopped' attribute. Cannot signal stop.")
 
 
         # Perform cleanup similar to the finally block in run()
@@ -734,25 +779,25 @@ class CustomAgent(Agent):
             if self.history_file and history:
                 try:
                     history.save_to_file(self.history_file)
-                    self.log.context.info(f"Saved agent history to {self.history_file} during shutdown.")
+                    logger.info(f"Saved agent history to {self.history_file} during shutdown.")
                 except Exception as e:
-                    self.log.context.error(f"Failed to save history during shutdown: {e}")
+                    logger.error(f"Failed to save history during shutdown: {e}")
 
             # Close Browser Context
             if not self.injected_browser_context and self.browser_context:
                 try:
                     await self.browser_context.close()
-                    self.log.context.info("Closed browser context during shutdown.")
+                    logger.info("Closed browser context during shutdown.")
                 except Exception as e:
-                    self.log.context.error(f"Error closing browser context during shutdown: {e}")
+                    logger.error(f"Error closing browser context during shutdown: {e}")
 
             # Close Browser
             if self.browser:
                 try:
                     await self.browser.close()
-                    self.log.context.info("Closed browser during shutdown.")
+                    logger.info("Closed browser during shutdown.")
                 except Exception as e:
-                    self.log.context.error(f"Error closing browser during shutdown: {e}")
+                    logger.error(f"Error closing browser during shutdown: {e}")
 
             # Generate GIF
             if self.settings.generate_gif and history:
@@ -763,15 +808,15 @@ class CustomAgent(Agent):
                         base, ext = os.path.splitext(self.settings.generate_gif)
                         output_path = f"{base}_shutdown{ext}"
 
-                    self.log.context.info(f"Generating shutdown GIF at {output_path}")
+                    logger.info(f"Generating shutdown GIF at {output_path}")
                     create_history_gif(task=f"{self.task} (Shutdown)", history=history, output_path=output_path)
                 except Exception as e:
-                     self.log.context.error(f"Failed to generate GIF during shutdown: {e}")
+                     logger.error(f"Failed to generate GIF during shutdown: {e}")
             
             self.log.close()
         except Exception as e:
             # Catch errors during the shutdown cleanup process itself
-            self.log.context.error(f"Error during agent shutdown cleanup: {e}")
-            self.log.context.error(traceback.format_exc())
+            logger.error(f"Error during agent shutdown cleanup: {e}")
+            logger.error(traceback.format_exc())
         finally:
-             self.log.context.info("Agent shutdown process complete.")
+             logger.info("Agent shutdown process complete.")
