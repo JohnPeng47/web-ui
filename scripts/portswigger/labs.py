@@ -8,3 +8,7 @@ GENERIC_SUBSET = [
 SQLI_SUBSET = [
     {"vuln_name": "sql_injection", "labs": [2,5,6,17]},
 ]
+
+SQLI_SUBSET_NO_STATE = [
+    {"vuln_name": "sql_injection", "labs": [2,3,4,5,6,8,9]}   
+]

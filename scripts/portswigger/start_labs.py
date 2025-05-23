@@ -266,7 +266,7 @@ Once this is done, you can exit
                 history_str,
             )
             return match.group(0) if match else None
-
+    
         except Exception:
             logger.error(">>>> Error during runnning the agent: ")
             traceback.print_exc(file=sys.stderr)
@@ -277,6 +277,6 @@ Once this is done, you can exit
             await browser.close()
 
 if __name__ == "__main__":
-    from .labs import SQLI_SUBSET
+    from .labs import SQLI_SUBSET_NO_STATE
 
-    PortSwiggerLabRunner(SQLI_SUBSET, poll_interval=15, headless=False).run()
+    PortSwiggerLabRunner(SQLI_SUBSET_NO_STATE, poll_interval=15, headless=False).run()
