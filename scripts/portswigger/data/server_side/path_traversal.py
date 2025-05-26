@@ -1,6 +1,7 @@
 PATH_TRAVERSAL_LABS = {
     "labs": [
         {
+            "index": 0,
             "name": "File path traversal, simple case",
             "link": "/web-security/file-path-traversal/lab-simple",
             "difficulty": "APPRENTICE",
@@ -14,6 +15,7 @@ Find a payload that exfiltrates /etc/passwd or similar file
             "solution": "Modify the filename parameter, giving it the value: ../../../etc/passwd Observe that the response contains the contents of the /etc/passwd file."
         },
         {
+            "index": 1,
             "name": "File path traversal, traversal sequences blocked with absolute path bypass",
             "link": "/web-security/file-path-traversal/lab-absolute-path-bypass", 
             "difficulty": "PRACTITIONER",
@@ -27,6 +29,7 @@ Find a payload that exfiltrates /etc/passwd or similar file
             "solution": "Modify the filename parameter, giving it the value /etc/passwd .  Observe that the response contains the contents of the /etc/passwd file."
         },
         {
+            "index": 2,
             "name": "File path traversal, traversal sequences stripped non-recursively",
             "link": "/web-security/file-path-traversal/lab-sequences-stripped-non-recursively",
             "difficulty": "PRACTITIONER", 
@@ -40,6 +43,7 @@ Find a payload that exfiltrates /etc/passwd or similar file
             "solution": "Modify the filename parameter, giving it the value:  ....//....//....//etc/passwd   Observe that the response contains the contents of the /etc/passwd file."
         },
         {
+            "index": 3,
             "name": "File path traversal, traversal sequences stripped with superfluous URL-decode",
             "link": "/web-security/file-path-traversal/lab-superfluous-url-decode",
             "difficulty": "PRACTITIONER",
@@ -53,6 +57,7 @@ Find a payload that exfiltrates /etc/passwd or similar file
             "solution": "Modify the filename parameter, giving it the value: ..%252f..%252f..%252fetc/passwd. Observe that the response contains the contents of the /etc/passwd file."
         },
         {
+            "index": 4,
             "name": "File path traversal, validation of start of path",
             "link": "/web-security/file-path-traversal/lab-validate-start-of-path",
             "difficulty": "PRACTITIONER",
@@ -66,6 +71,7 @@ Find a payload that exfiltrates /etc/passwd or similar file
             "solution": "Modify the filename parameter, giving it the value:  /var/www/images/../../../etc/passwd   Observe that the response contains the contents of the /etc/passwd file."
         },
         {
+            "index": 5,
             "name": "File path traversal, validation of file extension with null byte bypass",
             "link": "/web-security/file-path-traversal/lab-validate-file-extension-null-byte-bypass",
             "difficulty": "PRACTITIONER", 

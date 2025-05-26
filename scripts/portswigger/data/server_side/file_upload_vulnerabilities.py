@@ -1,5 +1,6 @@
 FILE_UPLOAD_VULNERABILITIES = [
     {
+        "index": 0,
         "name": "Remote code execution via web shell upload",
         "link": "/web-security/file-upload/lab-file-upload-remote-code-execution-via-web-shell-upload",
         "difficulty": "APPRENTICE",
@@ -8,6 +9,7 @@ FILE_UPLOAD_VULNERABILITIES = [
         "solution": "On your system, create a file called exploit.php, containing a script for fetching the contents of Carlos's secret file. For example: <?php echo file_get_contents('/home/carlos/secret'); ?> Use the avatar upload function to upload your malicious PHP file. The message in the response confirms that this was uploaded successfully. In Burp Repeater, change the path of the request to point to your PHP file: GET /files/avatars/exploit.php HTTP/1.1 Send the request. Notice that the server has executed your script and returned its output (Carlos's secret) in the response. Submit the secret to solve the lab."
     },
     {
+        "index": 1,
         "name": "Web shell upload via Content-Type restriction bypass",
         "link": "/web-security/file-upload/lab-file-upload-web-shell-upload-via-content-type-restriction-bypass",
         "difficulty": "APPRENTICE",
@@ -16,6 +18,7 @@ FILE_UPLOAD_VULNERABILITIES = [
         "solution": "In Burp, go back to the proxy history and find the POST /my-account/avatar request that was used to submit the file upload. Send this to Burp Repeater.  In Burp Repeater, go to the tab containing the POST /my-account/avatar request. In the part of the message body related to your file, change the specified Content-Type to image/jpeg .  Send the request. Observe that the response indicates that your file was successfully uploaded.  Switch to the other Repeater tab containing the GET /files/avatars/<YOUR-IMAGE> request. In the path, replace the name of your image file with exploit.php and send the request. Observe that Carlos's secret was returned in the response.  Submit the secret to solve the lab."
     },
     {
+        "index": 2,
         "name": "Web shell upload via path traversal",
         "link": "/web-security/file-upload/lab-file-upload-web-shell-upload-via-path-traversal",
         "difficulty": "PRACTITIONER",
@@ -24,6 +27,7 @@ FILE_UPLOAD_VULNERABILITIES = [
         "solution": "On your system, create a file called exploit.php, containing a script for fetching the contents of Carlos's secret. For example: <?php echo file_get_contents('/home/carlos/secret'); ?> Upload this script as your avatar. Notice that the website doesn't seem to prevent you from uploading PHP files. In Burp Repeater, go to the tab containing the GET /files/avatars/<YOUR-IMAGE> request. In the path, replace the name of your image file with exploit.php and send the request. Observe that instead of executing the script and returning the output, the server has just returned the contents of the PHP file as plain text. In Burp's proxy history, find the POST /my-account/avatar request that was used to submit the file upload and send it to Burp Repeater. In Burp Repeater, go to the tab containing the POST /my-account/avatar request and find the part of the request body that relates to your PHP file. In the Content-Disposition header, change the filename to include a directory traversal sequence: Content-Disposition: form-data; name=\"avatar\"; filename=\"../exploit.php\" Send the request. Notice that the response says The file avatars/exploit.php has been uploaded. This suggests that the server is stripping the directory traversal sequence from the file name. Obfuscate the directory traversal sequence by URL encoding the forward slash ( / ) character, resulting in: filename=\"..%2fexploit.php\" Send the request and observe that the message now says The file avatars/../exploit.php has been uploaded. This indicates that the file name is being URL decoded by the server. In the browser, go back to your account page. In Burp's proxy history, find the GET /files/avatars/..%2fexploit.php request. Observe that Carlos's secret was returned in the response. This indicates that the file was uploaded to a higher directory in the filesystem hierarchy ( /files ), and subsequently executed by the server. Note that this means you can also request this file using GET /files/exploit.php. Submit the secret to solve the lab."
     },
     {
+        "index": 3,
         "name": "Web shell upload via extension blacklist bypass",
         "link": "/web-security/file-upload/lab-file-upload-web-shell-upload-via-extension-blacklist-bypass",
         "difficulty": "PRACTITIONER",
@@ -32,6 +36,7 @@ FILE_UPLOAD_VULNERABILITIES = [
         "solution": "Solution   Log in and upload an image as your avatar, then go back to your account page.  In Burp, go to Proxy > HTTP history and notice that your image was fetched using a GET request to /files/avatars/<YOUR-IMAGE> . Send this request to Burp Repeater.   On your system, create a file called exploit.php containing a script for fetching the contents of Carlos's secret. For example:  <?php echo file_get_contents('/home/carlos/secret'); ?>   Attempt to upload this script as your avatar. The response indicates that you are not allowed to upload files with a .php extension.  In Burp's proxy history, find the POST /my-account/avatar request that was used to submit the file upload. In the response, notice that the headers reveal that you're talking to an Apache server. Send this request to Burp Repeater.  In Burp Repeater, go to the tab for the POST /my-account/avatar request and find the part of the body that relates to your PHP file. Make the following changes:  Change the value of the filename parameter to .htaccess .  Change the value of the Content-Type header to text/plain .   Replace the contents of the file (your PHP payload) with the following Apache directive:  AddType application/x-httpd-php .l33t  This maps an arbitrary extension ( .l33t ) to the executable MIME type application/x-httpd-php . As the server uses the mod_php module, it knows how to handle this already.     Send the request and observe that the file was successfully uploaded.  Use the back arrow in Burp Repeater to return to the original request for uploading your PHP exploit.  Change the value of the filename parameter from exploit.php to exploit.l33t . Send the request again and notice that the file was uploaded successfully.  Switch to the other Repeater tab containing the GET /files/avatars/<YOUR-IMAGE> request. In the path, replace the name of your image file with exploit.l33t and send the request. Observe that Carlos's secret was returned in the response. Thanks to our malicious .htaccess file, the .l33t file was executed as if it were a .php file.  Submit the secret to solve the lab."
     },
     {
+        "index": 4,
         "name": "Web shell upload via obfuscated file extension",
         "link": "/web-security/file-upload/lab-file-upload-web-shell-upload-via-obfuscated-file-extension",
         "difficulty": "PRACTITIONER",
@@ -40,6 +45,7 @@ FILE_UPLOAD_VULNERABILITIES = [
         "solution": "In Burp Repeater, go to the tab for the POST /my-account/avatar request and find the part of the body that relates to your PHP file. In the Content-Disposition header, change the value of the filename parameter to include a URL encoded null byte, followed by the .jpg extension:  filename=\"exploit.php%00.jpg\"   Send the request and observe that the file was successfully uploaded. Notice that the message refers to the file as exploit.php , suggesting that the null byte and .jpg extension have been stripped.  Switch to the other Repeater tab containing the GET /files/avatars/<YOUR-IMAGE> request. In the path, replace the name of your image file with exploit.php and send the request. Observe that Carlos's secret was returned in the response.  Submit the secret to solve the lab."
     },
     {
+        "index": 5,
         "name": "Remote code execution via polyglot web shell upload",
         "link": "/web-security/file-upload/lab-file-upload-remote-code-execution-via-polyglot-web-shell-upload",
         "difficulty": "PRACTITIONER",
@@ -48,6 +54,7 @@ FILE_UPLOAD_VULNERABILITIES = [
         "solution": "Create a polyglot PHP/JPG file that is fundamentally a normal image, but contains your PHP payload in its metadata. A simple way of doing this is to download and run ExifTool from the command line as follows: exiftool -Comment=\"<?php echo 'START ' . file_get_contents('/home/carlos/secret') . ' END'; ?>\" <YOUR-INPUT-IMAGE>.jpg -o polyglot.php. This adds your PHP payload to the image's Comment field, then saves the image with a .php extension. In the browser, upload the polyglot image as your avatar, then go back to your account page. In Burp's proxy history, find the GET /files/avatars/polyglot.php request. Use the message editor's search feature to find the START string somewhere within the binary image data in the response. Between this and the END string, you should see Carlos's secret, for example: START 2B2tlPyJQfJDynyKME5D02Cw0ouydMpZ END. Submit the secret to solve the lab."
     },
     {
+        "index": 6,
         "name": "Web shell upload via race condition",
         "link": "/web-security/file-upload/lab-file-upload-web-shell-upload-via-race-condition",
         "difficulty": "EXPERT",
