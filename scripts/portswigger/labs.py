@@ -12,3 +12,7 @@ SQLI_SUBSET = [
 SQLI_SUBSET_NO_STATE = [
     {"vuln_name": "sql_injection", "labs": [2,3,4,5,6,8,9]}   
 ]
+
+SQLI_TEST = [
+    {"vuln_name": "sql_injection", "labs": [8]}   
+]

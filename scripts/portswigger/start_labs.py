@@ -278,5 +278,6 @@ Once this is done, you can exit
 
 if __name__ == "__main__":
     from .labs import SQLI_SUBSET_NO_STATE
+    from .labs import SQLI_TEST
 
-    PortSwiggerLabRunner(SQLI_SUBSET_NO_STATE, poll_interval=15, headless=False).run()
+    PortSwiggerLabRunner(SQLI_TEST, poll_interval=15, headless=False).run()
