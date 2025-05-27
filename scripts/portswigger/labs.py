@@ -1,8 +1,8 @@
 GENERIC_SUBSET = [
-    # {"vuln_name": "path_traversal", "labs": [0,1,2,3,4,5]},
-    {"vuln_name": "sql_injection", "labs": [2,5,6,17]},
-    {"vuln_name": "path_traversal", "labs": [2,3]},
-    {"vuln_name": "server_side_request_forgery", "labs": [1]}
+    {"vuln_name": "sql_injection", "labs": [2,5,8]},
+    {"vuln_name": "server_side_request_forgery", "labs": [1]},
+    {"vuln_name": "path_traversal", "labs": [2]},
+    {"vuln_name": "file_upload", "labs": [4]}
 ]
 
 SQLI_SUBSET = [
@@ -14,5 +14,5 @@ SQLI_SUBSET_NO_STATE = [
 ]
 
 SQLI_TEST = [
-    {"vuln_name": "sql_injection", "labs": [8]}   
+    {"vuln_name": "sql_injection", "labs": [2,5,8]}   
 ]

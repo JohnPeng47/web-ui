@@ -16,6 +16,8 @@ from src.agent.harness import AgentHarness
 from src.agent.custom_prompts import CustomAgentMessagePrompt, CustomSystemPrompt
 from src.agent.controllers.observation_contoller import ObservationController, ObservationModel
 
+from scripts.portswigger.data.server_side import PORT_SWIGGER_LABS
+
 # ────────────────────────────────────────────
 # Configuration constants
 # ────────────────────────────────────────────
@@ -81,30 +83,6 @@ class PortSwiggerLabRunner:
         self._active_labs: Dict[Tuple[str, int], str] = {}
         self._poll_tasks: List[asyncio.Task] = []
 
-        with open(PORTSWIGGER_JSON, "r", encoding="utf-8") as fh:
-            self._labs_catalog = json.load(fh)
-
-        self._validate_labs_to_start()
-
-    def _validate_labs_to_start(self):
-        """
-        Verify that all labs_to_start exist in the catalog; if not, raise Exception and error out.
-        """
-        missing = []
-        for spec in self._labs_to_start:
-            vuln = spec.get("vuln_name")
-            labs = spec.get("labs", [])
-            if vuln not in self._labs_catalog:
-                missing.append(f"Vulnerability category '{vuln}' not found in catalog")
-                continue
-            available_labs = self._labs_catalog[vuln]
-            for idx in labs:
-                if not isinstance(idx, int) or idx < 0 or idx >= len(available_labs):
-                    missing.append(
-                        f"Lab index {idx} for category '{vuln}' is invalid (available: 0-{len(available_labs)-1})"
-                    )
-        if missing:
-            raise Exception("Invalid labs_to_start configuration:\n" + "\n".join(missing))
     # ────────────────────────────────────────
     # Public API
     # ────────────────────────────────────────
@@ -149,7 +127,7 @@ class PortSwiggerLabRunner:
         Return the live-lab URL (e.g. https://<uuid>.web-security-academy.net/)
         or None on error.
         """
-        labs = self._labs_catalog.get(vuln_category)
+        labs = PORT_SWIGGER_LABS[vuln_category]
         if not labs or lab_idx >= len(labs):
             logger.error("Invalid category (%s) or lab index (%s)", vuln_category, lab_idx)
             return None
@@ -277,7 +255,8 @@ Once this is done, you can exit
             await browser.close()
 
 if __name__ == "__main__":
+    from .labs import GENERIC_SUBSET
     from .labs import SQLI_SUBSET_NO_STATE
     from .labs import SQLI_TEST
 
-    PortSwiggerLabRunner(SQLI_TEST, poll_interval=15, headless=False).run()
+    PortSwiggerLabRunner(GENERIC_SUBSET, poll_interval=15, headless=False).run()

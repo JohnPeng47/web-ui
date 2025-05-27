@@ -1,4 +1,4 @@
-FILE_UPLOAD_VULNERABILITIES = [
+FILEUPLOAD_LABS = [
     {
         "index": 0,
         "name": "Remote code execution via web shell upload",

