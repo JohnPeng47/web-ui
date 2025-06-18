@@ -258,5 +258,6 @@ if __name__ == "__main__":
     from .labs import GENERIC_SUBSET
     from .labs import SQLI_SUBSET_NO_STATE
     from .labs import SQLI_TEST
+    from .labs import SSRF_TEST_SINGLE
 
-    PortSwiggerLabRunner(GENERIC_SUBSET, poll_interval=15, headless=False).run()
+    PortSwiggerLabRunner(SSRF_TEST_SINGLE, poll_interval=15, headless=False).run()
