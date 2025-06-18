@@ -16,3 +16,7 @@ SQLI_SUBSET_NO_STATE = [
 SQLI_TEST = [
     {"vuln_name": "sql_injection", "labs": [2,5,8]}   
 ]
+
+SSRF_TEST_SINGLE = [
+    {"vuln_name": "server_side_request_forgery", "labs": [1]},
+]
