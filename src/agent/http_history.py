@@ -2,6 +2,12 @@ from httplib import HTTPMessage
 from typing import List, Dict, Callable, Optional
 from dataclasses import dataclass
 
+import asyncio
+from typing import Set, Any
+
+from playwright.sync_api import Request, Response
+from httplib import HTTPRequest, HTTPResponse
+
 from logging import getLogger
 logger = getLogger(__name__)
 
@@ -150,3 +156,155 @@ class HTTPHistory:
             filtered_messages.append(msg)
 
         return filtered_messages
+
+DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text"]
+DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
+MAX_PAYLOAD_SIZE = 4000
+DEFAULT_FLUSH_TIMEOUT       = 5.0    # seconds to wait for all requests to be flushed
+DEFAULT_PER_REQUEST_TIMEOUT = 2.0     # seconds to wait for *each* unmatched request
+DEFAULT_SETTLE_TIMEOUT      = 1.0     # seconds of network “silence” after the *last* response
+POLL_INTERVAL               = 0.5    # how often we poll internal state
+
+class HTTPHandler:
+	def __init__(
+		self,
+		*,
+		banlist: List[str] | None = None,
+	):
+		self._messages: List[HTTPMessage]      = []
+		self._step_messages: List[HTTPMessage] = []
+		self._request_queue: List[HTTPRequest] = []
+		self._req_start: Dict[HTTPRequest, float] = {}
+
+		# URL filter  ───────────────────────────────────────────────────────
+		# A simple substring-based ban list imported from a shared module.
+		self._ban_substrings: List[str] = banlist or BAN_LIST
+		self._ban_list: Set[str]        = set()   # concrete URLs flagged at run-time
+
+	# ─────────────────────────────────────────────────────────────────────
+	# Helper
+	# ─────────────────────────────────────────────────────────────────────
+	def _is_banned(self, url: str) -> bool:
+		"""Return True if the URL matches any ban-substring or was added at runtime."""
+		if url in self._ban_list:
+			return True
+		for s in self._ban_substrings:
+			if s in url:
+				self._ban_list.add(url)      # cache for fast positive lookup next time
+				return True
+		return False
+
+	# ─────────────────────────────────────────────────────────────────────
+	# Browser-callback handlers
+	# ─────────────────────────────────────────────────────────────────────
+	async def handle_request(self, request: Request):
+		try:
+			http_request = HTTPRequest.from_pw(request)
+			url          = http_request.url
+
+			if self._is_banned(url):
+				logger.debug(f"Dropped banned URL: {url}")
+				return
+
+			self._request_queue.append(http_request)
+			self._req_start[http_request] = asyncio.get_running_loop().time()
+		except Exception as e:
+			logger.exception("Error handling request: %s", e)
+
+	async def handle_response(self, response: Response):
+		try:
+			if not response:
+				return
+
+			req_match      = HTTPRequest.from_pw(response.request)
+			http_response  = HTTPResponse.from_pw(response)
+
+			matching_request = next(
+				(req for req in self._request_queue
+				 if req.url == response.request.url and req.method == response.request.method),
+				None
+			)
+			if matching_request:
+				self._request_queue.remove(matching_request)
+				self._req_start.pop(matching_request, None)
+
+			self._step_messages.append(
+				HTTPMessage(request=req_match, response=http_response)
+			)
+		except Exception as e:
+			logger.exception("Error handling response: %s", e)
+
+	# ─────────────────────────────────────────────────────────────────────
+	# Flush logic with hard timeout
+	# ─────────────────────────────────────────────────────────────────────
+	async def flush(
+		self,
+		*,
+		per_request_timeout: float = DEFAULT_PER_REQUEST_TIMEOUT,
+		settle_timeout:      float = DEFAULT_SETTLE_TIMEOUT,
+		flush_timeout:       float = DEFAULT_FLUSH_TIMEOUT,
+	) -> List["HTTPMessage"]:
+		"""
+		Block until either:
+		  • all outstanding requests are answered / timed out and the network
+			has been quiet for `settle_timeout` seconds, **or**
+		  • `flush_timeout` seconds have elapsed in total.
+		"""
+		logger.info("Starting HTTP flush")
+		loop        = asyncio.get_running_loop()
+		start_time  = loop.time()
+
+		last_seen_response_idx = len(self._step_messages)
+		last_response_time     = start_time
+
+		while True:
+			await asyncio.sleep(POLL_INTERVAL)
+			now = loop.time()
+
+			# 0️⃣  Hard timeout check
+			if now - start_time >= flush_timeout:
+				logger.warning(
+					"Flush hit hard timeout of %.1f s; returning immediately", flush_timeout
+				)
+				break
+
+			# 1️⃣  Per-request time-outs
+			for req in list(self._request_queue):
+				started_at = self._req_start.get(req, now)
+				if now - started_at >= per_request_timeout:
+					logger.info("Request timed out: %s", req.url)
+					self._messages.append(HTTPMessage(request=req, response=None))
+					self._request_queue.remove(req)
+					self._req_start.pop(req, None)
+				else:
+					logger.debug("[REQUEST STAY] %s stay: %.2f s", req.url, now - started_at)
+
+			# 2️⃣  Quiet-period tracking
+			if len(self._step_messages) != last_seen_response_idx:
+				last_seen_response_idx = len(self._step_messages)
+				last_response_time     = now
+
+			# 3️⃣  Exit conditions
+			queue_empty  = not self._request_queue
+			quiet_enough = (now - last_response_time) >= settle_timeout
+			if queue_empty and quiet_enough:
+				logger.info("Flush complete")
+				break
+
+		# ────────────────────────────────────────────────────────────────
+		# Finalise
+		# ────────────────────────────────────────────────────────────────
+		unmatched = [
+			HTTPMessage(request=req, response=None) for req in self._request_queue
+		]
+		self._req_start.clear()
+
+		session_msgs        = self._step_messages
+		self._request_queue = []
+		self._step_messages = []
+		self._messages.extend(unmatched)
+		self._messages.extend(session_msgs)
+
+		logger.info("Returning %d messages from flush", len(session_msgs))
+		return session_msgs
+

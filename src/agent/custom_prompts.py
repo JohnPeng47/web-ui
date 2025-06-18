@@ -27,6 +27,7 @@ class CustomSystemPrompt(SystemPrompt):
 class CustomAgentMessagePrompt(AgentMessagePrompt):
     def __init__(
             self,
+            task: str,
             state: BrowserState,
             actions: List[ActionModel],
             result: List[ActionResult], 
@@ -40,6 +41,7 @@ class CustomAgentMessagePrompt(AgentMessagePrompt):
                                                        step_info=step_info)
         self.actions = actions
         self.http_msgs = http_msgs
+        self.task = task
 
     def get_user_message(self, use_vision: bool = True) -> HumanMessage:
         if self.step_info:
@@ -73,7 +75,7 @@ class CustomAgentMessagePrompt(AgentMessagePrompt):
 
         state_description = f"""
 {step_info_description}
-1. Task: {self.step_info.task}. 
+1. Task: {self.task}. 
 2. Hints(Optional): 
 {self.step_info.add_infos}
 3. Memory: 

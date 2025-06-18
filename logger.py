@@ -7,16 +7,47 @@ import logging
 import re
 import sys, contextvars, logging
 from pathlib import Path
+from typing import Optional, List
 
 LOG_DIR = "logs"
+
+# note: literally exists to filter out Litellm ...
+class ExcludeStringsFilter(logging.Filter):
+    """
+    A logging filter that excludes log records containing any of the specified strings.
+    """
+    DEFAULT_EXCLUDE_STRS = [
+        "LiteLLM",
+        "completion()",
+        "selected model name",
+        "Wrapper: Completed Call"
+    ]
+
+    def __init__(self, exclude_strs: List[str] = []):
+        super().__init__()
+        self.exclude_strs = exclude_strs + self.DEFAULT_EXCLUDE_STRS
+    
+    def filter(self, record):
+        """
+        Return False if the log record should be excluded, True otherwise.
+        """
+        if not self.exclude_strs:
+            return True
+        
+        # Check if any exclude string is in the log message
+        log_message = record.getMessage()
+        for exclude_str in self.exclude_strs:
+            if exclude_str in log_message:
+                return False
+        return True
 
 def converter(timestamp):
     dt = datetime.fromtimestamp(timestamp, tz=pytz.utc)
     return dt.astimezone(pytz.timezone("US/Eastern")).timetuple()
 
 formatter = logging.Formatter(
-    "%(asctime)s - %(name)s:%(levelname)s: %(filename)s:%(lineno)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
+    "%(asctime)s:[%(filename)s:%(lineno)s] - %(message)s",
+    datefmt="%H:%M:%S",
 )
 formatter.converter = converter
 console_formatter = logging.Formatter("%(message)s")
@@ -29,13 +60,14 @@ def get_file_handler(log_file: str | Path):
     file_handler.setFormatter(formatter)
     return file_handler
 
-def get_console_handler():
+def get_console_handler(exclude_strs: List[str] = []):
     """
     Returns a console handler for logging.
     """
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.INFO)
     console_handler.setFormatter(console_formatter)
+    console_handler.addFilter(ExcludeStringsFilter(exclude_strs))
     return console_handler
 
 def get_logfile_id(log_dir=LOG_DIR, file_prefix: str = "", log_name: str = "") -> tuple[str, int]:
@@ -79,7 +111,7 @@ def get_incremental_logdir(log_dir=LOG_DIR, file_prefix: str = "", log_name: str
     timestamp, next_number = get_logfile_id(log_dir, file_prefix, log_name=log_name)
     return os.path.join(log_dir, file_prefix, timestamp), next_number
     
-def get_incremental_file_handler(log_dir=LOG_DIR, file_prefix: str = "", log_name: str = ""):
+def get_incremental_file_handler(log_dir=LOG_DIR, file_prefix: str = "", log_name: str = "", exclude_strs: List[str] = []):
     """
     Returns a file handler that creates logs in timestamped directories with incremental filenames.
     Directory structure: log_dir/file_prefix/YYYY-MM-DD/0.log, 1.log, etc.
@@ -90,6 +122,7 @@ def get_incremental_file_handler(log_dir=LOG_DIR, file_prefix: str = "", log_nam
     file_name = f"{next_number}.log" if not log_name else f"{log_name}_{next_number}.log"
     file_handler = logging.FileHandler(os.path.join(log_subdir, file_name), encoding="utf-8")
     file_handler.setFormatter(formatter)
+    file_handler.addFilter(ExcludeStringsFilter(exclude_strs))
     return file_handler
 
 # TODO: DEEMO change back
