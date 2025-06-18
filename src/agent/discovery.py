@@ -11,11 +11,19 @@ interactions with the current webpage:
 """
 
 class PlanItem(BaseModel):
-    action: str
     description: str
+    completed: bool = False
 
 class Plan(BaseModel):
     plan_items: List[PlanItem]
+
+    def __str__(self) -> str:
+        lines = []
+        for i, item in enumerate(self.plan_items):
+            status = "[ * ]" if item.completed else "[ ]"
+            lines.append(f"{status} {i+1}. {item.description}")
+            
+        return "\n".join(lines)
 
 class CreatePlan(LMP):
     prompt = """

@@ -49,7 +49,8 @@ from .logger import AgentLogger
 
 from .discovery import (
 	CreatePlan,
-	TASK_PROMPT_WITH_PLAN
+	TASK_PROMPT_WITH_PLAN,
+	Plan
 )
 
 logger = getLogger(__name__)
@@ -357,6 +358,144 @@ class CustomAgent(Agent):
 
 		return 
 	
+	# TODO: should try to remove the plan variables from state
+	# async def create_or_update_plan(
+	# 	self,
+	# 	curr_page_contents: str,
+	# 	cur_url: str,
+	# 	step_number: int
+	# ) -> Tuple[str, Optional[str]]:
+	# 	prev_page_contents = self.state.prev_page_contents
+	# 	curr_plan = self.state.plan
+	# 	prev_url = self.state.prev_url
+	# 	eval_prev_goal = self.state.eval_prev_goal
+	# 	prev_goal = self.state.prev_goal
+
+	# 	# do nothing if we are in navigation mode
+	# 	# because this prevents us from setting a plan
+	# 	# TODO: definitely signs of refactor needed when we have just introduced another state into the program
+	# 	# by having to account for step > 2
+	# 	# if self.page_max_steps < 3:
+	# 	#     raise Exception("Page max steps must be at least 3")
+
+	# 	if self.mode == AgentMode.NAVIGATION:
+	# 		return self.state.task, None
+
+	# 	# this should execute *only* after we transition from NAVIGATION -> TASK_EXECUTION
+	# 	if not curr_plan and curr_page_contents:
+	# 		curr_plan = generate_plan(self.llm, curr_page_contents)
+	# 		self.state.plan = curr_plan
+	# 		new_task = PLANNING_TASK_TEMPLATE.format(plan=curr_plan)
+
+	# 		# init homepage
+	# 		self.homepage_url = cur_url
+	# 		self.homepage_contents = curr_page_contents
+	# 		self.state.pages.append(cur_url)
+
+	# 		self.full_log(f"[PLAN] Generated plan: {curr_plan}")
+	# 		return new_task, None
+		
+	# 	self.agent_log(f"[SUBPAGES]: {[page[2] for page in self.state.subpages]}")
+
+	# 	# TODO: parallelize these two
+	# 	curr_plan = check_plan_completion(
+	# 		self.llm, 
+	# 		curr_plan, 
+	# 		prev_page_contents, 
+	# 		curr_page_contents, 
+	# 		prev_goal
+	# 	)
+
+	# 	if step_number > 1 and step_number % DEDUP_AFTER_STEPS == 0:
+	# 		curr_plan = deduplicate_plan(self.llm, curr_plan)
+
+	# 	self.state.plan = curr_plan
+	# 	nav_page = determine_new_page(
+	# 		self.llm, 
+	# 		curr_page_contents, 
+	# 		prev_page_contents, 
+	# 		cur_url, 
+	# 		prev_url, 
+	# 		prev_goal, 
+	# 		self.state.subpages,
+	# 		self.homepage_contents,
+	# 		self.homepage_url
+	# 	)
+
+	# 	# TODO: we need to be careful to check that the last plan is not a back navigation task
+	# 	# OKay what happened ... after landing on homepage, we immediately took action that resulted in a new page  
+	# 	if nav_page.page_type == NewPageStatus.NEW_PAGE:
+	# 		new_task = UNDO_NAVIGATION_TASK_TEMPLATE.format(
+	# 			prev_url=prev_url,
+	# 			prev_page_contents=prev_page_contents
+	# 		)
+	# 		self.state.pages.append(cur_url)
+
+	# 		self.agent_log(f"[PLAN]: New page, navigating back from {cur_url}")
+	# 		return new_task, self.state.task
+
+	# 	elif nav_page.page_type == NewPageStatus.UPDATED_PAGE:
+	# 		# TODO: maybe need to rework should backnavigation to be smarter than default to back-navigation
+	# 		# -> ties into how we should use memory -> remembering back-navigation from page
+	# 		# TODO: need to set a status for when we navigate back from a page
+	# 		# TODO: compare to naive results
+	# 		# TODO: explicitly tell it to use nested subplan structure
+	# 		# TODO: tell it to not to refer to interactive elements by their index
+	# 		curr_plan = update_plan(
+	# 			self.llm, curr_page_contents, prev_page_contents, curr_plan, eval_prev_goal
+	# 		)
+	# 		self.state.plan = curr_plan
+	# 		new_task = PLANNING_TASK_TEMPLATE.format(plan=curr_plan)
+	# 		self.state.subpages.append((cur_url, curr_page_contents, nav_page.name))
+
+	# 		# self.agent_log(f"[PLAN] Updated plan: {curr_plan}")
+	# 		return new_task, None
+	# 	else:
+	# 		self.agent_log("[PLAN]: No task updates")
+	# 		# return the old task
+	# 		return self.state.task, None
+
+	# def handle_nav_mode_start(self):
+	# 	"""Handles when agent first navigates to a page"""
+	# 	if not self.mode == AgentMode.NAVIGATION:
+	# 		return
+
+	# 	if not self.state.pages:
+	# 		raise EarlyShutdown(f"No pages left to navigate to")
+
+	# 	# TODO: we need to not only deduplicate here but also get the canonical representation
+	# 	# need to make sure pages are canonicalized
+	# 	next_page = self.state.pages.pop()
+	# 	self.agent_log(f"Navigating to new page: {next_page}")
+	# 	self.homepage_url = next_page
+	# 	self.state.task = NAVIGATE_TO_PAGE_PROMPT.format(url=self.homepage_url)
+	
+	# def handle_nav_mode_end(self, curr_url: str, step_info: CustomAgentStepInfo):
+	# 	"""Handles when agent finishes navigating to a page"""
+	# 	if not self.mode == AgentMode.NAVIGATION:
+	# 		return
+	
+	# 	TASKS_FAILED = ["Failed", "Unknown"]
+	# 	TASKED_FAILED_STEP1 = ["Failed"]
+	# 	task_failed = TASKS_FAILED if step_info.step_number > 2 else TASKED_FAILED_STEP1
+
+	# 	curr_url = self.state.prev_url
+	# 	page_contents = self.state.prev_page_contents
+	# 	eval_prev_goal = self.state.eval_prev_goal
+
+	# 	if any(task.lower() in eval_prev_goal.lower() for task in task_failed):
+	# 		raise NavigationException(f"Failed to navigate to {curr_url}")
+
+	# 	# if curr_url != self.homepage_url:
+	# 	#     raise NavigationException(f"Failed to navigate to {self.homepage_url}")
+
+	# 	self.mode = AgentMode.TASK_EXECUTION
+	# 	self.homepage_url = curr_url
+	# 	self.agent_log(f"[HOMEPAGE URL]: Setting new homepage url {self.homepage_url}")
+	# 	self.homepage_contents = page_contents
+	# 	self.state.pages.append(curr_url)
+	# 	self.state.plan = None
+
 	async def _get_browser_state(self):
 		browser_state = await self.browser_context.get_state()
 		curr_url = (await self.browser_context.get_current_page()).url
@@ -399,17 +538,9 @@ class CustomAgent(Agent):
 		return model_output, result, input_messages
 	
 	async def _nav_think(self, model_output: CustomAgentOutput, step_info: CustomAgentStepInfo):
-		# # Ensure we hold a goal page
 		# if not self.ctx.pages:
 		# 	raise EarlyShutdown("No pages queued for navigation")
 
-		# target = self.ctx.pages[-1]			# peek
-		# self.ctx.homepage_url = target		# keep canonical target
-		# task_prompt = NAVIGATE_TO_PAGE_PROMPT.format(url=target)
-
-		# model_output = await self._invoke_llm(state, task_prompt)
-
-		# Decide event using previous evaluation string (no writes yet)
 		eval_str = model_output.current_state.evaluation_previous_goal.lower()
 		failed   = ("failed" in eval_str) or ("unknown" in eval_str and step_info.step_number > 2)
 		event    = Event.NAV_FAILED if failed else Event.NAV_SUCCESS
@@ -433,7 +564,8 @@ class CustomAgent(Agent):
 		# return None, model_output	# remain in TASK_EXECUTION
 		pass
 
-	async def _transition(self, event: Event | None) -> None:
+	# NOTE: should not use state here??
+	async def _transition(self, event: Event | None, new_url: str, new_page_contents: str) -> None:
 		if event is None:
 			return
 
@@ -450,11 +582,34 @@ class CustomAgent(Agent):
 			target = self.pages.pop()
 			task = NAVIGATE_TO_PAGE_PROMPT.format(url=target)
 			self._set_task(task)
-			
+		elif next_mode is AgentMode.TASK_EXECUTION:
+			if event == Event.NAV_SUCCESS:
+				self.pages.append(new_url)
+				self.homepage_url = new_url
+				self.homepage_contents = new_page_contents
+
+				new_plan = CreatePlan().invoke(
+					model=self.llm,
+					model_name=MODEL_NAME,
+					prompt_args={
+						"curr_page_contents": new_page_contents
+					}
+				)
+				self._set_plan(new_plan)
+				new_task = TASK_PROMPT_WITH_PLAN.format(plan=self.state.plan)
+				self._set_task(new_task, is_new_task=True)
+
 		self.mode = next_mode
 
-	# Managing setting and getting the task
-	def _set_task(self, task: str) -> None:
+	# Managing task and plan
+	def _set_plan(self, plan: Plan) -> None:
+		logger.info(f"[NEW PLAN]:\n{plan}")
+		self.state.plan = plan
+
+	def _get_plan(self) -> Optional[Plan]:
+		return self.state.plan
+
+	def _set_task(self, task: str, is_new_task: bool = False) -> None:
 		self.state.task = task
 
 	def _get_task(self) -> str:
@@ -500,6 +655,7 @@ class CustomAgent(Agent):
 			current_msg=input_messages[-1],
 			response=model_output
 		)
+		# TODO: add agent_client update here so we can send shutdown signal right before next step
 
 	@time_execution_async("--step")
 	async def step(self, step_info: CustomAgentStepInfo) -> None:
@@ -531,7 +687,7 @@ class CustomAgent(Agent):
 			elif self.mode == AgentMode.NOOP:
 				evt = Event.NOOP_NAV
 
-			await self._transition(evt)
+			await self._transition(evt, new_url, new_page_contents)
 			await self._update_state(result, model_output, step_info, input_messages)
 
 		except InterruptedError:
@@ -543,10 +699,6 @@ class CustomAgent(Agent):
 				)
 			]
 			return
-
-		# except (ValidationError, ValueError, RateLimitError, ResourceExhausted) as e:
-		#     result = await self._handle_step_error(e)
-		#     self.state.last_result = result
 
 		except Exception as e:
 			logger.error(f"Error in step {self.state.n_steps}: {e}")
