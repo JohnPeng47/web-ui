@@ -73,17 +73,19 @@ class CustomMessageManager(MessageManager):
     # AFTER DINNER:
     # - wire up HTTP_msgs everywhere
     def add_state_message(
-            self,
-            state: BrowserState,
-            actions: List[ActionModel],
-            result: List[ActionResult],
-            http_msgs: List[HTTPMessage],
-            step_info: Optional[CustomAgentStepInfo] = None,
-            use_vision=True,
+        self,
+        task: str,
+        state: BrowserState,
+        actions: List[ActionModel],
+        result: List[ActionResult],
+        http_msgs: List[HTTPMessage],
+        step_info: Optional[CustomAgentStepInfo] = None,
+        use_vision=True,
     ) -> None:
         """Add browser state as human message"""
         # otherwise add state message and result to next message (which will not stay in memory)
         state_message = self.settings.agent_prompt_class(
+            task,
             state,
             actions,
             result,
@@ -92,7 +94,6 @@ class CustomMessageManager(MessageManager):
             step_info,
         ).get_user_message(use_vision)
         self._add_message_with_tokens(state_message)
-
 
     def _remove_state_message_by_index(self, remove_ind=-1) -> None:
         """Remove last state message from history"""

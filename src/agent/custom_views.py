@@ -69,3 +69,6 @@ class CustomAgentState(BaseModel):
 
     last_action: List['ActionModel'] = Field(default_factory=list)
     extracted_content: str = ''
+
+    # new state vars
+    task: str = ''
