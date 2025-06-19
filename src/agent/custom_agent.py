@@ -45,7 +45,6 @@ from .custom_views import CustomAgentOutput
 from .custom_message_manager import CustomMessageManager, CustomMessageManagerSettings
 from .custom_views import CustomAgentStepInfo, CustomAgentState
 from .http_history import HTTPHistory, HTTPHandler, BAN_LIST
-from .logger import AgentLogger
 
 from .discovery import (
     CreatePlan,
@@ -55,7 +54,8 @@ from .discovery import (
     Plan
 )
 
-logger = getLogger(__name__)
+agent_log = getLogger("agentlog")
+full_log = getLogger("fr_logger")
 
 Context = TypeVar('Context')
 
@@ -203,15 +203,8 @@ class CustomAgent(Agent):
         self.agent_id = None
         if agent_client and not app_id:
             raise ValueError("app_id must be provided when agent_client is set")
-        
-        # username = self.agent_client.username if self.agent_client else "default"
-        username = self.agent_name if self.agent_name else "default"
-        
-        # TODO: probably not a good idea to use none global logging solution
-        init_root_logger(username)
 
         if browser_context:
-            logger.info("Registering HTTP handlers")
             browser_context.req_handler = self.http_handler.handle_request
             browser_context.res_handler = self.http_handler.handle_response
             # browser_context.page_handler = self.handle_page
@@ -242,8 +235,6 @@ class CustomAgent(Agent):
         self._set_task(NO_OP_TASK)
 
     def handle_page(self, page):
-        logger.info(f"[PLAYWRIGHT] >>>>>>>>>>>")
-        logger.info(f"[PLAYWRIGHT] Frame {page}")
         self.curr_page = page
         
     def _log_response(self, 
@@ -258,18 +249,18 @@ class CustomAgent(Agent):
         else:
             emoji = "🤷"
 
-        logger.info(f"{emoji} Eval: {response.current_state.evaluation_previous_goal}")
-        logger.info(f"🧠 New Memory: {response.current_state.important_contents}")
-        logger.info(f"🤔 Thought: {response.current_state.thought}")
-        logger.info(f"🎯 Next Goal: {response.current_state.next_goal}")
+        agent_log.info(f"{emoji} Eval: {response.current_state.evaluation_previous_goal}")
+        agent_log.info(f"🧠 New Memory: {response.current_state.important_contents}")
+        agent_log.info(f"🤔 Thought: {response.current_state.thought}")
+        agent_log.info(f"🎯 Next Goal: {response.current_state.next_goal}")
         for i, action in enumerate(response.action):
-            logger.info(
+            agent_log.info(
                 f"🛠️  Action {i + 1}/{len(response.action)}: {action.model_dump_json(exclude_unset=True)}"
             )
-        logger.info(f"[Prev Messages]: {current_msg.content}")
-        logger.info(f"Captured {len(http_msgs)} HTTP Messages")
+        agent_log.info(f"[Prev Messages]: {current_msg.content}")
+        agent_log.info(f"Captured {len(http_msgs)} HTTP Messages")
         for msg in http_msgs:
-            logger.info(f"[Agent] {msg.request.url}")
+            agent_log.info(f"[Agent] {msg.request.url}")
 
     def _setup_action_models(self) -> None:
         """Setup dynamic action models from controller's registry"""
@@ -296,7 +287,7 @@ class CustomAgent(Agent):
         ):
             step_info.memory += important_contents + "\n"
 
-        logger.info(f"🧠 All Memory: \n{step_info.memory}")
+        agent_log.info(f"🧠 All Memory: \n{step_info.memory}")
 
     @time_execution_async("--get_next_action")
     async def get_next_action(self, input_messages: List[BaseMessage]) -> CustomAgentOutput:
@@ -318,7 +309,7 @@ class CustomAgent(Agent):
         parsed: AgentOutput = self.AgentOutput(**parsed_json)
 
         if parsed is None:
-            logger.debug(ai_message.content)
+            agent_log.debug(ai_message.content)
             raise ValueError('Could not parse response.')
 
         # cut the number of actions to max_actions_per_step if needed
@@ -502,10 +493,10 @@ class CustomAgent(Agent):
 
         next_mode = TRANSITIONS.get((self.mode, event))
         if next_mode is None:
-            logger.info(f"[TRANSITION] No transition staying in {self.mode}")
+            agent_log.info(f"[TRANSITION] No transition staying in {self.mode}")
             return
  
-        logger.info(f"[TRANSITION] {self.mode} -> {next_mode}")
+        agent_log.info(f"[TRANSITION] {self.mode} -> {next_mode}")
         self.mode = next_mode
 
         if next_mode is AgentMode.NAVIGATION:
@@ -534,7 +525,7 @@ class CustomAgent(Agent):
 
     # Managing task and plan
     def _set_plan(self, plan: Plan) -> None:
-        logger.info(f"[NEW PLAN]:\n{plan}")
+        full_log.info(f"[NEW PLAN]:\n{plan}")
         self.state.plan = plan
 
     def _get_plan(self) -> Optional[Plan]:
@@ -577,7 +568,7 @@ class CustomAgent(Agent):
             if not self.state.extracted_content:
                 self.state.extracted_content = step_info.memory
             result[-1].extracted_content = self.state.extracted_content
-            logger.info(f"📄 Result: {result[-1].extracted_content}")
+            agent_log.info(f"📄 Result: {result[-1].extracted_content}")
 
         self.state.consecutive_failures = 0
 
@@ -591,7 +582,7 @@ class CustomAgent(Agent):
     @time_execution_async("--step")
     async def step(self, step_info: CustomAgentStepInfo) -> None:
         """Execute one step of the task"""
-        logger.info(f"Step {self.state.n_steps}")
+        agent_log.info(f"Step {self.state.n_steps}")
         model_output = None
         result: List[ActionResult] = []
         step_start_time = time.time() 
@@ -622,7 +613,7 @@ class CustomAgent(Agent):
             await self._update_state(result, model_output, step_info, input_messages)
 
         except InterruptedError:
-            logger.debug("Agent paused")
+            agent_log.debug("Agent paused")
             self.state.last_result = [
                 ActionResult(
                     error="The agent was paused - now continuing actions might need to be repeated",
@@ -632,8 +623,8 @@ class CustomAgent(Agent):
             return
 
         except Exception as e:
-            logger.error(f"Error in step {self.state.n_steps}: {e}")
-            logger.error(traceback.format_exc())
+            agent_log.error(f"Error in step {self.state.n_steps}: {e}")
+            agent_log.error(traceback.format_exc())
             step_info.step_number = step_info.max_steps
 
             raise e
@@ -684,12 +675,12 @@ class CustomAgent(Agent):
             for step in range(max_steps):
                 # Check if we should stop due to too many failures
                 if self.state.consecutive_failures >= self.settings.max_failures:
-                    logger.error(f'❌ Stopping due to {self.settings.max_failures} consecutive failures')
+                    agent_log.error(f'❌ Stopping due to {self.settings.max_failures} consecutive failures')
                     break
 
                 # Check control flags before each step
                 if self.state.stopped:
-                    logger.info('Agent stopped')
+                    agent_log.info('Agent stopped')
                     break
 
                 while self.state.paused:
@@ -708,7 +699,7 @@ class CustomAgent(Agent):
                 # 	await self.log_completion()
                 # 	break
             else:
-                logger.info("❌ Failed to complete task in maximum steps")
+                agent_log.info("❌ Failed to complete task in maximum steps")
                 if not self.state.extracted_content:
                     self.state.history.history[-1].result[-1].extracted_content = step_info.memory
                 else:
@@ -735,11 +726,11 @@ class CustomAgent(Agent):
 
             try:
                 if not self.injected_browser_context or self.close_browser:
-                    logger.info("Closing browser context")
+                    agent_log.info("Closing browser context")
                     await self.browser_context.close()
 
                 if (not self.injected_browser and self.browser) or (self.close_browser and self.browser):
-                    logger.info("Closing browser")
+                    agent_log.info("Closing browser")
                     await self.browser.close()
             except TargetClosedError as e:
                 pass
@@ -751,23 +742,23 @@ class CustomAgent(Agent):
 
                 create_history_gif(task=self.task, history=self.state.history, output_path=output_path)
             
-            logger.info("Graceful exit!")
+            agent_log.info("Graceful exit!")
 
     async def shutdown(self, reason: str = "Premature shutdown requested") -> None:
         """Shuts down the agent prematurely and performs cleanup."""
         # Check if already stopped to prevent duplicate shutdown calls
         if hasattr(self.state, 'stopped') and self.state.stopped:
-            logger.warning("Shutdown already in progress or completed.")
+            agent_log.warning("Shutdown already in progress or completed.")
             return
 
-        logger.info(f"Initiating premature shutdown: {reason}")
+        agent_log.info(f"Initiating premature shutdown: {reason}")
         # Ensure state has 'stopped' attribute before setting
         if hasattr(self.state, 'stopped'):
              self.state.stopped = True
         else:
              # If AgentState doesn't have stopped, we might need another way
              # to signal termination or handle this case.
-             logger.warning("Agent state does not have 'stopped' attribute. Cannot signal stop.")
+             agent_log.warning("Agent state does not have 'stopped' attribute. Cannot signal stop.")
 
 
         # Perform cleanup similar to the finally block in run()
@@ -798,25 +789,25 @@ class CustomAgent(Agent):
             if self.history_file and history:
                 try:
                     history.save_to_file(self.history_file)
-                    logger.info(f"Saved agent history to {self.history_file} during shutdown.")
+                    agent_log.info(f"Saved agent history to {self.history_file} during shutdown.")
                 except Exception as e:
-                    logger.error(f"Failed to save history during shutdown: {e}")
+                    agent_log.error(f"Failed to save history during shutdown: {e}")
 
             # Close Browser Context
             if not self.injected_browser_context and self.browser_context:
                 try:
                     await self.browser_context.close()
-                    logger.info("Closed browser context during shutdown.")
+                    agent_log.info("Closed browser context during shutdown.")
                 except Exception as e:
-                    logger.error(f"Error closing browser context during shutdown: {e}")
+                    agent_log.error(f"Error closing browser context during shutdown: {e}")
 
             # Close Browser
             if self.browser:
                 try:
                     await self.browser.close()
-                    logger.info("Closed browser during shutdown.")
+                    agent_log.info("Closed browser during shutdown.")
                 except Exception as e:
-                    logger.error(f"Error closing browser during shutdown: {e}")
+                    agent_log.error(f"Error closing browser during shutdown: {e}")
 
             # Generate GIF
             if self.settings.generate_gif and history:
@@ -827,14 +818,14 @@ class CustomAgent(Agent):
                         base, ext = os.path.splitext(self.settings.generate_gif)
                         output_path = f"{base}_shutdown{ext}"
 
-                    logger.info(f"Generating shutdown GIF at {output_path}")
+                    agent_log.info(f"Generating shutdown GIF at {output_path}")
                     create_history_gif(task=f"{self.task} (Shutdown)", history=history, output_path=output_path)
                 except Exception as e:
-                     logger.error(f"Failed to generate GIF during shutdown: {e}")
+                     agent_log.error(f"Failed to generate GIF during shutdown: {e}")
             
         except Exception as e:
             # Catch errors during the shutdown cleanup process itself
-            logger.error(f"Error during agent shutdown cleanup: {e}")
-            logger.error(traceback.format_exc())
+            agent_log.error(f"Error during agent shutdown cleanup: {e}")
+            agent_log.error(traceback.format_exc())
         finally:
-             logger.info("Agent shutdown process complete.")
+             agent_log.info("Agent shutdown process complete.")
