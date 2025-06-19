@@ -31,13 +31,13 @@ from browser_use.browser.views import BrowserState
 from json_repair import repair_json
 from src.utils.agent_state import AgentState
 from src.agent.client import AgentClient
+from src.llm_provider import LMP
 
-from johnllm import LLMModel, LMP
 from httplib import HTTPMessage
 
 from playwright._impl._errors import TargetClosedError
-from logging import getLogger
-from logger import init_root_logger
+from pentest_bot.logger import get_agent_loggers
+
 
 # from .state import CustomAgentOutput
 from common.agent import BrowserActions
@@ -54,8 +54,7 @@ from .discovery import (
     Plan
 )
 
-agent_log = getLogger("agentlog")
-full_log = getLogger("fr_logger")
+agent_log, full_log = get_agent_loggers()
 
 Context = TypeVar('Context')
 
@@ -102,7 +101,7 @@ class CustomAgent(Agent):
     def __init__(
         self,
         start_url: str,
-        llm: LLMModel,
+        llm: BaseChatModel,
         start_task: str = "", # TODO: task for handling all initial logic
         add_infos: str = "",
         # Optional parameters
@@ -188,7 +187,7 @@ class CustomAgent(Agent):
             injected_agent_state=None,
             context=context,
         )
-        self.llm: LLMModel
+        self.llm: BaseChatModel
         self.agent_name = agent_name
         self.close_browser = close_browser
         self.curr_page = None
@@ -292,18 +291,12 @@ class CustomAgent(Agent):
     @time_execution_async("--get_next_action")
     async def get_next_action(self, input_messages: List[BaseMessage]) -> CustomAgentOutput:
         """Get next action from LLM based on current state"""
-        ai_message: str = self.llm.invoke(
-            input_messages, 
-            model_name=MODEL_NAME, 
-            response_format=None
+        ai_message: BaseMessage = self.llm.invoke(
+            input_messages
         )
-        converted_msg = BaseMessage(
-            content=ai_message,
-            type="user"
-        )
-        self._message_manager._add_message_with_tokens(converted_msg)
+        self._message_manager._add_message_with_tokens(ai_message)
 
-        ai_content = ai_message.replace("```json", "").replace("```", "")
+        ai_content = ai_message.content.replace("```json", "").replace("```", "")
         ai_content = repair_json(ai_content)
         parsed_json = json.loads(ai_content)
         parsed: AgentOutput = self.AgentOutput(**parsed_json)
@@ -337,22 +330,9 @@ class CustomAgent(Agent):
                 ],
                 browser_actions
             )
-
-    def _create_or_update_plan(self, curr_page_contents: str) -> None:
-        """Create or update the plan"""
-
-        task_prompt = CreatePlan().invoke(
-            model=self.llm,
-            model_name=MODEL_NAME,
-            prompt_args={
-                "curr_page_contents": curr_page_contents
-            }
-        )
-
-        return 
     
     # TODO: should try to remove the plan variables from state
-    async def create_or_update_plan(
+    async def _create_or_update_plan(
         self,
         curr_page_contents: str,
         cur_url: str,
@@ -369,7 +349,6 @@ class CustomAgent(Agent):
 
         curr_plan = CheckPlanCompletion().invoke(
             model=self.llm,
-            model_name=MODEL_NAME,
             prompt_args={
                 "plan": curr_plan,
                 "prev_page_contents": prev_page_contents,
@@ -383,7 +362,6 @@ class CustomAgent(Agent):
         self.state.plan = curr_plan
         nav_page = DetermineNewPage().invoke(
             model=self.llm, 
-            model_name=MODEL_NAME,
             prompt_args={
                 "curr_page_contents": curr_page_contents, 
                 "prev_page_contents": prev_page_contents, 
@@ -395,26 +373,26 @@ class CustomAgent(Agent):
             }
         )
 
-        if nav_page.page_type == NewPageStatus.NEW_PAGE:
-            result_task = UNDO_NAVIGATION_TASK_TEMPLATE.format(
-                prev_url=prev_url,
-                prev_page_contents=prev_page_contents
-            )
-            result_secondary = self.state.task
-            self.state.pages.append(cur_url)
-            self.agent_log(f"[PLAN]: New page, navigating back from {cur_url}")
-        elif nav_page.page_type == NewPageStatus.UPDATED_PAGE:
-            curr_plan = update_plan(
-                self.llm, curr_page_contents, prev_page_contents, curr_plan, eval_prev_goal
-            )
-            self.state.plan = curr_plan
-            result_task = PLANNING_TASK_TEMPLATE.format(plan=curr_plan)
-            result_secondary = None
-            self.state.subpages.append((cur_url, curr_page_contents, nav_page.name))
-            # self.agent_log(f"[PLAN] Updated plan: {curr_plan}")
-        else:
-            self.agent_log("[PLAN]: No task updates")
-            # result_task and result_secondary already set to old task
+        # if nav_page.page_type == NewPageStatus.NEW_PAGE:
+        #     result_task = UNDO_NAVIGATION_TASK_TEMPLATE.format(
+        #         prev_url=prev_url,
+        #         prev_page_contents=prev_page_contents
+        #     )
+        #     result_secondary = self.state.task
+        #     self.state.pages.append(cur_url)
+        #     self.agent_log(f"[PLAN]: New page, navigating back from {cur_url}")
+        # elif nav_page.page_type == NewPageStatus.UPDATED_PAGE:
+        #     curr_plan = update_plan(
+        #         self.llm, curr_page_contents, prev_page_contents, curr_plan, eval_prev_goal
+        #     )
+        #     self.state.plan = curr_plan
+        #     result_task = PLANNING_TASK_TEMPLATE.format(plan=curr_plan)
+        #     result_secondary = None
+        #     self.state.subpages.append((cur_url, curr_page_contents, nav_page.name))
+        #     # self.agent_log(f"[PLAN] Updated plan: {curr_plan}")
+        # else:
+        #     self.agent_log("[PLAN]: No task updates")
+        #     # result_task and result_secondary already set to old task
 
         return result_task, result_secondary
 
@@ -470,7 +448,7 @@ class CustomAgent(Agent):
 
     async def _task_think(self, state, html, url, info):
         # # Plan management
-        task_prompt, replace_task, evt = await self._update_plan(html, url, info.step_number)
+        # task_prompt, replace_task, evt = await self._create_or_update_plan(html, url, info.step_number)
         # if replace_task:			# back-navigation case
         # 	self.state.task = replace_task
 
@@ -512,10 +490,10 @@ class CustomAgent(Agent):
 
                 new_plan = CreatePlan().invoke(
                     model=self.llm,
-                    model_name=MODEL_NAME,
                     prompt_args={
                         "curr_page_contents": new_page_contents
-                    }
+                    },
+                    prompt_logger=full_log
                 )
                 self._set_plan(new_plan)
                 new_task = TASK_PROMPT_WITH_PLAN.format(plan=self.state.plan)
