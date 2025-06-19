@@ -50,6 +50,7 @@ from .logger import AgentLogger
 from .discovery import (
     CreatePlan,
     CheckPlanCompletion,
+    DetermineNewPage,
     TASK_PROMPT_WITH_PLAN,
     Plan
 )
@@ -389,16 +390,18 @@ class CustomAgent(Agent):
         # 	curr_plan = deduplicate_plan(self.llm, curr_plan)
 
         self.state.plan = curr_plan
-        nav_page = determine_new_page(
-            self.llm, 
-            curr_page_contents, 
-            prev_page_contents, 
-            cur_url, 
-            prev_url, 
-            prev_goal, 
-            self.state.subpages,
-            self.homepage_contents,
-            self.homepage_url
+        nav_page = DetermineNewPage().invoke(
+            model=self.llm, 
+            model_name=MODEL_NAME,
+            prompt_args={
+                "curr_page_contents": curr_page_contents, 
+                "prev_page_contents": prev_page_contents, 
+                "curr_url": cur_url, 
+                "prev_url": prev_url, 
+                "prev_goal": prev_goal,
+                "homepage_contents": self.homepage_contents,
+                "homepage_url": self.homepage_url
+            }
         )
 
         if nav_page.page_type == NewPageStatus.NEW_PAGE:
