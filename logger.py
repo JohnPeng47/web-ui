@@ -46,7 +46,7 @@ def converter(timestamp):
     return dt.astimezone(pytz.timezone("US/Eastern")).timetuple()
 
 formatter = logging.Formatter(
-    "%(asctime)s:[%(filename)s:%(lineno)s] - %(message)s",
+    "%(asctime)s:[%(funcName)s:%(lineno)s] - %(message)s",
     datefmt="%H:%M:%S",
 )
 formatter.converter = converter
