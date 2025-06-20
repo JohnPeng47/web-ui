@@ -1,5 +1,5 @@
-from src.agent.discovery import CreatePlan
-from src.llm_models import openai_4o
+from src.agent.discovery import CreatePlanNested
+from src.llm_models import deepseek_r1
 
 MSG = """
 You are tasked with creating a plan for navigating a webpage. The plan should be exhaustive in
@@ -72,11 +72,14 @@ Help getting started/>
 [11]<button visibility_off
 Dismiss/>
 [12]<div />
+Your output should be a list of plans under a two-tier hierarchy.
+At the first level (UIGroup), you should decompose the page into non-overlapping UI hierarchies,
+each of which captures a set of interactive elements
+At the second level, these are the set of actions to be performed on the UI hierarchy
 Here are some things to watch for when creating the plan:
-- if popups are present, always prioritize closing them first
 - always refer to interactive elements by their name / description rather than by their numeric
 label
-- interactions that are more likely to lead to new functionalities should be ranked higher
+- UIGroups that are more likely to lead to new functionalities should be ranked higher in the list
 Now generate your plan
 Understand the content and provide
 the parsed objects in json that match the following json_schema:
@@ -99,19 +102,40 @@ the parsed objects in json that match the following json_schema:
       ],
       "title": "PlanItem",
       "type": "object"
+    },
+    "UIGroup": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/PlanItem"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "items"
+      ],
+      "title": "UIGroup",
+      "type": "object"
     }
   },
   "properties": {
-    "plan_items": {
+    "ui_groups": {
       "items": {
-        "$ref": "#/$defs/PlanItem"
+        "$ref": "#/$defs/UIGroup"
       },
-      "title": "Plan Items",
+      "title": "Ui Groups",
       "type": "array"
     }
   },
   "required": [
-    "plan_items"
+    "ui_groups"
   ],
   "title": "Plan",
   "type": "object"
@@ -119,12 +143,10 @@ the parsed objects in json that match the following json_schema:
 Make sure to return an instance of the JSON, not the schema itself
 """
 
-plan = CreatePlan().invoke_with_msgs(
-    model=openai_4o,
+plan = CreatePlanNested().invoke_with_msgs(
+    model=deepseek_r1,
     msgs=MSG
 )
 print(plan)
-
-
 
 

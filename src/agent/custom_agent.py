@@ -31,7 +31,7 @@ from browser_use.browser.views import BrowserState
 from json_repair import repair_json
 from src.utils.agent_state import AgentState
 from src.agent.client import AgentClient
-from src.llm_provider import LMP
+from src.llm_models import llm_hub, LLMHub
 
 from httplib import HTTPMessage
 
@@ -48,10 +48,16 @@ from .http_history import HTTPHistory, HTTPHandler, BAN_LIST
 
 from .discovery import (
     CreatePlan,
+    # CreatePlanNested,
     CheckPlanCompletion,
     DetermineNewPage,
+    UpdatePlan,
+    NewPageStatus,
+    NavPage,
     TASK_PROMPT_WITH_PLAN,
-    Plan
+    Plan,
+    AddPlanItemList,
+    CompletedPlans
 )
 
 agent_log, full_log = get_agent_loggers()
@@ -66,7 +72,7 @@ class AgentMode(Enum):
     NOOP = auto()
 
 class Event(Enum):
-    NOOP_NAV	   = auto()
+    NAV_START      = auto()
     NAV_SUCCESS    = auto()
     NAV_FAILED     = auto()
     TASK_COMPLETE  = auto()
@@ -74,12 +80,15 @@ class Event(Enum):
     SHUTDOWN       = auto()
 
 TRANSITIONS = {
-    (AgentMode.NOOP, Event.NOOP_NAV):    AgentMode.NAVIGATION,
-    (AgentMode.NAVIGATION, Event.NAV_SUCCESS):    AgentMode.TASK_EXECUTION,
-    (AgentMode.NAVIGATION, Event.NAV_FAILED):     AgentMode.NAVIGATION,
-    (AgentMode.TASK_EXECUTION, Event.TASK_COMPLETE): AgentMode.NAVIGATION,
+    (AgentMode.NOOP, Event.NAV_START):    AgentMode.NAVIGATION,
+    (AgentMode.TASK_EXECUTION, Event.NAV_START): AgentMode.NAVIGATION, # NOT IMPLEMENTED
     (AgentMode.TASK_EXECUTION, Event.BACKTRACK):  AgentMode.NAVIGATION,
+    (AgentMode.NAVIGATION, Event.NAV_FAILED):     AgentMode.NAVIGATION, # NOT IMPLEMENTED
+    (AgentMode.NAVIGATION, Event.NAV_SUCCESS):    AgentMode.TASK_EXECUTION, # need to differentiate backtrack (no plan change)
 }
+
+class EarlyShutdown(Exception):
+    pass
 
 NO_OP_TASK = """
 This is a no-op task. The agent will not take any action
@@ -89,19 +98,102 @@ Make sure to:
 """
 
 NAVIGATE_TO_PAGE_PROMPT = """
-Navigate to the following page:
+Here is the current page contents:
+{curr_page_contents}
 
+Navigate to the following page using the goto action:
 {url}
 
-First, determine if its possible to navigate to the page through UI interactions
-If so, do that. If not, use the goto action to perform the navigation
+EVALUATION NOTE: the URL may have been redirected, so just just judging by the success of the URL is not enough
+to determine if navigation was successful
 """
+
+async def _create_or_update_plan(
+    llm: LLMHub,
+    curr_page_contents: str,
+    curr_url: str,
+    step_number: int,
+    # New parameters - previously accessed via self.state
+    prev_page_contents: str,
+    prev_url: str,
+    eval_prev_goal: str,
+    prev_goal: str,
+    curr_plan: Plan,
+    # New parameters - previously accessed via self
+    homepage_contents: str,
+    homepage_url: str,
+) -> Tuple[Optional[Event], Optional[str], Plan, Plan, Optional[NavPage]]:  # Added return values for updated plan and subpages
+    """
+    REMOVED STATE WRITE OPERATIONS:
+    1. self.state.plan = curr_plan (line removed from original)
+    2. self._set_plan(curr_plan) (line removed from original)
+    3. self.subpages.append((curr_url, curr_page_contents, nav_page.name)) (line removed from original)
+    
+    Now returns: (event, new_task, updated_plan, updated_subpages)
+    """
+    new_task = None
+    event = None
+    old_plan = curr_plan
+
+    curr_plan = CheckPlanCompletion().invoke(
+        model=llm.get("default"),
+        prompt_args={
+            "plan": curr_plan,
+            "prev_page_contents": prev_page_contents,
+            "curr_page_contents": curr_page_contents,
+            "prev_goal": prev_goal
+        },
+        prompt_logger=full_log
+    )
+    
+    # if step_number > 1 and step_number % DEDUP_AFTER_STEPS == 0:
+    # 	curr_plan = deduplicate_plan(llm, curr_plan)
+    
+    nav_page: NavPage = DetermineNewPage().invoke(
+        model=llm.get("default"), 
+        prompt_args={
+            "curr_page_contents": curr_page_contents, 
+            "prev_page_contents": prev_page_contents, 
+            "curr_url": curr_url, 
+            "prev_url": prev_url, 
+            "prev_goal": prev_goal,
+            "homepage_contents": homepage_contents,
+            "homepage_url": homepage_url
+        },
+        prompt_logger=full_log
+    )
+    if nav_page.status == NewPageStatus.NEW_PAGE:
+        new_task = NAVIGATE_TO_PAGE_PROMPT.format(
+            curr_page_contents=curr_page_contents,
+            url=homepage_url
+        )
+        agent_log.info(f"Discovered [new_page]: {curr_url}")
+        agent_log.info(f"Navigating back to homepage:{homepage_url}")
+        event = Event.BACKTRACK
+    elif nav_page.status == NewPageStatus.SUBPAGE:
+        agent_log.info(f"Discovered [subpage]: {nav_page.name}")
+        curr_plan = UpdatePlan().invoke(
+            model=llm.get("default"),
+            prompt_args={
+                "plan": curr_plan,
+                "curr_page_contents": curr_page_contents,
+                "prev_page_contents": prev_page_contents,
+                "prev_goal": prev_goal,
+                "eval_prev_goal": eval_prev_goal
+            },
+            prompt_logger=full_log
+        )
+        new_task = TASK_PROMPT_WITH_PLAN.format(plan=curr_plan)        
+    else:
+        agent_log.info("No task updates")
+
+    return event, new_task, curr_plan, old_plan, nav_page
 
 class CustomAgent(Agent):
     def __init__(
         self,
         start_url: str,
-        llm: BaseChatModel,
+        llm: LLMHub,
         start_task: str = "", # TODO: task for handling all initial logic
         add_infos: str = "",
         # Optional parameters
@@ -157,7 +249,7 @@ class CustomAgent(Agent):
     ):
         super(CustomAgent, self).__init__(
             task=NO_OP_TASK,
-            llm=llm,
+            llm=llm_hub,
             browser=browser,
             browser_context=browser_context,
             controller=controller or Controller(),
@@ -187,7 +279,7 @@ class CustomAgent(Agent):
             injected_agent_state=None,
             context=context,
         )
-        self.llm: BaseChatModel
+        self.llm: LLMHub
         self.agent_name = agent_name
         self.close_browser = close_browser
         self.curr_page = None
@@ -226,12 +318,14 @@ class CustomAgent(Agent):
             ),
             state=self.state.message_manager_state,
         )
-
         self.step_http_msgs = []
         self.mode = AgentMode.NOOP
         self.pages = [start_url]
         self.subpages = []
         self._set_task(NO_OP_TASK)
+
+        self._backtrack = False
+
 
     def handle_page(self, page):
         self.curr_page = page
@@ -260,6 +354,8 @@ class CustomAgent(Agent):
         agent_log.info(f"Captured {len(http_msgs)} HTTP Messages")
         for msg in http_msgs:
             agent_log.info(f"[Agent] {msg.request.url}")
+
+        agent_log.info(f"Current plan:\n{self._get_plan()}")
 
     def _setup_action_models(self) -> None:
         """Setup dynamic action models from controller's registry"""
@@ -331,71 +427,6 @@ class CustomAgent(Agent):
                 browser_actions
             )
     
-    # TODO: should try to remove the plan variables from state
-    async def _create_or_update_plan(
-        self,
-        curr_page_contents: str,
-        cur_url: str,
-        step_number: int
-    ) -> Tuple[str, Optional[str]]:
-        prev_page_contents = self.state.prev_page_contents
-        curr_plan = self.state.plan
-        prev_url = self.state.prev_url
-        eval_prev_goal = self.state.eval_prev_goal
-        prev_goal = self.state.prev_goal
-
-        result_task = self.state.task
-        result_secondary = None
-
-        curr_plan = CheckPlanCompletion().invoke(
-            model=self.llm,
-            prompt_args={
-                "plan": curr_plan,
-                "prev_page_contents": prev_page_contents,
-                "curr_page_contents": curr_page_contents,
-                "prev_goal": prev_goal
-            }
-        )
-        # if step_number > 1 and step_number % DEDUP_AFTER_STEPS == 0:
-        # 	curr_plan = deduplicate_plan(self.llm, curr_plan)
-
-        self.state.plan = curr_plan
-        nav_page = DetermineNewPage().invoke(
-            model=self.llm, 
-            prompt_args={
-                "curr_page_contents": curr_page_contents, 
-                "prev_page_contents": prev_page_contents, 
-                "curr_url": cur_url, 
-                "prev_url": prev_url, 
-                "prev_goal": prev_goal,
-                "homepage_contents": self.homepage_contents,
-                "homepage_url": self.homepage_url
-            }
-        )
-
-        # if nav_page.page_type == NewPageStatus.NEW_PAGE:
-        #     result_task = UNDO_NAVIGATION_TASK_TEMPLATE.format(
-        #         prev_url=prev_url,
-        #         prev_page_contents=prev_page_contents
-        #     )
-        #     result_secondary = self.state.task
-        #     self.state.pages.append(cur_url)
-        #     self.agent_log(f"[PLAN]: New page, navigating back from {cur_url}")
-        # elif nav_page.page_type == NewPageStatus.UPDATED_PAGE:
-        #     curr_plan = update_plan(
-        #         self.llm, curr_page_contents, prev_page_contents, curr_plan, eval_prev_goal
-        #     )
-        #     self.state.plan = curr_plan
-        #     result_task = PLANNING_TASK_TEMPLATE.format(plan=curr_plan)
-        #     result_secondary = None
-        #     self.state.subpages.append((cur_url, curr_page_contents, nav_page.name))
-        #     # self.agent_log(f"[PLAN] Updated plan: {curr_plan}")
-        # else:
-        #     self.agent_log("[PLAN]: No task updates")
-        #     # result_task and result_secondary already set to old task
-
-        return result_task, result_secondary
-
     async def _get_browser_state(self):
         browser_state = await self.browser_context.get_state()
         curr_url = (await self.browser_context.get_current_page()).url
@@ -446,58 +477,95 @@ class CustomAgent(Agent):
         event    = Event.NAV_FAILED if failed else Event.NAV_SUCCESS
         return event
 
-    async def _task_think(self, state, html, url, info):
-        # # Plan management
-        # task_prompt, replace_task, evt = await self._create_or_update_plan(html, url, info.step_number)
-        # if replace_task:			# back-navigation case
-        # 	self.state.task = replace_task
+    async def _task_think(self, page_contents: str, url: str, step_info: CustomAgentStepInfo):
+        curr_plan = self._get_plan()
+        if curr_plan is None:
+            raise EarlyShutdown("No plan found, should not happen")
 
-        # model_output = await self._invoke_llm(state, task_prompt)
+        event, new_task, new_plan, old_plan, nav_page = await _create_or_update_plan(
+            llm=self.llm,
+            curr_page_contents=page_contents,
+            curr_url=url,
+            step_number=step_info.step_number,
+            # Parameters from self.state
+            prev_page_contents=self.state.prev_page_contents,
+            prev_url=self.state.prev_url,
+            eval_prev_goal=self.state.eval_prev_goal,
+            prev_goal=self.state.prev_goal,
+            curr_plan=curr_plan,
+            # Parameters from self
+            homepage_contents=self.homepage_contents,
+            homepage_url=self.homepage_url,
+        )
+        if event == Event.BACKTRACK:
+            self._backtrack = True
+            self._replace_plan = old_plan
 
-        # if evt:						# NEW_PAGE/BACKTRACK already decided
-        # 	return evt, model_output
-
-        # plan_done = self._plan_complete(self.ctx.plan)
-        # if plan_done or info.page_steps >= self.page_max_steps:
-        # 	return Event.TASK_COMPLETE, model_output
-
-        # return None, model_output	# remain in TASK_EXECUTION
-        pass
+        return event, new_task, new_plan, nav_page
 
     # NOTE: should not use state here??
-    async def _transition(self, event: Event | None, new_url: str, new_page_contents: str) -> None:
+    async def _transition(
+        self, 
+        event: Event | None, 
+        new_url: str, 
+        new_page_contents: str,
+        new_plan: Plan | None = None,
+        new_task: str | None = None,
+        nav_page: NavPage | None = None,
+    ) -> None:
+        """Do all task transitions and updates to page structure here"""
         if event is None:
             return
 
         next_mode = TRANSITIONS.get((self.mode, event))
         if next_mode is None:
-            agent_log.info(f"[TRANSITION] No transition staying in {self.mode}")
-            return
- 
-        agent_log.info(f"[TRANSITION] {self.mode} -> {next_mode}")
-        self.mode = next_mode
-
-        if next_mode is AgentMode.NAVIGATION:
-            # Pop next target, build nav task
-            target = self.pages.pop()
-            task = NAVIGATE_TO_PAGE_PROMPT.format(url=target)
-            self._set_task(task)
-        elif next_mode is AgentMode.TASK_EXECUTION:
-            if event == Event.NAV_SUCCESS:
-                self.pages.append(new_url)
-                self.homepage_url = new_url
-                self.homepage_contents = new_page_contents
-
-                new_plan = CreatePlan().invoke(
-                    model=self.llm,
-                    prompt_args={
-                        "curr_page_contents": new_page_contents
-                    },
-                    prompt_logger=full_log
-                )
+            agent_log.info(f"No transition staying in {self.mode}")
+            # TODO: having this here is ideal but dont see a way if we want to keep all task updates
+            # in transition
+            if next_mode is AgentMode.TASK_EXECUTION and new_task:
+                self._set_task(new_task, is_new_task=False)
                 self._set_plan(new_plan)
-                new_task = TASK_PROMPT_WITH_PLAN.format(plan=self.state.plan)
-                self._set_task(new_task, is_new_task=True)
+                if nav_page:
+                    self.subpages.append(nav_page.name)
+        else:
+            agent_log.info(f"{self.mode} -> {next_mode}")
+            self.mode = next_mode
+            if next_mode is AgentMode.NAVIGATION:
+                if event == Event.NAV_START:
+                    # Pop next target, build nav task
+                    target = self.pages.pop()
+                    task = NAVIGATE_TO_PAGE_PROMPT.format(
+                        curr_page_contents=new_page_contents,
+                        url=target
+                    )
+                    self._set_task(task, is_new_task=True)
+                elif event == Event.BACKTRACK:
+                    self.pages.append(new_url)
+                    self._set_task(new_task, is_new_task=True)
+            elif next_mode is AgentMode.TASK_EXECUTION:
+                if event == Event.NAV_SUCCESS:
+                    self.pages.append(new_url)
+                    self.homepage_url = new_url
+                    self.homepage_contents = new_page_contents
+
+                    # SPECIAL CASE: replace with original after navigation finished instead of creating new one
+                    if not self._backtrack:
+                        agent_log.info("Creating new plan")
+                        new_plan = CreatePlan().invoke(
+                            model=self.llm.get("default"),
+                            prompt_args={
+                                "curr_page_contents": new_page_contents
+                            },
+                            prompt_logger=full_log
+                        )
+                        self._set_plan(new_plan)
+                        new_task = TASK_PROMPT_WITH_PLAN.format(plan=new_plan)
+                        self._set_task(new_task, is_new_task=True)
+                    else:
+                        agent_log.info("Backtracking, replacing plan with original")
+                        self._set_plan(self._replace_plan)
+                        new_task = TASK_PROMPT_WITH_PLAN.format(plan=self._replace_plan)
+                        self._set_task(new_task, is_new_task=True)
 
         self.mode = next_mode
 
@@ -510,7 +578,7 @@ class CustomAgent(Agent):
         return self.state.plan
 
     def _set_task(self, task: str, is_new_task: bool = False) -> None:
-        self.state.task = task
+        self.state.task = task            
 
     def _get_task(self) -> str:
         return self.state.task
@@ -518,10 +586,17 @@ class CustomAgent(Agent):
     async def _update_state(
         self,
         result: list,
-        model_output,
+        model_output: CustomAgentOutput,
         step_info,
         input_messages: list,
+        new_url: str,
+        new_page_contents: str,
     ) -> None:
+        self.state.prev_goal = model_output.current_state.next_goal
+        self.state.eval_prev_goal = model_output.current_state.evaluation_previous_goal
+        self.state.prev_url = new_url
+        self.state.prev_page_contents = new_page_contents
+
         http_msgs = await self.http_handler.flush()
         self.step_http_msgs = self.http_history.filter_http_messages(http_msgs)
         browser_actions = BrowserActions(
@@ -560,7 +635,8 @@ class CustomAgent(Agent):
     @time_execution_async("--step")
     async def step(self, step_info: CustomAgentStepInfo) -> None:
         """Execute one step of the task"""
-        agent_log.info(f"Step {self.state.n_steps}")
+        agent_log.info(f"-------[Step {self.state.n_steps}]-------")
+        full_log.info(f"-------[Step {self.state.n_steps}]-------")
         model_output = None
         result: List[ActionResult] = []
         step_start_time = time.time() 
@@ -580,15 +656,19 @@ class CustomAgent(Agent):
             )
             new_browser_state, new_url, new_page_contents = await self._get_browser_state()
 
+            new_task = None
+            new_plan = None
+            nav_page = None
+
             if self.mode == AgentMode.NAVIGATION:
                 evt = await self._nav_think(model_output, step_info)
             elif self.mode == AgentMode.TASK_EXECUTION:
-                await self._task_think(self.state, new_page_contents, new_url, step_info)
+                evt, new_task, new_plan, nav_page = await self._task_think(new_page_contents, new_url, step_info)
             elif self.mode == AgentMode.NOOP:
-                evt = Event.NOOP_NAV
+                evt = Event.NAV_START
 
-            await self._transition(evt, new_url, new_page_contents)
-            await self._update_state(result, model_output, step_info, input_messages)
+            await self._transition(evt, new_url, new_page_contents, new_plan, new_task, nav_page)
+            await self._update_state(result, model_output, step_info, input_messages, new_url, new_page_contents)
 
         except InterruptedError:
             agent_log.debug("Agent paused")
