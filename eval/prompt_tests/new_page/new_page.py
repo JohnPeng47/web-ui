@@ -3,31 +3,31 @@ from src.llm_models import openai_4o, cohere_command_a
 
 MSGS = """
 Here is the current page:
-URL: http://147.79.78.153:3000/#/search
+URL: http://147.79.78.153:3000/#/
 Contents:
 [0]<div />
 OWASP Juice Shop
+Account
+[1]<a exit_to_app
+Login/>
 Contact
-[1]<a feedback
+[2]<a feedback
 Customer Feedback/>
 Company
-[2]<a business_center
+[3]<a business_center
 About Us/>
-[3]<a camera
+[4]<a camera
 Photo Wall/>
-[4]<a school
+[5]<a school
 Help getting started/>
-[5]<a GitHub/>
+[6]<a GitHub/>
 OWASP Juice Shop
 v17.3.0
-[6]<div />
+[7]<div />
 menu
 OWASP Juice Shop
 search
-account_circle
-Account
 language
-EN
 All Products
 Apple Juice (1000ml)
 1.99¤
@@ -38,42 +38,49 @@ Banana Juice (1000ml)
 Only 1 left
 Best Juice Shop Salesman Artwork
 5000¤
+[8]<img />
 Carrot Juice (1000ml)
 2.99¤
+[9]<img />
 Eggfruit Juice (500ml)
 8.99¤
-Fruit Press
-89.99¤
-Green Smoothie
+[10]<img />
+[11]<img />
+
+Here is the previous page:
+URL: http://147.79.78.153:3000/#/
+Contents:
+[0]<button menu/>
+[1]<button OWASP Juice Shop/>
+[2]<img />
+search
+[3]<button language
+EN/>
+All Products
+[4]<img />
+Apple Juice (1000ml)
+1.99¤
+[5]<img />
+Apple Pomace
+0.89¤
+[6]<img />
+Banana Juice (1000ml)
 1.99¤
 Only 1 left
 [7]<img />
-Juice Shop "Permafrost" 2020 Edition
-9999.99¤
+Best Juice Shop Salesman Artwork
+5000¤
 [8]<img />
-Lemon Juice (500ml)
+Carrot Juice (1000ml)
 2.99¤
-Only 3 left
 [9]<img />
-Melon Bike (Comeback-Product 2018 Edition)
-2999¤
-Sold Out
+Eggfruit Juice (500ml)
+8.99¤
 [10]<img />
-OWASP Juice Shop "King of the Hill" Facemask
-13.49¤
-Items per page:
-[11]<mat-select 12/>
-1 – 12 of 36
-[12]<button />
-[13]<button />
-
-Here is the previous page:
-URL: 
-Contents:
-
+[11]<img />
 
 Here is the previous goal that resulted in a transition to the current page:
-
+Since the navigation and verification are complete, there is no further action required for this task.
 
 Here is the homepage:
 URL: http://147.79.78.153:3000/#/
@@ -82,70 +89,43 @@ Contents:
 [1]<button OWASP Juice Shop/>
 [2]<img />
 search
-[3]<button account_circle
-Account/>
-[4]<button language
+[3]<button language
 EN/>
 All Products
-[5]<img />
+[4]<img />
 Apple Juice (1000ml)
 1.99¤
-[6]<img />
+[5]<img />
 Apple Pomace
 0.89¤
-[7]<img />
+[6]<img />
 Banana Juice (1000ml)
 1.99¤
 Only 1 left
-[8]<img />
+[7]<img />
 Best Juice Shop Salesman Artwork
 5000¤
-[9]<img />
+[8]<img />
 Carrot Juice (1000ml)
 2.99¤
-[10]<img />
+[9]<img />
 Eggfruit Juice (500ml)
 8.99¤
+[10]<img />
 [11]<img />
-Fruit Press
-89.99¤
-[12]<img />
-Green Smoothie
-1.99¤
-Only 1 left
-[13]<img />
-Juice Shop "Permafrost" 2020 Edition
-9999.99¤
-[14]<img />
-Lemon Juice (500ml)
-2.99¤
-Only 3 left
-[15]<img />
-Melon Bike (Comeback-Product 2018 Edition)
-2999¤
-Sold Out
-[16]<img />
-OWASP Juice Shop "King of the Hill" Facemask
-13.49¤
-Items per page:
-[17]<mat-select 12/>
-1 – 12 of 36
-[18]<button />
-[19]<button />
 
 Now try to determine if the current page is a:
 - new_page: a completely different page from the *homepage* but still part of the same web application
 - subpage: a different view of the homepage (ie. popup, menu dropdown, etc.)
 - out_of_scope: a completely different website from the *homepage*
 
+Some guidance:
+- when picking the name for a subpage, try to pick something descriptive of the new view that is introduced in the subpage from the previous page
+
 Now answer with the status of the current page
         
-
-
 Understand the content and provide
 the parsed objects in json that match the following json_schema:
-
-
 {
   "$defs": {
     "NewPageStatus": {
@@ -181,7 +161,7 @@ Make sure to return an instance of the JSON, not the schema itself
 
 for i in range(10):
     nav_page = DetermineNewPage().invoke_with_msgs(
-        model=cohere_command_a,
+        model=openai_4o,
         msgs=MSGS
     )
     print(nav_page)

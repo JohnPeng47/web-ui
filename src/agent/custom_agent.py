@@ -92,6 +92,7 @@ class EarlyShutdown(Exception):
 
 NO_OP_TASK = """
 This is a no-op task. The agent will not take any action
+Actually, if there are popups on the page, dismiss them
 
 Make sure to:
 - automatically evaluate this current task as successful by the next agentic step
@@ -104,6 +105,7 @@ Here is the current page contents:
 Navigate to the following page using the goto action:
 {url}
 
+Put as your next goal: Come up with a plan for the new page
 EVALUATION NOTE: the URL may have been redirected, so just just judging by the success of the URL is not enough
 to determine if navigation was successful
 """
@@ -150,7 +152,7 @@ async def _create_or_update_plan(
     # 	curr_plan = deduplicate_plan(llm, curr_plan)
     
     nav_page: NavPage = DetermineNewPage().invoke(
-        model=llm.get("default"), 
+        model=llm.get("cohere_command_a"), 
         prompt_args={
             "curr_page_contents": curr_page_contents, 
             "prev_page_contents": prev_page_contents, 
@@ -178,8 +180,8 @@ async def _create_or_update_plan(
                 "plan": curr_plan,
                 "curr_page_contents": curr_page_contents,
                 "prev_page_contents": prev_page_contents,
-                "prev_goal": prev_goal,
-                "eval_prev_goal": eval_prev_goal
+                # "prev_goal": prev_goal,
+                # "eval_prev_goal": eval_prev_goal
             },
             prompt_logger=full_log
         )
@@ -343,8 +345,6 @@ class CustomAgent(Agent):
             emoji = "🤷"
 
         agent_log.info(f"{emoji} Eval: {response.current_state.evaluation_previous_goal}")
-        agent_log.info(f"🧠 New Memory: {response.current_state.important_contents}")
-        agent_log.info(f"🤔 Thought: {response.current_state.thought}")
         agent_log.info(f"🎯 Next Goal: {response.current_state.next_goal}")
         for i, action in enumerate(response.action):
             agent_log.info(
@@ -364,31 +364,11 @@ class CustomAgent(Agent):
         # Create output model with the dynamic actions
         self.AgentOutput = CustomAgentOutput.type_with_custom_actions(self.ActionModel)
 
-    def update_step_info(
-        self, model_output: CustomAgentOutput, step_info: Optional[CustomAgentStepInfo] = None
-    ):
-        """
-        update step info
-        """
-        if step_info is None:
-            return
-
-        step_info.step_number += 1
-        important_contents = model_output.current_state.important_contents
-        if (
-                important_contents
-                and "None" not in important_contents
-                and important_contents not in step_info.memory
-        ):
-            step_info.memory += important_contents + "\n"
-
-        agent_log.info(f"🧠 All Memory: \n{step_info.memory}")
-
     @time_execution_async("--get_next_action")
     async def get_next_action(self, input_messages: List[BaseMessage]) -> CustomAgentOutput:
         """Get next action from LLM based on current state"""
-        ai_message: BaseMessage = self.llm.invoke(
-            input_messages
+        ai_message: BaseMessage = self.llm.get("cohere_command_a").invoke(
+            input_messages,
         )
         self._message_manager._add_message_with_tokens(ai_message)
 
@@ -437,13 +417,11 @@ class CustomAgent(Agent):
     async def _execute_agent_step(
         self,
         browser_state: "BrowserState",
-        curr_url: str,
-        curr_page_contents: str,
         step_info: "CustomAgentStepInfo",
     ) -> Tuple[CustomAgentOutput, List[ActionResult], List[BaseMessage]]:
         self._message_manager.add_state_message(
-            self.state.task,
-            browser_state, 
+            self._get_task(),
+            browser_state,
             self.state.last_action, 
             self.state.last_result, 
             self.step_http_msgs,
@@ -457,11 +435,11 @@ class CustomAgent(Agent):
                 msg.type = ""
             model_output = await self.get_next_action(input_messages)
 
-            self.update_step_info(model_output, step_info)
+            step_info.step_number += 1
             self.state.n_steps += 1
             await self._raise_if_stopped_or_paused()
         except Exception as e:
-            # model call failed, remove last state message from history
+            # model call failed, rem    ove last state message from history
             self._message_manager._remove_state_message_by_index(-1)
             raise e
 
@@ -477,7 +455,7 @@ class CustomAgent(Agent):
         event    = Event.NAV_FAILED if failed else Event.NAV_SUCCESS
         return event
 
-    async def _task_think(self, page_contents: str, url: str, step_info: CustomAgentStepInfo):
+    async def _task_think(self, page_contents: str, url: str, step_info: CustomAgentStepInfo, model_output: CustomAgentOutput):
         curr_plan = self._get_plan()
         if curr_plan is None:
             raise EarlyShutdown("No plan found, should not happen")
@@ -490,8 +468,8 @@ class CustomAgent(Agent):
             # Parameters from self.state
             prev_page_contents=self.state.prev_page_contents,
             prev_url=self.state.prev_url,
-            eval_prev_goal=self.state.eval_prev_goal,
-            prev_goal=self.state.prev_goal,
+            eval_prev_goal=model_output.current_state.evaluation_previous_goal,
+            prev_goal=model_output.current_state.next_goal,
             curr_plan=curr_plan,
             # Parameters from self
             homepage_contents=self.homepage_contents,
@@ -569,7 +547,6 @@ class CustomAgent(Agent):
 
         self.mode = next_mode
 
-    # Managing task and plan
     def _set_plan(self, plan: Plan) -> None:
         full_log.info(f"[NEW PLAN]:\n{plan}")
         self.state.plan = plan
@@ -601,7 +578,6 @@ class CustomAgent(Agent):
         self.step_http_msgs = self.http_history.filter_http_messages(http_msgs)
         browser_actions = BrowserActions(
             actions=model_output.action,
-            thought=model_output.current_state.thought,
             goal=model_output.current_state.next_goal, 
         )
         if self.agent_client:
@@ -609,20 +585,8 @@ class CustomAgent(Agent):
         
         # TODO: check if we really need all of this
         # random state update stuff ...
-        for ret_ in result:
-            if ret_.extracted_content and "Extracted page" in ret_.extracted_content:
-                # record every extracted page
-                if ret_.extracted_content[:100] not in self.state.extracted_content:
-                    self.state.extracted_content += ret_.extracted_content
-
         self.state.last_result = result
         self.state.last_action = model_output.action
-        if len(result) > 0 and result[-1].is_done:
-            if not self.state.extracted_content:
-                self.state.extracted_content = step_info.memory
-            result[-1].extracted_content = self.state.extracted_content
-            agent_log.info(f"📄 Result: {result[-1].extracted_content}")
-
         self.state.consecutive_failures = 0
 
         self._log_response(
@@ -630,7 +594,6 @@ class CustomAgent(Agent):
             current_msg=input_messages[-1],
             response=model_output
         )
-        # TODO: add agent_client update here so we can send shutdown signal right before next step
 
     @time_execution_async("--step")
     async def step(self, step_info: CustomAgentStepInfo) -> None:
@@ -641,19 +604,12 @@ class CustomAgent(Agent):
         result: List[ActionResult] = []
         step_start_time = time.time() 
         tokens = 0
-        curr_page: str = ""
-        curr_url: str = ""
 
         try:    
             # TODO: do we need this?
             # await self._raise_if_stopped_or_paused()
             browser_state, curr_url, curr_page_contents = await self._get_browser_state()
-            model_output, result, input_messages = await self._execute_agent_step(
-                browser_state, 
-                curr_url, 
-                curr_page_contents, 
-                step_info
-            )
+            model_output, result, input_messages = await self._execute_agent_step(browser_state, step_info)
             new_browser_state, new_url, new_page_contents = await self._get_browser_state()
 
             new_task = None
@@ -663,12 +619,12 @@ class CustomAgent(Agent):
             if self.mode == AgentMode.NAVIGATION:
                 evt = await self._nav_think(model_output, step_info)
             elif self.mode == AgentMode.TASK_EXECUTION:
-                evt, new_task, new_plan, nav_page = await self._task_think(new_page_contents, new_url, step_info)
+                evt, new_task, new_plan, nav_page = await self._task_think(new_page_contents, new_url, step_info, model_output)
             elif self.mode == AgentMode.NOOP:
                 evt = Event.NAV_START
 
-            await self._transition(evt, new_url, new_page_contents, new_plan, new_task, nav_page)
             await self._update_state(result, model_output, step_info, input_messages, new_url, new_page_contents)
+            await self._transition(evt, new_url, new_page_contents, new_plan, new_task, nav_page)
 
         except InterruptedError:
             agent_log.debug("Agent paused")

@@ -26,8 +26,6 @@ class CustomAgentBrain(BaseModel):
     """Current state of the agent"""
 
     evaluation_previous_goal: str
-    important_contents: str
-    thought: str
     next_goal: str
 
 
