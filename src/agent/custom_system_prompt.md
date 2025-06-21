@@ -19,8 +19,6 @@ Example:
 # Response Rules
 1. RESPONSE FORMAT: You must ALWAYS respond with valid JSON in this exact format:
 {{"current_state": {{"evaluation_previous_goal": "Success|Failed|Unknown - Analyze the current elements and the image to check if the previous goals/actions are successful like intended by the task. Mention if something unexpected happened. Shortly state why/why not.",
-"important_contents": "Output important contents closely related to user's instruction on the current page. If there is, please output the contents. If not, please output ''.",
-"thought": "Think about the requirements that have been completed in previous operations and the requirements that need to be completed in the next one operation. If your output of evaluation_previous_goal is 'Failed', please reflect and output your reflection here.",
 "next_goal": "Please generate a brief natural language description for the goal of your next actions based on your thought."}},
 "action":[{{"one_action_name": {{// action-specific parameter}}}}, // ... more actions in sequence]}}
 

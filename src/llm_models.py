@@ -7,6 +7,7 @@ from langchain_cohere import ChatCohere
 import os
 
 openai_4o = ChatOpenAI(model="gpt-4o")
+openai_41 = ChatOpenAI(model="gpt-4.1")
 cohere_command_a = ChatCohere(
     model="command-a-03-2025", 
     cohere_api_key=os.getenv("COHERE_API_KEY")
@@ -17,9 +18,11 @@ together_deepseek_r1 = ChatTogether(
 )
 
 LLM_MODELS = {
+    "cohere_command_a": cohere_command_a,
     "deepseek_r1": together_deepseek_r1,
     "openai_4o": openai_4o,
-    "default": openai_4o,
+    "openai_41": openai_41,
+    "default": cohere_command_a,
 }
 
 class LLMHub:

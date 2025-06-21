@@ -12,5 +12,4 @@ class BrowserActions(BaseModel):
     page_content: str = ""
     page_url: str = ""
     actions: Optional[List[ActionModel]] = Field(default_factory=list)
-    thought: Optional[str] = ""
     goal: Optional[str] = ""
