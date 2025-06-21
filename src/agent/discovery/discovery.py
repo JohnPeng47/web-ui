@@ -33,8 +33,7 @@ class AddPlanItemList(BaseModel):
 
 class UpdatePlan(LMP):
     prompt = """
-Here is the current plan:
-{{plan}}
+You are performing QA testing on a web application. Your task is to uncover/explore all user flows of the application
     
 Here is the current webpage:
 {{curr_page_contents}}
@@ -42,11 +41,11 @@ Here is the current webpage:
 Here is the previous webpage:
 {{prev_page_contents}}
 
-Here is the evaluation of the previous goal that led to a transition to the current webpage:
-{{prev_goal_eval}}
+Here is the previous plan:
+{{plan}}
 
 Now determine if the plan needs to be updated. This should happen in the following cases:
-- some new UI elements have been discovered adding an area to explore that is not covered by a previous plan item
+- the UI has changed between the previous and current webpage and some new interactive elements have been discovered that are not covered by the current plan
 
 Now return your response as a list of plan items that will get added to the plan. 
 This list should be empty if the plan does not need to be updated
@@ -58,7 +57,10 @@ This list should be empty if the plan does not need to be updated
         res.apply(plan)
 
         new_plan_items = '\n'.join([str(item) for item in res.plan_items])
-        agent_log.info(f"Added plan items:\n{new_plan_items}")
+        if new_plan_items:
+            agent_log.info(f"Added plan items:\n{new_plan_items}")
+        else:
+            agent_log.info("No plan items to add")
         return plan
 
 ## check plan completion
