@@ -84,7 +84,7 @@ Here is the previous webpage:
 Here is the previous goal that resulted in a transition to the current webpage:
 {{prev_goal}}
 
-Now try to determine which plan items have been completed by the agent
+Now try to determine which *new* plan items have been completed by the agent
 """
     response_format: Type[CompletedPlans] = CompletedPlans
 
@@ -92,8 +92,8 @@ Now try to determine which plan items have been completed by the agent
         plan: Plan = prompt_args["plan"]
         for compl in res.completed_plans:
             # +1 because plan items are 1-indexed
-            plan.plan_items[compl + 1].completed = True
-            agent_log.info(f"Completed plan item: {plan.plan_items[compl + 1].description}")
+            plan.plan_items[compl - 1].completed = True
+            agent_log.info(f"Completed plan item: {plan.plan_items[compl - 1].description}")
         return plan
     
 ## new page
