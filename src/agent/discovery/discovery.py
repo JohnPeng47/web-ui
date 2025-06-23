@@ -126,7 +126,7 @@ URL: {{prev_url}}
 Contents:
 {{prev_page_contents}}
 
-Here is the goal and action that resulted in a transition to the current page:
+Here is the goal that resulted in a transition to the current page:
 {{curr_goal}}
 
 Here is the homepage:
