@@ -3,9 +3,14 @@ from langchain_openai import ChatOpenAI
 from langchain_together import ChatTogether
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_cohere import ChatCohere
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 import os
 
+gemini_25_flash = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",
+    api_key=os.getenv("GEMINI_API_KEY")
+)
 openai_4o = ChatOpenAI(model="gpt-4o")
 openai_41 = ChatOpenAI(model="gpt-4.1")
 cohere_command_a = ChatCohere(
@@ -22,6 +27,7 @@ LLM_MODELS = {
     "deepseek_r1": together_deepseek_r1,
     "openai_4o": openai_4o,
     "openai_4.1": openai_41,
+    "gemini_25_flash": gemini_25_flash,
     "default": cohere_command_a,
 }
 

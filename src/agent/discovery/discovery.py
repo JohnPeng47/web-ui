@@ -4,7 +4,12 @@ from typing import List, Type
 import enum
 
 from .planv1 import Plan, PlanItem, CreatePlan as CreatePlan
-from .planv2 import CreatePlanNested
+from .planv3 import (
+    CreatePlanNested, 
+    UpdatePlanNested, 
+    CheckNestedPlanCompletion, 
+    CompletedNestedPlanItem
+)
 
 from pentest_bot.logger import get_agent_loggers
 
