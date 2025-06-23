@@ -5,9 +5,6 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 from src.llm_provider import LMP
-from src.agent.custom_agent import get_agent_loggers
-
-agent_log, full_log = get_agent_loggers()
 
 class PlanItem(BaseModel):
     description: str
@@ -63,18 +60,16 @@ class PlanItem(BaseModel):
         return parent._add_child(description=description, completed=completed)
     
     # -------------------- pretty print ----------------------- #
-    def _collect_lines(self, prefix: List[int], out: List[str], level: int = 0) -> None:
-        indent = "  " * level
-        status = "[ * ]" if self.completed else "[   ]"
-        out.append(f"{indent}{status} [{'.'.join(map(str, prefix))}] {self.description}")
+    def _collect_lines(self, prefix: List[int], out: List[str]) -> None:
+        out.append(f"[{'.'.join(map(str, prefix))}] {self.description}")
         for i, child in enumerate(self.children, start=1):
-            child._collect_lines(prefix + [i], out, level + 1)
+            child._collect_lines(prefix + [i], out)
 
     def __str__(self) -> str:  # noqa: D401
         lines: List[str] = []
-        self._collect_lines([1], lines, 0)
+        self._collect_lines([1], lines)
         return "\n".join(lines)
-    
+
     class Config:
         arbitrary_types_allowed = True
 
@@ -112,7 +107,6 @@ class AddPlanItemList(BaseModel):
 
     def apply(self, plan: PlanItem):
         for item in self.plan_items:
-            agent_log.info(f"Adding to parent index: {item.parent_index}")
             plan.add(item.parent_index, item.description)
         return plan
 
@@ -171,16 +165,10 @@ Now try to determine which *new* plan items have been completed by the agent and
 
 if __name__ == "__main__":
     root = PlanItem(description="Page")
-    # Prepare AddPlanItemList to add several items
-    add_items = AddPlanItemList(
-        plan_items=[
-            AddPlanItem(parent_index="", description="Subpage"),
-            AddPlanItem(parent_index="1", description="Click Me"),
-            AddPlanItem(parent_index="", description="Subpage 2"),
-            AddPlanItem(parent_index="", description="Profile"),
-        ]
-    )
-    add_items.apply(root)
+    root.add_to_root("Subpage")
+    root.add("1.1", "Click Me")
+    root.add_to_root("Subpage 2")
+    root.add_to_root("Profile")
 
     print(root)
-    print("get(\"1.1\") ->", root.get("1.1"))
+    print("get('1.1') ->", root.get("1.1"))

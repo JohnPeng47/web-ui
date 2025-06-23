@@ -7,7 +7,7 @@ from src.llm_models import (
 )
 
 MSG = """
-You are web-spidering a web application. Your task is to uncover/explore all user flows of the application
+You are performing QA testing on a web application. Your task is to uncover/explore all user flows of the application
     
 Here is the current webpage:
 [0]<div />
@@ -97,28 +97,32 @@ Juice Shop "Permafrost" 2020 Edition
 
 Here is the previous plan:
 [1] HomePage
-[1.1] Click on the 'menu' button to open the navigation menu and explore available options.
-[1.2] Click on the 'OWASP Juice Shop' button to navigate to the homepage or main landing page.
-[1.3] Click on the 'account_circle Account' button to access user account settings, login, or registration.
-[1.4] Click on the 'language EN' button to change the language of the webpage.
-[1.5] Click on any product image (e.g., Apple Juice, Fruit Press) to view detailed product information.
-[1.6] Click on the 'search' field to enter a search query and find specific products or content.
-[1.7] Interact with products displaying 'Only 1 left' (e.g., Banana Juice, Green Smoothie) to add them to the cart before they run out.
-[1.8] Click on the 'Best Juice Shop Salesman Artwork' to view or purchase the artwork.
-[1.9] Scroll through the 'All Products' section to browse available items and their prices.
-[1.10] Interact with high-value items (e.g., 'Juice Shop "Permafrost" 2020 Edition') to view details or add to cart.
+[1.1] Input a search query into the search bar to find specific products.
+[1.2] Click the 'menu' button to explore the main navigation options.
+[1.3] Click the 'OWASP Juice Shop' button to navigate to the main landing page.
+[1.4] Click the 'Account' button to access account management options like login or registration.
+[1.5] Click the 'EN' button to change the language of the website.
+[1.6] Click on 'Apple Juice (1000ml)' to view its detailed product page.
+[1.7] Click on 'Apple Pomace' to view its detailed product page.
+[1.8] Click on 'Banana Juice (1000ml)' to view its detailed product page.
+[1.9] Click on 'Best Juice Shop Salesman Artwork' to view its detailed product page.
+[1.10] Click on 'Carrot Juice (1000ml)' to view its detailed product page.
+[1.11] Click on 'Eggfruit Juice (500ml)' to view its detailed product page.
+[1.12] Click on 'Fruit Press' to view its detailed product page.
+[1.13] Click on 'Green Smoothie' to view its detailed product page.
+[1.14] Click on 'Juice Shop "Permafrost" 2020 Edition' to view its detailed product page.
 
 Now determine if the plan needs to be updated. This should happen in the following cases:
 - the UI has changed between the previous and current webpage and some new interactive elements have been discovered that are not covered by the current plan
 
 Here are some guidelines:
-- first, think through the information above:
---> make observations on *which* sub-level (and corresponding index) of the plan the current navigation based on the page transition information
---> think about appropriate subplans to add here
+- try first determine which nested sub-level the current navigation is at
 - then, if the plans need updating, use the tree indexing notation [a.b.c..] to find the parent_index to add the plans to
 
 Now return your response as a list of plan items that will get added to the plan. 
 This list should be empty if the plan does not need to be updated
+        
+
 
 Understand the content and provide
 the parsed objects in json that match the following json_schema:
@@ -172,7 +176,5 @@ for i in range(5):
         msgs=MSG
     )
     print(plan)
-
-
 
 

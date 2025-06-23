@@ -47,11 +47,13 @@ from .custom_views import CustomAgentStepInfo, CustomAgentState
 from .http_history import HTTPHistory, HTTPHandler, BAN_LIST
 
 from .discovery import (
-    CreatePlan,
-    # CreatePlanNested,
-    CheckPlanCompletion,
+    # CreatePlan,
+    # UpdatePlan,
+    CreatePlanNested,
+    UpdatePlanNested,
+    CheckNestedPlanCompletion,
+    CompletedNestedPlanItem,
     DetermineNewPage,
-    UpdatePlan,
     NewPageStatus,
     NavPage,
     TASK_PROMPT_WITH_PLAN,
@@ -85,6 +87,14 @@ TRANSITIONS = {
     (AgentMode.TASK_EXECUTION, Event.BACKTRACK):  AgentMode.NAVIGATION,
     (AgentMode.NAVIGATION, Event.NAV_FAILED):     AgentMode.NAVIGATION, # NOT IMPLEMENTED
     (AgentMode.NAVIGATION, Event.NAV_SUCCESS):    AgentMode.TASK_EXECUTION, # need to differentiate backtrack (no plan change)
+}
+
+MODEL_DICT = {
+    "browser_use": "default",
+    "check_plan_completion" : "default",
+    "determine_new_page" : "default",
+    "create_plan" : "default",
+    "update_plan" : "gemini_25_flash",
 }
 
 class EarlyShutdown(Exception):
@@ -137,8 +147,8 @@ async def _create_or_update_plan(
     event = None
     old_plan = curr_plan
 
-    completed: CompletedPlans = CheckPlanCompletion().invoke(
-        model=llm.get("default"),
+    completed: CompletedNestedPlanItem = CheckNestedPlanCompletion().invoke(
+        model=llm.get(MODEL_DICT["check_plan_completion"]),
         prompt_args={
             "plan": curr_plan,
             "prev_page_contents": prev_page_contents,
@@ -147,15 +157,15 @@ async def _create_or_update_plan(
         },
         prompt_logger=full_log  
     )
-    for compl in completed.completed_plans:
-        curr_plan.plan_items[compl - 1].completed = True
-        agent_log.info(f"Completed plan item: {curr_plan.plan_items[compl - 1].description}")    
+    for compl in completed.plan_indices:
+        curr_plan.get(compl).completed = True
+        agent_log.info(f"Completed plan item: {curr_plan.get(compl).description}")    
     
     # if step_number > 1 and step_number % DEDUP_AFTER_STEPS == 0:
     # 	curr_plan = deduplicate_plan(llm, curr_plan)
     
     nav_page: NavPage = DetermineNewPage().invoke(
-        model=llm.get("cohere_command_a"), 
+        model=llm.get(MODEL_DICT["determine_new_page"]), 
         prompt_args={
             "curr_page_contents": curr_page_contents, 
             "prev_page_contents": prev_page_contents, 
@@ -169,18 +179,19 @@ async def _create_or_update_plan(
     )
     # FEAT: add to data struct new page
     if nav_page.status == NewPageStatus.NEW_PAGE:
+        agent_log.info(f"Discovered [new_page]: {curr_url}")
+        agent_log.info(f"Navigating back to homepage:{homepage_url}")
         new_task = NAVIGATE_TO_PAGE_PROMPT.format(
             curr_page_contents=curr_page_contents,
             url=homepage_url
         )
-        agent_log.info(f"Discovered [new_page]: {curr_url}")
-        agent_log.info(f"Navigating back to homepage:{homepage_url}")
         event = Event.BACKTRACK
     elif nav_page.status == NewPageStatus.SUBPAGE:
         agent_log.info(f"Discovered [subpage]: {nav_page.name}")
+        agent_log.info(f"Using {MODEL_DICT['update_plan']} to update plan")
         # FEAT: add to plan item subpage name
-        curr_plan = UpdatePlan().invoke(
-            model=llm.get("default"),
+        curr_plan = UpdatePlanNested().invoke(
+            model=llm.get(MODEL_DICT["update_plan"]),
             prompt_args={
                 "plan": curr_plan,
                 "curr_page_contents": curr_page_contents,
@@ -349,13 +360,13 @@ class CustomAgent(Agent):
         else:
             emoji = "🤷"
 
-        agent_log.info(f"{emoji} Eval: {response.current_state.evaluation_previous_goal}")
-        agent_log.info(f"🎯 Next Goal: {response.current_state.next_goal}")
+        agent_log.info(f"Eval: {response.current_state.evaluation_previous_goal}")
+        agent_log.info(f"Next Goal: {response.current_state.next_goal}")
         for i, action in enumerate(response.action):
             agent_log.info(
-                f"🛠️  Action {i + 1}/{len(response.action)}: {action.model_dump_json(exclude_unset=True)}"
+                f"Action {i + 1}/{len(response.action)}: {action.model_dump_json(exclude_unset=True)}"
             )
-        agent_log.info(f"[Prev Messages]: {current_msg.content}")
+        agent_log.info(f"Prev Messages]: {current_msg.content}")
         agent_log.info(f"Captured {len(http_msgs)} HTTP Messages")
         for msg in http_msgs:
             agent_log.info(f"[Agent] {msg.request.url}")
@@ -372,7 +383,7 @@ class CustomAgent(Agent):
     @time_execution_async("--get_next_action")
     async def get_next_action(self, input_messages: List[BaseMessage]) -> CustomAgentOutput:
         """Get next action from LLM based on current state"""
-        ai_message: BaseMessage = self.llm.get("cohere_command_a").invoke(
+        ai_message: BaseMessage = self.llm.get(MODEL_DICT["browser_use"]).invoke(
             input_messages,
         )
         self._message_manager._add_message_with_tokens(ai_message)
@@ -434,6 +445,8 @@ class CustomAgent(Agent):
             use_vision=self.settings.use_vision
         )
         input_messages = self._message_manager.get_messages()
+        for msg in input_messages:
+            agent_log.info(f"[INPUT] {type(msg)}")
         try:
             # HACK
             for msg in input_messages:
@@ -534,8 +547,8 @@ class CustomAgent(Agent):
                     # SPECIAL CASE: replace with original after navigation finished instead of creating new one
                     if not self._backtrack:
                         agent_log.info("Creating new plan")
-                        new_plan = CreatePlan().invoke(
-                            model=self.llm.get("default"),
+                        new_plan = CreatePlanNested().invoke(
+                            model=self.llm.get(MODEL_DICT["create_plan"]),
                             prompt_args={
                                 "curr_page_contents": new_page_contents
                             },

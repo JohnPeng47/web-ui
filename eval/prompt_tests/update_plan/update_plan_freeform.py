@@ -1,13 +1,8 @@
 from src.agent.discovery import UpdatePlanNested
-from src.llm_models import (
-  openai_4o, 
-  cohere_command_a, 
-  openai_41,
-  gemini_25_flash
-)
+from src.llm_models import openai_4o, cohere_command_a, openai_41
 
 MSG = """
-You are web-spidering a web application. Your task is to uncover/explore all user flows of the application
+You are performing QA testing on a web application. Your task is to uncover/explore all user flows of the application
     
 Here is the current webpage:
 [0]<div />
@@ -108,70 +103,19 @@ Here is the previous plan:
 [1.9] Scroll through the 'All Products' section to browse available items and their prices.
 [1.10] Interact with high-value items (e.g., 'Juice Shop "Permafrost" 2020 Edition') to view details or add to cart.
 
-Now determine if the plan needs to be updated. This should happen in the following cases:
-- the UI has changed between the previous and current webpage and some new interactive elements have been discovered that are not covered by the current plan
-
-Here are some guidelines:
-- first, think through the information above:
---> make observations on *which* sub-level (and corresponding index) of the plan the current navigation based on the page transition information
---> think about appropriate subplans to add here
-- then, if the plans need updating, use the tree indexing notation [a.b.c..] to find the parent_index to add the plans to
-
-Now return your response as a list of plan items that will get added to the plan. 
-This list should be empty if the plan does not need to be updated
-
-Understand the content and provide
-the parsed objects in json that match the following json_schema:
-
-
-{
-  "$defs": {
-    "AddPlanItem": {
-      "properties": {
-        "description": {
-          "title": "Description",
-          "type": "string"
-        },
-        "parent_index": {
-          "title": "Parent Index",
-          "type": "string"
-        }
-      },
-      "required": [
-        "description",
-        "parent_index"
-      ],
-      "title": "AddPlanItem",
-      "type": "object"
-    }
-  },
-  "properties": {
-    "plan_items": {
-      "items": {
-        "$ref": "#/$defs/AddPlanItem"
-      },
-      "title": "Plan Items",
-      "type": "array"
-    }
-  },
-  "required": [
-    "plan_items"
-  ],
-  "title": "AddPlanItemList",
-  "type": "object"
-}
-
-Make sure to return an instance of the JSON, not the schema itself
+Come up with:
+1. The plan index to which to add the subplans
+2. The plans to add
 """
 
 for i in range(5):
-    # res = openai_41.invoke(MSG)
-    # print(res)
-    plan = UpdatePlanNested().invoke_with_msgs(
-        model=gemini_25_flash,
-        msgs=MSG
-    )
-    print(plan)
+    res = cohere_command_a.invoke(MSG)
+    print(res.content)
+    # plan = UpdatePlanNested().invoke_with_msgs(
+    #     model=openai_41,
+    #     msgs=MSG
+    # )
+    # print(plan)
 
 
 
