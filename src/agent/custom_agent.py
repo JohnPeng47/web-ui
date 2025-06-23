@@ -137,7 +137,7 @@ async def _create_or_update_plan(
     event = None
     old_plan = curr_plan
 
-    curr_plan = CheckPlanCompletion().invoke(
+    completed: CompletedPlans = CheckPlanCompletion().invoke(
         model=llm.get("default"),
         prompt_args={
             "plan": curr_plan,
@@ -145,8 +145,11 @@ async def _create_or_update_plan(
             "curr_page_contents": curr_page_contents,
             "prev_goal": prev_goal
         },
-        prompt_logger=full_log
+        prompt_logger=full_log  
     )
+    for compl in completed.completed_plans:
+        curr_plan.plan_items[compl - 1].completed = True
+        agent_log.info(f"Completed plan item: {curr_plan.plan_items[compl - 1].description}")    
     
     # if step_number > 1 and step_number % DEDUP_AFTER_STEPS == 0:
     # 	curr_plan = deduplicate_plan(llm, curr_plan)
@@ -164,6 +167,7 @@ async def _create_or_update_plan(
         },
         prompt_logger=full_log
     )
+    # FEAT: add to data struct new page
     if nav_page.status == NewPageStatus.NEW_PAGE:
         new_task = NAVIGATE_TO_PAGE_PROMPT.format(
             curr_page_contents=curr_page_contents,
@@ -174,6 +178,7 @@ async def _create_or_update_plan(
         event = Event.BACKTRACK
     elif nav_page.status == NewPageStatus.SUBPAGE:
         agent_log.info(f"Discovered [subpage]: {nav_page.name}")
+        # FEAT: add to plan item subpage name
         curr_plan = UpdatePlan().invoke(
             model=llm.get("default"),
             prompt_args={
