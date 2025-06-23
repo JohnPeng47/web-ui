@@ -76,14 +76,10 @@ class CustomAgentMessagePrompt(AgentMessagePrompt):
         state_description = f"""
 {step_info_description}
 1. Task: {self.task}. 
-2. Hints(Optional): 
-{self.step_info.add_infos}
-3. Memory: 
-{self.step_info.memory}
-4. Current url: {self.state.url}
-5. Available tabs:
+2. Current url: {self.state.url}
+3. Available tabs:
 {self.state.tabs}
-7. Interactive elements:
+4. Interactive elements:
 {elements_text}
         """
 

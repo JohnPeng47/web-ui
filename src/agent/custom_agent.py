@@ -25,7 +25,7 @@ from browser_use.telemetry.views import (
 )
 from browser_use.utils import time_execution_async
 from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_core.messages import BaseMessage
+from langchain_core.messages import BaseMessage, AIMessage
 from browser_use.browser.views import BrowserState
 
 from json_repair import repair_json
@@ -112,7 +112,7 @@ NAVIGATE_TO_PAGE_PROMPT = """
 Here is the current page contents:
 {curr_page_contents}
 
-Navigate to the following page using the goto action:
+Navigate to the following page using the goto action. You *MUST* take the goto action:
 {url}
 
 Put as your next goal: Come up with a plan for the new page
@@ -120,6 +120,8 @@ EVALUATION NOTE: the URL may have been redirected, so just just judging by the s
 to determine if navigation was successful
 """
 
+# TODO:
+# - fix issue with TASK_EXECUTION -> NAVIGATION not marking the task as complete 
 async def _create_or_update_plan(
     llm: LLMHub,
     curr_page_contents: str,
@@ -129,7 +131,7 @@ async def _create_or_update_plan(
     prev_page_contents: str,
     prev_url: str,
     eval_prev_goal: str,
-    prev_goal: str,
+    curr_goal: str,
     curr_plan: Plan,
     # New parameters - previously accessed via self
     homepage_contents: str,
@@ -153,7 +155,7 @@ async def _create_or_update_plan(
             "plan": curr_plan,
             "prev_page_contents": prev_page_contents,
             "curr_page_contents": curr_page_contents,
-            "prev_goal": prev_goal
+            "curr_goal": curr_goal
         },
         prompt_logger=full_log  
     )
@@ -171,13 +173,12 @@ async def _create_or_update_plan(
             "prev_page_contents": prev_page_contents, 
             "curr_url": curr_url, 
             "prev_url": prev_url, 
-            "prev_goal": prev_goal,
+            "curr_goal": curr_goal,
             "homepage_contents": homepage_contents,
             "homepage_url": homepage_url
         },
         prompt_logger=full_log
     )
-    # FEAT: add to data struct new page
     if nav_page.status == NewPageStatus.NEW_PAGE:
         agent_log.info(f"Discovered [new_page]: {curr_url}")
         agent_log.info(f"Navigating back to homepage:{homepage_url}")
@@ -189,14 +190,13 @@ async def _create_or_update_plan(
     elif nav_page.status == NewPageStatus.SUBPAGE:
         agent_log.info(f"Discovered [subpage]: {nav_page.name}")
         agent_log.info(f"Using {MODEL_DICT['update_plan']} to update plan")
-        # FEAT: add to plan item subpage name
         curr_plan = UpdatePlanNested().invoke(
             model=llm.get(MODEL_DICT["update_plan"]),
             prompt_args={
                 "plan": curr_plan,
                 "curr_page_contents": curr_page_contents,
                 "prev_page_contents": prev_page_contents,
-                # "prev_goal": prev_goal,
+                "curr_goal": curr_goal,
                 # "eval_prev_goal": eval_prev_goal
             },
             prompt_logger=full_log
@@ -360,7 +360,7 @@ class CustomAgent(Agent):
         else:
             emoji = "🤷"
 
-        agent_log.info(f"Eval: {response.current_state.evaluation_previous_goal}")
+        agent_log.info(f"Eval {emoji}: {response.current_state.evaluation_previous_goal}")
         agent_log.info(f"Next Goal: {response.current_state.next_goal}")
         for i, action in enumerate(response.action):
             agent_log.info(
@@ -445,8 +445,10 @@ class CustomAgent(Agent):
             use_vision=self.settings.use_vision
         )
         input_messages = self._message_manager.get_messages()
-        for msg in input_messages:
-            agent_log.info(f"[INPUT] {type(msg)}")
+        agent_log.info(f"[INPUT]: Input messages len {len(input_messages)}")
+        # for msg in input_messages:
+        #     if type(msg) == AIMessage:
+        #         agent_log.info(f"[INPUT] {msg.content}")
         try:
             # HACK
             for msg in input_messages:
@@ -455,9 +457,11 @@ class CustomAgent(Agent):
 
             step_info.step_number += 1
             self.state.n_steps += 1
+            self._message_manager._remove_last_human_message()
+
             await self._raise_if_stopped_or_paused()
         except Exception as e:
-            # model call failed, rem    ove last state message from history
+            # model call failed, remove last state message from history
             self._message_manager._remove_state_message_by_index(-1)
             raise e
 
@@ -487,7 +491,7 @@ class CustomAgent(Agent):
             prev_page_contents=self.state.prev_page_contents,
             prev_url=self.state.prev_url,
             eval_prev_goal=model_output.current_state.evaluation_previous_goal,
-            prev_goal=model_output.current_state.next_goal,
+            curr_goal=model_output.current_state.next_goal,
             curr_plan=curr_plan,
             # Parameters from self
             homepage_contents=self.homepage_contents,
@@ -511,20 +515,19 @@ class CustomAgent(Agent):
     ) -> None:
         """Do all task transitions and updates to page structure here"""
         if event is None:
-            return
-
-        next_mode = TRANSITIONS.get((self.mode, event))
-        if next_mode is None:
             agent_log.info(f"No transition staying in {self.mode}")
             # TODO: having this here is ideal but dont see a way if we want to keep all task updates
             # in transition
-            if next_mode is AgentMode.TASK_EXECUTION and new_task:
+            if self.mode is AgentMode.TASK_EXECUTION and new_task:
                 self._set_task(new_task, is_new_task=False)
                 self._set_plan(new_plan)
                 if nav_page:
                     self.subpages.append(nav_page.name)
+
+            next_mode = self.mode
         else:
-            agent_log.info(f"{self.mode} -> {next_mode}")
+            next_mode = TRANSITIONS.get((self.mode, event))
+            agent_log.info(f"{self.mode} -[{event}]-> {next_mode}")
             self.mode = next_mode
             if next_mode is AgentMode.NAVIGATION:
                 if event == Event.NAV_START:

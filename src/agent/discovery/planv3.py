@@ -129,11 +129,16 @@ Here is the previous webpage:
 Here is the previous plan:
 {{plan}}
 
+Here is the goal that resulted in a transition to the current page view:
+{{curr_goal}}
+
 Now determine if the plan needs to be updated. This should happen in the following cases:
 - the UI has changed between the previous and current webpage and some new interactive elements have been discovered that are not covered by the current plan
 
 Here are some guidelines:
-- try first determine which nested sub-level the current navigation is at
+- try first determine which sub-level the plan should be added to
+--> the nested sub-plans represent a dfs order of exploration of the web application
+--> by adding it to the appropriate sub-level, you are supplying the next steps in the dfs traversal order
 - then, if the plans need updating, use the tree indexing notation [a.b.c..] to find the parent_index to add the plans to
 
 Now return your response as a list of plan items that will get added to the plan. 
@@ -160,8 +165,8 @@ Here is the current webpage:
 Here is the previous webpage:
 {{prev_page_contents}}
 
-Here is the previous goal that resulted in a transition to the current webpage:
-{{prev_goal}}
+Here is the goal that resulted in a transition to the current webpage:
+{{curr_goal}}
 
 Now try to determine which *new* plan items have been completed by the agent and if there are any, use the tree indexing notation [a.b.c..] to refer to the completed plan items
 """

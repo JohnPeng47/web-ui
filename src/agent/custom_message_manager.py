@@ -106,3 +106,10 @@ class CustomMessageManager(MessageManager):
                 self.state.history.messages.pop(i)
                 break
             i -= 1
+
+    def _remove_last_human_message(self):
+        """Remove the last HumanMessage from history"""
+        for i in range(len(self.state.history.messages) - 1, -1, -1):
+            if isinstance(self.state.history.messages[i].message, HumanMessage):
+                self.state.history.messages.pop(i)
+                break
