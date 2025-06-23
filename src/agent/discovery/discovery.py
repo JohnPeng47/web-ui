@@ -88,13 +88,13 @@ Now try to determine which *new* plan items have been completed by the agent
 """
     response_format: Type[CompletedPlans] = CompletedPlans
 
-    def _process_result(self, res: CompletedPlans, **prompt_args):        
-        plan: Plan = prompt_args["plan"]
-        for compl in res.completed_plans:
-            # +1 because plan items are 1-indexed
-            plan.plan_items[compl - 1].completed = True
-            agent_log.info(f"Completed plan item: {plan.plan_items[compl - 1].description}")
-        return plan
+    # def _process_result(self, res: CompletedPlans, **prompt_args):        
+    #     plan: Plan = prompt_args["plan"]
+    #     for compl in res.completed_plans:
+    #         # +1 because plan items are 1-indexed
+    #         plan.plan_items[compl - 1].completed = True
+    #         agent_log.info(f"Completed plan item: {plan.plan_items[compl - 1].description}")
+    #     return plan
     
 ## new page
 # TODO: ask if current page is a child of the previous page
@@ -121,8 +121,8 @@ URL: {{prev_url}}
 Contents:
 {{prev_page_contents}}
 
-Here is the previous goal that resulted in a transition to the current page:
-{{prev_goal}}
+Here is the goal and action that resulted in a transition to the current page:
+{{curr_goal}}
 
 Here is the homepage:
 URL: {{homepage_url}}

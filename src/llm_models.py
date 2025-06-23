@@ -21,7 +21,7 @@ LLM_MODELS = {
     "cohere_command_a": cohere_command_a,
     "deepseek_r1": together_deepseek_r1,
     "openai_4o": openai_4o,
-    "openai_41": openai_41,
+    "openai_4.1": openai_41,
     "default": cohere_command_a,
 }
 
