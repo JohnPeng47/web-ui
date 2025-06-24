@@ -90,8 +90,8 @@ TRANSITIONS = {
 }
 
 MODEL_DICT = {
-    "browser_use": "default",
-    "check_plan_completion" : "default",
+    "browser_use": "gemini_25_flash",
+    "check_plan_completion" : "gemini_25_flash",
     "determine_new_page" : "default",
     "create_plan" : "default",
     "update_plan" : "gemini_25_flash",
