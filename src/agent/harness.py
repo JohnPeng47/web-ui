@@ -92,7 +92,7 @@ class AgentHarness:
 	# public API
 	# ---------------------------------------------------------------------
 
-	async def start_all(self, *, max_steps: int = 100) -> List[asyncio.Task]:
+	async def start_all(self, *, max_steps: int = 100, page_max_steps: int = 10) -> List[asyncio.Task]:
 		"""Instantiate & launch every agent.  Returns the list of *running* tasks."""
 
 		logger.info("Spawning %d agents …", len(self.agents_cfg))
@@ -115,7 +115,7 @@ class AgentHarness:
 			# 3️⃣ Instantiate and schedule the agent
 			agent = self.agent_cls(**cfg)
 			self._agents.append(agent)
-			task = asyncio.create_task(self._run_agent(agent, max_steps))
+			task = asyncio.create_task(self._run_agent(agent, max_steps, page_max_steps))
 			self._tasks.append(task)
 
 		return self._tasks
@@ -158,11 +158,11 @@ class AgentHarness:
 	# helpers
 	# ---------------------------------------------------------------------
 
-	async def _run_agent(self, agent: CustomAgent, max_steps: int) -> None:
+	async def _run_agent(self, agent: CustomAgent, max_steps: int, page_max_steps: int) -> None:
 		"""Run a *single* agent and collect its history."""
 
 		try:
-			result = await agent.run(max_steps=max_steps)
+			result = await agent.run(max_steps=max_steps, page_max_steps=page_max_steps)
 			self._history.append(result.model_dump())
 		except asyncio.CancelledError:
 			logger.info("Agent cancelled")

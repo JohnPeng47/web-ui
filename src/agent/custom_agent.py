@@ -32,6 +32,7 @@ from json_repair import repair_json
 from src.utils.agent_state import AgentState
 from src.agent.client import AgentClient
 from src.llm_models import llm_hub, LLMHub
+from src.agent.utils import Pages
 
 from httplib import HTTPMessage
 
@@ -79,12 +80,14 @@ class Event(Enum):
     NAV_FAILED     = auto()
     TASK_COMPLETE  = auto()
     BACKTRACK      = auto()
+    PAGE_COMPLETE  = auto()
     SHUTDOWN       = auto()
 
 TRANSITIONS = {
     (AgentMode.NOOP, Event.NAV_START):    AgentMode.NAVIGATION,
     (AgentMode.TASK_EXECUTION, Event.NAV_START): AgentMode.NAVIGATION, # NOT IMPLEMENTED
     (AgentMode.TASK_EXECUTION, Event.BACKTRACK):  AgentMode.NAVIGATION,
+    (AgentMode.TASK_EXECUTION, Event.PAGE_COMPLETE): AgentMode.NAVIGATION,
     (AgentMode.NAVIGATION, Event.NAV_FAILED):     AgentMode.NAVIGATION, # NOT IMPLEMENTED
     (AgentMode.NAVIGATION, Event.NAV_SUCCESS):    AgentMode.TASK_EXECUTION, # need to differentiate backtrack (no plan change)
 }
@@ -210,7 +213,7 @@ async def _create_or_update_plan(
 class CustomAgent(Agent):
     def __init__(
         self,
-        start_url: str,
+        start_urls: List[str],
         llm: LLMHub,
         start_task: str = "", # TODO: task for handling all initial logic
         add_infos: str = "",
@@ -338,12 +341,12 @@ class CustomAgent(Agent):
         )
         self.step_http_msgs = []
         self.mode = AgentMode.NOOP
-        self.pages = [start_url]
+
+        # need to do this to preserve order that we add the URLs
         self.subpages = []
+        self.pages = Pages(items=start_urls)
         self._set_task(NO_OP_TASK)
-
         self._backtrack = False
-
 
     def handle_page(self, page):
         self.curr_page = page
@@ -372,6 +375,7 @@ class CustomAgent(Agent):
             agent_log.info(f"[Agent] {msg.request.url}")
 
         agent_log.info(f"Current plan:\n{self._get_plan()}")
+        agent_log.info(f"Pages: {self.pages}")
 
     def _setup_action_models(self) -> None:
         """Setup dynamic action models from controller's registry"""
@@ -456,6 +460,7 @@ class CustomAgent(Agent):
             model_output = await self.get_next_action(input_messages)
 
             step_info.step_number += 1
+            step_info.page_step_number += 1
             self.state.n_steps += 1
             self._message_manager._remove_last_human_message()
 
@@ -506,7 +511,8 @@ class CustomAgent(Agent):
     # NOTE: should not use state here??
     async def _transition(
         self, 
-        event: Event | None, 
+        step_info: CustomAgentStepInfo,
+        event: Event | None,
         new_url: str, 
         new_page_contents: str,
         new_plan: Plan | None = None,
@@ -530,24 +536,28 @@ class CustomAgent(Agent):
             agent_log.info(f"{self.mode} -[{event}]-> {next_mode}")
             self.mode = next_mode
             if next_mode is AgentMode.NAVIGATION:
-                if event == Event.NAV_START:
-                    # Pop next target, build nav task
+                if event in [Event.NAV_START, Event.PAGE_COMPLETE]:
                     target = self.pages.pop()
+                    agent_log.info(f"Starting at new page: {target}")
                     task = NAVIGATE_TO_PAGE_PROMPT.format(
                         curr_page_contents=new_page_contents,
                         url=target
                     )
                     self._set_task(task, is_new_task=True)
+                    if event == Event.PAGE_COMPLETE:
+                        agent_log.info(f"[PAGE] Page transition to {target} complete")
+                        step_info.page_step_number = 0
+                        self._backtrack = False
                 elif event == Event.BACKTRACK:
-                    self.pages.append(new_url)
+                    self.pages.add(new_url)
                     self._set_task(new_task, is_new_task=True)
             elif next_mode is AgentMode.TASK_EXECUTION:
                 if event == Event.NAV_SUCCESS:
-                    self.pages.append(new_url)
                     self.homepage_url = new_url
                     self.homepage_contents = new_page_contents
 
-                    # SPECIAL CASE: replace with original after navigation finished instead of creating new one
+                    # SPECIAL CASE: replace task with original after navigation finished instead of creating new one
+                    # TODO: having _backtrack as additional transition state edge is not ideal ...
                     if not self._backtrack:
                         agent_log.info("Creating new plan")
                         new_plan = CreatePlanNested().invoke(
@@ -637,15 +647,18 @@ class CustomAgent(Agent):
             new_plan = None
             nav_page = None
 
-            if self.mode == AgentMode.NAVIGATION:
-                evt = await self._nav_think(model_output, step_info)
-            elif self.mode == AgentMode.TASK_EXECUTION:
-                evt, new_task, new_plan, nav_page = await self._task_think(new_page_contents, new_url, step_info, model_output)
-            elif self.mode == AgentMode.NOOP:
-                evt = Event.NAV_START
+            if step_info.page_step_number >= step_info.page_max_steps:
+                evt = Event.PAGE_COMPLETE
+            else:
+                if self.mode == AgentMode.NAVIGATION:
+                    evt = await self._nav_think(model_output, step_info)
+                elif self.mode == AgentMode.TASK_EXECUTION:
+                    evt, new_task, new_plan, nav_page = await self._task_think(new_page_contents, new_url, step_info, model_output)
+                elif self.mode == AgentMode.NOOP:
+                    evt = Event.NAV_START
 
             await self._update_state(result, model_output, step_info, input_messages, new_url, new_page_contents)
-            await self._transition(evt, new_url, new_page_contents, new_plan, new_task, nav_page)
+            await self._transition(step_info, evt, new_url, new_page_contents, new_plan, new_task, nav_page)
 
         except InterruptedError:
             agent_log.debug("Agent paused")
@@ -689,9 +702,9 @@ class CustomAgent(Agent):
                 json_msgs = [await msg.to_json() for msg in self.step_http_msgs]
                 self._make_history_item(model_output, browser_state, result, json_msgs, metadata=metadata)
 
-    async def run(self, max_steps: int = 100) -> AgentHistoryList:
+    async def run(self, max_steps: int, page_max_steps: int) -> AgentHistoryList:
         """Execute the task with maximum number of steps"""
-        try:
+        try:    
             self._log_agent_run()
 
             # Execute initial actions if provided
@@ -700,11 +713,10 @@ class CustomAgent(Agent):
                 self.state.last_result = result
 
             step_info = CustomAgentStepInfo(
-                task=self.task,
-                add_infos=self.add_infos,
                 step_number=1,
+                page_step_number=1,
                 max_steps=max_steps,
-                memory="",
+                page_max_steps=page_max_steps,
             )
 
             for step in range(max_steps):
@@ -735,10 +747,6 @@ class CustomAgent(Agent):
                 # 	break
             else:
                 agent_log.info("❌ Failed to complete task in maximum steps")
-                if not self.state.extracted_content:
-                    self.state.history.history[-1].result[-1].extracted_content = step_info.memory
-                else:
-                    self.state.history.history[-1].result[-1].extracted_content = self.state.extracted_content
 
             if self.history_file:
                 self.state.history.save_to_file(self.history_file)
