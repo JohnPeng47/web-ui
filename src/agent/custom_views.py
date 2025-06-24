@@ -17,10 +17,9 @@ from src.agent.discovery import Plan
 @dataclass
 class CustomAgentStepInfo(AgentStepInfo):
     step_number: int
+    page_step_number: int
     max_steps: int
-    task: str
-    add_infos: str
-    memory: str
+    page_max_steps: int
 
 class CustomAgentBrain(BaseModel):
     """Current state of the agent"""
