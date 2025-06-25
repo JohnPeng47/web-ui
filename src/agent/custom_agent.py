@@ -95,11 +95,11 @@ TRANSITIONS = {
 }
 
 MODEL_DICT = {
-    "browser_use": "gemini_25_flash",
-    "check_plan_completion" : "gemini_25_flash",
+    "browser_use": "gemini-2.5-flash",
+    "check_plan_completion" : "gemini-2.5-flash",
     "determine_new_page" : "default",
     "create_plan" : "default",
-    "update_plan" : "gemini_25_flash",
+    "update_plan" : "gemini-2.5-flash",
 }
 
 class EarlyShutdown(Exception):

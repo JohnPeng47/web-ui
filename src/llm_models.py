@@ -23,11 +23,11 @@ together_deepseek_r1 = ChatTogether(
 )
 
 LLM_MODELS = {
-    "cohere_command_a": cohere_command_a,
-    "deepseek_r1": together_deepseek_r1,
-    "openai_4o": openai_4o,
-    "openai_4.1": openai_41,
-    "gemini_25_flash": gemini_25_flash,
+    "command-a-03-2025": cohere_command_a,
+    # "deepseek_r1": together_deepseek_r1,
+    "gpt-4o": openai_4o,
+    "gpt-4.1": openai_41,
+    "gemini-2.5-flash": gemini_25_flash,
     "default": cohere_command_a,
 }
 
