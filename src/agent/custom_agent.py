@@ -94,14 +94,6 @@ TRANSITIONS = {
     (AgentMode.NAVIGATION, Event.NAV_SUCCESS):    AgentMode.TASK_EXECUTION, # need to differentiate backtrack (no plan change)
 }
 
-MODEL_DICT = {
-    "browser_use": "gemini-2.5-flash",
-    "check_plan_completion" : "gemini-2.5-flash",
-    "determine_new_page" : "default",
-    "create_plan" : "default",
-    "update_plan" : "gemini-2.5-flash",
-}
-
 class EarlyShutdown(Exception):
     pass
 
@@ -155,7 +147,7 @@ async def _create_or_update_plan(
     old_plan = curr_plan
 
     completed: CompletedNestedPlanItem = CheckNestedPlanCompletion().invoke(
-        model=llm.get(MODEL_DICT["check_plan_completion"]),
+        model=llm.get("check_plan_completion"),
         prompt_args={
             "plan": curr_plan,
             "prev_page_contents": prev_page_contents,
@@ -172,7 +164,7 @@ async def _create_or_update_plan(
     # 	curr_plan = deduplicate_plan(llm, curr_plan)
     
     nav_page: NavPage = DetermineNewPage().invoke(
-        model=llm.get(MODEL_DICT["determine_new_page"]), 
+        model=llm.get("determine_new_page"), 
         prompt_args={
             "curr_page_contents": curr_page_contents, 
             "prev_page_contents": prev_page_contents, 
@@ -196,7 +188,7 @@ async def _create_or_update_plan(
         agent_log.info(f"Discovered [subpage]: {nav_page.name}")
         agent_log.info(f"Using {MODEL_DICT['update_plan']} to update plan")
         curr_plan = UpdatePlanNested().invoke(
-            model=llm.get(MODEL_DICT["update_plan"]),
+            model=llm.get("update_plan"),
             prompt_args={
                 "plan": curr_plan,
                 "curr_page_contents": curr_page_contents,
@@ -273,7 +265,7 @@ class CustomAgent(Agent):
     ):
         super(CustomAgent, self).__init__(
             task=NO_OP_TASK,
-            llm=llm_hub,
+            llm=llm.get("default"),
             browser=browser,
             browser_context=browser_context,
             controller=controller or Controller(),
@@ -303,7 +295,7 @@ class CustomAgent(Agent):
             injected_agent_state=None,
             context=context,
         )
-        self.llm: LLMHub
+        self.llm = llm
         self.agent_name = agent_name
         self.close_browser = close_browser
         self.curr_page = None
@@ -393,7 +385,7 @@ class CustomAgent(Agent):
     @time_execution_async("--get_next_action")
     async def get_next_action(self, input_messages: List[BaseMessage]) -> CustomAgentOutput:
         """Get next action from LLM based on current state"""
-        ai_message: BaseMessage = self.llm.get(MODEL_DICT["browser_use"]).invoke(
+        ai_message: BaseMessage = self.llm.get("browser_use").invoke(
             input_messages,
         )
         self._message_manager._add_message_with_tokens(ai_message)
@@ -561,13 +553,16 @@ class CustomAgent(Agent):
                 if event == Event.NAV_SUCCESS:
                     self.homepage_url = new_url
                     self.homepage_contents = new_page_contents
+                    
+                    # FEAT: initialize the page here
 
+        
                     # SPECIAL CASE: replace task with original after navigation finished instead of creating new one
                     # TODO: having _backtrack as additional transition state edge is not ideal ...
                     if not self._backtrack:
                         agent_log.info("Creating new plan")
                         new_plan = CreatePlanNested().invoke(
-                            model=self.llm.get(MODEL_DICT["create_plan"]),
+                            model=self.llm.get("create_plan"),
                             prompt_args={
                                 "curr_page_contents": new_page_contents
                             },
@@ -798,6 +793,19 @@ class CustomAgent(Agent):
                 _, progress_str = self.eval_client.report_progress()
                 agent_log.info("Eval results:")
                 agent_log.info(progress_str)
+            
+
+            agent_log.info("===== LLM Cost Breakdown =====")
+            costs = self.llm.get_costs()
+            total_cost = sum(costs.values())
+            n_steps = getattr(self.state, "n_steps", 0)
+            avg_cost_per_step = total_cost / n_steps if n_steps > 0 else 0.0
+            
+            agent_log.info("Cost per function:")
+            for func, cost in costs.items():
+                agent_log.info(f"  {func}: ${cost:.6f}")
+            agent_log.info(f"Total cost: ${total_cost:.6f}")
+            agent_log.info(f"Average cost per step: ${avg_cost_per_step:.6f}")
 
             agent_log.info("======= [le fin] ========")
 

@@ -168,13 +168,20 @@ the parsed objects in json that match the following json_schema:
 Make sure to return an instance of the JSON, not the schema itself
 """
 
-for i in range(5):
-    # res = openai_41.invoke(MSG)
-    # print(res)
-    plan = UpdatePlanNested().invoke_with_msgs(
-        model=gemini_25_flash,
-        msgs=MSG
-    )
-    print(plan)
+# for i in range(5):
+res = openai_41.invoke(MSG)
+print(res.usage_metadata)
+print("____________________________________________________")
+res = cohere_command_a.invoke(MSG)
+print(res.usage_metadata)
+print("____________________________________________________")
+res = gemini_25_flash.invoke(MSG)
+print(res.usage_metadata)
+print("____________________________________________________")
+    # plan = UpdatePlanNested().invoke_with_msgs(
+    #     model=gemini_25_flash,
+    #     msgs=MSG
+    # )
+    # print(plan)
 
 

@@ -1,10 +1,12 @@
-from typing import Dict, Any
+from typing import Dict, Any, Callable
 from langchain_openai import ChatOpenAI
 from langchain_together import ChatTogether
+from langchain_core.messages import BaseMessage
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_cohere import ChatCohere
 from langchain_google_genai import ChatGoogleGenerativeAI
 
+import json
 import os
 
 gemini_25_flash = ChatGoogleGenerativeAI(
@@ -31,6 +33,31 @@ LLM_MODELS = {
     "default": cohere_command_a,
 }
 
+MODEL_DICT = {
+    "browser_use": "gemini-2.5-flash",
+    "check_plan_completion" : "gemini-2.5-flash",
+    "determine_new_page" : "default",
+    "create_plan" : "default",
+    "update_plan" : "gemini-2.5-flash",
+}
+
+# incredibly dumb hack to appease the type checker
+class BaseChatWrapper:
+    def __init__(
+            self, 
+            function_name: str, 
+            model: BaseChatModel, 
+            log_fn: Callable[[BaseMessage, str], None]
+        ):
+        self._function_name = function_name
+        self._model = model
+        self._log_fn = log_fn
+
+    def invoke(self, *args: Any, **kwargs: Any) -> Any:
+        res = self._model.invoke(*args, **kwargs)
+        self._log_fn(res, self._function_name)
+        return res
+
 class LLMHub:
     """
     Thin convenience wrapper around a collection of LangChain chat models.
@@ -39,14 +66,34 @@ class LLMHub:
         providers (Dict[str, BaseChatModel]):
             Mapping of model-name → model instance.
             One key **must** be "default".  That entry is used by ``invoke``.
+        function_map (Dict[str, str]):
+            Mapping of function-name -> model-name.
     """
 
-    def __init__(self, providers: Dict[str, BaseChatModel]) -> None:
+    def __init__(
+            self, 
+            function_map: Dict[str, str], 
+            providers: Dict[str, BaseChatModel] = LLM_MODELS
+        ) -> None:
         if "default" not in providers:
             raise ValueError('"default" key missing from providers mapping')
 
-        self._providers: Dict[str, BaseChatModel] = providers
-        self.default: BaseChatModel = providers["default"]
+        self.default = providers["default"]
+
+        self._providers = providers
+        self._function_map = function_map
+        self._cost_map = self._load_cost_map()
+        self._total_costs = {function_name: 0 for function_name in function_map.keys()}
+
+    def _load_cost_map(self) -> Dict:
+        with open("model_api_prices.json", "r") as f:
+            return json.load(f)
+        
+    def log_cost(self, res: BaseMessage, function_name: str) -> None:
+        model_name = self._function_map[function_name]
+
+        self._total_costs[function_name] += self._cost_map[model_name]["input_cost_per_token"] * res.usage_metadata["input_tokens"]
+        self._total_costs[function_name] += self._cost_map[model_name]["output_cost_per_token"] * res.usage_metadata["output_tokens"]
 
     # ------------- convenience helpers -----------------
     def set_default(self, name: str) -> None:
@@ -56,9 +103,18 @@ class LLMHub:
         self.default = self._providers[name]
         self._providers["default"] = self.default
 
-    def get(self, name: str) -> BaseChatModel:
-        """Return a specific provider by name."""
-        return self._providers[name]
+    def get(self, function_name: str) -> BaseChatModel:
+        """Return a wrapper for a specific provider by function name."""
+        model_name = self._function_map.get(function_name, "default")
+        
+        if model_name == "default":
+            model_to_wrap = self.default
+        elif model_name not in self._providers:
+            raise KeyError(f"model {model_name!r} not found")
+        else:
+            model_to_wrap = self._providers[model_name]
+        
+        return BaseChatWrapper(function_name, model_to_wrap, self.log_cost)
 
     # ------------- primary public API ------------------
     def invoke(self, message: str, **kwargs: Any):
@@ -70,4 +126,7 @@ class LLMHub:
         """
         return self.default.invoke(message, **kwargs)
     
-llm_hub = LLMHub(LLM_MODELS)
+    def get_costs(self):
+        return self._total_costs
+    
+llm_hub = LLMHub(providers=LLM_MODELS, function_map={})
