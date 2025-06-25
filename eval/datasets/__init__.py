@@ -1,0 +1,1 @@
+from .juice_shop_urls import JUICE_SHOP_ENDPOINTS

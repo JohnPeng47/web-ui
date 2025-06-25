@@ -34,6 +34,8 @@ from src.agent.client import AgentClient
 from src.llm_models import llm_hub, LLMHub
 from src.agent.utils import Pages
 
+from eval.client import AgentEvalClient
+
 from httplib import HTTPMessage
 
 from playwright._impl._errors import TargetClosedError
@@ -45,7 +47,7 @@ from common.agent import BrowserActions
 from .custom_views import CustomAgentOutput
 from .custom_message_manager import CustomMessageManager, CustomMessageManagerSettings
 from .custom_views import CustomAgentStepInfo, CustomAgentState
-from .http_history import HTTPHistory, HTTPHandler, BAN_LIST
+from .http_history import HTTPHistory, HTTPHandler
 
 from .discovery import (
     # CreatePlan,
@@ -264,6 +266,7 @@ class CustomAgent(Agent):
         context: Context | None = None,
         history_file: Optional[str] = None,
         agent_client: Optional[AgentClient] = None,
+        eval_client: Optional[AgentEvalClient] = None,
         app_id: Optional[str] = None,
         close_browser: bool = False,
         agent_name: str = ""
@@ -307,14 +310,6 @@ class CustomAgent(Agent):
         self.history_file = history_file
         self.http_handler = HTTPHandler()
         self.http_history = HTTPHistory()
-        self.agent_client = agent_client
-        if self.agent_client:
-            self.agent_client.set_shutdown(self.shutdown)
-
-        self.app_id = app_id
-        self.agent_id = None
-        if agent_client and not app_id:
-            raise ValueError("app_id must be provided when agent_client is set")
 
         if browser_context:
             browser_context.req_handler = self.http_handler.handle_request
@@ -339,14 +334,25 @@ class CustomAgent(Agent):
             ),
             state=self.state.message_manager_state,
         )
-        self.step_http_msgs = []
         self.mode = AgentMode.NOOP
-
-        # need to do this to preserve order that we add the URLs
-        self.subpages = []
-        self.pages = Pages(items=start_urls)
         self._set_task(NO_OP_TASK)
         self._backtrack = False
+
+        self.step_http_msgs = []
+
+        # every thing have some interaction with the server
+        self.agent_client = agent_client
+        self.app_id = app_id
+        self.agent_id = None
+        if agent_client and not app_id:
+            raise ValueError("app_id must be provided when agent_client is set")
+        
+        self.subpages = []
+        self.pages = Pages(items=start_urls)
+        # TODO: should move this to server-side eventually to support multiple agents
+        self.eval_client = eval_client
+        if self.eval_client:
+            self.eval_client.set_shutdown(self.shutdown)
 
     def handle_page(self, page):
         self.curr_page = page
@@ -660,6 +666,9 @@ class CustomAgent(Agent):
             await self._update_state(result, model_output, step_info, input_messages, new_url, new_page_contents)
             await self._transition(step_info, evt, new_url, new_page_contents, new_plan, new_task, nav_page)
 
+            if self.eval_client:
+                self.eval_client.update_status(http_msgs=self.step_http_msgs)
+
         except InterruptedError:
             agent_log.debug("Agent paused")
             self.state.last_result = [
@@ -785,7 +794,12 @@ class CustomAgent(Agent):
 
                 create_history_gif(task=self.task, history=self.state.history, output_path=output_path)
             
-            agent_log.info("Graceful exit!")
+            if self.eval_client:
+                _, progress_str = self.eval_client.report_progress()
+                agent_log.info("Eval results:")
+                agent_log.info(progress_str)
+
+            agent_log.info("======= [le fin] ========")
 
     async def shutdown(self, reason: str = "Premature shutdown requested") -> None:
         """Shuts down the agent prematurely and performs cleanup."""
