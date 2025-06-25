@@ -3,8 +3,8 @@ from pydantic import BaseModel
 from typing import List, Type
 import enum
 
-from .planv1 import Plan, PlanItem, CreatePlan as CreatePlan
-from .planv3 import (
+from .prompts.planv1 import Plan, PlanItem, CreatePlan as CreatePlan
+from .prompts.planv3 import (
     CreatePlanNested, 
     UpdatePlanNested, 
     CheckNestedPlanCompletion, 
