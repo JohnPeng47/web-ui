@@ -1,9 +1,7 @@
 pyperclip==1.9.0
-gradio==5.10.0
 json-repair
-langchain-mistralai==0.2.4
-langchain-google-genai==2.0.8
-MainContentExtractor==0.0.4
+langchain-google-genai
+MainContentExtractor
 pydantic==2.10.6
 pytest
 pytest-asyncio
@@ -14,8 +12,10 @@ fastapi
 asgi_lifespan
 aiosqlite
 alembic
-httpx==0.22.0
-
+dotenv
+aiohttp
+# why do i need this specific version again?
+httpx
 -e ./submodules/browser-use
 -e ./submodules/johnllm
 -e ./submodules/opik/sdks/python

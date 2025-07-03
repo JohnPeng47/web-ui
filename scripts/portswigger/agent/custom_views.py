@@ -12,19 +12,20 @@ from browser_use.agent.views import (
 from browser_use.controller.registry.views import ActionModel
 from pydantic import BaseModel, Field, create_model
 
-from src.agent.discovery import Plan
-
 @dataclass
 class CustomAgentStepInfo(AgentStepInfo):
     step_number: int
-    page_step_number: int
     max_steps: int
-    page_max_steps: int
+    task: str
+    add_infos: str
+    memory: str
 
 class CustomAgentBrain(BaseModel):
     """Current state of the agent"""
 
     evaluation_previous_goal: str
+    important_contents: str
+    thought: str
     next_goal: str
 
 
@@ -58,7 +59,7 @@ class CustomAgentState(BaseModel):
     agent_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     n_steps: int = 1
     consecutive_failures: int = 0
-    last_result: List["ActionResult"] = Field(default_factory=list)
+    last_result: List['ActionResult'] = Field(default_factory=list)
     history: AgentHistoryList = Field(default_factory=lambda: AgentHistoryList(history=[]))
     last_plan: Optional[str] = None
     paused: bool = False
@@ -66,13 +67,5 @@ class CustomAgentState(BaseModel):
 
     message_manager_state: MessageManagerState = Field(default_factory=MessageManagerState)
 
-    last_action: List["ActionModel"] = Field(default_factory=list)
-    extracted_content: str = ""
-
-    # new state vars
-    task: str = ""
-    prev_page_contents: str = ""
-    prev_url: str = ""
-    prev_goal: str = ""
-    eval_prev_goal: str = ""
-    plan: Optional[Plan] = None
+    last_action: List['ActionModel'] = Field(default_factory=list)
+    extracted_content: str = ''

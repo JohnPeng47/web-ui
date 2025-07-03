@@ -26,7 +26,7 @@ together_deepseek_r1 = ChatTogether(
 
 LLM_MODELS = {
     "command-a-03-2025": cohere_command_a,
-    # "deepseek_r1": together_deepseek_r1,
+    # "deepseeks_r1": together_deepseek_r1,
     "gpt-4o": openai_4o,
     "gpt-4.1": openai_41,
     "gemini-2.5-flash": gemini_25_flash,
@@ -65,7 +65,6 @@ class LLMHub:
     Args:
         providers (Dict[str, BaseChatModel]):
             Mapping of model-name → model instance.
-            One key **must** be "default".  That entry is used by ``invoke``.
         function_map (Dict[str, str]):
             Mapping of function-name -> model-name.
     """
@@ -75,11 +74,6 @@ class LLMHub:
             function_map: Dict[str, str], 
             providers: Dict[str, BaseChatModel] = LLM_MODELS
         ) -> None:
-        if "default" not in providers:
-            raise ValueError('"default" key missing from providers mapping')
-
-        self.default = providers["default"]
-
         self._providers = providers
         self._function_map = function_map
         self._cost_map = self._load_cost_map()
@@ -100,15 +94,13 @@ class LLMHub:
         """Switch the default model."""
         if name not in self._providers:
             raise KeyError(f"model {name!r} not found")
-        self.default = self._providers[name]
-        self._providers["default"] = self.default
 
     def get(self, function_name: str) -> BaseChatModel:
         """Return a wrapper for a specific provider by function name."""
-        model_name = self._function_map.get(function_name, "default")
+        model_name = self._function_map.get(function_name)
         
-        if model_name == "default":
-            model_to_wrap = self.default
+        if model_name is None:
+            raise KeyError(f"function {function_name!r} not found in function map")
         elif model_name not in self._providers:
             raise KeyError(f"model {model_name!r} not found")
         else:
@@ -116,16 +108,6 @@ class LLMHub:
         
         return BaseChatWrapper(function_name, model_to_wrap, self.log_cost)
 
-    # ------------- primary public API ------------------
-    def invoke(self, message: str, **kwargs: Any):
-        """
-        Proxy call to the **current** default model.
-
-        Extra kwargs are passed through verbatim, so you can still do e.g.
-        ``hub.invoke("hi", temperature=0.2)``.
-        """
-        return self.default.invoke(message, **kwargs)
-    
     def get_costs(self):
         return self._total_costs
     
