@@ -74,7 +74,7 @@ MODEL_NAME = "gpt-4.1"
 class AgentMode(Enum):
     NAVIGATION = auto()
     TASK_EXECUTION = auto()
-    NOOP = auto()
+    START_ACTION = auto()
 
 class Event(Enum):
     NAV_START      = auto()
@@ -86,7 +86,7 @@ class Event(Enum):
     SHUTDOWN       = auto()
 
 TRANSITIONS = {
-    (AgentMode.NOOP, Event.NAV_START):    AgentMode.NAVIGATION,
+    (AgentMode.START_ACTION, Event.NAV_START):    AgentMode.NAVIGATION,
     (AgentMode.TASK_EXECUTION, Event.NAV_START): AgentMode.NAVIGATION, # NOT IMPLEMENTED
     (AgentMode.TASK_EXECUTION, Event.BACKTRACK):  AgentMode.NAVIGATION,
     (AgentMode.TASK_EXECUTION, Event.PAGE_COMPLETE): AgentMode.NAVIGATION,
@@ -103,6 +103,7 @@ Actually, if there are popups on the page, dismiss them
 
 Make sure to:
 - automatically evaluate this current task as successful by the next agentic step
+Emit the done action to mark this no-op task as completed
 """
 
 NAVIGATE_TO_PAGE_PROMPT = """
@@ -186,7 +187,6 @@ async def _create_or_update_plan(
         event = Event.BACKTRACK
     elif nav_page.status == NewPageStatus.SUBPAGE:
         agent_log.info(f"Discovered [subpage]: {nav_page.name}")
-        agent_log.info(f"Using {MODEL_DICT['update_plan']} to update plan")
         curr_plan = UpdatePlanNested().invoke(
             model=llm.get("update_plan"),
             prompt_args={
@@ -263,8 +263,10 @@ class CustomAgent(Agent):
         close_browser: bool = False,
         agent_name: str = ""
     ):
+        start_task = start_task or NO_OP_TASK
+
         super(CustomAgent, self).__init__(
-            task=NO_OP_TASK,
+            task=start_task,
             llm=llm.get("default"),
             browser=browser,
             browser_context=browser_context,
@@ -302,7 +304,7 @@ class CustomAgent(Agent):
         self.history_file = history_file
         self.http_handler = HTTPHandler()
         self.http_history = HTTPHistory()
-
+        
         if browser_context:
             browser_context.req_handler = self.http_handler.handle_request
             browser_context.res_handler = self.http_handler.handle_response
@@ -311,7 +313,7 @@ class CustomAgent(Agent):
         self.state = CustomAgentState()
         self.add_infos = add_infos
         self._message_manager = CustomMessageManager(
-            task=NO_OP_TASK,
+            task=start_task,
             system_message=self.settings.system_prompt_class(
                 self.available_actions,
                 max_actions_per_step=self.settings.max_actions_per_step,
@@ -326,8 +328,8 @@ class CustomAgent(Agent):
             ),
             state=self.state.message_manager_state,
         )
-        self.mode = AgentMode.NOOP
-        self._set_task(NO_OP_TASK)
+        self.mode = AgentMode.START_ACTION
+        self._set_task(start_task)
         self._backtrack = False
 
         self.step_http_msgs = []
@@ -448,9 +450,8 @@ class CustomAgent(Agent):
         )
         input_messages = self._message_manager.get_messages()
         agent_log.info(f"[INPUT]: Input messages len {len(input_messages)}")
-        # for msg in input_messages:
-        #     if type(msg) == AIMessage:
-        #         agent_log.info(f"[INPUT] {msg.content}")
+        for msg in input_messages:
+            agent_log.info(f"[INPUT] {msg.content}")
         try:
             # HACK
             for msg in input_messages:
@@ -647,16 +648,20 @@ class CustomAgent(Agent):
             new_task = None
             new_plan = None
             nav_page = None
+            evt = None
 
-            if step_info.page_step_number >= step_info.page_max_steps:
-                evt = Event.PAGE_COMPLETE
+            # Always complete the start action before page transition
+            if self.mode == AgentMode.START_ACTION and result[-1].is_done:
+                agent_log.info("START ACTION COMPLETED!")
+                evt = Event.NAV_START
             else:
-                if self.mode == AgentMode.NAVIGATION:
-                    evt = await self._nav_think(model_output, step_info)
-                elif self.mode == AgentMode.TASK_EXECUTION:
-                    evt, new_task, new_plan, nav_page = await self._task_think(new_page_contents, new_url, step_info, model_output)
-                elif self.mode == AgentMode.NOOP:
-                    evt = Event.NAV_START
+                if step_info.page_step_number >= step_info.page_max_steps:
+                    evt = Event.PAGE_COMPLETE
+                else:
+                    if self.mode == AgentMode.NAVIGATION:
+                        evt = await self._nav_think(model_output, step_info)
+                    elif self.mode == AgentMode.TASK_EXECUTION:
+                        evt, new_task, new_plan, nav_page = await self._task_think(new_page_contents, new_url, step_info, model_output)
 
             await self._update_state(result, model_output, step_info, input_messages, new_url, new_page_contents)
             await self._transition(step_info, evt, new_url, new_page_contents, new_plan, new_task, nav_page)
@@ -709,7 +714,12 @@ class CustomAgent(Agent):
     async def run(self, max_steps: int, page_max_steps: int) -> AgentHistoryList:
         """Execute the task with maximum number of steps"""
         try:    
-            self._log_agent_run()
+            # sys_msgs = self.message_manager.get_messages()
+            # full_log.info(f"Sytem prompt:")
+            # for msg in sys_msgs:
+            #     full_log.info(msg.content)
+
+            # self._log_agent_run()
 
             # Execute initial actions if provided
             if self.initial_actions:
@@ -739,13 +749,12 @@ class CustomAgent(Agent):
                     if self.state.stopped:  # Allow stopping while paused
                         break
 
-                await self.step(step_info)
-
+                await self.step(step_info)    
                 # TODO: disabled task completion check for now
                 # if self.state.history.is_done():
-                # 	if self.settings.validate_output and step < max_steps - 1:
-                # 		if not await self._validate_output():
-                # 			continue
+                # 	if selft await self._validate_output():
+                # 			co.settings.validate_output and step < max_steps - 1:
+                # 		if nontinue
 
                 # 	await self.log_completion()
                 # 	break
@@ -800,7 +809,7 @@ class CustomAgent(Agent):
             total_cost = sum(costs.values())
             n_steps = getattr(self.state, "n_steps", 0)
             avg_cost_per_step = total_cost / n_steps if n_steps > 0 else 0.0
-            
+
             agent_log.info("Cost per function:")
             for func, cost in costs.items():
                 agent_log.info(f"  {func}: ${cost:.6f}")

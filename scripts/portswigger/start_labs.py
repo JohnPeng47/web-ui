@@ -13,10 +13,11 @@ from johnllm import LLMModel
 from logging import getLogger
 
 from src.agent.harness import AgentHarness
-from src.agent.custom_prompts import CustomAgentMessagePrompt, CustomSystemPrompt
 from src.agent.controllers.observation_contoller import ObservationController, ObservationModel
 
 from scripts.portswigger.data.server_side import PORT_SWIGGER_LABS
+from scripts.portswigger.agent.agent import CustomAgent as BrowserAgent
+from scripts.portswigger.agent.custom_prompts import CustomAgentMessagePrompt, CustomSystemPrompt
 
 # ────────────────────────────────────────────
 # Configuration constants
@@ -229,6 +230,7 @@ Once this is done, you can exit
         # )
 
         harness = AgentHarness(
+            agent_cls=BrowserAgent,
             browser=browser,
             agents_config=[{"task": agent_prompt, "agent_client": None}],
             common_kwargs=shared_cfg,
@@ -251,7 +253,7 @@ Once this is done, you can exit
             return None
         finally:
             logger.error(">>>> Forcibly shutting down the agent: ")
-            await harness.kill_all("Done")
+            await harness.kill_all(reason="Done")
             await browser.close()
 
 if __name__ == "__main__":

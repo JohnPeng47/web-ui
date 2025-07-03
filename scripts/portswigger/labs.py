@@ -20,3 +20,7 @@ SQLI_TEST = [
 SSRF_TEST_SINGLE = [
     {"vuln_name": "server_side_request_forgery", "labs": [1]},
 ]
+
+XSS_TEST_SINGLE = [
+    {"vuln_name": "cross_site_scripting", "labs": [2]},
+]
