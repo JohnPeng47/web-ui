@@ -15,7 +15,7 @@ from logging import getLogger
 from src.agent.harness import AgentHarness
 from src.agent.controllers.observation_contoller import ObservationController, ObservationModel
 
-from scripts.portswigger.data.server_side import PORT_SWIGGER_LABS
+from scripts.portswigger.data import PORT_SWIGGER_LABS
 from scripts.portswigger.agent.agent import CustomAgent as BrowserAgent
 from scripts.portswigger.agent.custom_prompts import CustomAgentMessagePrompt, CustomSystemPrompt
 
@@ -261,5 +261,6 @@ if __name__ == "__main__":
     from .labs import SQLI_SUBSET_NO_STATE
     from .labs import SQLI_TEST
     from .labs import SSRF_TEST_SINGLE
+    from .labs import XSS_TEST_SINGLE
 
-    PortSwiggerLabRunner(SSRF_TEST_SINGLE, poll_interval=15, headless=False).run()
+    PortSwiggerLabRunner(XSS_TEST_SINGLE, poll_interval=15, headless=False).run()

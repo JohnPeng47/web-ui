@@ -25,7 +25,11 @@ def extract_json_tags(response: str) -> str:
     """
     Extracts the JSON tags from the response.
     """
-    return response.split("```json")[1].split("```")[0]
+    try:
+        return response.split("```json")[1].split("```")[0]
+    except IndexError as e:
+        # assume that response is already json
+        return response
 
 def is_typed_dict(cls) -> bool:
     return (
@@ -147,6 +151,9 @@ Make sure to return an instance of the JSON, not the schema itself
         while current_retry <= max_retries:
             try:
                 res = model.invoke(prompt)
+                print("--------------------------------")
+                print(res.content)
+                print("--------------------------------")
                 content = res.content
 
                 if not isinstance(content, str):
