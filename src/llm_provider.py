@@ -19,7 +19,11 @@ from instructor.function_calls import OpenAISchema, openai_schema
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import BaseMessage
 
-T = TypeVar("T")
+from src.llm_models import ChatModelWithName, openai_41 as lazy_openai_41
+
+manual_rewrite_model = lazy_openai_41
+
+T = TypeVar("T") 
 
 def extract_json_tags(response: str) -> str:
     """
@@ -87,10 +91,27 @@ class LMP(Generic[T]):
     prompt: str
     response_format: Type[T]
     templates: Dict = {}
+    manual_response_models: List[str] = [
+        "gemini-2.5-pro"
+    ]
+    manual_rewrite_model: Optional[BaseChatModel] = None
+    manual_rewrite_prompt: str = """
+Convert the following response into a valid JSON object:
 
-    def _prepare_prompt(self, templates={}, **prompt_args) -> str:        
+{response}
+"""
+
+    def _prepare_prompt(self, templates={}, manual_rewrite: bool = False, **prompt_args) -> str:        
         prompt_str = jinja2.Template(self.prompt).render(**prompt_args, **templates)
-        return self._get_instructor_prompt(prompt_str)
+
+        if manual_rewrite:
+            return prompt_str + self._get_instructor_prompt()
+        else:
+            return prompt_str
+    
+    def _prepare_manual_rewrite_prompt(self, response: str) -> str:
+        prompt_str = self.manual_rewrite_prompt.format(response=response)
+        return prompt_str + self._get_instructor_prompt()
 
     def _verify_or_raise(self, res, **prompt_args):
         return True
@@ -98,12 +119,12 @@ class LMP(Generic[T]):
     def _process_result(self, res, **prompt_args) -> Any:
         return res
     
-    def _get_instructor_prompt(self, prompt: str) -> str:
+    def _get_instructor_prompt(self) -> str:
         if not self.response_format:
-            return prompt
+            return ""
     
         response_model = prepare_response_model(self.response_format)
-        return prompt + f"""
+        return f"""
         \n\n
 Understand the content and provide
 the parsed objects in json that match the following json_schema:\n
@@ -138,9 +159,11 @@ Make sure to return an instance of the JSON, not the schema itself
                max_retries: int = 3,
                retry_delay: int = 1,
                prompt_args: Dict = {},
-               prompt_logger: Optional[Logger] = None) -> Any:
+               prompt_logger: Optional[Logger] = None,
+               manual_rewrite: bool = False) -> Any:
         prompt = self._prepare_prompt(
             templates=self.templates,
+            manual_rewrite=manual_rewrite,
             **prompt_args,
         )
         if prompt_logger:
@@ -151,10 +174,21 @@ Make sure to return an instance of the JSON, not the schema itself
         while current_retry <= max_retries:
             try:
                 res = model.invoke(prompt)
-                print("--------------------------------")
-                print(res.content)
-                print("--------------------------------")
-                content = res.content
+
+                # print("--------------------------------")
+                # print(res.content)
+                # print("--------------------------------")
+                # content = res.content
+
+                if model.model_name in self.manual_response_models or manual_rewrite:
+                    if not self.manual_rewrite_model:
+                        self.manual_rewrite_model = lazy_openai_41()
+
+                    prompt = self._prepare_manual_rewrite_prompt(res.content)
+                    res = self.manual_rewrite_model.invoke(prompt)
+                    content = res.content
+                else:
+                    content = res.content
 
                 if not isinstance(content, str):
                     raise Exception("[LLM] CONTENT IS NOT A STRING")
