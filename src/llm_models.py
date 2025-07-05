@@ -5,23 +5,82 @@ from langchain_core.messages import BaseMessage
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_cohere import ChatCohere
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_anthropic import ChatAnthropic
 
 import json
 import os
 
-gemini_25_flash = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    api_key=os.getenv("GEMINI_API_KEY")
+class ChatModelWithName:
+    """Wrapper for BaseChatModel that adds a model_name attribute."""
+    
+    def __init__(self, model: BaseChatModel, model_name: str):
+        self._model = model
+        self.model_name = model_name
+        self.log_fn = None
+        self.function_name = None
+
+    def set_log_fn(self, log_fn: Callable[[BaseMessage, str], None], function_name: str) -> None:
+        self.log_fn = log_fn
+        self.function_name = function_name
+    
+    def invoke(self, *args: Any, **kwargs: Any) -> Any:
+        res = self._model.invoke(*args, **kwargs)
+        if self.log_fn:
+            self.log_fn(res, self.function_name)
+        return res
+    
+    def __getattr__(self, name: str) -> Any:
+        # Delegate all other attribute access to the wrapped model
+        return getattr(self._model, name)
+
+# Lazy-init models
+gemini_25_flash = lambda: ChatModelWithName(
+    ChatGoogleGenerativeAI(
+        model="gemini-2.5-flash",
+        api_key=os.getenv("GEMINI_API_KEY")
+    ),
+    "gemini-2.5-flash"
 )
-openai_4o = ChatOpenAI(model="gpt-4o")
-openai_41 = ChatOpenAI(model="gpt-4.1")
-cohere_command_a = ChatCohere(
-    model="command-a-03-2025", 
-    cohere_api_key=os.getenv("COHERE_API_KEY")
+gemini_25_pro = lambda: ChatModelWithName(
+    ChatGoogleGenerativeAI(
+        model="gemini-2.5-pro",
+        api_key=os.getenv("GEMINI_API_KEY")
+    ),
+    "gemini-2.5-pro"
 )
-together_deepseek_r1 = ChatTogether(
-    model="deepseek-ai/DeepSeek-R1-0528-tput",
-    api_key=os.getenv("TOGETHER_API_KEY")
+openai_4o = lambda: ChatModelWithName(
+    ChatOpenAI(model="gpt-4o"),
+    "gpt-4o"
+)
+openai_41 = lambda: ChatModelWithName(
+    ChatOpenAI(model="gpt-4.1"),
+    "gpt-4.1"
+)
+cohere_command_a = lambda: ChatModelWithName(
+    ChatCohere(
+        model="command-a-03-2025", 
+        cohere_api_key=os.getenv("COHERE_API_KEY")
+    ),
+    "command-a-03-2025"
+)
+together_deepseek_r1 = lambda: ChatModelWithName(
+    ChatTogether(
+        model="deepseek-ai/DeepSeek-R1-0528-tput",
+        api_key=os.getenv("TOGETHER_API_KEY")
+    ),
+    "deepseek-ai/DeepSeek-R1-0528-tput"
+)
+openai_o3 = lambda: ChatModelWithName(
+    ChatOpenAI(model="o3"),
+    "o3"
+)
+anthropic_claude_3_5_sonnet = lambda: ChatModelWithName(
+    ChatAnthropic(model="claude-3-5-sonnet-20240620"),
+    "claude-3-5-sonnet-20240620"
+)
+claude_4_sonnet = lambda: ChatModelWithName(
+    ChatAnthropic(model="claude-sonnet-4-20250514"),
+    "claude-sonnet-4-20250514"
 )
 
 LLM_MODELS = {
@@ -30,15 +89,11 @@ LLM_MODELS = {
     "gpt-4o": openai_4o,
     "gpt-4.1": openai_41,
     "gemini-2.5-flash": gemini_25_flash,
+    "gemini-2.5-pro": gemini_25_pro,
     "default": cohere_command_a,
-}
-
-MODEL_DICT = {
-    "browser_use": "gemini-2.5-flash",
-    "check_plan_completion" : "gemini-2.5-flash",
-    "determine_new_page" : "default",
-    "create_plan" : "default",
-    "update_plan" : "gemini-2.5-flash",
+    "o3": openai_o3,
+    "claude-3-5-sonnet-20240620": anthropic_claude_3_5_sonnet,
+    "claude-sonnet-4-20250514": claude_4_sonnet,
 }
 
 # incredibly dumb hack to appease the type checker
@@ -72,9 +127,9 @@ class LLMHub:
     def __init__(
             self, 
             function_map: Dict[str, str], 
-            providers: Dict[str, BaseChatModel] = LLM_MODELS
+            providers: Dict[str, Callable[[], ChatModelWithName] | ChatModelWithName] = LLM_MODELS
         ) -> None:
-        self._providers = providers
+        self._providers = providers # lazily convert these to actually initialized models
         self._function_map = function_map
         self._cost_map = self._load_cost_map()
         self._total_costs = {function_name: 0 for function_name in function_map.keys()}
@@ -95,7 +150,7 @@ class LLMHub:
         if name not in self._providers:
             raise KeyError(f"model {name!r} not found")
 
-    def get(self, function_name: str) -> BaseChatModel:
+    def get(self, function_name: str) -> ChatModelWithName:
         """Return a wrapper for a specific provider by function name."""
         model_name = self._function_map.get(function_name)
         
@@ -103,12 +158,34 @@ class LLMHub:
             raise KeyError(f"function {function_name!r} not found in function map")
         elif model_name not in self._providers:
             raise KeyError(f"model {model_name!r} not found")
-        else:
-            model_to_wrap = self._providers[model_name]
         
-        return BaseChatWrapper(function_name, model_to_wrap, self.log_cost)
+        provider_entry = self._providers[model_name]
+
+        # Lazy-init if we stored a factory (callable)
+        if callable(provider_entry):
+            provider_entry: ChatModelWithName = provider_entry()
+            self._providers[model_name] = provider_entry  # cache the instance
+            provider_entry.set_log_fn(self.log_cost, function_name)
+
+        return provider_entry
 
     def get_costs(self):
         return self._total_costs
+
+# if __name__ == "__main__":
+#     import time
     
-llm_hub = LLMHub(providers=LLM_MODELS, function_map={})
+#     start_time = time.time()
+    
+#     print(LLM_MODELS["gemini-2.5-flash"].model_name)
+#     print(LLM_MODELS["gemini-2.5-pro"].model_name)
+#     print(LLM_MODELS["gpt-4o"].model_name)
+#     print(LLM_MODELS["gpt-4.1"].model_name)
+#     print(LLM_MODELS["command-a-03-2025"].model_name)
+#     print(LLM_MODELS["o3"].model_name)
+#     print(LLM_MODELS["claude-3-5-sonnet-20240620"].model_name)
+#     print(LLM_MODELS["claude-sonnet-4-20250514"].model_name)
+    
+#     end_time = time.time()
+#     execution_time = end_time - start_time
+#     print(f"Execution time: {execution_time:.6f} seconds")
