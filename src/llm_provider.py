@@ -104,7 +104,7 @@ Convert the following response into a valid JSON object:
     def _prepare_prompt(self, templates={}, manual_rewrite: bool = False, **prompt_args) -> str:        
         prompt_str = jinja2.Template(self.prompt).render(**prompt_args, **templates)
 
-        if manual_rewrite:
+        if not manual_rewrite:
             return prompt_str + self._get_instructor_prompt()
         else:
             return prompt_str
@@ -173,13 +173,7 @@ Make sure to return an instance of the JSON, not the schema itself
         current_retry = 1
         while current_retry <= max_retries:
             try:
-                res = model.invoke(prompt)
-
-                # print("--------------------------------")
-                # print(res.content)
-                # print("--------------------------------")
-                # content = res.content
-
+                # two part model invocation
                 if model.model_name in self.manual_response_models or manual_rewrite:
                     if not self.manual_rewrite_model:
                         self.manual_rewrite_model = lazy_openai_41()
@@ -188,6 +182,12 @@ Make sure to return an instance of the JSON, not the schema itself
                     res = self.manual_rewrite_model.invoke(prompt)
                     content = res.content
                 else:
+                    res = model.invoke(prompt)
+
+                    print("--------------------------------")
+                    print(res.content)
+                    print("--------------------------------")
+
                     content = res.content
 
                 if not isinstance(content, str):

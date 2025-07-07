@@ -31,7 +31,7 @@ from browser_use.browser.views import BrowserState
 from json_repair import repair_json
 from src.utils.agent_state import AgentState
 from src.agent.client import AgentClient
-from src.llm_models import llm_hub, LLMHub
+from src.llm_models import LLMHub
 from src.agent.utils import Pages
 
 from eval.client import AgentEvalClient

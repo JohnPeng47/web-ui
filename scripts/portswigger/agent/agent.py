@@ -40,7 +40,6 @@ from httplib import HTTPRequest, HTTPResponse, HTTPMessage
 
 from playwright._impl._errors import TargetClosedError
 from logging import getLogger
-from logger import init_root_logger
 
 # from .state import CustomAgentOutput
 from common.agent import BrowserActions
@@ -353,7 +352,7 @@ class CustomAgent(Agent):
         username = self.agent_name if self.agent_name else "default"
         
         # TODO: probably not a good idea to use none global logging solution
-        init_root_logger(username)
+        # init_root_logger(username)
         self.observations = {title.value: "" for title in AgentObservations}
 
         if browser_context:

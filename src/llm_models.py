@@ -37,7 +37,8 @@ class ChatModelWithName:
 gemini_25_flash = lambda: ChatModelWithName(
     ChatGoogleGenerativeAI(
         model="gemini-2.5-flash",
-        api_key=os.getenv("GEMINI_API_KEY")
+        api_key=os.getenv("GEMINI_API_KEY"),
+        enable_thinking=True
     ),
     "gemini-2.5-flash"
 )
