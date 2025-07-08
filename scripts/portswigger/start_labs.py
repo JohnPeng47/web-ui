@@ -263,10 +263,6 @@ if __name__ == "__main__":
     from .labs import SSRF_TEST_SINGLE
     from .labs import XSS_TEST_SINGLE
 
-    from scripts.portswigger.data import XSS_APPRENTICE_LABS as TEST_LABS
+    from scripts.portswigger.data import XSS_APPRENTICE_SINGLE as TEST_LABS
 
-    # lab test sets
-    convert_xss_apprentice_labs = lambda labs: [{"vuln_name": "cross_site_scripting", "labs": labs[0]["labs"][-4:]}]
-    apprentice_labs = convert_xss_apprentice_labs(TEST_LABS)
-
-    PortSwiggerLabRunner(apprentice_labs, poll_interval=15, headless=False).run()
+    PortSwiggerLabRunner(TEST_LABS, poll_interval=15, headless=False).run()

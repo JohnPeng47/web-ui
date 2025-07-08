@@ -173,17 +173,17 @@ Make sure to return an instance of the JSON, not the schema itself
         current_retry = 1
         while current_retry <= max_retries:
             try:
+                res = model.invoke(prompt)
+
                 # two part model invocation
                 if model.model_name in self.manual_response_models or manual_rewrite:
                     if not self.manual_rewrite_model:
                         self.manual_rewrite_model = lazy_openai_41()
 
                     prompt = self._prepare_manual_rewrite_prompt(res.content)
-                    res = self.manual_rewrite_model.invoke(prompt)
-                    content = res.content
+                    rewrite_res = self.manual_rewrite_model.invoke(prompt)
+                    content = rewrite_res.content
                 else:
-                    res = model.invoke(prompt)
-
                     print("--------------------------------")
                     print(res.content)
                     print("--------------------------------")
