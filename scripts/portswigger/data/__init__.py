@@ -13,10 +13,18 @@ PORT_SWIGGER_LABS = {
     "cross_site_scripting": CROSS_SITE_SCRIPTING_LABS
 }
 
-# python macros
-XSS_APPRENTICE_LABS = [{"vuln_name": "cross_site_scripting", "labs": [1, 2, 3, 4, 5, 7, 8, 9]}]
-XSS_PRACTITIONER_LABS = [{"vuln_name": "cross_site_scripting", "labs": [10, 11, 12, 13, 16, 17, 18, 19, 20, 21, 24]}]
-XSS_EXPERT_LABS = [{"vuln_name": "cross_site_scripting", "labs": [25, 27, 28, 30]}]
+# LABS requiring browser interaction or collaborator server
+# filtered_lab_ids = [4, 5, 6, 7, 13, 14, 16, 19, 21, 22, 25, 26, 27, 28]
+
+# LABS only requiring page refresh and no browser interaction
+# REMAINING_LAB_IDS = [
+#     0, 1, 2, 3, 8, 9, 10,
+#     11, 12, 15, 17, 18, 20,
+#     23, 24, 29
+# ]
+XSS_APPRENTICE_LABS = [{"vuln_name": "cross_site_scripting", "labs": [1, 2, 3, 8, 9]}]
+XSS_PRACTITIONER_LABS = [{"vuln_name": "cross_site_scripting", "labs": [10, 11, 12, 17, 18, 20, 24]}]
+XSS_EXPERT_LABS = [{"vuln_name": "cross_site_scripting", "labs": [29]}]
 
 XSS_APPRENTICE_SINGLE = [{"vuln_name": "cross_site_scripting", "labs": [2]}]
 create_xss_apprentice_labs = lambda labs: [{"vuln_name": "cross_site_scripting", "labs": labs[0]["labs"][-4:]}]

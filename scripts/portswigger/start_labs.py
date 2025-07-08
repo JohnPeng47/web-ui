@@ -263,6 +263,6 @@ if __name__ == "__main__":
     from .labs import SSRF_TEST_SINGLE
     from .labs import XSS_TEST_SINGLE
 
-    from scripts.portswigger.data import XSS_APPRENTICE_SINGLE as TEST_LABS
+    from scripts.portswigger.data import XSS_APPRENTICE_SET_ONE as TEST_LABS
 
     PortSwiggerLabRunner(TEST_LABS, poll_interval=15, headless=False).run()

