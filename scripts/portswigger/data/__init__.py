@@ -18,6 +18,10 @@ XSS_APPRENTICE_LABS = [{"vuln_name": "cross_site_scripting", "labs": [1, 2, 3, 4
 XSS_PRACTITIONER_LABS = [{"vuln_name": "cross_site_scripting", "labs": [10, 11, 12, 13, 16, 17, 18, 19, 20, 21, 24]}]
 XSS_EXPERT_LABS = [{"vuln_name": "cross_site_scripting", "labs": [25, 27, 28, 30]}]
 
+XSS_APPRENTICE_SINGLE = [{"vuln_name": "cross_site_scripting", "labs": [2]}]
+create_xss_apprentice_labs = lambda labs: [{"vuln_name": "cross_site_scripting", "labs": labs[0]["labs"][-4:]}]
+XSS_APPRENTICE_SET_ONE = create_xss_apprentice_labs(XSS_APPRENTICE_LABS)
+
 PROMPT_TEMPLATES = {
     "cross_site_scripting":
         {
