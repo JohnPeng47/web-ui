@@ -13,12 +13,14 @@ if __name__ == "__main__":
     interpreter = PythonInterpreter()
     res = interpreter.run("""
 import requests
-res = requests.get("https://example.com")
-print(res.text[:200])
-    """)
-    
-    real = requests.get("https://example.com")
+                          
+res = requests.get("http://localhost:8065/vulntest/channels/town-square")
+print(res.text)
+""")
     print(res)
-    print("-"*100)
-    print(real.text[:200])
+
+    # real = requests.get("https://example.com")
+    # print(res)
+    # print("-"*100)
+    # print(real.text[:200])
 
