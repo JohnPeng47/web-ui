@@ -117,7 +117,15 @@ CROSS_SITE_SCRIPTING_LABS = [
         "out_of_band": False,
         "description": "This lab demonstrates a reflected DOM vulnerability. Reflected DOM vulnerabilities occur when the server-side application processes data from a request and echoes the data in the response. A script on the page then processes the reflected data in an unsafe way, ultimately writing it to a dangerous sink. To solve this lab, create an injection that calls the alert() function.",
         "hint": "In Burp Suite, go to the Proxy tool and make sure that the Intercept feature is switched on. Back in the lab, go to the target website and use the search bar to search for a random test string, such as \"XSS\". Return to the Proxy tool in Burp Suite and forward the request. On the Intercept tab, notice that the string is reflected in a JSON response called search-results. From the Site Map, open the searchResults.js file and notice that the JSON response is used with an eval() function call. By experimenting with different search strings, you can identify that the JSON response is escaping quotation marks. However, backslash is not being escaped.",
-        "solution": "To solve the lab, enter the following search term: \\\"-alert(1)}//. As you have injected a backslash and the site isn't escaping them, when the JSON response attempts to escape the opening double-quotes character, it adds a second backslash. The resulting double-backslash causes the escaping to be effectively canceled out. This means that the double-quotes are processed unescaped, which closes the string that should contain the search term. An arithmetic operator (in this case the subtraction operator) is then used to separate the expressions before the alert() function is called. Finally, a closing curly bracket and two forward slashes close the JSON object early and comment out what would have been the rest of the object. As a result, the response is generated as follows: {\"searchTerm\":\"\\\\\"-alert(1)}//\", \"results\":[]}."
+        # TODO: dont think this is legit
+        "solution": """
+Reflected DOM XSS – compact 5-step guide
+1. Recon : /?search=test returns {"searchTerm":"test", ...} – input lands inside quotes.
+2. Sink  : client JS builds "var q=\"" + data.searchTerm + "\";" – we must break the string.
+3. Bypass: Prefix one backslash; server adds another (\\), so the next quote is unescaped.
+4. Payload: \"-alert(1)}//  → closes string, uses ─ to eval alert, ends JSON, comments rest.
+5. Deliver: https://<lab-host>/?search=%5C%22-alert(1)%7D//  → alert box solves the lab.
+"""
     },
     {
         "id": "12",
@@ -185,7 +193,7 @@ CROSS_SITE_SCRIPTING_LABS = [
         "link": "/web-security/cross-site-scripting/contexts/lab-javascript-string-angle-brackets-double-quotes-encoded-single-quotes-escaped",
         "difficulty": "PRACTITIONER",
         "out_of_band": False,
-        "description": "Lab: Reflected XSS into a JavaScript string with angle brackets and double quotes HTML-encoded and single quotes escaped   PRACTITIONER                                        This lab contains a reflected cross-site scripting vulnerability in the search query tracking functionality where angle brackets and double are HTML encoded and single quotes are escaped. To solve this lab, perform a cross-site scripting attack that breaks out of the JavaScript string and calls the alert function.",
+        "description": "This lab contains a reflected cross-site scripting vulnerability in the search query tracking functionality where angle brackets and double are HTML encoded and single quotes are escaped. To solve this lab, perform a cross-site scripting attack that breaks out of the JavaScript string and calls the alert function.",
         "hint": "Submit a random alphanumeric string in the search box, then use Burp Suite to intercept the search request and send it to Burp Repeater.  Observe that the random string has been reflected inside a JavaScript string.  Try sending the payload test'payload and observe that your single quote gets backslash-escaped, preventing you from breaking out of the string.  Try sending the payload test\\payload and observe that your backslash doesn't get escaped.",
         "solution": "Replace your input with the following payload to break out of the JavaScript string and inject an alert:  \\'-alert(1)//   Verify the technique worked by right clicking, selecting \"Copy URL\", and pasting the URL in the browser. When you load the page it should trigger an alert."
     },
