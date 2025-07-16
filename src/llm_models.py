@@ -49,6 +49,10 @@ gemini_25_pro = lambda: ChatModelWithName(
     ),
     "gemini-2.5-pro"
 )
+openai_o3_mini = lambda: ChatModelWithName(
+    ChatOpenAI(model="o3-mini"),
+    "o3-mini"
+)
 openai_4o = lambda: ChatModelWithName(
     ChatOpenAI(model="gpt-4o"),
     "gpt-4o"
@@ -93,6 +97,7 @@ LLM_MODELS = {
     "gemini-2.5-pro": gemini_25_pro,
     "default": cohere_command_a,
     "o3": openai_o3,
+    "o3-mini": openai_o3_mini,
     "claude-3-5-sonnet-20240620": anthropic_claude_3_5_sonnet,
     "claude-sonnet-4-20250514": claude_4_sonnet,
 }
@@ -172,21 +177,3 @@ class LLMHub:
 
     def get_costs(self):
         return self._total_costs
-
-# if __name__ == "__main__":
-#     import time
-    
-#     start_time = time.time()
-    
-#     print(LLM_MODELS["gemini-2.5-flash"].model_name)
-#     print(LLM_MODELS["gemini-2.5-pro"].model_name)
-#     print(LLM_MODELS["gpt-4o"].model_name)
-#     print(LLM_MODELS["gpt-4.1"].model_name)
-#     print(LLM_MODELS["command-a-03-2025"].model_name)
-#     print(LLM_MODELS["o3"].model_name)
-#     print(LLM_MODELS["claude-3-5-sonnet-20240620"].model_name)
-#     print(LLM_MODELS["claude-sonnet-4-20250514"].model_name)
-    
-#     end_time = time.time()
-#     execution_time = end_time - start_time
-#     print(f"Execution time: {execution_time:.6f} seconds")

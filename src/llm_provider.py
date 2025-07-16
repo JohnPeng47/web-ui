@@ -81,6 +81,11 @@ def prepare_response_model(response_model: type[T] | None) -> type[T] | None:
 
     return response_model
 
+
+class LMPVerificationException(Exception):
+    """Thrown when post_process raises an error"""
+    pass
+
 # TODO: change to use generic[t]
 # DESIGN: not sure how to enforce this but we should only allow JSON serializable
 # args to be passed to the model, to be compatible with Braintrust 
@@ -184,9 +189,9 @@ Make sure to return an instance of the JSON, not the schema itself
                     rewrite_res = self.manual_rewrite_model.invoke(prompt)
                     content = rewrite_res.content
                 else:
-                    print("--------------------------------")
-                    print(res.content)
-                    print("--------------------------------")
+                    # print("--------------------------------")
+                    # print(res.content)
+                    # print("--------------------------------")
 
                     content = res.content
 
