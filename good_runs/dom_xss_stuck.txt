@@ -1,0 +1,1842 @@
+[5] 21:34:22:[start_agent:531] - agent started for mlife
+[5] 21:34:48:[_log:315] - ========== STEP 1 ==========
+[5] 21:34:48:[_log:315] - Interpreter Prompt: 
+
+In your python scripting environment, you have access to an instance of *synchronous* PlayWright BrowserContext under the variable name "pw_context3"
+You should interact with the web application in your scripts only by using pw_context3.request: 
+ie. 
+pw_context3.request.get("https://example.com")
+pw_context3.request.post("https://example.com", data={"key": "value"})
+...
+
+[5] 21:34:48:[_debug_prompt:320] - Prompt:
+
+<problem_stmt>
+Here is the CTF problem statement:
+
+This is the URL of the web application: https://mlife.mo
+Try to find a XSS vulnerability in this application
+
+</problem_stmt>
+
+
+
+
+
+
+
+
+
+<interp_prompt>
+
+In your python scripting environment, you have access to an instance of *synchronous* PlayWright BrowserContext under the variable name "pw_context3"
+You should interact with the web application in your scripts only by using pw_context3.request: 
+ie. 
+pw_context3.request.get("https://example.com")
+pw_context3.request.post("https://example.com", data={"key": "value"})
+...
+
+</interp_prompt>
+
+You are a professional web‑app CTF/pentesting agent named **PentestBot**.
+Your goal is to discover and exploit a vulnerability in the target.
+The *only* interaction channel with the target is a Python script that will be
+executed immediately.  You will receive the combined stdout/stderr of that
+execution to inform your next step.
+
+<recommended_workflow>
+Recommended workflow per turn:
+1. Analyse the previous execution script and output.
+2. Add any important information to the scratchpad.  This will be used to
+   provide context for future turns.  Some good information to put here:
+   • completed stages in a multi‑step exploit attempt
+   • attempted tactical objectives so future agent can avoid repeating them
+   • any other observations that might be useful for future turns
+3. Decide the next tactical objective.
+4. Emit a concise reflection explaining your reasoning.
+5. Emit a *complete* Python script implementing that objective.
+</recommended_workflow>
+
+*Tips*:
+Scripting:
+- you have access to the standard python library modules
+- you also have access to the requests module
+
+XSS:
+Here is a guide for approaching XSS vulnerabilities:
+1. Locate: this step consists locating where the input is located in the DOM
+> come up with a bunch of different payloads that test for different sink contexts
+> use requests module to get the DOM
+> then parse and extract the reflected input using re and BeautifulSoup
+
+2. Exploit: once location and context identified, come up with a payload that exploits the sink
+> finally confirm using the browser_check_xss tool
+        
+
+
+Understand the content and provide
+the parsed objects in json that match the following json_schema:
+
+
+{
+  "description": "LLM response schema expected by :pymeth:`PentestBot.invoke`.",
+  "properties": {
+    "reflection": {
+      "title": "Reflection",
+      "type": "string"
+    },
+    "script": {
+      "title": "Script",
+      "type": "string"
+    },
+    "add_to_scratchpad": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Add To Scratchpad"
+    }
+  },
+  "required": [
+    "reflection",
+    "script"
+  ],
+  "title": "AgentStep",
+  "type": "object"
+}
+
+Make sure to return an instance of the JSON, not the schema itself
+        
+[5] 21:35:04:[_log:315] - Reflection:
+First step is reconnaissance: fetch the homepage and programmatically enumerate obvious links and form actions that contain query-string parameters.  This will give us candidate endpoints/parameters where we can later insert test payloads and check whether the input is reflected in the HTML.  The script below retrieves https://mlife.mo, parses anchor hrefs and form actions, and prints the discovered URLs and parameters so we can plan our next injection tests.
+[5] 21:35:07:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+
+[+] Candidate endpoints/links containing parameters:
+
+
+[*] Fetching home page …
+[+] Status: 200
+
+[5] 21:35:07:[_log:315] - ========== STEP 2 ==========
+[5] 21:35:29:[_log:315] - Reflection:
+The home page didn’t expose any obvious reflection points – no links containing “?” and no forms with query parameters.  Next step is to crawl a bit deeper (depth-2, limited to ~50 pages) staying inside the mlife.mo domain.  For every fetched page we’ll:
+ • extract <a> hrefs and queue unvisited internal pages
+ • collect links/actions that contain a query-string or that are GET/POST forms, recording their parameters
+This reconnaissance should give us concrete endpoints/parameters to begin injecting XSS payloads in the following turn.
+[5] 21:35:30:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+
+[+] Discovered candidate GET endpoints (with parameters placeholders where possible):
+https://mlife.mo?_csrf={test}
+
+[+] Discovered POST forms:
+
+
+[*] Starting crawl …
+[+] (1) https://mlife.mo  status=200
+
+[5] 21:35:30:[_log:315] - ========== STEP 3 ==========
+[5] 21:35:54:[_log:315] - Reflection:
+The crawl only found the root page – very likely the site is a single-page (JS) app so static link scraping won’t reveal its internal routes.  Let’s inspect the raw HTML / JS delivered at https://mlife.mo to look for hard-coded routes or API endpoints that accept query-string params (possible XSS sinks).  We’ll fetch the page and print:
+ • first 200 lines for a quick manual look
+ • every snippet that contains a “?” inside quotes (href="…?…", fetch("…?…), etc.)
+This reconnaissance should expose client-side routes and give us concrete URLs/parameters for the next step.
+[5] 21:35:54:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[5] 21:35:55:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+
+===== FIRST 200 LINES =====
+
+001: ﻿<!DOCTYPE html>
+002: <!-- Copyright (c) 2016 Four Winds Interactive LLC. All rights reserved. -->
+003: <html class="ui-mobile-rendering" lang="">
+004: <head>
+005:   <meta charset="utf-8"></meta>
+006:   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"></meta>
+007:   <!-- TEMP CHANGE: not allow user to scale the device -->
+008:   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"></meta>
+009:   <meta name="apple-mobile-web-app-capable" content="yes"></meta>
+010:   <meta name="apple-mobile-web-app-title" content=""></meta>
+011:     <!-- Aliyun Captcha Config -->
+012:     <script>
+013:       window.AliyunCaptchaConfig = {
+014:         region: "cn",
+015:         prefix: "fb25dpi",
+016:       };
+017:       </script>
+018:     <script type="text/javascript" src="https://o.alicdn.com/captcha-frontend/aliyunCaptcha/AliyunCaptcha.js">
+019:         </script>
+020:   <title></title>
+021:   <link rel="shortcut icon" href="#"></link>
+022:   <link rel="stylesheet" href="css/add2home.css"></link>
+023:   <link rel="stylesheet" href="css/select2.css"></link>
+024:   <link rel="stylesheet" href="css/bootstrap.css"></link>
+025:   <link rel="stylesheet" data-filename="styles.css" href="config/css/styles.css"></link>
+026:   <!-- TEMP CHANGE: add css and new home view html template -->
+027:   <link rel="stylesheet" href="config/css/styles-new-home-view.css"></link>
+028: <style>
+029:     @media only screen and (max-width: 600px) {
+030:         div.bar-title.alias-language-buttons, div.ag {display: flex; float: unset;}
+031:         .bar-title.alias-language-buttons > span {margin: 0 auto;}
+032:         .bar-title #header-right {width: 100%;}
+033:     }
+034: </style>
+035: <!-- new style added for re-skin start -->
+036: <style>
+037:   body {
+038:     background-color: black!important;
+039:   }
+040:   div.menu-list-item-info {
+041:     padding: 5px;
+042:   }
+043:   div.menu-list-item-info > div.user-info {
+044:     font-size: 10px!important;
+045:   }
+046:   span.swiper-pagination-dir.left,
+047:   span.swiper-pagination-dir.right {
+048:     display: none!important;
+049:   }
+050:   /* .swiper-wrapper {
+051:     display: none;
+052:   } */
+053:   #homeslider .swiper-container {
+054:     border-radius: 20px;
+055:     margin-bottom: 20px;
+056:   }
+057:   nav#home-menu {
+058:     margin-bottom: 15px;
+059:   }
+060:   /* nav#home-menu:nth-child(1) {
+061:     color: #ffebca;
+062:   } */
+063:   div.swiper-pagination {
+064:     visibility: hidden;
+065:   }
+066:   #content #new-home {
+067:     padding: 0px 10px;
+068:   }
+069:   .lionlogon {
+070:       width: 100%;
+071:       display: none;
+072:   }
+073:   .menu .menu-content {
+074:     background-color: #3ea7d9!important;
+075:   }
+076:   #menu-content .js-menu-content-content{
+077:     width: 300px;
+078:   }
+079:   #menu-content .menu-content-header .menu-content-close .menu-list-item .js-menu-content-close-img{
+080:     float: right;
+081:   }
+082:   #menu-content .menu-content-header .menu-content-close .menu-list-item .js-menu-content-close-label{
+083:     visibility: hidden;
+084:   }
+085:   .lionlogon img {
+086:     height: auto;
+087:     width: 70%;
+088:     position: absolute;
+089:     bottom: 0;
+090:     right: 0;
+091:   }
+092:   div.item.form-group input.form-input, 
+093:   input.input-text, 
+094:   select.form-input {
+095:     border-radius: 10px!important;
+096:     border-color: #f3d7ad;
+097:   }
+098:   div.item.form-group {
+099:     margin-top: 30px;
+100:   }
+101:   button.js-sign-in, 
+102:   button.button.js-has-no-player-id.join-now, 
+103:   button.button.js-check-user-registered, 
+104:   button.button.js-continue-registration,
+105:   button.button.js-login,
+106:   button.button.js-verify-identity,
+107:   button#redeem.button,
+108:   .input-group #bookingbutton,
+109:   .input-group #processButton,
+110:   .menu-content-content .dialog-confirm .dialog-confirm-button-container .dialog-confirm-button,
+111:   .menu-content-content .dialog-confirm .dialog-confirm-button-container .dialog-cancel-button,
+112:   .input-group #checkvoyagescheduleBtn,
+113:   .input-group #redeemTurbojetPoint,
+114:   .input-group #redeemTurbojet{
+115:     border-radius: 10px!important;
+116:     color: black!important;
+117:     background: linear-gradient(to right, #D9B681, #FCE4BF, #D9B681, #FCE4BF) !important;
+118:     height: 42px;
+119:   }
+120:   .menu-content-content .dialog-confirm .dialog-confirm-message{
+121:     font-size: 17px;
+122:   }
+123:   .menu-content-content .dialog-confirm .dialog-confirm-button-container .dialog-confirm-button,
+124:   .menu-content-content .dialog-confirm .dialog-confirm-button-container .dialog-cancel-button{
+125:     border: none;
+126:     width: 100%;
+127:     margin-bottom: 15px;
+128:   }
+129:   .menu-content-content .dialog-confirm .dialog-confirm-button-container{
+130:     padding-top: 0;
+131:     padding-bottom: 140px;
+132:   }
+133:   div.item.input-group{
+134:     /* width: 25%!important; */
+135:     padding: 0px 0px 10px 5px;
+136:   }
+137:   div.ymd, div.myglc, 
+138:   .glcpromo-r1, 
+139:   .glcpromo-r2,
+140:   .glcpromo-r3 {
+141:     display: flex;
+142:   }
+143:   div.ymd, 
+144:   .glcpromo-r1, 
+145:   .glcpromo-r2,
+146:   .glcpromo-r3 {
+147:     gap: 10px;
+148:   }
+149:   .glcpromo-r3 {
+150:     width: 50%;
+151:   }
+152:   div.myglc {
+153:     margin-bottom: 30px;
+154:   }
+155:   div.myglc div {
+156:     margin: 0 auto;
+157:   }
+158:   div.myglc a {
+159:     text-align: center;
+160:   }
+161:   div.myglc-fr {
+162:     display: flex;
+163:     flex-direction: column;
+164:     position: relative;
+165:   }
+166:   div.myglc-fr img {
+167:     width: 50%;
+168:   }
+169:   div.glcpromo div a {
+170:     margin: 10px 5px;
+171:     width: 100%;
+172:     font-size: 17px;
+173:     text-decoration: underline;
+174:   }
+175:   div.glcpromo div a div {
+176:     /* color: black; */
+177:     font-weight: 600;
+178:     /* font-size: 16px; */
+179:     display: flex;
+180:     flex-direction: column;
+181:     justify-content: center;
+182:   }
+183:   .glcpromo-r1, .glcpromo-r2 {
+184:     margin: 15px 0px;
+185:   }
+186:   div.glcpromo-img {
+187:     background-size: 100% 100%;
+188:     width: 100%;
+189:     height: 100px;
+190:     border-radius: 9px;
+191:   }
+192:   div.glcpromo-offer {
+193:     background-image: url("/getAsset/promo-and-offer.png");
+194:   }
+195:   div.glcpromo-gifts {
+196:     background-image: url("/getAsset/mgm-gifts.png");
+197:   }
+198:   div.glcpromo-resort {
+199:     background-image: url("/getAsset/mgm-resort-and-facility.png");
+200:   }
+
+===== STRINGS CONTAINING '?' =====
+
+ ? FWI.t(
+) %>?
+
+  <% } else { %>
+
+    <%= FWI.t(
+/FourWindsIntegration/eHostWebservice/Barcode.asmx/GenerateQRCode?CodeText=<%=entity.trans_id_qrcode%>
+<%= (data.Images && data.Images.Image) ? data.Images.Image[0] : data.ImageUrl %>
+;
+
+          }
+
+          function styleIfWidth(loginInput) {
+
+              var w = loginInput.width ? loginInput.wi…
+;
+
+							 // TEMP CHANGE: to override the tab style when initialize
+
+							 var tabStyle = tabSelected ? 
+proxy?url=
+{integrationUrl}/FourWindsIntegration/GamingLoyaltySystem/GetPlayerModuleInfo.ashx?Connection={integrationConnection}…
+{integrationUrl}/FourWindsIntegration/GamingLoyaltySystem/GetModuleInfo.ashx?Connection={integrationConnection}&Cultu…
+{integrationUrl}/FourWindsIntegration/GamingLoyaltySystem/GetModuleInfo.ashx?Connection={integrationConnection}&Cultu…
+{integrationUrl}/FourWindsIntegration/GamingLoyaltySystem/GetAvailablePlayerCampaigns.ashx?Connection={integrationCon…
+{integrationUrl}/FourWindsIntegration/GamingLoyaltySystem/GetAvailablePlayerCampaigns.ashx?Connection={integrationCon…
+{integrationUrl}/FourWindsIntegration/GamingLoyaltySystem/GetAvailablePlayerCampaigns.ashx?Connection={integrationCon…
+{integrationUrl}/FourWindsIntegration/GamingLoyaltySystem/GetModuleInfo.ashx?Connection={integrationConnection}&Cultu…
+Why Should I Join?
+{integrationUrl}/FourWindsIntegration/GamingLoyaltySystem/GetModuleInfo.ashx?Connection={integrationConnection}&Cultu…
+{ESB4IF}/Patrons/RequestAllPromotionAndOfferInfos?CultureCode={locale}&EhostSessionId={ehostSe
+[5] 21:35:55:[_log:315] - ========== STEP 4 ==========
+[5] 21:35:55:[_log:315] - Prev Reflections: 
+[1] First step is reconnaissance: fetch the homepage and programmatically enumerate obvious links and form actions that contain query-string parameters.  This will give us candidate endpoints/parameters where we can later insert test payloads and check whether the input is reflected in the HTML.  The script below retrieves https://mlife.mo, parses anchor hrefs and form actions, and prints the discovered URLs and parameters so we can plan our next injection tests.
+[2] The home page didn’t expose any obvious reflection points – no links containing “?” and no forms with query parameters.  Next step is to crawl a bit deeper (depth-2, limited to ~50 pages) staying inside the mlife.mo domain.  For every fetched page we’ll:
+ • extract <a> hrefs and queue unvisited internal pages
+ • collect links/actions that contain a query-string or that are GET/POST forms, recording their parameters
+This reconnaissance should give us concrete endpoints/parameters to begin injecting XSS payloads in the following turn.
+[3] The crawl only found the root page – very likely the site is a single-page (JS) app so static link scraping won’t reveal its internal routes.  Let’s inspect the raw HTML / JS delivered at https://mlife.mo to look for hard-coded routes or API endpoints that accept query-string params (possible XSS sinks).  We’ll fetch the page and print:
+ • first 200 lines for a quick manual look
+ • every snippet that contains a “?” inside quotes (href="…?…", fetch("…?…), etc.)
+This reconnaissance should expose client-side routes and give us concrete URLs/parameters for the next step.
+
+[5] 21:36:41:[_log:315] - Reflection:
+The initial raw-HTML contained many server-side placeholders; we still don’t know which URL parameters (if any) are parsed client-side.  Next step is to statically analyse every JavaScript file the home page loads.  For each internal <script src="…"> and every inline <script>, we’ll search for common patterns that read the query-string (location.search, URLSearchParams, getParameterByName, etc.).  That should reveal concrete parameter names the application trusts and possibly sinks such as innerHTML / document.write.  Those findings will give us real endpoints/params to probe with XSS payloads in the following turn.
+[5] 21:36:41:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[5] 21:36:43:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+===== Suspicious query-string usage in JS files =====
+
+--- inline ---
+0024: <div class="title-img-logo" onclick="window.location.href='#homeView'"></div>
+
+--- https://mlife.mo/js/jquery.min.js ---
+0002: !function(e,t){"use strict";"object"==typeof module&&"object"==typeof module.exports?module.exports=e.document?t(e,!0):function(e){if(!e.document)throw new E…
+
+--- https://mlife.mo/js/fwimobile.min.js ---
+0001: !function(e){function t(n){if(i[n])return i[n].exports;var o=i[n]={exports:{},id:n,loaded:!1};return e[n].call(o.exports,o,o.exports,t),o.loaded=!0,o.exports…
+
+
+
+[+] Fetching https://mlife.mo
+
+[5] 21:36:43:[_log:315] - ========== STEP 5 ==========
+[5] 21:37:23:[_log:315] - Reflection:
+We still have no hint what parameters the SPA uses; perhaps XSS is in the fragment (#).  Let’s extend the static scan to look for any code that accesses window.location.hash (or similar).  We’ll re-fetch every internal JS file we already enumerated and print lines containing “hash”-related patterns so we can spot where the fragment is inserted into the DOM.
+[5] 21:37:23:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[5] 21:37:26:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+===== Possible fragment/hash usage in JS files =====
+
+--- https://mlife.mo/js/jquery.min.js ---
+0002: !function(e,t){"use strict";"object"==typeof module&&"object"==typeof module.exports?module.exports=e.document?t(e,!0):function(e){if(!e.document)throw new E…
+
+--- https://mlife.mo/js/fwimobile.min.js ---
+0001: !function(e){function t(n){if(i[n])return i[n].exports;var o=i[n]={exports:{},id:n,loaded:!1};return e[n].call(o.exports,o,o.exports,t),o.loaded=!0,o.exports…
+
+
+
+[+] Fetching https://mlife.mo
+
+[5] 21:37:26:[_log:315] - ========== STEP 6 ==========
+[5] 21:38:16:[_log:315] - Reflection:
+Goal: identify concrete parameters used by the client code.  We will re-fetch every internal JavaScript file and search for patterns showing the application reads the query-string (location.search, URLSearchParams, etc.).  We will print the surrounding code snippet (first 250 chars of the match) so that we can spot the exact parameter names.  Those parameter names will give us endpoints to probe for XSS in the next turn.
+[5] 21:38:17:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[5] 21:38:19:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+
+
+[+] Fetching https://mlife.mo
+Traceback (most recent call last):
+  File "C:\Users\jpeng\Documents\projects\code\web-ui3\pentest_bot\web_exploit\tools\interpreter.py", line 68, in run
+    exec(code, self._globals, self._globals)
+  File "<string>", line 42, in <module>
+  File "C:\Users\jpeng\AppData\Local\Programs\Python\Python311\Lib\re\__init__.py", line 227, in compile
+    return _compile(pattern, flags)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jpeng\AppData\Local\Programs\Python\Python311\Lib\re\__init__.py", line 294, in _compile
+    p = _compiler.compile(pattern, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jpeng\AppData\Local\Programs\Python\Python311\Lib\re\_compiler.py", line 745, in compile
+    p = _parser.parse(p, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jpeng\AppData\Local\Programs\Python\Python311\Lib\re\_parser.py", line 989, in parse
+    p = _parse_sub(source, state, flags & SRE_FLAG_VERBOSE, 0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jpeng\AppData\Local\Programs\Python\Python311\Lib\re\_parser.py", line 464, in _parse_sub
+    itemsappend(_parse(source, state, verbose, nested + 1,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jpeng\AppData\Local\Programs\Python\Python311\Lib\re\_parser.py", line 872, in _parse
+    p = _parse_sub(source, state, sub_verbose, nested + 1)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jpeng\AppData\Local\Programs\Python\Python311\Lib\re\_parser.py", line 464, in _parse_sub
+    itemsappend(_parse(source, state, verbose, nested + 1,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jpeng\AppData\Local\Programs\Python\Python311\Lib\re\_parser.py", line 874, in _parse
+    raise source.error("missing ), unterminated subpattern",
+re.error: missing ), unterminated subpattern at position 110
+
+[5] 21:38:19:[_log:315] - ========== STEP 7 ==========
+[5] 21:38:51:[_log:315] - Reflection:
+The previous regex pattern list contained malformed escape sequences which led to an unterminated sub-pattern error when calling re.compile().  I’ll rerun the JavaScript-analysis step with a cleaned-up, verified set of patterns (properly escaped parentheses and no redundant backslashes).  The script will:
+1. Fetch https://mlife.mo
+2. Download every internal JavaScript file (and include inline <script>s)
+3. Search each script for query-string or hash access patterns (location.search, URLSearchParams, location.hash, etc.)
+4. Print a short surrounding snippet so we can identify concrete parameter names / sinks for future XSS tests.
+[5] 21:38:51:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[5] 21:38:54:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+===== Possible query/hash usage in JS files =====
+
+--- inline ---
+tyle="border: 4px solid <%=entity.premierColor%>" src="/FourWindsIntegration/eHostWebservice/Barcode.asmx/GenerateQRCode?CodeText=<%=entity.trans_id_qrcode%>"></div> </div> </td> </tr> <
+
+--- inline ---
+solved HTML with duplicates. FWI = {"name":"mlife.mo","version":"1.0","siteHost":"mlife.mo","proxyingPrefix":"proxy?url=","imageResources":[{"id":"loginIcon","name":"Login Icon","assetFile":"Log_in@3x.png","overwriteOriginalStyles":true},{"
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+iew Website"}],"name":"[Untitled Custom…
+
+--- inline ---
+:"[Untitled Custom…
+
+--- inline ---
+taSource":{"url":"{ESB4IF}/Patrons/RequestAllPromotionAndOfferInfos?CultureCode={locale}&EhostSessionId={ehostSessionId}&PlayerId={loginedPlayerId}&SenderId=MobileEhost001&PropertyId=1","urlSubstitution":{"sessionId":"integrationSessionId","locale":"
+
+--- inline ---
+Patrons/RequestAllPromotionAndOfferInfos?CultureCode={locale}&EhostSessionId={ehostSessionId}&PlayerId={loginedPlayerId}&SenderId=MobileEhost001&PropertyId=1","urlSubstitution":{"sessionId":"integrationSessionId","locale":"locale","loginedPlayerId":"
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+Untitled Custom…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+Untitled Custom…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+":"[Untitled Custom…
+
+--- inline ---
+ce":{"url":"{integrationUrl}/FourWindsIntegration/OpenIntegration/GetFromUrl.ashx?Connection={integrationFeedConnection}&Url=http://edu.163.com/special/002944N7/edunews0126.xml","urlSubstitution":{"sessionId":"integrationSessionId","locale":"loc
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+ed Custom…
+
+--- inline ---
+url":"{integrationUrl}/FourWindsIntegration/GamingLoyaltySystem/GetHotelRoomInfo.ashx?Connection={integrationConnection}&SessionId={sessionId}&CultureCode={locale}&propertyID=9-…
+
+--- inline ---
+/FourWindsIntegration/GamingLoyaltySystem/GetHotelRoomInfo.ashx?Connection={integrationConnection}&SessionId={sessionId}&CultureCode={locale}&propertyID=9-…
+
+--- inline ---
+/GamingLoyaltySystem/GetHotelRoomInfo.ashx?Connection={integrationConnection}&SessionId={sessionId}&CultureCode={locale}&propertyID=9-…
+
+--- inline ---
+":"[Untitled Custom…
+
+--- inline ---
+ce":{"url":"{integrationUrl}/FourWindsIntegration/OpenIntegration/GetFromUrl.ashx?Connection={integrationFeedConnection}&Url=http://ent.163.com/special/00031K7Q/rss_toutiao.xml","urlSubstitution":{"sessionId":"integrationSessionId","locale":"loc
+
+--- inline ---
+":"[Untitled Custom…
+
+--- inline ---
+ce":{"url":"{integrationUrl}/FourWindsIntegration/OpenIntegration/GetFromUrl.ashx?Connection={integrationFeedConnection}&Url=http://money.163.com/special/00252EQ2/toutiaorss.xml","urlSubstitution":{"sessionId":"integrationSessionId","locale":"lo
+
+--- inline ---
+om…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+ed Custom…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+ed Custom…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+m…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+tled Custom…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+axRedeem","dataType":"string"}],"name":"[Untitled Custom…
+
+--- inline ---
+"string"}],"name":"[Untitled Custom…
+
+--- inline ---
+tom Field]"}},"dataSource":{"url":"{ESB4IF}/Patrons/GetTicketEvents?CultureCode={locale}&EhostSessionId={ehostSessionId}&PlayerId={loginedPlayerId}&SenderId=MobileEhost001","urlSubstitution":{"sessionId":"integrationSessionId","locale":"locale","logi
+
+--- inline ---
+{"url":"{ESB4IF}/Patrons/GetTicketEvents?CultureCode={locale}&EhostSessionId={ehostSessionId}&PlayerId={loginedPlayerId}&SenderId=MobileEhost001","urlSubstitution":{"sessionId":"integrationSessionId","locale":"locale","loginedPlayerId":"loginedPlayer
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- inline ---
+…
+
+--- https://mlife.mo/js/modernizr.custom.95941.js ---
+l):(n.parentNode.removeChild(n),g.style.overflow=k),!!i},y={}.hasOwnProperty,z;!C(y,"undefined")&&!C(y.call,"undefined")?z=function(a,b){return y.call(a,b)}:z=function(a,b){return b in a&&C(a.constructor.prototype[b],"undefined")},Function.pro
+
+--- https://mlife.mo/js/aes.js ---
+j<c;j++)e[j>>>2]|=(a.charCodeAt(j)&255)<<24-8*(j%4);return new r.init(e,c)}},x=w.Utf8={stringify:function(a){try{return decodeURIComponent(escape(b.stringify(a)))}catch(c){throw Error("Malformed UTF-8 data");}},parse:function(a){return…
+
+--- https://mlife.mo/js/aes.js ---
+3684, 1701076831]).concat(a).concat(b):b).toString(r)},parse:function(a){a=r.parse(a);var b=a.words;if(1398893684==b[0]&&1701076831==b[1]){var c=s.create(b.slice(2,4));b.splice(0,4);a.sigBytes-=16}return…
+
+--- https://mlife.mo/js/aes.js ---
+=a.sigBytes/4,a=4*((this._nRounds=d+6)+1),e=this._keySchedule=[],j=0;j<a;j++)if(j<d)e[j]=c[j];else{var k=e[j-1];j%d?6<d&&4==j%d&&(k=l[k>>>24]<<24|l[k>>>16&255]<<16|l[k>>>8&255]<<8|l[k&255]):(k=k<<8|k>>>24,k=l[k>>>24]<<24|l[k>>>16&255]<<16|l[k>
+
+--- https://mlife.mo/js/jquery.min.js ---
+ion(e){return"function"==typeof e&&"number"!=typeof e.nodeType&&"function"!=typeof e.item},x=function(e){return null!=e&&e===e.window},S=C.document,c={type:!0,src:!0,nonce:!0,noModule:!0};function b(e,t,n){var r,i,o=(n=n||S).createElement("scr
+
+--- https://mlife.mo/js/jquery.min.js ---
+)){if(c=t,f=e,1===p&&(U.test(t)||z.test(t))){(f=ee.test(t)&&ve(e.parentNode)||e)===e&&d.scope||((s=e.getAttribute("id"))?s=s.replace(re,ie):e.setAttribute("id",s=E)),o=(l=h(t)).length;while(o--)l[o]=(s?"#"+s:":scope")+" "+xe(l[o]);c=l.join(","
+
+--- https://mlife.mo/js/jquery.min.js ---
+),t=null}}function fe(e,t){var n=e.split("|"),r=n.length;while(r--)b.attrHandle[n[r]]=t}function pe(e,t){var n=t&&e,r=n&&1===e.nodeType&&1===t.nodeType&&e.sourceIndex-t.sourceIndex;if(r)return r;if(n)while(n=n.nextSibling)if(n===t)return-1;ret
+
+--- https://mlife.mo/js/jquery.min.js ---
+on fe(e,t){var n=e.split("|"),r=n.length;while(r--)b.attrHandle[n[r]]=t}function pe(e,t){var n=t&&e,r=n&&1===e.nodeType&&1===t.nodeType&&e.sourceIndex-t.sourceIndex;if(r)return r;if(n)while(n=n.nextSibling)if(n===t)return-1;return e?1:-1}funct
+
+--- https://mlife.mo/js/jquery.min.js ---
+ment;return!Y.test(t||n&&n.nodeName||"HTML")},T=se.setDocument=function(e){var t,n,r=e?e.ownerDocument||e:p;return r!=C&&9===r.nodeType&&r.documentElement&&(a=(C=r).documentElement,S=!i(C),p!=C&&(n=C.defaultView)&&n.top!==n&&(n.addEventListene
+
+--- https://mlife.mo/js/jquery.min.js ---
+nerDocument||e)==(t.ownerDocument||t)?e.compareDocumentPosition(t):1)||!d.sortDetached&&t.compareDocumentPosition(e)===n?e==C||e.ownerDocument==p&&v(p,e)?-1:t==C||t.ownerDocument==p&&v(p,t)?1:u?P(u,e)-P(u,t):0:4&n?-1:1)}:function(e,t){if(e===t
+
+--- https://mlife.mo/js/jquery.min.js ---
+e("class")||"")})},ATTR:function(n,r,i){return function(e){var t=se.
+[5] 21:38:54:[_log:315] - ========== STEP 8 ==========
+[5] 21:38:54:[_log:315] - Prev Reflections: 
+[1] First step is reconnaissance: fetch the homepage and programmatically enumerate obvious links and form actions that contain query-string parameters.  This will give us candidate endpoints/parameters where we can later insert test payloads and check whether the input is reflected in the HTML.  The script below retrieves https://mlife.mo, parses anchor hrefs and form actions, and prints the discovered URLs and parameters so we can plan our next injection tests.
+[2] The home page didn’t expose any obvious reflection points – no links containing “?” and no forms with query parameters.  Next step is to crawl a bit deeper (depth-2, limited to ~50 pages) staying inside the mlife.mo domain.  For every fetched page we’ll:
+ • extract <a> hrefs and queue unvisited internal pages
+ • collect links/actions that contain a query-string or that are GET/POST forms, recording their parameters
+This reconnaissance should give us concrete endpoints/parameters to begin injecting XSS payloads in the following turn.
+[3] The crawl only found the root page – very likely the site is a single-page (JS) app so static link scraping won’t reveal its internal routes.  Let’s inspect the raw HTML / JS delivered at https://mlife.mo to look for hard-coded routes or API endpoints that accept query-string params (possible XSS sinks).  We’ll fetch the page and print:
+ • first 200 lines for a quick manual look
+ • every snippet that contains a “?” inside quotes (href="…?…", fetch("…?…), etc.)
+This reconnaissance should expose client-side routes and give us concrete URLs/parameters for the next step.
+[4] The initial raw-HTML contained many server-side placeholders; we still don’t know which URL parameters (if any) are parsed client-side.  Next step is to statically analyse every JavaScript file the home page loads.  For each internal <script src="…"> and every inline <script>, we’ll search for common patterns that read the query-string (location.search, URLSearchParams, getParameterByName, etc.).  That should reveal concrete parameter names the application trusts and possibly sinks such as innerHTML / document.write.  Those findings will give us real endpoints/params to probe with XSS payloads in the following turn.
+[5] We still have no hint what parameters the SPA uses; perhaps XSS is in the fragment (#).  Let’s extend the static scan to look for any code that accesses window.location.hash (or similar).  We’ll re-fetch every internal JS file we already enumerated and print lines containing “hash”-related patterns so we can spot where the fragment is inserted into the DOM.
+[6] Goal: identify concrete parameters used by the client code.  We will re-fetch every internal JavaScript file and search for patterns showing the application reads the query-string (location.search, URLSearchParams, etc.).  We will print the surrounding code snippet (first 250 chars of the match) so that we can spot the exact parameter names.  Those parameter names will give us endpoints to probe for XSS in the next turn.
+[7] The previous regex pattern list contained malformed escape sequences which led to an unterminated sub-pattern error when calling re.compile().  I’ll rerun the JavaScript-analysis step with a cleaned-up, verified set of patterns (properly escaped parentheses and no redundant backslashes).  The script will:
+1. Fetch https://mlife.mo
+2. Download every internal JavaScript file (and include inline <script>s)
+3. Search each script for query-string or hash access patterns (location.search, URLSearchParams, location.hash, etc.)
+4. Print a short surrounding snippet so we can identify concrete parameter names / sinks for future XSS tests.
+
+[5] 21:39:38:[_log:315] - Reflection:
+We need to locate parameters actually read by the SPA.  The last run just listed every match for very broad patterns and produced huge, useless output.  Let’s narrow the static-analysis:  • download every internal JS file again,  • keep only lines that both (a) contain a SINK (innerHTML / insertAdjacentHTML / html( / document.write / .append( … )) and (b) also reference a SOURCE (location.search / location.hash / URLSearchParams / getParameter / decodeURIComponent).  That drastically shrinks the noise and should reveal exactly where user-controlled data is injected.  Once we know the concrete param/hash name we can craft a proof-of-concept XSS.
+[5] 21:39:38:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[5] 21:39:41:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+
+
+[+] Fetching https://mlife.mo
+Traceback (most recent call last):
+  File "C:\Users\jpeng\Documents\projects\code\web-ui3\pentest_bot\web_exploit\tools\interpreter.py", line 68, in run
+    exec(code, self._globals, self._globals)
+  File "<string>", line 46, in <module>
+  File "C:\Users\jpeng\AppData\Local\Programs\Python\Python311\Lib\re\__init__.py", line 227, in compile
+    return _compile(pattern, flags)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jpeng\AppData\Local\Programs\Python\Python311\Lib\re\__init__.py", line 294, in _compile
+    p = _compiler.compile(pattern, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jpeng\AppData\Local\Programs\Python\Python311\Lib\re\_compiler.py", line 745, in compile
+    p = _parser.parse(p, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jpeng\AppData\Local\Programs\Python\Python311\Lib\re\_parser.py", line 989, in parse
+    p = _parse_sub(source, state, flags & SRE_FLAG_VERBOSE, 0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jpeng\AppData\Local\Programs\Python\Python311\Lib\re\_parser.py", line 464, in _parse_sub
+    itemsappend(_parse(source, state, verbose, nested + 1,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jpeng\AppData\Local\Programs\Python\Python311\Lib\re\_parser.py", line 874, in _parse
+    raise source.error("missing ), unterminated subpattern",
+re.error: missing ), unterminated subpattern at position 71
+
+[5] 21:39:41:[_log:315] - ========== STEP 9 ==========
+[5] 21:40:11:[_log:315] - Reflection:
+The previous regex failed because it contained raw parentheses that weren’t escaped. I will rerun the JS static-analysis step with cleaned regexes: separate SOURCE and SINK lists, escape parentheses properly, and only print snippets that show both patterns nearby. This should reveal where user-supplied data is written into the DOM, giving us the parameter or hash name for an XSS PoC.
+[5] 21:40:11:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[5] 21:40:14:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+===== Potentially dangerous SOURCE → SINK patterns =====
+
+--- https://mlife.mo/js/fwimobile.min.js ---
+-item-exc-img:not(.view-icon)&quot;);if(w+=&quot;if &quot;,w+=&quot;(this.src !== &#x27;&quot;+b[0]+&quot;&#x27;) &quot;,w+=&quot;this.src = &#x27;&quot;+b[0]+&quot;&#x27;; &quot;,I.length&gt;1){I[0].id;var C=I.eq(0),x=I.eq(1);C.append(o(&quot;&lt;img /&gt;&quot;).attr(&quot;style&quot;,&quot;display:none&quot;).attr(&quot;src&quot;,b[T-2]).attr(&quot;onerror&quot;,w).on(&quot;load&quot;,this.imgLoad)),x.append(o(&quot;&lt;img /&gt;&quot;).attr(&quot;style&quot;,&quot;di
+
+--- https://mlife.mo/js/fwimobile.min.js ---
+&gt;1){I[0].id;var C=I.eq(0),x=I.eq(1);C.append(o(&quot;&lt;img /&gt;&quot;).attr(&quot;style&quot;,&quot;display:none&quot;).attr(&quot;src&quot;,b[T-2]).attr(&quot;onerror&quot;,w).on(&quot;load&quot;,this.imgLoad)),x.append(o(&quot;&lt;img /&gt;&quot;).attr(&quot;style&quot;,&quot;display:none&quot;).attr(&quot;src&quot;,b[T-1]).attr(&quot;onerror&quot;,w).on(&quot;load&quot;,this.imgLoad))}else{-1!=(S=window.location.hash).inde
+
+--- https://mlife.mo/js/fwimobile.min.js ---
+r(&quot;style&quot;,&quot;display:none&quot;).attr(&quot;src&quot;,b[T-1]).attr(&quot;onerror&quot;,w).on(&quot;load&quot;,this.imgLoad))}else{-1!=(S=window.location.hash).indexOf(&quot;view/offers;Id=&quot;)?I.append(o(&quot;&lt;img /&gt;&quot;).attr(&quot;style&quot;,&quot;display:none&quot;).attr(&quot;src&quot;,b[T-2]).attr(&quot;onerror&quot;,w).on(&quot;load&quot;,this.imgLoad)):I.append(o(&quot;&lt;img /&gt;&quot;).attr(&quot;style&quot;,&quot;di
+
+--- https://mlife.mo/js/fwimobile.min.js ---
+on.hash).indexOf(&quot;view/offers;Id=&quot;)?I.append(o(&quot;&lt;img /&gt;&quot;).attr(&quot;style&quot;,&quot;display:none&quot;).attr(&quot;src&quot;,b[T-2]).attr(&quot;onerror&quot;,w).on(&quot;load&quot;,this.imgLoad)):I.append(o(&quot;&lt;img /&gt;&quot;).attr(&quot;style&quot;,&quot;display:none&quot;).attr(&quot;src&quot;,b[T-1]).attr(&quot;onerror&quot;,w).on(&quot;load&quot;,this.imgLoad))}}this.setElement(_),_.addClass(t.attr(
+
+--- https://mlife.mo/js/fwimobile.min.js ---
+y();if(!n(&quot;#load-overlay&quot;).length){var t=n(&#x27;&lt;div id=&quot;load-overlay&quot;&gt;&lt;/div&gt;&#x27;),i=s.loadingIconUrl(FWI.appModel.get(&quot;imageResources&quot;));h.load({url:i},t),e.append(t),t.find(&quot;img&quot;).removeClass(&quot;raster-icon&quot;)}},removeLoadOverlay:function(){this.removeOverlay()},applyHeadInfo:function(){var e=FWI.imageResou
+
+--- https://mlife.mo/js/fwimobile.min.js ---
+ode&quot;).removeClass(&quot;is-error&quot;),i.hide();const o=t.serialize(),r=new URLSearchParams(o),a=s.getCookie(&quot;fwiuser&quot;)||&quot;{}&quot;,l=JSON.parse(a);l&amp;&amp;l.emails[0]&amp;&amp;r.append(&quot;email&quot;,l.emails[0]),l&amp;&amp;l.phones[0]&amp;&amp;r.append(&quot;phoneNumber&quot;,l.phones[0]),r.append(&quot;CaptchaValue&quot;,JSON.stringify(e));const c=r.toString();t.fin
+
+--- https://mlife.mo/js/fwimobile.min.js ---
+=t.serialize(),r=new URLSearchParams(o),a=s.getCookie(&quot;fwiuser&quot;)||&quot;{}&quot;,l=JSON.parse(a);l&amp;&amp;l.emails[0]&amp;&amp;r.append(&quot;email&quot;,l.emails[0]),l&amp;&amp;l.phones[0]&amp;&amp;r.append(&quot;phoneNumber&quot;,l.phones[0]),r.append(&quot;CaptchaValue&quot;,JSON.stringify(e));const c=r.toString();t.find(&quot;#aliyun-captcha_S&quot;).prop(&quot;disabled&quot;,!0).css
+
+--- https://mlife.mo/js/fwimobile.min.js ---
+(o),a=s.getCookie(&quot;fwiuser&quot;)||&quot;{}&quot;,l=JSON.parse(a);l&amp;&amp;l.emails[0]&amp;&amp;r.append(&quot;email&quot;,l.emails[0]),l&amp;&amp;l.phones[0]&amp;&amp;r.append(&quot;phoneNumber&quot;,l.phones[0]),r.append(&quot;CaptchaValue&quot;,JSON.stringify(e));const c=r.toString();t.find(&quot;#aliyun-captcha_S&quot;).prop(&quot;disabled&quot;,!0).css(&quot;background-color&quot;,&quot;#808080&quot;);const
+
+
+
+[+] Fetching https://mlife.mo
+
+[5] 21:40:14:[_log:315] - ========== STEP 10 ==========
+[5] 21:41:07:[_log:315] - Reflection:
+The last static scan showed location.hash is used, but we still do not know which concrete parameter names are parsed from either the query-string or the fragment.  A good next step is to mine every internal JavaScript asset for literal strings that *look* like parameterised URLs ( …?param= or …;Param= inside a hash).  Collecting that list will tell us which names the SPA expects (e.g. Id, OfferId, view, etc.).  With those names in hand we can then try payload injection in subsequent turns.
+[5] 21:41:07:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[5] 21:41:10:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+
+=== Potential parameter names referenced in JS (sorted by frequency) ===
+
+Connection            x 41  -> ation/GamingLoyaltySystem/GetPlayerModuleInfo.ashx?Connection={integrationConnection}&SessionId={sessionId}&Modu
+t                     x 35  -> f[k>>>16&255]<<16|f[n>>>8&255]<<8|f[g&255])^c[p++];t=(f[k>>>24]<<24|f[n>>>16&255]<<16|f[g>>>8&255]<<8|f
+e                     x 32  -> |!d.sortDetached&&t.compareDocumentPosition(e)===n?e==C||e.ownerDocument==p&&v(p,e)?-1:t==C||t.ownerDoc
+i                     x 25  -> n=o.getAttributeNode("id"))&&n.value===e)return[o];i=t.getElementsByName(e),r=0;while(o=i[r++])if((n=o.
+n                     x 23  -> gBytes=4*(n.length+1);this._process();b=this._hash;n=b.words;for(a=0;4>a;a++)c=n[a],n[a]=(c<<8|c>>>24)&
+o                     x 21  -> c.delegateType||d,bt.test(s+d)||(o=o.parentNode);o;o=o.parentNode)p.push(o),a=o;a===(n.ownerDocument||S
+a                     x 20  -> tion(a){var c=this.words,e=a.words,j=this.sigBytes;a=a.sigBytes;this.clamp();if(j%4)for(var k=0;k<a;k++
+r                     x 17  -> ],x=0;64>x;x++)b[x]=4294967296*u.abs(u.sin(x+1))|0;r=r.MD5=v.extend({_doReset:function(){this._hash=new
+s                     x 17  -> f[h>>>16&255]<<16|f[k>>>8&255]<<8|f[n&255])^c[p++];s=(f[h>>>24]<<24|f[k>>>16&255]<<16|f[n>>>8&255]<<8|f
+l                     x 15  -> nd(d);var l=a.createEncryptor(c,d);b=l.finalize(b);l=l.cfg;return n.create({ciphertext:b,key:c,iv:l.iv,
+c                     x 10  -> c,d=c<<24|c<<16|c<<8|c,l=[],n=0;n<c;n+=4)l.push(d);c=s.create(l,c);a.concat(c)},unpad:function(a){a.sig
+null                  x  8  -> |(E.expr.match.bool.test(t)?pt:void 0)),void 0!==n?null===n?void E.removeAttr(e,t):i&&"set"in i&&void 0!==
+Id                    x  8  -> {-1!=(S=window.location.hash).indexOf("view/offers;Id=")?I.append(o("<img />").attr("style","display:non
+b                     x  7  -> ,a[d]);else{a=a.toLowerCase();if(e[a]!==c)return e;b=typeof b=="function"?b():b,typeof f!="undefined"&&
+d                     x  6  -> ){var l=d.words,p=d.sigBytes,t=this._map;d.clamp();d=[];for(var r=0;r<p;r+=3)for(var w=(l[r>>>2]>>>24-8
+-1                    x  6  -> "&CodeWidth=310&CodeHeight=75&ResponseFormat=jpg");-1==T.indexOf("/FourWindsIntegration/eHostWebservice/
+f                     x  5  -> f(e){if(0<u)while(l--)c[l]||f[l]||(f[l]=q.call(r));f=Te(f)}H.apply(r,f),i&&!e&&0<f.length&&1<u+v.length
+0                     x  5  -> ");return B(this,function(e,t,n){var r;return x(e)?0===o.indexOf("outer")?e["inner"+a]:e.document.docum
+CodeText              x  4  -> ration/eHostWebservice/Barcode.asmx/GenerateQRCode?CodeText=<%=entity.trans_id_qrcode%>"></div>
+h                     x  4  -> rCase(),y=!l&&!a,_=!1;if(g){if(r){for(;m;){for(h=t;h=h[m];)if(a?h.nodeName.toLowerCase()===v:1===h.node
+2                     x  4  -> a function but got "+f.classString(o));var r,a=!0;2===e&&Array.isArray(arguments[0])?(e=(r=arguments[0
+url                   x  3  -> 1.0","siteHost":"mlife.mo","proxyingPrefix":"proxy?url=","imageResources":[{"id":"loginIcon","name":"Logi
+q                     x  3  -> (a){for(var q=0;q<a;q+=k)this._doProcessBlock(e,q);q=e.splice(0,a);c.sigBytes-=j}return new r.init(q,j)
+g                     x  3  -> "show")){if("show"!==i||!y||void 0===y[r])continue;g=!0}d[r]=y&&y[r]||E.style(e,r)}if((u=!E.isEmptyObje
+p                     x  3  -> nodeName.toLowerCase()===v:1===h.nodeType)return!1;p=m="only"===e&&!p&&"nextSibling"}return!0}if(p=[s?g
+CultureCode           x  2  -> "{ESB4IF}/Patrons/RequestAllPromotionAndOfferInfos?CultureCode={locale}&EhostSessionId={ehostSessionId}&PlayerId=
+1                     x  2  -> guments.length?(i=m(n),this.each(function(e){var t;1===this.nodeType&&(null==(t=i?n.call(this,e,E(this)
+v                     x  2  -> f(n){if(f>0)for(;p--;)g[p]||v[p]||(v[p]=q.call(l));v=m(v)}Z.apply(l,v),c&&!n&&v.length>0&&f+i.length>1&
+I                     x  2  -> "etag"))&&(ne.etag[r]=b)),204===e||"HEAD"===h.type?I="nocontent":304===e?I="notmodified":(I=_.state,d=_
+P                     x  2  -> )){descs=d.split(";"),isRewardFlag=6==descs.length;P=n.get("ImageUrl");if(isRewardFlag){var h=P.lastInd
+m                     x  2  -> split("$$$").join("</div>")}if(m.indexOf("###")>-1?m=m.replace("###",""):s.is_showDetails="y",m.indexOf
+id                    x  2  -> n('<div class="tab-icon"></div>'),o=this.model,a="?id="+o.id;e.attr("id",o.id),e.attr("data-url",a);var
+src                   x  2  -> ",i="https://8015923.fls.doubleclick.net/activityi;src=8015923;type=mgmma0;cat=mgmma00v;dc_lat=;dc_rdid=;
+type                  x  2  -> /8015923.fls.doubleclick.net/activityi;src=8015923;type=mgmma0;cat=mgmma00v;dc_lat=;dc_rdid=;tag_for_child
+cat                   x  2  -> .doubleclick.net/activityi;src=8015923;type=mgmma0;cat=mgmma00v;dc_lat=;dc_rdid=;tag_for_child_directed_t
+dc_lat                x  2  -> net/activityi;src=8015923;type=mgmma0;cat=mgmma00v;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;
+dc_rdid               x  2  -> vityi;src=8015923;type=mgmma0;cat=mgmma00v;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;npa=;ord=
+tfua                  x  2  -> dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;npa=;ord="+1e13*(Math.random()+"")+"?",o={signinP
+npa                   x  2  -> =;dc_rdid=;tag_for_child_directed_treatment=;tfua=;npa=;ord="+1e13*(Math.random()+"")+"?",o={signinPlayer
+ord                   x  2  -> rdid=;tag_for_child_directed_treatment=;tfua=;npa=;ord="+1e13*(Math.random()+"")+"?",o={signinPlayerIdMes
+EventId               x  2  -> del.get("Id"),s=FWI.createNav({location:"loginById?EventId="+r,type:"custom"});return FWI.navigate(s),!1},pro
+3                     x  2  -> :")>-1)e._value=function(e){var t=e.split(":"),i=0;3===t.length?(i+=60*Number(t[0])*60,i+=60*Number(t[1
+z                     x  1  -> operty,z;!C(y,"undefined")&&!C(y.call,"undefined")?z=function(a,b){return y.call(a,b)}:z=function(a,b){
+ID                    x  1  -> stname + window.location.pathname + "#transactions;ID="); var message={orientation: window.
+j                     x  1  -> u.ceil(b):u.max((b|0)-this._minBufferSize,0);a=b*k;j=u.min(4*a,j);if(a){for(var q=0;q<a;q+=k)this._doPr
+y                     x  1  -> 24|y>>>8;r[e]=y<<16|y>>>16;w[e]=y<<8|y>>>24;v[e]=y;y=16843009*G^65537*F^257*z^16843008*e;b[k]=y<<24|y>>
+u                     x  1  -> nodeName.toLowerCase()===f:1===a.nodeType)return!1;u=l="only"===h&&!u&&"nextSibling"}return!0}if(u=[m?c
+ce                    x  1  -> r\n\f]*)/i,he=/^$|^module$|\/(?:java|ecma)script/i;ce=S.createDocumentFragment().appendChild(S.createEle
+expires               x  1  -> =new Date(Date.now()+1e3*t*60);document.cookie=e+";expires="+i.toUTCString()+";path=/"},template:function(e,t
+path                  x  1  -> 0);document.cookie=e+";expires="+i.toUTCString()+";path=/"},template:function(e,t,i){var r=null,s=n(e);ret
+charset               x  1  -> ))try{l=s=o("<iframe>").attr("src","data:text/html;charset=utf-8,"+encodeURI(f)).css({width:"100%",height:"10
+blocale               x  1  -> Hant":"zh_tw"},p="en_us",m=document.cookie.match(/\blocale=([A-Za-z-]+)/);m&&2==m.length&&(p=f[m[1]]||"en_us"
+view                  x  1  -> !0}r.trigger("replaceBarcodeImageUrl");var f="main?view=homeView"==d||"homeView"==d||!d||"/"==d||"/#"==d||
+x                     x  1  -> onPossiblyUnhandledRejection=function(e){var t=k();x="function"==typeof e?null===t?e:t.bind(e):void 0},
+C                     x  1  -> .onUnhandledRejectionHandled=function(e){var t=k();C="function"==typeof e?null===t?e:t.bind(e):void 0};
+S                     x  1  -> ction(e){console.warn(e)},D.isNode&&t.stderr.isTTY?S=function(e,t){var i=t?"[33m":"[31m";console.warn
+N                     x  1  -> r]();!(t=n.next()).done;)i.push(t.value);return i};N=function(e){return S.isArray(e)?e:null!=e&&"functi
+i-                    x  1  -> ak}o=o.offsetParent}while(o);o=e;do{if(o===r)break;i-=o.scrollTop||0,n-=o.scrollLeft||0,o=o.parentNode}w
+lang                  x  1  -> "lang="+t+"&","").replace("&lang="+t,"").replace("?lang="+t,"");if(i!=o)throw document.cookie="locale="+i,
+field1                x  1  -> teria "'+e+'". Criteria should take the form "...;field1
+[5] 21:41:10:[_log:315] - ========== STEP 11 ==========
+[5] 21:41:53:[_log:315] - Reflection:
+We identified that the SPA pays attention to the fragment part of the URL – e.g. patterns like “#view/offers;Id=” and “#transactions;ID=”.  To understand whether the value that follows Id / ID ends up in an HTML sink we should inspect the exact piece of JavaScript that reacts to the hash and manipulates the DOM.  The next script re-downloads every internal JS asset and prints a short snippet (±250 chars) around the interesting literals “view/offers;Id=” or “transactions;ID=” plus any occurrence where location.hash appears on the same line as an obvious sink (.html( , .append( , innerHTML=).  That will tell us how (and if) the Id/ID value is inserted into the page so we can craft an XSS payload in a subsequent step.
+[5] 21:41:53:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[5] 21:41:56:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+
+=== https://mlife.mo/js/motixGames.js ===
+[literal] …var url_transaction = encodeURIComponent('https://' + window.location.hostname + window.location.pathname + "#transactions;ID="); var message={orientation: window.orientation, url_gamelist: url_gamelist, url_transaction: url_transact…
+
+=== https://mlife.mo/js/jquery.min.js ===
+[src+sink] !function(e,t){"use strict";"object"==typeof module&&"object"==typeof module.exports?module.exports=e.document?t(e,!0):function(e){if(!e.document)throw new Error("jQuery requires a window with a document");return [...]
+
+=== https://mlife.mo/js/fwimobile.min.js ===
+[literal] …display:none").attr("src",b[T-1]).attr("onerror",w).on("load",this.imgLoad))}else{-1!=(S=window.location.hash).indexOf("view/offers;Id=")?I.append(o("<img [...]…
+[literal] …vents"))-1!=e.indexOf("view/entevents;Id")?FWI.back():FWI.navigate(FWI.createNav({location:""}));else if(-1!=e.indexOf("view/offers;Id="))FWI.navigate(FWI.createNav({location:"view/offers",type:"custom"}));else [...]…
+[literal] …ment.getElementById("turbojetfinalFlag");if(null!=i){"Special [...]…
+[literal] ….getElementById("turbojetfinalFlag");if(null!=i){var r=i.value;"Special [...]…
+[src+sink] !function(e){function t(n){if(i[n])return i[n].exports;var o=i[n]={exports:{},id:n,loaded:!1};return e[n].call(o.exports,o,o.exports,t),o.loaded=!0,o.exports}var i={};t.m=e,t.c=i,t.p="/",t(0)}([function(e,t,i){var [...]
+
+
+[+] Fetching homepage
+[+] Downloaded 100 JS assets
+
+[5] 21:41:56:[_log:315] - ========== STEP 12 ==========
+[5] 21:41:56:[_log:315] - Prev Reflections: 
+[1] First step is reconnaissance: fetch the homepage and programmatically enumerate obvious links and form actions that contain query-string parameters.  This will give us candidate endpoints/parameters where we can later insert test payloads and check whether the input is reflected in the HTML.  The script below retrieves https://mlife.mo, parses anchor hrefs and form actions, and prints the discovered URLs and parameters so we can plan our next injection tests.
+[2] The home page didn’t expose any obvious reflection points – no links containing “?” and no forms with query parameters.  Next step is to crawl a bit deeper (depth-2, limited to ~50 pages) staying inside the mlife.mo domain.  For every fetched page we’ll:
+ • extract <a> hrefs and queue unvisited internal pages
+ • collect links/actions that contain a query-string or that are GET/POST forms, recording their parameters
+This reconnaissance should give us concrete endpoints/parameters to begin injecting XSS payloads in the following turn.
+[3] The crawl only found the root page – very likely the site is a single-page (JS) app so static link scraping won’t reveal its internal routes.  Let’s inspect the raw HTML / JS delivered at https://mlife.mo to look for hard-coded routes or API endpoints that accept query-string params (possible XSS sinks).  We’ll fetch the page and print:
+ • first 200 lines for a quick manual look
+ • every snippet that contains a “?” inside quotes (href="…?…", fetch("…?…), etc.)
+This reconnaissance should expose client-side routes and give us concrete URLs/parameters for the next step.
+[4] The initial raw-HTML contained many server-side placeholders; we still don’t know which URL parameters (if any) are parsed client-side.  Next step is to statically analyse every JavaScript file the home page loads.  For each internal <script src="…"> and every inline <script>, we’ll search for common patterns that read the query-string (location.search, URLSearchParams, getParameterByName, etc.).  That should reveal concrete parameter names the application trusts and possibly sinks such as innerHTML / document.write.  Those findings will give us real endpoints/params to probe with XSS payloads in the following turn.
+[5] We still have no hint what parameters the SPA uses; perhaps XSS is in the fragment (#).  Let’s extend the static scan to look for any code that accesses window.location.hash (or similar).  We’ll re-fetch every internal JS file we already enumerated and print lines containing “hash”-related patterns so we can spot where the fragment is inserted into the DOM.
+[6] Goal: identify concrete parameters used by the client code.  We will re-fetch every internal JavaScript file and search for patterns showing the application reads the query-string (location.search, URLSearchParams, etc.).  We will print the surrounding code snippet (first 250 chars of the match) so that we can spot the exact parameter names.  Those parameter names will give us endpoints to probe for XSS in the next turn.
+[7] The previous regex pattern list contained malformed escape sequences which led to an unterminated sub-pattern error when calling re.compile().  I’ll rerun the JavaScript-analysis step with a cleaned-up, verified set of patterns (properly escaped parentheses and no redundant backslashes).  The script will:
+1. Fetch https://mlife.mo
+2. Download every internal JavaScript file (and include inline <script>s)
+3. Search each script for query-string or hash access patterns (location.search, URLSearchParams, location.hash, etc.)
+4. Print a short surrounding snippet so we can identify concrete parameter names / sinks for future XSS tests.
+[8] We need to locate parameters actually read by the SPA.  The last run just listed every match for very broad patterns and produced huge, useless output.  Let’s narrow the static-analysis:  • download every internal JS file again,  • keep only lines that both (a) contain a SINK (innerHTML / insertAdjacentHTML / html( / document.write / .append( … )) and (b) also reference a SOURCE (location.search / location.hash / URLSearchParams / getParameter / decodeURIComponent).  That drastically shrinks the noise and should reveal exactly where user-controlled data is injected.  Once we know the concrete param/hash name we can craft a proof-of-concept XSS.
+[9] The previous regex failed because it contained raw parentheses that weren’t escaped. I will rerun the JS static-analysis step with cleaned regexes: separate SOURCE and SINK lists, escape parentheses properly, and only print snippets that show both patterns nearby. This should reveal where user-supplied data is written into the DOM, giving us the parameter or hash name for an XSS PoC.
+[10] The last static scan showed location.hash is used, but we still do not know which concrete parameter names are parsed from either the query-string or the fragment.  A good next step is to mine every internal JavaScript asset for literal strings that *look* like parameterised URLs ( …?param= or …;Param= inside a hash).  Collecting that list will tell us which names the SPA expects (e.g. Id, OfferId, view, etc.).  With those names in hand we can then try payload injection in subsequent turns.
+[11] We identified that the SPA pays attention to the fragment part of the URL – e.g. patterns like “#view/offers;Id=” and “#transactions;ID=”.  To understand whether the value that follows Id / ID ends up in an HTML sink we should inspect the exact piece of JavaScript that reacts to the hash and manipulates the DOM.  The next script re-downloads every internal JS asset and prints a short snippet (±250 chars) around the interesting literals “view/offers;Id=” or “transactions;ID=” plus any occurrence where location.hash appears on the same line as an obvious sink (.html( , .append( , innerHTML=).  That will tell us how (and if) the Id/ID value is inserted into the page so we can craft an XSS payload in a subsequent step.
+
+[5] 21:42:27:[_log:315] - Reflection:
+We still need to understand how the fragment value after “#view/offers;Id=” is consumed.  The minified file js/fwimobile.min.js contains that literal and various references to location.hash.  We can focus on that one file: download it and print ±250-character windows around every occurrence of “location.hash”.  Seeing the surrounding code will show whether the hash (and therefore the Id value) is ever concatenated into HTML or assigned to dangerous attributes.  That will guide us in crafting an XSS payload next.
+[5] 21:42:27:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[5] 21:42:28:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+
+--- snippet ---
+{this.iframe=document.createElement("iframe"),this.iframe.src="javascript:0",this.iframe.style.display="none",this.ifram
+e.tabIndex=-1;var n=document.body,o=n.insertBefore(this.iframe,n.firstChild).contentWindow;o.document.open(),o.document.
+close(),o.location.hash="#"+this.fragment}var r=window.addEventListener||function(e,t){return attachEvent("on"+e,t)};if(
+this._usePushState?r("popstate",this.checkUrl,!1):this._useHashChange&&!this.iframe?r("hashchange",this.checkUrl,!1):thi
+s._wantsHashChange&&(this._checkU
+
+--- snippet ---
+ye,_e).toLowerCase(),function(t){var i;do{if(i=F?t.lang:t.getAttribute("xml:lang")||t.getAttribute("lang"))return(i=i.to
+LowerCase())===e||0===i.indexOf(e+"-")}while((t=t.parentNode)&&1===t.nodeType);return!1}}),target:function(t){var
+i=e.location&&e.location.hash;return i&&i.slice(1)===t.id},root:function(e){return e===M},focus:function(e){return e===D
+.activeElement&&(!D.hasFocus||D.hasFocus())&&!!(e.type||e.href||~e.tabIndex)},enabled:function(e){return!1===e.disabled}
+,disabled:function(e){return!0===e.disa
+
+--- snippet ---
+elAttribute(o,n[e].fieldList);else if(!(a=o[e])&&(l=e.split("."))&&l.length>1)if("imageResources"===l[0]){(c=(t.model.ge
+t("imageResources")||i.get("imageResources")).get(l[1]))&&(a=c.get("assetFile"))}else a=t.valueFromNestedFields(o,l);if(
+d){window.location.hash.indexOf("PromotionsAndOffer")>0?(url=t.urlPrefixed(a),url=url.replace("HotelRooms","PromotionAnd
+Offer"),s.pno_img=url):t.pushImageUrl(a,!0)}if(h&&(a=t.urlPrefixed(a||o[e])),a&&e&&(o[e]=a),f){var
+m=a;if(a.indexOf("$$$")>-1){m='<div class="period p-n-
+
+--- snippet ---
+q(1);C.append(o("<img
+/>").attr("style","display:none").attr("src",b[T-2]).attr("onerror",w).on("load",this.imgLoad)),x.append(o("<img />").at
+tr("style","display:none").attr("src",b[T-1]).attr("onerror",w).on("load",this.imgLoad))}else{-
+1!=(S=window.location.hash).indexOf("view/offers;Id=")?I.append(o("<img
+/>").attr("style","display:none").attr("src",b[T-2]).attr("onerror",w).on("load",this.imgLoad)):I.append(o("<img
+/>").attr("style","display:none").attr("src",b[T-1]).attr("onerror",w).on("load",this.imgLo
+
+--- snippet ---
+r("src",b[T-2]).attr("onerror",w).on("load",this.imgLoad)):I.append(o("<img />").attr("style","display:none").attr("src"
+,b[T-1]).attr("onerror",w).on("load",this.imgLoad))}}this.setElement(_),_.addClass(t.attr("class")),t.replaceWith(_);var
+S=window.location.hash,k=["accommodations","wineanddine","onlineshopping","entevents"];for(i=0;i<k.length;i++)S.indexOf(
+k[i])>0&&_.addClass("rm-des");return this.addIcons(),this},itemClicked:function(e){var
+t=e.target,i=(t.innerHTML,t.className),n=t.id+"_";if(-1!=i.indexO
+
+--- snippet ---
+.append(t),t.find("img").removeClass("raster-
+icon")}},removeLoadOverlay:function(){this.removeOverlay()},applyHeadInfo:function(){var e=FWI.imageResources,t=s.addToH
+omeScreenImageUrl(e),i=FWI.appModel.get("iosFullScreen")?"yes":"no";if(t){-
+1!=window.location.hash.indexOf("redemptionSpecials")?n("head link[rel^=apple-touch-
+icon]").attr("href","https://mlife.mo/getAsset/config/images/Content/CBF_mlife.mo.png"):n("head link[rel^=apple-touch-
+icon]").attr("href","https://mlife.mo/config/images/app.png")}n("head m
+
+--- snippet ---
+display="block":n(".online-lucky-games")[0].style.display="none")}},renderView:function(e,t){var
+i=this,t=t||null;if(this.removeSubHeader(),e)return this.listenTo(e,"renderedView",function(t){e.delegateEvents(),t&&i.r
+estoreViewState(e,t[0])}),window.location.hash===(window.history.state&&window.history.state.urlHash)?e.render(t,this.pa
+geState):e.render(t,null),e},cachedViews:{},cacheView:function(e){var
+t=e&&e.controller,i=t&&"home"===this.router.urlState;return i&&(this.cachedViews[t.viewId]=e),i},dismissLo
+
+--- snippet ---
+e"===p.id)l.isPendingLogin()&&(a.get("views").each(function(e){e.has("authRequired")&&(console.log("Setting authRequired
+for - ",e.id),e.set("authRequired",!1))}),l.dismissLoginView(),s.trigger("authenticated"));else{var m=i.getViewIdFromHas
+h(window.location.hash),g=(w=FWI.getViewDefinition(m)).get("authRequired");l.isPendingLogin()?(l.renderLoginView(),l.sho
+wLogin()):i.authRequiredAndLacking(g)?(s.trigger("loggedOut"),l.renderLoginView(),l.showLogin()):l.renderLoginView()}}el
+se if("addMenuView"===e.data.att
+
+--- snippet ---
+,{at:0,silent:!0})}),P.trigger("sort");break;case"change-view-attribute":var w=FWI.getViewDefinition(f.viewId),L=f.name,
+D=f.value;switch(L){case"imageResources":w.setImageResources(D);break;case"authRequired":w.set(L,D),(m=i.getViewIdFromHa
+sh(window.location.hash))!==f.viewId&&f.viewId!==FWI.defaultView||(i.requiresAuthentication(window.location.hash)?s.trig
+ger("loggedOut"):s.trigger("authenticated"));break;case"displayTitleKey":w.set(L,D),l.isPendingLogin()&&(l.renderLoginVi
+ew(),l.showLogin()),l.applyTitle(
+
+--- snippet ---
+wDefinition(f.viewId),L=f.name,D=f.value;switch(L){case"imageResources":w.setImageResources(D);break;case"authRequired":
+w.set(L,D),(m=i.getViewIdFromHash(window.location.hash))!==f.viewId&&f.viewId!==FWI.defaultView||(i.requiresAuthenticati
+on(window.location.hash)?s.trigger("loggedOut"):s.trigger("authenticated"));break;case"displayTitleKey":w.set(L,D),l.isP
+endingLogin()&&(l.renderLoginView(),l.showLogin()),l.applyTitle();break;case"type":a.getViewDefinition(w).set(L,D),l.dis
+playPageContents();break;default:
+
+--- snippet ---
+okie(a,120)},initialize:function(e){try{this.alterLocaleByCode(),this.enterStaffmodeByCode()}catch(e){return}this.listen
+To(s,"reloadHomeSlider",this.reloadHomeSlider),this.listenTo(s,"replaceBarcodeImageUrl",this.replaceBarcodeImageUrl);var
+t=window.location.hash;this.pageView=new a({appModel:e}),this.definition=e,this.urlState="",this.hitRoutes=[t],this.curr
+entRoute=t,this.processingBackClick=!1,this.defaultRouterOpts={pushState:!1,silent:!1},this.defaultNavOptions={trigger:!
+0,replace:!1},this.pageView.rout
+
+--- snippet ---
+t > div").click(function(){e.removeClass("show"),n("#ResponsibleGamblingLogoId").hide()})}),n(document).ready(function()
+{i(72)}),window.onpopstate=function(e){e.state&&(this.processingBackClick=!0),this.processingBackClick&&(this.currentRou
+te=window.location.hash,this.updateHitRoutes(),this.pageView.setPageState(e.state))}.bind(this)},toggleHeaderLogin:funct
+ion(){var e=n("#header-login"),t=n("#header-
+logout");r.isLoggedIn()?(t.show(),t.on("click",function(){s.trigger("logout")}),e.hide()):(e.show(),e.on("cli
+
+--- snippet ---
+roxy?url=","").replace("ResponseFormat=png","ResponseFormat=jpg").replace("CodeHeight=1&","CodeHeight=75&")).replace(o,"
+"),t.attr("src",i))}},startAppHistory:function(e){var t=o.extend({},this.defaultRouterOpts,e);t.keepHits||(this.hitRoute
+s=[window.location.hash]),s.history.stop(),s.history.start(t)},isDirectRoutes:function(e){return-
+1!==n.inArray(e,["loginById","login","register","resetPassword","custom"])},overrideBackboneMethods:function(){var
+e=this;"1.2.3"!==s.VERSION&&console.warn("Backbone version ha
+
+--- snippet ---
+if(controller=t.controller,i=controller.viewDef,dataSource=i.get("dataSource"),dataSource){var a=!1;i.get("items").lengt
+h||(a=!0),dataSource.cache||(a=!0),a&&controller.trigger("fetchItems")}t.displayPageContents()}if("entevents"==e)try{var
+l=window.location.hash,c=l.indexOf("p_ehostSessionId=");if(-1!=c){var u=decodeURIComponent(l.substring(c+17)),d=r.getCoo
+kie("softTicket")||"{}",h=JSON.parse(d);h.ehostSessionid=u,d="softTicket="+JSON.stringify(h),r.writeCookie(d,10);var
+f=FWI.user.get("user").playerId,p=u
+
+--- snippet ---
+urrentRoute&&loadDetailView()}.bind(this),750):(console.log("Item was not found matching criteria:"),console.log(a),FWI.
+navigate(FWI.createNav({location:""})))}),i.pendingRequest||l.trigger("fetchItems"))},HandleDetailModel:function(){var e
+,t=window.location.hash;if(-1!=t.indexOf("view/messages;Id")||-
+1!=t.indexOf("view/offers;Id")){if(t.indexOf("view/messages;Id")>0){var i=model.get("Description");if(-
+1!=i.indexOf("EdrawMessage")){descs=i.split(";"),isRewardFlag=6==descs.length;a=model.get("ImageUrl");if(is
+
+[5] 21:42:28:[_log:315] - ========== STEP 13 ==========
+[5] 21:43:04:[_log:315] - Reflection:
+We need to see if the hash value is ever written straight into the DOM.  The minified fwimobile.js is huge; let’s just grep windows where the source (location.hash) sits close (±150 chars) to obvious sinks (html(, append(, innerHTML, write(), insertAdjacentHTML).  If we find any, we’ll know exactly which pattern (e.g. view/offers;Id=) flows into the sink and can then craft an exploit in the following turn.
+[5] 21:43:04:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[5] 21:43:05:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+
+--- POSSIBLE SOURCE→SINK WINDOW ---
+b[0]+"'; ",I.length>1){I[0].id;var C=I.eq(0),x=I.eq(1);C.append(o("<img
+/>").attr("style","display:none").attr("src",b[T-2]).attr("onerror",w).on("load",this.imgLoad)),x.append(o("<img />").at
+tr("style","display:none").attr("src",b[T-1]).attr("onerror",w).on("load",this.imgLoad))}else{-
+1!=(S=window.location.hash).indexOf("view/offers;Id=")?I.append(o("<img
+/>").attr("style","display:none").attr("src",b[T-2]).attr("onerror",w).on("load",this.imgLoad)):I.append(o("<img />").at
+tr("style","display:none").attr("src",b[T-
+1]).attr("onerror",w).on("load",this.imgLoad))}}this.setElement(_),_.addClass(t
+
+--- POSSIBLE SOURCE→SINK WINDOW ---
+pend(o("<img
+/>").attr("style","display:none").attr("src",b[T-2]).attr("onerror",w).on("load",this.imgLoad)):I.append(o("<img />").at
+tr("style","display:none").attr("src",b[T-
+1]).attr("onerror",w).on("load",this.imgLoad))}}this.setElement(_),_.addClass(t.attr("class")),t.replaceWith(_);var S=wi
+ndow.location.hash,k=["accommodations","wineanddine","onlineshopping","entevents"];for(i=0;i<k.length;i++)S.indexOf(k[i]
+)>0&&_.addClass("rm-des");return this.addIcons(),this},itemClicked:function(e){var
+t=e.target,i=(t.innerHTML,t.className),n=t.id+"_";if(-1!=i.indexOf("promotiontitle"))return n=n.substr
+
+--- POSSIBLE SOURCE→SINK WINDOW ---
+ppModel.get("imageResources"));h.load({url:i},t),e.append(t),t.find("img").removeClass("raster-
+icon")}},removeLoadOverlay:function(){this.removeOverlay()},applyHeadInfo:function(){var e=FWI.imageResources,t=s.addToH
+omeScreenImageUrl(e),i=FWI.appModel.get("iosFullScreen")?"yes":"no";if(t){-
+1!=window.location.hash.indexOf("redemptionSpecials")?n("head link[rel^=apple-touch-
+icon]").attr("href","https://mlife.mo/getAsset/config/images/Content/CBF_mlife.mo.png"):n("head link[rel^=apple-touch-
+icon]").attr("href","https://mlife.mo/config/images/app.png")}n("head meta[name=apple-mobile-web-app-capable
+
+[5] 21:43:05:[_log:315] - ========== STEP 14 ==========
+[5] 21:43:39:[_log:315] - Reflection:
+Need to dig deeper in JavaScript to see if value that follows “#…;Id=” (or any other fragment/query parameter) is ever concatenated into HTML.  I’ll re-download fwimobile.min.js and scan for patterns where something derived from location.hash is ultimately handed to .innerHTML / .html(…) / document.write / insertAdjacentHTML.  The script will:
+1. Fetch fwimobile.min.js
+2. For every occurrence of “location.hash” capture the variable it’s stored in, then look forward ~500 characters to see if that same variable is used in a sink.
+3. Print any positive findings so we know the exact construct and can craft a PoC next turn.
+[5] 21:43:39:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[5] 21:43:40:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+
+=== POSSIBLE FLOW variable S ===
+ttr("style","display:none").attr("src",b[T-1]).attr("onerror",w).on("load",this.imgLoad))}else{-
+1!=(S=window.location.hash).indexOf("view/offers;Id=")?I.append(o("<img
+/>").attr("style","display:none").attr("src",b[T-2]).attr("onerror",w).on("load",this.imgLoad)):I.append(o("<img />").at
+tr("style","display:none").attr("src",b[T-
+1]).attr("onerror",w).on("load",this.imgLoad))}}this.setElement(_),_.addClass(t.attr("class")),t.replaceWith(_);var S=wi
+ndow.location.hash,k=["accommodations","wineanddine","onlineshopping","entevents"];for(i=0;i<k.length;i++)S.indexOf(k[i]
+)>0&&_.addClass("rm-des");return this.addIcons(),this},itemClicked:function(e){var
+t=e.target,i=(t.innerHTML,t.className),n=t.id+"_";if(-1!=i.indexOf("promotiontitle"))return
+n=n.substring(1),o("#currentProm").val(n),void o(".tile-itemtest").each(function(){var
+e=o(this).attr("id");if(null!=e&&e+""!="undefined"&&""!=e)if(-1!=e.indexOf(n)){var t=o(thi
+
+[5] 21:43:40:[_log:315] - ========== STEP 15 ==========
+[5] 21:45:48:[_log:315] - Reflection:
+We still have not proven that the value coming from location.hash is written into the DOM in an unsafe manner.  The previous quick scan only looked 800 bytes ahead; the sink may be further away.  Next step: search the whole fwimobile.min.js for ANY place where (a) location.hash appears in the same 400-character window as a DOM-writing sink (.innerHTML, .html( … ), .append( … ), insertAdjacentHTML, document.write).  If we find such co-occurrences, print a ~600-character snippet so we can inspect manually and decide if a PoC is possible.
+[5] 21:45:48:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[5] 21:45:50:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+
+=== POSSIBLE HASH→SINK #1 ===
+".tile-item-exc-img:not(.view-icon)");if(w+="if ",w+="(this.src !== '"+b[0]+"') ",w+="this.src = '"+b[0]+"';
+",I.length>1){I[0].id;var C=I.eq(0),x=I.eq(1);C.append(o("<img
+/>").attr("style","display:none").attr("src",b[T-2]).attr("onerror",w).on("load",this.imgLoad)),x.append(o("<img />").at
+tr("style","display:none").attr("src",b[T-1]).attr("onerror",w).on("load",this.imgLoad))}else{-
+1!=(S=window.location.hash).indexOf("view/offers;Id=")?I.append(o("<img
+/>").attr("style","display:none").attr("src",b[T-2]).attr("onerror",w).on("load",this.imgLoad)):I.append(o("<img />").at
+tr("style","display:none").attr("src",b[T-
+1]).attr("onerror",w).on("load",this.imgLoad))}}this.setElement(_),_.addClass(t.attr("class")),t.replaceWith(_);var
+S=window.location.hash,k=["accommodations","wineanddine","onlineshopping","e
+
+=== POSSIBLE HASH→SINK #2 ===
+error",w).on("load",this.imgLoad))}else{-1!=(S=window.location.hash).indexOf("view/offers;Id=")?I.append(o("<img
+/>").attr("style","display:none").attr("src",b[T-2]).attr("onerror",w).on("load",this.imgLoad)):I.append(o("<img />").at
+tr("style","display:none").attr("src",b[T-
+1]).attr("onerror",w).on("load",this.imgLoad))}}this.setElement(_),_.addClass(t.attr("class")),t.replaceWith(_);var S=wi
+ndow.location.hash,k=["accommodations","wineanddine","onlineshopping","entevents"];for(i=0;i<k.length;i++)S.indexOf(k[i]
+)>0&&_.addClass("rm-des");return this.addIcons(),this},itemClicked:function(e){var
+t=e.target,i=(t.innerHTML,t.className),n=t.id+"_";if(-1!=i.indexOf("promotiontitle"))return
+n=n.substring(1),o("#currentProm").val(n),void o(".tile-itemtest").each(function(){var
+e=o(this).attr("id");if(null!=e&&e+"
+
+=== POSSIBLE HASH→SINK #3 ===
+y();if(!n("#load-overlay").length){var t=n('<div id="load-overlay"></div>'),i=s.loadingIconUrl(FWI.appModel.get("imageRe
+sources"));h.load({url:i},t),e.append(t),t.find("img").removeClass("raster-
+icon")}},removeLoadOverlay:function(){this.removeOverlay()},applyHeadInfo:function(){var e=FWI.imageResources,t=s.addToH
+omeScreenImageUrl(e),i=FWI.appModel.get("iosFullScreen")?"yes":"no";if(t){-
+1!=window.location.hash.indexOf("redemptionSpecials")?n("head link[rel^=apple-touch-
+icon]").attr("href","https://mlife.mo/getAsset/config/images/Content/CBF_mlife.mo.png"):n("head link[rel^=apple-touch-
+icon]").attr("href","https://mlife.mo/config/images/app.png")}n("head meta[name=apple-mobile-web-app-
+capable]").attr("content",i)},renderBackButton:function(){var e=n("<span class='header-btn back-btn'></span>"),t=this.$e
+
+[5] 21:45:50:[_log:315] - ========== STEP 16 ==========
+[5] 21:45:50:[_log:315] - Prev Reflections: 
+[1] First step is reconnaissance: fetch the homepage and programmatically enumerate obvious links and form actions that contain query-string parameters.  This will give us candidate endpoints/parameters where we can later insert test payloads and check whether the input is reflected in the HTML.  The script below retrieves https://mlife.mo, parses anchor hrefs and form actions, and prints the discovered URLs and parameters so we can plan our next injection tests.
+[2] The home page didn’t expose any obvious reflection points – no links containing “?” and no forms with query parameters.  Next step is to crawl a bit deeper (depth-2, limited to ~50 pages) staying inside the mlife.mo domain.  For every fetched page we’ll:
+ • extract <a> hrefs and queue unvisited internal pages
+ • collect links/actions that contain a query-string or that are GET/POST forms, recording their parameters
+This reconnaissance should give us concrete endpoints/parameters to begin injecting XSS payloads in the following turn.
+[3] The crawl only found the root page – very likely the site is a single-page (JS) app so static link scraping won’t reveal its internal routes.  Let’s inspect the raw HTML / JS delivered at https://mlife.mo to look for hard-coded routes or API endpoints that accept query-string params (possible XSS sinks).  We’ll fetch the page and print:
+ • first 200 lines for a quick manual look
+ • every snippet that contains a “?” inside quotes (href="…?…", fetch("…?…), etc.)
+This reconnaissance should expose client-side routes and give us concrete URLs/parameters for the next step.
+[4] The initial raw-HTML contained many server-side placeholders; we still don’t know which URL parameters (if any) are parsed client-side.  Next step is to statically analyse every JavaScript file the home page loads.  For each internal <script src="…"> and every inline <script>, we’ll search for common patterns that read the query-string (location.search, URLSearchParams, getParameterByName, etc.).  That should reveal concrete parameter names the application trusts and possibly sinks such as innerHTML / document.write.  Those findings will give us real endpoints/params to probe with XSS payloads in the following turn.
+[5] We still have no hint what parameters the SPA uses; perhaps XSS is in the fragment (#).  Let’s extend the static scan to look for any code that accesses window.location.hash (or similar).  We’ll re-fetch every internal JS file we already enumerated and print lines containing “hash”-related patterns so we can spot where the fragment is inserted into the DOM.
+[6] Goal: identify concrete parameters used by the client code.  We will re-fetch every internal JavaScript file and search for patterns showing the application reads the query-string (location.search, URLSearchParams, etc.).  We will print the surrounding code snippet (first 250 chars of the match) so that we can spot the exact parameter names.  Those parameter names will give us endpoints to probe for XSS in the next turn.
+[7] The previous regex pattern list contained malformed escape sequences which led to an unterminated sub-pattern error when calling re.compile().  I’ll rerun the JavaScript-analysis step with a cleaned-up, verified set of patterns (properly escaped parentheses and no redundant backslashes).  The script will:
+1. Fetch https://mlife.mo
+2. Download every internal JavaScript file (and include inline <script>s)
+3. Search each script for query-string or hash access patterns (location.search, URLSearchParams, location.hash, etc.)
+4. Print a short surrounding snippet so we can identify concrete parameter names / sinks for future XSS tests.
+[8] We need to locate parameters actually read by the SPA.  The last run just listed every match for very broad patterns and produced huge, useless output.  Let’s narrow the static-analysis:  • download every internal JS file again,  • keep only lines that both (a) contain a SINK (innerHTML / insertAdjacentHTML / html( / document.write / .append( … )) and (b) also reference a SOURCE (location.search / location.hash / URLSearchParams / getParameter / decodeURIComponent).  That drastically shrinks the noise and should reveal exactly where user-controlled data is injected.  Once we know the concrete param/hash name we can craft a proof-of-concept XSS.
+[9] The previous regex failed because it contained raw parentheses that weren’t escaped. I will rerun the JS static-analysis step with cleaned regexes: separate SOURCE and SINK lists, escape parentheses properly, and only print snippets that show both patterns nearby. This should reveal where user-supplied data is written into the DOM, giving us the parameter or hash name for an XSS PoC.
+[10] The last static scan showed location.hash is used, but we still do not know which concrete parameter names are parsed from either the query-string or the fragment.  A good next step is to mine every internal JavaScript asset for literal strings that *look* like parameterised URLs ( …?param= or …;Param= inside a hash).  Collecting that list will tell us which names the SPA expects (e.g. Id, OfferId, view, etc.).  With those names in hand we can then try payload injection in subsequent turns.
+[11] We identified that the SPA pays attention to the fragment part of the URL – e.g. patterns like “#view/offers;Id=” and “#transactions;ID=”.  To understand whether the value that follows Id / ID ends up in an HTML sink we should inspect the exact piece of JavaScript that reacts to the hash and manipulates the DOM.  The next script re-downloads every internal JS asset and prints a short snippet (±250 chars) around the interesting literals “view/offers;Id=” or “transactions;ID=” plus any occurrence where location.hash appears on the same line as an obvious sink (.html( , .append( , innerHTML=).  That will tell us how (and if) the Id/ID value is inserted into the page so we can craft an XSS payload in a subsequent step.
+[12] We still need to understand how the fragment value after “#view/offers;Id=” is consumed.  The minified file js/fwimobile.min.js contains that literal and various references to location.hash.  We can focus on that one file: download it and print ±250-character windows around every occurrence of “location.hash”.  Seeing the surrounding code will show whether the hash (and therefore the Id value) is ever concatenated into HTML or assigned to dangerous attributes.  That will guide us in crafting an XSS payload next.
+[13] We need to see if the hash value is ever written straight into the DOM.  The minified fwimobile.js is huge; let’s just grep windows where the source (location.hash) sits close (±150 chars) to obvious sinks (html(, append(, innerHTML, write(), insertAdjacentHTML).  If we find any, we’ll know exactly which pattern (e.g. view/offers;Id=) flows into the sink and can then craft an exploit in the following turn.
+[14] Need to dig deeper in JavaScript to see if value that follows “#…;Id=” (or any other fragment/query parameter) is ever concatenated into HTML.  I’ll re-download fwimobile.min.js and scan for patterns where something derived from location.hash is ultimately handed to .innerHTML / .html(…) / document.write / insertAdjacentHTML.  The script will:
+1. Fetch fwimobile.min.js
+2. For every occurrence of “location.hash” capture the variable it’s stored in, then look forward ~500 characters to see if that same variable is used in a sink.
+3. Print any positive findings so we know the exact construct and can craft a PoC next turn.
+[15] We still have not proven that the value coming from location.hash is written into the DOM in an unsafe manner.  The previous quick scan only looked 800 bytes ahead; the sink may be further away.  Next step: search the whole fwimobile.min.js for ANY place where (a) location.hash appears in the same 400-character window as a DOM-writing sink (.innerHTML, .html( … ), .append( … ), insertAdjacentHTML, document.write).  If we find such co-occurrences, print a ~600-character snippet so we can inspect manually and decide if a PoC is possible.
+
+[5] 21:46:26:[_log:315] - Reflection:
+We still have not demonstrated that any value derived from window.location.hash is ever injected into the DOM.  The short co-occurrence scan only showed conditional checks.  A better way: 1) in every internal JS file, record the variable name that is assigned window.location.hash (e.g. var S = window.location.hash). 2) Then search the entire file for any DOM-writing sink (.innerHTML=, .html(…), .append(…), document.write, insertAdjacentHTML) that uses that same variable. 3) Print large (~800-char) snippets around such matches.  If we discover such a flow we can craft a PoC, otherwise we may have to look for query-string reflections instead.
+[5] 21:46:26:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[5] 21:46:26:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+[*] Found 0 internal JS files
+
+[5] 21:46:26:[_log:315] - ========== STEP 17 ==========
+[5] 21:47:01:[_log:315] - Reflection:
+Our previous detection of 0 internal <script src> tags suggests either the main page is almost empty (maybe a redirect, error, or must-supply cookies / user-agent) or the SPA is entirely inline.  First we must truly see what https://mlife.mo returns.  I will fetch the root URL again, check response code, final URL after redirects, Content-Type and length, and print the first 1200 characters of the body.  That will tell us whether we are actually getting the real page or something minimal.  From there we can decide how to continue reconnaissance (e.g. follow redirect, set User-Agent, fetch sub-paths).
+[5] 21:47:01:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[5] 21:47:02:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+[+] status=200, final_url=https://mlife.mo/
+[+] content-type: text/html; charset=utf-8
+[+] body length: 298040 bytes
+
+==== FIRST 1200 CHARS ====
+
+﻿<!DOCTYPE html>  <!-- Copyright (c) 2016 Four Winds Interactive LLC. All rights reserved. -->  <html class="ui-mobile-
+rendering" lang="">  <head>    <meta charset="utf-8"></meta>    <meta http-equiv="X-UA-Compatible"
+content="IE=edge,chrome=1"></meta>    <!-- TEMP CHANGE: not allow user to scale the device -->    <meta name="viewport"
+content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"></meta>    <meta
+name="apple-mobile-web-app-capable" content="yes"></meta>    <meta name="apple-mobile-web-app-title" content=""></meta>
+<!-- Aliyun Captcha Config -->      <script>        window.AliyunCaptchaConfig = {          region: "cn",
+prefix: "fb25dpi",        };        </script>            <script type="text/javascript"
+src="https://o.alicdn.com/captcha-frontend/aliyunCaptcha/AliyunCaptcha.js">          </script>    <title></title>
+<link rel="shortcut icon" href="#"></link>    <link rel="stylesheet" href="css/add2home.css"></link>    <link
+rel="stylesheet" href="css/select2.css"></link>    <link rel="stylesheet" href="css/bootstrap.css"></link>    <link
+rel="stylesheet" data-filename="styles.css" href="config/css/style
+
+==========================
+
+[script 0] inline length=107
+[script 1] src=https://o.alicdn.com/captcha-frontend/aliyunCaptcha/AliyunCaptcha.js
+[script 2] inline length=8026
+[script 3] inline length=5185
+[script 4] inline length=721
+[script 5] inline length=323
+[script 6] inline length=1235
+[script 7] inline length=99
+[script 8] inline length=323
+[script 9] inline length=416
+[script 10] inline length=754
+[script 11] inline length=911
+[script 12] inline length=829
+[script 13] inline length=4790
+[script 14] inline length=1117
+[script 15] inline length=5704
+[script 16] inline length=377
+[script 17] inline length=6484
+[script 18] inline length=4827
+[script 19] inline length=634
+[script 20] inline length=4530
+[script 21] inline length=765
+[script 22] inline length=233
+[script 23] inline length=431
+[script 24] inline length=337
+[script 25] inline length=812
+[script 26] inline length=787
+[script 27] inline length=535
+[script 28] inline length=4557
+[script 29] inline length=101
+[script 30] inline length=240
+[script 31] inline length=287
+[script 32] inline length=448
+[script 33] inline length=151
+[script 34] inline length=1940
+[script 35] inline length=284
+[script 36] inline length=811
+[script 37] inline length=270
+[script 38] inline length=2872
+[script 39] inline length=708
+[script 40] inline length=1682
+[script 41] inline length=47
+[script 42] inline length=797
+[script 43] inline length=39
+[script 44] inline length=3359
+[script 45] inline length=1363
+[script 46] inline length=1135
+[script 47] inline length=376
+[script 48] inline length=2032
+[script 49] inline length=3504
+[script 50] inline length=12519
+[script 51] inline length=3007
+[script 52] inline length=1784
+[script 53] inline length=1361
+[script 54] inline length=2116
+[script 55] inline length=516
+[script 56] inline length=519
+[script 57] inline length=4511
+[script 58] inline length=8899
+[script 59] inline length=3810
+[script 60] inline length=496
+[script 61] inline length=4205
+[script 62] inline length=3074
+[script 63] inline length=1930
+[script 64] inline length=1983
+[script 65] inline length=1411
+[script 66] inline length=643
+[script 67] inline length=4833
+[script 68] inline length=1921
+[script 69] inline length=520
+[script 70] inline length=1559
+[script 71] inline length=1605
+[script 72] inline length=358
+[script 73] inline length=304
+[script 74] inline length=7211
+[script 75] inline length=1314
+[script 76] inline length=688
+[script 77] inline length=1481
+[script 78] inline length=48
+[script 79] inline length=97
+[script 80] inline length=46
+[script 81] inline length=35
+[script 82] inline length=364
+[script 83] inline length=238
+[script 84] inline length=126
+[script 85] inline length=157
+[script 86] inline length=160
+[script 87] inline length=2311
+[script 88] inline length=8516
+[script 89] inline length=167
+[script 90] inline length=96413
+[script 91] inline length=728
+[script 92] inline length=2890
+[script 93] src=js/modernizr.custom.95941.js
+[script 94] src=js/motixGames.js
+[script 95] src=js/aes.js
+[script 96] src=js/jquery.min.js
+[script 97] src=js/fwimobile.min.js
+[script 98] inline length=396
+[script 99] inline length=304
+[script 100] inline length=3862
+
+[5] 21:47:02:[_log:315] - ========== STEP 18 ==========
+[5] 21:47:55:[_log:315] - Reflection:
+We still don’t know which user-controlled value (query string or fragment) might be injected into the DOM.  The next objective is therefore reconnaissance: download every **internal** JavaScript file referenced by the home page and look for any dangerous sink (innerHTML, insertAdjacentHTML, document.write, .html(), .append()) that appears on the same line as, or close to, a SOURCE that comes from the URL (location.search, location.hash, URLSearchParams, decodeURIComponent(location…), etc.).  Printing a compact snippet around each hit will let us manually see which concrete parameter name is used.  Armed with that knowledge we can craft a PoC payload in a later turn.
+
+The script:
+1. Fetch https://mlife.mo
+2. Extract every <script src> whose URL is inside the mlife.mo origin (relative or absolute).
+3. Download each of those JS files.
+4. Scan each file line-by-line; whenever a line contains a SINK keyword, look ±2 lines for a SOURCE keyword.  If found, print the file name, line number and a 5-line context.
+
+This focused search should reveal exactly where hash/query values flow into HTML.
+[5] 21:47:55:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[5] 21:47:59:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+
+
+Traceback (most recent call last):
+  File "C:\Users\jpeng\Documents\projects\code\web-ui3\pentest_bot\web_exploit\tools\interpreter.py", line 68, in run
+    exec(code, self._globals, self._globals)
+  File "<string>", line 15, in <module>
+AttributeError: 'APIResponse' object has no attribute 'raise_for_status'
+
+[5] 21:47:59:[_log:315] - ========== STEP 19 ==========
+[5] 21:48:18:[_log:315] - Reflection:
+The previous script crashed because Playwright’s APIResponse doesn’t provide raise_for_status() or the .status attribute.  We need to use response.status() / response.ok() and response.text() instead.  First we’ll re-fetch https://mlife.mo, print basic info (status, length, first 600 chars), then list every <script src> pointing inside the same origin so we can confirm whether there really are internal JS assets to analyse in later steps.
+[5] 21:48:18:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[Turn 18] - Need to identify where location.search/hash flows into DOM.
+- Current script downloads all internal JS files and prints 5-line context where a DOM sink is close to a URL source.
+[5] 21:48:21:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+
+
+Traceback (most recent call last):
+  File "C:\Users\jpeng\Documents\projects\code\web-ui3\pentest_bot\web_exploit\tools\interpreter.py", line 68, in run
+    exec(code, self._globals, self._globals)
+  File "<string>", line 7, in <module>
+TypeError: 'int' object is not callable
+
+[5] 21:48:21:[_log:315] - ========== STEP 20 ==========
+[5] 21:48:21:[_log:315] - Prev Reflections: 
+[1] First step is reconnaissance: fetch the homepage and programmatically enumerate obvious links and form actions that contain query-string parameters.  This will give us candidate endpoints/parameters where we can later insert test payloads and check whether the input is reflected in the HTML.  The script below retrieves https://mlife.mo, parses anchor hrefs and form actions, and prints the discovered URLs and parameters so we can plan our next injection tests.
+[2] The home page didn’t expose any obvious reflection points – no links containing “?” and no forms with query parameters.  Next step is to crawl a bit deeper (depth-2, limited to ~50 pages) staying inside the mlife.mo domain.  For every fetched page we’ll:
+ • extract <a> hrefs and queue unvisited internal pages
+ • collect links/actions that contain a query-string or that are GET/POST forms, recording their parameters
+This reconnaissance should give us concrete endpoints/parameters to begin injecting XSS payloads in the following turn.
+[3] The crawl only found the root page – very likely the site is a single-page (JS) app so static link scraping won’t reveal its internal routes.  Let’s inspect the raw HTML / JS delivered at https://mlife.mo to look for hard-coded routes or API endpoints that accept query-string params (possible XSS sinks).  We’ll fetch the page and print:
+ • first 200 lines for a quick manual look
+ • every snippet that contains a “?” inside quotes (href="…?…", fetch("…?…), etc.)
+This reconnaissance should expose client-side routes and give us concrete URLs/parameters for the next step.
+[4] The initial raw-HTML contained many server-side placeholders; we still don’t know which URL parameters (if any) are parsed client-side.  Next step is to statically analyse every JavaScript file the home page loads.  For each internal <script src="…"> and every inline <script>, we’ll search for common patterns that read the query-string (location.search, URLSearchParams, getParameterByName, etc.).  That should reveal concrete parameter names the application trusts and possibly sinks such as innerHTML / document.write.  Those findings will give us real endpoints/params to probe with XSS payloads in the following turn.
+[5] We still have no hint what parameters the SPA uses; perhaps XSS is in the fragment (#).  Let’s extend the static scan to look for any code that accesses window.location.hash (or similar).  We’ll re-fetch every internal JS file we already enumerated and print lines containing “hash”-related patterns so we can spot where the fragment is inserted into the DOM.
+[6] Goal: identify concrete parameters used by the client code.  We will re-fetch every internal JavaScript file and search for patterns showing the application reads the query-string (location.search, URLSearchParams, etc.).  We will print the surrounding code snippet (first 250 chars of the match) so that we can spot the exact parameter names.  Those parameter names will give us endpoints to probe for XSS in the next turn.
+[7] The previous regex pattern list contained malformed escape sequences which led to an unterminated sub-pattern error when calling re.compile().  I’ll rerun the JavaScript-analysis step with a cleaned-up, verified set of patterns (properly escaped parentheses and no redundant backslashes).  The script will:
+1. Fetch https://mlife.mo
+2. Download every internal JavaScript file (and include inline <script>s)
+3. Search each script for query-string or hash access patterns (location.search, URLSearchParams, location.hash, etc.)
+4. Print a short surrounding snippet so we can identify concrete parameter names / sinks for future XSS tests.
+[8] We need to locate parameters actually read by the SPA.  The last run just listed every match for very broad patterns and produced huge, useless output.  Let’s narrow the static-analysis:  • download every internal JS file again,  • keep only lines that both (a) contain a SINK (innerHTML / insertAdjacentHTML / html( / document.write / .append( … )) and (b) also reference a SOURCE (location.search / location.hash / URLSearchParams / getParameter / decodeURIComponent).  That drastically shrinks the noise and should reveal exactly where user-controlled data is injected.  Once we know the concrete param/hash name we can craft a proof-of-concept XSS.
+[9] The previous regex failed because it contained raw parentheses that weren’t escaped. I will rerun the JS static-analysis step with cleaned regexes: separate SOURCE and SINK lists, escape parentheses properly, and only print snippets that show both patterns nearby. This should reveal where user-supplied data is written into the DOM, giving us the parameter or hash name for an XSS PoC.
+[10] The last static scan showed location.hash is used, but we still do not know which concrete parameter names are parsed from either the query-string or the fragment.  A good next step is to mine every internal JavaScript asset for literal strings that *look* like parameterised URLs ( …?param= or …;Param= inside a hash).  Collecting that list will tell us which names the SPA expects (e.g. Id, OfferId, view, etc.).  With those names in hand we can then try payload injection in subsequent turns.
+[11] We identified that the SPA pays attention to the fragment part of the URL – e.g. patterns like “#view/offers;Id=” and “#transactions;ID=”.  To understand whether the value that follows Id / ID ends up in an HTML sink we should inspect the exact piece of JavaScript that reacts to the hash and manipulates the DOM.  The next script re-downloads every internal JS asset and prints a short snippet (±250 chars) around the interesting literals “view/offers;Id=” or “transactions;ID=” plus any occurrence where location.hash appears on the same line as an obvious sink (.html( , .append( , innerHTML=).  That will tell us how (and if) the Id/ID value is inserted into the page so we can craft an XSS payload in a subsequent step.
+[12] We still need to understand how the fragment value after “#view/offers;Id=” is consumed.  The minified file js/fwimobile.min.js contains that literal and various references to location.hash.  We can focus on that one file: download it and print ±250-character windows around every occurrence of “location.hash”.  Seeing the surrounding code will show whether the hash (and therefore the Id value) is ever concatenated into HTML or assigned to dangerous attributes.  That will guide us in crafting an XSS payload next.
+[13] We need to see if the hash value is ever written straight into the DOM.  The minified fwimobile.js is huge; let’s just grep windows where the source (location.hash) sits close (±150 chars) to obvious sinks (html(, append(, innerHTML, write(), insertAdjacentHTML).  If we find any, we’ll know exactly which pattern (e.g. view/offers;Id=) flows into the sink and can then craft an exploit in the following turn.
+[14] Need to dig deeper in JavaScript to see if value that follows “#…;Id=” (or any other fragment/query parameter) is ever concatenated into HTML.  I’ll re-download fwimobile.min.js and scan for patterns where something derived from location.hash is ultimately handed to .innerHTML / .html(…) / document.write / insertAdjacentHTML.  The script will:
+1. Fetch fwimobile.min.js
+2. For every occurrence of “location.hash” capture the variable it’s stored in, then look forward ~500 characters to see if that same variable is used in a sink.
+3. Print any positive findings so we know the exact construct and can craft a PoC next turn.
+[15] We still have not proven that the value coming from location.hash is written into the DOM in an unsafe manner.  The previous quick scan only looked 800 bytes ahead; the sink may be further away.  Next step: search the whole fwimobile.min.js for ANY place where (a) location.hash appears in the same 400-character window as a DOM-writing sink (.innerHTML, .html( … ), .append( … ), insertAdjacentHTML, document.write).  If we find such co-occurrences, print a ~600-character snippet so we can inspect manually and decide if a PoC is possible.
+[16] We still have not demonstrated that any value derived from window.location.hash is ever injected into the DOM.  The short co-occurrence scan only showed conditional checks.  A better way: 1) in every internal JS file, record the variable name that is assigned window.location.hash (e.g. var S = window.location.hash). 2) Then search the entire file for any DOM-writing sink (.innerHTML=, .html(…), .append(…), document.write, insertAdjacentHTML) that uses that same variable. 3) Print large (~800-char) snippets around such matches.  If we discover such a flow we can craft a PoC, otherwise we may have to look for query-string reflections instead.
+[17] Our previous detection of 0 internal <script src> tags suggests either the main page is almost empty (maybe a redirect, error, or must-supply cookies / user-agent) or the SPA is entirely inline.  First we must truly see what https://mlife.mo returns.  I will fetch the root URL again, check response code, final URL after redirects, Content-Type and length, and print the first 1200 characters of the body.  That will tell us whether we are actually getting the real page or something minimal.  From there we can decide how to continue reconnaissance (e.g. follow redirect, set User-Agent, fetch sub-paths).
+[18] We still don’t know which user-controlled value (query string or fragment) might be injected into the DOM.  The next objective is therefore reconnaissance: download every **internal** JavaScript file referenced by the home page and look for any dangerous sink (innerHTML, insertAdjacentHTML, document.write, .html(), .append()) that appears on the same line as, or close to, a SOURCE that comes from the URL (location.search, location.hash, URLSearchParams, decodeURIComponent(location…), etc.).  Printing a compact snippet around each hit will let us manually see which concrete parameter name is used.  Armed with that knowledge we can craft a PoC payload in a later turn.
+
+The script:
+1. Fetch https://mlife.mo
+2. Extract every <script src> whose URL is inside the mlife.mo origin (relative or absolute).
+3. Download each of those JS files.
+4. Scan each file line-by-line; whenever a line contains a SINK keyword, look ±2 lines for a SOURCE keyword.  If found, print the file name, line number and a 5-line context.
+
+This focused search should reveal exactly where hash/query values flow into HTML.
+[19] The previous script crashed because Playwright’s APIResponse doesn’t provide raise_for_status() or the .status attribute.  We need to use response.status() / response.ok() and response.text() instead.  First we’ll re-fetch https://mlife.mo, print basic info (status, length, first 600 chars), then list every <script src> pointing inside the same origin so we can confirm whether there really are internal JS assets to analyse in later steps.
+
+[5] 21:48:38:[_log:315] - Reflection:
+The last attempt failed because I mistakenly treated response.status as a callable.  Let’s just redo the basic reconnaissance correctly: fetch https://mlife.mo, print status / length / first 600 chars, then enumerate all <script src> tags that point to the same origin so we know what JavaScript files exist for further static analysis.
+[5] 21:48:38:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[Turn 18] - Need to identify where location.search/hash flows into DOM.
+- Current script downloads all internal JS files and prints 5-line context where a DOM sink is close to a URL source.
+[5] 21:48:40:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+[+] OK=True; HTTP 200; final_url=https://mlife.mo/
+[+] Body length: 298040 bytes
+[+] First 600 chars:
+﻿<!DOCTYPE html>
+ <!-- Copyright (c) 2016 Four Winds Interactive LLC. All rights reserved. -->
+ <html class="ui-mobile-rendering" lang="">
+ <head>
+   <meta charset="utf-8"></meta>
+   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"></meta>
+   <!-- TEMP CHANGE: not allow user to scale the device -->
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"></meta>
+   <meta name="apple-mobile-web-app-capable" content="yes"></meta>
+   <meta name="apple-mobile-web-app-title" content=""></meta>
+ 
+     <!-- Aliyun Ca
+---
+[+] Found 5 internal JS files:
+    https://mlife.mo/js/modernizr.custom.95941.js
+    https://mlife.mo/js/motixGames.js
+    https://mlife.mo/js/aes.js
+    https://mlife.mo/js/jquery.min.js
+    https://mlife.mo/js/fwimobile.min.js
+
+[5] 21:48:40:[_log:315] - ========== STEP 21 ==========
+[5] 21:49:09:[_log:315] - Reflection:
+We now know the home page loads five internal JS files.  To spot a client-side XSS we should look inside those scripts for flows where user-controlled URL data (location.search / location.hash / URLSearchParams / decodeURIComponent(..)) is subsequently written to the DOM via dangerous sinks (innerHTML, .html(…), .append(…), insertAdjacentHTML, document.write, etc.).  A concise static scan that prints only contexts where a SOURCE and a SINK appear within the same 600-character window should quickly reveal any unsafe pattern and, importantly, the exact parameter / fragment name that is reflected.  That intelligence will let us craft a PoC payload in the next turn.
+[5] 21:49:09:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[Turn 18] - Need to identify where location.search/hash flows into DOM.
+- Current script downloads all internal JS files and prints 5-line context where a DOM sink is close to a URL source.
+[5] 21:49:21:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+[+] Scanning 5 internal JS files
+
+=== POTENTIAL FLOW in https://mlife.mo/js/fwimobile.min.js
+==v&&(e.isFreeComp="Yes")}var y=r.template(f,null,{variable:"data"}),_=o(y(e));if(d)_.find(".tile-item-exc").remove();else{var w="this.onerror = null; ",b=this.itemImageUrls,T=b&&b.length||0,I=_.find(".tile-item-exc-img:not(.view-icon)");if(w+="if ",w+="(this.src !== '"+b[0]+"') ",w+="this.src = '"+b[0]+"'; ",I.length>1){I[0].id;var C=I.eq(0),x=I.eq(1);C.append(o("<img...
+=I.eq(1);C.append(o("<img />").attr("style","display:none").attr("src",b[T-2]).attr("onerror",w).on("load",this.imgLoad)),x.append(o("<img />").attr("style","display:none").attr("src",b[T-1]).attr("onerror",w).on("load",this.imgLoad))}else{-1!=(S=window.location.hash).indexOf("view/offers;Id=")?I.append(o("<img...
+ar e=n("#overlay");return e.length||(e=n('<div id="overlay"></div>'),this.$el.prepend(e)),e},removeOverlay:function(){this.$el.find("#overlay").remove()},addLoadOverlay:function(){var e=this.addOverlay();if(!n("#load-overlay").length){var t=n('<div id="load-overlay"></div>'),i=s.loadingIconUrl(FWI.appModel.get("imageResources"));h.load({url:i},t),e.append(t),t.find("img").removeClass("raster-...
+"tw","zh-Hans":"cn",jp:"ja",kr:"ko",th:"th"}[e]||"en",window.initAliyunCaptcha({SceneId:"9zkosnf00",element:"#aliyun-captcha-container_S",button:"#aliyun-...
+
+[5] 21:49:21:[_log:315] - ========== STEP 22 ==========
+[5] 21:50:08:[_log:315] - Reflection:
+We need a closer look at the minified file fwimobile.min.js – that is where the only SOURCE+SINK co-occurrence appeared.  Instead of another broad scan across all JS, I’ll focus on this file and:
+1. Download it.
+2. Show every ±1500-char window that contains BOTH a URL-source (location.hash / location.search / URLSearchParams / decodeURIComponent) and a DOM-sink (innerHTML, .html(…, .append(…, insertAdjacentHTML, document.write).
+That large context will let us read the exact logic and see whether some fragment/query value (e.g. after “#view/offers;Id=”) is inserted into the DOM unsafely.  Once we confirm the flow we can craft the actual XSS payload in the next turn.
+[5] 21:50:08:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[Turn 18] - Need to identify where location.search/hash flows into DOM.
+- Current script downloads all internal JS files and prints 5-line context where a DOM sink is close to a URL source.
+[Turn 21] - Enumerated 5 internal JS files; need to locate XSS by static scan.
+- Next script downloads each JS file and prints 600-char windows that contain both a SOURCE (location.search/hash etc.) and a SINK (innerHTML, .html(…) etc.).
+- Findings will reveal if/where XSS is feasible and the parameter/hash that is used.
+[5] 21:50:14:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+[+] Analysing https://mlife.mo/js/fwimobile.min.js
+
+=== Window 1 ===
+n<t.length;n++){var l,c=(r=t[n]).field,u=r.dataType,d=t[n].static,h=t[n].staticField,f=e[c]||e.get&&e.get(c);if(u)l=this.valueFromDataType(f,u,r);else if(r.isHtml&&f&&""!==f.trim())try{l=s=o("<iframe>").attr("src","data:text/html;charset=utf-8,"+encodeURI(f)).css({width:"100%",height:"100%","min-height":"250px","background-image":"none"})[0].outerHTML}catch(e){throw i=e.toString()+" ('"+f+"' format:'"+s+"')",console.log(i),e}else if(d||" "===d)l=FWI.t(d);else if(h){var p=e[h]||e.get(h);l=p?FWI.t(p):FWI.t(h)}else l=f||"";a.push(l)}var m="",g=t.length;for(n=0;n<g;n++)m+=a[n];return m},valueFromReference:function(e,t,i,n){var o,r,s,a=FWI.getViewDefinition(t);if(a){s=a.get("items");var l={};return l[i]=e,(r=s.findWhere(l))&&(o=r.get(n)),o}},resolve:function(e){var t=this,i=this.controller.viewDef,n=i.get("itemModel"),o=this.model.toJSON();this.itemImageUrls=[],this.pushImageUrl(u.defaultItemImageUrl(FWI.imageResources)),this.pushImageUrl(u.defaultItemImageUrl(i.get("imageResources"))),o.displayTitle=FWI.t(o.displayTitleKey);var s={};return r.each(e,function(e,r){var a,l,c,u=n&&n[e],d=r.contains&&r.contains("ImageStyle"),h=r.contains&&r.contains("SrcSrc"),f=r.contains&&r.contains("mainInfo1"),p=new Array;if(u)a=t.valueForComplexItemModelAttribute(o,n[e].fieldList);else if(!(a=o[e])&&(l=e.split("."))&&l.length>1)if("imageResources"===l[0]){(c=(t.model.get("imageResources")||i.get("imageResources")).get(l[1]))&&(a=c.get("assetFile"))}else a=t.valueFromNestedFields(o,l);if(d){window.location.hash.indexOf("PromotionsAndOffer")>0?(url=t.urlPrefixed(a),url=url.replace("HotelRooms","PromotionAndOffer"),s.pno_img=url):t.pushImageUrl(a,!0)}if(h&&(a=t.urlPrefixed(a||o[e])),a&&e&&(o[e]=a),f){var m=a;if(a.indexOf("$$$")>-1){m='<div class="period...
+
+=== Window 2 ===
+.hideImageArea,h=s.notify;h.enable&&"one"===h.dismiss&&h.updateViewedItem(a,n.id),o("body").removeClass("loading");var f="";if(l&&r.each(l.templates,function(e){var t=u.template("#"+e,!1);t?f+=t:console.log("Missing referenced HTML template "+e)}),c&&(e=this.resolve(c)),void 0!==e.methodDataType&&-1!=e.methodDataType.indexOf("TurboJET")||void 0!==e.methodValue&&-1!=e.methodValue.indexOf("TurboJET")){e.Dates=u.getRecent14Date();var p;void 0!==e.methodValue&&-1!=e.methodValue.indexOf("TurboJET")&&void 0!==e.methodDataType&&"Point Redemption"!=e.methodDataType?(e.Routes=u.getTurbojetSpecialOfferRoutes(),p=u.getRemainHourToday4Offer(24)):(e.Routes=u.getTurbojetRedemptionPointRoutes(),p=u.getRemainHourToday(23)),e.Times=p;for(var m=[],g=0;g<p.length;g++)m.push(p[g].substring(11));e.Times1=m}if(window.location.href.indexOf("#view/messages")>0){var v=n.get("Type");void 0!==v&&""!=v&&"Free Comp"==v&&(e.isFreeComp="Yes")}var y=r.template(f,null,{variable:"data"}),_=o(y(e));if(d)_.find(".tile-item-exc").remove();else{var w="this.onerror = null; ",b=this.itemImageUrls,T=b&&b.length||0,I=_.find(".tile-item-exc-img:not(.view-icon)");if(w+="if ",w+="(this.src !== '"+b[0]+"') ",w+="this.src = '"+b[0]+"'; ",I.length>1){I[0].id;var C=I.eq(0),x=I.eq(1);C.append(o("<img />").attr("style","display:none").attr("src",b[T-2]).attr("onerror",w).on("load",this.imgLoad)),x.append(o("<img />").attr("style","display:none").attr("src",b[T-1]).attr("onerror",w).on("load",this.imgLoad))}else{-1!=(S=window.location.hash).indexOf("view/offers;Id=")?I.append(o("<img />").attr("style","display:none").attr("src",b[T-2]).attr("onerror",w).on("load",this.imgLoad)):I.append(o("<img...
+
+=== Window 3 ===
+!==e.methodValue&&-1!=e.methodValue.indexOf("TurboJET")){e.Dates=u.getRecent14Date();var p;void 0!==e.methodValue&&-1!=e.methodValue.indexOf("TurboJET")&&void 0!==e.methodDataType&&"Point Redemption"!=e.methodDataType?(e.Routes=u.getTurbojetSpecialOfferRoutes(),p=u.getRemainHourToday4Offer(24)):(e.Routes=u.getTurbojetRedemptionPointRoutes(),p=u.getRemainHourToday(23)),e.Times=p;for(var m=[],g=0;g<p.length;g++)m.push(p[g].substring(11));e.Times1=m}if(window.location.href.indexOf("#view/messages")>0){var v=n.get("Type");void 0!==v&&""!=v&&"Free Comp"==v&&(e.isFreeComp="Yes")}var y=r.template(f,null,{variable:"data"}),_=o(y(e));if(d)_.find(".tile-item-exc").remove();else{var w="this.onerror = null; ",b=this.itemImageUrls,T=b&&b.length||0,I=_.find(".tile-item-exc-img:not(.view-icon)");if(w+="if ",w+="(this.src !== '"+b[0]+"') ",w+="this.src = '"+b[0]+"'; ",I.length>1){I[0].id;var C=I.eq(0),x=I.eq(1);C.append(o("<img />").attr("style","display:none").attr("src",b[T-2]).attr("onerror",w).on("load",this.imgLoad)),x.append(o("<img />").attr("style","display:none").attr("src",b[T-1]).attr("onerror",w).on("load",this.imgLoad))}else{-1!=(S=window.location.hash).indexOf("view/offers;Id=")?I.append(o("<img />").attr("style","display:none").attr("src",b[T-2]).attr("onerror",w).on("load",this.imgLoad)):I.append(o("<img />").attr("style","display:none").attr("src",b[T-1]).attr("onerror",w).on("load",this.imgLoad))}}this.setElement(_),_.addClass(t.attr("class")),t.replaceWith(_);var S=window.location.hash,k=["accommodations","wineanddine","onlineshopping","entevents"];for(i=0;i<k.length;i++)S.indexOf(k[i])>0&&_.addClass("rm-des");return this.addIcons(),this},itemClicked:function(e){var t=e.target,i=(t.innerHTML,t.className),n=t.id+"_";if(-1!=i.indexOf("promotiontitle"))return...
+
+=== Window 4 ===
+-button button">'+o+'</label><label class="dialog-cancel-button js-cancel-button button">'+r+"</label></div></div>");l.html(u);var d=a.find(".js-confirm-button"),h=a.find(".js-cancel-button");return d.on("click",function(){d.off("click"),h.off("click"),t.closeMenu(),s.resolve(!0)}),h.on("click",function(){d.off("click"),h.off("click"),t.closeMenu(),s.resolve(!1)}),this.openMenu("page-confirm"),s.promise()},showLogin:function(){var e=this.userView;return e.clearForm(),FWI.getHomeView().get("authRequired")?e.hideClose():e.showClose(),this.openMenu("user-profile"),n(".js-menu, .js-dismiss-cover").addClass("menu-full"),setTimeout(function(){e.loginFocus()},0),this.isShowingLogin=!0,this},hideClose:function(){var e=this.dialog.$el.find("label[for=bodycover]");e.length&&e.hide()},showClose:function(){var e=this.dialog.$el.find("label[for=bodycover]");e.length&&e.show()},addOverlay:function(){var e=n("#overlay");return e.length||(e=n('<div id="overlay"></div>'),this.$el.prepend(e)),e},removeOverlay:function(){this.$el.find("#overlay").remove()},addLoadOverlay:function(){var e=this.addOverlay();if(!n("#load-overlay").length){var t=n('<div id="load-overlay"></div>'),i=s.loadingIconUrl(FWI.appModel.get("imageResources"));h.load({url:i},t),e.append(t),t.find("img").removeClass("raster-icon")}},removeLoadOverlay:function(){this.removeOverlay()},applyHeadInfo:function(){var e=FWI.imageResources,t=s.addToHomeScreenImageUrl(e),i=FWI.appModel.get("iosFullScreen")?"yes":"no";if(t){-1!=window.location.hash.indexOf("redemptionSpecials")?n("head link[rel^=apple-touch-icon]").attr("href","https://mlife.mo/getAsset/config/images/Content/CBF_mlife.mo.png"):n("head link[rel^=apple-touch-icon]").attr("href","https://mlife.mo/config/images/app.png")}n("head meta[name=apple-mobile-web-app-...
+
+=== Window 5 ===
+)?' target="_blank"></a></div>':"></a></div>"}n("#homeslider").removeClass(function(e,t){return(t.match(/(^|\s)col-\S+/g)||[]).join(" ")}).addClass("col-"+i.length),e.find(".swiper-wrapper").html(r),t();var a=new y("#homeslider .swiper-container",{mode:"horizontal",pagination:"#homeslider .swiper-pagination",loop:!0,speed:300,autoplay:7e3,paginationClickable:!0,autoplayDisableOnInteraction:!1});n("#homeslider .left").click(function(){a.swipePrev()}),n("#homeslider .right").click(function(){a.swipeNext()})},o=n(document.body).data("sliderImages"),s=n(document.body).data("sliderLinks");if(o)i(o,s);else{var a=r.getCookie("locale")||FWI.defaultLocale;n.ajax({url:"FourWindsIntegration/GamingLoyaltySystem/GetModuleInfo.ashx?Connection=DEV&ModuleName=slider&CultureCode="+a,type:"get",dataType:"xml",success:function(e){var t=n(e),o=n.parseJSON(t.find("Description").text()),r=n.parseJSON(t.find("Link").text());n(document.body).data("sliderImages",o),n(document.body).data("sliderLinks",r),i(o,r)},error:function(e,t){co
+[5] 21:50:14:[_log:315] - ========== STEP 23 ==========
+[5] 21:50:35:[_log:315] - Reflection:
+The previous static scan showed some co-occurrences of location.hash checks with DOM sinks, but nothing clearly concatenates the Id (or any other user–supplied fragment/query value) straight into innerHTML / html() etc.  We should re-orient: actually look at the live HTML that the application serves so we can try direct reflection tests.  A simple first diagnostic is to (1) GET https://mlife.mo, (2) print status, headers, and the first ~1200 chars of body.  This confirms we’re seeing the *real* page (not an error or redirect) and lets us eyeball whether any string we control (e.g. ?x=foo or #foo) is shown.  With that baseline we can adjust the next step — e.g., request the same page with ?test=<script>alert`1`</script> or with a crafted fragment and see whether it comes back in the HTML response (server-side reflection) or whether the JS SPA parses it (client-side reflection).
+[5] 21:50:35:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[Turn 18] - Need to identify where location.search/hash flows into DOM.
+- Current script downloads all internal JS files and prints 5-line context where a DOM sink is close to a URL source.
+[Turn 21] - Enumerated 5 internal JS files; need to locate XSS by static scan.
+- Next script downloads each JS file and prints 600-char windows that contain both a SOURCE (location.search/hash etc.) and a SINK (innerHTML, .html(…) etc.).
+- Findings will reveal if/where XSS is feasible and the parameter/hash that is used.
+[5] 21:50:35:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+
+
+Traceback (most recent call last):
+  File "C:\Users\jpeng\Documents\projects\code\web-ui3\pentest_bot\web_exploit\tools\interpreter.py", line 68, in run
+    exec(code, self._globals, self._globals)
+  File "<string>", line 6, in <module>
+TypeError: 'int' object is not callable
+
+[5] 21:50:35:[_log:315] - ========== STEP 24 ==========
+[5] 21:50:35:[_log:315] - Prev Reflections: 
+[1] First step is reconnaissance: fetch the homepage and programmatically enumerate obvious links and form actions that contain query-string parameters.  This will give us candidate endpoints/parameters where we can later insert test payloads and check whether the input is reflected in the HTML.  The script below retrieves https://mlife.mo, parses anchor hrefs and form actions, and prints the discovered URLs and parameters so we can plan our next injection tests.
+[2] The home page didn’t expose any obvious reflection points – no links containing “?” and no forms with query parameters.  Next step is to crawl a bit deeper (depth-2, limited to ~50 pages) staying inside the mlife.mo domain.  For every fetched page we’ll:
+ • extract <a> hrefs and queue unvisited internal pages
+ • collect links/actions that contain a query-string or that are GET/POST forms, recording their parameters
+This reconnaissance should give us concrete endpoints/parameters to begin injecting XSS payloads in the following turn.
+[3] The crawl only found the root page – very likely the site is a single-page (JS) app so static link scraping won’t reveal its internal routes.  Let’s inspect the raw HTML / JS delivered at https://mlife.mo to look for hard-coded routes or API endpoints that accept query-string params (possible XSS sinks).  We’ll fetch the page and print:
+ • first 200 lines for a quick manual look
+ • every snippet that contains a “?” inside quotes (href="…?…", fetch("…?…), etc.)
+This reconnaissance should expose client-side routes and give us concrete URLs/parameters for the next step.
+[4] The initial raw-HTML contained many server-side placeholders; we still don’t know which URL parameters (if any) are parsed client-side.  Next step is to statically analyse every JavaScript file the home page loads.  For each internal <script src="…"> and every inline <script>, we’ll search for common patterns that read the query-string (location.search, URLSearchParams, getParameterByName, etc.).  That should reveal concrete parameter names the application trusts and possibly sinks such as innerHTML / document.write.  Those findings will give us real endpoints/params to probe with XSS payloads in the following turn.
+[5] We still have no hint what parameters the SPA uses; perhaps XSS is in the fragment (#).  Let’s extend the static scan to look for any code that accesses window.location.hash (or similar).  We’ll re-fetch every internal JS file we already enumerated and print lines containing “hash”-related patterns so we can spot where the fragment is inserted into the DOM.
+[6] Goal: identify concrete parameters used by athe client code.  We will re-fetch every internal JavaScript file and search for patterns showing the application reads the query-string (location.search, URLSearchParams, etc.).  We will print the surrounding code snippet (first 250 chars of the match) so that we can spot the exact parameter names.  Those parameter names will give us endpoints to probe for XSS in the next turn.
+[7] The previous regex pattern list contained malformed escape sequences which led to an unterminated sub-pattern error when calling re.compile().  I’ll rerun the JavaScript-analysis step with a cleaned-up, verified set of patterns (properly escaped parentheses and no redundant backslashes).  The script will:
+1. Fetch https://mlife.mo
+2. Download every internal JavaScript file (and include inline <script>s)
+3. Search each script for query-string or hash access patterns (location.search, URLSearchParams, location.hash, etc.)
+4. Print a short surrounding snippet so we can identify concrete parameter names / sinks for future XSS tests.
+[8] We need to locate parameters actually read by the SPA.  The last run just listed every match for very broad patterns and produced huge, useless output.  Let’s narrow the static-analysis:  • download every internal JS file again,  • keep only lines that both (a) contain a SINK (innerHTML / insertAdjacentHTML / html( / document.write / .append( … )) and (b) also reference a SOURCE (location.search / location.hash / URLSearchParams / getParameter / decodeURIComponent).  That drastically shrinks the noise and should reveal exactly where user-controlled data is injected.  Once we know the concrete param/hash name we can craft a proof-of-concept XSS.
+[9] The previous regex failed because it contained raw parentheses that weren’t escaped. I will rerun the JS static-analysis step with cleaned regexes: separate SOURCE and SINK lists, escape parentheses properly, and only print snippets that show both patterns nearby. This should reveal where user-supplied data is written into the DOM, giving us the parameter or hash name for an XSS PoC.
+[10] The last static scan showed location.hash is used, but we still do not know which concrete parameter names are parsed from either the query-string or the fragment.  A good next step is to mine every internal JavaScript asset for literal strings that *look* like parameterised URLs ( …?param= or …;Param= inside a hash).  Collecting that list will tell us which names the SPA expects (e.g. Id, OfferId, view, etc.).  With those names in hand we can then try payload injection in subsequent turns.
+[11] We identified that the SPA pays attention to the fragment part of the URL – e.g. patterns like “#view/offers;Id=” and “#transactions;ID=”.  To understand whether the value that follows Id / ID ends up in an HTML sink we should inspect the exact piece of JavaScript that reacts to the hash and manipulates the DOM.  The next script re-downloads every internal JS asset and prints a short snippet (±250 chars) around the interesting literals “view/offers;Id=” or “transactions;ID=” plus any occurrence where location.hash appears on the same line as an obvious sink (.html( , .append( , innerHTML=).  That will tell us how (and if) the Id/ID value is inserted into the page so we can craft an XSS payload in a subsequent step.
+[12] We still need to understand how the fragment value after “#view/offers;Id=” is consumed.  The minified file js/fwimobile.min.js contains that literal and various references to location.hash.  We can focus on that one file: download it and print ±250-character windows around every occurrence of “location.hash”.  Seeing the surrounding code will show whether the hash (and therefore the Id value) is ever concatenated into HTML or assigned to dangerous attributes.  That will guide us in crafting an XSS payload next.
+[13] We need to see if the hash value is ever written straight into the DOM.  The minified fwimobile.js is huge; let’s just grep windows where the source (location.hash) sits close (±150 chars) to obvious sinks (html(, append(, innerHTML, write(), insertAdjacentHTML).  If we find any, we’ll know exactly which pattern (e.g. view/offers;Id=) flows into the sink and can then craft an exploit in the following turn.
+[14] Need to dig deeper in JavaScript to see if value that follows “#…;Id=” (or any other fragment/query parameter) is ever concatenated into HTML.  I’ll re-download fwimobile.min.js and scan for patterns where something derived from location.hash is ultimately handed to .innerHTML / .html(…) / document.write / insertAdjacentHTML.  The script will:
+1. Fetch fwimobile.min.js
+2. For every occurrence of “location.hash” capture the variable it’s stored in, then look forward ~500 characters to see if that same variable is used in a sink.
+3. Print any positive findings so we know the exact construct and can craft a PoC next turn.
+[15] We still have not proven that the value coming from location.hash is written into the DOM in an unsafe manner.  The previous quick scan only looked 800 bytes ahead; the sink may be further away.  Next step: search the whole fwimobile.min.js for ANY place where (a) location.hash appears in the same 400-character window as a DOM-writing sink (.innerHTML, .html( … ), .append( … ), insertAdjacentHTML, document.write).  If we find such co-occurrences, print a ~600-character snippet so we can inspect manually and decide if a PoC is possible.
+[16] We still have not demonstrated that any value derived from window.location.hash is ever injected into the DOM.  The short co-occurrence scan only showed conditional checks.  A better way: 1) in every internal JS file, record the variable name that is assigned window.location.hash (e.g. var S = window.location.hash). 2) Then search the entire file for any DOM-writing sink (.innerHTML=, .html(…), .append(…), document.write, insertAdjacentHTML) that uses that same variable. 3) Print large (~800-char) snippets around such matches.  If we discover such a flow we can craft a PoC, otherwise we may have to look for query-string reflections instead.
+[17] Our previous detection of 0 internal <script src> tags suggests either the main page is almost empty (maybe a redirect, error, or must-supply cookies / user-agent) or the SPA is entirely inline.  First we must truly see what https://mlife.mo returns.  I will fetch the root URL again, check response code, final URL after redirects, Content-Type and length, and print the first 1200 characters of the body.  That will tell us whether we are actually getting the real page or something minimal.  From there we can decide how to continue reconnaissance (e.g. follow redirect, set User-Agent, fetch sub-paths).
+[18] We still don’t know which user-controlled value (query string or fragment) might be injected into the DOM.  The next objective is therefore reconnaissance: download every **internal** JavaScript file referenced by the home page and look for any dangerous sink (innerHTML, insertAdjacentHTML, document.write, .html(), .append()) that appears on the same line as, or close to, a SOURCE that comes from the URL (location.search, location.hash, URLSearchParams, decodeURIComponent(location…), etc.).  Printing a compact snippet around each hit will let us manually see which concrete parameter name is used.  Armed with that knowledge we can craft a PoC payload in a later turn.
+
+The script:
+1. Fetch https://mlife.mo
+2. Extract every <script src> whose URL is inside the mlife.mo origin (relative or absolute).
+3. Download each of those JS files.
+4. Scan each file line-by-line; whenever a line contains a SINK keyword, look ±2 lines for a SOURCE keyword.  If found, print the file name, line number and a 5-line context.
+
+This focused search should reveal exactly where hash/query values flow into HTML.
+[19] The previous script crashed because Playwright’s APIResponse doesn’t provide raise_for_status() or the .status attribute.  We need to use response.status() / response.ok() and response.text() instead.  First we’ll re-fetch https://mlife.mo, print basic info (status, length, first 600 chars), then list every <script src> pointing inside the same origin so we can confirm whether there really are internal JS assets to analyse in later steps.
+[20] The last attempt failed because I mistakenly treated response.status as a callable.  Let’s just redo the basic reconnaissance correctly: fetch https://mlife.mo, print status / length / first 600 chars, then enumerate all <script src> tags that point to the same origin so we know what JavaScript files exist for further static analysis.
+[21] We now know the home page loads five internal JS files.  To spot a client-side XSS we should look inside those scripts for flows where user-controlled URL data (location.search / location.hash / URLSearchParams / decodeURIComponent(..)) is subsequently written to the DOM via dangerous sinks (innerHTML, .html(…), .append(…), insertAdjacentHTML, document.write, etc.).  A concise static scan that prints only contexts where a SOURCE and a SINK appear within the same 600-character window should quickly reveal any unsafe pattern and, importantly, the exact parameter / fragment name that is reflected.  That intelligence will let us craft a PoC payload in the next turn.
+[22] We need a closer look at the minified file fwimobile.min.js – that is where the only SOURCE+SINK co-occurrence appeared.  Instead of another broad scan across all JS, I’ll focus on this file and:
+1. Download it.
+2. Show every ±1500-char window that contains BOTH a URL-source (location.hash / location.search / URLSearchParams / decodeURIComponent) and a DOM-sink (innerHTML, .html(…, .append(…, insertAdjacentHTML, document.write).
+That large context will let us read the exact logic and see whether some fragment/query value (e.g. after “#view/offers;Id=”) is inserted into the DOM unsafely.  Once we confirm the flow we can craft the actual XSS payload in the next turn.
+[23] The previous static scan showed some co-occurrences of location.hash checks with DOM sinks, but nothing clearly concatenates the Id (or any other user–supplied fragment/query value) straight into innerHTML / html() etc.  We should re-orient: actually look at the live HTML that the application serves so we can try direct reflection tests.  A simple first diagnostic is to (1) GET https://mlife.mo, (2) print status, headers, and the first ~1200 chars of body.  This confirms we’re seeing the *real* page (not an error or redirect) and lets us eyeball whether any string we control (e.g. ?x=foo or #foo) is shown.  With that baseline we can adjust the next step — e.g., request the same page with ?test=<script>alert`1`</script> or with a crafted fragment and see whether it comes back in the HTML response (server-side reflection) or whether the JS SPA parses it (client-side reflection).
+
+[5] 21:50:54:[_log:315] - Reflection:
+The last run crashed because I treated response.status as a callable.  In Playwright’s APIResponse the status is an int attribute, not a function.  I will redo the basic reconnaissance using resp.status, not resp.status().  The script fetches https://mlife.mo, prints status, content-type, length and the first 1200 chars of the body so we can verify we’re getting the real page.  It also lists internal <script src> paths for later static analysis.
+[5] 21:50:54:[_log:315] - Scratchpad:
+[Turn 2] Home page had no query-param links or forms.  Next step: depth-2 crawl to collect internal links with parameters and form actions for future XSS testing.
+[Turn 4] - Need to map which JS reads query parameters to locate reflection sinks
+- Next step: this script enumerates internal JS assets and finds code using location.search, etc., to reveal parameter names
+- After that we’ll craft payload and test reflection
+[Turn 18] - Need to identify where location.search/hash flows into DOM.
+- Current script downloads all internal JS files and prints 5-line context where a DOM sink is close to a URL source.
+[Turn 21] - Enumerated 5 internal JS files; need to locate XSS by static scan.
+- Next script downloads each JS file and prints 600-char windows that contain both a SOURCE (location.search/hash etc.) and a SINK (innerHTML, .html(…) etc.).
+- Findings will reveal if/where XSS is feasible and the parameter/hash that is used.
+[5] 21:50:55:[_log_execution_output:324] - Execution output (truncated to 8192 chars):
+Status: 200
+Content-Type: text/html; charset=utf-8
+Body length: 298040
+--- First 1200 chars ---
+﻿<!DOCTYPE html>
+
+<!-- Copyright (c) 2016 Four Winds Interactive LLC. All rights reserved. -->
+
+<html class="ui-mobile-rendering" lang="">
+
+<head>
+
+  <meta charset="utf-8"></meta>
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"></meta>
+
+  <!-- TEMP CHANGE: not allow user to scale the device -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"></meta>
+
+  <meta name="apple-mobile-web-app-capable" content="yes"></meta>
+
+  <meta name="apple-mobile-web-app-title" content=""></meta>
+
+
+
+    <!-- Aliyun Captcha Config -->
+
+    <script>
+
+      window.AliyunCaptchaConfig = {
+
+        region: "cn",
+
+        prefix: "fb25dpi",
+
+      };
+
+      </script>
+
+    
+
+    <script type="text/javascript" src="https://o.alicdn.com/captcha-frontend/aliyunCaptcha/AliyunCaptcha.js">
+
+        </script>
+
+  <title></title>
+
+
+
+  <link rel="shortcut icon" href="#"></link>
+
+  <link rel="stylesheet" href="css/add2home.css"></link>
+
+  <link rel="stylesheet" href="css/select2.css"></link>
+
+  <link rel="stylesheet" href="css/bootstrap.css"></link>
+
+  <link rel="stylesheet" data-filename="styles.css" href="config/css/style
+
+--- Internal <script src> ---
+
+[5] 21:50:55:[_log:315] - 💀 Maximum steps (24) reached without confirmed exploit.
