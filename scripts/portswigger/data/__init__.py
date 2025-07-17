@@ -36,6 +36,7 @@ _PRACTITIONER_SINGLE = [12]
 APPRENTICE_LABS = [{"vuln_name": "cross_site_scripting", "labs": _APPRENTICE_LABS_1}]
 PRACTITIONER_LABS = [{"vuln_name": "cross_site_scripting", "labs": _PRACTITIONER_LABS_1}]
 PRACTITIONER_LABS_2 = [{"vuln_name": "cross_site_scripting", "labs": _PRACTITIONER_LABS_2}]
+ALL_PRACTITIONER_LABS = [{"vuln_name": "cross_site_scripting", "labs": _PRACTITIONER_LABS_1 + _PRACTITIONER_LABS_2}]
 XSS_APPRENTICE_SINGLE = [{"vuln_name": "cross_site_scripting", "labs": _XSS_APPRENTICE_SINGLE}]
 XSS_PRACTITIONER_SINGLE = [{"vuln_name": "cross_site_scripting", "labs": _PRACTITIONER_SINGLE}]
 
