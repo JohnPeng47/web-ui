@@ -189,9 +189,9 @@ Make sure to return an instance of the JSON, not the schema itself
                     rewrite_res = self.manual_rewrite_model.invoke(prompt)
                     content = rewrite_res.content
                 else:
-                    # print("--------------------------------")
-                    # print(res.content)
-                    # print("--------------------------------")
+                    print("--------------------------------")
+                    print(res.content)
+                    print("--------------------------------")
 
                     content = res.content
 
