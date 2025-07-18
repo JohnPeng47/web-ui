@@ -84,7 +84,7 @@ anthropic_claude_3_5_sonnet = lambda: ChatModelWithName(
     "claude-3-5-sonnet-20240620"
 )
 claude_4_sonnet = lambda: ChatModelWithName(
-    ChatAnthropic(model="claude-sonnet-4-20250514"),
+    ChatAnthropic(model="claude-sonnet-4-20250514", max_tokens=15000),
     "claude-sonnet-4-20250514"
 )
 

