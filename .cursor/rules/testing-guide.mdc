@@ -6,4 +6,4 @@ alwaysApply: true
 
 # Your rule content
 Do not use python unittest for writing tests, use pytest framework instead
-When executing a task that involves looking through the files of a directory in the list [cnc], always check the IMPORTANT.md file first that is located in the directory root before executing any further file search operations. This contains important condensed info regarding the files in the dir
+Never use mocks, always try to replicate the actual code conditions in the test
