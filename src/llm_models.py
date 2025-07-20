@@ -10,6 +10,7 @@ from langchain_anthropic import ChatAnthropic
 import json
 import os
 
+# TODO: this is for all intents and purposes a BaseChatModel
 class ChatModelWithName:
     """Wrapper for BaseChatModel that adds a model_name attribute."""
     

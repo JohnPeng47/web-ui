@@ -25,15 +25,37 @@ manual_rewrite_model = lazy_openai_41
 
 T = TypeVar("T") 
 
-def extract_json_tags(response: str) -> str:
+def extract_json(response: str) -> str:
     """
-    Extracts the JSON tags from the response.
+    Extracts the JSON from the response using stack-based parsing to match braces.
     """
+    # First try to extract from markdown code blocks
     try:
-        return response.split("```json")[1].split("```")[0]
-    except IndexError as e:
-        # assume that response is already json
+        if "```json" in response:
+            return response.split("```json")[1].split("```")[0]
+    except IndexError:
+        pass
+    
+    # Find the first opening brace
+    start_idx = response.find("{")
+    if start_idx == -1:
+        # No JSON found, return original response
         return response
+    
+    # Use stack-based parsing to find matching closing brace
+    stack = []
+    for i, char in enumerate(response[start_idx:], start_idx):
+        if char == "{":
+            stack.append(char)
+        elif char == "}":
+            if stack:
+                stack.pop()
+                if not stack:
+                    # Found matching closing brace
+                    return response[start_idx:i+1]
+    
+    # If we get here, unmatched braces - return from start to end
+    return response[start_idx:]
 
 def is_typed_dict(cls) -> bool:
     return (
@@ -80,6 +102,20 @@ def prepare_response_model(response_model: type[T] | None) -> type[T] | None:
         response_model = openai_schema(response_model)  # type: ignore
 
     return response_model
+
+def get_instructor_prompt(response_format: Type[T]) -> str:
+    if not response_format:
+        return ""
+
+    response_model = prepare_response_model(response_format)
+    return f"""
+    \n
+Understand the content and provide the parsed objects in json that match the following json_schema:\n
+
+{json.dumps(response_model.model_json_schema(), indent=2, ensure_ascii=False)}
+
+Make sure to return an instance of the JSON, not the schema itself
+    """
 
 
 class LMPVerificationException(Exception):
@@ -131,12 +167,12 @@ Convert the following response into a valid JSON object:
         response_model = prepare_response_model(self.response_format)
         return f"""
         \n\n
-Understand the content and provide
-the parsed objects in json that match the following json_schema:\n
+Understand the content and provide the parsed objects in json that match the following json_schema:\n
 
 {json.dumps(response_model.model_json_schema(), indent=2, ensure_ascii=False)}
 
 Make sure to return an instance of the JSON, not the schema itself
+
         """
     
     def invoke_with_msgs(
@@ -152,7 +188,7 @@ Make sure to return an instance of the JSON, not the schema itself
             raise Exception("[LLM] CONTENT IS NOT A STRING")
         
         if self.response_format:
-            content = extract_json_tags(content)
+            content = extract_json(content)
             content = self.response_format.model_validate_json(content)
 
         self._verify_or_raise(content, **prompt_args)
@@ -189,18 +225,19 @@ Make sure to return an instance of the JSON, not the schema itself
                     rewrite_res = self.manual_rewrite_model.invoke(prompt)
                     content = rewrite_res.content
                 else:
-                    print("--------------------------------")
-                    print(res.content)
-                    print("--------------------------------")
-
                     content = res.content
 
                 if not isinstance(content, str):
                     raise Exception("[LLM] CONTENT IS NOT A STRING")
                 
                 if self.response_format:
-                    content = extract_json_tags(content)
-                    content = self.response_format.model_validate_json(content)
+                    try:
+                        content = extract_json(content)
+                        content = self.response_format.model_validate_json(content)
+                    except Exception as e:
+                        print(f"Error validating response: {e}")
+                        print(f"Response:\n -------------\n{content}\n -------------")
+                        raise e
 
                 self._verify_or_raise(content, **prompt_args)
                 return self._process_result(content, **prompt_args)
