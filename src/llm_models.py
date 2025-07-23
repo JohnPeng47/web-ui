@@ -1,11 +1,6 @@
 from typing import Dict, Any, Callable
-from langchain_openai import ChatOpenAI
-from langchain_together import ChatTogether
 from langchain_core.messages import BaseMessage
 from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_cohere import ChatCohere
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_anthropic import ChatAnthropic
 
 import json
 import os
@@ -35,59 +30,95 @@ class ChatModelWithName:
         return getattr(self._model, name)
 
 # Lazy-init models
-gemini_25_flash = lambda: ChatModelWithName(
-    ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
-        api_key=os.getenv("GEMINI_API_KEY"),
-        enable_thinking=True
-    ),
-    "gemini-2.5-flash"
-)
-gemini_25_pro = lambda: ChatModelWithName(
-    ChatGoogleGenerativeAI(
-        model="gemini-2.5-pro",
-        api_key=os.getenv("GEMINI_API_KEY")
-    ),
-    "gemini-2.5-pro"
-)
-openai_o3_mini = lambda: ChatModelWithName(
-    ChatOpenAI(model="o3-mini"),
-    "o3-mini"
-)
-openai_4o = lambda: ChatModelWithName(
-    ChatOpenAI(model="gpt-4o"),
-    "gpt-4o"
-)
-openai_41 = lambda: ChatModelWithName(
-    ChatOpenAI(model="gpt-4.1"),
-    "gpt-4.1"
-)
-cohere_command_a = lambda: ChatModelWithName(
-    ChatCohere(
-        model="command-a-03-2025", 
-        cohere_api_key=os.getenv("COHERE_API_KEY")
-    ),
-    "command-a-03-2025"
-)
-together_deepseek_r1 = lambda: ChatModelWithName(
-    ChatTogether(
-        model="deepseek-ai/DeepSeek-R1-0528-tput",
-        api_key=os.getenv("TOGETHER_API_KEY")
-    ),
-    "deepseek-ai/DeepSeek-R1-0528-tput"
-)
-openai_o3 = lambda: ChatModelWithName(
-    ChatOpenAI(model="o3"),
-    "o3"
-)
-anthropic_claude_3_5_sonnet = lambda: ChatModelWithName(
-    ChatAnthropic(model="claude-3-5-sonnet-20240620"),
-    "claude-3-5-sonnet-20240620"
-)
-claude_4_sonnet = lambda: ChatModelWithName(
-    ChatAnthropic(model="claude-sonnet-4-20250514", max_tokens=15000),
-    "claude-sonnet-4-20250514"
-)
+def gemini_25_flash():
+    from langchain_google_genai import ChatGoogleGenerativeAI
+    return ChatModelWithName(
+        ChatGoogleGenerativeAI(
+            model="gemini-2.5-flash",
+            api_key=os.getenv("GEMINI_API_KEY"),
+            enable_thinking=True
+        ),
+        "gemini-2.5-flash"
+    )
+
+def gemini_25_pro():
+    from langchain_google_genai import ChatGoogleGenerativeAI
+    return ChatModelWithName(
+        ChatGoogleGenerativeAI(
+            model="gemini-2.5-pro",
+            api_key=os.getenv("GEMINI_API_KEY")
+        ),
+        "gemini-2.5-pro"
+    )
+
+def openai_o3_mini():
+    from langchain_openai import ChatOpenAI
+    return ChatModelWithName(
+        ChatOpenAI(model="o3-mini"),
+        "o3-mini"
+    )
+
+def openai_o4_mini():
+    from langchain_openai import ChatOpenAI
+    return ChatModelWithName(
+        ChatOpenAI(model="o4-mini"),
+        "o4-mini"
+    )
+
+def openai_4o():
+    from langchain_openai import ChatOpenAI
+    return ChatModelWithName(
+        ChatOpenAI(model="gpt-4o"),
+        "gpt-4o"
+    )
+
+def openai_41():
+    from langchain_openai import ChatOpenAI
+    return ChatModelWithName(
+        ChatOpenAI(model="gpt-4.1"),
+        "gpt-4.1"
+    )
+
+def cohere_command_a():
+    from langchain_cohere import ChatCohere
+    return ChatModelWithName(
+        ChatCohere(
+            model="command-a-03-2025", 
+            cohere_api_key=os.getenv("COHERE_API_KEY")
+        ),
+        "command-a-03-2025"
+    )
+
+def together_deepseek_r1():
+    from langchain_together import ChatTogether
+    return ChatModelWithName(
+        ChatTogether(
+            model="deepseek-ai/DeepSeek-R1-0528-tput",
+            api_key=os.getenv("TOGETHER_API_KEY")
+        ),
+        "deepseek-ai/DeepSeek-R1-0528-tput"
+    )
+
+def openai_o3():
+    from langchain_openai import ChatOpenAI
+    return ChatModelWithName(
+        ChatOpenAI(model="o3"),
+        "o3"
+    )
+
+def anthropic_claude_3_5_sonnet():
+    from langchain_anthropic import ChatAnthropic
+    return ChatModelWithName(
+        ChatAnthropic(model="claude-3-5-sonnet-20240620"),
+        "claude-3-5-sonnet-20240620"
+    )
+
+def claude_4_sonnet():
+    from langchain_anthropic import ChatAnthropic
+    return ChatModelWithName(
+        ChatAnthropic(model="claude-sonnet-4-20250514", max_tokens=15000),
+        "claude-sonnet-4-20250514"
+    )
 
 LLM_MODELS = {
     "command-a-03-2025": cohere_command_a,
@@ -97,6 +128,7 @@ LLM_MODELS = {
     "gemini-2.5-flash": gemini_25_flash,
     "gemini-2.5-pro": gemini_25_pro,
     "default": cohere_command_a,
+    "o4-mini": openai_o4_mini,
     "o3": openai_o3,
     "o3-mini": openai_o3_mini,
     "claude-3-5-sonnet-20240620": anthropic_claude_3_5_sonnet,

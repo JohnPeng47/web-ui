@@ -5,7 +5,7 @@ from opik.evaluation.models import base_model
 from pydantic import BaseModel
 import warnings
 from textwrap import dedent
-from typing import Any, Dict, List, Optional, Set, TypeVar
+from typing import Any, List, Optional
 import argparse
 from logging import getLogger
 import json
