@@ -10,7 +10,7 @@ from logging import Logger
 from collections.abc import Iterable
 from typing import Dict, Generic, Any, TypeVar, get_args, get_origin, List, Optional, Type
 
-from pydantic import BaseModel, create_model
+from pydantic import BaseModel, create_model, ValidationError
 
 from instructor.dsl.iterable import IterableModel
 from instructor.dsl.simple_type import ModelAdapter, is_simple_type
@@ -19,7 +19,7 @@ from instructor.function_calls import OpenAISchema, openai_schema
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import BaseMessage
 
-from src.llm_models import ChatModelWithName, openai_41 as lazy_openai_41
+from src.llm_models import openai_41 as lazy_openai_41
 
 manual_rewrite_model = lazy_openai_41
 
@@ -207,6 +207,8 @@ Make sure to return an instance of the JSON, not the schema itself
             manual_rewrite=manual_rewrite,
             **prompt_args,
         )
+        raise ValidationError
+
         if prompt_logger:
             prompt_logger.info(f"[{self.__class__.__name__}]: {prompt}")
 
@@ -238,7 +240,7 @@ Make sure to return an instance of the JSON, not the schema itself
                         print(f"Error validating response: {e}")
                         print(f"Response:\n -------------\n{content}\n -------------")
                         raise e
-
+        
                 self._verify_or_raise(content, **prompt_args)
                 return self._process_result(content, **prompt_args)
             
