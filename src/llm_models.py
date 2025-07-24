@@ -5,6 +5,17 @@ from langchain_core.language_models.chat_models import BaseChatModel
 import json
 import os
 
+COST_MAP = None
+
+# singleton cost map
+def load_cost_map() -> Dict:
+    global COST_MAP
+    if not COST_MAP:
+        with open("model_api_prices.json", "r") as f:
+            COST_MAP = json.load(f)
+
+    return COST_MAP
+
 # TODO: this is for all intents and purposes a BaseChatModel
 class ChatModelWithName:
     """Wrapper for BaseChatModel that adds a model_name attribute."""
@@ -13,16 +24,30 @@ class ChatModelWithName:
         self._model = model
         self.model_name = model_name
         self.log_fn = None
-        self.function_name = None
+        self.function_name = ""
+
+        self._cost_map = load_cost_map()
+        self._cost = 0
+
+    def get_cost(self) -> float:
+        return self._cost
 
     def set_log_fn(self, log_fn: Callable[[BaseMessage, str], None], function_name: str) -> None:
         self.log_fn = log_fn
         self.function_name = function_name
     
-    def invoke(self, *args: Any, **kwargs: Any) -> Any:
-        res = self._model.invoke(*args, **kwargs)
+    def log_cost(self, res: BaseMessage) -> None:
+        invoke_cost = 0
+        invoke_cost += self._cost_map[self.model_name]["input_cost_per_token"] * res.usage_metadata["input_tokens"]
+        invoke_cost += self._cost_map[self.model_name]["output_cost_per_token"] * res.usage_metadata["output_tokens"]
+        self._cost += invoke_cost
+        
         if self.log_fn:
             self.log_fn(res, self.function_name)
+
+    def invoke(self, *args: Any, **kwargs: Any) -> Any:
+        res = self._model.invoke(*args, **kwargs)
+        self.log_cost(res)
         return res
     
     def __getattr__(self, name: str) -> Any:
@@ -170,18 +195,10 @@ class LLMHub:
         ) -> None:
         self._providers = providers # lazily convert these to actually initialized models
         self._function_map = function_map
-        self._cost_map = self._load_cost_map()
-        self._total_costs = {function_name: 0 for function_name in function_map.keys()}
+        self._total_costs = {function_name: 0.0 for function_name in function_map.keys()}
 
-    def _load_cost_map(self) -> Dict:
-        with open("model_api_prices.json", "r") as f:
-            return json.load(f)
-        
-    def log_cost(self, res: BaseMessage, function_name: str) -> None:
-        model_name = self._function_map[function_name]
-
-        self._total_costs[function_name] += self._cost_map[model_name]["input_cost_per_token"] * res.usage_metadata["input_tokens"]
-        self._total_costs[function_name] += self._cost_map[model_name]["output_cost_per_token"] * res.usage_metadata["output_tokens"]
+    def log_cost(self, invoke_cost: float, function_name: str) -> None:
+        self._total_costs[function_name] += invoke_cost
 
     # ------------- convenience helpers -----------------
     def set_default(self, name: str) -> None:
