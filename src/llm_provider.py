@@ -8,9 +8,10 @@ import json
 
 from logging import Logger
 from collections.abc import Iterable
-from typing import Dict, Generic, Any, TypeVar, get_args, get_origin, List, Optional, Type
+from typing import Dict, Generic, Any, TypeVar, get_args, get_origin, List, Optional, Type, Tuple
 
 from pydantic import BaseModel, create_model, ValidationError
+import opik
 
 from instructor.dsl.iterable import IterableModel
 from instructor.dsl.simple_type import ModelAdapter, is_simple_type
@@ -141,9 +142,21 @@ Convert the following response into a valid JSON object:
 
 {response}
 """
+    opik_prompt: Optional[opik.Prompt] = None
 
-    def _prepare_prompt(self, templates={}, manual_rewrite: bool = False, **prompt_args) -> str:        
-        prompt_str = jinja2.Template(self.prompt).render(**prompt_args, **templates)
+    def _prepare_prompt(self, templates={}, manual_rewrite: bool = False, **prompt_args) -> str:
+        # try to first get with opik prompt
+        opik_client = opik.Opik()
+        opik_prompt = opik_client.get_prompt(self.prompt)
+        if opik_prompt:
+            prompt_str = opik_prompt.prompt
+            self.opik_prompt = opik_prompt
+            if opik_prompt.type == opik.PromptType.JINJA2:
+                prompt_str = jinja2.Template(prompt_str).render(**prompt_args, **templates)
+            else:
+                raise ValueError(f"Unsupported prompt type for LMP: {opik_prompt.type}")
+        else:
+            prompt_str = jinja2.Template(self.prompt).render(**prompt_args, **templates)
 
         if not manual_rewrite:
             return prompt_str + self._get_instructor_prompt()
@@ -207,8 +220,6 @@ Make sure to return an instance of the JSON, not the schema itself
             manual_rewrite=manual_rewrite,
             **prompt_args,
         )
-        raise ValidationError
-
         if prompt_logger:
             prompt_logger.info(f"[{self.__class__.__name__}]: {prompt}")
 
@@ -254,3 +265,8 @@ Make sure to return an instance of the JSON, not the schema itself
                 current_delay = retry_delay * (2 ** (current_retry - 1))
                 time.sleep(current_delay)
                 print(f"Retry attempt {current_retry}/{max_retries} after error: {str(e)}. Waiting {current_delay}s")
+
+    def get_opik_prompt_info(self) -> Tuple[str, str]:
+        if self.opik_prompt:
+            return self.opik_prompt.name, self.opik_prompt.commit
+        raise ValueError("No opik prompt found")

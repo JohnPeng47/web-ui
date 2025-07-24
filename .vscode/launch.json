@@ -4,8 +4,6 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-
-    
         {
             "name": "Python: WebUI",
             "type": "debugpy",
@@ -62,5 +60,17 @@
             "program": "tests/test_browsing.py",
             "console": "integratedTerminal"
         },
+        {
+            "name": "Python: cli_db",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pentest_bot.cli_db.cli_db",
+            "console": "integratedTerminal",
+            "args": [
+                "label-steps",
+                "--result-id",
+                "246"
+            ]
+        }
     ]
 }
