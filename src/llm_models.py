@@ -104,15 +104,15 @@ def openai_41():
         "gpt-4.1"
     )
 
-def cohere_command_a():
-    from langchain_cohere import ChatCohere
-    return ChatModelWithName(
-        ChatCohere(
-            model="command-a-03-2025", 
-            cohere_api_key=os.getenv("COHERE_API_KEY")
-        ),
-        "command-a-03-2025"
-    )
+# def cohere_command_a():
+#     from langchain_cohere import ChatCohere
+#     return ChatModelWithName(
+#         ChatCohere(
+#             model="command-a-03-2025", 
+#             cohere_api_key=os.getenv("COHERE_API_KEY")
+#         ),
+#         "command-a-03-2025"
+#     )
 
 def together_deepseek_r1():
     from langchain_together import ChatTogether
@@ -146,13 +146,13 @@ def claude_4_sonnet():
     )
 
 LLM_MODELS = {
-    "command-a-03-2025": cohere_command_a,
+    # "command-a-03-2025": cohere_command_a,
     # "deepseeks_r1": together_deepseek_r1,
     "gpt-4o": openai_4o,
     "gpt-4.1": openai_41,
     "gemini-2.5-flash": gemini_25_flash,
     "gemini-2.5-pro": gemini_25_pro,
-    "default": cohere_command_a,
+    # "default": cohere_command_a,
     "o4-mini": openai_o4_mini,
     "o3": openai_o3,
     "o3-mini": openai_o3_mini,

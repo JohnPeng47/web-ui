@@ -11,14 +11,13 @@ from collections.abc import Iterable
 from typing import Dict, Generic, Any, TypeVar, get_args, get_origin, List, Optional, Type, Tuple
 
 from pydantic import BaseModel, create_model, ValidationError
-import opik
 
 from instructor.dsl.iterable import IterableModel
 from instructor.dsl.simple_type import ModelAdapter, is_simple_type
 from instructor.function_calls import OpenAISchema, openai_schema
 
-from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_core.messages import BaseMessage
+# from langchain_core.language_models.chat_models import BaseChatModel
+# from langchain_core.messages import BaseMessage
 
 from src.llm_models import openai_41 as lazy_openai_41
 
@@ -136,7 +135,7 @@ class LMP(Generic[T]):
     manual_response_models: List[str] = [
         "gemini-2.5-pro"
     ]
-    manual_rewrite_model: Optional[BaseChatModel] = None
+    manual_rewrite_model: Optional[Any] = None
     manual_rewrite_prompt: str = """
 Convert the following response into a valid JSON object:
 
@@ -145,6 +144,8 @@ Convert the following response into a valid JSON object:
     opik_prompt: Optional[opik.Prompt] = None
 
     def _prepare_prompt(self, templates={}, manual_rewrite: bool = False, **prompt_args) -> str:
+        import opik
+
         # try to first get with opik prompt
         opik_client = opik.Opik()
         opik_prompt = opik_client.get_prompt(self.prompt)
@@ -190,8 +191,8 @@ Make sure to return an instance of the JSON, not the schema itself
     
     def invoke_with_msgs(
             self, 
-            model: BaseChatModel,
-            msgs: List[BaseMessage],
+            model: Any,
+            msgs: List[Any],
             **prompt_args
         ) -> Any:
         res = model.invoke(msgs)
@@ -209,7 +210,7 @@ Make sure to return an instance of the JSON, not the schema itself
         return content
 
     def invoke(self, 
-               model: BaseChatModel,
+               model: Any,
                max_retries: int = 3,
                retry_delay: int = 1,
                prompt_args: Dict = {},
