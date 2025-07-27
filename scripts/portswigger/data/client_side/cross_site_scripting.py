@@ -135,7 +135,13 @@ Reflected DOM XSS – compact 5-step guide
         "out_of_band": False,
         "description": "Lab: Stored DOM XSS PRACTITIONER This lab demonstrates a stored DOM vulnerability in the blog comment functionality. To solve this lab, exploit this vulnerability to call the alert() function. ACCESS THE LAB Launching labs may take some time, please hold on while we build your environment.",
         "hint": "In an attempt to prevent XSS, the website uses the JavaScript replace() function to encode angle brackets. However, when the first argument is a string, the function only replaces the first occurrence.",
-        "solution": "Post a comment containing the following vector: <><img src=1 onerror=alert(1)> We exploit this vulnerability by simply including an extra set of angle brackets at the beginning of the comment. These angle brackets will be encoded, but any subsequent angle brackets will be unaffected, enabling us to effectively bypass the filter and inject HTML."
+        "solution": """
+1. Find the comment form on the webpage
+2. Test the comment for reflection
+3a). Find the script on the page that is responsible for client-side filtering out the first "<>" pair
+3b). Brute-force payloads to realize that the script is only filtering out the first "<>" pair
+4. Deliver payload in form <><REGULAR_HTML_TAG_PAYLOAD>
+"""
     },
     {
         "id": "13",

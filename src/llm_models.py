@@ -43,7 +43,7 @@ class ChatModelWithName:
         self._cost += invoke_cost
         
         if self.log_fn:
-            self.log_fn(res, self.function_name)
+            self.log_fn(invoke_cost, self.function_name)
 
     def invoke(self, *args: Any, **kwargs: Any) -> Any:
         res = self._model.invoke(*args, **kwargs)
