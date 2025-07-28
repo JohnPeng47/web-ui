@@ -9,6 +9,7 @@ import json
 from logging import Logger
 from collections.abc import Iterable
 from typing import Dict, Generic, Any, TypeVar, get_args, get_origin, List, Optional, Type, Tuple
+import opik
 
 from pydantic import BaseModel, create_model, ValidationError
 
@@ -143,22 +144,23 @@ Convert the following response into a valid JSON object:
 """
     opik_prompt: Optional[opik.Prompt] = None
 
-    def _prepare_prompt(self, templates={}, manual_rewrite: bool = False, **prompt_args) -> str:
-        import opik
+    def __init__(self, opik_config: Optional[Dict] = None):
+        # we reassign the prompt template according to opik_config
+        if opik_config:
+            prompt_name, commit = opik_config["name"], opik_config.get("commit", None)
+            opik_client = opik.Opik()
+            opik_prompt = opik_client.get_prompt(prompt_name, commit=commit)
+            if not opik_prompt:
+                raise ValueError(f"Prompt {prompt_name} not found")
 
-        # try to first get with opik prompt
-        opik_client = opik.Opik()
-        opik_prompt = opik_client.get_prompt(self.prompt)
-        if opik_prompt:
-            prompt_str = opik_prompt.prompt
+            self.prompt = opik_prompt.prompt
             self.opik_prompt = opik_prompt
-            if opik_prompt.type == opik.PromptType.JINJA2:
-                prompt_str = jinja2.Template(prompt_str).render(**prompt_args, **templates)
-            else:
-                raise ValueError(f"Unsupported prompt type for LMP: {opik_prompt.type}")
-        else:
-            prompt_str = jinja2.Template(self.prompt).render(**prompt_args, **templates)
 
+        elif not self.prompt:
+            raise ValueError("Either prompt cls var need to be declared or opik_config must be provided")
+
+    def _prepare_prompt(self, templates={}, manual_rewrite: bool = False, **prompt_args) -> str:
+        prompt_str = jinja2.Template(self.prompt).render(**prompt_args, **templates)
         if not manual_rewrite:
             return prompt_str + self._get_instructor_prompt()
         else:
