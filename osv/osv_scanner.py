@@ -2,25 +2,33 @@
 """
 osv_scanner.py
 
-Query OSV for vulnerabilities by repo or package name and optionally
-check whether each affected-range 'introduced' version appears as a
-Docker Hub tag in a provided repository.
+Read projects from a CSV and write structured JSON results for each:
+- Query OSV by package/ecosystem[/version]
+- Optionally fetch Docker Hub tags and record match status for 'introduced' events
 
-Usage examples:
-    python osv_scanner.py mattermost --ecosystem Go --docker-repo mattermost/mattermost-team-edition
-    python osv_scanner.py ghost --ecosystem npm --docker-repo library/ghost
-    python osv_scanner.py grafana --ecosystem Go --docker-repo grafana/grafana --docker-max-tags 500
+CSV columns (by header):
+  - Project Name
+  - OSV Search Term   (formats: "package", "package:ecosystem", "package:ecosystem:version", "package::version")
+  - Docker Repository (e.g., "library/ghost" or "grafana/grafana")
+
+Output:
+  - JSON files under ./test_osv/
+
+Usage:
+    python osv_scanner.py projects.csv
 """
 
 from __future__ import annotations
 
 import argparse
+import csv
+import json
+import os
 import sys
 import time
-from typing import Dict, Iterable, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 import requests
-from sqlalchemy.sql.expression import True_
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Docker Hub helper (requires docker.py from previous step)
@@ -28,7 +36,6 @@ from sqlalchemy.sql.expression import True_
 try:
     from docker import repository_exists, iter_all_tags
 except Exception:
-    # Allow running without docker.py; Docker checks will just be disabled
     repository_exists = None  # type: ignore
     iter_all_tags = None  # type: ignore
 
@@ -44,20 +51,14 @@ def _query_osv(
     commit: Optional[str] = None,
 ) -> List[Dict]:
     """
-    Call POST /v1/query with a package and an optional version or commit.
+    POST /v1/query with a package and an optional version or commit.
     Returns a list of vulnerability objects (may be empty).
     """
     url = f"{OSV_API_BASE}/v1/query"
-
     if not package_name or not ecosystem:
         return []
 
-    body: Dict = {
-        "package": {
-            "name": package_name,
-            "ecosystem": ecosystem,
-        }
-    }
+    body: Dict = {"package": {"name": package_name, "ecosystem": ecosystem}}
     if version:
         body["version"] = version
     if commit:
@@ -140,17 +141,19 @@ def search_vulns_by_name(
     return results
 
 
-def _format_severity(v: Dict) -> str:
+def _format_best_severity(v: Dict) -> Optional[str]:
     sev = v.get("severity") or []
     if not sev:
-        return "n/a"
+        return None
     by_pref = {"CVSS_V4": 1, "CVSS_V3": 2, "CVSS_V2": 3, "UNSPECIFIED": 4}
     sev_sorted = sorted(sev, key=lambda s: by_pref.get((s.get("type") or "UNSPECIFIED"), 99))
     best = sev_sorted[0]
-    return f"{best.get('type', 'n/a')} {best.get('score', 'n/a')}"
+    t = best.get("type") or "UNSPECIFIED"
+    s = best.get("score") or ""
+    return f"{t} {s}".strip()
 
 
-def _normalize_tag_candidates(introduced: str) -> List[str]:
+def _normalize_tag_candidates(introduced: str) -> str:
     """
     Produce plausible docker tag candidates from an introduced version:
     - exact
@@ -161,123 +164,25 @@ def _normalize_tag_candidates(introduced: str) -> List[str]:
     if not intro:
         return []
     no_v = intro[1:] if intro.startswith("v") else intro
-    return [intro, no_v, f"v{no_v}"]
+    return no_v
 
-
-def _print_intro_match_status(
-    intro: Optional[str],
-    range_type: Optional[str],
-    docker_tags: Optional[Set[str]],
-    indent: str = "    ",
-) -> None:
-    """
-    Implements the requested prints:
-      - if introduced tag is not "0" → print "ORIGINAL"
-      - if it matches a Docker tag → print f"MATCHED {intro}"
-      - otherwise                → print f"NO MATCH {intro}"
-    Notes:
-      * We only attempt matching for SEMVER/ECOSYSTEM ranges; GIT introduced
-        values are commits, not version tags.
-    """
-    if not intro:
-        return
-
-    # Always print ORIGINAL if introduced != "0"
-    if intro != "0":
-        print(f"{indent}ORIGINAL")
-
-    # Attempt match only when we have docker tags and a version-based range
-    if not docker_tags:
-        return
-    if (range_type or "").upper() not in {"SEMVER", "ECOSYSTEM"}:
-        return
-
-    for cand in _normalize_tag_candidates(intro):
-        if cand in docker_tags:
-            print(f"{indent}MATCHED {intro}")
-            return
-    print(f"{indent}NO MATCH {intro}")
-
-
-def print_vulnerabilities(subject: str, vulns: List[Dict], docker_tags: Optional[Set[str]] = None) -> bool:
-    if not vulns:
-        print(f"No vulnerabilities found for '{subject}'.")
-        return False
-
-    print(f"Found {len(vulns)} vulnerabilities for '{subject}':\n")
-    for v in sorted(vulns, key=lambda x: (x.get("modified") or x.get("published") or ""), reverse=True):
-        vid = v.get("id", "n/a")
-        published = v.get("published", "n/a")
-        modified = v.get("modified", "n/a")
-        summary = (v.get("summary") or "").strip()
-        details = (v.get("details") or "").strip()
-        severity = _format_severity(v)
-        aliases = ", ".join(v.get("aliases") or []) or "n/a"
-        refs = [r.get("url") for r in (v.get("references") or []) if r.get("url")]
-        affected = v.get("affected") or []
-
-        print("=" * 80)
-        print(f"ID: {vid}")
-        print(f"Severity: {severity}")
-        print(f"Published: {published}")
-        print(f"Modified:  {modified}")
-        print(f"Aliases:   {aliases}")
-        if summary:
-            print(f"Summary:   {summary}")
-        if details:
-            snippet = details.replace("\n", " ")
-            if len(snippet) > 500:
-                snippet = snippet[:500] + " …"
-            print(f"Details:   {snippet}")
-
-        if affected:
-            print("Affected:")
-            for a in affected:
-                pkg = a.get("package") or {}
-                eco = pkg.get("ecosystem", "n/a")
-                name = pkg.get("name", "n/a")
-                print(f"- {eco} :: {name}")
-
-                versions = a.get("versions") or []
-                if versions:
-                    joined = ", ".join(versions[:10])
-                    suffix = " …" if len(versions) > 10 else ""
-                    print(f"    versions: {joined}{suffix}")
-
-                ranges = a.get("ranges") or []
-                for r in ranges:
-                    rtype = r.get("type", "n/a")
-                    print(f"    range[{rtype}]:")
-                    events = r.get("events") or []
-                    for e in events:
-                        intro = e.get("introduced")
-                        fixed = e.get("fixed")
-                        last = e.get("lastAffected")
-                        limit = e.get("limit")
-                        parts: List[str] = []
-                        if intro:
-                            parts.append(f"introduced={intro}")
-                        if fixed:
-                            parts.append(f"fixed={fixed}")
-                        if last:
-                            parts.append(f"lastAffected={last}")
-                        if limit:
-                            parts.append(f"limit={limit}")
-                        if parts:
-                            print(f"      " + "{" + ", ".join(parts) + "}")
-
-                        # New: print ORIGINAL / MATCHED / NO MATCH status per 'introduced'
-                        if intro:
-                            _print_intro_match_status(intro, rtype, docker_tags, indent="      ")
-
-        if refs:
-            print("References:")
-            for url in refs[:15]:
-                print(f"  - {url}")
-        print()
-
-    print("=" * 80)
-    return True
+def _github_link_exists(
+    references: List[Dict]
+) -> Dict[str, bool]:
+    result = {
+        "gh_commit": False,
+        "gh_pr": False
+    }
+    
+    for ref in references:
+        url = ref.get("url")
+        if ref.get("type") == "WEB" and url and url.startswith("https://github.com/"):
+            if "/commit/" in url:
+                result["gh_commit"] = True
+            elif "/pull/" in url:
+                result["gh_pr"] = True
+    
+    return result
 
 
 def _load_docker_tags(repo: str, max_tags: int) -> Optional[Set[str]]:
@@ -301,83 +206,145 @@ def _load_docker_tags(repo: str, max_tags: int) -> Optional[Set[str]]:
         return None
 
 
+def _vulns_to_json(
+    subject: str,
+    vulns: List[Dict],
+    docker_repo: Optional[str],
+    docker_tags: Optional[Set[str]],
+) -> Dict:
+    """
+    Convert raw OSV vulns + docker context into a structured JSON-serializable dict.
+    """
+    out: Dict = {
+        "subject": subject,
+        "docker_repo": docker_repo,
+        "docker_tag_count": len(docker_tags) if docker_tags is not None else None,
+        "vulnerability_count": len(vulns),
+        "vulnerabilities": [],
+    }
+
+    # newest first
+    vulns_sorted = sorted(vulns, key=lambda x: (x.get("modified") or x.get("published") or ""), reverse=True)
+
+    for v in vulns_sorted:
+        v_entry: Dict = {
+            "id": v.get("id"),
+            "published": v.get("published"),
+            "modified": v.get("modified"),
+            "withdrawn": v.get("withdrawn"),
+            "summary": v.get("summary"),
+            "details": v.get("details"),
+            "aliases": v.get("aliases") or [],
+            "related": v.get("related") or [],
+            "severity_raw": v.get("severity") or [],
+            "best_severity": _format_best_severity(v),
+            "references": [{"type": r.get("type"), "url": r.get("url")} for r in (v.get("references") or [])],
+            "affected": [],
+        }
+
+        for a in v.get("affected") or []:
+            pkg = a.get("package") or {}
+            affected_entry: Dict = {
+                "package": {
+                    "ecosystem": pkg.get("ecosystem"),
+                    "name": pkg.get("name"),
+                    "purl": pkg.get("purl"),
+                },
+                "docker_matched": [],
+                "github_matched": _github_link_exists(v.get("references") or [])
+            }
+            for version in a.get("versions") or []:
+                if _normalize_tag_candidates(version):
+                    affected_entry["docker_matched"].append(version)
+                    
+            v_entry["affected"].append(affected_entry)
+
+        out["vulnerabilities"].append(v_entry)
+
+    return out
+
+
 def main(argv: List[str]) -> int:
-    parser = argparse.ArgumentParser(description="Search OSV for vulnerabilities by repo or package name.")
-    parser.add_argument("filename", nargs="?", help="Read package names from file (txt or csv) and write results to osv folder")
-    parser.add_argument("--ecosystem", help="Optional OSV ecosystem, e.g., Go, npm, PyPI, Maven, RubyGems, crates.io, Packagist, NuGet.")
-    parser.add_argument("--version", help="Optional package version string for a precise query.")
-    parser.add_argument("--commit", help="Optional commit hash for a precise query.")
+    parser = argparse.ArgumentParser(description="Search OSV for vulnerabilities by repo or package name and emit JSON.")
+    parser.add_argument("filename", nargs="?", help="Read package rows from CSV and write JSON files into ./test_osv")
+    parser.add_argument("--ecosystem", help="Default OSV ecosystem if not in CSV (Go, npm, PyPI, Maven, RubyGems, crates.io, Packagist, NuGet).")
+    parser.add_argument("--version", help="Default package version if not in CSV.")
+    parser.add_argument("--commit", help="Optional commit hash (rarely used when package+version suffice).")
     parser.add_argument("--max-candidates", type=int, default=10, help="Maximum candidate mappings to try when ecosystem is not specified.")
+    parser.add_argument("--docker-max-tags", type=int, default=1000, help="Max number of Docker tags to fetch for matching.")
     args = parser.parse_args(argv)
 
-    # Process packages from file
-    import os
-    import csv
-    output_dir = "osv"
+    if not args.filename or not args.filename.endswith(".csv"):
+        print("Please provide a CSV file as the first argument.")
+        return 2
+
+    output_dir = "test_osv"
     os.makedirs(output_dir, exist_ok=True)
-    
-    # Determine file type and process accordingly
-    if args.filename.endswith(".csv"):
-        # Process CSV file
-        with open(args.filename, "r", newline="", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
 
-                project_name = row.get("Project Name", "")
-                osv_search_term = row.get("OSV Search Term", "")
-                docker_repo = row.get("Docker Repository", "")
-                
-                if not osv_search_term:
-                    continue
-                
-                docker_tags: Optional[Set[str]] = None
-                docker_tags = _load_docker_tags(docker_repo, max_tags=200)
-                if docker_tags is None:
-                    print(f"[WARN] Could not load Docker tags for '{docker_repo}'. Continuing without tag matching.")
+    with open(args.filename, "r", newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            project_name = row.get("Project Name", "") or ""
+            osv_search_term = row.get("OSV Search Term", "") or ""
+            docker_repo = row.get("Docker Repository", "") or ""
 
-                # Parse OSV search term for ecosystem and version info
-                # Format: package:ecosystem:version or package:ecosystem or package::version
-                parts = osv_search_term.split(":")
-                package_name = parts[0]
-                line_ecosystem = parts[1] if len(parts) > 1 and parts[1] else args.ecosystem
-                line_version = parts[2] if len(parts) > 2 and parts[2] else args.version
-                
-                # Create safe filename using project name if available
-                if project_name:
-                    safe_filename = project_name.replace("/", "_").replace("@", "_").replace(":", "_").replace(" ", "_")
-                else:
-                    safe_filename = package_name.replace("/", "_").replace("@", "_").replace(":", "_")
-                
-                if line_ecosystem:
-                    safe_filename += f"_{line_ecosystem}"
-                if line_version:
-                    safe_filename += f"_{line_version}"
-                output_file = os.path.join(output_dir, f"{safe_filename}.txt")
-                
-                # Search for vulnerabilities
-                vulns = search_vulns_by_name(
-                    package_name,
-                    ecosystem=line_ecosystem,
-                    version=line_version,
-                    commit=args.commit,
-                    max_candidates=args.max_candidates,
-                )
+            if not osv_search_term:
+                # Skip rows without an OSV target
+                continue
 
-                import sys
-                from io import StringIO
-                old_stdout = sys.stdout
-                sys.stdout = mystdout = StringIO()
-                
-                subject = package_name if not line_ecosystem else f"{line_ecosystem}:{package_name}"
-                if project_name:
-                    subject = f"{project_name} ({subject})"
-                vulns_found = print_vulnerabilities(subject, vulns, docker_tags)
+            # Load docker tags if a repo is given
+            docker_tags: Optional[Set[str]] = None
+            if docker_repo:
+                docker_tags = _load_docker_tags(docker_repo, max_tags=args.docker_max_tags)
 
-                # Write results to file
-                if vulns_found:
-                    with open(output_file, "w") as out_f:
-                        sys.stdout = old_stdout
-                        out_f.write(mystdout.getvalue())
+            # Parse OSV search term → package, ecosystem, version
+            # Formats: "package", "package:ecosystem", "package:ecosystem:version", "package::version"
+            parts = osv_search_term.split(":")
+            package_name = parts[0]
+            line_ecosystem = parts[1] if len(parts) > 1 and parts[1] else args.ecosystem
+            line_version = parts[2] if len(parts) > 2 and parts[2] else args.version
+
+            # Query OSV
+            vulns = search_vulns_by_name(
+                package_name,
+                ecosystem=line_ecosystem,
+                version=line_version,
+                commit=args.commit,
+                max_candidates=args.max_candidates,
+            )
+
+            # Subject metadata
+            subject = package_name if not line_ecosystem else f"{line_ecosystem}:{package_name}"
+            if project_name:
+                subject = f"{project_name} ({subject})"
+
+            # Convert to JSON structure
+            json_doc = _vulns_to_json(
+                subject=subject,
+                vulns=vulns,
+                docker_repo=docker_repo or None,
+                docker_tags=docker_tags,
+            )
+
+            # Build safe file name and write JSON
+            if project_name:
+                safe_filename = project_name
+            else:
+                safe_filename = package_name
+            safe_filename = (
+                safe_filename.replace("/", "_")
+                .replace("@", "_")
+                .replace(":", "_")
+                .replace(" ", "_")
+            )
+            if line_ecosystem:
+                safe_filename += f"_{line_ecosystem}"
+            if line_version:
+                safe_filename += f"_{line_version}"
+            output_path = os.path.join(output_dir, f"{safe_filename}.json")
+
+            with open(output_path, "w", encoding="utf-8") as out_f:
+                json.dump(json_doc, out_f, ensure_ascii=False, indent=2)
 
     return 0
 
