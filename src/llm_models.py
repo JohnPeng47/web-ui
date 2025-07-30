@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Dict, Any, Callable
 from langchain_core.messages import BaseMessage
 from langchain_core.language_models.chat_models import BaseChatModel
@@ -11,7 +12,7 @@ COST_MAP = None
 def load_cost_map() -> Dict:
     global COST_MAP
     if not COST_MAP:
-        with open("model_api_prices.json", "r") as f:
+        with open(Path(__file__).parent.parent / "model_api_prices.json", "r") as f:
             COST_MAP = json.load(f)
 
     return COST_MAP
@@ -102,6 +103,16 @@ def openai_41():
     return ChatModelWithName(
         ChatOpenAI(model="gpt-4.1"),
         "gpt-4.1"
+    )
+
+def grok4():
+    from langchain_xai import ChatXAI
+    return ChatModelWithName(
+        ChatXAI(
+            model="grok-4", 
+            api_key=os.getenv("XAI_API_KEY")
+        ),
+        "grok-4"
     )
 
 # def cohere_command_a():

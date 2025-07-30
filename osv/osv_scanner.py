@@ -19,6 +19,8 @@ Usage:
 """
 
 from __future__ import annotations
+import sys
+sys.path.append("..")
 
 import argparse
 import csv
@@ -29,6 +31,11 @@ import time
 from typing import Dict, List, Optional, Set, Tuple
 
 import requests
+
+from src.llm_models import openai_o4_mini as lazy_openai_o4_mini
+from classify_vuln import ClassifyVuln
+
+openai_o4_mini = lazy_openai_o4_mini()
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Docker Hub helper (requires docker.py from previous step)
@@ -240,7 +247,13 @@ def _vulns_to_json(
             "best_severity": _format_best_severity(v),
             "references": [{"type": r.get("type"), "url": r.get("url")} for r in (v.get("references") or [])],
             "affected": [],
+            "vuln_categories": []
         }
+
+        vuln_description = v.get("summary") or ""
+        vuln_description += "\n" + v.get("details") or ""
+        vuln_categories = ClassifyVuln().invoke(openai_o4_mini, prompt_args={"vuln_description": vuln_description})
+        v_entry["vuln_categories"] = vuln_categories.vuln_category
 
         for a in v.get("affected") or []:
             pkg = a.get("package") or {}
@@ -278,7 +291,7 @@ def main(argv: List[str]) -> int:
         print("Please provide a CSV file as the first argument.")
         return 2
 
-    output_dir = "test_osv"
+    output_dir = "osv"
     os.makedirs(output_dir, exist_ok=True)
 
     with open(args.filename, "r", newline="", encoding="utf-8") as f:
