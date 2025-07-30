@@ -245,7 +245,7 @@ Once this is done, you can exit
                 r"https://[0-9a-f]{32}\.web-security-academy\.net/",
                 history_str,
             )
-            return match.group(0) if match else None
+            return match.group(0    ) if match else None
     
         except Exception:
             logger.error(">>>> Error during runnning the agent: ")
@@ -257,12 +257,6 @@ Once this is done, you can exit
             await browser.close()
 
 if __name__ == "__main__":
-    from .labs import GENERIC_SUBSET
-    from .labs import SQLI_SUBSET_NO_STATE
-    from .labs import SQLI_TEST
-    from .labs import SSRF_TEST_SINGLE
-    from .labs import XSS_TEST_SINGLE
-
-    from scripts.portswigger.data import PRACTITIONER_LABS as TEST_LABS
+    from scripts.portswigger.data import XSS_PRACTITIONER_SINGLE as TEST_LABS
 
     PortSwiggerLabRunner(TEST_LABS, poll_interval=15, headless=False).run()

