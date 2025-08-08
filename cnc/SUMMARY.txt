@@ -1,0 +1,93 @@
+# System Architecture Overview
+
+## Major Components
+
+### 1. Database Layer
+**Purpose:** Persistence layer for storing application data
+**Key Files:** 
+- `database/models.py`: SQLModel definitions for Application, Agent, AuthSession, HTTPMessageDB
+- `database/crud.py`: CRUD operations for database entities
+- `database/session.py`: Database connection and session management
+
+### 2. Schemas Layer
+**Purpose:** Data validation and transfer objects
+**Key Files:**
+- `schemas/application.py`: Pydantic models for application, agent, and finding entities
+- `schemas/http.py`: Pydantic models for HTTP message enrichment and processing
+
+### 3. API Layer
+**Purpose:** Exposes REST endpoints and handles HTTP requests
+**Key Files:**
+- `routers/application.py`: Endpoints for application management
+- `routers/agent.py`: Endpoints for agent registration and message ingestion
+
+### 4. Service Layer
+**Purpose:** Contains core business logic
+**Key Files:**
+- `services/application.py`: Application management logic
+- `services/agent.py`: Agent registration and message handling
+- `services/enrichment.py`: Request enrichment and processing
+- `services/attack.py`: Security vulnerability detection
+- `services/queue.py`: Broadcast channels for async message passing
+
+### 5. Queue System
+**Purpose:** In-memory message passing between components
+**Key Files:**
+- `services/queue.py`: QueueRegistry implementation
+- `helpers/queue.py`: Channel implementation for pub/sub functionality
+
+### 6. Workers
+**Purpose:** Performs asynchronous processing of messages
+**Key Files:**
+- `services/enrichment.py`: RequestEnrichmentWorker
+- `services/attack.py`: AuthzAttacker
+- `workers_launcher.py`: Initializes and runs workers
+
+### 7. Helpers
+**Purpose:** Utility functions used across the application
+**Key Files:**
+- `helpers/uuid.py`: UUID generation and validation
+- `helpers/queue.py`: Queue implementation
+
+### 8. Entry Points
+**Purpose:** Application initialization and startup
+**Key Files:**
+- `main.py`: Creates and configures FastAPI application
+- `workers_launcher.py`: Initializes and runs worker processes
+
+## Component Interactions
+
+1. **API → Service → Database Flow**:
+   - API routers receive HTTP requests and validate them using schema models
+   - Routers delegate to service layer for business logic
+   - Service layer performs CRUD operations through database layer
+   - Results are returned back through the same path
+
+2. **Message Publishing Flow**:
+   - Agents send HTTP traffic to the `/agents/push` endpoint
+   - API layer calls service to store messages in database
+   - Service layer publishes messages to "raw_http_msgs" queue channel
+   - Messages are now available for asynchronous processing
+
+3. **Worker Processing Flow**:
+   - Enrichment workers subscribe to "raw_http_msgs" channel
+   - Workers process messages (auth/session detection, etc.)
+   - Enriched messages are published to "enriched_requests_authz" channel
+   - Attack workers (AuthzAttacker) subscribe to "enriched_requests_authz" channel
+   - Attack workers analyze for security vulnerabilities
+
+4. **System Initialization Flow**:
+   - `main.py` initializes FastAPI application, DB connection and queue registry
+   - `workers_launcher.py` initializes workers and wires them to appropriate channels
+   - Workers run concurrently with the API server
+
+5. **Testing Flow**:
+   - Tests use temporary SQLite databases and isolated queue instances
+   - Context managers ensure proper cleanup after tests
+
+The system is designed as a hub-and-spoke architecture where:
+- The hub (API) receives traffic from multiple browser agents
+- Traffic is stored in the database for persistence
+- Messages are distributed via in-memory queues to workers (spokes)
+- Workers process messages asynchronously and independently
+- Everything is fully async, leveraging Python's asyncio capabilities
