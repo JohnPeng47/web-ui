@@ -1,3 +1,4 @@
+from itertools import filterfalse
 from browser_use.browser.browser import Browser, BrowserConfig
 from browser_use.browser.context import BrowserContextConfig
 from browser_use.controller.service import Controller
@@ -17,8 +18,8 @@ Go to the url: http://147.79.78.153:8080/
 
 If you see home page, great, exit
 If you see login page, login with following credentials:
-username: admin
-password: U546DbhEHthPYEAE
+username: user1
+password: 1234
 """
 
 async def main():
@@ -29,7 +30,7 @@ async def main():
     # 1) Create a Browser similar to harness usage
     browser = Browser(
         config=BrowserConfig(
-            headless=True,
+            headless=False,
             disable_security=True,
         )
     )
@@ -47,6 +48,7 @@ async def main():
         agent = MinimalAgent(
             start_task=TASK,
             llm=llm,
+            max_steps=5,
             agent_sys_prompt=CUSTOM_SYSTEM_PROMPT,
             browser_context=context,
             controller=controller,
