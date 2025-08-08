@@ -1,0 +1,21 @@
+{
+    "exclude": [
+        "osv",
+        "logs",
+        "**/__pycache__",
+        "**/node_modules",
+        "**/.venv",
+        "**/venv",
+        "build",
+        "dist",
+        "**/*.pyc",
+        "**/migrations",
+        "tests/fixtures",
+        "path/to/specific/file.py"
+    ],
+    "ignore": [
+        "src/legacy",
+        "scripts/temp",
+        "**/test_*.py"
+    ]
+}

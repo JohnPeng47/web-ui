@@ -17,7 +17,7 @@ def load_cost_map() -> Dict:
 
     return COST_MAP
 
-# TODO: this is for all intents and purposes a BaseChatModel
+# TODO: this is for all contents and purposes a BaseChatModel
 class ChatModelWithName:
     """Wrapper for BaseChatModel that adds a model_name attribute."""
     
@@ -47,7 +47,13 @@ class ChatModelWithName:
             self.log_fn(invoke_cost, self.function_name)
 
     def invoke(self, *args: Any, **kwargs: Any) -> Any:
-        res = self._model.invoke(*args, **kwargs)
+        structured_output = kwargs.pop("structured_output", None)
+        if structured_output:
+            model = self._model.with_structured_output(structured_output)
+        else:
+            model = self._model
+
+        res = model.invoke(*args, **kwargs)
         self.log_cost(res)
         return res
     
@@ -103,6 +109,13 @@ def openai_41():
     return ChatModelWithName(
         ChatOpenAI(model="gpt-4.1"),
         "gpt-4.1"
+    )
+
+def openai_5():
+    from langchain_openai import ChatOpenAI
+    return ChatModelWithName(
+        ChatOpenAI(model="gpt-5"),
+        "gpt-5"
     )
 
 def grok4():
@@ -169,6 +182,7 @@ LLM_MODELS = {
     "o3-mini": openai_o3_mini,
     "claude-3-5-sonnet-20240620": anthropic_claude_3_5_sonnet,
     "claude-sonnet-4-20250514": claude_4_sonnet,
+    "gpt-5": openai_5,
 }
 
 # incredibly dumb hack to appease the type checker

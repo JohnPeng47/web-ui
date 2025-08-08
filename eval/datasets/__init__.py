@@ -1,2 +1,0 @@
-from .juice_shop_urls import JUICE_SHOP_ENDPOINTS
-from .mattermost_urls import MATTERMOST_ENDPOINTS
