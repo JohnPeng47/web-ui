@@ -32,7 +32,8 @@ def main() -> None:
         )
 
         page = context.new_page()
-        page.goto(TARGET_URL, wait_until="load")
+        res = page.goto(TARGET_URL, wait_until="load")
+        print(res.text())
         print("Browser opened. Press Ctrl+C to close.")
 
         try:
