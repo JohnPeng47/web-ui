@@ -257,6 +257,6 @@ Once this is done, you can exit
             await browser.close()
 
 if __name__ == "__main__":
-    from scripts.portswigger.data import PRACTITIONER_LABS as TEST_LABS
+    from scripts.portswigger.data import XSS_PRACTITIONER_SINGLE as TEST_LABS
 
     PortSwiggerLabRunner(TEST_LABS, poll_interval=15, headless=False).run()
