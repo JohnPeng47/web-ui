@@ -267,7 +267,7 @@ class CustomAgent(Agent):
 
         super(CustomAgent, self).__init__(
             task=start_task,
-            llm=llm.get("default"),
+            llm=llm.get("browser_use"),
             browser=browser,
             browser_context=browser_context,
             controller=controller or Controller(),
@@ -449,6 +449,10 @@ class CustomAgent(Agent):
             use_vision=self.settings.use_vision
         )
         input_messages = self._message_manager.get_messages()
+        for i, msg in enumerate(input_messages, start=1):
+            agent_log.info(f"==========[INPUT] {i}==========")
+            agent_log.info(f"{msg.content}")
+            
         agent_log.info(f"[INPUT]: Input messages len {len(input_messages)}")
         for msg in input_messages:
             agent_log.info(f"[INPUT] {msg.content}")

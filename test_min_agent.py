@@ -20,6 +20,8 @@ If you see home page, great, exit
 If you see login page, login with following credentials:
 username: user1
 password: 1234
+
+Once you login, click on the dataset page
 """
 
 async def main():

@@ -1,5 +1,5 @@
 import json
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, Dict
 from langchain_core.messages import BaseMessage
 
 from pydantic import BaseModel, ValidationError, Field
@@ -7,11 +7,11 @@ from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_excep
 from browser_use.browser.context import BrowserContext
 from browser_use.browser.views import BrowserState
 from browser_use.controller.service import Controller
-from browser_use.agent.views import ActionResult, AgentOutput, ActionModel
+from browser_use.agent.views import ActionResult, ActionModel
 
 from common.utils import extract_json
 from src.llm_models import LLMHub
-from src.agent.custom_views import CustomAgentOutput
+from src.agent.custom_views import CustomAgentOutput, CustomAgentBrain
 
 from pentest_bot.logger import get_agent_loggers
 
@@ -37,6 +37,8 @@ INCLUDE_ATTRIBUTES: List[str] = (
 # - terminate on success
 # - add results from previous steps
 # - find way to get the current url
+# - before switching over to stagehand, we should build evaluations for perf comparing browser-base
+# to stagehand
 class AgentState(BaseModel):
     step: int
     max_steps: int
@@ -48,31 +50,36 @@ class AgentState(BaseModel):
 
 # Wrapper classes for action and result to introduce a layer of indirection
 # for when we potentially want to switch to stagehand
-class AgentAction:
-    def __init__(self, action: ActionModel):
-        self._action = action
+class AgentAction(BaseModel):
+    action: ActionModel
 
     def __str__(self) -> str:
-        return self._action.model_dump_json(exclude_unset=True)
+        return self.action.model_dump_json(exclude_unset=True)
 
-class AgentResult:
-    def __init__(self, result: ActionResult):
-        self._result = result
+class AgentResult(BaseModel):
+    result: ActionResult
+
+    @property
+    def error(self) -> str:
+        if self.result.error:
+            return self.result.error.split('\n')[-1]
+        return ""
 
     def __str__(self) -> str:
-        return self._result.model_dump_json(exclude_unset=True)
+        return self.result.model_dump_json(exclude_unset=True)
 
 class AgentStep(BaseModel):
     actions: List[AgentAction]
     results: List[AgentResult]
+    current_state: CustomAgentBrain
 
 class AgentContext:
     """The main interface for interacting agent step history"""
     def __init__(self, agent_steps: List[AgentStep]):
         self._ctxt = agent_steps
 
-    def update(self, curr_actions: List[ActionModel], last_results: List[ActionResult]) -> None:
-        curr_step = AgentStep(actions=curr_actions, results=last_results)
+    def update(self, curr_actions: List[AgentAction], last_results: List[AgentResult], current_state: CustomAgentBrain) -> None:
+        curr_step = AgentStep(actions=curr_actions, results=last_results, current_state=current_state)
         prev_step = self.prev_step()
         if prev_step:
             prev_step.results.extend(last_results)
@@ -86,13 +93,16 @@ class AgentContext:
             return None
         return self._ctxt[-1]
 
-    def history(self, end_step: Optional[int] = None) -> str:
-        lines: List[str] = []
-        for step in self._ctxt[:end_step]:
-            action_json = ", ".join(a.model_dump_json(exclude_unset=True) for a in step.actions)
-            result_json = ", ".join(r.model_dump_json(exclude_unset=True) for r in step.results)
-            lines.append(f"[Actions: {action_json}] -> [Results: {result_json}]")
-        return "\n".join(lines)
+    def history(self, end_step: Optional[int] = None) -> List[dict[str, Dict]]:
+        lines = []
+        for i, ctxt in enumerate(self._ctxt[:end_step], start = 1):
+            history = {
+                "step": i,
+                "current_state": ctxt.current_state.model_dump_json(),
+                "actions": [a.model_dump_json() for a in ctxt.actions],
+            }
+            lines.append(history)
+        return lines
 
     # @classmethod
     # def from_db(cls, agent_steps: List) -> "AgentContext":
@@ -119,8 +129,6 @@ class MinimalAgent:
         controller: Controller[Any],
         max_steps: int = 50,
         *,
-        max_input_tokens: int = 128000,
-        available_file_paths: Optional[List[str]] = None,
         http_capture: bool = False,
     ):
         self.task = start_task or NO_OP_TASK
@@ -150,6 +158,20 @@ class MinimalAgent:
 
     async def _build_agent_prompt(self) -> List[dict[str, str]]:
         _, url, content = await self._get_browser_state()
+
+        sys_msg = {
+            "role": "system",
+            "content": self.sys_prompt
+        }
+        agent_history = self.agent_context.history(self.agent_state.step)
+        history = {
+            "role": "user",
+            "content": f"""
+Here are the previous steps taken by the agent:
+{agent_history}
+""" 
+        } if agent_history else {}
+
         agent_prompt = """
 ===== Current step: {step_number}/{max_steps} =====
 
@@ -163,37 +185,26 @@ Interactive Elements: {interactive_elements}
     curr_url=url, 
     interactive_elements=content
 )
-        actions, results = self.agent_context.prev_step()
-        if actions and results:
-            agent_prompt += "\n **Previous Actions** \n"
+        agent_step = self.agent_context.prev_step()
+        if agent_step:
+            actions = agent_step.actions
+            results = agent_step.results
+            agent_prompt += "\n**Previous Actions**\n"
             agent_prompt += f'Previous step: {self.agent_state.curr_step() - 1}/{self.agent_state.max_steps} \n'
             for i, result in enumerate(results):
                 action = actions[i]
-                agent_prompt += f"Previous action {i + 1}/{len(results)}: {action.model_dump_json(exclude_unset=True)}\n"
+                agent_prompt += f"Previous action {i + 1}/{len(results)}: {str(action)}\n"
                 if result.error:
-                    # only use last 300 characters of error
-                    error = result.error.split('\n')[-1]
                     agent_prompt += (
-                        f"Error of previous action {i + 1}/{len(results)}: ...{error}\n"
+                        f"Error of previous action {i + 1}/{len(results)}: ...{result.error}\n"
                     )
-                if result.include_in_memory:
-                    if result.extracted_content:
-                        agent_prompt += f"Result of previous action {i + 1}/{len(results)}: {result.extracted_content}\n"
-
-        sys_msg = {
-            "role": "system",
-            "content": self.sys_prompt
-        }
+                    
         agent_msg = {
             "role": "user",
             "content": agent_prompt
         }
-        history = {
-            "role": "user",
-            "content": self.agent_context.history(self.agent_state.step)
-        }
-        return [sys_msg, agent_msg]
 
+        return [msg for msg in [sys_msg, history, agent_msg] if msg]
 
     async def _execute_actions(
         self, ctx: BrowserContext, actions: List[Any]
@@ -256,10 +267,21 @@ Interactive Elements: {interactive_elements}
         parsed: CustomAgentOutput = _invoke_and_parse()
         return parsed
 
-    def _update_state(self, actions: List[ActionModel], results: List[ActionResult]) -> None:
-        self.agent_context.update(actions, results)
+    def _update_state(self, model_output: CustomAgentOutput, results: List[ActionResult]) -> None:
+        agent_actions = [AgentAction(action=a) for a in model_output.action]
+        agent_results = [AgentResult(result=result) for result in results]
+
+        self.agent_context.update(agent_actions, agent_results, model_output.current_state)
         self.agent_state.step += 1
         self.agent_state.is_done = self._check_done(results)
+
+    def _log_state(self, model_output: CustomAgentOutput, agent_msgs: List[dict[str, str]]) -> None:
+        agent_log.info(agent_msgs[-1]["content"])
+
+        success = "[Success]" if "Success" in model_output.current_state.evaluation_previous_goal else "[Failed]"
+        agent_log.info(f"Eval {success}: {model_output.current_state.evaluation_previous_goal}")
+        agent_log.info(f"Next Goal: {model_output.current_state.next_goal}")
+        agent_log.info(f"Step {self.agent_state.step} completed")
 
     async def step(self):
         """
@@ -270,14 +292,12 @@ Interactive Elements: {interactive_elements}
           - execute actions
         """
         # Build prompt for this turn
-        agent_prompt = await self._build_agent_prompt()
-        agent_log.info(agent_prompt[1]["content"])
-
-        model_output = await self._llm_next_actions(agent_prompt)
+        agent_msgs = await self._build_agent_prompt()
+        model_output = await self._llm_next_actions(agent_msgs)
         results = await self._execute_actions(self.browser_context, model_output.action)
 
-        self._update_state(model_output.action, results)
-        agent_log.info(f"Step {self.agent_state.step} completed")
+        self._update_state(model_output, results)
+        self._log_state(model_output, agent_msgs)
         
         # Optional: flush HTTP logs here if you wired http_capture
         # if self.http_handler and self.http_history:
