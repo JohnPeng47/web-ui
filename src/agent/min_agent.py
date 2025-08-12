@@ -278,6 +278,7 @@ Interactive Elements: {interactive_elements}
         self.agent_state.is_done = self._check_done(results)
 
     def _log_state(self, model_output: CustomAgentOutput, agent_msgs: List[dict[str, str]]) -> None:
+        # log the agent prompt with DOM, prev acitons and results
         agent_log.info(agent_msgs[-1]["content"])
 
         success = "[Success]" if "Success" in model_output.current_state.evaluation_previous_goal else "[Failed]"
