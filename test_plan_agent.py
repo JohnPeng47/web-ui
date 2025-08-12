@@ -3,7 +3,7 @@ from browser_use.browser.browser import Browser, BrowserConfig
 from browser_use.browser.context import BrowserContextConfig
 from browser_use.controller.service import Controller
 
-from src.agent.min_agent import MinimalAgent
+from src.agent.min_agent_plan import MinimalAgent
 from src.llm_models import LLMHub
 from src.agent.prompts import CUSTOM_SYSTEM_PROMPT
 
@@ -11,23 +11,17 @@ from pentest_bot.logger import setup_agent_logger
 
 
 MODEL_DICT = {
-    "browser_use": "gemini-2.5-flash",
+    "browser_use": "gpt-4o",
+    "create_plan": "gemini-2.5-flash",
+    "update_plan": "gemini-2.5-flash",
+    "check_plan_completion": "gemini-2.5-flash",
+    "determine_new_page": "gemini-2.5-flash",
 }
-TASK = """
-Go to the url: http://147.79.78.153:8080/
-
-If you see home page, great, exit
-If you see login page, login with following credentials:
-username: admin
-password: drSPkGKB6ZdHqRKG
-
-Once you login, click on the dataset page
-"""
 
 async def main():
     """Initialize MinimalAgent following the harness flow (browser -> context -> agent)."""
 
-    setup_agent_logger("min_agent", subfolder="min_agent")
+    setup_agent_logger("min_agent_plan", subfolder="min_agent_plan")
 
     # 1) Create a Browser similar to harness usage
     browser = Browser(
@@ -48,12 +42,15 @@ async def main():
 
         # 4) Initialize the MinimalAgent with the created context and controller
         agent = MinimalAgent(
-            start_task=TASK,
+            None,
             llm=llm,
             max_steps=5,
             agent_sys_prompt=CUSTOM_SYSTEM_PROMPT,
             browser_context=context,
             controller=controller,
+            start_urls=["http://147.79.78.153:3000"],
+            page_max_steps=8,
+            cont_mode=False,
         )
         await agent.run()
 
