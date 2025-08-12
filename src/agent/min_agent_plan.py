@@ -530,6 +530,7 @@ Interactive Elements: {interactive_elements}
             self.mode = next_mode
             if next_mode is AgentMode.NAVIGATION:
                 if event in [Event.NAV_START, Event.PAGE_COMPLETE]:
+                    # TODO: put spider links into here
                     target = self.pages.pop()
                     agent_log.info(f"Starting at new page: {target}")
                     task = NAVIGATE_TO_PAGE_PROMPT.format(

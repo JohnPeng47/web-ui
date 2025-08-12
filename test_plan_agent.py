@@ -1,4 +1,6 @@
 from itertools import filterfalse
+from pathlib import Path
+
 from browser_use.browser.browser import Browser, BrowserConfig
 from browser_use.browser.context import BrowserContextConfig
 from browser_use.controller.service import Controller
@@ -17,6 +19,9 @@ MODEL_DICT = {
     "check_plan_completion": "gemini-2.5-flash",
     "determine_new_page": "gemini-2.5-flash",
 }
+PROFILE_DIR = Path(
+    r"C:\Users\jpeng\AppData\Local\Google\Chrome\User Data\Profile 2"
+)
 
 async def main():
     """Initialize MinimalAgent following the harness flow (browser -> context -> agent)."""
@@ -28,6 +33,8 @@ async def main():
         config=BrowserConfig(
             headless=False,
             disable_security=True,
+            user_data_dir=str(PROFILE_DIR),
+            chrome_instance_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe"
         )
     )
 
