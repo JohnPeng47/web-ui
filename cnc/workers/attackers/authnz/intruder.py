@@ -4,7 +4,6 @@ from enum import Enum
 import json  # Added import
 import httpx  # Added import
 import logging
-from abc import ABC, abstractmethod
 
 from playwright.sync_api import Request
 from httplib import HTTPRequest, HTTPRequestData, AuthSession, ResourceLocator
@@ -347,7 +346,6 @@ class TestPlanner:
                             action=action,
                             type_name=type_name,
                         )
-
 
 class TestExecutor:
     def __init__(

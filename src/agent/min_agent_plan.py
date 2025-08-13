@@ -25,6 +25,7 @@ from src.agent.discovery import (
     TASK_PROMPT_WITH_PLAN,
 )
 from src.agent.discovery.prompts.planv3 import PlanItem as PlanNode
+from eval.client import PagedDiscoveryEvalClient
 
 from pentest_bot.logger import get_agent_loggers
 
@@ -166,20 +167,12 @@ async def _create_or_update_plan(
 
     return event, new_task, curr_plan, old_plan, nav_page
 
-# TODO: find out what the hell this does
 INCLUDE_ATTRIBUTES: List[str] = (
     ["title", "type", "name", "role", "aria-label", "placeholder", "value", "alt"]
 )
 
 # TODO List:
-# - should add action for completing subgoals
-# - update http listener and alert listener to wrap the pw context
-# -> need to get bu.Context to return pw.context
-# - terminate on success
-# - add results from previous steps
-# - find way to get the current url
-# - before switching over to stagehand, we should build evaluations for perf comparing browser-base
-# to stagehand
+# - store http messages for replayability
 class AgentState(BaseModel):
     step: int
     max_steps: int
@@ -188,8 +181,6 @@ class AgentState(BaseModel):
     def curr_step(self) -> int:
         """Always print 1-indexed"""
         return self.step + 1
-
-
 
 # Wrapper classes for action and result to introduce a layer of indirection
 # for when we potentially want to switch to stagehand
@@ -251,6 +242,76 @@ class AgentContext:
     # def from_db(cls, agent_steps: List) -> "AgentContext":
     #     pass
 
+def build_agent_prompt(
+    *,
+    sys_prompt: str,
+    task: str,
+    curr_url: str,
+    interactive_elements: str,
+    curr_step: int,
+    max_steps: int,
+    agent_history: Optional[List[Dict]] = None,
+    prev_actions: Optional[List[Any]] = None,
+    prev_results: Optional[List[Any]] = None,
+) -> List[dict[str, str]]:
+    """Build the LLM prompt for the agent.
+
+    This is a pure function that formats the system/user messages given
+    the current browser state, step counters, and optional history.
+    """
+    sys_msg = {
+        "role": "system",
+        "content": sys_prompt,
+    }
+
+    history_msg: dict[str, str] = {}
+    if agent_history:
+        history_msg = {
+            "role": "user",
+            "content": (
+                """
+Here are the previous steps taken by the agent:
+{agent_history}
+"""
+            ).format(agent_history=agent_history),
+        }
+
+    agent_prompt = (
+        """
+===== Current step: {step_number}/{max_steps} =====
+
+Task: {task}
+Current url: {curr_url}
+Interactive Elements: {interactive_elements}
+"""
+    ).format(
+        step_number=curr_step,
+        max_steps=max_steps,
+        task=task,
+        curr_url=curr_url,
+        interactive_elements=interactive_elements,
+    )
+
+    if prev_actions and prev_results:
+        agent_prompt += "\n**Previous Actions**\n"
+        agent_prompt += f"Previous step: {curr_step - 1}/{max_steps} \n"
+        for i, result in enumerate(prev_results):
+            action = prev_actions[i]
+            agent_prompt += f"Previous action {i + 1}/{len(prev_results)}: {str(action)}\n"
+            # Expect prev_results to expose an 'error' attribute or falsy value
+            err = getattr(result, "error", "")
+            if err:
+                agent_prompt += (
+                    f"Error of previous action {i + 1}/{len(prev_results)}: ...{err}\n"
+                )
+
+    agent_msg = {
+        "role": "user",
+        "content": agent_prompt,
+    }
+
+    return [msg for msg in [sys_msg, history_msg, agent_msg] if msg]
+
 class MinimalAgent:
     """
     Minimal agent:
@@ -275,13 +336,16 @@ class MinimalAgent:
         start_urls: Optional[List[str]] = None,
         page_max_steps: int = 10,
         http_capture: bool = False,
-        cont_mode: bool = True
+        cont_mode: bool = True,
+        # TODO: remove this annotation
+        challenge_client: Optional[PagedDiscoveryEvalClient] = None
     ):
         self.task = start_task or NO_OP_TASK
         self.llm = llm
         self.browser_context = browser_context
         self.controller = controller
         self.cont_mode = cont_mode
+        self.challenge_client = challenge_client
 
         self.agent_context = AgentContext([])
         # TODO: check how url is updated in old code
@@ -327,52 +391,23 @@ class MinimalAgent:
     async def _build_agent_prompt(self) -> List[dict[str, str]]:
         _, url, content = await self._get_browser_state()
 
-        sys_msg = {
-            "role": "system",
-            "content": self.sys_prompt
-        }
-        agent_history = self.agent_context.history(self.agent_state.step)
-        history = {
-            "role": "user",
-            "content": f"""
-Here are the previous steps taken by the agent:
-{agent_history}
-""" 
-        } if agent_history else {}
-
-        agent_prompt = """
-===== Current step: {step_number}/{max_steps} =====
-
-Task: {task}
-Current url: {curr_url}
-Interactive Elements: {interactive_elements}
-""".format(
-    step_number=self.agent_state.curr_step(),
-    max_steps=self.agent_state.max_steps,
-    task=self.task, 
-    curr_url=url, 
-    interactive_elements=content
-)
         agent_step = self.agent_context.prev_step()
-        if agent_step:
-            actions = agent_step.actions
-            results = agent_step.results
-            agent_prompt += "\n**Previous Actions**\n"
-            agent_prompt += f'Previous step: {self.agent_state.curr_step() - 1}/{self.agent_state.max_steps} \n'
-            for i, result in enumerate(results):
-                action = actions[i]
-                agent_prompt += f"Previous action {i + 1}/{len(results)}: {str(action)}\n"
-                if result.error:
-                    agent_prompt += (
-                        f"Error of previous action {i + 1}/{len(results)}: ...{result.error}\n"
-                    )
-                    
-        agent_msg = {
-            "role": "user",
-            "content": agent_prompt
-        }
+        prev_actions = agent_step.actions if agent_step else None
+        prev_results = agent_step.results if agent_step else None
 
-        return [msg for msg in [sys_msg, history, agent_msg] if msg]
+        messages = build_agent_prompt(
+            sys_prompt=self.sys_prompt,
+            task=self.task,
+            curr_url=url,
+            interactive_elements=content,
+            curr_step=self.agent_state.curr_step(),
+            max_steps=self.agent_state.max_steps,
+            agent_history=self.agent_context.history(self.agent_state.step),
+            prev_actions=prev_actions,
+            prev_results=prev_results,
+        )
+
+        return messages
 
     async def _execute_actions(
         self, ctx: BrowserContext, actions: List[Any]
@@ -577,10 +612,16 @@ Interactive Elements: {interactive_elements}
           - query LLM
           - execute actions
         """
-        # Build prompt for this turn
-        agent_msgs = await self._build_agent_prompt()
-        model_output = await self._llm_next_actions(agent_msgs)
-        results = await self._execute_actions(self.browser_context, model_output.action)
+        try:
+            # Build prompt for this turn
+            agent_msgs = await self._build_agent_prompt()
+            model_output = await self._llm_next_actions(agent_msgs)
+            results = await self._execute_actions(self.browser_context, model_output.action)
+        # TODO: should have better error handling 
+        # but works for now, because we can return and go next step without agent updating
+        except Exception:
+            agent_log.info("Error in step")
+            return
 
         # fetch new browser state for planning decisions
         _, new_url, new_page_contents = await self._get_browser_state()
@@ -611,7 +652,26 @@ Interactive Elements: {interactive_elements}
                         model_output=model_output,
                     )
 
-        self._update_state(model_output, results, new_url=new_url, new_page_contents=new_page_contents)
+        self._update_state(
+            model_output, 
+            results, 
+            new_url=new_url, 
+            new_page_contents=new_page_contents
+        )
+        # Optional: flush HTTP logs here if you wired http_capture
+        if self.http_handler and self.http_history:
+            http_msgs = await self.http_handler.flush()
+            filtered = self.http_history.filter_http_messages(http_msgs)
+            if self.challenge_client:
+                completed = self.challenge_client.update_status(filtered, new_url)
+                if completed is None:
+                    agent_log.info("No yet on challenge page")
+                else:
+                    if completed == 1:
+                        agent_log.info("CHALLENGE COMPLETED!!")
+                        self.cont_mode = True
+                        return
+
         await self._transition(
             event=evt,
             new_url=new_url,
@@ -622,15 +682,12 @@ Interactive Elements: {interactive_elements}
         )
         self._log_state(model_output, agent_msgs)
         
-        # Optional: flush HTTP logs here if you wired http_capture
-        # if self.http_handler and self.http_history:
-        #     http_msgs = await self.http_handler.flush()
-        #     filtered = self.http_history.filter_http_messages(http_msgs)
-        #     _ = filtered  # do whatever you want with them
-
     async def run(self) -> None:
         while self.agent_state.step < self.agent_state.max_steps:
             await self.step()
             if self.agent_state.is_done and self.cont_mode:
                 agent_log.info(f"Agent completed successfully @ {self.agent_state.step}/{self.agent_state.max_steps} steps!")
                 break
+        
+        complete, complete_str = self.challenge_client.report_progress()
+        print(complete_str)

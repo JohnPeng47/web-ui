@@ -312,3 +312,6 @@ class HTTPHandler:
 		full_log.info("Returning %d messages from flush", len(session_msgs))
 		return session_msgs
 
+
+	def get_history(self) -> List[HTTPMessage]:
+		return self._messages

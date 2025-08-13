@@ -83,15 +83,16 @@ class InitialPlan(BaseModel):
 
 class CreatePlanNested(LMP):
     prompt = """
-You are tasked with creating a plan for navigating a webpage. The plan should be exhaustive in covering steps for every 
-possible interaction with the current webpage. Here is the current webpage:
+You are tasked with creating a plan for navigating a webpage. 
+The plan should be exhaustive in covering steps for every possible interaction with the current webpage *except* for navigational actions.
+Here is the current webpage:
 {{curr_page_contents}}
 
 Guidelines for writing the plan:
 - Refer to interactive elements by their visible label, not a numeric index.
 - List higher-leverage interactions earlier
 
-IMPORTANT: ignore all interactions which might trigger a navigational action resulting in the browser going to another page
+IMPORTANT: Do not create plans which might trigger a navigational action resulting in the browser going to another page ie. clicking on a button that you think will cause a navigation action to occur 
 
 Return JSON that conforms to the Plan schema.
 """
@@ -143,7 +144,7 @@ Here are some guidelines:
 --> by adding it to the appropriate sub-level, you are supplying the next steps in the dfs traversal order
 - then, if the plans need updating, use the tree indexing notation [a.b.c..] to find the parent_index to add the plans to
 
-IMPORTANT: ignore all interactions which might trigger a navigational action resulting in the browser going to another page
+IMPORTANT: Do not create plans which might trigger a navigational action resulting in the browser going to another page ie. clicking on a button that you think will cause a navigation action to occur 
 
 Now return your response as a list of plan items that will get added to the plan. 
 This list should be empty if the plan does not need to be updated

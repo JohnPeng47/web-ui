@@ -217,6 +217,7 @@ Make sure to return an instance of the JSON, not the schema itself
                retry_delay: int = 1,
                prompt_args: Dict = {},
                prompt_logger: Optional[Logger] = None,
+               prompt_log_preamble: Optional[str] = "",
                manual_rewrite: bool = False) -> Any:
         prompt = self._prepare_prompt(
             templates=self.templates,
@@ -224,7 +225,7 @@ Make sure to return an instance of the JSON, not the schema itself
             **prompt_args,
         )
         if prompt_logger:
-            prompt_logger.info(f"[{self.__class__.__name__}]: {prompt}")
+            prompt_logger.info(f"{prompt_log_preamble}\n[{self.__class__.__name__}]: {prompt}")
 
         # TODO: make this decorator
         current_retry = 1
