@@ -1,70 +1,71 @@
+import asyncio
 from itertools import filterfalse
-from browser_use.browser.browser import Browser, BrowserConfig
-from browser_use.browser.context import BrowserContextConfig
+
+from browser_use.browser import BrowserSession, BrowserProfile
 from browser_use.controller.service import Controller
+from browser_use.llm.google.chat import ChatGoogle
+from browser_use.llm.openai.chat import ChatOpenAI
 
-from src.agent.min_agent import MinimalAgent
 from src.llm_models import LLMHub
+from src.agent.min_agent import MinimalAgent
+
 from src.agent.prompts import CUSTOM_SYSTEM_PROMPT
-
-from pentest_bot.logger import setup_agent_logger
-
+from pentest_bot.logger import setup_agent_logger, get_agent_loggers
 
 MODEL_DICT = {
     "browser_use": "gemini-2.5-flash",
 }
+
 TASK = """
-Go to the url: http://147.79.78.153:8080/
+Go to the url: http://147.79.78.153:3000
 
 If you see home page, great, exit
 If you see login page, login with following credentials:
-username: admin
-password: drSPkGKB6ZdHqRKG
+username: bjoern.kimminich@gmail.com
+password: bW9jLmxpYW1nQGhjaW5pbW1pay5ucmVvamI=
 
-Once you login, click on the dataset page
+Once you login, add an item to cart then finish
 """
 
+MODEL_CONFIG = {
+    "browser_use": "gpt-4o",
+}
+
 async def main():
-    """Initialize MinimalAgent following the harness flow (browser -> context -> agent)."""
+    """Initialize MinimalAgent using the new BrowserSession-based API."""
 
     setup_agent_logger("min_agent", subfolder="min_agent")
+    agent_log, _ = get_agent_loggers()
+    agent_log.info("Starting agent")
 
-    # 1) Create a Browser similar to harness usage
-    browser = Browser(
-        config=BrowserConfig(
-            headless=False,
-            disable_security=True,
+    browser_session = BrowserSession(
+        browser_profile=BrowserProfile(
+            keep_alive=False,
         )
     )
+    await browser_session.start()
 
-    # 2) Create an isolated BrowserContext (harness creates one per agent)
-    context = None
     try:
-        context = await browser.new_context(config=BrowserContextConfig(no_viewport=False))
-
-        # 3) Build LLMHub and Controller (kept minimal; we are not invoking the LLM here)
-        llm = LLMHub(MODEL_DICT)
+        # LLM and Controller
+        llm = LLMHub(MODEL_CONFIG)
         controller = Controller()
 
-        # 4) Initialize the MinimalAgent with the created context and controller
+        # MinimalAgent now uses browser_session instead of Browser/BrowserContext
         agent = MinimalAgent(
             start_task=TASK,
             llm=llm,
             max_steps=5,
             agent_sys_prompt=CUSTOM_SYSTEM_PROMPT,
-            browser_context=context,
+            browser_session=browser_session,
             controller=controller,
         )
         await agent.run()
-
     except Exception as e:
-        print(f"Playwright browser/context not available: {e}")
+        import traceback
+        traceback.print_exc()
+        print(f"Browser session failed: {e}")
     finally:
-        # Cleanup resources like the harness
-        if context is not None:
-            await context.close()
-        await browser.close()
+        await browser_session.kill()
 
 if __name__ == "__main__":
-    import asyncio
     asyncio.run(main())

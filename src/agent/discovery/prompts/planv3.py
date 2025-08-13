@@ -78,6 +78,13 @@ class PlanItem(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
+PLAN_GUIDELINES = """
+Guidelines for writing the plan:
+- Refer to interactive elements by their visible label, not a numeric index.
+- List higher-leverage interactions earlier
+- No need to look at all repeated elements on a page, just a few should suffice
+"""
+
 class InitialPlan(BaseModel):
     plan_descriptions: List[str]
 
@@ -88,11 +95,12 @@ The plan should be exhaustive in covering steps for every possible interaction w
 Here is the current webpage:
 {{curr_page_contents}}
 
+IMPORTANT: Do not create plans which might trigger a navigational action resulting in the browser going to another page ie. clicking on a button that you think will cause a navigation action to occur 
+
 Guidelines for writing the plan:
 - Refer to interactive elements by their visible label, not a numeric index.
 - List higher-leverage interactions earlier
-
-IMPORTANT: Do not create plans which might trigger a navigational action resulting in the browser going to another page ie. clicking on a button that you think will cause a navigation action to occur 
+- No need to look at all repeated elements on a page, just a few should suffice
 
 Return JSON that conforms to the Plan schema.
 """
@@ -145,6 +153,11 @@ Here are some guidelines:
 - then, if the plans need updating, use the tree indexing notation [a.b.c..] to find the parent_index to add the plans to
 
 IMPORTANT: Do not create plans which might trigger a navigational action resulting in the browser going to another page ie. clicking on a button that you think will cause a navigation action to occur 
+
+Guidelines for writing the plan:
+- Refer to interactive elements by their visible label, not a numeric index.
+- List higher-leverage interactions earlier
+- No need to look at all repeated elements on a page, just a few should suffice
 
 Now return your response as a list of plan items that will get added to the plan. 
 This list should be empty if the plan does not need to be updated
