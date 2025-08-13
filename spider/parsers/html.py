@@ -275,6 +275,8 @@ def parse_links(content, regex_str, mode=1, more_regex=None, no_dup=1):
 
     return filtered_items
 
+def parse_links_from_str(content: str) -> List[str]:
+    return parse_links(content, regex_str, mode=0, no_dup=1)
 
 def cli_output(endpoints):
     """

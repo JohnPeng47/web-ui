@@ -1,6 +1,7 @@
 import json
 from enum import Enum, auto
 from typing import Any, List, Optional, Tuple, Dict
+from browser_use.dom.views import DOMElementNode
 from langchain_core.messages import BaseMessage
 
 from pydantic import BaseModel, ValidationError, Field
@@ -26,6 +27,7 @@ from src.agent.discovery import (
 )
 from src.agent.discovery.prompts.planv3 import PlanItem as PlanNode
 from eval.client import PagedDiscoveryEvalClient
+from spider.parsers.html import parse_links_from_str
 
 from pentest_bot.logger import get_agent_loggers
 
@@ -89,7 +91,6 @@ Put as your next goal: Come up with a plan for the new page
 EVALUATION NOTE: the URL may have been redirected, so just just judging by the success of the URL is not enough
 to determine if navigation was successful
 """
-
 
 async def _create_or_update_plan(
     llm: LLMHub,
@@ -388,6 +389,14 @@ class MinimalAgent:
         self.page_step_number: int = 0
         self.page_max_steps: int = page_max_steps
 
+    def _find_navigational_links(self, nodes_with_links: List[DOMElementNode]) -> List[str]:
+        """
+        Extract navigational links from the DOM 
+        """
+        node_str = "\n".join([str(node) for node in nodes_with_links])
+        links = parse_links_from_str(node_str)
+        return links
+
     async def _build_agent_prompt(self) -> List[dict[str, str]]:
         _, url, content = await self._get_browser_state()
 
@@ -447,6 +456,7 @@ class MinimalAgent:
 
         # Keep it simple: the LLM sees only a compact string of clickable elements
         content = browser_state.element_tree.clickable_elements_to_string(include_attributes=INCLUDE_ATTRIBUTES)
+        # links = self._find_links(browser_state.element_tree.linkable_elements())
         return browser_state, url, content
 
     async def _llm_next_actions(
@@ -619,8 +629,10 @@ class MinimalAgent:
             results = await self._execute_actions(self.browser_context, model_output.action)
         # TODO: should have better error handling 
         # but works for now, because we can return and go next step without agent updating
-        except Exception:
-            agent_log.info("Error in step")
+        except Exception as e:
+            import traceback
+            agent_log.info(f"Error in step, skipping to next step")
+            agent_log.info(f"Stack trace: {traceback.format_exc()}")
             return
 
         # fetch new browser state for planning decisions

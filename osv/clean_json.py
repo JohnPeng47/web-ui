@@ -10,12 +10,16 @@ def clean_vulnerability(vuln):
     """
     # Check if any affected package has github_matched.gh_commit = true
     has_github_commit = False
+    docker_matched = []
     
     for affected in vuln.get("affected", []):
         github_matched = affected.get("github_matched", {})
         if github_matched.get("gh_commit", False):
             has_github_commit = True
-            break
+        
+        # Collect docker_matched data
+        # if "docker_matched" in affected:
+        #     docker_matched.extend(affected["docker_matched"])
     
     # Skip if no github commit
     if not has_github_commit:
@@ -35,6 +39,7 @@ def clean_vulnerability(vuln):
         "details": vuln.get("details"),
         "github_commit_urls": github_commit_urls,
         "vuln_categories": vuln.get("vuln_categories", []),
+        "docker_matched": docker_matched,
     }
     
     return cleaned_vuln
