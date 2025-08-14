@@ -1,11 +1,9 @@
 import json
-import logging
 from typing import Any, Dict, List, Optional, Tuple
 import asyncio
 from abc import ABC, abstractmethod
 
 from pydantic import BaseModel, ValidationError
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 from langchain_core.messages import BaseMessage
 
 from browser_use.browser import BrowserSession
@@ -15,9 +13,16 @@ from browser_use.agent.views import ActionResult, AgentOutput
 from browser_use.controller.registry.views import ActionModel
 from browser_use.controller.views import NoParamsAction
 
-from browser_use.llm.base import BaseChatModel
-from browser_use.llm.messages import SystemMessage, UserMessage
-
+from src.agent.discovery import (
+    CreatePlanNested,
+    UpdatePlanNested,
+    CheckNestedPlanCompletion,
+    CompletedNestedPlanItem,
+    DetermineNewPage,
+    NewPageStatus,
+    NavPage,
+    TASK_PROMPT_WITH_PLAN,
+)
 from src.llm_models import LLMHub
 from src.agent.utils import url_did_change
 from common.utils import extract_json
@@ -33,6 +38,13 @@ NO_OP_TASK = "Do nothing unless necessary. If a popup appears, dismiss it. Then 
 INCLUDE_ATTRIBUTES: List[str] = (
     ["title", "type", "name", "role", "aria-label", "placeholder", "value", "alt"]
 )
+
+class GoToUrlAction(BaseModel):
+    url: str
+    new_tab: bool
+
+class GoToUrlActionModel(ActionModel):
+    go_to_url: GoToUrlAction | None = None
 
 class GoBackActionModel(ActionModel):
     go_back: NoParamsAction | None = None
@@ -159,7 +171,6 @@ class MinimalAgent:
 
     Everything else is a hook you can wire back in if you truly need it.
     """
-
     def __init__(
         self,
         start_task: str,
@@ -169,6 +180,7 @@ class MinimalAgent:
         controller: Controller,
         start_urls: List[str],
         max_steps: int = 50,
+        max_page_steps: int = 10,
         *,
         http_capture: bool = False,
     ):
@@ -192,9 +204,8 @@ class MinimalAgent:
 
         # page tracking
         self.urls = start_urls
-        self.curr_page = start_urls.pop()
-
-        agent_log.info(f"Starting agent with initial page: {self.curr_page}")
+        self.page_steps = 0
+        self.plan = None
 
     def _log(self, msg: str):
         agent_log.info(msg)
@@ -288,6 +299,26 @@ class MinimalAgent:
                 self.agent_state.step, 
                 f"[GO_BACK] Page changed from {self.curr_page} to {state.url}, going back"
             )
+
+    async def _goto_page(self, url: str):
+        res = await self.controller.act(
+            action=GoToUrlActionModel(**{"go_to_url": GoToUrlAction(url=url, new_tab=False)}),
+            browser_session=self.browser_session,
+            page_extraction_llm=None,
+            sensitive_data=None,
+            available_file_paths=None,
+            file_system=None,  # pass a real FileSystem if you use done() attachments
+            context=None,
+        )
+        await asyncio.sleep(2)
+
+        agent_log.info(f"[Action]: {GoToUrlActionModel(**{'go_to_url': GoToUrlAction(url=url, new_tab=False)})}")
+        agent_log.info(f"[Result]: {res}")
+
+        self.agent_context.update_event(
+            self.agent_state.step, 
+            f"[GOTO_PAGE] Go to url: {url}"
+        )
 
     async def _execute_actions(self, actions: List[Any]) -> List[ActionResult]:
         results: List[ActionResult] = []
@@ -450,6 +481,23 @@ class MinimalAgent:
           - query LLM
           - execute actions
         """
+        # build plan
+        if self.page_steps == 0:
+            self.curr_page = self.urls.pop()
+            await self._goto_page(self.curr_page)
+
+            state = await self.browser_session.get_browser_state_summary(
+                cache_clickable_elements_hashes=True,
+                include_screenshot=False,
+                cached=False,
+                include_recent_events=False,
+            )
+            print(state.dom_state.llm_representation(include_attributes=INCLUDE_ATTRIBUTES))
+            agent_log.info(f"Starting agent with initial page: {self.curr_page}")
+
+            import sys
+            sys.exit()
+        
         try:
             # Build prompt for this turn
             agent_msgs = await self._build_agent_prompt()
@@ -462,7 +510,12 @@ class MinimalAgent:
 
         self._update_state(model_output, results)
         self._log_state(model_output, agent_msgs)
+
+        # NOTE: curr_page_check is essentially a NOOP in terms of state updates
         await self._curr_page_check()
+
+        # check plan completion and update plan
+
 
         # Optional: flush HTTP logs here if you wired http_capture
         # if self.http_handler and self.http_history:
