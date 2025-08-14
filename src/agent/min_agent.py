@@ -2,6 +2,7 @@ import json
 import logging
 from typing import Any, Dict, List, Optional, Tuple
 import asyncio
+from abc import ABC, abstractmethod
 
 from pydantic import BaseModel, ValidationError
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
@@ -12,24 +13,34 @@ from browser_use.browser.views import BrowserStateSummary
 from browser_use.controller.service import Controller
 from browser_use.agent.views import ActionResult, AgentOutput
 from browser_use.controller.registry.views import ActionModel
+from browser_use.controller.views import NoParamsAction
+
 from browser_use.llm.base import BaseChatModel
 from browser_use.llm.messages import SystemMessage, UserMessage
 
 from src.llm_models import LLMHub
+from src.agent.utils import url_did_change
 from common.utils import extract_json
 from pentest_bot.logger import get_agent_loggers
 
 # Basic logger compatible with this repo
-agent_log, _ = get_agent_loggers()
+agent_log, full_log = get_agent_loggers()
 
 
 # HTTP capture hooks from old architecture are not used with the new BrowserSession
 NO_OP_TASK = "Do nothing unless necessary. If a popup appears, dismiss it. Then emit done."
 
-# TODO: find out what the hell this does
 INCLUDE_ATTRIBUTES: List[str] = (
     ["title", "type", "name", "role", "aria-label", "placeholder", "value", "alt"]
 )
+
+class GoBackActionModel(ActionModel):
+    go_back: NoParamsAction | None = None
+
+class LLMNextActionsError(Exception):
+    def __init__(self, message: str, errors: list[dict[str, str]]):
+        super().__init__(message)
+        self.errors = errors
 
 # TODO List:
 # - terminate on success
@@ -66,40 +77,71 @@ class AgentResult(BaseModel):
     def __str__(self) -> str:
         return self.result.model_dump_json(exclude_unset=True)
 
-class AgentStep(BaseModel):
+class HistoryItem(BaseModel, ABC):
+    step: int
+
+    @abstractmethod
+    def to_history_item(self) -> dict[str, Any]:
+        pass
+
+class AgentStep(HistoryItem):
     actions: List[Any]
     results: List[ActionResult]
     current_state: Any
 
+    def to_history_item(self) -> dict[str, Any]:
+        return {
+            "step": self.step,
+            "actions": [a.model_dump_json() for a in self.actions],
+            "results": [r.model_dump_json() for r in self.results],
+            "current_state": self.current_state.model_dump_json(),
+        }
+
+class Event(HistoryItem):
+    msg: str
+
+    def to_history_item(self) -> dict[str, Any]:
+        return {
+            "msg": self.msg,
+        }
+
 class AgentContext:
     """The main interface for interacting agent step history"""
-    def __init__(self, agent_steps: List[AgentStep]):
+    def __init__(self, agent_steps: List[HistoryItem]):
         self._ctxt = agent_steps
 
-    def update(self, curr_actions: List[ActionModel], last_results: List[ActionResult], current_state: Any) -> None:
-        curr_step = AgentStep(actions=curr_actions, results=last_results, current_state=current_state)
-        prev_step = self.prev_step()
+    def update(self, step: int, curr_actions: List[ActionModel], last_results: List[ActionResult], current_state: Any) -> None:
+        curr_step = AgentStep(
+            step=step, 
+            actions=curr_actions, 
+            results=last_results, 
+            current_state=current_state
+        )
+        prev_step = self.prev_agent_step()
         if prev_step:
             prev_step.results.extend(last_results)
         self._ctxt.append(curr_step)
 
-    def steps(self) -> List[AgentStep]:
+    # TODO: unify this API with update()
+    def update_event(self, step: int, msg: str):
+        self._ctxt.append(Event(step=step, msg=msg))
+
+    def steps(self) -> List[HistoryItem]:
         return self._ctxt
 
-    def prev_step(self) -> AgentStep | None:
+    def prev_agent_step(self) -> AgentStep | None:
         if not self._ctxt:
             return None
-        return self._ctxt[-1]
+        # Find the latest AgentStep by iterating backwards
+        for item in reversed(self._ctxt):
+            if isinstance(item, AgentStep):
+                return item
+        return None
 
     def history(self, end_step: Optional[int] = None) -> List[dict[str, Dict]]:
         lines = []
         for i, ctxt in enumerate(self._ctxt[:end_step], start = 1):
-            history = {
-                "step": i,
-                "current_state": json.dumps(ctxt.current_state.model_dump() if hasattr(ctxt.current_state, "model_dump") else getattr(ctxt.current_state, "__dict__", {})),
-                "actions": [a.model_dump_json() for a in ctxt.actions],
-            }
-            lines.append(history)
+            lines.append(ctxt.to_history_item())
         return lines
 
     # @classmethod
@@ -125,6 +167,7 @@ class MinimalAgent:
         agent_sys_prompt: str,
         browser_session: BrowserSession,
         controller: Controller,
+        start_urls: List[str],
         max_steps: int = 50,
         *,
         http_capture: bool = False,
@@ -146,6 +189,16 @@ class MinimalAgent:
         # HTTP capture hooks removed in new architecture; keep placeholders
         self.http_handler = None
         self.http_history = None
+
+        # page tracking
+        self.urls = start_urls
+        self.curr_page = start_urls.pop()
+
+        agent_log.info(f"Starting agent with initial page: {self.curr_page}")
+
+    def _log(self, msg: str):
+        agent_log.info(msg)
+        full_log.info(msg)
 
     async def _build_agent_prompt(self) -> List[Any]:
         _, url, content = await self._get_browser_state()
@@ -173,7 +226,7 @@ class MinimalAgent:
         )
 
         agent_prompt = (
-            "===== Current step: {step_number}/{max_steps} =====\n\n"
+            "Current step: {step_number}/{max_steps}\n\n"
             "Task: {task}\n"
             "Current url: {curr_url}\n"
             "Interactive Elements: {interactive_elements}\n"
@@ -184,7 +237,7 @@ class MinimalAgent:
             curr_url=url,
             interactive_elements=content,
         )
-        agent_step = self.agent_context.prev_step()
+        agent_step = self.agent_context.prev_agent_step()
         if agent_step:
             actions = agent_step.actions
             results = agent_step.results
@@ -204,6 +257,37 @@ class MinimalAgent:
         }
 
         return [m for m in [sys_msg, history_msg, agent_msg] if m is not None]
+
+    async def _curr_page_check(self):
+        # TODO: try to cache calls to this method and track url change with every call
+        state = await self.browser_session.get_browser_state_summary(
+            cache_clickable_elements_hashes=True,
+            include_screenshot=False,
+            cached=False,
+            include_recent_events=False,
+        )
+        # TODO_IMPORTANT: need to change this back to support regular URL checking after juice_shop 
+        # > removing check page updates for now 
+        if url_did_change(self.curr_page, state.url):
+            self._log(f"Page changed from {self.curr_page} to {state.url}, going back")
+
+            await asyncio.sleep(self.browser_session.browser_profile.wait_between_actions)
+            res = await self.controller.act(
+                action=GoBackActionModel(**{"go_back": NoParamsAction()}),
+                browser_session=self.browser_session,
+                page_extraction_llm=None,
+                sensitive_data=None,
+                available_file_paths=None,
+                file_system=None,  # pass a real FileSystem if you use done() attachments
+                context=None,
+            )
+            agent_log.info(f"[Action]: {GoBackActionModel(**{'go_back': NoParamsAction()})}")
+            agent_log.info(f"[Result]: {res}")
+
+            self.agent_context.update_event(
+                self.agent_state.step, 
+                f"[GO_BACK] Page changed from {self.curr_page} to {state.url}, going back"
+            )
 
     async def _execute_actions(self, actions: List[Any]) -> List[ActionResult]:
         results: List[ActionResult] = []
@@ -259,6 +343,9 @@ class MinimalAgent:
             )
             results.append(res)
 
+            agent_log.info(f"[Action]: {action}")
+            agent_log.info(f"[Result]: {res}")
+
             if res.is_done or res.error:
                 break
 
@@ -283,38 +370,77 @@ class MinimalAgent:
         return browser_state, url, content
 
     async def _llm_next_actions(
-        self, input_messages: List[Any]
+        self, input_messages: List[dict[str, str]]
     ) -> AgentOutput:
-        @retry(
-            reraise=True,
-            stop=stop_after_attempt(3),
-            wait=wait_exponential(multiplier=0.5, min=0.5, max=2.0),
-            retry=retry_if_exception_type(ValidationError),
+        error_outputs: list[dict[str, Any]] = []
+        max_attempts = 3
+
+        for attempt in range(1, max_attempts + 1):
+            content: Optional[str] = None
+            payload: Optional[dict[str, Any]] = None
+
+            try:
+                # If your .invoke(...) is async, replace with: ai_msg = await ...
+                ai_msg: BaseMessage = self.llm.get("browser_use").invoke(input_messages)
+                content = ai_msg.content
+                if not isinstance(content, str):
+                    raise ValueError(f"Expected content to be a string, got {type(content)}")
+
+                payload = json.loads(extract_json(content))
+
+                # This is the line you care about: track per-payload failures here.
+                agent_output = self.AgentOutput(**payload)  # type: ignore[call-arg]
+                agent_log.info("AGENT OUTPUT: %s", content)
+                return agent_output
+
+            except (ValidationError, TypeError) as e:
+                # Pydantic or typing errors when building AgentOutput(**payload)
+                error_entry = {
+                    "attempt": attempt,
+                    "stage": "model_parse",
+                    "exception": type(e).__name__,
+                    "message": str(e),
+                    "payload": payload,          # keep the exact payload that failed
+                    "raw_content": content,
+                }
+                error_outputs.append(error_entry)
+                agent_log.error("Attempt %s model_parse failed: %s", attempt, e)
+
+            # Backoff between attempts, then loop
+            if attempt < max_attempts:
+                await asyncio.sleep(min(2.0, 0.5 * (2 ** (attempt - 1))))
+
+        # Exhausted all attempts
+        agent_log.error("Aggregate LLM parse failures: %s", error_outputs)
+        raise LLMNextActionsError(
+            "Failed to produce a valid AgentOutput after retries.",
+            error_outputs,
         )
-        async def _invoke_and_parse() -> AgentOutput:
-            ai_msg: BaseMessage = self.llm.get("browser_use").invoke(input_messages)
-            content = ai_msg.content
-            if not isinstance(content, str):
-                raise ValueError(f"Expected content to be a string, got {type(content)}")
-
-            payload = json.loads(extract_json(content))
-            return self.AgentOutput(**payload)  # type: ignore[return-value]
-
-        parsed: AgentOutput = await _invoke_and_parse()
-        return parsed
 
     def _update_state(self, model_output: AgentOutput, results: List[ActionResult]) -> None:
-        self.agent_context.update(model_output.action, results, model_output.current_state)
-        self.agent_state.step += 1
+        self.agent_context.update(self.agent_state.step, model_output.action, results, model_output.current_state)
         self.agent_state.is_done = self._check_done(results)
 
     def _log_state(self, model_output: AgentOutput, agent_msgs: List[Any]) -> None:
-        agent_log.info(agent_msgs[-1]["content"])
+        self._log(f"========== Agent State: {self.agent_state.curr_step()}/{self.agent_state.max_steps} ==========")
+        
+        full_log.info("[HISTORY]")
+        for msg in agent_msgs[:-1]:
+            full_log.info(msg["content"])
+        self._log(agent_msgs[-1]["content"])
 
         success_prefix = "[Success]" if (model_output.current_state.evaluation_previous_goal or "").lower().find("success") != -1 else "[Failed]"
-        agent_log.info(f"Eval {success_prefix}: {model_output.current_state.evaluation_previous_goal}")
-        agent_log.info(f"Next Goal: {model_output.current_state.next_goal}")
-        agent_log.info(f"Step {self.agent_state.step} completed")
+        self._log(f"Eval {success_prefix}: {model_output.current_state.evaluation_previous_goal}")
+        self._log(f"Next Goal: {model_output.current_state.next_goal}")
+        self._log(f"Step {self.agent_state.step} completed")
+
+    def _handle_error(self, e: Exception):
+        if isinstance(e, LLMNextActionsError):
+            self._log(f"LLMNextActionsError: {e.errors}")
+        else:
+            import traceback
+            self._log(f"Error in step, skipping to next step")
+            self._log(f"Stack trace: {traceback.format_exc()}")
 
     async def step(self):
         """
@@ -324,14 +450,20 @@ class MinimalAgent:
           - query LLM
           - execute actions
         """
-        # Build prompt for this turn
-        agent_msgs = await self._build_agent_prompt()
-        model_output = await self._llm_next_actions(agent_msgs)
-        results = await self._execute_actions(model_output.action)
+        try:
+            # Build prompt for this turn
+            agent_msgs = await self._build_agent_prompt()
+            model_output = await self._llm_next_actions(agent_msgs)
+            results = await self._execute_actions(model_output.action)
+        except Exception as e:
+            self._handle_error(e)
+            self.agent_state.is_done = True
+            return
 
         self._update_state(model_output, results)
         self._log_state(model_output, agent_msgs)
-        
+        await self._curr_page_check()
+
         # Optional: flush HTTP logs here if you wired http_capture
         # if self.http_handler and self.http_history:
         #     http_msgs = await self.http_handler.flush()
@@ -342,5 +474,7 @@ class MinimalAgent:
         while self.agent_state.step < self.agent_state.max_steps:
             await self.step()
             if self.agent_state.is_done:
-                agent_log.info(f"Agent completed successfully @ {self.agent_state.step}/{self.agent_state.max_steps} steps!")
+                self._log(f"Agent completed successfully @ {self.agent_state.step}/{self.agent_state.max_steps} steps!")
                 break
+
+            self.agent_state.step += 1

@@ -1,3 +1,11 @@
+from urllib.parse import urlparse
+
+def url_did_change(old_url: str, new_url: str) -> bool:
+    """
+    Check if the URL has changed.
+    """
+    return urlparse(old_url).fragment != urlparse(new_url).fragment
+
 class Pages:
     def __init__(self, items=None):
         """
