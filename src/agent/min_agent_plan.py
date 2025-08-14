@@ -1,19 +1,19 @@
 import json
 from enum import Enum, auto
 from typing import Any, List, Optional, Tuple, Dict
-from browser_use.dom.views import DOMElementNode
 from langchain_core.messages import BaseMessage
+import asyncio
 
-from pydantic import BaseModel, ValidationError, Field
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
-from browser_use.browser.context import BrowserContext
-from browser_use.browser.views import BrowserState
+from pydantic import BaseModel, ValidationError
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type, RetryCallState
+from browser_use.browser import BrowserSession
+from browser_use.browser.views import BrowserStateSummary
 from browser_use.controller.service import Controller
-from browser_use.agent.views import ActionResult, ActionModel
+from browser_use.agent.views import ActionResult, AgentOutput
+from browser_use.controller.registry.views import ActionModel
 
 from common.utils import extract_json
 from src.llm_models import LLMHub
-from src.agent.custom_views import CustomAgentOutput, CustomAgentBrain
 from src.agent.utils import Pages
 from src.agent.discovery import (
     CreatePlanNested,
@@ -27,7 +27,6 @@ from src.agent.discovery import (
 )
 from src.agent.discovery.prompts.planv3 import PlanItem as PlanNode
 from eval.client import PagedDiscoveryEvalClient
-from spider.parsers.html import parse_links_from_str
 
 from pentest_bot.logger import get_agent_loggers
 
@@ -128,7 +127,9 @@ async def _create_or_update_plan(
         node = curr_plan.get(compl)
         if node is not None:
             node.completed = True
-            agent_log.info(f"Completed plan item: {node.description}")
+            agent_log.info(f"[COMPLETE_PLAN_ITEM]: {node.description}")
+        else:
+            agent_log.info(f"PLAN_ITEM_NOT_COMPLETED")
 
     nav_page: NavPage = DetermineNewPage().invoke(
         model=llm.get("determine_new_page"),
@@ -168,6 +169,11 @@ async def _create_or_update_plan(
 
     return event, new_task, curr_plan, old_plan, nav_page
 
+class LLMNextActionsError(Exception):
+    def __init__(self, message: str, errors: list[dict[str, str]]):
+        super().__init__(message)
+        self.errors = errors
+
 INCLUDE_ATTRIBUTES: List[str] = (
     ["title", "type", "name", "role", "aria-label", "placeholder", "value", "alt"]
 )
@@ -185,35 +191,18 @@ class AgentState(BaseModel):
 
 # Wrapper classes for action and result to introduce a layer of indirection
 # for when we potentially want to switch to stagehand
-class AgentAction(BaseModel):
-    action: ActionModel
-
-    def __str__(self) -> str:
-        return self.action.model_dump_json(exclude_unset=True)
-
-class AgentResult(BaseModel):
-    result: ActionResult
-
-    @property
-    def error(self) -> str:
-        if self.result.error:
-            return self.result.error.split('\n')[-1]
-        return ""
-
-    def __str__(self) -> str:
-        return self.result.model_dump_json(exclude_unset=True)
-
 class AgentStep(BaseModel):
-    actions: List[AgentAction]
-    results: List[AgentResult]
-    current_state: CustomAgentBrain
+    actions: List[Any]
+    results: List[ActionResult]
+    current_state: Any
 
 class AgentContext:
     """The main interface for interacting agent step history"""
     def __init__(self, agent_steps: List[AgentStep]):
         self._ctxt = agent_steps
 
-    def update(self, curr_actions: List[AgentAction], last_results: List[AgentResult], current_state: CustomAgentBrain) -> None:
+    def update(self, curr_actions: List[ActionModel], last_results: List[ActionResult], current_state: Any) -> None:
+        
         curr_step = AgentStep(actions=curr_actions, results=last_results, current_state=current_state)
         prev_step = self.prev_step()
         if prev_step:
@@ -233,7 +222,7 @@ class AgentContext:
         for i, ctxt in enumerate(self._ctxt[:end_step], start = 1):
             history = {
                 "step": i,
-                "current_state": ctxt.current_state.model_dump_json(),
+                "current_state": json.dumps(ctxt.current_state.model_dump() if hasattr(ctxt.current_state, "model_dump") else getattr(ctxt.current_state, "__dict__", {})),
                 "actions": [a.model_dump_json() for a in ctxt.actions],
             }
             lines.append(history)
@@ -330,8 +319,8 @@ class MinimalAgent:
         start_task: str,
         llm: LLMHub,
         agent_sys_prompt: str,
-        browser_context: BrowserContext,
-        controller: Controller[Any],
+        browser_session: BrowserSession,
+        controller: Controller,
         max_steps: int = 50,
         *,
         start_urls: Optional[List[str]] = None,
@@ -343,7 +332,7 @@ class MinimalAgent:
     ):
         self.task = start_task or NO_OP_TASK
         self.llm = llm
-        self.browser_context = browser_context
+        self.browser_session = browser_session
         self.controller = controller
         self.cont_mode = cont_mode
         self.challenge_client = challenge_client
@@ -354,19 +343,16 @@ class MinimalAgent:
 
         # TODO: deprecate and replace
         self.sys_prompt = agent_sys_prompt
-        self.ActionModel = self.controller.registry.create_action_model()
-        self.AgentOutput = CustomAgentOutput.type_with_custom_actions(self.ActionModel)
+        self.ActionModel = self.controller.registry.create_action_model(page_url=None)
+        self.AgentOutput = AgentOutput.type_with_custom_actions(self.ActionModel)
 
         # Optional HTTP capture hook
         self.http_handler = None
         self.http_history = None
+        # HTTP capture hooks from old architecture are not used with the new BrowserSession
         if http_capture and HAS_HTTP:
-            # Only set handlers if available
             self.http_handler = HTTPHandler() if HTTPHandler else None
             self.http_history = HTTPHistory() if HTTPHistory else None
-            if self.http_handler:
-                self.browser_context.req_handler = self.http_handler.handle_request  # type: ignore[attr-defined]
-                self.browser_context.res_handler = self.http_handler.handle_response  # type: ignore[attr-defined]
 
         # ---------------- planning state ---------------- #
         self.mode: AgentMode = AgentMode.START_ACTION
@@ -389,14 +375,7 @@ class MinimalAgent:
         self.page_step_number: int = 0
         self.page_max_steps: int = page_max_steps
 
-    def _find_navigational_links(self, nodes_with_links: List[DOMElementNode]) -> List[str]:
-        """
-        Extract navigational links from the DOM 
-        """
-        node_str = "\n".join([str(node) for node in nodes_with_links])
-        links = parse_links_from_str(node_str)
-        return links
-
+    # Removed unused DOM link extraction to align with new BrowserSession API
     async def _build_agent_prompt(self) -> List[dict[str, str]]:
         _, url, content = await self._get_browser_state()
 
@@ -418,73 +397,133 @@ class MinimalAgent:
 
         return messages
 
-    async def _execute_actions(
-        self, ctx: BrowserContext, actions: List[Any]
-    ) -> List[ActionResult]:
-        """
-        Minimal action runner. If your Controller differs, adapt here.
-        """
+    async def _execute_actions(self, actions: List[Any]) -> List[ActionResult]:
         results: List[ActionResult] = []
-        for action in actions:
-            # Use Controller.act per upstream API
+        baseline = await self.browser_session.get_browser_state_summary(
+            cache_clickable_elements_hashes=True,
+            include_screenshot=False,
+            cached=False,
+            include_recent_events=False,
+        )
+        cached_selector_map = baseline.dom_state.selector_map
+        cached_hashes = {e.parent_branch_hash() for e in cached_selector_map.values()}
+
+        for i, action in enumerate(actions):
+            # 2) Between-actions: let UI settle and re-sync DOM
+            agent_log.info(f"Executing action {i}/{len(actions)}: {action.model_dump_json()}")
+            if i > 0:
+                await asyncio.sleep(self.browser_session.browser_profile.wait_between_actions)
+                state = await self.browser_session.get_browser_state_summary(
+                    cache_clickable_elements_hashes=False,
+                    include_screenshot=False,
+                    cached=False,
+                    include_recent_events=False,
+                )
+                new_map = state.dom_state.selector_map
+
+                idx = getattr(action, "get_index", lambda: None)()
+                if idx is not None:
+                    orig = cached_selector_map.get(idx)
+                    new = new_map.get(idx)
+                    orig_hash = orig.parent_branch_hash() if orig else None
+                    new_hash = new.parent_branch_hash() if new else None
+
+                    # If the target moved or vanished, stop to replan next step
+                    if orig_hash != new_hash:
+                        msg = f"Element index changed after action {i}/{len(actions)}, stopping to replan."
+                        results.append(ActionResult(extracted_content=msg, include_in_memory=True, long_term_memory=msg))
+                        agent_log.info(msg)
+                        break
+
+                    # Also bail if new elements appeared (DOM shape changed)
+                    new_hashes = {e.parent_branch_hash() for e in new_map.values()}
+                    if not new_hashes.issubset(cached_hashes):
+                        msg = f"New elements appeared after action {i}/{len(actions)}; stopping remaining actions."
+                        results.append(ActionResult(extracted_content=msg, include_in_memory=True, long_term_memory=msg))
+                        agent_log.info(msg)
+                        break
+
             res = await self.controller.act(
-                action,
-                ctx,
+                action=action,
+                browser_session=self.browser_session,
                 page_extraction_llm=None,
                 sensitive_data=None,
                 available_file_paths=None,
+                file_system=None,  # pass a real FileSystem if you use done() attachments
                 context=None,
             )
             results.append(res)
+
+            if res.is_done or res.error:
+                break
+
         return results
 
     def _check_done(self, results: List[ActionResult]) -> bool:
-        # Check if any action was successful
-        for result in results:
-            if result.success:
-                return True
-        return False
+        return any(getattr(result, "is_done", False) or getattr(result, "success", False) for result in results)
 
-    async def _get_browser_state(self) -> Tuple[BrowserState, str, str]:
+    async def _get_browser_state(self) -> Tuple[BrowserStateSummary, str, str]:
         """
-        1) Get browser state (the only state we truly need each turn).
+        1) Get browser state summary (the only state we truly need each turn).
         """
-        browser_state = await self.browser_context.get_state()
-        # this method calls into the pw browser
-        page = await self.browser_context.get_current_page()
-        url = page.url
-
-        # Keep it simple: the LLM sees only a compact string of clickable elements
-        content = browser_state.element_tree.clickable_elements_to_string(include_attributes=INCLUDE_ATTRIBUTES)
-        # links = self._find_links(browser_state.element_tree.linkable_elements())
+        browser_state: BrowserStateSummary = await self.browser_session.get_browser_state_summary(
+            include_screenshot=False,
+            cached=False,
+            include_recent_events=False,
+        )
+        url = browser_state.url
+        content = browser_state.dom_state.llm_representation(include_attributes=INCLUDE_ATTRIBUTES)
         return browser_state, url, content
 
     async def _llm_next_actions(
         self, input_messages: List[dict[str, str]]
-    ) -> CustomAgentOutput:
-        @retry(
-            reraise=True,
-            stop=stop_after_attempt(3),
-            wait=wait_exponential(multiplier=0.5, min=0.5, max=2.0),
-            retry=retry_if_exception_type(ValidationError),
+    ) -> AgentOutput:
+        error_outputs: list[dict[str, Any]] = []
+        max_attempts = 3
+
+        for attempt in range(1, max_attempts + 1):
+            content: Optional[str] = None
+            payload: Optional[dict[str, Any]] = None
+
+            try:
+                # If your .invoke(...) is async, replace with: ai_msg = await ...
+                ai_msg: BaseMessage = self.llm.get("browser_use").invoke(input_messages)
+                content = ai_msg.content
+                if not isinstance(content, str):
+                    raise ValueError(f"Expected content to be a string, got {type(content)}")
+
+                payload = json.loads(extract_json(content))
+
+                # This is the line you care about: track per-payload failures here.
+                agent_output = self.AgentOutput(**payload)  # type: ignore[call-arg]
+                agent_log.info("AGENT OUTPUT: %s", content)
+                return agent_output
+
+            except (ValidationError, TypeError) as e:
+                # Pydantic or typing errors when building AgentOutput(**payload)
+                error_entry = {
+                    "attempt": attempt,
+                    "stage": "model_parse",
+                    "exception": type(e).__name__,
+                    "message": str(e),
+                    "payload": payload,          # keep the exact payload that failed
+                    "raw_content": content,
+                }
+                error_outputs.append(error_entry)
+                agent_log.error("Attempt %s model_parse failed: %s", attempt, e)
+
+            # Backoff between attempts, then loop
+            if attempt < max_attempts:
+                await asyncio.sleep(min(2.0, 0.5 * (2 ** (attempt - 1))))
+
+        # Exhausted all attempts
+        agent_log.error("Aggregate LLM parse failures: %s", error_outputs)
+        raise LLMNextActionsError(
+            "Failed to produce a valid AgentOutput after retries.",
+            error_outputs,
         )
-        def _invoke_and_parse() -> CustomAgentOutput:
-            ai_msg: BaseMessage = self.llm.get("browser_use").invoke(input_messages)
-            content = ai_msg.content
-            if not isinstance(content, str):
-                raise ValueError(f"Expected content to be a string, got {type(content)}")
-
-            payload = json.loads(extract_json(content))
-            return self.AgentOutput(**payload)  # type: ignore[return-value]
-
-        parsed: CustomAgentOutput = _invoke_and_parse()
-        return parsed
-
-    def _update_state(self, model_output: CustomAgentOutput, results: List[ActionResult], *, new_url: str, new_page_contents: str) -> None:
-        agent_actions = [AgentAction(action=a) for a in model_output.action]
-        agent_results = [AgentResult(result=result) for result in results]
-
-        self.agent_context.update(agent_actions, agent_results, model_output.current_state)
+    def _update_state(self, model_output: AgentOutput, results: List[ActionResult], *, new_url: str, new_page_contents: str) -> None:
+        self.agent_context.update(model_output.action, results, model_output.current_state)
         self.agent_state.step += 1
         self.agent_state.is_done = self._check_done(results)
 
@@ -494,16 +533,14 @@ class MinimalAgent:
         self.prev_url = new_url
         self.prev_page_contents = new_page_contents
 
-    def _log_state(self, model_output: CustomAgentOutput, agent_msgs: List[dict[str, str]]) -> None:
+    def _log_state(self, model_output: AgentOutput, agent_msgs: List[dict[str, str]]) -> None:
         # log the agent prompt with DOM, prev acitons and results
-        agent_log.info(agent_msgs[-1]["content"])
+        agent_log.info("Post Action DOM: \n" + agent_msgs[-1]["content"])
 
-        success = "[Success]" if "Success" in model_output.current_state.evaluation_previous_goal else "[Failed]"
-        agent_log.info(f"Eval {success}: {model_output.current_state.evaluation_previous_goal}")
+        success_prefix = "[Success]" if (model_output.current_state.evaluation_previous_goal or "").lower().find("success") != -1 else "[Failed]"
+        agent_log.info(f"Eval {success_prefix}: {model_output.current_state.evaluation_previous_goal}")
         agent_log.info(f"Next Goal: {model_output.current_state.next_goal}")
         agent_log.info(f"Step {self.agent_state.step} completed")
-        if self._plan is not None:
-            agent_log.info(f"Current plan:\n{self._plan}")
         if self.pages:
             agent_log.info(f"Pages: {self.pages}")
 
@@ -521,12 +558,12 @@ class MinimalAgent:
     def _get_task(self) -> str:
         return self.task
 
-    async def _nav_think(self, model_output: CustomAgentOutput, *, step_number: int) -> Event:
+    async def _nav_think(self, model_output: AgentOutput, *, step_number: int) -> Event:
         eval_str = model_output.current_state.evaluation_previous_goal.lower()
         failed = ("failed" in eval_str) or ("unknown" in eval_str and step_number > 2)
         return Event.NAV_FAILED if failed else Event.NAV_SUCCESS
 
-    async def _task_think(self, page_contents: str, url: str, *, step_number: int, model_output: CustomAgentOutput) -> Tuple[Optional[Event], Optional[str], Optional[PlanNode], Optional[NavPage]]:
+    async def _task_think(self, page_contents: str, url: str, *, step_number: int, model_output: AgentOutput) -> Tuple[Optional[Event], Optional[str], Optional[PlanNode], Optional[NavPage]]:
         curr_plan = self._get_plan()
         if curr_plan is None:
             raise EarlyShutdown("No plan found, should not happen")
@@ -614,6 +651,16 @@ class MinimalAgent:
 
         self.mode = next_mode
 
+    def _handle_error(self, e: Exception):
+        if isinstance(e, LLMNextActionsError):
+            agent_log.info(f"LLMNextActionsError: {e.errors}")
+            return
+        else:
+            import traceback
+            agent_log.info(f"Error in step, skipping to next step")
+            agent_log.info(f"Stack trace: {traceback.format_exc()}")
+            return
+
     async def step(self):
         """
         One iteration:
@@ -626,14 +673,11 @@ class MinimalAgent:
             # Build prompt for this turn
             agent_msgs = await self._build_agent_prompt()
             model_output = await self._llm_next_actions(agent_msgs)
-            results = await self._execute_actions(self.browser_context, model_output.action)
+            results = await self._execute_actions(model_output.action)
         # TODO: should have better error handling 
         # but works for now, because we can return and go next step without agent updating
         except Exception as e:
-            import traceback
-            agent_log.info(f"Error in step, skipping to next step")
-            agent_log.info(f"Stack trace: {traceback.format_exc()}")
-            return
+            self._handle_error(e)
 
         # fetch new browser state for planning decisions
         _, new_url, new_page_contents = await self._get_browser_state()
@@ -701,5 +745,8 @@ class MinimalAgent:
                 agent_log.info(f"Agent completed successfully @ {self.agent_state.step}/{self.agent_state.max_steps} steps!")
                 break
         
-        complete, complete_str = self.challenge_client.report_progress()
-        print(complete_str)
+        if self.challenge_client:
+            complete, complete_str = self.challenge_client.report_progress()
+            agent_log.info(f"[Challenge Status]: {complete_str}")
+
+        agent_log.info(f"Cost: {json.dumps(self.llm.get_costs(), indent=2)}")
