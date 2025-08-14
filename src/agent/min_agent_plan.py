@@ -9,6 +9,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_excep
 from browser_use.browser import BrowserSession
 from browser_use.browser.views import BrowserStateSummary
 from browser_use.controller.service import Controller
+from browser_use.controller.views import NoParamsAction
 from browser_use.agent.views import ActionResult, AgentOutput
 from browser_use.controller.registry.views import ActionModel
 
@@ -66,6 +67,8 @@ TRANSITIONS: Dict[Tuple[AgentMode, Event], AgentMode] = {
     (AgentMode.NAVIGATION, Event.NAV_SUCCESS): AgentMode.TASK_EXECUTION,
 }
 
+class GoBackActionModel(ActionModel):
+    go_back: NoParamsAction | None = None
 
 class EarlyShutdown(Exception):
     pass
