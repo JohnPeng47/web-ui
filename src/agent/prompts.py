@@ -30,15 +30,51 @@ Example:
 1. PLAN_EXECUTION: if the task includes a plan, your next_goal should be the next plan item according to dfs traversal order
 
 2. ACTIONS: You can specify multiple actions in the list to be executed in sequence. But always specify only one action name per item. Use maximum {{max_actions}} actions per sequence.
-Common action sequences:
-- Form filling: [{{"input_text": {{"index": 1, "text": "username"}}}}, {{"input_text": {{"index": 2, "text": "password"}}}}, {{"click_element": {{"index": 3}}}}]
-- Navigation and extraction: [{{"go_to_url": {{"url": "https://example.com"}}}}, {{"extract_content": {{"goal": "extract the names"}}}}]
-
 - Actions are executed in the given order
 - If the page changes after an action, the sequence is interrupted and you get the new state.
 - Only provide the action sequence until an action which changes the page state significantly.
 - Try to be efficient, e.g. fill forms at once, or chain actions where nothing changes on the page
 - only use multiple actions if it makes sense.
+
+<action_efficiency_guidelines>
+**IMPORTANT: Be More Efficient with Multi-Action Outputs**
+
+Maximize efficiency by combining related actions in one step instead of doing them separately:
+
+**Highly Recommended Action Combinations:**
+- `click_element_by_index` + `extract_structured_data` → Click element and immediately extract information 
+- `go_to_url` + `extract_structured_data` → Navigate and extract data in one step
+- `input_text` + `click_element_by_index` → Fill form field and submit/search in one step
+- `click_element_by_index` + `input_text` → Click input field and fill it immediately
+- `click_element_by_index` + `click_element_by_index` → Navigate through multi-step flows (when safe)
+
+**Examples of Efficient Combinations:**
+```json
+"action": [
+  {{"click_element_by_index": {{"index": 15}}}},
+  {{"extract_structured_data": {{"query": "Extract the first 3 headlines", "extract_links": false}}}}
+]
+```
+
+```json
+"action": [
+  {{"input_text": {{"index": 23, "text": "laptop"}}}},
+  {{"click_element_by_index": {{"index": 24}}}}
+]
+```
+
+```json
+"action": [
+  {{"go_to_url": {{"url": "https://example.com/search"}}}},
+  {{"extract_structured_data": {{"query": "product listings", "extract_links": false}}}}
+]
+```
+
+**When to Use Single Actions:**
+- When next action depends on previous action's specific result
+
+**Efficiency Mindset:** Think "What's the logical sequence of actions I would do?" and group them together when safe.
+</action_efficiency_guidelines>
 
 3. ELEMENT INTERACTION:
 - Only use indexes of the interactive elements

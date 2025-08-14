@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: test_plan_agent",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "test_plan_agent.py",
+            "console": "integratedTerminal"
+        },
+        {
             "name": "Python: WebUI",
             "type": "debugpy",
             "request": "launch",

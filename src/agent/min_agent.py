@@ -1,6 +1,7 @@
 import json
 import logging
 from typing import Any, Dict, List, Optional, Tuple
+import asyncio
 
 from pydantic import BaseModel, ValidationError
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
@@ -204,25 +205,63 @@ class MinimalAgent:
 
         return [m for m in [sys_msg, history_msg, agent_msg] if m is not None]
 
-    async def _execute_actions(
-        self, actions: List[Any]
-    ) -> List[ActionResult]:
-        """
-        Minimal action runner. If your Controller differs, adapt here.
-        """
+    async def _execute_actions(self, actions: List[Any]) -> List[ActionResult]:
         results: List[ActionResult] = []
-        for action in actions:
-            # Use Controller.act per upstream API
+        baseline = await self.browser_session.get_browser_state_summary(
+            cache_clickable_elements_hashes=True,
+            include_screenshot=False,
+            cached=False,
+            include_recent_events=False,
+        )
+        cached_selector_map = baseline.dom_state.selector_map
+        cached_hashes = {e.parent_branch_hash() for e in cached_selector_map.values()}
+
+        for i, action in enumerate(actions):
+            # 2) Between-actions: let UI settle and re-sync DOM
+            if i > 0:
+                await asyncio.sleep(self.browser_session.browser_profile.wait_between_actions)
+                state = await self.browser_session.get_browser_state_summary(
+                    cache_clickable_elements_hashes=False,
+                    include_screenshot=False,
+                    cached=False,
+                    include_recent_events=False,
+                )
+                new_map = state.dom_state.selector_map
+
+                idx = getattr(action, "get_index", lambda: None)()
+                if idx is not None:
+                    orig = cached_selector_map.get(idx)
+                    new = new_map.get(idx)
+                    orig_hash = orig.parent_branch_hash() if orig else None
+                    new_hash = new.parent_branch_hash() if new else None
+
+                    # If the target moved or vanished, stop to replan next step
+                    if orig_hash != new_hash:
+                        msg = f"Element index changed after action {i}/{len(actions)}, stopping to replan."
+                        results.append(ActionResult(extracted_content=msg, include_in_memory=True, long_term_memory=msg))
+                        break
+
+                    # Also bail if new elements appeared (DOM shape changed)
+                    new_hashes = {e.parent_branch_hash() for e in new_map.values()}
+                    if not new_hashes.issubset(cached_hashes):
+                        msg = f"New elements appeared after action {i}/{len(actions)}; stopping remaining actions."
+                        results.append(ActionResult(extracted_content=msg, include_in_memory=True, long_term_memory=msg))
+                        break
+
             res = await self.controller.act(
                 action=action,
                 browser_session=self.browser_session,
                 page_extraction_llm=None,
                 sensitive_data=None,
                 available_file_paths=None,
-                file_system=None,
+                file_system=None,  # pass a real FileSystem if you use done() attachments
                 context=None,
             )
             results.append(res)
+
+            if res.is_done or res.error:
+                break
+
         return results
 
     def _check_done(self, results: List[ActionResult]) -> bool:

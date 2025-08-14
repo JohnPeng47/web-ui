@@ -78,29 +78,24 @@ class PlanItem(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-PLAN_GUIDELINES = """
-Guidelines for writing the plan:
-- Refer to interactive elements by their visible label, not a numeric index.
-- List higher-leverage interactions earlier
-- No need to look at all repeated elements on a page, just a few should suffice
-"""
-
 class InitialPlan(BaseModel):
     plan_descriptions: List[str]
 
 class CreatePlanNested(LMP):
     prompt = """
-You are tasked with creating a plan for navigating a webpage. 
-The plan should be exhaustive in covering steps for every possible interaction with the current webpage *except* for navigational actions.
+You are tasked with creating a plan for triggering all meaningful DOM interaction on the webpage except for navigational actions. Meaningful actions are actions that change the application functional state, rather than purely cosmetic changes.
+
 Here is the current webpage:
 {{curr_page_contents}}
 
 IMPORTANT: Do not create plans which might trigger a navigational action resulting in the browser going to another page ie. clicking on a button that you think will cause a navigation action to occur 
 
 Guidelines for writing the plan:
+- Focus on describing the overall goal of the plan rather than specific step
+- Focus on interacting with DOM elements *only* and *not* responsive interactions like screen resizing, voice-over screen reader, etc.
 - Refer to interactive elements by their visible label, not a numeric index.
 - List higher-leverage interactions earlier
-- No need to look at all repeated elements on a page, just a few should suffice
+- If there are repeated elements on a page select a representative sample to include rather than all of them
 
 Return JSON that conforms to the Plan schema.
 """
@@ -129,7 +124,7 @@ class AddPlanItemList(BaseModel):
 
 class UpdatePlanNested(LMP):
     prompt = """
-You are performing QA testing on a web application. Your task is to uncover/explore all user flows of the application
+You are tasked with creating a plan for exhaustively triggering every possible DOM interaction on the webpage *except* for navigational actions. Your previous action triggered a re-render, causing some elements to change on the DOM
     
 Here is the current webpage:
 {{curr_page_contents}}
@@ -155,6 +150,7 @@ Here are some guidelines:
 IMPORTANT: Do not create plans which might trigger a navigational action resulting in the browser going to another page ie. clicking on a button that you think will cause a navigation action to occur 
 
 Guidelines for writing the plan:
+- Focus on interacting with DOM elements *only* and *not* responsive interactions like screen resizing, voice-over screen reader, etc.
 - Refer to interactive elements by their visible label, not a numeric index.
 - List higher-leverage interactions earlier
 - No need to look at all repeated elements on a page, just a few should suffice
