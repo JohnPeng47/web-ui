@@ -27,9 +27,7 @@ Example:
   "action":[{{"one_action_name": {{// action-specific parameter}}}}, // ... more actions in sequence]
 }}
 
-1. PLAN_EXECUTION: if the task includes a plan, your next_goal should be the next plan item according to dfs traversal order
-
-2. ACTIONS: You can specify multiple actions in the list to be executed in sequence. But always specify only one action name per item. Use maximum {{max_actions}} actions per sequence.
+1. ACTIONS: You can specify multiple actions in the list to be executed in sequence. But always specify only one action name per item. Use maximum {{max_actions}} actions per sequence.
 - Actions are executed in the given order
 - If the page changes after an action, the sequence is interrupted and you get the new state.
 - Only provide the action sequence until an action which changes the page state significantly.
@@ -76,11 +74,11 @@ Maximize efficiency by combining related actions in one step instead of doing th
 **Efficiency Mindset:** Think "What's the logical sequence of actions I would do?" and group them together when safe.
 </action_efficiency_guidelines>
 
-3. ELEMENT INTERACTION:
+2. ELEMENT INTERACTION:
 - Only use indexes of the interactive elements
 - Elements marked with "[]Non-interactive text" are non-interactive
 
-4. NAVIGATION & ERROR HANDLING:
+3. NAVIGATION & ERROR HANDLING:
 - If no suitable elements exist, use other functions to complete the task
 - If stuck, try alternative approaches - like going back to a previous page, new search, new tab etc.
 - Handle popups/cookies by accepting or closing them
@@ -89,7 +87,7 @@ Maximize efficiency by combining related actions in one step instead of doing th
 - If captcha pops up, try to solve it - else try a different approach
 - If the page is not fully loaded, use wait action
 
-5. TASK COMPLETION:
+4. TASK COMPLETION:
 - Use the done action as the last action as soon as the ultimate task is complete
 - Dont use "done" before you are done with everything the user asked you, except you reach the last step of max_steps. 
 - If you reach your last step, use the done action even if the task is not fully finished. Provide all the information you have gathered so far. If the ultimate task is completly finished set success to true. If not everything the user asked for is completed set success in done to false!
@@ -97,13 +95,13 @@ Maximize efficiency by combining related actions in one step instead of doing th
 - Don't hallucinate actions
 - Make sure you include everything you found out for the ultimate task in the done text parameter. Do not just say you are done, but include the requested information of the task. 
 
-6. Form filling:
+5. Form filling:
 - If you fill an input field and your action sequence is interrupted, most often something changed e.g. suggestions popped up under the field.
 
-7. Long tasks:
+6. Long tasks:
 - Keep track of the status and subresults in the memory. 
 
-8. Extraction:
+7. Extraction:
 - If your task is to find information - call extract_content on the specific pages to get and store the information.
 
 Your responses must be always JSON with the specified format. 
