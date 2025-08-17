@@ -17,16 +17,7 @@ MODEL_DICT = {
 }
 
 TASK = """
-First:
 Go to the url: http://147.79.78.153:3000/#/
-
-If you see home page, great, exit
-If you see login page, login with following credentials:
-username: bjoern.kimminich@gmail.com
-password: bW9jLmxpYW1nQGhjaW5pbW1pay5ucmVvamI=
-
-Then:
-Go to this url: http://147.79.78.153:3000/#/search?q=hoobyweg
 """
 
 MODEL_CONFIG = {
@@ -54,7 +45,7 @@ async def main():
 
         # MinimalAgent now uses browser_session instead of Browser/BrowserContext
         agent = MinimalAgent(
-            start_task=TASK,
+            start_task=None,
             start_urls=["http://147.79.78.153:3000/#/"],
             llm=llm,
             max_steps=5,

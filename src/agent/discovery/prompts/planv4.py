@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import List, Optional, Tuple, Literal
 
 from pydantic import BaseModel, Field
 
@@ -8,6 +8,14 @@ from src.llm_provider import LMP
 from pentest_bot.logger import get_agent_loggers
 
 agent_log, full_log = get_agent_loggers()
+
+TASK_PROMPT_WITH_PLAN = """
+Your task is to execute each action in the following plan
+Execute each plan-item in the order they are defined
+If a plan includes nested plan-items, then execute all of these before moving on
+
+{plan}
+"""
 
 class PlanItem(BaseModel):
     description: str
@@ -54,13 +62,84 @@ class PlanItem(BaseModel):
 
         Example:
             root.add("1.2", "Click OK")   # adds next child of node 1.2
-            root.add("1",   "Settings")   # adds to root’s children
+            root.add("1",   "Settings")   # adds to root's children
         """
         parent = self.get(parent_path)
         if parent is None:
             raise ValueError(f"Parent path does not exist: {parent_path!r}")
 
         return parent._add_child(description=description, completed=completed)
+    
+    def __eq__(self, other) -> bool:
+        """Compare PlanItems based on their description."""
+        if not isinstance(other, PlanItem):
+            return False
+        return self.description == other.description
+    
+    def __hash__(self) -> int:
+        """Make PlanItem hashable based on description."""
+        return hash(self.description)
+    
+    def diff(self, b: "PlanItem") -> List[Tuple["PlanItem", Literal["+", "-"]]]:
+        """
+        Find the deleted/added items from b relative to self.
+        Returns a list of tuples with PlanItems and their change type ('+' for added, '-' for deleted).
+        Only returns top-level changed nodes, not their children.
+        """
+        def _collect_all_items(node: "PlanItem") -> List["PlanItem"]:
+            """Recursively collect all items in the tree."""
+            items = [node]
+            for child in node.children:
+                items.extend(_collect_all_items(child))
+            return items
+        
+        # Get all items from both trees
+        self_items = _collect_all_items(self)
+        b_items = _collect_all_items(b)
+        
+        diff_items: List[Tuple["PlanItem", Literal["+", "-"]]] = []
+        added_items = set()
+        deleted_items = set()
+        
+        # Find items in b but not in self (added items)
+        for b_item in b_items:
+            if b_item not in self_items:
+                added_items.add(b_item)
+        
+        # Find items in self but not in b (deleted items)
+        for self_item in self_items:
+            if self_item not in b_items:
+                deleted_items.add(self_item)
+        
+        # Filter out children of already added/deleted items
+        def is_descendant_of_changed_item(item: "PlanItem", changed_items: set) -> bool:
+            """Check if item is a descendant of any item in changed_items."""
+            for changed_item in changed_items:
+                if item != changed_item:
+                    # Check if item is in the subtree of changed_item
+                    def is_in_subtree(node: "PlanItem", target: "PlanItem") -> bool:
+                        if node == target:
+                            return True
+                        for child in node.children:
+                            if is_in_subtree(child, target):
+                                return True
+                        return False
+                    
+                    if is_in_subtree(changed_item, item):
+                        return True
+            return False
+        
+        # Add top-level added items
+        for item in added_items:
+            if not is_descendant_of_changed_item(item, added_items):
+                diff_items.append((item, "+"))
+        
+        # Add top-level deleted items
+        for item in deleted_items:
+            if not is_descendant_of_changed_item(item, deleted_items):
+                diff_items.append((item, "-"))
+        
+        return diff_items
     
     # -------------------- pretty print ----------------------- #
     def _collect_lines(self, prefix: List[int], out: List[str], level: int = 0) -> None:
@@ -119,24 +198,25 @@ class AddPlanItemList(BaseModel):
             plan.add(item.parent_index, item.description)
         return plan
 
+# TODO: maybe we add the nested goal here to guide the update?
+# TODO: realizing that actually, we probably do need to address deletions
+# TODO: potentially may need to issue backtrack order, say, if an action removes visibility from nodes that implicated in the plan ie. changing the filter
+# TODO: this eventuality need to be tested for
 class UpdatePlanNested(LMP):
     prompt = """
-You are tasked with creating a plan for exhaustively triggering every possible DOM interaction on the webpage *except* for navigational actions. Your previous action triggered a re-render, causing some elements to change on the DOM
-    
-Here is the current webpage:
-{{curr_page_contents}}
+You are tasked with updating a plan originally designed to trigger all meaningful DOM interaction on the webpage, except for navigational actions. Meaningful actions are actions that change the application functional state, rather than purely cosmetic changes. Your previous action triggered a re-render, and your goal now is to identify if the plan needs to be changed  
 
-Here is the previous webpage:
-{{prev_page_contents}}
+You will be given:
+1. A special DOM representation that marks where/what nodes changed during the re-render
+2. The previous plan
+3. The goal that was executed to trigger the re-render
+Your goal is to update the plan (if nessescary) to cover the new changes
+    
+Here is the updated DOM tree:
+{{diff_dom_tree}}
 
 Here is the previous plan:
 {{plan}}
-
-Here is the goal that resulted in a transition to the current page view:
-{{curr_goal}}
-
-Now determine if the plan needs to be updated. This should happen in the following cases:
-- the UI has changed between the previous and current webpage and some new interactive elements have been discovered that are not covered by the current plan
 
 Here are some guidelines:
 - try first determine which sub-level the plan should be added to
@@ -150,7 +230,8 @@ Guidelines for writing the plan:
 - List higher-leverage interactions earlier
 - No need to look at all repeated elements on a page, just a few should suffice
 
-Now return your response as a list of plan items that will get added to the plan. 
+Now determine if the plan needs to be updated
+Return your response as a list of plan items that will get added to the plan. 
 This list should be empty if the plan does not need to be updated
 """
     response_format = AddPlanItemList
