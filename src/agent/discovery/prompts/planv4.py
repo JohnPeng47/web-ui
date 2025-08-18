@@ -92,6 +92,7 @@ class PlanItem(BaseModel):
             for child in node.children:
                 items.extend(_collect_all_items(child))
             return items
+            
         
         # Get all items from both trees
         self_items = _collect_all_items(self)
@@ -240,7 +241,45 @@ This list should be empty if the plan does not need to be updated
         plan: PlanItem = prompt_args["plan"]
         res.apply(plan)
         return plan
+
+class UpdatePlanNestedV2(LMP):
+    prompt = """
+You are tasked with creating a plan for exhaustively triggering every possible DOM interaction on the webpage *except* for navigational actions. Your previous action triggered a re-render, causing some elements to change on the DOM
     
+Here is the current webpage:
+{{curr_page_contents}}
+
+Here is the previous webpage:
+{{prev_page_contents}}
+
+Here is the previous plan:
+{{plan}}
+
+Now determine if the plan needs to be updated. This should happen in the following cases:
+- the UI has changed between the previous and current webpage and some new interactive elements have been discovered that are not covered by the current plan
+
+Here are some guidelines:
+- try first determine which sub-level the plan should be added to
+--> the nested sub-plans represent a dfs order of exploration of the web application
+--> by adding it to the appropriate sub-level, you are supplying the next steps in the dfs traversal order
+- then, if the plans need updating, use the tree indexing notation [a.b.c..] to find the parent_index to add the plans to
+
+Guidelines for writing the plan:
+- Focus on interacting with DOM elements *only* and *not* responsive interactions like screen resizing, voice-over screen reader, etc.
+- Refer to interactive elements by their visible label, not a numeric index.
+- List higher-leverage interactions earlier
+- No need to look at all repeated elements on a page, just a few should suffice
+
+Now return your response as a list of plan items that will get added to the plan. 
+This list should be empty if the plan does not need to be updated
+"""
+    response_format = AddPlanItemList
+
+    def _process_result(self, res: AddPlanItemList, **prompt_args) -> PlanItem:
+        plan: PlanItem = prompt_args["plan"]
+        res.apply(plan)
+        return plan
+
 class CompletedNestedPlanItem(BaseModel):
     plan_indices: List[str]
 

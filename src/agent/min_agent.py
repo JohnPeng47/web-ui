@@ -2,6 +2,7 @@ import json
 from typing import Any, Dict, List, Optional, Tuple
 import asyncio
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 from pydantic import BaseModel, ValidationError
 from langchain_core.messages import BaseMessage
@@ -12,14 +13,12 @@ from browser_use.controller.service import Controller
 from browser_use.agent.views import ActionResult, AgentOutput
 from browser_use.controller.registry.views import ActionModel
 from browser_use.controller.views import NoParamsAction
-from browser_use.dom.views import EnhancedDOMTreeNode
-from browser_use.dom.serializer.serializer import DOMTreeSerializer
+from browser_use.agent.views import AgentBrain
 
-from browser_use.dom.diff import diff_dom_trees
 from src.agent.discovery.prompts.planv4 import (
     PlanItem,
     CreatePlanNested,
-    UpdatePlanNested,
+    UpdatePlanNestedV2 as UpdatePlanNested,
     CheckNestedPlanCompletion,
     CompletedNestedPlanItem,
     TASK_PROMPT_WITH_PLAN,
@@ -100,7 +99,7 @@ class HistoryItem(BaseModel, ABC):
 class AgentStep(HistoryItem):
     actions: List[Any]
     results: List[ActionResult]
-    current_state: Any
+    current_state: Any # For some reason cant use AgentBrain annotation here?
 
     def to_history_item(self) -> dict[str, Any]:
         return {
@@ -123,7 +122,7 @@ class AgentContext:
     def __init__(self, agent_steps: List[HistoryItem]):
         self._ctxt = agent_steps
 
-    def update(self, step: int, curr_actions: List[ActionModel], last_results: List[ActionResult], current_state: Any) -> None:
+    def update(self, step: int, curr_actions: List[ActionModel], last_results: List[ActionResult], current_state: AgentBrain) -> None:
         curr_step = AgentStep(
             step=step, 
             actions=curr_actions, 
@@ -184,6 +183,7 @@ class MinimalAgent:
         max_page_steps: int = 10,
         *,
         http_capture: bool = False,
+        agent_dir: Path,
     ):
         self.task = start_task or NO_OP_TASK
         self.llm = llm
@@ -191,6 +191,7 @@ class MinimalAgent:
         self.controller = controller
         self.agent_context = AgentContext([])
         self.agent_state = AgentState(step=1, max_steps=max_steps, is_done=False)
+        self.agent_dir = agent_dir
 
         # System prompt and schema for actions
         self.sys_prompt = agent_sys_prompt
@@ -209,8 +210,18 @@ class MinimalAgent:
         self.page_step = 0
         self.plan: PlanItem | None = None
         self.curr_url: str = ""
-        self.dom_str: str = ""
-        self.dom_node: EnhancedDOMTreeNode | None = None
+        self.curr_dom_str: str = ""
+
+    def _set_screenshot_service(self) -> None:
+        """Initialize screenshot service using agent directory"""
+        try:
+            from browser_use.screenshots.service import ScreenshotService
+
+            self.screenshot_service = ScreenshotService(self.agent_dir)
+            self._log(f'📸 Screenshot service initialized in: {self.agent_dir}/screenshots')
+        except Exception as e:
+            self._log(f'📸 Failed to initialize screenshot service: {e}.')
+            raise 
 
     async def _build_agent_prompt(self) -> List[Any]:
         # Combine provided system prompt with available actions description
@@ -245,7 +256,7 @@ class MinimalAgent:
             max_steps=self.agent_state.max_steps,
             task=self.task,
             curr_url=self.curr_url,
-            interactive_elements=self.dom_str,
+            interactive_elements=self.curr_dom_str,
         )
         agent_step = self.agent_context.prev_agent_step()
         if agent_step:
@@ -450,36 +461,62 @@ class MinimalAgent:
             error_outputs,
         )
 
-    async def _update_plan(self, old_dom: EnhancedDOMTreeNode, new_dom: EnhancedDOMTreeNode):
+    async def _update_plan(self, new_dom_str: str, plan: PlanItem):
         """
         Updates the plan based on changes to the DOM tree 
         """
-        if not self.plan:
+        task = None
+        if not plan:
             raise ValueError("Plan is not initialized")
         
-        diff_result = diff_dom_trees(old_dom, new_dom)
-        if diff_result.additions or diff_result.modifications or diff_result.replacements:
-            self._log(f"DOM tree changed, checking if plan needs updating")
-            diff_tree, _ = DOMTreeSerializer(new_dom).serialize_accessible_elements(diff_result=diff_result)
-            updated_plan = UpdatePlanNested().invoke(
-                model=self.llm.get("browser_use"),
-                prompt_args={
-                    "diff_dom_tree": diff_tree.llm_representation(),
-                    "plan": self.plan
-                },
-                prompt_logger=full_log
-            )
-            diff_items = self.plan.diff(updated_plan)
-            self._log(f"Old plan:\n{self.plan}")
-            self._log(f"New plan:\n{updated_plan}")
+        updated_plan = UpdatePlanNested().invoke(
+            model=self.llm.get("update_plan"),
+            prompt_args={
+                "plan": plan,
+                "curr_page_contents": self.curr_dom_str,
+                "prev_page_contents": new_dom_str,
+            },
+            prompt_logger=full_log,
+        )
+        diff_items = plan.diff(updated_plan)
+        self._log(f"Old plan:\n{plan}")
+        self._log(f"New plan:\n{updated_plan}")
 
-            if diff_items:
-                self._log(f"Updating plan:")
-                for item, change_type in diff_items:
-                    self._log(f"[{change_type}] {item.description}")
+        if diff_items:
+            self._log(f"Updating plan:")
+            for item, change_type in diff_items:
+                self._log(f"[{change_type}] {item.description}")
+            plan = updated_plan
+            task = TASK_PROMPT_WITH_PLAN.format(plan=str(plan))
 
-                self.plan = updated_plan
-                self.task = TASK_PROMPT_WITH_PLAN.format(plan=str(self.plan))
+        return plan, task
+
+    async def _check_plan_complete(self, new_dom_str: str, plan: Optional[PlanItem]):
+        """
+        Checks if the plan is complete by comparing the new DOM tree to the plan
+        """
+        if not plan:
+            raise ValueError("Plan is not initialized")
+        
+        completed = CheckNestedPlanCompletion().invoke(
+            model=self.llm.get("check_plan_completion"),
+            prompt_args={
+                "plan": plan,
+                "prev_page_contents": self.curr_dom_str,
+                "curr_page_contents": new_dom_str,
+                "curr_goal": self.agent_context.prev_agent_step().current_state.next_goal,
+            },
+            prompt_logger=full_log,
+        )
+        for compl in completed.plan_indices:
+            node = plan.get(compl)
+            if node is not None:
+                node.completed = True
+                agent_log.info(f"[COMPLETE_PLAN_ITEM]: {node.description}")
+            else:
+                agent_log.info(f"PLAN_ITEM_NOT_COMPLETED")
+        
+        return plan
 
     async def step(self):
         """
@@ -489,6 +526,7 @@ class MinimalAgent:
           - query LLM
           - execute actions
         """
+        # 1) Create plan if this is the first step we take on the page
         if self.page_step == 0:
             self._log(f"Creating plan for exploring: {self.curr_url}")
 
@@ -496,25 +534,26 @@ class MinimalAgent:
             await self._goto_page(self.curr_url)
 
             browser_state = await self._get_browser_state()
-            self.dom_str = browser_state.dom_state.llm_representation(include_attributes=INCLUDE_ATTRIBUTES)
-            self.curr_dom = browser_state.dom_tree
-
+            self.curr_dom_str = browser_state.dom_state.llm_representation(include_attributes=INCLUDE_ATTRIBUTES)
             new_plan = CreatePlanNested().invoke(
-                model=self.llm.get("browser_use"),
+                model=self.llm.get("create_plan"),
                 prompt_args={
-                    "curr_page_contents": self.curr_dom,
+                    "curr_page_contents": self.curr_dom_str,
                 },
                 prompt_logger=full_log
             )
             self.plan = new_plan
             self.task = TASK_PROMPT_WITH_PLAN.format(plan=str(self.plan))
+
             # await self._write_dom_tree(browser_state)
 
-        # Execute agent action for this turn
+        # 2) Execute agent action for this turn. Everything in this block relies on the 
+        # same agent state as the previous step
         try:
             agent_msgs = await self._build_agent_prompt()
             model_output = await self._llm_next_actions(agent_msgs)
             results = await self._execute_actions(model_output.action)
+            # this action has potential to undo the last agent action
             new_page = await self._curr_page_check()
             if new_page:
                 return
@@ -523,11 +562,19 @@ class MinimalAgent:
             self.agent_state.is_done = True
             return
 
+        # 3) Everything after this relies on new agent state as result of executed action
         # new browser state after executing actions
-        new_browser_state = await self._get_browser_state() 
-        await self._update_plan(self.curr_dom, new_browser_state.dom_tree)
+        new_browser_state = await self._get_browser_state()
+        new_dom = new_browser_state.dom_state.llm_representation(include_attributes=INCLUDE_ATTRIBUTES)
 
-        self._update_state(new_browser_state, model_output, results)
+        await self._update_state(new_browser_state, model_output, results)
+        # TODO: move these into update_state
+        plan_with_complete = await self._check_plan_complete(new_dom, self.plan)
+        updated_plan, updated_task = await self._update_plan(new_dom, plan_with_complete)
+        if updated_plan and updated_task:
+            self.plan = updated_plan
+            self.task = updated_task
+
         self._log_state(model_output, agent_msgs)
         
         # Optional: flush HTTP logs here if you wired http_capture
@@ -549,12 +596,20 @@ class MinimalAgent:
             self._log(f"Error in step, skipping to next step")
             self._log(f"Stack trace: {traceback.format_exc()}")
 
-    def _update_state(self, browser_state: BrowserStateSummary, model_output: AgentOutput, results: List[ActionResult]) -> None:
-        self.dom_str = browser_state.dom_state.llm_representation(include_attributes=INCLUDE_ATTRIBUTES)
-        self.curr_dom = browser_state.dom_tree
+    async def _update_state(self, browser_state: BrowserStateSummary, model_output: AgentOutput, results: List[ActionResult]) -> None:
+        self.curr_dom_str = browser_state.dom_state.llm_representation(include_attributes=INCLUDE_ATTRIBUTES)
 
         self.agent_context.update(self.agent_state.step, model_output.action, results, model_output.current_state)
         self.agent_state.is_done = self._check_done(results)
+
+        if browser_state.screenshot:
+            self._log(
+                f'📸 Storing screenshot for step {self.agent_state.step}, screenshot length: {len(browser_state.screenshot)}'
+            )
+            screenshot_path = await self.screenshot_service.store_screenshot(browser_state.screenshot, self.agent_state.step)
+            self._log(f'📸 Screenshot stored at: {screenshot_path}')
+        else:
+            self._log(f'📸 No screenshot in browser_state_summary for step {self.agent_state.step}')
 
     def _log_state(self, model_output: AgentOutput, agent_msgs: List[Any]) -> None:
         self._log(f"========== Agent State: {self.agent_state.curr_step()}/{self.agent_state.max_steps} ==========")
