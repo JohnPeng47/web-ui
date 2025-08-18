@@ -1,6 +1,7 @@
 import contextvars
 from contextlib import contextmanager
 from typing import Iterator
+import difflib
 
 # The one and only ContextVar you export  –  anything else stays private
 _log_context_id: contextvars.ContextVar[str] = contextvars.ContextVar(
@@ -50,3 +51,13 @@ def extract_state_from_history(history):
             states.append(entry["model_output"]["current_state"])
     
     return states
+
+def diff_dom(a: str, b: str) -> str:
+    diff = difflib.unified_diff(
+        a.splitlines(keepends=True),
+        b.splitlines(keepends=True),
+        fromfile="a.txt",
+        tofile="b.txt",
+        lineterm=""
+    )
+    return "".join(diff)
