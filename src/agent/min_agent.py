@@ -23,6 +23,7 @@ from src.agent.discovery.prompts.planv4 import (
     CompletedNestedPlanItem,
     TASK_PROMPT_WITH_PLAN,
 )
+from src.agent.proxy import ProxyHandler
 from src.llm_models import LLMHub
 from src.agent.utils import url_did_change
 from common.utils import extract_json
@@ -182,7 +183,7 @@ class MinimalAgent:
         max_steps: int = 50,
         max_page_steps: int = 10,
         *,
-        http_capture: bool = False,
+        proxy_handler: ProxyHandler | None = None,
         agent_dir: Path,
     ):
         self.task = start_task or NO_OP_TASK
@@ -192,6 +193,7 @@ class MinimalAgent:
         self.agent_context = AgentContext([])
         self.agent_state = AgentState(step=1, max_steps=max_steps, is_done=False)
         self.agent_dir = agent_dir
+        self.proxy_handler = proxy_handler
 
         # System prompt and schema for actions
         self.sys_prompt = agent_sys_prompt
@@ -199,10 +201,6 @@ class MinimalAgent:
         # Controller has the registry; use it to build the ActionModel
         self.ActionModel = self.controller.registry.create_action_model(page_url=None)
         self.AgentOutput = AgentOutput.type_with_custom_actions(self.ActionModel)
-
-        # HTTP capture hooks removed in new architecture; keep placeholders
-        self.http_handler = None
-        self.http_history = None
 
         # TODO: possibly move to agent_context
         # browser state tracking
@@ -461,47 +459,45 @@ class MinimalAgent:
             error_outputs,
         )
 
-    async def _update_plan(self, new_dom_str: str, plan: PlanItem):
+    async def _update_plan(self, new_dom_str: str):
         """
         Updates the plan based on changes to the DOM tree 
         """
-        task = None
-        if not plan:
+        if not self.plan:
             raise ValueError("Plan is not initialized")
         
         updated_plan = UpdatePlanNested().invoke(
             model=self.llm.get("update_plan"),
             prompt_args={
-                "plan": plan,
+                "plan": self.plan,
                 "curr_page_contents": self.curr_dom_str,
                 "prev_page_contents": new_dom_str,
             },
             prompt_logger=full_log,
         )
-        diff_items = plan.diff(updated_plan)
-        self._log(f"Old plan:\n{plan}")
-        self._log(f"New plan:\n{updated_plan}")
+        self._update_plan_and_task(updated_plan)
+        
+        # diff_items = self.plan.diff(updated_plan)
+        # self._log(f"Old plan:\n{self.plan}")
+        # self._log(f"New plan:\n{updated_plan}")
 
-        if diff_items:
-            self._log(f"Updating plan:")
-            for item, change_type in diff_items:
-                self._log(f"[{change_type}] {item.description}")
-            plan = updated_plan
-            task = TASK_PROMPT_WITH_PLAN.format(plan=str(plan))
+        # if diff_items:
+        #     self._log(f"Updating plan:")
+        #     for item, change_type in diff_items:
+        #         self._log(f"[{change_type}] {item.description}")
 
-        return plan, task
 
-    async def _check_plan_complete(self, new_dom_str: str, plan: Optional[PlanItem]):
+    async def _check_plan_complete(self, new_dom_str: str):
         """
         Checks if the plan is complete by comparing the new DOM tree to the plan
         """
-        if not plan:
+        if not self.plan:
             raise ValueError("Plan is not initialized")
         
         completed = CheckNestedPlanCompletion().invoke(
             model=self.llm.get("check_plan_completion"),
             prompt_args={
-                "plan": plan,
+                "plan": self.plan,
                 "prev_page_contents": self.curr_dom_str,
                 "curr_page_contents": new_dom_str,
                 "curr_goal": self.agent_context.prev_agent_step().current_state.next_goal,
@@ -509,14 +505,18 @@ class MinimalAgent:
             prompt_logger=full_log,
         )
         for compl in completed.plan_indices:
-            node = plan.get(compl)
+            node = self.plan.get(compl)
             if node is not None:
                 node.completed = True
                 agent_log.info(f"[COMPLETE_PLAN_ITEM]: {node.description}")
             else:
                 agent_log.info(f"PLAN_ITEM_NOT_COMPLETED")
         
-        return plan
+        self._update_plan_and_task(self.plan)
+
+    def _update_plan_and_task(self, plan: PlanItem):
+        self.plan = plan
+        self.task = TASK_PROMPT_WITH_PLAN.format(plan=str(self.plan))
 
     async def step(self):
         """
@@ -569,19 +569,15 @@ class MinimalAgent:
 
         await self._update_state(new_browser_state, model_output, results)
         # TODO: move these into update_state
-        plan_with_complete = await self._check_plan_complete(new_dom, self.plan)
-        updated_plan, updated_task = await self._update_plan(new_dom, plan_with_complete)
-        if updated_plan and updated_task:
-            self.plan = updated_plan
-            self.task = updated_task
+        await self._check_plan_complete(new_dom)
+        await self._update_plan(new_dom)
 
         self._log_state(model_output, agent_msgs)
         
-        # Optional: flush HTTP logs here if you wired http_capture
-        # if self.http_handler and self.http_history:
-        #     http_msgs = await self.http_handler.flush()
-        #     filtered = self.http_history.filter_http_messages(http_msgs)
-        #     _ = filtered  # do whatever you want with them
+        if self.proxy_handler:
+            msgs = await self.proxy_handler.flush()
+            for msg in msgs:
+                agent_log.info(f"[{msg.method}] {msg.url}\n{msg.body}")
 
     # State update and logging 
     def _log(self, msg: str):
