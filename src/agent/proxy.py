@@ -1,6 +1,7 @@
 import threading
 import time
 import logging
+import asyncio
 from typing import Optional, Dict, Any
 
 try:
@@ -14,7 +15,7 @@ except ImportError as e:
     ) from e
 
 from pentest_bot.logger import get_agent_loggers
-from http_history import HTTPHandler
+from src.agent.http_history import HTTPHandler
 from httplib import (
     HTTPMessage, 
     HTTPRequest, 
@@ -118,22 +119,12 @@ class ProxyHandler:
     def proxy_url(self) -> str:
         return f"http://{self._listen_host}:{self._listen_port}"
 
-    async def flush(
-        self,
-        *,
-        per_request_timeout: float,
-        settle_timeout: float,
-        flush_timeout: float,
-    ):
+    async def flush(self):
         """
         Delegate to your HTTPHandler.flush(). Use this after browser/app requests
         should have finished to collect the captured step messages.
         """
-        return await self._handler.flush(
-            per_request_timeout=per_request_timeout,
-            settle_timeout=settle_timeout,
-            flush_timeout=flush_timeout,
-        )
+        return await self._handler.flush()
 
     def get_history(self):
         """
@@ -147,7 +138,8 @@ class ProxyHandler:
     def _run_master(self) -> None:
         assert self._master is not None
         try:
-            self._master.run()  # blocking
+            # mitmproxy's DumpMaster.run() is async; run it in this thread's event loop
+            asyncio.run(self._master.run())
         except Exception as e:
             agent_log.exception("mitmproxy master crashed: %s", e)
         finally:
@@ -245,24 +237,29 @@ class ProxyHandler:
             is_iframe=False,
         )
         request = HTTPRequest(data=data)
-        agent_log.info(f"Request: {request}")
-        
+        # agent_log.info(f"Request: [{request.method}] {request.url}\n{request.data}")
         return request
 
     def _flow_to_http_response(self, flow: "http.HTTPFlow") -> HTTPResponse:
         """
         Map mitmproxy flow.response to your HTTPResponse.
         """
-        headers: Dict[str, str] = {k.lower(): v for k, v in flow.response.headers.items()}
-        body_bytes: Optional[bytes] = None
-        try:
-            body_bytes = flow.response.raw_content if flow.response.raw_content is not None else None
-        except Exception:
+        if not flow.response:
+            headers: Dict[str, str] = {}
+            body_bytes: Optional[bytes] = None
+            status_code: int = 0
+        else:
+            headers = {k.lower(): v for k, v in flow.response.headers.items()}
             body_bytes = None
+            try:
+                body_bytes = flow.response.raw_content if flow.response.raw_content is not None else None
+            except Exception:
+                body_bytes = None
+            status_code = getattr(flow.response, "status_code", 0)
 
         data = HTTPResponseData(
             url=flow.request.url,
-            status=flow.response.status_code,
+            status=status_code,
             headers=headers,
             is_iframe=False,
             body=body_bytes,

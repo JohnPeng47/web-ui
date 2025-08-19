@@ -195,7 +195,7 @@ class AddPlanItemList(BaseModel):
 
     def apply(self, plan: PlanItem):
         for item in self.plan_items:
-            agent_log.info(f"Adding to parent index: {item.parent_index}")
+            agent_log.info(f"Adding plan item: {item.description} to [{item.parent_index}]")
             plan.add(item.parent_index, item.description)
         return plan
 
