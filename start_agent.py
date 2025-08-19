@@ -52,7 +52,6 @@ async def main():
         headless=False,
         args=[f"--remote-debugging-port={PORT}"],
     )
-    context = await browser.new_context()
 
     browser_session = BrowserSession(
         browser_profile=BrowserProfile(
