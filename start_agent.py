@@ -1,17 +1,20 @@
 import asyncio
 from pathlib import Path
+import httpx
 
 from playwright.async_api import async_playwright
 from browser_use.browser import BrowserSession, BrowserProfile
 from browser_use.controller.service import Controller
 
+from eval.client import PagedDiscoveryEvalClient
 from src.llm_models import LLMHub
 from src.agent.min_agent import MinimalAgent
 from src.agent.prompts import CUSTOM_SYSTEM_PROMPT
 from src.agent.http_history import HTTPHandler
 from src.agent.proxy import ProxyHandler
+from eval.discovery.juiceshop import JUICE_SHOP_ALL
 
-from pentest_bot.logger import LOG_DIR, setup_agent_logger, get_agent_loggers
+from pentest_bot.logger import setup_agent_logger, get_agent_loggers
 
 MODEL_DICT = {
     "browser_use": "gemini-2.5-flash",
@@ -32,15 +35,33 @@ PORT = 9899
 PROXY_HOST = "127.0.0.1"
 PROXY_PORT = 8081
 
+# 6 urls
+TEST_URLS = [
+    # "http://147.79.78.153:3000/#/",
+    "http://147.79.78.153:3000/#/login",
+    # "http://147.79.78.153:3000/#/contact",
+    # "http://147.79.78.153:3000/#/about",
+    # "http://147.79.78.153:3000/#/photo-wall",
+    # "http://147.79.78.153:3000/#/search",
+]
+TEST_PATHS = [
+    "/login",
+    "/contact",
+    "/about",
+    "/photo-wall",
+    "/search"
+]
+JUICE_SHOP_SUBSET = {p: JUICE_SHOP_ALL[p] for p in TEST_PATHS}
+
 def setup_agent_dir(agent_name: str):
     agent_dir = Path(f".{agent_name}")
     agent_dir.mkdir(exist_ok=True)
-    
+
     log_dir = agent_dir / "logs"
     log_dir.mkdir(exist_ok=True)
-    
     return agent_dir, log_dir
-    
+
+# 1) Start proxy handler (mitmproxy)    
 async def main():
     """Initialize MinimalAgent using the new BrowserSession-based API."""
     agent_dir, log_dir = setup_agent_dir("min_agent")
@@ -48,9 +69,14 @@ async def main():
 
     agent_log, _ = get_agent_loggers()
     agent_log.info("Starting agent")
-
-    # 1) Start proxy handler (mitmproxy)
-    http_handler = HTTPHandler()
+    
+    # TODO: adding scopes is currently not working
+    http_handler = HTTPHandler(
+        scopes=[
+            "http://147.79.78.153:3000/rest/",
+            "http://147.79.78.153:3000/api/",
+        ]
+    )
     proxy_handler = ProxyHandler(
         handler=http_handler,
         listen_host=PROXY_HOST,
@@ -69,7 +95,6 @@ async def main():
         args=[f"--remote-debugging-port={PORT}", "--remote-debugging-address=127.0.0.1"],
         proxy={"server": f"http://{PROXY_HOST}:{PROXY_PORT}"},
     )
-
     browser_session = BrowserSession(
         browser_profile=BrowserProfile(
             keep_alive=True,
@@ -81,15 +106,20 @@ async def main():
     
     try:
         # LLM and Controller
+        client = PagedDiscoveryEvalClient(
+            challenges=JUICE_SHOP_SUBSET,
+            async_client=httpx.AsyncClient(),
+        )
         llm = LLMHub(MODEL_CONFIG)
         controller = Controller(exclude_actions=["extract_structured_data"])
 
         # MinimalAgent now uses browser_session instead of Browser/BrowserContext
         agent = MinimalAgent(
             start_task="",
-            start_urls=["http://147.79.78.153:3000/#/"],
+            start_urls=TEST_URLS,
             llm=llm,
-            max_steps=5,
+            max_steps=10,
+            max_page_steps=10,
             agent_sys_prompt=CUSTOM_SYSTEM_PROMPT,
             browser_session=browser_session,
             controller=controller,
@@ -97,6 +127,13 @@ async def main():
             agent_dir=agent_dir,
         )
         await agent.run()
+
+        complete, complete_str = client.report_progress()
+        agent_log.info(f"[Challenge Status]: {complete_str}")
+
+        with open("agent_summary.txt", "w") as f:
+            f.write(agent.page_summary())
+
     except Exception as e:
         import traceback
         traceback.print_exc()

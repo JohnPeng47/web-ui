@@ -11,6 +11,7 @@ from typing import (
     Sequence,
     Set,
 )
+from urllib.parse import urlparse
 
 from httplib import HTTPMessage, HTTPRequest, HTTPResponse
 from playwright.sync_api import Request, Response
@@ -63,7 +64,7 @@ def is_uninteresting(url: str) -> bool:
 # --------------------------------------------------------------------------------------
 
 @dataclass
-class HTTPFilter:
+class HTTPFilterConfig:
     include_mime_types: Sequence[str] = field(default_factory=lambda: ["html", "script", "xml", "flash", "other_text"])
     include_status_codes: Sequence[str] = field(default_factory=lambda: ["2xx", "3xx", "4xx", "5xx"])
     max_payload_size: int | None = 4000
@@ -73,7 +74,7 @@ class HTTPFilter:
 # 3.  Main history manager
 # --------------------------------------------------------------------------------------
 
-class HTTPHistory:
+class HTTPFilter:
     """
     Filter a list of HTTPMessage objects (request/response) according to an `HTTPFilter`.
     Only MIME-types explicitly listed in filter.include_mime_types will pass.
@@ -102,22 +103,15 @@ class HTTPHistory:
     # URL substrings that are always ignored (in addition to BAN_LIST)
     URL_FILTERS: Sequence[str] = ("socket.io",)
 
-    def __init__(self, http_filter: HTTPFilter | None = None, *, logger: logging.Logger | None = None) -> None:
-        self.cfg = http_filter or HTTPFilter()
-
-    # ------------------------------------------------------------------ public API
-
-    def filter_http_messages(self, messages: List["HTTPMessage"]) -> List["HTTPMessage"]:
-        """Return the subset of *messages* that pass every configured gate."""
-        allowed: List["HTTPMessage"] = []
-        for msg in messages:
-            if not self._passes_all_filters(msg):
-                continue
-            allowed.append(msg)
-        return allowed
+    def __init__(
+		self, 
+		http_filter_config: HTTPFilterConfig | None = None, 
+		*, 
+		logger: logging.Logger | None = None
+	) -> None:
+        self.cfg = http_filter_config or HTTPFilterConfig()
 
     # ------------------------------------------------------------------ internal helpers
-
     def _passes_all_filters(self, msg: "HTTPMessage") -> bool:
         """Evaluate every gate in order and short-circuit on the first failure."""
         if msg.response is None:
@@ -174,6 +168,8 @@ class HTTPHandler:
 		self,
 		*,
 		banlist: List[str] | None = None,
+		scopes: List[str] | None = None,
+		http_filter: HTTPFilter | None = None,
 	):
 		self._messages: List[HTTPMessage]      = []
 		self._step_messages: List[HTTPMessage] = []
@@ -184,6 +180,29 @@ class HTTPHandler:
 		# A simple substring-based ban list imported from a shared module.
 		self._ban_substrings: List[str] = banlist or BAN_LIST
 		self._ban_list: Set[str]        = set()   # concrete URLs flagged at run-time
+		self._scopes: List[str]         = self._validate_scopes(scopes or [])
+		self._http_filter: HTTPFilter   = HTTPFilter()
+		
+	def _validate_scopes(self, scopes: List[str]) -> List[str]:
+		"""Validate that scopes are well-formed URLs. Scheme is optional."""
+		validated_scopes = []
+		for scope in scopes:
+			# If scope doesn't have scheme, add // to make it parse correctly
+			if "://" not in scope:
+				test_scope = "//" + scope
+			else:
+				test_scope = scope
+				
+			parsed = urlparse(test_scope)
+			
+			# Check that we have at least a netloc (host)
+			if not parsed.netloc:
+				full_log.warning(f"Invalid scope '{scope}' - missing host, skipping")
+				continue
+				
+			validated_scopes.append(scope)
+			
+		return validated_scopes
 
 	# ─────────────────────────────────────────────────────────────────────
 	# Helper
@@ -198,45 +217,39 @@ class HTTPHandler:
 				return True
 		return False
 
-	# ─────────────────────────────────────────────────────────────────────
-	# Browser-callback handlers
-	# ─────────────────────────────────────────────────────────────────────
-	async def handle_request(self, request: Request):
-		try:
-			http_request = HTTPRequest.from_pw(request)
-			url          = http_request.url
+	def _is_in_scope(self, url: str) -> bool:
+		"""Return True if scopes are empty or the URL starts with any configured scope prefix."""
+		if not self._scopes:
+			return True
+				
+		parsed_url = urlparse(url)
 
-			if self._is_banned(url):
-				full_log.debug(f"Dropped banned URL: {url}")
-				return
+		for scope in self._scopes:
+			# If scope doesn't have scheme, add // to make it parse correctly
+			if '://' not in scope:
+				scope = '//' + scope
+				
+			parsed_scope = urlparse(scope)
+			
+			# Check host match
+			if parsed_url.netloc != parsed_scope.netloc:
+				continue
+				
+			# Check path is a subpath
+			if parsed_url.path.startswith(parsed_scope.path):
+				return True
+				
+		return False
 
-			self._request_queue.append(http_request)
-			self._req_start[http_request] = asyncio.get_running_loop().time()
-		except Exception as e:
-			full_log.exception("Error handling request: %s", e)
-
-	async def handle_response(self, response: Response):
-		try:
-			if not response:
-				return
-
-			req_match      = HTTPRequest.from_pw(response.request)
-			http_response  = HTTPResponse.from_pw(response)
-
-			matching_request = next(
-				(req for req in self._request_queue
-				 if req.url == response.request.url and req.method == response.request.method),
-				None
-			)
-			if matching_request:
-				self._request_queue.remove(matching_request)
-				self._req_start.pop(matching_request, None)
-
-			self._step_messages.append(
-				HTTPMessage(request=req_match, response=http_response)
-			)
-		except Exception as e:
-			full_log.exception("Error handling response: %s", e)
+	def _validate_msg(self, msg: HTTPMessage) -> bool:
+		"""Validate that the URL is well-formed."""
+		if (
+			# self._is_in_scope(msg.request.url) and 
+			not self._is_banned(msg.request.url) and 
+			self._http_filter._passes_all_filters(msg)
+		):
+			return True
+		return False
 
 	# ─────────────────────────────────────────────────────────────────────
 	# Flush logic with hard timeout
@@ -310,8 +323,10 @@ class HTTPHandler:
 		self._messages.extend(session_msgs)
 
 		full_log.info("Returning %d messages from flush", len(session_msgs))
+		# return [
+		# 	msg for msg in session_msgs if self._validate_msg(msg)
+		# ]
 		return session_msgs
-
 
 	def get_history(self) -> List[HTTPMessage]:
 		return self._messages

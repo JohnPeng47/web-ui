@@ -20,18 +20,20 @@ from src.agent.discovery.prompts.planv4 import (
     CreatePlanNested,
     UpdatePlanNestedV2 as UpdatePlanNested,
     CheckNestedPlanCompletion,
-    CompletedNestedPlanItem,
     TASK_PROMPT_WITH_PLAN,
 )
+from src.agent.links import parse_links_from_str
 from src.agent.proxy import ProxyHandler
 from src.llm_models import LLMHub
 from src.agent.utils import url_did_change
+from src.agent.pages import Page
+from eval.client import PagedDiscoveryEvalClient
+
 from common.utils import extract_json
 from pentest_bot.logger import get_agent_loggers
 
 # Basic logger compatible with this repo
 agent_log, full_log = get_agent_loggers()
-
 
 # HTTP capture hooks from old architecture are not used with the new BrowserSession
 NO_OP_TASK = "Do nothing unless necessary. If a popup appears, dismiss it. Then emit done."
@@ -39,6 +41,7 @@ NO_OP_TASK = "Do nothing unless necessary. If a popup appears, dismiss it. Then 
 INCLUDE_ATTRIBUTES: List[str] = (
     ["title", "type", "name", "role", "aria-label", "placeholder", "value", "alt"]
 )
+EMPTY_MSG = {"role": "user", "content": ""}
 
 class GoToUrlAction(BaseModel):
     url: str
@@ -56,6 +59,8 @@ class LLMNextActionsError(Exception):
         self.errors = errors
 
 # TODO List:
+# - refactor: clean up browser-use operations and move them out of this implementation
+
 # - terminate on success
 # - add results from previous steps
 # - find way to get the current url
@@ -183,6 +188,7 @@ class MinimalAgent:
         max_steps: int = 50,
         max_page_steps: int = 10,
         *,
+        challenge_client: Optional[PagedDiscoveryEvalClient] = None,
         proxy_handler: ProxyHandler | None = None,
         agent_dir: Path,
     ):
@@ -194,6 +200,7 @@ class MinimalAgent:
         self.agent_state = AgentState(step=1, max_steps=max_steps, is_done=False)
         self.agent_dir = agent_dir
         self.proxy_handler = proxy_handler
+        self.challenge_client = challenge_client
 
         # System prompt and schema for actions
         self.sys_prompt = agent_sys_prompt
@@ -205,10 +212,15 @@ class MinimalAgent:
         # TODO: possibly move to agent_context
         # browser state tracking
         self.urls = start_urls
+        self.max_page_steps = max_page_steps
+        self.page_skip = False
+        self.pages: List[Page] = []
         self.page_step = 0
         self.plan: PlanItem | None = None
         self.curr_url: str = ""
         self.curr_dom_str: str = ""
+
+        self._set_screenshot_service()
 
     def _set_screenshot_service(self) -> None:
         """Initialize screenshot service using agent directory"""
@@ -241,7 +253,7 @@ class MinimalAgent:
                 "content": "Here are the previous steps taken by the agent:\n" + json.dumps(agent_history),
             }
             if agent_history
-            else None
+            else EMPTY_MSG
         )
 
         agent_prompt = (
@@ -274,9 +286,8 @@ class MinimalAgent:
             "role": "user",
             "content": agent_prompt,
         }
+        return [sys_msg, history_msg, agent_msg]
 
-        return [m for m in [sys_msg, history_msg, agent_msg] if m is not None]
-    
     async def _curr_page_check(self) -> bool:
         """Checks check if we accidentally went to a new page before officially transitioning and go back if so"""
         # TODO: try to cache calls to this method and track url change with every call
@@ -310,7 +321,86 @@ class MinimalAgent:
             )
             return True
         return False
+
+    # TODO: replace with method that piggybacks off of dom_str
+    async def _get_page_html(self) -> str:
+        # Ensure the session is started and connected
+        cdp_session = await self.browser_session.get_or_create_cdp_session()
+        result = await cdp_session.cdp_client.send.Runtime.evaluate(
+            params={
+                "expression": "document.documentElement.outerHTML",
+                "returnByValue": True,
+            },
+            session_id=cdp_session.session_id,
+        )
+        return result["result"]["value"]
     
+    async def _update_plan(self, new_dom_str: str):
+        """
+        Updates the plan based on changes to the DOM tree 
+        """
+        if not self.plan:
+            raise ValueError("Plan is not initialized")
+        
+        updated_plan = UpdatePlanNested().invoke(
+            model=self.llm.get("update_plan"),
+            prompt_args={
+                "plan": self.plan,
+                "curr_page_contents": self.curr_dom_str,
+                "prev_page_contents": new_dom_str,
+            },
+            prompt_logger=full_log,
+        )
+        # TODO: should only update if we have different plans
+        self._update_plan_and_task(updated_plan)
+
+        # update links
+        dom_html = await self._get_page_html()
+        links = parse_links_from_str(dom_html)
+        for link in links:
+            agent_log.info(f"Discovered additional link: {link}")
+            self.pages[-1].add_link(link)
+
+        # diff_items = self.plan.diff(updated_plan)
+        # self._log(f"Old plan:\n{self.plan}")
+        # self._log(f"New plan:\n{updated_plan}")
+
+        # if diff_items:
+        #     self._log(f"Updating plan:")
+        #     for item, change_type in diff_items:
+        #         self._log(f"[{change_type}] {item.description}")
+
+    async def _check_plan_complete(self, new_dom_str: str):
+        """
+        Checks if the plan is complete by comparing the new DOM tree to the plan
+        """
+        if not self.plan:
+            raise ValueError("Plan is not initialized")
+        
+        completed = CheckNestedPlanCompletion().invoke(
+            model=self.llm.get("check_plan_completion"),
+            prompt_args={
+                "plan": self.plan,
+                "prev_page_contents": self.curr_dom_str,
+                "curr_page_contents": new_dom_str,
+                "curr_goal": self.agent_context.prev_agent_step().current_state.next_goal,
+            },
+            prompt_logger=full_log,
+        )
+        for compl in completed.plan_indices:
+            node = self.plan.get(compl)
+            if node is not None:
+                node.completed = True
+                agent_log.info(f"[COMPLETE_PLAN_ITEM]: {node.description}")
+            else:
+                agent_log.info(f"PLAN_ITEM_NOT_COMPLETED")
+        
+        self._update_plan_and_task(self.plan)
+
+    def _update_plan_and_task(self, plan: PlanItem):
+        self.plan = plan
+        self.task = TASK_PROMPT_WITH_PLAN.format(plan=str(self.plan))
+
     # UGLY
     async def _goto_page(self, url: str):
         res = await self.controller.act(
@@ -404,7 +494,7 @@ class MinimalAgent:
         1) Get browser state summary (the only state we truly need each turn).
         """
         browser_state: BrowserStateSummary = await self.browser_session.get_browser_state_summary(
-            include_screenshot=False,
+            include_screenshot=True,
             cached=False,
             include_recent_events=False,
         )
@@ -459,65 +549,6 @@ class MinimalAgent:
             error_outputs,
         )
 
-    async def _update_plan(self, new_dom_str: str):
-        """
-        Updates the plan based on changes to the DOM tree 
-        """
-        if not self.plan:
-            raise ValueError("Plan is not initialized")
-        
-        updated_plan = UpdatePlanNested().invoke(
-            model=self.llm.get("update_plan"),
-            prompt_args={
-                "plan": self.plan,
-                "curr_page_contents": self.curr_dom_str,
-                "prev_page_contents": new_dom_str,
-            },
-            prompt_logger=full_log,
-        )
-        self._update_plan_and_task(updated_plan)
-        
-        # diff_items = self.plan.diff(updated_plan)
-        # self._log(f"Old plan:\n{self.plan}")
-        # self._log(f"New plan:\n{updated_plan}")
-
-        # if diff_items:
-        #     self._log(f"Updating plan:")
-        #     for item, change_type in diff_items:
-        #         self._log(f"[{change_type}] {item.description}")
-
-
-    async def _check_plan_complete(self, new_dom_str: str):
-        """
-        Checks if the plan is complete by comparing the new DOM tree to the plan
-        """
-        if not self.plan:
-            raise ValueError("Plan is not initialized")
-        
-        completed = CheckNestedPlanCompletion().invoke(
-            model=self.llm.get("check_plan_completion"),
-            prompt_args={
-                "plan": self.plan,
-                "prev_page_contents": self.curr_dom_str,
-                "curr_page_contents": new_dom_str,
-                "curr_goal": self.agent_context.prev_agent_step().current_state.next_goal,
-            },
-            prompt_logger=full_log,
-        )
-        for compl in completed.plan_indices:
-            node = self.plan.get(compl)
-            if node is not None:
-                node.completed = True
-                agent_log.info(f"[COMPLETE_PLAN_ITEM]: {node.description}")
-            else:
-                agent_log.info(f"PLAN_ITEM_NOT_COMPLETED")
-        
-        self._update_plan_and_task(self.plan)
-
-    def _update_plan_and_task(self, plan: PlanItem):
-        self.plan = plan
-        self.task = TASK_PROMPT_WITH_PLAN.format(plan=str(self.plan))
-
     async def step(self):
         """
         One iteration:
@@ -528,9 +559,9 @@ class MinimalAgent:
         """
         # 1) Create plan if this is the first step we take on the page
         if self.page_step == 0:
-            self._log(f"Creating plan for exploring: {self.curr_url}")
+            self._log(f"[PAGE_TRANSITION]: {self.curr_url}")
 
-            self.curr_url = self.urls.pop()
+            self.curr_url = self.urls.pop(0)
             await self._goto_page(self.curr_url)
 
             browser_state = await self._get_browser_state()
@@ -544,7 +575,23 @@ class MinimalAgent:
             )
             self.plan = new_plan
             self.task = TASK_PROMPT_WITH_PLAN.format(plan=str(self.plan))
+            self.pages.append(Page(url=self.curr_url))
 
+            # add initial links
+            # dom_html = await self._get_page_html()
+            # with open("dom2.html", "w") as f:
+            #     f.write(browser_state.dom_tree.to_str())
+
+            links = parse_links_from_str(browser_state.dom_tree.to_str())
+            for link in links:
+                agent_log.info(f"Discovered initial link: {link}")
+                self.pages[-1].add_link(link)
+
+            # needed so that the next eval step doesnt fail
+            self.agent_context.update_event(
+                self.agent_state.step, 
+                f"[NEW_PAGE] Forced browsing to go to {self.curr_url}, you should ignore the result of executing the next action"
+            )
             # await self._write_dom_tree(browser_state)
 
         # 2) Execute agent action for this turn. Everything in this block relies on the 
@@ -553,7 +600,7 @@ class MinimalAgent:
             agent_msgs = await self._build_agent_prompt()
             model_output = await self._llm_next_actions(agent_msgs)
             results = await self._execute_actions(model_output.action)
-            # this action has potential to undo the last agent action
+            # this action can potentially invalidate the last agent action
             new_page = await self._curr_page_check()
             if new_page:
                 return
@@ -574,10 +621,37 @@ class MinimalAgent:
 
         self._log_state(model_output, agent_msgs)
         
+        # update page state
         if self.proxy_handler:
             msgs = await self.proxy_handler.flush()
             for msg in msgs:
+                self.pages[-1].add_http_msg(msg)
                 agent_log.info(f"[{msg.method}] {msg.url}\n{msg.body}")
+
+                if self.challenge_client:
+                    completed = self.challenge_client.update_status(msgs, self.curr_url)
+                    if completed is None:
+                        agent_log.info("No yet on challenge page")
+                    else:
+                        if completed == 1:
+                            agent_log.info("CHALLENGE COMPLETED!!")
+                            # self.agent_state.is_done = True
+                            return
+
+    async def run(self) -> None:
+        while self.agent_state.step < self.agent_state.max_steps:
+            await self.step()
+            if self.agent_state.is_done:
+                self._log(f"Agent completed successfully @ {self.agent_state.curr_step()}/{self.agent_state.max_steps} steps!")
+                break
+
+            self.agent_state.step += 1
+            self.page_step += 1
+            if self.page_step > self.max_page_steps:
+                self.page_step = 0
+
+    def page_summary(self) -> str:
+        return "\n".join([str(page) for page in self.pages])
 
     # State update and logging 
     def _log(self, msg: str):
@@ -624,13 +698,3 @@ class MinimalAgent:
         dom_node = browser_state.dom_tree
         with open(f"dom_tree_{self.agent_state.step}.json", "w") as f:
             f.write(json.dumps(dom_node.__json__()))
-
-    async def run(self) -> None:
-        while self.agent_state.step < self.agent_state.max_steps:
-            await self.step()
-            if self.agent_state.is_done:
-                self._log(f"Agent completed successfully @ {self.agent_state.step}/{self.agent_state.max_steps} steps!")
-                break
-
-            self.agent_state.step += 1
-            self.page_step += 1

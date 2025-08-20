@@ -72,6 +72,7 @@ class PagedDiscoveryEvalClient:
 
         for msg in http_msgs:
             for idx, (challenge, solved) in enumerate(apis):
+                agent_log.info("[Matching]: ", msg.request.url, msg.request.method)
                 if challenge.match(msg.request.url, method=msg.request.method):
                     agent_log.info(f"Discovered {challenge}!")
                     apis[idx] = (challenge, True)
