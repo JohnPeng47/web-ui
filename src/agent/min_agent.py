@@ -179,7 +179,7 @@ class MinimalAgent:
     """
     def __init__(
         self,
-        start_task: str,
+        extra_task: str,
         llm: LLMHub,
         agent_sys_prompt: str,
         browser_session: BrowserSession,
@@ -192,7 +192,9 @@ class MinimalAgent:
         proxy_handler: ProxyHandler | None = None,
         agent_dir: Path,
     ):
-        self.task = start_task or NO_OP_TASK
+        # initiailized in the agent loop
+        # self.task = ""
+        self.extra_task = extra_task
         self.llm = llm
         self.browser_session = browser_session
         self.controller = controller
@@ -400,6 +402,8 @@ class MinimalAgent:
     def _update_plan_and_task(self, plan: PlanItem):
         self.plan = plan
         self.task = TASK_PROMPT_WITH_PLAN.format(plan=str(self.plan))
+        if self.extra_task:
+            self.task += f"\n{self.extra_task}"
 
     # UGLY
     async def _goto_page(self, url: str):
@@ -573,8 +577,7 @@ class MinimalAgent:
                 },
                 prompt_logger=full_log
             )
-            self.plan = new_plan
-            self.task = TASK_PROMPT_WITH_PLAN.format(plan=str(self.plan))
+            self._update_plan_and_task(new_plan)
             self.pages.append(Page(url=self.curr_url))
 
             # add initial links
@@ -626,8 +629,6 @@ class MinimalAgent:
             msgs = await self.proxy_handler.flush()
             for msg in msgs:
                 self.pages[-1].add_http_msg(msg)
-                agent_log.info(f"[{msg.method}] {msg.url}\n{msg.body}")
-
                 if self.challenge_client:
                     completed = self.challenge_client.update_status(msgs, self.curr_url)
                     if completed is None:
