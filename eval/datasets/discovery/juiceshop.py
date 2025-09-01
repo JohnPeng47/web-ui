@@ -1,4 +1,4 @@
-from pentest_bot.discovery.url import Route
+from eval.datasets.base import Route
 
 JUICE_SHOP_HOMEPAGE = {
     "path": "/",

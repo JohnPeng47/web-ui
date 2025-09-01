@@ -446,7 +446,7 @@ class SimpleAgent:
 
                 if self.eval_client:
                     agent_log.info(f"[{self.curr_url}]")
-                    completed = self.eval_client.update_status(msgs, self.curr_url)
+                    completed = await self.eval_client.update_status(msgs, self.curr_url)
                     if completed is None:
                         agent_log.info("No yet on challenge page")
                     else:

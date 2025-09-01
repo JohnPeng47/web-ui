@@ -1,6 +1,6 @@
 import asyncio
 from pathlib import Path
-import httpx
+from urllib.parse import urlparse
 
 from playwright.async_api import async_playwright
 from browser_use.browser import BrowserSession, BrowserProfile
@@ -11,10 +11,19 @@ from src.agent.simp_agent import SimpleAgent
 from src.agent.prompts import CUSTOM_SYSTEM_PROMPT
 from src.agent.http_history import HTTPHandler
 from src.agent.proxy import ProxyHandler
-from eval.datasets.juiceshop import JUICE_SHOP_ALL
 from eval.client import PagedDiscoveryEvalClient
 
+from eval.datasets.discovery.juiceshop import JUICE_SHOP_ALL as JUICE_SHOP_ALL_DISCOVERY
+from eval.datasets.exploit.juiceshop import JUICE_SHOP_VULNERABILITIES as JUICE_SHOP_VULNERABILITIES_EXPLOIT
+
 from pentest_bot.logger import setup_agent_logger, get_agent_loggers
+
+def normalize_urls(urls):
+    norm_urls = []
+    for url in urls:
+        norm_urls.append(urlparse(url).path)
+        norm_urls.append(urlparse(url).fragment)
+    return norm_urls
 
 MODEL_CONFIG = {
     "browser_use": "gpt-4.1",
@@ -28,15 +37,23 @@ PROFILE_DIR = Path(
 PORT = 9899
 PROXY_HOST = "127.0.0.1"
 PROXY_PORT = 8081
+
 TEST_PATHS = [
     "/login",
-
+    "/#/login",
 ]
-JUICE_SHOP_SUBSET = {p: JUICE_SHOP_ALL[p] for p in TEST_PATHS}
+
+JUICE_SHOP_BASE_URL = "http://147.79.78.153:3000"
+JUICE_SHOP_ALL = {**JUICE_SHOP_ALL_DISCOVERY, **JUICE_SHOP_VULNERABILITIES_EXPLOIT}
+JUICE_SHOP_SUBSET = {p: JUICE_SHOP_ALL.get(p, []) for p in TEST_PATHS if p}
 
 # Single task for SimpleAgent
 TASK = """
-Visit the login page at http://147.79.78.153:3000/#/login and attempt to log in with test credentials
+Visit the login page at http://147.79.78.153:3000/#/login and attempt to log in with test credentials:
+
+email: bjoern.kimminich@gmail.com
+password: 'bW9jLmxpYW1nQGhjaW5pbW1pay5ucmVvamI='
+
 Then exit
 """
 
@@ -114,11 +131,17 @@ async def main():
             proxy_handler=proxy_handler,
             eval_client=PagedDiscoveryEvalClient(
                 challenges=JUICE_SHOP_SUBSET,
-                async_client=httpx.AsyncClient(),
+                base_url=JUICE_SHOP_BASE_URL,
             )
         )
         await agent.run()
+        solved = agent.eval_client.get_solved()
 
+        # print(solved)
+        # print("ALL SOLVED: ", solved.get("/#/login"))
+        # print("SOLVED: ", solved.get("/login"))
+        # TMRW TODO: THIS PRINTS []??
+        print("SOLVED: ", [challenge[0] for challenge in solved["/#/login"] if challenge[1] == True])
         agent_log.info("SimpleAgent execution completed")
 
     except Exception as e:
