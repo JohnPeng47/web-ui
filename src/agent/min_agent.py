@@ -14,6 +14,7 @@ from browser_use.agent.views import ActionResult, AgentOutput
 from browser_use.controller.registry.views import ActionModel
 from browser_use.controller.views import NoParamsAction
 from browser_use.agent.views import AgentBrain
+from browser_use.dom.views import EnhancedDOMTreeNode
 
 from src.agent.discovery.prompts.planv4 import (
     PlanItem,
@@ -179,7 +180,6 @@ class MinimalAgent:
     """
     def __init__(
         self,
-        extra_task: str,
         llm: LLMHub,
         agent_sys_prompt: str,
         browser_session: BrowserSession,
@@ -191,10 +191,12 @@ class MinimalAgent:
         challenge_client: Optional[PagedDiscoveryEvalClient] = None,
         proxy_handler: ProxyHandler | None = None,
         agent_dir: Path,
+        init_task: Optional[str] = None,
+        screenshots: bool = False
     ):
         # initiailized in the agent loop
         # self.task = ""
-        self.extra_task = extra_task
+        self.take_screenshot = screenshots
         self.llm = llm
         self.browser_session = browser_session
         self.controller = controller
@@ -204,6 +206,8 @@ class MinimalAgent:
         self.proxy_handler = proxy_handler
         self.challenge_client = challenge_client
 
+        self._init_task = init_task
+
         # System prompt and schema for actions
         self.sys_prompt = agent_sys_prompt
         # Include all actions (unfiltered) in the schema; we will filter in text prompts
@@ -211,18 +215,19 @@ class MinimalAgent:
         self.ActionModel = self.controller.registry.create_action_model(page_url=None)
         self.AgentOutput = AgentOutput.type_with_custom_actions(self.ActionModel)
 
-        # TODO: possibly move to agent_context
-        # browser state tracking
+        # TODO: MOVE INTO AGENT_CONTEXT
         self.urls = start_urls
         self.max_page_steps = max_page_steps
         self.page_skip = False
         self.pages: List[Page] = []
         self.page_step = 0
         self.plan: PlanItem | None = None
+        self.curr_dom_tree: EnhancedDOMTreeNode | None = None
         self.curr_url: str = ""
         self.curr_dom_str: str = ""
 
-        self._set_screenshot_service()
+        if self.take_screenshot:
+            self._set_screenshot_service()
 
     def _set_screenshot_service(self) -> None:
         """Initialize screenshot service using agent directory"""
@@ -355,22 +360,7 @@ class MinimalAgent:
         )
         # TODO: should only update if we have different plans
         self._update_plan_and_task(updated_plan)
-
-        # update links
-        dom_html = await self._get_page_html()
-        links = parse_links_from_str(dom_html)
-        for link in links:
-            agent_log.info(f"Discovered additional link: {link}")
-            self.pages[-1].add_link(link)
-
-        # diff_items = self.plan.diff(updated_plan)
-        # self._log(f"Old plan:\n{self.plan}")
-        # self._log(f"New plan:\n{updated_plan}")
-
-        # if diff_items:
-        #     self._log(f"Updating plan:")
-        #     for item, change_type in diff_items:
-        #         self._log(f"[{change_type}] {item.description}")
+        self._find_links_on_page()
 
     async def _check_plan_complete(self, new_dom_str: str):
         """
@@ -402,8 +392,6 @@ class MinimalAgent:
     def _update_plan_and_task(self, plan: PlanItem):
         self.plan = plan
         self.task = TASK_PROMPT_WITH_PLAN.format(plan=str(self.plan))
-        if self.extra_task:
-            self.task += f"\n{self.extra_task}"
 
     # UGLY
     async def _goto_page(self, url: str):
@@ -489,6 +477,33 @@ class MinimalAgent:
 
         return results
 
+    def _find_links_on_page(self):
+        """Manually scrape links in the DOM string"""
+        if not self.curr_dom_tree:
+            raise ValueError("Current DOM tree is not initialized!")
+
+        links = parse_links_from_str(self.curr_dom_tree.to_str())
+        for link in links:
+            agent_log.info(f"Discovered additional link: {link}")
+            self.pages[-1].add_link(link)
+
+    def _create_new_plan(self):
+        new_plan = CreatePlanNested().invoke(
+            model=self.llm.get("create_plan"),
+            prompt_args={
+                "curr_page_contents": self.curr_dom_str,
+            },
+            prompt_logger=full_log
+        )
+        self._update_plan_and_task(new_plan)
+        self._find_links_on_page()
+
+        # needed so that the next eval step doesnt fail
+        self.agent_context.update_event(
+            self.agent_state.step, 
+            f"[NEW_PAGE] Forced browsing to go to {self.curr_url}, you should ignore the result of executing the next action"
+        )
+
     def _check_done(self, results: List[ActionResult]) -> bool:
         # New API: Done indicated via is_done flag
         return any(getattr(result, "is_done", False) for result in results)
@@ -553,6 +568,7 @@ class MinimalAgent:
             error_outputs,
         )
 
+    # TODO: consider moving out single task execution logic into a subclass 
     async def step(self):
         """
         One iteration:
@@ -567,46 +583,25 @@ class MinimalAgent:
 
             self.curr_url = self.urls.pop(0)
             await self._goto_page(self.curr_url)
+            self.pages.append(Page(url=self.curr_url))
 
             browser_state = await self._get_browser_state()
             self.curr_dom_str = browser_state.dom_state.llm_representation(include_attributes=INCLUDE_ATTRIBUTES)
-            new_plan = CreatePlanNested().invoke(
-                model=self.llm.get("create_plan"),
-                prompt_args={
-                    "curr_page_contents": self.curr_dom_str,
-                },
-                prompt_logger=full_log
-            )
-            self._update_plan_and_task(new_plan)
-            self.pages.append(Page(url=self.curr_url))
+            self.curr_dom_tree = browser_state.dom_tree
 
-            # add initial links
-            # dom_html = await self._get_page_html()
-            # with open("dom2.html", "w") as f:
-            #     f.write(browser_state.dom_tree.to_str())
-
-            links = parse_links_from_str(browser_state.dom_tree.to_str())
-            for link in links:
-                agent_log.info(f"Discovered initial link: {link}")
-                self.pages[-1].add_link(link)
-
-            # needed so that the next eval step doesnt fail
-            self.agent_context.update_event(
-                self.agent_state.step, 
-                f"[NEW_PAGE] Forced browsing to go to {self.curr_url}, you should ignore the result of executing the next action"
-            )
-            # await self._write_dom_tree(browser_state)
-
-        # 2) Execute agent action for this turn. Everything in this block relies on the 
-        # same agent state as the previous step
+            if not self._init_task:
+                self._create_new_plan()
+            else:
+                self.task = self._init_task
         try:
             agent_msgs = await self._build_agent_prompt()
             model_output = await self._llm_next_actions(agent_msgs)
             results = await self._execute_actions(model_output.action)
             # this action can potentially invalidate the last agent action
-            new_page = await self._curr_page_check()
-            if new_page:
-                return
+            if not self._init_task:
+                new_page = await self._curr_page_check()
+                if new_page:
+                    return
         except Exception as e:
             self._handle_error(e)
             self.agent_state.is_done = True
@@ -618,9 +613,11 @@ class MinimalAgent:
         new_dom = new_browser_state.dom_state.llm_representation(include_attributes=INCLUDE_ATTRIBUTES)
 
         await self._update_state(new_browser_state, model_output, results)
-        # TODO: move these into update_state
-        await self._check_plan_complete(new_dom)
-        await self._update_plan(new_dom)
+
+        if not self._init_task:
+            # TODO: move these into update_state
+            await self._check_plan_complete(new_dom)
+            await self._update_plan(new_dom)
 
         self._log_state(model_output, agent_msgs)
         
@@ -629,15 +626,13 @@ class MinimalAgent:
             msgs = await self.proxy_handler.flush()
             for msg in msgs:
                 self.pages[-1].add_http_msg(msg)
-                if self.challenge_client:
-                    completed = self.challenge_client.update_status(msgs, self.curr_url)
-                    if completed is None:
-                        agent_log.info("No yet on challenge page")
-                    else:
-                        if completed == 1:
-                            agent_log.info("CHALLENGE COMPLETED!!")
-                            # self.agent_state.is_done = True
-                            return
+            if self.challenge_client:
+                await self.challenge_client.update_status(
+                    msgs, 
+                    self.curr_url, 
+                    self.agent_state.step, 
+                    self.page_step,
+                )
 
     async def run(self) -> None:
         while self.agent_state.step < self.agent_state.max_steps:
@@ -669,11 +664,11 @@ class MinimalAgent:
 
     async def _update_state(self, browser_state: BrowserStateSummary, model_output: AgentOutput, results: List[ActionResult]) -> None:
         self.curr_dom_str = browser_state.dom_state.llm_representation(include_attributes=INCLUDE_ATTRIBUTES)
-
+        self.curr_dom_tree = browser_state.dom_tree
         self.agent_context.update(self.agent_state.step, model_output.action, results, model_output.current_state)
         self.agent_state.is_done = self._check_done(results)
 
-        if browser_state.screenshot:
+        if browser_state.screenshot and self.take_screenshot:
             self._log(
                 f'📸 Storing screenshot for step {self.agent_state.step}, screenshot length: {len(browser_state.screenshot)}'
             )

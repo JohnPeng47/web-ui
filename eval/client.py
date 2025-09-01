@@ -3,10 +3,11 @@ from typing import Any, Dict, List, Optional, Callable, Tuple
 import httpx
 from abc import ABC, abstractmethod
 from urllib.parse import urlparse
+from pydantic import BaseModel
 
 from httplib import HTTPMessage
 from pentest_bot.logger import get_agent_loggers
-from pentest_bot.discovery.url import Route
+from eval.datasets.base import Challenge
 
 agent_log, _ = get_agent_loggers()
 
@@ -14,7 +15,7 @@ agent_log, _ = get_agent_loggers()
 class AgentEvalClient(ABC):
     def __init__(
         self, 
-        challenges: List[Route],
+        challenges: List[Challenge],
         async_client: httpx.AsyncClient
     ):
         self._shutdown: Optional[Callable] = None
@@ -32,72 +33,107 @@ class AgentEvalClient(ABC):
     def report_progress(self) -> Tuple[Dict, str]:
         pass
 
-class DiscoveryEvalClient(AgentEvalClient):
-    def update_status(self, http_msgs: List[HTTPMessage]) -> None:
-        for msg in http_msgs:
-            for idx, (challenge, solved) in enumerate(self._solved):
-                if challenge.match(msg.request.url, method=msg.request.method):
-                    agent_log.info(f"Discovered {challenge}!")
-                    self._solved[idx] = (challenge, True)
 
-    def report_progress(self) -> Tuple[Dict, str]:
-        progress = {
-            "solved": [challenge for challenge, solved in self._solved if solved],
-            "total": len(self._solved),
-        }
-        solved_count = len(progress["solved"])
-        total_count = progress["total"]
-        progress_str = f'Solved {solved_count} out of {total_count} challenges: {progress["solved"]}'
-        return progress
+class SolvedChallenge(BaseModel):
+    challenge: Challenge
+    is_solved: bool
+    agent_step: int | None = None
+    page_step: int | None = None
+
+    def __repr__(self):
+        return f"{self.challenge.name} - Solved: {self.is_solved} - [{self.agent_step}, {self.page_step}]"
+
+    def __str__(self):
+        return f"{self.challenge.name} - Solved: {self.is_solved} - [{self.agent_step}, {self.page_step}]"
 
 class PagedDiscoveryEvalClient:
     def __init__(
         self, 
-        challenges: Dict,
-        async_client: httpx.AsyncClient
+        challenges: Dict[str, List[Challenge]],
+        base_url: str
     ):
         self._shutdown: Optional[Callable] = None
-        self._solved = {path: [(api, False) for api in apis] for path, apis in challenges.items()}
-        self._async_client = async_client
+        self._solved = {
+            path: [SolvedChallenge(challenge=api, is_solved=False) for api in apis] 
+            for path, apis in challenges.items()
+        }
+        self._async_client = httpx.AsyncClient(base_url=base_url)
         self._last_solved_url = None
 
     def set_shutdown(self, shutdown):
         pass
 
-    def update_status(self, http_msgs: List[HTTPMessage], page_url: str) -> Optional[float]:
-        page_url = urlparse(page_url).fragment
-        apis = self._solved.get(page_url, None)
-        if not apis:
+    async def get_vuln_challenges(self) -> Dict[str, Any]:
+        """
+        GET /api/Challenges from the vulnerable application.
+        The Juice Shop flavour returns `{"status": "success", "data": [...]}`.
+        """
+        resp = await self._async_client.get("/api/Challenges")
+        resp.raise_for_status()
+        return resp.json()
+
+    def match_url_to_challenge(self, url: str) -> Optional[List[Tuple[str, SolvedChallenge]]]:
+        """Returns list of challenges that matches canonicalized URL rep"""
+        reps = [
+            urlparse(url).fragment,
+            urlparse(url).path,
+        ]
+        matched_challenges = [] 
+        for rep in reps:
+            matched_challenges.extend([
+                (rep, solved_challenge) for solved_challenge in self._solved.get(rep, [])
+            ])
+        return matched_challenges
+
+    async def update_status(
+        self, 
+        http_msgs: List[HTTPMessage], 
+        page_url: str,
+        agent_step: int,
+        page_step: int,
+    ) -> Optional[float]:
+        challenges_for_path = self.match_url_to_challenge(page_url)
+        vuln_challenges = await self.get_vuln_challenges()
+
+        agent_log.info(f"Looking for challenge {page_url}, keys: [{self._solved.keys()}]")
+        if not challenges_for_path:
             return None
 
         for msg in http_msgs:
-            for idx, (challenge, solved) in enumerate(apis):
-                agent_log.info("[Matching]: ", msg.request.url, msg.request.method)
-                if challenge.match(msg.request.url, method=msg.request.method):
-                    agent_log.info(f"Discovered {challenge}!")
-                    apis[idx] = (challenge, True)
-                    self._last_solved_url = page_url
+            ctxt = {
+                "url": msg.request.url,
+                "method": msg.request.method,
+                "vuln_challenges": vuln_challenges,
+            }
+            for idx, (url, solved_challenge) in enumerate(challenges_for_path):
+                # agent_log.info(f"[Matching]: {msg.request.url}|{msg.request.method}")
+                if await solved_challenge.challenge.is_solved(**ctxt):
+                    agent_log.info(f"Challenge {solved_challenge.challenge} solved!")
+                    # update the solved challenge
+                    self._solved[url][idx].is_solved = True
+                    self._solved[url][idx].agent_step = agent_step
+                    self._solved[url][idx].page_step = page_step
 
-        return (sum([1 for api, solved in apis if solved]) / len(apis))
+    def get_solved(self):
+        return self._solved
 
     def report_progress(self) -> Tuple[Dict, str]:
         progress = {
             "solved": {},
             "total": 0,
         }
-        for path, apis in self._solved.items():
-            solved_apis = [api for api, solved in apis if solved]
+        for path, solved_challenges in self._solved.items():
+            solved_apis = [solved_challenge.challenge for solved_challenge in solved_challenges if solved_challenge.is_solved]
             progress["solved"][path] = solved_apis
-            progress["total"] += len(apis)
+            progress["total"] += len(solved_challenges)
                 
         # Create solve rate string for each page
         page_rates = []
-        for path, apis in self._solved.items():
-            solved_count = sum(1 for api, solved in apis if solved)
-            total_apis = len(apis)
+        for path, solved_challenges in self._solved.items():
+            solved_count = sum(1 for solved_challenge in solved_challenges if solved_challenge.is_solved)
+            total_apis = len(solved_challenges)
             page_rates.append(f"{path}: {solved_count}/{total_apis}")
         
         progress_str = " | ".join(page_rates)
         
         return progress, progress_str
-
