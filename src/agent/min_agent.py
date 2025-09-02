@@ -31,7 +31,7 @@ from src.agent.pages import Page, PageObservations
 from eval.client import PagedDiscoveryEvalClient
 
 from common.utils import extract_json
-from pentest_bot.logger import get_agent_loggers
+from logger import get_agent_loggers
 
 # Basic logger compatible with this repo
 agent_log, full_log = get_agent_loggers()

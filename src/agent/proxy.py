@@ -14,7 +14,7 @@ except ImportError as e:
         "mitmproxy is required for ProxyHandler. Install with: pip install mitmproxy"
     ) from e
 
-from pentest_bot.logger import get_agent_loggers
+from logger import get_agent_loggers
 from src.agent.http_history import HTTPHandler
 from httplib import (
     HTTPMessage, 

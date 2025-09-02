@@ -13,7 +13,7 @@ from src.agent.prompts import CUSTOM_SYSTEM_PROMPT
 from eval.client import PagedDiscoveryEvalClient
 from eval.discovery import JUICE_SHOP_ALL
 
-from pentest_bot.logger import setup_agent_logger
+from logger import setup_agent_logger
 
 MODEL_DICT = {
     "browser_use": "gpt-4.1",
