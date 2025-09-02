@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from uuid import UUID
 
-from schemas.application import ApplicationCreate, ApplicationOut, AddFindingRequest
-from database.session import get_session
-from services import application as app_service
+from cnc.schemas.application import ApplicationCreate, ApplicationOut, AddFindingRequest
+from cnc.database.session import get_session
+from cnc.services import application as app_service
 from cnc.services.queue import BroadcastChannel
 from httplib import HTTPMessage
 

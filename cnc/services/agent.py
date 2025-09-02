@@ -2,8 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from uuid import UUID
 
-from database import crud
-from schemas.application import AgentRegister
+from cnc.database import crud
+from cnc.schemas.application import AgentRegister
 from cnc.database.models import Agent
 
 from httplib import HTTPMessage

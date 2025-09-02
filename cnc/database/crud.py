@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlmodel import select
 
-from helpers.uuid import generate_uuid
-from schemas.application import ApplicationCreate, AgentRegister
+from cnc.helpers.uuid import generate_uuid
+from cnc.schemas.application import ApplicationCreate, AgentRegister
 from cnc.database.models import Application, Agent, HTTPMessageDB, AuthSession
 
 from httplib import HTTPMessage

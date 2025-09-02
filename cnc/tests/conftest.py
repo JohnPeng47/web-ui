@@ -1,28 +1,17 @@
-import asyncio
-import os
 import uuid
-from contextlib import asynccontextmanager
-from uuid import uuid4, UUID
-
-import httpx
 import json
 import pytest
 import pytest_asyncio
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,          # preferred helper in SQLAlchemy 2.0+
 )
-from sqlmodel import SQLModel
-from typing import Any, Dict, List, Optional, Tuple, Union, AsyncGenerator
+from typing import AsyncGenerator
 
 # ── App-side imports ──────────────────────────────────────────────────────────
-from src.agent.client import AgentClient
+from cnc.client import AgentClient
 from cnc.main import create_app
-from cnc.services.queue import BroadcastChannel
-from cnc.database.models import Agent as AgentModel, Application
 from cnc.database.session import override_db, create_db_and_tables, engine
 from cnc.schemas.http import EnrichedRequest
 from httplib import ResourceLocator, RequestPart
@@ -136,5 +125,7 @@ async def test_app_client() -> AsyncGenerator:
         await create_db_and_tables()           # schema lives on disk
         app = create_app()                     # routes import the models
 
-        async with AsyncClient(app=app, base_url="http://test") as ac:
+
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
             yield AgentClient(client=ac), app           # hand them to the test

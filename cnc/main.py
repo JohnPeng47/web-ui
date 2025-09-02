@@ -1,16 +1,19 @@
+import asyncio
+import uvicorn
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from contextlib import asynccontextmanager
-import uvicorn
-from httplib import HTTPMessage
-from cnc.schemas.http import EnrichedRequest
 
-from routers.application import make_application_router
-from routers.agent import make_agent_router
-from database.session import create_db_and_tables
+from logger import setup_server_logger
+from cnc.workers_launcher import start_workers
+
+from cnc.schemas.http import EnrichedRequest, EnrichAuthNZMessage
 from cnc.services.queue import BroadcastChannel
-import asyncio
-from workers_launcher import start_workers
+
+from cnc.database.session import create_db_and_tables
+from cnc.routers.application import make_application_router
+from cnc.routers.agent import make_agent_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -36,7 +39,7 @@ def create_app() -> FastAPI:
     )
     
     # Create broadcast channels
-    raw_channel = BroadcastChannel[HTTPMessage]()
+    raw_channel = BroadcastChannel[EnrichAuthNZMessage]()
     enriched_channel = BroadcastChannel[EnrichedRequest]()
     
     # Store channels in app state for access by workers and dependencies
@@ -66,9 +69,12 @@ async def start_api_server(app_instance: FastAPI):
     await server.serve()
 
 async def main():
+    setup_server_logger(".server_logs")
+    
     """Start both workers and API server concurrently."""
     # Create the app instance inside main
     app_instance = create_app()
+    
     await asyncio.gather(
         start_workers(app_instance),
         start_api_server(app_instance)
