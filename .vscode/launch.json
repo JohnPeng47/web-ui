@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "test serialize",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "test_page_serialize.py",
+            "console": "integratedTerminal"
+        },
+        {
             "name": "Start simp agent",
             "type": "debugpy",
             "request": "launch",

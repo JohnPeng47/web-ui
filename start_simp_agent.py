@@ -18,13 +18,6 @@ from eval.datasets.exploit.juiceshop import JUICE_SHOP_VULNERABILITIES as JUICE_
 
 from pentest_bot.logger import setup_agent_logger, get_agent_loggers
 
-def normalize_urls(urls):
-    norm_urls = []
-    for url in urls:
-        norm_urls.append(urlparse(url).path)
-        norm_urls.append(urlparse(url).fragment)
-    return norm_urls
-
 MODEL_CONFIG = {
     "browser_use": "gpt-4.1",
     "update_plan": "o3-mini",

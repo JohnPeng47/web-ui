@@ -27,7 +27,7 @@ from src.agent.links import parse_links_from_str
 from src.agent.proxy import ProxyHandler
 from src.llm_models import LLMHub
 from src.agent.utils import url_did_change
-from src.agent.pages import Page
+from src.agent.pages import Page, PageObservations
 from eval.client import PagedDiscoveryEvalClient
 
 from common.utils import extract_json
@@ -219,7 +219,7 @@ class MinimalAgent:
         self.urls = start_urls
         self.max_page_steps = max_page_steps
         self.page_skip = False
-        self.pages: List[Page] = []
+        self.pages: PageObservations = PageObservations()
         self.page_step = 0
         self.plan: PlanItem | None = None
         self.curr_dom_tree: EnhancedDOMTreeNode | None = None
@@ -485,7 +485,7 @@ class MinimalAgent:
         links = parse_links_from_str(self.curr_dom_tree.to_str())
         for link in links:
             agent_log.info(f"Discovered additional link: {link}")
-            self.pages[-1].add_link(link)
+            self.pages.curr_page().add_link(link)
 
     def _create_new_plan(self):
         new_plan = CreatePlanNested().invoke(
@@ -583,7 +583,7 @@ class MinimalAgent:
 
             self.curr_url = self.urls.pop(0)
             await self._goto_page(self.curr_url)
-            self.pages.append(Page(url=self.curr_url))
+            self.pages.add_page(Page(url=self.curr_url))
 
             browser_state = await self._get_browser_state()
             self.curr_dom_str = browser_state.dom_state.llm_representation(include_attributes=INCLUDE_ATTRIBUTES)
@@ -625,7 +625,7 @@ class MinimalAgent:
         if self.proxy_handler:
             msgs = await self.proxy_handler.flush()
             for msg in msgs:
-                self.pages[-1].add_http_msg(msg)
+                self.pages.curr_page().add_http_msg(msg)
             if self.challenge_client:
                 await self.challenge_client.update_status(
                     msgs, 
@@ -645,10 +645,7 @@ class MinimalAgent:
             self.page_step += 1
             if self.page_step > self.max_page_steps:
                 self.page_step = 0
-
-    def page_summary(self) -> str:
-        return "\n".join([str(page) for page in self.pages])
-
+                
     # State update and logging 
     def _log(self, msg: str):
         agent_log.info(msg)
