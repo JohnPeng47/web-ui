@@ -14,7 +14,7 @@ from src.agent.proxy import ProxyHandler
 from eval.client import PagedDiscoveryEvalClient
 
 from eval.datasets.discovery.juiceshop import JUICE_SHOP_ALL as JUICE_SHOP_ALL_DISCOVERY
-from eval.datasets.exploit.juiceshop import JUICE_SHOP_VULNERABILITIES as JUICE_SHOP_VULNERABILITIES_EXPLOIT
+from eval.datasets.discovery.juiceshop_exploit import JUICE_SHOP_VULNERABILITIES as JUICE_SHOP_VULNERABILITIES_EXPLOIT
 
 from pentest_bot.logger import setup_agent_logger, get_agent_loggers
 
