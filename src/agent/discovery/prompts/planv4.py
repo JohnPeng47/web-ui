@@ -5,7 +5,7 @@ from typing import List, Optional, Tuple, Literal
 from pydantic import BaseModel, Field
 
 from src.llm_provider import LMP
-from pentest_bot.logger import get_agent_loggers
+from logger import get_agent_loggers
 
 agent_log, full_log = get_agent_loggers()
 

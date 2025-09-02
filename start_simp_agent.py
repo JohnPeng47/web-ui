@@ -16,7 +16,7 @@ from eval.client import PagedDiscoveryEvalClient
 from eval.datasets.discovery.juiceshop import JUICE_SHOP_ALL as JUICE_SHOP_ALL_DISCOVERY
 from eval.datasets.discovery.juiceshop_exploit import JUICE_SHOP_VULNERABILITIES as JUICE_SHOP_VULNERABILITIES_EXPLOIT
 
-from pentest_bot.logger import setup_agent_logger, get_agent_loggers
+from logger import setup_agent_logger, get_agent_loggers
 
 MODEL_CONFIG = {
     "browser_use": "gpt-4.1",

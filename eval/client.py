@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 from pydantic import BaseModel
 
 from httplib import HTTPMessage
-from pentest_bot.logger import get_agent_loggers
+from logger import get_agent_loggers
 from eval.datasets.base import Challenge
 
 agent_log, _ = get_agent_loggers()

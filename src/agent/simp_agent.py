@@ -15,7 +15,7 @@ from browser_use.controller.registry.views import ActionModel
 
 from src.llm_models import LLMHub
 from common.utils import extract_json
-from pentest_bot.logger import get_agent_loggers
+from logger import get_agent_loggers
 from src.agent.proxy import ProxyHandler
 from eval.client import PagedDiscoveryEvalClient
 

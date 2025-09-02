@@ -18,7 +18,7 @@ from httplib import HTTPMessage, HTTPRequest, HTTPResponse
 from playwright.sync_api import Request, Response
 
 from src.utils import ContentTypeDetector
-from pentest_bot.logger import get_agent_loggers
+from logger import get_agent_loggers
 
 agent_log, _ = get_agent_loggers()
 
