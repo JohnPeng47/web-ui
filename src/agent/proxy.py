@@ -148,28 +148,23 @@ class ProxyHandler:
     # ─────────────────────────────────────────────────────────────────────
     # Internal: conversions and ingestion
     # ─────────────────────────────────────────────────────────────────────
-    def _ingest_request(self, flow: "http.HTTPFlow") -> None:
+    async def _ingest_request(self, flow: "http.HTTPFlow") -> None:
         """
         Convert mitmproxy request to your HTTPRequest and push into handler's queue.
         """
         try:
             url = flow.request.url
-
-            # Respect handler banlist.
+            
             if getattr(self._handler, "_is_banned")(url):  # uses your handler's method
                 agent_log.debug("Proxy dropped banned URL: %s", url)
                 return
 
             req = self._flow_to_http_request(flow)
-            with self._lock:
-                # Mirror HTTPHandler.handle_request() behavior:
-                self._handler._request_queue.append(req)
-                # Use a monotonic clock compatible with asyncio loop.time()
-                self._handler._req_start[req] = time.monotonic()
+            await self._handler.handle_request(req)
         except Exception as e:
             agent_log.exception("Proxy request ingestion failed: %s", e)
 
-    def _ingest_response(self, flow: "http.HTTPFlow") -> None:
+    async def _ingest_response(self, flow: "http.HTTPFlow") -> None:
         """
         Convert mitmproxy response to your HTTPResponse and finalize an HTTPMessage.
         """
@@ -180,17 +175,7 @@ class ProxyHandler:
             req = self._flow_to_http_request(flow)
             resp = self._flow_to_http_response(flow)
 
-            # Match and remove from queue, then append to step_messages.
-            with self._lock:
-                match = next(
-                    (r for r in self._handler._request_queue if r.url == req.url and r.method == req.method),
-                    None,
-                )
-                if match:
-                    self._handler._request_queue.remove(match)
-                    self._handler._req_start.pop(match, None)
-
-                self._handler._step_messages.append(HTTPMessage(request=req, response=resp))
+            await self._handler.handle_response(resp, req)
         except Exception as e:
             agent_log.exception("Proxy response ingestion failed: %s", e)
 
@@ -276,8 +261,8 @@ class _MitmAddon:
     def __init__(self, proxy_handler: ProxyHandler) -> None:
         self._proxy = proxy_handler
 
-    def request(self, flow: "http.HTTPFlow") -> None:
-        self._proxy._ingest_request(flow)
+    async def request(self, flow: "http.HTTPFlow") -> None:
+        await self._proxy._ingest_request(flow)
 
-    def response(self, flow: "http.HTTPFlow") -> None:
-        self._proxy._ingest_response(flow)
+    async def response(self, flow: "http.HTTPFlow") -> None:
+        await self._proxy._ingest_response(flow)

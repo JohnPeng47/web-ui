@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from typing import Iterator, List
 import difflib
 import logging
+import tiktoken
 
 # The one and only ContextVar you export  –  anything else stays private
 _log_context_id: contextvars.ContextVar[str] = contextvars.ContextVar(
@@ -31,6 +32,9 @@ def push_ctxt_id(value: str) -> Iterator[None]:
     finally:
         _log_context_id.reset(token)
 
+def get_token_count(text: str) -> int:
+    encoding = tiktoken.get_encoding("cl100k_base")
+    return len(encoding.encode(text))
 
 def extract_state_from_history(history):
     """
@@ -401,46 +405,3 @@ class ContentTypeDetector:
             return guessed_type, "mimetypes_guess"
         
         return 'application/octet-stream', "default"
-
-
-# Integration with your existing HTTPFilter class
-class HTTPFilter:
-    """
-    Enhanced HTTPFilter with better content type detection.
-    """
-    
-    def __init__(self, http_filter_config=None, *, logger=None):
-        self.cfg = http_filter_config or HTTPFilterConfig()
-        self.content_detector = ContentTypeDetector()
-        self.logger = logger
-    
-    def _get_reliable_content_type(self, response, url: str = None) -> str:
-        """
-        Get content type using enhanced detection.
-        """
-        content_type = self.content_detector.detect_content_type(response, url)
-        
-        # Log detection method if logger is available
-        if self.logger:
-            _, method = self.content_detector.get_content_info(response, url)
-            self.logger.debug(f"Content-Type detected via {method}: {content_type}")
-        
-        return content_type
-    
-    def _passes_all_filters(self, msg):
-        """Updated filter method using enhanced content type detection."""
-        if msg.response is None:
-            return False
-        
-        url = msg.request.url
-        
-        # Use enhanced content type detection instead of just get_content_type()
-        ct = self._get_reliable_content_type(msg.response, url)
-        
-        symbol, allowed = self._mime_allowed(ct)
-        if not allowed and self.logger:
-            self.logger.info(f"Reject {url} – MIME {ct} not allowed [{symbol}]")
-            return False
-        
-        # ... rest of your filtering logic
-        return True
