@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 from .discovery.juiceshop import JUICE_SHOP_ALL as JUICE_SHOP_ALL_DISCOVERY
-from .exploit.juiceshop import JUICE_SHOP_VULNERABILITIES as JUICE_SHOP_ALL_EXPLOIT
+from .discovery.juiceshop_exploit import JUICE_SHOP_VULNERABILITIES as JUICE_SHOP_ALL_EXPLOIT
 
 # class Challenge 
 
