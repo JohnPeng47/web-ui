@@ -1,6 +1,7 @@
 import asyncio
 from pathlib import Path
 import httpx
+import json
 
 from playwright.async_api import async_playwright
 from browser_use.browser import BrowserSession, BrowserProfile
@@ -18,12 +19,6 @@ from eval.datasets.exploit.juiceshop import JUICE_SHOP_VULNERABILITIES as JUICE_
 
 from pentest_bot.logger import setup_agent_logger, get_agent_loggers
 
-MODEL_DICT = {
-    "browser_use": "gemini-2.5-flash",
-}
-TASK = """
-Go to the url: http://147.79.78.153:3000/#/
-"""
 MODEL_CONFIG = {
     "browser_use": "gpt-4.1",
     "update_plan": "o3-mini",
@@ -36,25 +31,34 @@ PROFILE_DIR = Path(
 PORT = 9899
 PROXY_HOST = "127.0.0.1"
 PROXY_PORT = 8081
+
+TEST_PATHS = [
+    "/login"
+]
+START_URLS = ["http://147.79.78.153:3000/#/login"]
+JUICE_SHOP_BASE_URL = "http://147.79.78.153:3000"
 JUICE_SHOP_ALL = {**JUICE_SHOP_ALL_DISCOVERY, **JUICE_SHOP_VULNERABILITIES_EXPLOIT}
+JUICE_SHOP_SUBSET = {p: JUICE_SHOP_ALL.get(p, []) for p in TEST_PATHS if p}
+
+# Single task for SimpleAgent
+TASK = """
+Visit the login page at http://147.79.78.153:3000/#/login and attempt to log in with test credentials:
+
+email: bjoern.kimminich@gmail.com
+password: 'bW9jLmxpYW1nQGhjaW5pbW1pay5ucmVvamI='
+
+Then exit
+"""
 
 # 6 urls
 TEST_URLS = [
-    "http://147.79.78.153:3000/#/",
+    # "http://147.79.78.153:3000/#/",
     "http://147.79.78.153:3000/#/login",
-    "http://147.79.78.153:3000/#/contact",
-    "http://147.79.78.153:3000/#/about",
-    "http://147.79.78.153:3000/#/photo-wall",
-    "http://147.79.78.153:3000/#/search",
+    # "http://147.79.78.153:3000/#/contact",
+    # "http://147.79.78.153:3000/#/about",
+    # "http://147.79.78.153:3000/#/photo-wall",
+    # "http://147.79.78.153:3000/#/search",
 ]
-TEST_PATHS = [
-    "/login",
-    "/contact",
-    "/about",
-    "/photo-wall",
-    "/search"
-]
-JUICE_SHOP_SUBSET = {p: JUICE_SHOP_ALL[p] for p in TEST_PATHS}
 
 def setup_agent_dir(agent_name: str):
     agent_dir = Path(f".{agent_name}")
@@ -111,7 +115,7 @@ async def main():
         # LLM and Controller
         client = PagedDiscoveryEvalClient(
             challenges=JUICE_SHOP_SUBSET,
-            async_client=httpx.AsyncClient(),
+            base_url=JUICE_SHOP_BASE_URL,
         )
         llm = LLMHub(MODEL_CONFIG)
         controller = Controller(exclude_actions=["extract_structured_data"])
@@ -120,8 +124,8 @@ async def main():
         agent = MinimalAgent(
             start_urls=TEST_URLS,
             llm=llm,
-            max_steps=60,
-            max_page_steps=10,
+            max_steps=5,
+            max_page_steps=5,
             agent_sys_prompt=CUSTOM_SYSTEM_PROMPT,
             browser_session=browser_session,
             controller=controller,
@@ -131,11 +135,11 @@ async def main():
         )
         await agent.run()
 
-        complete, complete_str = client.report_progress()
-        agent_log.info(f"[Challenge Status]: {complete_str}")
+        # complete, complete_str = client.report_progress()
+        # agent_log.info(f"[Challenge Status]: {complete_str}")
 
-        with open("agent_summary.txt", "w") as f:
-            f.write(agent.page_summary())
+        with open("agent_summary.json", "w") as f:
+            f.write(json.dumps(await agent.pages.to_json(), indent=2))
 
     except Exception as e:
         import traceback

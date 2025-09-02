@@ -145,8 +145,7 @@ class HTTPRequest(BaseModel):
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "HTTPRequest":
-        request_data = HTTPRequestData(**data)
-        return cls(data=request_data)
+        return cls(**data)
 
     @classmethod
     def from_pw(cls, request: Request) -> "HTTPRequest":
@@ -263,15 +262,7 @@ class HTTPResponse(BaseModel):
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "HTTPResponse":
-        response_data = HTTPResponseData(
-            url=data["url"],
-            status=data["status"],
-            headers=data["headers"],
-            is_iframe=data["is_iframe"],
-            body=data.get("body", "").encode() if "body" in data else None,
-            body_error=data.get("body_error")
-        )
-        return cls(data=response_data)
+        return cls(**data)
 
     @classmethod
     def from_pw(cls, response: Response) -> "HTTPResponse":
