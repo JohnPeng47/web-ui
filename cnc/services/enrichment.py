@@ -11,9 +11,9 @@ from httplib import HTTPMessage, ResourceLocator
 from johnllm import LMP, LLMModel
 from src.llm import RequestResources, EXTRACT_REQUESTS_PROMPT
 
-from logger import init_file_logger
+from logger import get_server_logger
 
-log = init_file_logger(__name__)
+log = get_server_logger()
 
 class ExtractResources(LMP):
     prompt = EXTRACT_REQUESTS_PROMPT

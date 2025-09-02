@@ -11,7 +11,7 @@ from cnc.schemas.application import Finding
 from cnc.services.queue import BroadcastChannel
 from cnc.database.models import AuthSession as DBAuthSession
 from httplib import HTTPRequest, HTTPRequestData
-from logger import init_file_logger
+from logger import get_server_logger
 
 
 class AttackResult(BaseModel):
@@ -32,7 +32,7 @@ class FindingsStore(ABC):
     def append(self, finding: Union[Attack, str]):
         pass
 
-log = init_file_logger(__name__)
+log = get_server_logger()
 
 class BaseAttackWorker(ABC):
     """Base class for attack workers that analyze requests for vulnerabilities"""

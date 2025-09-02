@@ -3,13 +3,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional, Dict
 from uuid import UUID
 
-from schemas.application import AgentRegister, AgentOut, PushMessages
-from database.session import get_session
+from cnc.schemas.application import AgentRegister, AgentOut, PushMessages
+from cnc.database.session import get_session
 from cnc.database.models import Agent
 
-from services import agent as agent_service
+from cnc.services import agent as agent_service
 from cnc.services.queue import BroadcastChannel
-from schemas.http import EnrichAuthNZMessage
+from cnc.schemas.http import EnrichAuthNZMessage
 
 def make_agent_router(raw_channel: BroadcastChannel[EnrichAuthNZMessage]) -> APIRouter:
     """

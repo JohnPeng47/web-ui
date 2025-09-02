@@ -4,7 +4,6 @@ from typing import Dict
 from uuid import UUID
 
 import httpx
-from src.agent.client import AgentClient 
 
 pytestmark = pytest.mark.asyncio
 
