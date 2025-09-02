@@ -124,8 +124,8 @@ async def main():
         agent = MinimalAgent(
             start_urls=TEST_URLS,
             llm=llm,
-            max_steps=5,
-            max_page_steps=5,
+            max_steps=10,
+            max_page_steps=10,
             agent_sys_prompt=CUSTOM_SYSTEM_PROMPT,
             browser_session=browser_session,
             controller=controller,

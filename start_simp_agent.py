@@ -60,7 +60,7 @@ def setup_agent_dir(agent_name: str):
     log_dir = agent_dir / "logs"
     log_dir.mkdir(exist_ok=True)
     return agent_dir, log_dir
-
+ 
 async def main():
     """Initialize SimpleAgent using the new BrowserSession-based API."""
     agent_dir, log_dir = setup_agent_dir("simp_agent")
