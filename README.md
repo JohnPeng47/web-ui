@@ -1,0 +1,12 @@
+2025/09/02:
+- Start deprecating pentest_bot and moving agent logic into src/exploit and moving eval harnesses into eval/harness/exploit
+--> AMF, should move start_*agent into eval/harness/discovery
+2025/09/03:
+- Inventory all hardcoded variaables, remote services (ie. Opik). Especially important are filepaths and env variables that need to be taken into account during deployment to another environment ( linux environment)
+- DEBT: currently only PageItem is HTTPMessage. Should be genericized to include more things. Affects: 
+Detect -> Queue (item) -> Convert to Exploit Prompt
+Files:
+> src/detection/prompts.py
+> src/agent/pages.py
+> eval/harness/exploit/eval_agent_pool.py
+- DEBT: HTTPMessage.req/res.body no longer has to be async I think since we are not getting them from PW anymore

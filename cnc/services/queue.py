@@ -27,3 +27,7 @@ class BroadcastChannel(Generic[T]):
     async def publish(self, item: T):
         for q in self._subs:
             await q.put(item)
+
+    # Helpers
+    async def get_all(self) -> List[T]:
+        return [await q.get() for q in self._subs]

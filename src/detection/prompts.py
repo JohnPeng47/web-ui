@@ -1,9 +1,11 @@
 from pydantic import BaseModel
 
-from typing import List, Any
+from typing import List, Optional
 
 from src.agent.pages import PageObservations
 from src.llm_provider import LMP
+
+from httplib import HTTPMessage
 
 # TODO: potentially change to being able to specify multiple page items
 class ScheduledActionLM(BaseModel):
@@ -14,7 +16,7 @@ class ScheduledActionsLM(BaseModel):
     actions: List[ScheduledActionLM]
 
 class ScheduledAction(BaseModel):
-    page_item: Any
+    page_item: Optional[HTTPMessage]
     vulnerability_description: str
 
     class Config:

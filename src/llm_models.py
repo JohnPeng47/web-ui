@@ -9,6 +9,7 @@ import os
 COST_MAP = None
 
 # singleton cost map
+# https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json
 def load_cost_map() -> Dict:
     global COST_MAP
     if not COST_MAP:

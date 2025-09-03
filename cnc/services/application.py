@@ -1,9 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
-from typing import Dict, List, Any
 
 from cnc.database import crud
-from cnc.schemas.application import ApplicationCreate, ApplicationOut, Finding
+from cnc.schemas.application import ApplicationCreate, Finding
 from cnc.database.models import Application
 
 
