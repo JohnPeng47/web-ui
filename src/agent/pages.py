@@ -1,9 +1,9 @@
 from typing import Optional, List, Dict, Tuple, Set
-from httplib import HTTPMessage, HTTPResponse
+from httplib import HTTPMessage, HTTPResponse, HTTPRequest
 
 from src.utils import get_token_count
 
-# TODO: add plan item here that is related to the 
+# TODO: this should be moved into HTTPMessage so we can use later down the line
 def concat_output(output_str: str, new_str: str) -> str:
     """Concatenate strings for output with simple base64 redaction.
     - Any base64-looking substring longer than 16 chars is replaced with "<b64>...".
@@ -50,7 +50,7 @@ class Page:
             self._group_order.append(key)
         self._groups[key].append(msg)
 
-    def get_page_item(self, section_number: int):
+    def get_page_item(self, section_number: int) -> Optional[HTTPMessage]:
         """Return an example HTTP request for the given section (1-based)."""
         if section_number <= 0 or section_number > len(self._group_order):
             return None
@@ -59,7 +59,7 @@ class Page:
         if not msgs:
             return None
         # Return any associated request; choose the most recent
-        return msgs[-1].request
+        return msgs[-1]
 
     def add_link(self, link: str):
         if link not in self.links:

@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Optional, Dict
 from uuid import UUID
 
 from cnc.schemas.application import AgentRegister, AgentOut, PushMessages
