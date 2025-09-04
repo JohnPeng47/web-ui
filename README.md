@@ -10,3 +10,7 @@ Files:
 > src/agent/pages.py
 > eval/harness/exploit/eval_agent_pool.py
 - DEBT: HTTPMessage.req/res.body no longer has to be async I think since we are not getting them from PW anymore
+- Logging is fucked for AgentPool
+2025/09/04:
+APIS and Models:
+1. POST /application
