@@ -5,80 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Eval AgentPool",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "eval.harness.exploit.eval_agent_pool",
+            "console": "integratedTerminal"
+        },
+        {
             "name": "test serialize",
             "type": "debugpy",
             "request": "launch",
             "program": "test_page_serialize.py",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Start simp agent",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "start_simp_agent.py",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Start agent",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "start_agent.py",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Python: WebUI",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "webui.py",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Python: eval.extract_params",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "eval.extract_params",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Python: test_intruder",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "test_intruder.py",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Python: PortSwigger Labs",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "scripts.portswigger.labs",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Python: JuiceShop",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "pentest_bot.discovery.eval_juiceshop",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Python: start_cnc",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "start_cnc.py",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Python: Test Intruder",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "test_agent_intruder.py",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Python: Test Browsing",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "tests/test_browsing.py",
             "console": "integratedTerminal"
         },
         {
