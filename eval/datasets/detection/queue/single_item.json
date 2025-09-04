@@ -1,0 +1,49 @@
+[
+    {
+        "page_item": {
+            "request": {
+                "data": {
+                    "method": "GET",
+                    "url": "http://147.79.78.153:3000/rest/user/whoami",
+                    "headers": {
+                        "host": "147.79.78.153:3000",
+                        "proxy-connection": "keep-alive",
+                        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+                        "accept": "application/json, text/plain, */*",
+                        "authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdGF0dXMiOiJzdWNjZXNzIiwiZGF0YSI6eyJpZCI6NCwidXNlcm5hbWUiOiJia2ltbWluaWNoIiwiZW1haWwiOiJiam9lcm4ua2ltbWluaWNoQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiNmVkZDlkNzI2Y2JkYzg3M2M1MzllNDFhZTg3NTdiOGMiLCJyb2xlIjoiYWRtaW4iLCJkZWx1eGVUb2tlbiI6IiIsImxhc3RMb2dpbklwIjoiIiwicHJvZmlsZUltYWdlIjoiYXNzZXRzL3B1YmxpYy9pbWFnZXMvdXBsb2Fkcy9kZWZhdWx0QWRtaW4ucG5nIiwidG90cFNlY3JldCI6IiIsImlzQWN0aXZlIjp0cnVlLCJjcmVhdGVkQXQiOiIyMDI1LTA5LTAxIDIxOjUwOjIxLjEwMyArMDA6MDAiLCJ1cGRhdGVkQXQiOiIyMDI1LTA5LTAxIDIxOjUwOjIxLjEwMyArMDA6MDAiLCJkZWxldGVkQXQiOm51bGx9LCJpYXQiOjE3NTY3NjM1MjF9.gH86LrTCM4srKgqGnePZvktIBDEGKM6arVvHbXQeFbggpXEB-oT6SPUyH-djQ2POq_-zc9x_aUUzRzVra6KWKfRaL8ccXcZr4lLhMVoQqaW9OGeQTlvi7lgHRClx-TDi3YC5ceXXeBXwcZ34F7J4j7ADIU1DPLZTykeBxeKDOPg",
+                        "referer": "http://147.79.78.153:3000/",
+                        "accept-encoding": "gzip, deflate",
+                        "accept-language": "en-US,en;q=0.9",
+                        "cookie": "welcomebanner_status=dismiss; cookieconsent_status=dismiss; language=en; continueCode=qo61W2w2ZW6a3BeyxzDmjrPKlY5bAyzDdLO4XpRqkJQ8VE7g1ovNMn9kZ9wr",
+                        "if-none-match": "W/\"b-/5bSboVjVhGw3qRgvUfZjE1r1Ns\""
+                    },
+                    "post_data": null,
+                    "redirected_from_url": null,
+                    "redirected_to_url": null,
+                    "is_iframe": false
+                }
+            },
+            "response": {
+                "data": {
+                    "url": "http://147.79.78.153:3000/rest/user/whoami",
+                    "status": 304,
+                    "headers": {
+                        "access-control-allow-origin": "*",
+                        "x-content-type-options": "nosniff",
+                        "x-frame-options": "SAMEORIGIN",
+                        "feature-policy": "payment 'self'",
+                        "x-recruiting": "/#/jobs",
+                        "etag": "W/\"b-/5bSboVjVhGw3qRgvUfZjE1r1Ns\"",
+                        "date": "Tue, 02 Sep 2025 16:36:53 GMT",
+                        "connection": "keep-alive",
+                        "keep-alive": "timeout=5"
+                    },
+                    "is_iframe": false,
+                    "body": null,
+                    "body_error": null
+                }
+            }
+        },
+        "vulnerability_description": "Session fixation and insecure cookie attributes: /rest/user/whoami sets a JWT token pre-authentication with no HttpOnly, Secure, or SameSite flags over HTTP. Test whether this token persists after login (session fixation), can be stolen via XSS, and can be replayed to hijack sessions."
+    }
+]

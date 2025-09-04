@@ -10,7 +10,33 @@ from typing import Optional, List
 
 from src.utils import get_ctxt_id, LoggerProxy
 
-LOG_DIR = "logs"
+_LOG_FORMAT = "[%(context_id)s] %(asctime)s:[%(funcName)s:%(lineno)s] - %(message)s"
+_CONSOLE_FORMAT = "[%(context_id)s] %(message)s"
+
+def converter(timestamp):
+    dt = datetime.fromtimestamp(timestamp, tz=pytz.utc)
+    return dt.astimezone(pytz.timezone("US/Eastern")).timetuple()
+
+# --------------------------------------------------------------------------- #
+#  formatter that injects the context-local ID
+#  #
+class ContextVarFormatter(logging.Formatter):
+    """
+    Prepends the current value of `_context_id_var` to every record.
+    """
+    def format(self, record: logging.LogRecord) -> str:
+        # Expose the context value as an attribute the format string can use
+        record.context_id = get_ctxt_id()
+        return super().format(record)
+
+# --------------------------------------------------------------------------- #
+#  format strings
+# --------------------------------------------------------------------------- #
+
+# The rest of your config stays the same, just swap in the new formatter class
+formatter = ContextVarFormatter(_LOG_FORMAT, datefmt="%H:%M:%S")
+formatter.converter = converter                    # keep your custom time zone
+console_formatter = ContextVarFormatter(_CONSOLE_FORMAT)
 
 # note: literally exists to filter out Litellm ...
 class ExcludeStringsFilter(logging.Filter):
@@ -42,33 +68,6 @@ class ExcludeStringsFilter(logging.Filter):
                 return False
         return True
 
-def converter(timestamp):
-    dt = datetime.fromtimestamp(timestamp, tz=pytz.utc)
-    return dt.astimezone(pytz.timezone("US/Eastern")).timetuple()
-
-# --------------------------------------------------------------------------- #
-#  formatter that injects the context-local ID
-# --------------------------------------------------------------------------- #
-class ContextVarFormatter(logging.Formatter):
-    """
-    Prepends the current value of `_context_id_var` to every record.
-    """
-    def format(self, record: logging.LogRecord) -> str:
-        # Expose the context value as an attribute the format string can use
-        record.context_id = get_ctxt_id()
-        return super().format(record)
-
-# --------------------------------------------------------------------------- #
-#  format strings
-# --------------------------------------------------------------------------- #
-_LOG_FORMAT = "[%(context_id)s] %(asctime)s:[%(funcName)s:%(lineno)s] - %(message)s"
-_CONSOLE_FORMAT = "[%(context_id)s] %(message)s"
-
-# The rest of your config stays the same, just swap in the new formatter class
-formatter = ContextVarFormatter(_LOG_FORMAT, datefmt="%H:%M:%S")
-formatter.converter = converter                    # keep your custom time zone
-console_formatter = ContextVarFormatter(_CONSOLE_FORMAT)
-
 # --------------------------------------------------------------------------- #
 #  existing helpers (unchanged except for the new formatter objects)
 # --------------------------------------------------------------------------- #
@@ -89,13 +88,6 @@ def get_console_handler(exclude_strs: List[str] = []) -> logging.StreamHandler:
     console_handler.setFormatter(console_formatter)
     console_handler.addFilter(ExcludeStringsFilter(exclude_strs))
     return console_handler
-
-#  constants
-# --------------------------------------------------------------------------- #
-LOG_PATH = Path(LOG_DIR)
-INDENT_LEN = 100
-INDENT_STR = ""
-_run_lock = threading.Lock()               # <── thread-safety
 
 def create_log_dir_or_noop(log_dir: str):
     date_dir = datetime.now().strftime("%Y-%m-%d")
