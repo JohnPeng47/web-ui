@@ -138,8 +138,8 @@ async def main():
         # complete, complete_str = client.report_progress()
         # agent_log.info(f"[Challenge Status]: {complete_str}")
 
-        with open("agent_summary.json", "w") as f:
-            f.write(json.dumps(await agent.pages.to_json(), indent=2))
+        # with open("agent_summary.json", "w") as f:
+        #     f.write(json.dumps(await agent.pages.to_json(), indent=2))
 
     except Exception as e:
         import traceback
