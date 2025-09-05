@@ -3,11 +3,21 @@ from pydantic import BaseModel
 from datetime import datetime
 from uuid import UUID
 
-from .auth import UserRoleCredentials
+from .auth import UserCredentialsBase
 
 class UserRole(BaseModel):
     role: str
-    credentials: UserRoleCredentials
+    credentials: UserCredentialsBase
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "role": self.role,
+            "credentials": self.credentials.to_dict()
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "UserRole":
+        return cls(role=data["role"], credentials=UserCredentialsBase.from_dict(data["credentials"]))
 
 class ApplicationBase(BaseModel):
     name: str

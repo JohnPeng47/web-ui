@@ -3,15 +3,15 @@ from uuid import UUID
 
 from cnc.database import crud
 from cnc.schemas.application import ApplicationCreate, Finding
-from cnc.database.models import Application
+from cnc.database.models import PentestEngagement
 
 
-async def create_app(db: AsyncSession, app_data: ApplicationCreate) -> Application:
+async def create_app(db: AsyncSession, app_data: ApplicationCreate) -> PentestEngagement:
     """Create a new application."""
     return await crud.create_application(db, app_data)
 
 
-async def get_app(db: AsyncSession, app_id: UUID) -> Application:
+async def get_app(db: AsyncSession, app_id: UUID) -> PentestEngagement:
     """Get an application by ID."""
     app = await crud.get_application(db, app_id)
     if not app:
@@ -19,7 +19,7 @@ async def get_app(db: AsyncSession, app_id: UUID) -> Application:
     return app
 
 
-async def add_finding(db: AsyncSession, app_id: UUID, finding: Finding) -> Application:
+async def add_finding(db: AsyncSession, app_id: UUID, finding: Finding) -> PentestEngagement:
     """Add a security finding to an application."""
     app = await crud.get_application(db, app_id)
     if not app:

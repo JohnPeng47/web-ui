@@ -17,8 +17,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 # Import after setting sys.path
 from sqlmodel import SQLModel
+
 # Import all models to ensure they're registered with SQLModel metadata
-from cnc.database.models import Application, Agent, AuthSession, HTTPMessageDB
+from cnc.database.models import *
+from cnc.database.agent.models import *
 
 # Import your database URL
 from cnc.database.session import DATABASE_URL
