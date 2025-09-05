@@ -6,15 +6,15 @@ from sqlmodel import select
 
 from cnc.helpers.uuid import generate_uuid
 from cnc.schemas.application import ApplicationCreate, AgentRegister
-from cnc.database.models import Application, Agent, HTTPMessageDB, AuthSession
+from cnc.database.models import PentestEngagement, Agent, HTTPMessageDB, AuthSession
 
 from httplib import HTTPMessage
 
 
 async def create_application(
     db: AsyncSession, app_data: ApplicationCreate
-) -> Application:
-    app = Application(
+) -> PentestEngagement:
+    app = PentestEngagement(
         id=generate_uuid(),
         name=app_data.name,
         description=app_data.description,
@@ -25,12 +25,12 @@ async def create_application(
     return app
 
 
-async def get_application(db: AsyncSession, app_id: UUID) -> Optional[Application]:
-    result = await db.execute(select(Application).where(Application.id == app_id))
+async def get_application(db: AsyncSession, app_id: UUID) -> Optional[PentestEngagement]:
+    result = await db.execute(select(PentestEngagement).where(PentestEngagement.id == app_id))
     return result.scalars().first()
 
 
-async def update_application(db: AsyncSession, app: Application) -> Application:
+async def update_application(db: AsyncSession, app: PentestEngagement) -> PentestEngagement:
     """Update an application with new data."""
     db.add(app)
     await db.commit()
