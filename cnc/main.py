@@ -13,7 +13,7 @@ from cnc.services.queue import BroadcastChannel
 
 from cnc.database.session import create_db_and_tables
 from cnc.routers.application import make_application_router
-from cnc.routers.agent import make_agent_router
+# from cnc.routers.agent import make_agent_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -54,11 +54,9 @@ def create_app() -> FastAPI:
     
     # Create routers with injected dependencies
     application_router = make_application_router()
-    agent_router = make_agent_router(raw_channel)
     
     # Include routers
     app.include_router(application_router)
-    app.include_router(agent_router)
     
     return app
 

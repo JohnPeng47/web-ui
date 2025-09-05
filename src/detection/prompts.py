@@ -15,7 +15,7 @@ class ScheduledActionLM(BaseModel):
 class ScheduledActionsLM(BaseModel):
     actions: List[ScheduledActionLM]
 
-class ScheduledAction(BaseModel):
+class StartExploitRequest(BaseModel):
     page_item: Optional[HTTPMessage]
     vulnerability_description: str
 
@@ -38,13 +38,13 @@ Some guidance for the response format:
 """
     response_format = ScheduledActionsLM
 
-    def _process_result(self, res: ScheduledActionsLM, **prompt_args) -> List[ScheduledAction]:
+    def _process_result(self, res: ScheduledActionsLM, **prompt_args) -> List[StartExploitRequest]:
         pages: PageObservations = prompt_args["pages"]
         scheduled_actions = []
 
         for action in res.actions:
             scheduled_actions.append(
-                ScheduledAction(
+                StartExploitRequest(
                     page_item=pages.get_page_item(action.page_item_id), 
                     vulnerability_description=action.vulnerability_description
                 )

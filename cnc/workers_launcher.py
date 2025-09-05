@@ -1,12 +1,17 @@
 import asyncio
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from fastapi import FastAPI
 from typing import Optional
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from cnc.database.session import engine
 from cnc.services.queue import BroadcastChannel
 from cnc.services.enrichment import RequestEnrichmentWorker 
 from cnc.workers.attackers.authnz.attacker import AuthzAttacker
+
+from cnc.workers.agent.browser import start_single_browser
+
+# agents
+from cnc.services.agent.discovery_pool import run_asyncio_loop_with_sigint_handling as start_discovery_pool
 
 async def start_enrichment_worker(raw_channel: BroadcastChannel, enriched_channel: BroadcastChannel, session: AsyncSession):
     """
@@ -69,7 +74,8 @@ async def start_workers(app: Optional[FastAPI] = None):
         enriched_channel = app.state.enriched_channel
         print("Using channels from FastAPI app.state")
     else:
-        raise Exception("No channels found in FastAPI app.state. Please provide an app instance.")
+        raw_channel = BroadcastChannel()
+        enriched_channel = BroadcastChannel()
     
     # Create session factory
     async_session = async_sessionmaker(engine, expire_on_commit=False)
@@ -81,8 +87,10 @@ async def start_workers(app: Optional[FastAPI] = None):
         
         # Run all workers concurrently
         await asyncio.gather(
-            start_enrichment_worker(raw_channel, enriched_channel, session),
-            start_attacker_worker(enriched_channel, session)
+            # start_enrichment_worker(raw_channel, enriched_channel, session),
+            # start_attacker_worker(enriched_channel, session),
+            start_single_browser(),
+            start_discovery_pool(),
         )
 
 if __name__ == "__main__":

@@ -12,5 +12,12 @@ Files:
 - DEBT: HTTPMessage.req/res.body no longer has to be async I think since we are not getting them from PW anymore
 - Logging is fucked for AgentPool
 2025/09/04:
-APIS and Models:
-1. POST /application
+- MITM local proxy will not work for remote browsers
+> should be deprecating in favor of CDP anyways
+- Initialize LLM configs at one of the parent layers instead of inside PentestSession
+2025/09/04:
+TODO:
+> make get_browser_session do more retries ..
+> we should make use of HTTP endpoints to accept queue updates from the clients because this gives us:
+1. access to db
+2. flexibility to trigger other logic -> such as queueing up another agent request 
