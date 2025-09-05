@@ -3,15 +3,15 @@ from datetime import datetime
 from sqlmodel import Field, SQLModel, Relationship, Column, JSON
 from uuid import UUID
 
-from cnc.schemas.agent import DiscoveryAgentStep
+from cnc.schemas.agent import ExploitAgentStep
 
 class AgentBase(SQLModel, table=False):    
     id: int = Field(primary_key=True, default=None)  # autoincrement is default
     agent_status: str = Field(default=False, nullable=False)
     max_steps: int = Field(nullable=False)
     model_name: str = Field(nullable=False)
-    model_costs: float = Field(nullable=False)
-    log_filepath: str = Field(nullable=False)
+    model_costs: float = Field(nullable=True)
+    log_filepath: str = Field(nullable=True) # add this later
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
     # Opik metadata fields
@@ -23,7 +23,15 @@ class ExploitAgent(AgentBase, table=True):
         default=None, 
         sa_column=Column(JSON),
         description="JSON array of agent"
-    )
+    )    
+    @property
+    def agent_steps(self) -> List[ExploitAgentStep]:
+        if not self.agent_steps_data:
+            return []
+
+        return [
+            ExploitAgentStep.from_dict(step_data) for step_data in self.agent_steps_data
+        ]
 
 class DiscoveryAgent(AgentBase, table=True):
     agent_steps_data: Optional[List[Dict[str, Any]]] = Field(
@@ -31,11 +39,8 @@ class DiscoveryAgent(AgentBase, table=True):
         sa_column=Column(JSON),
         description="JSON array of agent"
     )
-    @property
-    def agent_steps(self) -> List[DiscoveryAgentStep]:
-        if not self.agent_steps_data:
-            return []
-
-        return [
-            DiscoveryAgentStep.from_dict(step_data) for step_data in self.agent_steps_data
-        ]
+    page_data: Optional[List[Dict[str, Any]]] = Field(
+        default=None, 
+        sa_column=Column(JSON),
+        description="JSON array of pages"
+    )

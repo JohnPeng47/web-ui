@@ -12,7 +12,7 @@ from cnc.schemas.http import EnrichedRequest, EnrichAuthNZMessage
 from cnc.services.queue import BroadcastChannel
 
 from cnc.database.session import create_db_and_tables
-from cnc.routers.application import make_application_router
+from cnc.routers.engagement import make_engagement_router
 # from cnc.routers.agent import make_agent_router
 
 @asynccontextmanager
@@ -53,10 +53,10 @@ def create_app() -> FastAPI:
 
     
     # Create routers with injected dependencies
-    application_router = make_application_router()
+    engagement_router = make_engagement_router()
     
     # Include routers
-    app.include_router(application_router)
+    app.include_router(engagement_router)
     
     return app
 

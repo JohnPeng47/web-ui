@@ -10,7 +10,6 @@ from sqlalchemy.ext.asyncio import (
 from typing import AsyncGenerator
 
 # ── App-side imports ──────────────────────────────────────────────────────────
-from cnc.client import AgentClient
 from cnc.main import create_app
 from cnc.database.session import override_db, create_db_and_tables, engine
 from cnc.schemas.http import EnrichedRequest
@@ -125,7 +124,6 @@ async def test_app_client() -> AsyncGenerator:
         await create_db_and_tables()           # schema lives on disk
         app = create_app()                     # routes import the models
 
-
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as ac:
-            yield AgentClient(client=ac), app           # hand them to the test
+            yield ac         # hand them to the test

@@ -7,7 +7,7 @@ from pydantic import BaseModel
 import asyncio
 
 from cnc.schemas.http import EnrichedRequest
-from cnc.schemas.application import Finding
+from cnc.schemas.engagement import Finding
 from cnc.services.queue import BroadcastChannel
 from cnc.database.models import AuthSession as DBAuthSession
 from httplib import HTTPRequest, HTTPRequestData

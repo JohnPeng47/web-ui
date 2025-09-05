@@ -19,17 +19,20 @@ class UserRole(BaseModel):
     def from_dict(cls, data: Dict[str, Any]) -> "UserRole":
         return cls(role=data["role"], credentials=UserCredentialsBase.from_dict(data["credentials"]))
 
-class ApplicationBase(BaseModel):
+class EngagementBase(BaseModel):
     name: str
+    base_url: str
+    scopes: Optional[List[str]] = None
     description: Optional[str] = None
 
-class ApplicationCreate(ApplicationBase):
+class EngagementCreate(EngagementBase):
     pass
 
-class ApplicationOut(ApplicationBase):
+class EngagementOut(EngagementBase):
     id: UUID
     created_at: datetime
     findings: Optional[List[Dict[str, Any]]] = None
+    domain_ownership_verified: bool = False
 
     class Config:
         from_attributes = True
