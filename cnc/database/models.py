@@ -43,11 +43,9 @@ class PentestEngagement(SQLModel, table=True):
     # Many-to-many relationships to different agent types
     exploit_agents: List["ExploitAgent"] = Relationship(
         link_model=PentestEngagementExploitAgent,
-        back_populates="pentest_engagements"
     )
     discovery_agents: List["DiscoveryAgent"] = Relationship(
         link_model=PentestEngagementDiscoveryAgent,
-        back_populates="pentest_engagements"
     )
     
     @property
@@ -69,17 +67,6 @@ class PentestEngagement(SQLModel, table=True):
         all_agents.extend(self.discovery_agents)
         return all_agents
     
-    def add_agent(self, agent: Union["ExploitAgent", "DiscoveryAgent"]) -> None:
-        """Add an agent of any supported type"""
-        if isinstance(agent, ExploitAgent):
-            if agent not in self.exploit_agents:
-                self.exploit_agents.append(agent)
-        elif isinstance(agent, DiscoveryAgent):
-            if agent not in self.discovery_agents:
-                self.discovery_agents.append(agent)
-        else:
-            raise ValueError(f"Unsupported agent type: {type(agent)}")
-
 class AuthSession(SQLModel, table=True):
     # Tell SQLModel to use our specific metadata
     # metadata = db_metadata
