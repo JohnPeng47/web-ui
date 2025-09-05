@@ -1,23 +1,30 @@
 import asyncio
 from pathlib import Path
-import httpx
+from urllib.parse import urlparse
 import json
 
 from playwright.async_api import async_playwright
 from browser_use.browser import BrowserSession, BrowserProfile
 from browser_use.controller.service import Controller
 
-from eval.client import PagedDiscoveryEvalClient
 from src.llm_models import LLMHub
 from src.agent.min_agent import MinimalAgent
 from src.agent.prompts import CUSTOM_SYSTEM_PROMPT
 from src.agent.http_history import HTTPHandler
 from src.agent.proxy import ProxyHandler
+from eval.client import PagedDiscoveryEvalClient
 
 from eval.datasets.discovery.juiceshop import JUICE_SHOP_ALL as JUICE_SHOP_ALL_DISCOVERY
 from eval.datasets.discovery.juiceshop_exploit import JUICE_SHOP_VULNERABILITIES as JUICE_SHOP_VULNERABILITIES_EXPLOIT
 
 from logger import setup_agent_logger, get_agent_loggers
+
+def normalize_urls(urls):
+    norm_urls = []
+    for url in urls:
+        norm_urls.append(urlparse(url).path)
+        norm_urls.append(urlparse(url).fragment)
+    return norm_urls
 
 MODEL_CONFIG = {
     "browser_use": "gpt-4.1",
@@ -50,15 +57,8 @@ password: 'bW9jLmxpYW1nQGhjaW5pbW1pay5ucmVvamI='
 Then exit
 """
 
-# 6 urls
-TEST_URLS = [
-    # "http://147.79.78.153:3000/#/",
-    "http://147.79.78.153:3000/#/login",
-    # "http://147.79.78.153:3000/#/contact",
-    # "http://147.79.78.153:3000/#/about",
-    # "http://147.79.78.153:3000/#/photo-wall",
-    # "http://147.79.78.153:3000/#/search",
-]
+# Single URL for SimpleAgent
+TEST_URL = "http://147.79.78.153:3000/#/login"
 
 def setup_agent_dir(agent_name: str):
     agent_dir = Path(f".{agent_name}")
@@ -68,16 +68,15 @@ def setup_agent_dir(agent_name: str):
     log_dir.mkdir(exist_ok=True)
     return agent_dir, log_dir
 
-# 1) Start proxy handler (mitmproxy)    
 async def main():
-    """Initialize MinimalAgent using the new BrowserSession-based API."""
+    """Initialize SimpleAgent using the new BrowserSession-based API."""
     agent_dir, log_dir = setup_agent_dir("min_agent")
     setup_agent_logger(log_dir=str(log_dir))
 
     agent_log, _ = get_agent_loggers()
-    agent_log.info("Starting agent")
+    agent_log.info("Starting SimpleAgent")
     
-    # TODO: adding scopes is currently not working
+    # Start proxy handler (mitmproxy)
     http_handler = HTTPHandler(
         scopes=[
             "http://147.79.78.153:3000/rest/",
@@ -93,7 +92,7 @@ async def main():
     )
     proxy_handler.start()
 
-    # 2) Launch external Playwright Chromium with proxy + CDP enabled
+    # Launch external Playwright Chromium with proxy + CDP enabled
     pw = await async_playwright().start()
     browser = await pw.chromium.launch_persistent_context(
         user_data_dir=str(PROFILE_DIR),
@@ -111,40 +110,42 @@ async def main():
     )
     await browser_session.start()
     
+    # Navigate to the test URL
+    page = await browser.new_page()
+    await page.goto(TEST_URL)
+
     try:
-        # LLM and Controller
-        client = PagedDiscoveryEvalClient(
+        challenge_client=PagedDiscoveryEvalClient(
             challenges=JUICE_SHOP_SUBSET,
             base_url=JUICE_SHOP_BASE_URL,
         )
+        # LLM and Controller
         llm = LLMHub(MODEL_CONFIG)
         controller = Controller(exclude_actions=["extract_structured_data"])
 
-        # MinimalAgent now uses browser_session instead of Browser/BrowserContext
+        # SimpleAgent for single-shot execution
         agent = MinimalAgent(
-            start_urls=TEST_URLS,
+            start_urls=START_URLS,
             llm=llm,
-            max_steps=10,
-            max_page_steps=10,
             agent_sys_prompt=CUSTOM_SYSTEM_PROMPT,
             browser_session=browser_session,
             controller=controller,
-            proxy_handler=proxy_handler,
-            challenge_client=client,
             agent_dir=agent_dir,
+            max_steps=10,
+            cdp_handler=proxy_handler,
+            challenge_client=challenge_client,
+            init_task=TASK,
         )
         await agent.run()
+        for challenges in challenge_client.get_solved()["/login"]:
+            for challenge in challenges:
+                print(challenge)
 
-        # complete, complete_str = client.report_progress()
-        # agent_log.info(f"[Challenge Status]: {complete_str}")
-
-        # with open("agent_summary.json", "w") as f:
-        #     f.write(json.dumps(await agent.pages.to_json(), indent=2))
+        agent_log.info("SimpleAgent execution completed")
 
     except Exception as e:
         import traceback
         traceback.print_exc()
-        print(f"Browser session failed: {e}")
     finally:
         try:
             await browser_session.stop()

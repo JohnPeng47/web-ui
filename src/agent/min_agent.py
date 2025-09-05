@@ -24,11 +24,12 @@ from src.agent.discovery.prompts.planv4 import (
     TASK_PROMPT_WITH_PLAN,
 )
 from src.agent.links import parse_links_from_str
-from src.agent.proxy import ProxyHandler
 from src.llm_models import LLMHub
 from src.agent.utils import url_did_change
 from src.agent.pages import Page, PageObservations
 from eval.client import PagedDiscoveryEvalClient
+
+from cnc.workers.agent.cdp_handler import CDPHTTPHandler
 
 from common.utils import extract_json
 from logger import get_agent_loggers
@@ -189,7 +190,7 @@ class MinimalAgent:
         max_page_steps: int = 10,
         *,
         challenge_client: Optional[PagedDiscoveryEvalClient] = None,
-        proxy_handler: ProxyHandler | None = None,
+        cdp_handler: CDPHTTPHandler | None = None,
         agent_dir: Path,
         init_task: Optional[str] = None,
         screenshots: bool = False
@@ -203,7 +204,7 @@ class MinimalAgent:
         self.agent_context = AgentContext([])
         self.agent_state = AgentState(step=1, max_steps=max_steps, is_done=False)
         self.agent_dir = agent_dir
-        self.proxy_handler = proxy_handler
+        self.cdp_handler = cdp_handler
         self.challenge_client = challenge_client
 
         self._init_task = init_task

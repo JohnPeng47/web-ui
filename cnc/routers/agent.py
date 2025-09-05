@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
-from cnc.schemas.application import AgentRegister, AgentOut, PushMessages
+from cnc.schemas.agent import AgentRegister, AgentOut, PushMessages
 from cnc.database.session import get_session
 from cnc.database.models import Agent
 
-from cnc.services import agent as agent_service
+from cnc.services.agent import crud as agent_service
 from cnc.services.queue import BroadcastChannel
 from cnc.schemas.http import EnrichAuthNZMessage
 
