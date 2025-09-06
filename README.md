@@ -30,8 +30,11 @@ TODO:
 - move all common type definitions of agents into src/detection, src/discovery, src/exploit
 > src.agent -> src.exploit
 - add a dynamic adapter class for handling serializing/deserializing data for UserRole and AgentSteps that:
-1. encodes the subclass info in JSON format
+1. encodes the subclass     info in JSON format
 2. can read 1. and dynamically choose the appropriate serialization routine
 - currently not supporting UserRole based testing
+- add agent service to configure things like configuring LLMs before calling DB crud API
 Goals next week:
 - refactor code to a point where we can start running CC and CodexCLI on it
+
+# spend last 2 hours on front end UI

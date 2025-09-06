@@ -30,6 +30,13 @@ class AgentStep(JSONModel):
     def from_dict(cls, data: Dict[str, Any]) -> "AgentStep":
         return cls(**data)
 
+class DiscoveryAgentCreate(BaseModel):
+    max_steps: int
+    model_name: str
+    model_costs: Optional[float] = None
+    log_filepath: Optional[str] = None
+    agent_status: Optional[str] = "active"
+
 class ExploitAgentStep(AgentStep):
     step_num: int
     reflection: str
@@ -47,15 +54,6 @@ class ExploitAgentStep(AgentStep):
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "ExploitAgentStep":
         return cls(**data)
-
-
-class ExploitAgentCreate(BaseModel):
-    max_steps: int
-    model_name: str
-    model_costs: Optional[float] = None
-    log_filepath: Optional[str] = None
-    agent_status: Optional[str] = "active"
-
 
 class UploadAgentSteps(AgentMessage):
     steps: List[ExploitAgentStep]
