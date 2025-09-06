@@ -1,6 +1,6 @@
 import asyncio
 from fastapi import FastAPI
-from typing import Optional
+from typing import Optional, Callable, Any
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from cnc.database.session import engine
@@ -10,8 +10,8 @@ from cnc.workers.attackers.authnz.attacker import AuthzAttacker
 
 from cnc.workers.agent.browser import start_single_browser
 
-# agents
-from cnc.services.agent.discovery_pool import run_asyncio_loop_with_sigint_handling as start_discovery_pool
+# agent pools
+from cnc.pools.discovery_agent_pool import run_asyncio_loop_with_sigint_handling as start_discovery_pool
 
 async def start_enrichment_worker(raw_channel: BroadcastChannel, enriched_channel: BroadcastChannel, session: AsyncSession):
     """
@@ -53,7 +53,10 @@ async def start_attacker_worker(enriched_channel: BroadcastChannel, session: Asy
     # Run the worker
     await authz_worker.run()
 
-async def start_workers(app: Optional[FastAPI] = None):
+async def start_workers(
+    discovery_agent_pool: Callable[[BroadcastChannel], Any],
+    app: Optional[FastAPI] = None,
+):
     """
     Launch all worker processes.
     
@@ -72,10 +75,12 @@ async def start_workers(app: Optional[FastAPI] = None):
         # Use channels from app.state
         raw_channel = app.state.raw_channel
         enriched_channel = app.state.enriched_channel
+        discovery_agent_queue = app.state.discovery_agent_queue
         print("Using channels from FastAPI app.state")
     else:
         raw_channel = BroadcastChannel()
         enriched_channel = BroadcastChannel()
+        discovery_agent_queue = BroadcastChannel()
     
     # Create session factory
     async_session = async_sessionmaker(engine, expire_on_commit=False)
@@ -90,12 +95,12 @@ async def start_workers(app: Optional[FastAPI] = None):
             # start_enrichment_worker(raw_channel, enriched_channel, session),
             # start_attacker_worker(enriched_channel, session),
             start_single_browser(),
-            start_discovery_pool(),
+            discovery_agent_pool(discovery_agent_queue),
         )
 
 if __name__ == "__main__":
     try:
-        asyncio.run(start_workers())
+        asyncio.run(start_workers(start_discovery_pool))
     except KeyboardInterrupt:
         print("Worker launcher shutdown by user")
     except Exception as e:

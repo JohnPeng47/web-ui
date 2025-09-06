@@ -33,8 +33,17 @@ TODO:
 1. encodes the subclass     info in JSON format
 2. can read 1. and dynamically choose the appropriate serialization routine
 - currently not supporting UserRole based testing
-- add agent service to configure things like configuring LLMs before calling DB crud API
-Goals next week:
-- refactor code to a point where we can start running CC and CodexCLI on it
+- add agent service to configure things like configuring LLMs before calling 
+DB crud API
+- should implement a GET agent request in PageUpdateClient to confirm agent_id
+2025/09/05:
+- CDP traffic interception bonked, using MITMProxy for now
+
+Deployment Notes:
+- do a grep for http:// to make sure we have all the schemas configured properly for HTTPS
 
 # spend last 2 hours on front end UI
+
+Goals next week:
+- refactor code to a point where we can start running CC and CodexCLI on it
+- continue 

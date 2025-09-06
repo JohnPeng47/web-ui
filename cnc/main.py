@@ -1,6 +1,7 @@
 import asyncio
 import uvicorn
 from contextlib import asynccontextmanager
+from typing import Callable, Any
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -14,6 +15,13 @@ from cnc.services.queue import BroadcastChannel
 from cnc.database.session import create_db_and_tables
 from cnc.routers.engagement import make_engagement_router
 from cnc.routers.agent import make_agent_router
+
+# agent pools
+from cnc.pools.discovery_agent_pool import run_asyncio_loop_with_sigint_handling as start_discovery_pool
+
+from cnc.pools.pool import StartDiscoveryRequest
+
+from common.constants import API_SERVER_HOST, API_SERVER_PORT
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -38,10 +46,12 @@ def create_app() -> FastAPI:
         lifespan=lifespan
     )
     
-    # Create broadcast channels
+    # authnz attack channels
     raw_channel = BroadcastChannel[EnrichAuthNZMessage]()
     enriched_channel = BroadcastChannel[EnrichedRequest]()
-    
+    # discovery agent queue
+    discovery_agent_queue = BroadcastChannel[StartDiscoveryRequest]()
+
     # Store channels in app state for access by workers and dependencies
     app.state.raw_channel = raw_channel
     app.state.enriched_channel = enriched_channel
@@ -54,7 +64,7 @@ def create_app() -> FastAPI:
     
     # Create routers with injected dependencies
     engagement_router = make_engagement_router()
-    agent_router = make_agent_router()
+    agent_router = make_agent_router(discovery_agent_queue)
     
     # Include routers
     app.include_router(engagement_router)
@@ -64,11 +74,13 @@ def create_app() -> FastAPI:
 
 async def start_api_server(app_instance: FastAPI):
     """Start the FastAPI server using uvicorn."""
-    config = uvicorn.Config(app=app_instance, host="0.0.0.0", port=8000)
+    config = uvicorn.Config(app=app_instance, host=API_SERVER_HOST, port=API_SERVER_PORT)
     server = uvicorn.Server(config)
     await server.serve()
 
-async def main():
+async def start_all(
+    start_discovery_pool: Callable[[BroadcastChannel], Any]
+):
     setup_server_logger(".server_logs")
     
     """Start both workers and API server concurrently."""
@@ -76,9 +88,9 @@ async def main():
     app_instance = create_app()
     
     await asyncio.gather(
-        start_workers(app_instance),
+        start_workers(start_discovery_pool, app_instance),
         start_api_server(app_instance)
     )
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(start_all(start_discovery_pool))

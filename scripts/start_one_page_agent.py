@@ -11,7 +11,6 @@ from src.llm_models import LLMHub
 from src.agent.min_agent_single_page import MinimalAgentSinglePage
 from src.agent.prompts import CUSTOM_SYSTEM_PROMPT
 from src.agent.http_history import HTTPHandler
-from src.agent.proxy import ProxyHandler
 
 from eval.datasets.discovery.juiceshop import JUICE_SHOP_ALL as JUICE_SHOP_ALL_DISCOVERY
 from eval.datasets.discovery.juiceshop_exploit import JUICE_SHOP_VULNERABILITIES as JUICE_SHOP_VULNERABILITIES_EXPLOIT

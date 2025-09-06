@@ -27,9 +27,11 @@ from src.agent.links import parse_links_from_str
 from src.llm_models import LLMHub
 from src.agent.utils import url_did_change
 from src.agent.pages import Page, PageObservations
-from eval.client import PagedDiscoveryEvalClient
-
 from cnc.workers.agent.cdp_handler import CDPHTTPHandler
+
+# clients
+from src.agent.page_client import PageUpdateClient
+from eval.client import PagedDiscoveryEvalClient
 
 from common.utils import extract_json
 from logger import get_agent_loggers
@@ -190,6 +192,7 @@ class MinimalAgent:
         max_page_steps: int = 10,
         *,
         challenge_client: Optional[PagedDiscoveryEvalClient] = None,
+        server_client: Optional[PageUpdateClient] = None,
         cdp_handler: CDPHTTPHandler | None = None,
         agent_dir: Path,
         init_task: Optional[str] = None,
@@ -205,6 +208,7 @@ class MinimalAgent:
         self.agent_state = AgentState(step=1, max_steps=max_steps, is_done=False)
         self.agent_dir = agent_dir
         self.cdp_handler = cdp_handler
+        self.server_client = server_client
         self.challenge_client = challenge_client
 
         self._init_task = init_task
@@ -623,8 +627,8 @@ class MinimalAgent:
         self._log_state(model_output, agent_msgs)
         
         # update page state
-        if self.proxy_handler:
-            msgs = await self.proxy_handler.flush()
+        if self.cdp_handler:
+            msgs = await self.cdp_handler.flush()
             for msg in msgs:
                 self.pages.curr_page().add_http_msg(msg)
             if self.challenge_client:
@@ -634,6 +638,8 @@ class MinimalAgent:
                     self.agent_state.step, 
                     self.page_step,
                 )
+            if self.server_client:
+                await self.server_client.update_page_data(self.pages)
 
     async def run(self) -> None:
         while self.agent_state.step < self.agent_state.max_steps:

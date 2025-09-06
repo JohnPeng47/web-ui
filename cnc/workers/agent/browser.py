@@ -3,7 +3,9 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 from common.constants import (
     BROWSER_PROFILE_DIR, 
-    BROWSER_CDP_PORT 
+    BROWSER_CDP_PORT,
+    BROWSER_PROXY_HOST,
+    BROWSER_PROXY_PORT,
 )
 from playwright.async_api import async_playwright
 from browser_use.browser import BrowserSession, BrowserProfile
@@ -18,17 +20,21 @@ async def start_single_browser():
             user_data_dir=str(BROWSER_PROFILE_DIR),
             headless=True,
             executable_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe",
-            args=[f"--remote-debugging-port={BROWSER_CDP_PORT}", "--remote-debugging-address=127.0.0.1"],
+            args=[
+                f"--remote-debugging-port={BROWSER_CDP_PORT}", 
+                "--remote-debugging-address=127.0.0.1",
+                f"--proxy-server=http://{BROWSER_PROXY_HOST}:{BROWSER_PROXY_PORT}"
+            ],
         )        
         # idk why but need this here or CDP doesn't work
-        browser_session = BrowserSession(
-            browser_profile=BrowserProfile(
-                keep_alive=True,
-            ),
-            is_local=False,
-            cdp_url=f"http://127.0.0.1:{BROWSER_CDP_PORT}/",
-        )
-        await browser_session.start()
+        # browser_session = BrowserSession(
+        #     browser_profile=BrowserProfile(
+        #         keep_alive=True,
+        #     ),
+        #     is_local=False,
+        #     cdp_url=f"http://127.0.0.1:{BROWSER_CDP_PORT}/",
+        # )
+        # await browser_session.start()
 
         # Keep browser running until interrupted
         while True:
