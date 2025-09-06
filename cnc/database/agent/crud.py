@@ -1,10 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from uuid import UUID
 
 from sqlmodel import select
 
-from cnc.helpers.uuid import generate_uuid
 from cnc.database.models import DiscoveryAgent
 from cnc.schemas.agent import DiscoveryAgentCreate, ExploitAgentStep
 from cnc.database.crud import get_engagement
@@ -46,6 +45,21 @@ async def append_discovery_agent_steps(
         current_steps.append(step.to_dict())
     agent.agent_steps_data = current_steps
 
+    db.add(agent)
+    await db.commit()
+    await db.refresh(agent)
+    return agent
+
+
+async def update_page_data(
+    db: AsyncSession, agent_id: int, pages: List[Dict[str, Any]]
+) -> DiscoveryAgent:
+    """Replace the discovery agent's page_data with the provided pages list."""
+    agent = await get_discovery_agent(db, agent_id)
+    if not agent:
+        raise ValueError(f"Agent with ID {agent_id} not found")
+
+    agent.page_data = pages
     db.add(agent)
     await db.commit()
     await db.refresh(agent)

@@ -1,11 +1,9 @@
 import asyncio
 import signal
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional, Type, Union
 
 from pydantic import BaseModel
 
-from common.eval_pool import EvalAgentPool
 from common.constants import (
     MAX_DISCOVERY_AGENT_STEPS, 
     MAX_DISCOVERY_PAGE_STEPS, 
@@ -13,12 +11,16 @@ from common.constants import (
     BROWSER_CDP_PORT,
     BROWSER_CDP_HOST,
 )
-from eval.harness.exploit.queue import PersistedQueue
 from eval.datasets.detection import DISCOVERY_QUEUE_JSON
 from logger import setup_agent_logger, get_agent_loggers
-from src.agent.min_agent import MinimalAgent
 from src.agent.prompts import CUSTOM_SYSTEM_PROMPT
 from src.llm_models import LLMHub
+from cnc.pools.pool import LiveQueuePool
+from cnc.services.queue import BroadcastChannel
+
+# supported agents
+from src.agent.min_agent import MinimalAgent
+from src.agent.min_agent_single_page import MinimalAgentSinglePage
 
 # local connections
 from cnc.workers.agent.browser import get_browser_session
@@ -26,9 +28,8 @@ from cnc.workers.agent.cdp_handler import CDPHTTPHandler
 from src.agent.http_history import HTTPHandler
 
 # browser-use imports
-from browser_use.browser import BrowserSession, BrowserProfile
+from browser_use.browser import BrowserSession
 from browser_use.controller.service import Controller
-from playwright.async_api import async_playwright
 
 agent_log, _ = get_agent_loggers()
 
@@ -49,7 +50,7 @@ class StartDiscoveryRequest(BaseModel):
     init_task: Optional[str] = None
 
 
-class DiscoveryAgentPool(EvalAgentPool[StartDiscoveryRequest]):
+class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
     """
     AgentPool for running the async MinimalAgent flow inside the pool's thread executor.
 
@@ -61,6 +62,7 @@ class DiscoveryAgentPool(EvalAgentPool[StartDiscoveryRequest]):
         *,
         channel,
         item_cls,
+        agent_cls: Type[Union[MinimalAgent, MinimalAgentSinglePage]],
         queue_fp: str,
         llm_config: Dict,
         browser_session: BrowserSession,
@@ -80,6 +82,7 @@ class DiscoveryAgentPool(EvalAgentPool[StartDiscoveryRequest]):
             max_workers=max_workers,
             log_subfolder=log_subfolder,
         )
+        self._agent_cls = agent_cls
         self._browser_session = browser_session
         self._cdp_port = cdp_port
         self._proxy_host = proxy_host
@@ -103,7 +106,7 @@ class DiscoveryAgentPool(EvalAgentPool[StartDiscoveryRequest]):
         llm = LLMHub(self.llm_config["model_config"])
         controller = Controller(exclude_actions=self._exclude_actions)
 
-        agent = MinimalAgent(
+        agent = self._agent_cls(
             start_urls=list(queue_item.start_urls),
             llm=llm,
             max_steps=MAX_DISCOVERY_AGENT_STEPS,
@@ -121,19 +124,19 @@ class DiscoveryAgentPool(EvalAgentPool[StartDiscoveryRequest]):
         # dun matter
         return True
 
-async def run_asyncio_loop_with_sigint_handling():
+async def run_asyncio_loop_with_sigint_handling(channel: BroadcastChannel):
     setup_agent_logger(log_dir=".min_agent/logs")
     loop = asyncio.get_running_loop()
     browser_session = await get_browser_session()
 
-    vuln_queue = PersistedQueue()
     agent_pool = DiscoveryAgentPool(
-        channel=vuln_queue,
+        channel=channel,
         queue_fp=DISCOVERY_QUEUE_JSON,
         llm_config=MODEL_CONFIG,
         browser_session=browser_session,
         max_workers=MAX_WORKERS,
-        item_cls=StartDiscoveryRequest
+        item_cls=StartDiscoveryRequest,
+        agent_cls=MinimalAgent,
     )
 
     await agent_pool.start_channel_consumer()

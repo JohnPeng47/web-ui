@@ -13,9 +13,19 @@ from typing import AsyncGenerator
 from cnc.main import create_app
 from cnc.database.session import override_db, create_db_and_tables, engine
 from cnc.schemas.http import EnrichedRequest
-from httplib import ResourceLocator, RequestPart
+from cnc.main import start_all
 
-from httplib import HTTPMessage, HTTPRequest, HTTPResponse, HTTPRequestData, HTTPResponseData
+from cnc.pools.discovery_agent_pool import run_asyncio_loop_with_sigint_handling as start_discovery_pool
+
+from httplib import (
+    ResourceLocator, 
+    RequestPart,
+    HTTPMessage, 
+    HTTPRequest, 
+    HTTPResponse, 
+    HTTPRequestData, 
+    HTTPResponseData
+)
 
 
 @pytest.fixture

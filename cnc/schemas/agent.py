@@ -9,12 +9,8 @@ from cnc.schemas.base import JSONModel
 
 class AgentOut(BaseModel):
     id: int
-    agent_status: str
-    max_steps: int
-    model_name: str
-    model_costs: float
-    log_filepath: str
-    created_at: datetime
+    # TODO: add this in
+    # agent_status: str
 
     class Config:
         from_attributes = True
@@ -65,3 +61,10 @@ class UploadAgentSteps(AgentMessage):
 
 #     class Config:
 #         arbitrary_types_allowed = True  # Allows non-Pydantic models
+
+
+class UploadPageData(AgentMessage):
+    """Upload model for PageObservations coming from src.agent.pages.PageObservations.to_json().
+    Accepts a list of page dicts as-is to keep schema flexible and aligned with runtime objects.
+    """
+    page_data: List[Dict[str, Any]]

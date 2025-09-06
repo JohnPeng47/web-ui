@@ -13,6 +13,7 @@ async def create_engagement(
 ) -> PentestEngagement:
     app = PentestEngagement(
         id=generate_uuid(),
+        scopes=engagement_data.scopes,
         name=engagement_data.name,
         base_url=engagement_data.base_url,
         description=engagement_data.description,

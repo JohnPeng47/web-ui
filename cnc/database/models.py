@@ -28,6 +28,7 @@ class PentestEngagement(SQLModel, table=True):
     id: UUID = Field(primary_key=True)
     name: str
     base_url: str
+    scopes: Optional[List[str]] = None
     domain_ownership_verified: bool = False
     description: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)

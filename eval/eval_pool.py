@@ -5,20 +5,21 @@ from typing import Optional, TypeVar, Type
 from pydantic import BaseModel
 
 from common.agent import AgentPool
+from pentest_bot.web_exploit.tools import PythonInterpreter
+from eval.harness.exploit.queue import PersistedQueue
 from logger import get_agent_loggers
-from cnc.services.queue import BroadcastChannel
 
 agent_log, full_log = get_agent_loggers()
 
 T = TypeVar("T", bound=BaseModel)
 
-class LiveQueuePool(AgentPool[T]):
+class EvalAgentPool(AgentPool[T]):
     def __init__(
         self,
         *,
-        channel: BroadcastChannel[T],
-        item_cls: Optional[Type[T]] = None,
-        queue_fp: Optional[str] = None,
+        channel: PersistedQueue[T],
+        item_cls: Type[T],
+        queue_fp: str,
         llm_config: dict,
         max_workers: Optional[int] = None,
         log_subfolder: str = "pentest_bot",
@@ -40,16 +41,12 @@ class LiveQueuePool(AgentPool[T]):
         self._consumer_task: Optional[asyncio.Task] = None
         self._consumer_lock = threading.Lock()
         self._stop_event: asyncio.Event = asyncio.Event()
-        self._install_sigint_handler()
+        self._install_sigint_handler(self.stop_channel_consumer)
 
     async def start_channel_consumer(self) -> asyncio.Task:
         """
-        Start an async consumer that continuously pulls from a live
-        BroadcastChannel subscription and enqueues agent runs.
-
-        Runs indefinitely until `stop_channel_consumer` is called, using
-        an internal asyncio.gather to keep the loop alive alongside a
-        stop-event waiter.
+        Start the async consumer that pulls from the BroadcastChannel subscription
+        and enqueues agent runs. Returns the created asyncio.Task.
 
         You must call this from within a running event loop.
         """
@@ -58,23 +55,9 @@ class LiveQueuePool(AgentPool[T]):
                 raise RuntimeError("Channel consumer already running.")
             loop = asyncio.get_running_loop()
 
-            async def _run():
-                try:
-                    await asyncio.gather(
-                        self._consume_queue(),
-                        self._stop_event.wait(),
-                    )
-                except asyncio.CancelledError:
-                    pass
-                finally:
-                    try:
-                        await self.on_exit()
-                    except NotImplementedError:
-                        pass
-                    except Exception:
-                        agent_log.exception("on_exit handler failed.")
+            await self._channel.fill_from_file(self._queue_fp, self._item_cls)
+            self._consumer_task = loop.create_task(self._consume_queue())
 
-            self._consumer_task = loop.create_task(_run())
             return self._consumer_task
 
     def stop_channel_consumer(self) -> None:
@@ -88,13 +71,12 @@ class LiveQueuePool(AgentPool[T]):
 
     async def _consume_queue(self) -> None:
         """
-        Core loop: await queue items from a live BroadcastChannel subscription,
-        convert, and enqueue agent runs. Relies on AgentPool.start_agent for
-        execution and tracking.
+        Core loop: await queue items, convert, and enqueue agent runs.
+        Relies on AgentPool.start_agent for execution and tracking.
         """
-        print("Consuming live queue, initial qsize: ", self._sub_queue.qsize())
+        print("Consuming queue, qsize: ", self._sub_queue.qsize())
 
-        while not self._stop_event.is_set():
+        while self._sub_queue.qsize() > 0 and not self._stop_event.is_set():
             # Wait for either a new item or a stop signal, whichever comes first
             get_task = asyncio.create_task(self._sub_queue.get())
             stop_task = asyncio.create_task(self._stop_event.wait())
@@ -117,7 +99,3 @@ class LiveQueuePool(AgentPool[T]):
                 agent_log.exception("start_agent failed for broadcast item.")
             finally:
                 self._sub_queue.task_done()
-
-    async def on_exit(self) -> None:
-        """Hook for graceful shutdown. Override in subclasses."""
-        raise NotImplementedError

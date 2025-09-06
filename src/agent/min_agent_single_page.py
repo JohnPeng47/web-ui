@@ -8,9 +8,13 @@ from browser_use.agent.views import ActionResult
 
 from src.agent.min_agent import MinimalAgent
 from src.llm_models import LLMHub
-from eval.client import PagedDiscoveryEvalClient
 from cnc.workers.agent.cdp_handler import CDPHTTPHandler
+from cnc.workers.agent.proxy_handler import MitmProxyHTTPHandler
 from src.agent.pages import Page
+
+# clients
+from src.agent.page_client import PageUpdateClient
+from eval.client import PagedDiscoveryEvalClient
 
 INCLUDE_ATTRIBUTES: List[str] = (
     ["title", "type", "name", "role", "aria-label", "placeholder", "value", "alt"]
@@ -33,7 +37,7 @@ class MinimalAgentSinglePage(MinimalAgent):
         max_page_steps: int = 10,
         *,
         challenge_client: Optional[PagedDiscoveryEvalClient] = None,
-        cdp_handler: CDPHTTPHandler | None = None,
+        cdp_handler: MitmProxyHTTPHandler | None = None,
         agent_dir: Path,
         init_task: Optional[str] = None,
         screenshots: bool = False
@@ -100,8 +104,8 @@ class MinimalAgentSinglePage(MinimalAgent):
             if self.cdp_handler:
                 msgs = await self.cdp_handler.flush()
                 for msg in msgs:
-                    print(f"[{msg.method}] {msg.url}")
                     self.pages.curr_page().add_http_msg(msg)
+                    print(f"[{msg.method}] {msg.url}")
                 if self.challenge_client:
                     await self.challenge_client.update_status(
                         msgs, 
@@ -109,9 +113,16 @@ class MinimalAgentSinglePage(MinimalAgent):
                         self.agent_state.step, 
                         self.page_step,
                     )
+                print(self.pages)
+                if self.server_client:
+                    await self.server_client.update_page_data(self.pages)
 
             self._log(f"Single page visit completed for: {self.curr_url}")
         else:
             # No more URLs to process or already processed
             self.agent_state.is_done = True
             self._log("No more pages to visit - agent done")
+
+    async def run(self):
+        await self.step()
+        print("Single page agent run completed!")

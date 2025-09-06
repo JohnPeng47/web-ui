@@ -196,10 +196,11 @@ class AgentPool(ABC, Generic[T]):
 
         os._exit(1)
 
-    def _install_sigint_handler(self) -> None:
+    def _install_sigint_handler(self, shutdown_cb: Callable[[], None]) -> None:
         def _sigint(signum, frame):
             print("\n[!] SIGINT received – terminating thread pool …", file=sys.stderr)
             self._executor.shutdown(wait=False, cancel_futures=True)
+            shutdown_cb()
             logging.shutdown()
 
             os._exit(1)
