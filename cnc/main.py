@@ -17,8 +17,7 @@ from cnc.routers.engagement import make_engagement_router
 from cnc.routers.agent import make_agent_router
 
 # agent pools
-from cnc.pools.discovery_agent_pool import run_asyncio_loop_with_sigint_handling as start_discovery_pool
-
+from cnc.pools.discovery_agent_pool import start_discovery_agent as start_discovery_pool
 from cnc.pools.pool import StartDiscoveryRequest
 
 from common.constants import API_SERVER_HOST, API_SERVER_PORT
@@ -55,13 +54,13 @@ def create_app() -> FastAPI:
     # Store channels in app state for access by workers and dependencies
     app.state.raw_channel = raw_channel
     app.state.enriched_channel = enriched_channel
+    app.state.discovery_agent_queue = discovery_agent_queue
     
     # Add exception handler for validation errors (422)
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
         print(f"Validation error: {exc.errors()}")
 
-    
     # Create routers with injected dependencies
     engagement_router = make_engagement_router()
     agent_router = make_agent_router(discovery_agent_queue)

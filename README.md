@@ -38,6 +38,8 @@ DB crud API
 - should implement a GET agent request in PageUpdateClient to confirm agent_id
 2025/09/05:
 - CDP traffic interception bonked, using MITMProxy for now
+- [BUG] Proxy handler not catching any response data
+- [FIX] BrowserUse browser session connection script
 
 Deployment Notes:
 - do a grep for http:// to make sure we have all the schemas configured properly for HTTPS

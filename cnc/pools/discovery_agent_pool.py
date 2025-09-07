@@ -23,6 +23,7 @@ from src.agent.min_agent import MinimalAgent
 from src.agent.min_agent_single_page import MinimalAgentSinglePage
 
 # local connections
+from cnc.pools.pool import StartDiscoveryRequest
 from cnc.workers.agent.browser import get_browser_session
 from cnc.workers.agent.cdp_handler import CDPHTTPHandler
 from src.agent.http_history import HTTPHandler
@@ -43,12 +44,6 @@ MODEL_CONFIG = {
         "check_plan_completion": "gpt-4.1",
     }
 }
-
-class StartDiscoveryRequest(BaseModel):
-    start_urls: List[str]
-    scopes: Optional[List[str]] = None
-    init_task: Optional[str] = None
-
 
 class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
     """
@@ -117,6 +112,7 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
             cdp_handler=cdp_handler,
             agent_dir=self.parent_dir,
             init_task=queue_item.init_task,
+            server_client=queue_item.client,
             screenshots=SCREENSHOTS,
         )
         await agent.run()
@@ -124,7 +120,10 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
         # dun matter
         return True
 
-async def run_asyncio_loop_with_sigint_handling(channel: BroadcastChannel):
+async def start_discovery_agent(
+    channel: BroadcastChannel,
+    agent_cls: Type[Union[MinimalAgent, MinimalAgentSinglePage]] = MinimalAgentSinglePage,
+):
     setup_agent_logger(log_dir=".min_agent/logs")
     loop = asyncio.get_running_loop()
     browser_session = await get_browser_session()
@@ -136,7 +135,7 @@ async def run_asyncio_loop_with_sigint_handling(channel: BroadcastChannel):
         browser_session=browser_session,
         max_workers=MAX_WORKERS,
         item_cls=StartDiscoveryRequest,
-        agent_cls=MinimalAgent,
+        agent_cls=agent_cls,
     )
 
     await agent_pool.start_channel_consumer()

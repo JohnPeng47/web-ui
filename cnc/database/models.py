@@ -28,19 +28,22 @@ class PentestEngagement(SQLModel, table=True):
     id: UUID = Field(primary_key=True)
     name: str
     base_url: str
-    scopes: Optional[List[str]] = None
     domain_ownership_verified: bool = False
     description: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     findings: Optional[List[Dict[str, Any]]] = Field(default=None, sa_column=Column(JSON))
-    
+
     # JSON fields stored with suffix _data
+    scopes_data: Optional[List[str]] = Field(
+        default=None, 
+        sa_column=Column(JSON),
+        description="List of scope URLs/domains for the engagement"
+    )
     user_roles_data: Optional[List[Dict[str, Any]]] = Field(
         default=None, 
         sa_column=Column(JSON),
         description="JSON array of user role objects with credentials"
     )
-    
     # Many-to-many relationships to different agent types
     exploit_agents: List["ExploitAgent"] = Relationship(
         link_model=PentestEngagementExploitAgent,

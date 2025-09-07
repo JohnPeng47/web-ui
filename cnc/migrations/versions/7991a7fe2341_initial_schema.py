@@ -1,8 +1,8 @@
 """initial schema
 
-Revision ID: eb16b292251c
+Revision ID: 7991a7fe2341
 Revises: 
-Create Date: 2025-09-05 15:00:59.805848
+Create Date: 2025-09-06 21:22:15.996953
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'eb16b292251c'
+revision: str = '7991a7fe2341'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -27,12 +27,13 @@ def upgrade() -> None:
     sa.Column('agent_status', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('max_steps', sa.Integer(), nullable=False),
     sa.Column('model_name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('model_costs', sa.Float(), nullable=False),
-    sa.Column('log_filepath', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('model_costs', sa.Float(), nullable=True),
+    sa.Column('log_filepath', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('opik_prompt_name', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('opik_prompt_commit', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('agent_steps_data', sa.JSON(), nullable=True),
+    sa.Column('page_data', sa.JSON(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('exploitagent',
@@ -40,8 +41,8 @@ def upgrade() -> None:
     sa.Column('agent_status', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('max_steps', sa.Integer(), nullable=False),
     sa.Column('model_name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('model_costs', sa.Float(), nullable=False),
-    sa.Column('log_filepath', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('model_costs', sa.Float(), nullable=True),
+    sa.Column('log_filepath', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('opik_prompt_name', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('opik_prompt_commit', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
@@ -56,6 +57,7 @@ def upgrade() -> None:
     sa.Column('description', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('findings', sa.JSON(), nullable=True),
+    sa.Column('scopes_data', sa.JSON(), nullable=True),
     sa.Column('user_roles_data', sa.JSON(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )

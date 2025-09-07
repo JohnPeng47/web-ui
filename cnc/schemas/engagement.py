@@ -22,7 +22,7 @@ class UserRole(BaseModel):
 class EngagementBase(BaseModel):
     name: str
     base_url: str
-    scopes: Optional[List[str]] = None
+    scopes_data: Optional[List[str]] = None
     description: Optional[str] = None
 
 class EngagementCreate(EngagementBase):

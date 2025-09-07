@@ -11,7 +11,7 @@ from cnc.workers.attackers.authnz.attacker import AuthzAttacker
 from cnc.workers.agent.browser import start_single_browser
 
 # agent pools
-from cnc.pools.discovery_agent_pool import run_asyncio_loop_with_sigint_handling as start_discovery_pool
+from cnc.pools.discovery_agent_pool import start_discovery_agent as start_discovery_pool
 
 async def start_enrichment_worker(raw_channel: BroadcastChannel, enriched_channel: BroadcastChannel, session: AsyncSession):
     """
@@ -89,12 +89,14 @@ async def start_workers(
     async with async_session() as session:
         # Start workers with DI channels
         print("Starting workers with dependency injection...")
+        asyncio.create_task(start_single_browser())
+
+        await asyncio.sleep(4)
         
         # Run all workers concurrently
         await asyncio.gather(
             # start_enrichment_worker(raw_channel, enriched_channel, session),
             # start_attacker_worker(enriched_channel, session),
-            start_single_browser(),
             discovery_agent_pool(discovery_agent_queue),
         )
 

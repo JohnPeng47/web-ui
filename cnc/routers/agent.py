@@ -51,11 +51,12 @@ def make_agent_router(discovery_agent_queue: BroadcastChannel[StartDiscoveryRequ
             await discovery_agent_queue.publish(
                 StartDiscoveryRequest(
                     start_urls=[engagement.base_url], 
-                    scopes=engagement.scopes, 
+                    scopes=engagement.scopes_data, 
                     init_task=None,
                     client=PageUpdateClient(
                         agent_id=agent.id,
-                        api_url=f"http://{API_SERVER_HOST}:{API_SERVER_PORT}",
+                        # TODO: FOR testing only
+                        api_url=f"http://127.0.0.1:{API_SERVER_PORT}",
                     )
                 )
             )
@@ -97,6 +98,21 @@ def make_agent_router(discovery_agent_queue: BroadcastChannel[StartDiscoveryRequ
 
             agent = await update_page_data_service(db, agent_id, payload.page_data)
             return agent
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    @router.get("/agents/{agent_id}/page-data")
+    async def get_agent_page_data(
+        agent_id: int,
+        db: AsyncSession = Depends(get_session),
+    ):
+        """Get page data for a discovery agent."""
+        try:
+            agent = await get_discovery_agent_service(db, agent_id)
+            if not agent:
+                raise HTTPException(status_code=404, detail="Agent not found")
+
+            return {"page_data": agent.page_data}
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
     
