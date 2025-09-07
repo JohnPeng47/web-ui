@@ -1,0 +1,63 @@
+import pytest
+import asyncio
+from httpx import AsyncClient
+
+pytestmark = pytest.mark.asyncio
+
+async def test_discovery_agent_integration(test_app_client_with_workers: AsyncClient):
+    """Integration test for discovery agent: create engagement, register agent, verify page data collection."""
+    application_client = test_app_client_with_workers
+
+    # 2. Create engagement (API)
+    engagement_payload = {
+        "name": "Discovery Agent Integration Test",
+        "base_url": "https://example.com",
+        "description": "Integration test for discovery agent functionality",
+        "scopes_data": ["https://example.com"]
+    }
+    create_resp = await application_client.post("/engagement/", json=engagement_payload)
+    assert create_resp.status_code == 200
+    engagement = create_resp.json()
+    engagement_id = engagement["id"]
+
+    # 3. Register discovery agent (API)
+    agent_payload = {
+        "max_steps": 5,
+        "model_name": "gpt-4o-mini",
+        "model_costs": 0.01,
+        "log_filepath": "/tmp/discovery_agent.log",
+        "agent_status": "active",
+    }
+    register_resp = await application_client.post(
+        f"/engagement/{engagement_id}/agents/discovery/register",
+        json=agent_payload,
+    )
+    assert register_resp.status_code == 200
+    agent = register_resp.json()
+    agent_id = agent["id"]
+
+    # 4. Continue polling on the agent page_data API on a poll/sleep(1) loop for 20 iterations
+    page_data_found = False
+    for i in range(20):
+        get_page_data_resp = await application_client.get(f"/agents/{agent_id}/page-data")
+        assert get_page_data_resp.status_code == 200
+        page_data_result = get_page_data_resp.json()
+        
+        if "page_data" in page_data_result and page_data_result["page_data"]:
+            page_data_found = True
+            break
+            
+        await asyncio.sleep(1)
+
+    # 5. Confirm that the page data is not empty and has been updated by the agent
+    assert page_data_found, "Discovery agent did not collect any page data within 20 seconds"
+    
+    # Verify the structure of collected page data
+    final_resp = await application_client.get(f"/agents/{agent_id}/page-data")
+    final_data = final_resp.json()
+    
+    assert len(final_data["page_data"]) > 0
+    # Verify basic page data structure
+    page_item = final_data["page_data"][0]
+    assert "url" in page_item
+    assert "content" in page_item or "title" in page_item

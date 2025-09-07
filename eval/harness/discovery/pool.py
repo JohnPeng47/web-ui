@@ -23,6 +23,7 @@ from src.llm_models import LLMHub
 from cnc.workers.agent.browser import get_browser_session
 from cnc.workers.agent.cdp_handler import CDPHTTPHandler
 from cnc.workers.agent.proxy_handler import MitmProxyHTTPHandler
+# from cnc.workers.agent.proxy_handler2 import MitmProxyHTTPHandler
 from src.agent.http_history import HTTPHandler
 
 # supported agents
@@ -102,9 +103,9 @@ class DiscoveryAgentPool(EvalAgentPool[StartDiscoveryRequest]):
             handler=HTTPHandler(scopes=queue_item.scopes),
             # listen_host=PROXY_HOST,
             # listen_port=PORT,
-            start_browser=False,
+            # start_browser=False,
         )
-        await cdp_handler.connect()
+        cdp_handler.connect()
 
         # cdp_handler = CDPHTTPHandler(
         #     handler=HTTPHandler(scopes=queue_item.scopes),
@@ -127,6 +128,7 @@ class DiscoveryAgentPool(EvalAgentPool[StartDiscoveryRequest]):
             cdp_handler=cdp_handler,
             agent_dir=self.parent_dir,
             init_task=queue_item.init_task,
+            server_client=queue_item.server_client,
             screenshots=SCREENSHOTS,
         )
         await agent.run()

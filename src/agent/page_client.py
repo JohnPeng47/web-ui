@@ -28,6 +28,7 @@ class PageUpdateClient:
         """
         self.agent_id = agent_id
         self.timeout = timeout
+        self.base_url = api_url
         self.client = client if client else httpx.AsyncClient(base_url=api_url, timeout=timeout)
 
         headers = {
@@ -52,7 +53,8 @@ class PageUpdateClient:
         """
         path = f"/agents/{self.agent_id}/page-data"
         payload = {
-            "page_data": pages.to_json()
+            "agent_id": self.agent_id,
+            "page_data": await pages.to_json()
         }
         response = await self.client.post(path, json=payload)
         response.raise_for_status()

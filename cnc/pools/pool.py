@@ -1,5 +1,6 @@
 import asyncio
 import threading
+from dataclasses import dataclass
 from typing import Optional, List, TypeVar, Type
 
 from pydantic import BaseModel
@@ -14,9 +15,10 @@ from src.detection.prompts import StartExploitRequest
 
 agent_log, full_log = get_agent_loggers()
 
-T = TypeVar("T", bound=BaseModel)
+T = TypeVar("T")
 
-class StartDiscoveryRequest(BaseModel):
+@dataclass
+class StartDiscoveryRequest:
     start_urls: List[str]
     scopes: Optional[List[str]] = None
     init_task: Optional[str] = None

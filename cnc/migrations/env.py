@@ -25,11 +25,26 @@ from cnc.database.agent.models import *
 # Import your database URL
 from cnc.database.session import DATABASE_URL
 
-# Convert async URL to sync URL for Alembic
-sync_DATABASE_URL = DATABASE_URL.replace("sqlite+aiosqlite:", "sqlite:")
+def get_url():
+    """Get URL based on environment or section"""
+    # Check for environment variable first
+    env_schema = os.getenv('ALEMBIC_SCHEMA')
+    if env_schema:
+        # Try to get URL from specific section
+        try:
+            url = config.get_section_option(env_schema, "sqlalchemy.url")
+            # Convert async URL to sync URL for Alembic
+            return url.replace("sqlite+aiosqlite:", "sqlite:")
+        except:
+            # Fallback to main section or default
+            pass
+    
+    # Default: Convert your main DATABASE_URL to sync
+    sync_DATABASE_URL = DATABASE_URL.replace("sqlite+aiosqlite:", "sqlite:")
+    return sync_DATABASE_URL
 
-# Set the SQLAlchemy URL
-config.set_main_option("sqlalchemy.url", sync_DATABASE_URL)
+# Set the SQLAlchemy URL based on schema selection
+config.set_main_option("sqlalchemy.url", get_url())
 
 # Interpret the config file for Python logging
 if config.config_file_name is not None:
@@ -40,7 +55,8 @@ target_metadata = SQLModel.metadata
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
-    url = config.get_main_option("sqlalchemy.url")
+    url = get_url()
+    
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -59,13 +75,21 @@ def do_run_migrations(connection: Connection) -> None:
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
+    # Get the appropriate URL
+    url = get_url()
+    
     # Use the sync version of the URL
     connectable = config.attributes.get("connection", None)
     if connectable is None:
+        # Create engine config with the selected URL
+        engine_config = {
+            "sqlalchemy.url": url,
+            "sqlalchemy.poolclass": pool.NullPool
+        }
+        
         connectable = engine_from_config(
-            context.config.get_section(context.config.config_ini_section),
+            engine_config,
             prefix="sqlalchemy.",
-            poolclass=pool.NullPool,
         )
 
     with connectable.connect() as connection:

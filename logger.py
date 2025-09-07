@@ -6,7 +6,7 @@ import threading
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, Any, cast
 
 from src.utils import get_ctxt_id, LoggerProxy
 
@@ -169,7 +169,14 @@ def setup_agent_logger(
 
     if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
         logger.addHandler(get_console_handler())
-    if not any(isinstance(h, AgentFileHandler) and h._thread_id == thread_id for h in logger.handlers):
+    existing_fh = next((
+        h for h in logger.handlers
+        if isinstance(h, AgentFileHandler) and getattr(h, "_thread_id", None) == thread_id
+    ), None)
+    if existing_fh is not None:
+        fh = existing_fh
+        cast(Any, logger)._run_dir = fh.base_logdir          # keep this public attr
+    else:
         fh = AgentFileHandler(
             name,
             base_dir,
@@ -177,7 +184,7 @@ def setup_agent_logger(
             thread_id=thread_id,
         )
         logger.addHandler(fh)
-        logger._run_dir = fh.base_logdir          # keep this public attr
+        cast(Any, logger)._run_dir = fh.base_logdir          # keep this public attr
 
     # ─────────── Secondary logger ("full_requests") ────────────────────── #
     fr_logger = logging.getLogger("full_requests")
@@ -186,7 +193,8 @@ def setup_agent_logger(
 
     if not any(isinstance(h, AgentFileHandler) and h._thread_id == thread_id for h in fr_logger.handlers):
         # create a sibling dir <run>/full_requests/
-        fr_dir = logger._run_dir / "full_requests"
+        run_dir = cast(Path, getattr(logger, "_run_dir"))
+        fr_dir = run_dir / "full_requests"
         fr_dir.mkdir(exist_ok=True)
 
         fr_fh = AgentFileHandler(

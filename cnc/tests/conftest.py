@@ -1,3 +1,4 @@
+import asyncio
 import uuid
 import json
 import pytest
@@ -15,7 +16,8 @@ from cnc.database.session import override_db, create_db_and_tables, engine
 from cnc.schemas.http import EnrichedRequest
 from cnc.main import start_all
 
-from cnc.pools.discovery_agent_pool import run_asyncio_loop_with_sigint_handling as start_discovery_pool
+from cnc.pools.discovery_agent_pool import start_discovery_agent as start_discovery_pool
+from src.agent.min_agent_single_page import MinimalAgentSinglePage
 
 from httplib import (
     ResourceLocator, 
@@ -126,7 +128,6 @@ TEST_DB_URL = (
 def _sessionmaker() -> async_sessionmaker[AsyncSession]:
     return async_sessionmaker(engine, expire_on_commit=False)
 
-
 # ── FIXTURE: FastAPI app + HTTPX AsyncClient on an isolated DB ────────────────
 @pytest_asyncio.fixture(scope="function")
 async def test_app_client() -> AsyncGenerator:
@@ -137,3 +138,58 @@ async def test_app_client() -> AsyncGenerator:
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as ac:
             yield ac         # hand them to the test
+
+
+# ── FIXTURE: App client with background workers (auto-teardown) ───────────────
+@pytest_asyncio.fixture(scope="function")
+async def test_app_client_with_workers() -> AsyncGenerator[AsyncClient, None]:
+    """
+    Starts the browser worker and discovery agent pool tied to the same FastAPI
+    app instance used by the HTTP client. All background tasks are cancelled and
+    cleaned up when the fixture scope ends.
+    """
+    # Deferred imports to avoid test collection side-effects
+    from cnc.workers.agent.browser import start_single_browser, get_browser_session
+
+    async with override_db(TEST_DB_URL):
+        await create_db_and_tables()
+        app = create_app()
+
+        # Background workers
+        browser_task = asyncio.create_task(start_single_browser())
+        stop_event: asyncio.Event = asyncio.Event()
+        discovery_task = asyncio.create_task(
+            start_discovery_pool(
+                app.state.discovery_agent_queue,
+                agent_cls=MinimalAgentSinglePage
+            )
+        )
+
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            try:
+                yield ac
+            finally:
+                # Teardown workers
+                stop_event.set()
+                for t in (discovery_task, browser_task):
+                    if not t.done():
+                        t.cancel()
+                # Await cancellations without raising
+                for t in (discovery_task, browser_task):
+                    try:
+                        await t
+                    except asyncio.CancelledError:
+                        pass
+
+# @pytest_asyncio.fixture(scope="function")
+# async def test_ () -> AsyncGenerator:
+#     async with override_db(TEST_DB_URL):
+#         await create_db_and_tables()           # schema lives on disk
+#         app = create_app()                     # routes import the models
+
+#         transport = ASGITransport(app=app)
+#         async with AsyncClient(transport=transport, base_url="http://test") as ac:
+#             yield ac         # hand them to the test
+
+

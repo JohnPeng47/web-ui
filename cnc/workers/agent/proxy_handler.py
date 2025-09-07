@@ -270,67 +270,19 @@ class MitmProxyHTTPHandler:
     def _flow_to_http_response(self, flow: http.HTTPFlow) -> HTTPResponse:
         resp = flow.response
         req = flow.request
+
+        status = resp.status_code if resp else 0
         headers = dict(resp.headers) if resp else {}
-        body = resp.raw_content if resp and resp.raw_content is not None else None
+        ctype = headers.get("content-type", "")
 
-        # Detect and decode body content based on byte data analysis
-        processed_body = body
+        processed_body = resp.get_text(strict=False)
         body_error = None
-        
-        if body:
-            try:
-                # Analyze the raw byte data to determine content type
-                if isinstance(body, bytes):
-                    # Check for JSON by looking at the first non-whitespace bytes
-                    stripped_body = body.lstrip()
-                    is_json = stripped_body.startswith((b"{", b"["))
-                    
-                    # Check for common text patterns
-                    is_text = True
-                    try:
-                        # Try to decode as UTF-8 to see if it's text
-                        text_body = body.decode("utf-8", errors="strict")
-                    except UnicodeDecodeError:
-                        # If strict UTF-8 decoding fails, likely binary
-                        is_text = False
-                        text_body = body.decode("utf-8", errors="replace")
-                    
-                    if is_text and is_json:
-                        # Parse as JSON if it looks like JSON and is valid text
-                        import json
-                        try:
-                            processed_body = json.loads(text_body)
-                        except (json.JSONDecodeError, ValueError):
-                            # If JSON parsing fails, keep as text
-                            processed_body = text_body
-                    elif is_text:
-                        # For other text content, use the decoded text
-                        processed_body = text_body
-                    else:
-                        # For binary content, keep as raw bytes
-                        processed_body = body
-                else:
-                    # Non-bytes body, convert to string
-                    text_body = str(body)
-                    # Check if it looks like JSON
-                    if text_body.strip().startswith(("{", "[")):
-                        import json
-                        try:
-                            processed_body = json.loads(text_body)
-                        except (json.JSONDecodeError, ValueError):
-                            processed_body = text_body
-                    else:
-                        processed_body = text_body
-                    
-            except Exception as e:
-                body_error = str(e)
-                processed_body = body
 
-        print(f"Processed body [{req.url}]: {processed_body}")
-        
+        print(f"Processed body [{req.pretty_url}]:\n{processed_body}")
+
         data = HTTPResponseData(
             url=req.pretty_url,
-            status=resp.status_code if resp else 0,
+            status=status,
             headers={k.lower(): v for k, v in headers.items()},
             is_iframe=False,
             body=processed_body,
