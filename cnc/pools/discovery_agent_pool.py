@@ -2,8 +2,6 @@ import asyncio
 import signal
 from typing import Dict, List, Optional, Type, Union
 
-from pydantic import BaseModel
-
 from common.constants import (
     MAX_DISCOVERY_AGENT_STEPS, 
     MAX_DISCOVERY_PAGE_STEPS, 
@@ -26,6 +24,7 @@ from src.agent.min_agent_single_page import MinimalAgentSinglePage
 from cnc.pools.pool import StartDiscoveryRequest
 from cnc.workers.agent.browser import get_browser_session
 from cnc.workers.agent.cdp_handler import CDPHTTPHandler
+from cnc.workers.agent.proxy_handler import MitmProxyHTTPHandler
 from src.agent.http_history import HTTPHandler
 
 # browser-use imports
@@ -58,7 +57,6 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
         channel,
         item_cls,
         agent_cls: Type[Union[MinimalAgent, MinimalAgentSinglePage]],
-        queue_fp: str,
         llm_config: Dict,
         browser_session: BrowserSession,
         cdp_port: int = 9899,
@@ -72,7 +70,6 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
         super().__init__(
             channel=channel,
             item_cls=item_cls,
-            queue_fp=queue_fp,
             llm_config=llm_config,
             max_workers=max_workers,
             log_subfolder=log_subfolder,
@@ -90,12 +87,18 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
         """
         Build and run a MinimalAgent session for a single discovery request.
         """
-        cdp_handler = CDPHTTPHandler(
+        # cdp_handler = CDPHTTPHandler(
+        #     handler=HTTPHandler(scopes=queue_item.scopes),
+        #     cdp_host=BROWSER_CDP_HOST,
+        #     cdp_port=BROWSER_CDP_PORT
+        # )
+        # await cdp_handler.connect()
+        proxy_handler = MitmProxyHTTPHandler(
             handler=HTTPHandler(scopes=queue_item.scopes),
-            cdp_host=BROWSER_CDP_HOST,
-            cdp_port=BROWSER_CDP_PORT
+            listen_host=self._proxy_host,
+            listen_port=self._proxy_port,
         )
-        await cdp_handler.connect()
+        await proxy_handler.connect()
 
         # LLM and Controller
         llm = LLMHub(self.llm_config["model_config"])
@@ -109,7 +112,7 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
             agent_sys_prompt=CUSTOM_SYSTEM_PROMPT,
             browser_session=self._browser_session,
             controller=controller,
-            cdp_handler=cdp_handler,
+            cdp_handler=proxy_handler,
             agent_dir=self.parent_dir,
             init_task=queue_item.init_task,
             server_client=queue_item.client,
@@ -122,7 +125,7 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
 
 async def start_discovery_agent(
     channel: BroadcastChannel,
-    agent_cls: Type[Union[MinimalAgent, MinimalAgentSinglePage]] = MinimalAgentSinglePage,
+    agent_cls: Type[Union[MinimalAgent, MinimalAgentSinglePage]] = MinimalAgent,
 ):
     setup_agent_logger(log_dir=".min_agent/logs")
     loop = asyncio.get_running_loop()
@@ -130,7 +133,6 @@ async def start_discovery_agent(
 
     agent_pool = DiscoveryAgentPool(
         channel=channel,
-        queue_fp=DISCOVERY_QUEUE_JSON,
         llm_config=MODEL_CONFIG,
         browser_session=browser_session,
         max_workers=MAX_WORKERS,

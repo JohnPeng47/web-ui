@@ -1,6 +1,7 @@
 from __future__ import annotations  # type: ignore[all]
 
 import time
+import asyncio
 from textwrap import dedent
 
 import jinja2
@@ -265,6 +266,87 @@ Make sure to return an instance of the JSON, not the schema itself
                 # Exponential backoff: retry_delay * (2 ^ attempt)
                 current_delay = retry_delay * (2 ** (current_retry - 1))
                 time.sleep(current_delay)
+                print(f"Retry attempt {current_retry}/{max_retries} after error: {str(e)}. Waiting {current_delay}s")
+
+    async def ainvoke(
+        self,
+        model: Any,
+        max_retries: int = 3,
+        retry_delay: int = 1,
+        prompt_args: Dict = {},
+        prompt_logger: Optional[Logger] = None,
+        prompt_log_preamble: Optional[str] = "",
+        manual_rewrite: bool = False
+    ) -> Any:
+        """Async version of invoke that leverages model.ainvoke when available.
+
+        Falls back to running the sync invoke in a thread if the model has no ainvoke.
+        Also supports the manual rewrite flow using an async call when available.
+        """
+        prompt = self._prepare_prompt(
+            templates=self.templates,
+            manual_rewrite=manual_rewrite,
+            **prompt_args,
+        )
+        if prompt_logger:
+            prompt_logger.info(f"{prompt_log_preamble}\n[{self.__class__.__name__}]: {prompt}")
+
+        current_retry = 1
+        while current_retry <= max_retries:
+            try:
+                # Invoke primary model
+                if hasattr(model, "ainvoke"):
+                    res = await model.ainvoke(prompt)
+                    # Manually log cost since wrapper logging happens in sync path
+                    if hasattr(model, "log_cost"):
+                        try:
+                            model.log_cost(res)
+                        except Exception:
+                            pass
+                else:
+                    res = await asyncio.to_thread(model.invoke, prompt)
+
+                # Optional manual rewrite step
+                if getattr(model, "model_name", None) in self.manual_response_models or manual_rewrite:
+                    if not self.manual_rewrite_model:
+                        self.manual_rewrite_model = lazy_openai_41()
+
+                    rewrite_prompt = self._prepare_manual_rewrite_prompt(res.content)
+                    rw_model = self.manual_rewrite_model
+                    if hasattr(rw_model, "ainvoke"):
+                        rewrite_res = await rw_model.ainvoke(rewrite_prompt)
+                        if hasattr(rw_model, "log_cost"):
+                            try:
+                                rw_model.log_cost(rewrite_res)
+                            except Exception:
+                                pass
+                    else:
+                        rewrite_res = await asyncio.to_thread(rw_model.invoke, rewrite_prompt)
+                    content = rewrite_res.content
+                else:
+                    content = res.content
+
+                if not isinstance(content, str):
+                    raise Exception("[LLM] CONTENT IS NOT A STRING")
+
+                if self.response_format:
+                    try:
+                        content = extract_json(content)
+                        content = self.response_format.model_validate_json(content)
+                    except Exception as e:
+                        print(f"Error validating response: {e}")
+                        print(f"Response:\n -------------\n{content}\n -------------")
+                        raise e
+
+                self._verify_or_raise(content, **prompt_args)
+                return self._process_result(content, **prompt_args)
+
+            except Exception as e:
+                current_retry += 1
+                if current_retry > max_retries:
+                    raise e
+                current_delay = retry_delay * (2 ** (current_retry - 1))
+                await asyncio.sleep(current_delay)
                 print(f"Retry attempt {current_retry}/{max_retries} after error: {str(e)}. Waiting {current_delay}s")
 
     def get_opik_prompt_info(self) -> Tuple[str, str]:

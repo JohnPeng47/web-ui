@@ -76,7 +76,6 @@ class AuthzAttacker(BaseAttackWorker):
             "session": enriched.session
         }
 
-    # TODO: tmrw -> should work..
     async def ingest(
         self,
         *,

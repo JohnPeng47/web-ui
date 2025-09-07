@@ -1,6 +1,6 @@
 import asyncio
 from fastapi import FastAPI
-from typing import Optional, Callable, Any
+from typing import Optional, Callable, Any, Type, Union
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from cnc.database.session import engine
@@ -12,6 +12,10 @@ from cnc.workers.agent.browser import start_single_browser
 
 # agent pools
 from cnc.pools.discovery_agent_pool import start_discovery_agent as start_discovery_pool
+from cnc.pools.exploit_agent_pool import start_exploit_agent as start_exploit_pool
+
+from src.agent.min_agent_single_page import MinimalAgentSinglePage
+from src.agent.min_agent import MinimalAgent
 
 async def start_enrichment_worker(raw_channel: BroadcastChannel, enriched_channel: BroadcastChannel, session: AsyncSession):
     """
@@ -54,8 +58,11 @@ async def start_attacker_worker(enriched_channel: BroadcastChannel, session: Asy
     await authz_worker.run()
 
 async def start_workers(
-    discovery_agent_pool: Callable[[BroadcastChannel], Any],
+    start_discovery_pool: Callable[[BroadcastChannel], Any],
+    start_exploit_pool: Callable[[BroadcastChannel], Any],
     app: Optional[FastAPI] = None,
+    discovery_agent_cls: Type[Union[MinimalAgent, MinimalAgentSinglePage]] = MinimalAgentSinglePage,
+    override_max_steps: Optional[int] = 3,
 ):
     """
     Launch all worker processes.
@@ -76,11 +83,13 @@ async def start_workers(
         raw_channel = app.state.raw_channel
         enriched_channel = app.state.enriched_channel
         discovery_agent_queue = app.state.discovery_agent_queue
+        exploit_agent_queue = app.state.exploit_agent_queue
         print("Using channels from FastAPI app.state")
     else:
         raw_channel = BroadcastChannel()
         enriched_channel = BroadcastChannel()
         discovery_agent_queue = BroadcastChannel()
+        exploit_agent_queue = BroadcastChannel()
     
     # Create session factory
     async_session = async_sessionmaker(engine, expire_on_commit=False)
@@ -92,17 +101,19 @@ async def start_workers(
         asyncio.create_task(start_single_browser())
 
         await asyncio.sleep(4)
-        
+
         # Run all workers concurrently
         await asyncio.gather(
             # start_enrichment_worker(raw_channel, enriched_channel, session),
             # start_attacker_worker(enriched_channel, session),
-            discovery_agent_pool(discovery_agent_queue),
+
+            start_discovery_pool(discovery_agent_queue, agent_cls=discovery_agent_cls),
+            start_exploit_pool(exploit_agent_queue, override_max_steps=override_max_steps),
         )
 
 if __name__ == "__main__":
     try:
-        asyncio.run(start_workers(start_discovery_pool))
+        asyncio.run(start_workers(start_discovery_pool, start_exploit_pool))
     except KeyboardInterrupt:
         print("Worker launcher shutdown by user")
     except Exception as e:

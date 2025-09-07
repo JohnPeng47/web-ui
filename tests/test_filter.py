@@ -1,8 +1,6 @@
 from src.agent.http_history import HTTPHandler
 import pytest
 
-# TODO: still something wrong with filtering, get to bottom of this tmrw
-# nvm seems to be working... confirm in more detail tmrw
 @pytest.mark.asyncio
 async def test_filter_scope(http_msgs):
     http_handler = HTTPHandler(

@@ -13,7 +13,7 @@ from cnc.workers.agent.proxy_handler import MitmProxyHTTPHandler
 from src.agent.pages import Page
 
 # clients
-from src.agent.page_client import PageUpdateClient
+from src.agent.agent_client import AgentClient
 from eval.client import PagedDiscoveryEvalClient
 
 INCLUDE_ATTRIBUTES: List[str] = (
@@ -37,7 +37,7 @@ class MinimalAgentSinglePage(MinimalAgent):
         max_page_steps: int = 10,
         *,
         challenge_client: Optional[PagedDiscoveryEvalClient] = None,
-        server_client: Optional[PageUpdateClient] = None,
+        server_client: Optional[AgentClient] = None,
         cdp_handler: MitmProxyHTTPHandler | None = None,
         agent_dir: Path,
         init_task: Optional[str] = None,

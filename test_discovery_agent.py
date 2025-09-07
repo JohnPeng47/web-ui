@@ -6,9 +6,12 @@ base_url = "http://127.0.0.1:8000"
 # 2. Create engagement (API)
 engagement_payload = {
     "name": "Discovery Agent Integration Test",
-    "base_url": "https://example.com",
+    "base_url": "http://147.79.78.153:3000/#/login",
     "description": "Integration test for discovery agent functionality",
-    "scopes_data": ["https://example.com"]
+    "scopes_data": [
+        "http://147.79.78.153:3000/rest/",
+        "http://147.79.78.153:3000/api/",
+    ]
 }
 create_resp = requests.post(f"{base_url}/engagement/", json=engagement_payload)
 assert create_resp.status_code == 200

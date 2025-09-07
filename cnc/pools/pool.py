@@ -3,15 +3,14 @@ import threading
 from dataclasses import dataclass
 from typing import Optional, List, TypeVar, Type
 
-from pydantic import BaseModel
-
 from common.agent import AgentPool
 from logger import get_agent_loggers
 from cnc.services.queue import BroadcastChannel
 
-from src.agent.page_client import PageUpdateClient
+from src.agent.agent_client import AgentClient
 
-from src.detection.prompts import StartExploitRequest
+from httplib import HTTPMessage
+from logger import get_agent_loggers
 
 agent_log, full_log = get_agent_loggers()
 
@@ -22,7 +21,14 @@ class StartDiscoveryRequest:
     start_urls: List[str]
     scopes: Optional[List[str]] = None
     init_task: Optional[str] = None
-    client: Optional[PageUpdateClient] = None
+    client: Optional[AgentClient] = None
+
+@dataclass
+class StartExploitRequest:
+    page_item: Optional[HTTPMessage] = None
+    vulnerability_description: str = ""
+    vulnerability_title: str = ""
+    max_steps: int = 12
 
 class LiveQueuePool(AgentPool[T]):
     def __init__(
@@ -30,7 +36,6 @@ class LiveQueuePool(AgentPool[T]):
         *,
         channel: BroadcastChannel[T],
         item_cls: Optional[Type[T]] = None,
-        queue_fp: Optional[str] = None,
         llm_config: dict,
         max_workers: Optional[int] = None,
         log_subfolder: str = "pentest_bot",
@@ -44,7 +49,6 @@ class LiveQueuePool(AgentPool[T]):
         )
         self._channel = channel
         self._item_cls = item_cls
-        self._queue_fp = queue_fp
         # Each pool instance keeps its own subscription queue
         self._sub_queue: asyncio.Queue[T] = self._channel.subscribe()
 
@@ -123,8 +127,6 @@ class LiveQueuePool(AgentPool[T]):
             # Otherwise, we have an item from the queue
             item = get_task.result()
             try:
-                print("Pulling item from queue: ", item)
-
                 run_id = await asyncio.to_thread(self.start_agent, item)
                 agent_log.info(f"Enqueued run_id {run_id} from broadcast item.")
             except Exception:

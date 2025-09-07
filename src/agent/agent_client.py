@@ -5,9 +5,11 @@ import httpx
 
 from src.agent.pages import PageObservations
 
+from pentest_bot.models.steps import AgentStep
+
 logger = logging.getLogger(__name__)
 
-class PageUpdateClient:
+class AgentClient:
     """
     HTTP client for interacting with the agent API endpoints defined in cnc/routers/agent.py.
     """
@@ -36,7 +38,7 @@ class PageUpdateClient:
         }
         self.client.headers.update(headers)
         self._shutdown = None
-    
+
     async def update_page_data(self, pages: PageObservations) -> Dict[str, Any]:
         """
         Update page data for an agent.
@@ -55,6 +57,28 @@ class PageUpdateClient:
         payload = {
             "agent_id": self.agent_id,
             "page_data": await pages.to_json()
+        }
+        response = await self.client.post(path, json=payload)
+        response.raise_for_status()
+        return response.json()
+
+    async def upload_exploit_agent_steps(self, agent_step: AgentStep) -> Dict[str, Any]:
+        """
+        Upload agent steps to be appended to the agent.
+        
+        Args:
+            steps: List of agent steps to upload
+            
+        Returns:
+            Agent data response
+            
+        Raises:
+            httpx.HTTPStatusError: If the server returns an error response
+        """
+        path = f"/agents/{self.agent_id}/steps"
+        payload = {
+            "agent_id": self.agent_id,
+            "steps": [agent_step.model_dump_json()]
         }
         response = await self.client.post(path, json=payload)
         response.raise_for_status()
