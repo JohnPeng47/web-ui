@@ -1,12 +1,16 @@
-from typing import Optional
+from typing import Optional, Union
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from cnc.helpers.uuid import generate_uuid
 from cnc.schemas.engagement import EngagementCreate
-from cnc.database.models import PentestEngagement, AuthSession
-
+from cnc.database.models import (
+    PentestEngagement,
+    AuthSession,
+    PentestEngagementDiscoveryAgent,
+    PentestEngagementExploitAgent,
+)
 
 async def create_engagement(
     db: AsyncSession, engagement_data: EngagementCreate
@@ -83,3 +87,31 @@ async def get_session_by_id(
         )
     )
     return result.scalars().first()
+
+
+async def get_engagement_by_agent_id(
+    db: AsyncSession, agent_id: int
+) -> Optional[PentestEngagement]:
+    """Return the engagement associated with a discovery or exploit agent id."""
+    # Try discovery agent link first
+    res = await db.execute(
+        select(PentestEngagementDiscoveryAgent.pentest_engagement_id).where(
+            PentestEngagementDiscoveryAgent.discovery_agent_id == agent_id
+        )
+    )
+    engagement_id = res.scalars().first()
+    if engagement_id is not None:
+        engagement = await get_engagement(db, engagement_id)
+        if engagement is not None:
+            return engagement
+
+    # Fallback to exploit agent link
+    res = await db.execute(
+        select(PentestEngagementExploitAgent.pentest_engagement_id).where(
+            PentestEngagementExploitAgent.exploit_agent_id == agent_id
+        )
+    )
+    engagement_id = res.scalars().first()
+    if engagement_id is not None:
+        return await get_engagement(db, engagement_id)
+    return None

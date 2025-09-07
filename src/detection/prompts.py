@@ -7,10 +7,14 @@ from src.llm_provider import LMP
 
 from httplib import HTTPMessage
 
+# TMRW: 
+# - add a vulnerability title along with description to display the data
+
 # TODO: potentially change to being able to specify multiple page items
 class ScheduledActionLM(BaseModel):
     page_item_id: str
     vulnerability_description: str
+    vulnerability_title: str
 
 class ScheduledActionsLM(BaseModel):
     actions: List[ScheduledActionLM]
@@ -18,6 +22,7 @@ class ScheduledActionsLM(BaseModel):
 class StartExploitRequest(BaseModel):
     page_item: Optional[HTTPMessage]
     vulnerability_description: str
+    vulnerability_title: str
 
     class Config:
         arbitrary_types_allowed = True
@@ -33,6 +38,7 @@ You are given the above notes collected during the recond phase of a pentest. Re
 Come up with a list of 5 actions, prioritized by likelihood/impact
 
 Some guidance for the response format:
+- return a short, descriptive vulnerability title
 - every identifiable page item is prefixed with a id string in the format "a.b"
 - while each page item covers alot of content, you can tailor your vulnerability description to the specific aspect of the page item that is most relevant to the vulnerability you are looking for
 """
@@ -46,7 +52,8 @@ Some guidance for the response format:
             scheduled_actions.append(
                 StartExploitRequest(
                     page_item=pages.get_page_item(action.page_item_id), 
-                    vulnerability_description=action.vulnerability_description
+                    vulnerability_description=action.vulnerability_description,
+                    vulnerability_title=action.vulnerability_title
                 )
             )
             

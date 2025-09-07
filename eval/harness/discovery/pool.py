@@ -181,9 +181,6 @@ async def run_asyncio_loop_with_sigint_handling():
 async def main():
     from cnc.workers.agent.browser import start_single_browser
     
-    # TMRW:
-    # - request time out for in-scope URLs; investigate
-    # - this function does not terminate
     try:
         browser_task = asyncio.create_task(start_single_browser())
         await asyncio.sleep(2)

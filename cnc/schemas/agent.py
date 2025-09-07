@@ -33,6 +33,14 @@ class DiscoveryAgentCreate(BaseModel):
     log_filepath: Optional[str] = None
     agent_status: Optional[str] = "active"
 
+class ExploitAgentCreate(BaseModel):
+    max_steps: int
+    model_name: str
+    model_costs: Optional[float] = None
+    log_filepath: Optional[str] = None
+    agent_status: Optional[str] = "active"
+    
+# TODO: test uploading exploit agent steps first
 class ExploitAgentStep(AgentStep):
     step_num: int
     reflection: str

@@ -30,7 +30,7 @@ from src.agent.pages import Page, PageObservations
 from cnc.workers.agent.cdp_handler import CDPHTTPHandler
 
 # clients
-from src.agent.page_client import PageUpdateClient
+from src.agent.agent_client import AgentClient
 from eval.client import PagedDiscoveryEvalClient
 
 from common.utils import extract_json
@@ -192,7 +192,7 @@ class MinimalAgent:
         max_page_steps: int = 10,
         *,
         challenge_client: Optional[PagedDiscoveryEvalClient] = None,
-        server_client: Optional[PageUpdateClient] = None,
+        server_client: Optional[AgentClient] = None,
         cdp_handler: CDPHTTPHandler | None = None,
         agent_dir: Path,
         init_task: Optional[str] = None,

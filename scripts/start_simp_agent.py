@@ -133,7 +133,6 @@ async def main():
         # print(solved)
         # print("ALL SOLVED: ", solved.get("/#/login"))
         # print("SOLVED: ", solved.get("/login"))
-        # TMRW TODO: THIS PRINTS []??
         print("SOLVED: ", [challenge[0] for challenge in solved["/#/login"] if challenge[1] == True])
         agent_log.info("SimpleAgent execution completed")
 

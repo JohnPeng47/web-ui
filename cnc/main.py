@@ -18,7 +18,8 @@ from cnc.routers.agent import make_agent_router
 
 # agent pools
 from cnc.pools.discovery_agent_pool import start_discovery_agent as start_discovery_pool
-from cnc.pools.pool import StartDiscoveryRequest
+from cnc.pools.exploit_agent_pool import start_exploit_agent as start_exploit_pool
+from cnc.pools.pool import StartDiscoveryRequest, StartExploitRequest
 
 from common.constants import API_SERVER_HOST, API_SERVER_PORT
 
@@ -34,7 +35,7 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
     # configure_relationships() # Ensure it's called if not called at module level
-
+ 
     print("Creating FastAPI app...")
     
     # Create the FastAPI app without routers initially
@@ -50,11 +51,13 @@ def create_app() -> FastAPI:
     enriched_channel = BroadcastChannel[EnrichedRequest]()
     # discovery agent queue
     discovery_agent_queue = BroadcastChannel[StartDiscoveryRequest]()
+    exploit_agent_queue = BroadcastChannel[StartExploitRequest]()
 
     # Store channels in app state for access by workers and dependencies
     app.state.raw_channel = raw_channel
     app.state.enriched_channel = enriched_channel
     app.state.discovery_agent_queue = discovery_agent_queue
+    app.state.exploit_agent_queue = exploit_agent_queue
     
     # Add exception handler for validation errors (422)
     @app.exception_handler(RequestValidationError)
@@ -63,7 +66,7 @@ def create_app() -> FastAPI:
 
     # Create routers with injected dependencies
     engagement_router = make_engagement_router()
-    agent_router = make_agent_router(discovery_agent_queue)
+    agent_router = make_agent_router(discovery_agent_queue, exploit_agent_queue)
     
     # Include routers
     app.include_router(engagement_router)
@@ -87,7 +90,7 @@ async def start_all(
     app_instance = create_app()
     
     await asyncio.gather(
-        start_workers(start_discovery_pool, app_instance),
+        start_workers(start_discovery_pool, start_exploit_pool, app_instance),
         start_api_server(app_instance)
     )
 

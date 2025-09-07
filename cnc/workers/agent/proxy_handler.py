@@ -117,8 +117,9 @@ class MitmProxyHTTPHandler:
                     self._ssl_insecure,
                 )
                 await self._master.run()
-            except Exception:
-                agent_log.exception("mitmproxy master crashed")
+            except Exception as e:
+                import traceback
+                agent_log.exception("mitmproxy master crashed: %s\n%s", str(e), traceback.format_exc())
             finally:
                 agent_log.info("mitmproxy master exited")
 
@@ -277,9 +278,6 @@ class MitmProxyHTTPHandler:
 
         processed_body = resp.get_text(strict=False)
         body_error = None
-
-        print(f"Processed body [{req.pretty_url}]:\n{processed_body}")
-
         data = HTTPResponseData(
             url=req.pretty_url,
             status=status,

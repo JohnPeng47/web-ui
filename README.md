@@ -35,11 +35,23 @@ TODO:
 - currently not supporting UserRole based testing
 - add agent service to configure things like configuring LLMs before calling 
 DB crud API
-- should implement a GET agent request in PageUpdateClient to confirm agent_id
+- should implement a GET agent request in AgentClient to confirm agent_id
 2025/09/05:
 - CDP traffic interception bonked, using MITMProxy for now
 - [BUG] Proxy handler not catching any response data
+> Seems to catch for some request on homepage
 - [FIX] BrowserUse browser session connection script
+- [REFACTOR] Convert _invoke in PentestSession to async
+- [BUG] Error here:
+> await self.server_client.update_page_data(self.pages)
+> httpx timeout error (Big request ??)
+> or possibly thread is blocked
+- Split off features that can be completed with CC vs. those that need manual attention
+Error Handling:
+- Better error handling at run_mitm (currently mitm loop crashes on http error from agent error)
+> [DESIGN] need better error isolation between workers
+- Finish writing CLAUDE_CODE.md
+- [FIX] generating ALTER syntax for alembic
 
 Deployment Notes:
 - do a grep for http:// to make sure we have all the schemas configured properly for HTTPS
