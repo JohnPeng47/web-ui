@@ -1,11 +1,14 @@
+import os
+from pathlib import Path
+from typing import AsyncGenerator
+
 from contextlib import asynccontextmanager
 from sqlmodel import SQLModel, create_engine
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-import os
-from typing import AsyncGenerator
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///./pentest_hub.db")
+DB_PATH = Path(__file__).parent.parent / "pentest_hub.db"
+DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite+aiosqlite:///./{str(DB_PATH)}")
 
 engine = create_async_engine(DATABASE_URL, echo=False)
 

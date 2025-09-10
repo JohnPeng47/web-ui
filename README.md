@@ -30,7 +30,7 @@ TODO:
 - move all common type definitions of agents into src/detection, src/discovery, src/exploit
 > src.agent -> src.exploit
 - add a dynamic adapter class for handling serializing/deserializing data for UserRole and AgentSteps that:
-1. encodes the subclass     info in JSON format
+1. encodes the subclass info in JSON format
 2. can read 1. and dynamically choose the appropriate serialization routine
 - currently not supporting UserRole based testing
 - add agent service to configure things like configuring LLMs before calling 
@@ -52,12 +52,40 @@ Error Handling:
 > [DESIGN] need better error isolation between workers
 - Finish writing CLAUDE_CODE.md
 - [FIX] generating ALTER syntax for alembic
+- Modify start_agent server to work without the routes, so we can avoid triggering side effects -> create and label these fixtures
+- [BUG] auto-incremented, table specific ID for both discovery/exploit agents, need to consilidate into single ID
+- add the fastapi specific instructions
 
+=========================
+===== HIGH THOUGHTS =====
+- brainstorm how to construct an a/b test
+> commits!
+> if we can isolate fully remote commits, and context, then we can do a/b testing to determine the effectiveness of different context patterns
+> part of what we need to monitor on
 Deployment Notes:
 - do a grep for http:// to make sure we have all the schemas configured properly for HTTPS
+- yo
+- what we build our inline-tree editing thing to do in-line code-gen project management 
+=========================
 
 # spend last 2 hours on front end UI
 
 Goals next week:
-- refactor code to a point where we can start running CC and CodexCLI on it
+- get code ready so that it can be refactored on and worked on by CC and systems
 - continue 
+=================
+Claude Code Comments
+=================
+# TODO:
+- should create mapping of doc to live references that change
+> parse @location and check on every commit, if the mapping has changed
+> essentially parse every entity relationship in doc and iterate if changes are required in the docs
+- identify parts of the code that have strong logical components
+- refactoring check over the import boundaries to assure that these relationships hold
+- generate grep patterns for each of the lines above
+- extract from description to add a git commit hook to look at the message
+- derive a set of rules from above to apply to each commit to check if any of these are broken
+
+Positives:
+1. if we define doc, we can then actually abstract out implementation and make it easy to port code over to Golang eventually
+2. we can use the same abstractions to generate our vulnerable web apps

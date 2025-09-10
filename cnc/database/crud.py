@@ -1,16 +1,19 @@
-from typing import Optional, Union
+from typing import Optional, Union, List, Any, cast
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from cnc.helpers.uuid import generate_uuid
 from cnc.schemas.engagement import EngagementCreate
+from cnc.schemas.agent import AgentOut
 from cnc.database.models import (
     PentestEngagement,
     AuthSession,
     PentestEngagementDiscoveryAgent,
     PentestEngagementExploitAgent,
 )
+from cnc.database.agent.models import AgentBase, ExploitAgent, DiscoveryAgent
+from src.agent.base import AgentType
 
 async def create_engagement(
     db: AsyncSession, engagement_data: EngagementCreate
@@ -90,7 +93,7 @@ async def get_session_by_id(
 
 
 async def get_engagement_by_agent_id(
-    db: AsyncSession, agent_id: int
+    db: AsyncSession, agent_id: str
 ) -> Optional[PentestEngagement]:
     """Return the engagement associated with a discovery or exploit agent id."""
     # Try discovery agent link first
@@ -115,3 +118,36 @@ async def get_engagement_by_agent_id(
     if engagement_id is not None:
         return await get_engagement(db, engagement_id)
     return None
+
+async def list_agents_for_engagement(
+    db: AsyncSession, engagement_id: UUID
+) -> List[Union[ExploitAgent, DiscoveryAgent]]:
+    """Enumerate all agents attached to an engagement id.
+
+    Returns list of AgentBase SQLModel ORM objects.
+    """
+    # Exploit agents via subquery to avoid join typing issues
+    exploit_ids_subq = (
+        select(PentestEngagementExploitAgent.exploit_agent_id)
+        .where(PentestEngagementExploitAgent.pentest_engagement_id == engagement_id)
+    )
+    exploit_result = await db.execute(
+        select(ExploitAgent).where(
+            cast(Any, ExploitAgent.id).in_(exploit_ids_subq)  # type: ignore
+        )
+    )
+    exploit_agents = exploit_result.scalars().all()
+
+    # Discovery agents via subquery
+    discovery_ids_subq = (
+        select(PentestEngagementDiscoveryAgent.discovery_agent_id)
+        .where(PentestEngagementDiscoveryAgent.pentest_engagement_id == engagement_id)
+    )
+    discovery_result = await db.execute(
+        select(DiscoveryAgent).where(
+            cast(Any, DiscoveryAgent.id).in_(discovery_ids_subq)  # type: ignore
+        )
+    )
+    discovery_agents = discovery_result.scalars().all()
+    
+    return list(exploit_agents) + list(discovery_agents)

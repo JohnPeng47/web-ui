@@ -4,6 +4,7 @@ from typing import List, Optional
 
 from src.agent.pages import PageObservations
 from src.llm_provider import LMP
+from common.constants import NUM_SCHEDULED_ACTIONS
 
 from httplib import HTTPMessage
 
@@ -35,7 +36,7 @@ You are given the above notes collected during the recond phase of a pentest. Re
 1. One of items mentioned in the recon report
 2. The targeted vulnerability to search for in that item
 
-Come up with a list of 5 actions, prioritized by likelihood/impact
+Come up with a list of {{num_actions}} actions, prioritized by likelihood/impact
 
 Some guidance for the response format:
 - return a short, descriptive vulnerability title

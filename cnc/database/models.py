@@ -12,13 +12,13 @@ from cnc.database.agent.models import ExploitAgent, DiscoveryAgent
 class PentestEngagementExploitAgent(SQLModel, table=True):
     """Junction table for PentestEngagement to ExploitAgent many-to-many relationship"""
     pentest_engagement_id: UUID = Field(foreign_key="pentestengagement.id", primary_key=True)
-    exploit_agent_id: int = Field(foreign_key="exploitagent.id", primary_key=True)
+    exploit_agent_id: str = Field(foreign_key="exploitagent.id", primary_key=True)
 
 
 class PentestEngagementDiscoveryAgent(SQLModel, table=True):
     """Junction table for PentestEngagement to DiscoveryAgent many-to-many relationship"""
     pentest_engagement_id: UUID = Field(foreign_key="pentestengagement.id", primary_key=True)
-    discovery_agent_id: int = Field(foreign_key="discoveryagent.id", primary_key=True)
+    discovery_agent_id: str = Field(foreign_key="discoveryagent.id", primary_key=True)
 
 
 class PentestEngagement(SQLModel, table=True):

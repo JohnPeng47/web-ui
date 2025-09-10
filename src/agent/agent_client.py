@@ -14,7 +14,7 @@ class AgentClient:
     HTTP client for interacting with the agent API endpoints defined in cnc/routers/agent.py.
     """
     def __init__(self,
-                 agent_id: int,
+                 agent_id: str,
                  api_url: str,
                  *,
                  timeout: int = 45, 
@@ -55,7 +55,7 @@ class AgentClient:
         """
         path = f"/agents/{self.agent_id}/page-data"
         payload = {
-            "agent_id": self.agent_id,
+            "agent_id": str(self.agent_id),
             "page_data": await pages.to_json()
         }
         response = await self.client.post(path, json=payload)
@@ -77,8 +77,8 @@ class AgentClient:
         """
         path = f"/agents/{self.agent_id}/steps"
         payload = {
-            "agent_id": self.agent_id,
-            "steps": [agent_step.model_dump_json()]
+            "agent_id": str(self.agent_id),
+            "steps": [agent_step.model_dump()]
         }
         response = await self.client.post(path, json=payload)
         response.raise_for_status()

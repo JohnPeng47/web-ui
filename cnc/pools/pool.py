@@ -28,7 +28,8 @@ class StartExploitRequest:
     page_item: Optional[HTTPMessage] = None
     vulnerability_description: str = ""
     vulnerability_title: str = ""
-    max_steps: int = 12
+    max_steps: int = 12    
+    client: Optional[AgentClient] = None
 
 class LiveQueuePool(AgentPool[T]):
     def __init__(
