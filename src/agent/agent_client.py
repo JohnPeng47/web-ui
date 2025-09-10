@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 
 import httpx
 
-from src.agent.pages import PageObservations
+from src.agent.discovery.pages import PageObservations
 
 from pentest_bot.models.steps import AgentStep
 

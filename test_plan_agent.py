@@ -8,7 +8,7 @@ from browser_use.controller.service import Controller
 
 from src.agent.min_agent_plan import MinimalAgent
 from src.llm_models import LLMHub
-from src.agent.prompts import CUSTOM_SYSTEM_PROMPT
+from src.agent.discovery.prompts.sys_prompt import CUSTOM_SYSTEM_PROMPT
 
 from eval.client import PagedDiscoveryEvalClient
 from eval.discovery import JUICE_SHOP_ALL

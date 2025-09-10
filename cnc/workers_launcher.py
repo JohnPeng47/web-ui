@@ -14,8 +14,8 @@ from cnc.workers.agent.browser import start_single_browser
 from cnc.pools.discovery_agent_pool import start_discovery_agent as start_discovery_pool
 from cnc.pools.exploit_agent_pool import start_exploit_agent as start_exploit_pool
 
-from src.agent.min_agent_single_page import MinimalAgentSinglePage
-from src.agent.min_agent import MinimalAgent
+from src.agent.discovery.min_agent_single_page import MinimalAgentSinglePage
+from src.agent.discovery.agent import DiscoveryAgent
 
 async def start_enrichment_worker(raw_channel: BroadcastChannel, enriched_channel: BroadcastChannel, session: AsyncSession):
     """
@@ -61,7 +61,7 @@ async def start_workers(
     start_discovery_pool: Callable[[BroadcastChannel], Any],
     start_exploit_pool: Callable[[BroadcastChannel], Any],
     app: Optional[FastAPI] = None,
-    discovery_agent_cls: Type[Union[MinimalAgent, MinimalAgentSinglePage]] = MinimalAgentSinglePage,
+    discovery_agent_cls: Type[Union[DiscoveryAgent, MinimalAgentSinglePage]] = MinimalAgentSinglePage,
     override_max_steps: Optional[int] = 3,
 ):
     """

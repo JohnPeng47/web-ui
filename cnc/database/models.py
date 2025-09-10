@@ -6,7 +6,7 @@ from uuid import UUID
 # from cnc.schemas.application import UserRole
 from cnc.schemas.auth import PasswordCredentials
 
-from cnc.database.agent.models import ExploitAgent, DiscoveryAgent
+from cnc.database.agent.models import ExploitAgentModel, DiscoveryAgentModel
 
 # Junction tables for many-to-many relationships
 class PentestEngagementExploitAgent(SQLModel, table=True):
@@ -45,10 +45,10 @@ class PentestEngagement(SQLModel, table=True):
         description="JSON array of user role objects with credentials"
     )
     # Many-to-many relationships to different agent types
-    exploit_agents: List["ExploitAgent"] = Relationship(
+    exploit_agents: List["ExploitAgentModel"] = Relationship(
         link_model=PentestEngagementExploitAgent,
     )
-    discovery_agents: List["DiscoveryAgent"] = Relationship(
+    discovery_agents: List["DiscoveryAgentModel"] = Relationship(
         link_model=PentestEngagementDiscoveryAgent,
     )
     
@@ -64,7 +64,7 @@ class PentestEngagement(SQLModel, table=True):
         ]
     
     @property
-    def agents(self) -> List[Union["ExploitAgent", "DiscoveryAgent"]]:
+    def agents(self) -> List[Union["ExploitAgentModel", "DiscoveryAgentModel"]]:
         """Get all associated agents as a heterogeneous list"""
         all_agents = []
         all_agents.extend(self.exploit_agents)

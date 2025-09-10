@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 from typing import List, Optional
 
-from src.agent.pages import PageObservations
+from src.agent.discovery.pages import PageObservations
 from src.llm_provider import LMP
 from common.constants import NUM_SCHEDULED_ACTIONS
 

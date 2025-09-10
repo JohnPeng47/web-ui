@@ -23,10 +23,10 @@ from src.agent.discovery.prompts.planv4 import (
     CheckNestedPlanCompletion,
     TASK_PROMPT_WITH_PLAN,
 )
-from src.agent.links import parse_links_from_str
+from src.agent.discovery.links import parse_links_from_str
 from src.llm_models import LLMHub
 from src.agent.utils import url_did_change
-from src.agent.pages import Page, PageObservations
+from src.agent.discovery.pages import Page, PageObservations
 from cnc.workers.agent.cdp_handler import CDPHTTPHandler
 
 # clients
@@ -170,7 +170,7 @@ class AgentContext:
     # def from_db(cls, agent_steps: List) -> "AgentContext":
     #     pass
 
-class MinimalAgent:
+class DiscoveryAgent:
     """
     Minimal agent:
       step():

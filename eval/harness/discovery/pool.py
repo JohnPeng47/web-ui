@@ -16,19 +16,19 @@ from eval.eval_pool import EvalAgentPool
 from eval.harness.exploit.queue import PersistedQueue
 from eval.datasets.detection import DISCOVERY_QUEUE_JSON
 from logger import setup_agent_logger, get_agent_loggers
-from src.agent.prompts import CUSTOM_SYSTEM_PROMPT
+from src.agent.discovery.prompts.sys_prompt import CUSTOM_SYSTEM_PROMPT
 from src.llm_models import LLMHub
 
 # local connections
 from cnc.workers.agent.browser import get_browser_session
 from cnc.workers.agent.cdp_handler import CDPHTTPHandler
-from cnc.workers.agent.proxy_handler import MitmProxyHTTPHandler
+from src.agent.discovery.proxy import MitmProxyHTTPHandler
 # from cnc.workers.agent.proxy_handler2 import MitmProxyHTTPHandler
-from src.agent.http_history import HTTPHandler
+from common.http_handler import HTTPHandler
 
 # supported agents
-from src.agent.min_agent import MinimalAgent
-from src.agent.min_agent_single_page import MinimalAgentSinglePage
+from src.agent.discovery.agent import DiscoveryAgent
+from src.agent.discovery.min_agent_single_page import MinimalAgentSinglePage
 
 # browser-use imports
 from browser_use.browser import BrowserSession, BrowserProfile
@@ -66,7 +66,7 @@ class DiscoveryAgentPool(EvalAgentPool[StartDiscoveryRequest]):
         *,
         channel,
         item_cls,
-        agent_cls: Type[Union[MinimalAgent, MinimalAgentSinglePage]],
+        agent_cls: Type[Union[DiscoveryAgent, MinimalAgentSinglePage]],
         queue_fp: str,
         llm_config: Dict,
         browser_session: BrowserSession,

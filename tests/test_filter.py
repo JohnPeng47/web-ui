@@ -1,4 +1,4 @@
-from src.agent.http_history import HTTPHandler
+from common.http_handler import HTTPHandler
 import pytest
 
 @pytest.mark.asyncio

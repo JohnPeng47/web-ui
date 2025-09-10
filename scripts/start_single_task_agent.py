@@ -8,9 +8,9 @@ from browser_use.browser import BrowserSession, BrowserProfile
 from browser_use.controller.service import Controller
 
 from src.llm_models import LLMHub
-from src.agent.min_agent import MinimalAgent
-from src.agent.prompts import CUSTOM_SYSTEM_PROMPT
-from src.agent.http_history import HTTPHandler
+from src.agent.discovery.agent import DiscoveryAgent
+from src.agent.discovery.prompts.sys_prompt import CUSTOM_SYSTEM_PROMPT
+from common.http_handler import HTTPHandler
 from src.agent.proxy import ProxyHandler
 from eval.client import PagedDiscoveryEvalClient
 
@@ -124,7 +124,7 @@ async def main():
         controller = Controller(exclude_actions=["extract_structured_data"])
 
         # SimpleAgent for single-shot execution
-        agent = MinimalAgent(
+        agent = DiscoveryAgent(
             start_urls=START_URLS,
             llm=llm,
             agent_sys_prompt=CUSTOM_SYSTEM_PROMPT,

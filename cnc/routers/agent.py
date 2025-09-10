@@ -27,9 +27,9 @@ from cnc.pools.pool import StartDiscoveryRequest, StartExploitRequest
 
 from common.constants import API_SERVER_HOST, API_SERVER_PORT, NUM_SCHEDULED_ACTIONS
 
-from src.agent.pages import PageObservations
+from src.agent.discovery.pages import PageObservations
 from src.agent.agent_client import AgentClient
-from src.detection.prompts import DetectAndSchedule
+from src.agent.detection.prompts import DetectAndSchedule
 from src.llm_models import LLMHub
 
 
@@ -50,7 +50,7 @@ def make_agent_router(
     llm_hub: LLMHub,
 ) -> APIRouter:
     """
-    Create the agent router with injected   dependencies.
+    Create the agent router with injected dependencies.
     
     Args:
         raw_channel: Channel for publishing raw HTTP messages
@@ -112,7 +112,7 @@ def make_agent_router(
             print(f"Stacktrace: {traceback.format_exc()}")
             raise HTTPException(status_code=500, detail=str(e))
 
-    @router.post("/agents/{agent_id}/steps", response_model=AgentOut)
+    @router.post("/agents/{agent_id}/steps")
     async def upload_agent_steps(
         agent_id: str,
         payload: UploadAgentSteps,
@@ -125,16 +125,15 @@ def make_agent_router(
             if not agent:
                 raise HTTPException(status_code=404, detail="Agent not found")
 
-            agent = await append_discovery_agent_steps_service(db, agent_id, payload.steps)
-            return agent
+            await append_discovery_agent_steps_service(db, agent_id, payload.steps)
         except Exception as e:
             import traceback
             print(f"Exception: {e}")
             print(f"Stacktrace: {traceback.format_exc()}")
             raise HTTPException(status_code=500, detail=str(e))
         
-    @router.post("/agents/{agent_id}/page-data", response_model=AgentOut)
-    async def update_page_data(
+    @router.post("/agents/{agent_id}/page-data")
+    async def upload_page_data(
         agent_id: str,
         payload: UploadPageData,
         db: AsyncSession = Depends(get_session),
@@ -179,8 +178,7 @@ def make_agent_router(
                         )
                     )
                 )
-            agent = await update_page_data_service(db, agent_id, payload.page_data)
-            return agent
+            await update_page_data_service(db, agent_id, payload.page_data)
         except Exception as e:
             import traceback
             print(f"Exception: {e}")

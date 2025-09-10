@@ -1,5 +1,5 @@
 from browser_use.agent.views import AgentHistoryList
-from src.agent.pages import PageObservations
+from src.agent.discovery.pages import PageObservations
 
 from typing import List
 from httplib import HTTPMessage
