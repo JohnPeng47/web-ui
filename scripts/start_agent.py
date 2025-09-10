@@ -8,9 +8,9 @@ from browser_use.controller.service import Controller
 
 from eval.client import PagedDiscoveryEvalClient
 from src.llm_models import LLMHub
-from src.agent.min_agent import MinimalAgent
-from src.agent.prompts import CUSTOM_SYSTEM_PROMPT
-from src.agent.http_history import HTTPHandler
+from src.agent.discovery.agent import DiscoveryAgent
+from src.agent.discovery.prompts.sys_prompt import CUSTOM_SYSTEM_PROMPT
+from common.http_handler import HTTPHandler
 
 from eval.datasets.discovery.juiceshop import JUICE_SHOP_ALL as JUICE_SHOP_ALL_DISCOVERY
 from eval.datasets.discovery.juiceshop_exploit import JUICE_SHOP_VULNERABILITIES as JUICE_SHOP_VULNERABILITIES_EXPLOIT
@@ -117,7 +117,7 @@ async def main():
         controller = Controller(exclude_actions=["extract_structured_data"])
 
         # MinimalAgent now uses browser_session instead of Browser/BrowserContext
-        agent = MinimalAgent(
+        agent = DiscoveryAgent(
             start_urls=TEST_URLS,
             llm=llm,
             max_steps=10,

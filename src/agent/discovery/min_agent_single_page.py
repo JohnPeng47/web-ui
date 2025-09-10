@@ -6,11 +6,11 @@ from browser_use.browser import BrowserSession
 from browser_use.controller.service import Controller
 from browser_use.agent.views import ActionResult
 
-from src.agent.min_agent import MinimalAgent
+from src.agent.discovery.agent import DiscoveryAgent
 from src.llm_models import LLMHub
 from cnc.workers.agent.cdp_handler import CDPHTTPHandler
-from cnc.workers.agent.proxy_handler import MitmProxyHTTPHandler
-from src.agent.pages import Page
+from src.agent.discovery.proxy import MitmProxyHTTPHandler
+from src.agent.discovery.pages import Page
 
 # clients
 from src.agent.agent_client import AgentClient
@@ -20,7 +20,7 @@ INCLUDE_ATTRIBUTES: List[str] = (
     ["title", "type", "name", "role", "aria-label", "placeholder", "value", "alt"]
 )
 
-class MinimalAgentSinglePage(MinimalAgent):
+class MinimalAgentSinglePage(DiscoveryAgent):
     """
     A subclass of MinimalAgent that visits a single page without executing LLM actions.
     Simply visits the page and triggers necessary state updates.

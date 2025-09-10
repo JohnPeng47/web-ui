@@ -11,21 +11,21 @@ from common.constants import (
 )
 from eval.datasets.detection import DISCOVERY_QUEUE_JSON
 from logger import setup_agent_logger, get_agent_loggers
-from src.agent.prompts import CUSTOM_SYSTEM_PROMPT
+from src.agent.discovery.prompts.sys_prompt import CUSTOM_SYSTEM_PROMPT
 from src.llm_models import LLMHub
 from cnc.pools.pool import LiveQueuePool
 from cnc.services.queue import BroadcastChannel
 
 # supported agents
-from src.agent.min_agent import MinimalAgent
-from src.agent.min_agent_single_page import MinimalAgentSinglePage
+from src.agent.discovery.agent import DiscoveryAgent
+from src.agent.discovery.min_agent_single_page import MinimalAgentSinglePage
 
 # local connections
 from cnc.pools.pool import StartDiscoveryRequest
 from cnc.workers.agent.browser import get_browser_session
 from cnc.workers.agent.cdp_handler import CDPHTTPHandler
-from cnc.workers.agent.proxy_handler import MitmProxyHTTPHandler
-from src.agent.http_history import HTTPHandler
+from src.agent.discovery.proxy import MitmProxyHTTPHandler
+from common.http_handler import HTTPHandler
 
 # browser-use imports
 from browser_use.browser import BrowserSession
@@ -56,7 +56,7 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
         *,
         channel,
         item_cls,
-        agent_cls: Type[Union[MinimalAgent, MinimalAgentSinglePage]],
+        agent_cls: Type[Union[DiscoveryAgent, MinimalAgentSinglePage]],
         llm_config: Dict,
         browser_session: BrowserSession,
         cdp_port: int = 9899,
@@ -125,7 +125,7 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
 
 async def start_discovery_agent(
     channel: BroadcastChannel,
-    agent_cls: Type[Union[MinimalAgent, MinimalAgentSinglePage]] = MinimalAgent,
+    agent_cls: Type[Union[DiscoveryAgent, MinimalAgentSinglePage]] = DiscoveryAgent,
 ):
     setup_agent_logger(log_dir=".min_agent/logs")
     loop = asyncio.get_running_loop()

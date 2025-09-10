@@ -11,6 +11,7 @@ class AgentOut(BaseModel):
     id: str
     agent_status: str
     agent_type: AgentType
+    agent_name: str
 
     class Config:
         from_attributes = True
@@ -75,7 +76,7 @@ class UploadAgentSteps(AgentMessage):
 
 
 class UploadPageData(AgentMessage):
-    """Upload model for PageObservations coming from src.agent.pages.PageObservations.to_json().
+    """Upload model for PageObservations coming from src.agent.discovery.pages.PageObservations.to_json().
     Accepts a list of page dicts as-is to keep schema flexible and aligned with runtime objects.
     """
     page_data: List[Dict[str, Any]]

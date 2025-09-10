@@ -2,10 +2,8 @@
 globs: cnc/*
 alwaysApply: false
 ---
+Here are some guidelines for completing a CODEEDIT_TASK in the cnc/ folder
 
-When creating your plan to edit some software task 
-
-Below are some components:
 ======================
 ROUTER_STRUCTURE
 ======================
@@ -31,6 +29,8 @@ ROUTER_STRUCTURE
 >> CRUD:
     > location: cnc/database/**/crud.py
     > wraps db models to provide an interaction layer with the rest of the code
+4. Agent Pools:
+> 
 
 ======================
 DOMAIN_MODULE
@@ -47,3 +47,19 @@ LOGIC_SPLIT
 - service vs. crud
 > simililarly, this split should favor service
 > crud should be bare minimum db wrapper
+
+======================
+TESTING
+======================
+> For each CODEEDIT_TASK you *MUST*:
+1. Locate the relevant test cases to run; you are encouraged to select the smallest set of testcases relevant to your task
+2. Determine if:
+a) existing test cases provide full coverage of your new features 
+b) existing test cases need to be modified based on your change 
+c) new test cases need to be created
+3. Make sure that the test is passed before completing your CODEEDIT_TASK
+
+======================
+Additional Guidance
+======================
+- *Always*, when making changes in this repo, come up with a plan to first determine which of the above will be affected, and then articulate the your steps in strict guidance with the project structure

@@ -17,7 +17,7 @@ from cnc.schemas.http import EnrichedRequest
 from cnc.main import start_all
 
 from cnc.pools.discovery_agent_pool import start_discovery_agent as start_discovery_pool
-from src.agent.min_agent_single_page import MinimalAgentSinglePage
+from src.agent.discovery.min_agent_single_page import MinimalAgentSinglePage
 
 from httplib import (
     ResourceLocator, 

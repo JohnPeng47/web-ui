@@ -13,7 +13,7 @@ except ImportError as e:
     ) from e
 
 from logger import get_agent_loggers
-from src.agent.http_history import HTTPHandler
+from common.http_handler import HTTPHandler
 from httplib import (
     HTTPRequest, 
     HTTPResponse, 

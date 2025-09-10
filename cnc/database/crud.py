@@ -5,14 +5,13 @@ from sqlmodel import select
 
 from cnc.helpers.uuid import generate_uuid
 from cnc.schemas.engagement import EngagementCreate
-from cnc.schemas.agent import AgentOut
 from cnc.database.models import (
     PentestEngagement,
     AuthSession,
     PentestEngagementDiscoveryAgent,
     PentestEngagementExploitAgent,
 )
-from cnc.database.agent.models import AgentBase, ExploitAgent, DiscoveryAgent
+from cnc.database.agent.models import AgentBase, ExploitAgentModel, DiscoveryAgentModel
 from src.agent.base import AgentType
 
 async def create_engagement(
@@ -121,7 +120,7 @@ async def get_engagement_by_agent_id(
 
 async def list_agents_for_engagement(
     db: AsyncSession, engagement_id: UUID
-) -> List[Union[ExploitAgent, DiscoveryAgent]]:
+) -> List[Union[ExploitAgentModel, DiscoveryAgentModel]]:
     """Enumerate all agents attached to an engagement id.
 
     Returns list of AgentBase SQLModel ORM objects.
@@ -132,8 +131,8 @@ async def list_agents_for_engagement(
         .where(PentestEngagementExploitAgent.pentest_engagement_id == engagement_id)
     )
     exploit_result = await db.execute(
-        select(ExploitAgent).where(
-            cast(Any, ExploitAgent.id).in_(exploit_ids_subq)  # type: ignore
+        select(ExploitAgentModel).where(
+            cast(Any, ExploitAgentModel.id).in_(exploit_ids_subq)  # type: ignore
         )
     )
     exploit_agents = exploit_result.scalars().all()
@@ -144,8 +143,8 @@ async def list_agents_for_engagement(
         .where(PentestEngagementDiscoveryAgent.pentest_engagement_id == engagement_id)
     )
     discovery_result = await db.execute(
-        select(DiscoveryAgent).where(
-            cast(Any, DiscoveryAgent.id).in_(discovery_ids_subq)  # type: ignore
+        select(DiscoveryAgentModel).where(
+            cast(Any, DiscoveryAgentModel.id).in_(discovery_ids_subq)  # type: ignore
         )
     )
     discovery_agents = discovery_result.scalars().all()

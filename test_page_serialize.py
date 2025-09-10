@@ -1,7 +1,7 @@
 from src.llm_models import openai_5
 
-from src.detection.prompts import DetectAndSchedule
-from src.agent.pages import Page, PageObservations
+from src.agent.detection.prompts import DetectAndSchedule
+from src.agent.discovery.pages import Page, PageObservations
 import json
 
 model = openai_5()
