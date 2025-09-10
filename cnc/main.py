@@ -21,7 +21,9 @@ from cnc.pools.discovery_agent_pool import start_discovery_agent as start_discov
 from cnc.pools.exploit_agent_pool import start_exploit_agent as start_exploit_pool
 from cnc.pools.pool import StartDiscoveryRequest, StartExploitRequest
 
-from common.constants import API_SERVER_HOST, API_SERVER_PORT
+from src.llm_models import LLMHub
+
+from common.constants import API_SERVER_HOST, API_SERVER_PORT, LLM_CONFIG
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -64,9 +66,11 @@ def create_app() -> FastAPI:
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
         print(f"Validation error: {exc.errors()}")
 
+    llm_hub = LLMHub(function_map=LLM_CONFIG)
+
     # Create routers with injected dependencies
     engagement_router = make_engagement_router()
-    agent_router = make_agent_router(discovery_agent_queue, exploit_agent_queue)
+    agent_router = make_agent_router(discovery_agent_queue, exploit_agent_queue, llm_hub)
     
     # Include routers
     app.include_router(engagement_router)
@@ -76,7 +80,7 @@ def create_app() -> FastAPI:
 
 async def start_api_server(app_instance: FastAPI):
     """Start the FastAPI server using uvicorn."""
-    config = uvicorn.Config(app=app_instance, host=API_SERVER_HOST, port=API_SERVER_PORT)
+    config = uvicorn.Config(app=app_instance, host="0.0.0.0", port=API_SERVER_PORT)
     server = uvicorn.Server(config)
     await server.serve()
 

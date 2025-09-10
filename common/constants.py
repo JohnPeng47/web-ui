@@ -19,5 +19,13 @@ BROWSER_PROFILE_DIR = Path(
 )
 
 # cnc server url
-API_SERVER_HOST = "0.0.0.0"
+API_SERVER_HOST = "127.0.0.1"
 API_SERVER_PORT = 8000
+
+# detection prompt
+NUM_SCHEDULED_ACTIONS = 1
+
+# llm model for server
+LLM_CONFIG = {
+    "detection": "gpt-4o"
+}

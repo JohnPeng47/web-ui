@@ -1,24 +1,29 @@
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from sqlmodel import Field, SQLModel, Relationship, Column, JSON
-from uuid import UUID
+from sqlmodel import Field, SQLModel, Column, JSON
+import uuid
 
 from cnc.schemas.agent import ExploitAgentStep
+from src.agent.base import AgentType
 
 class AgentBase(SQLModel, table=False):    
-    id: int = Field(primary_key=True, default=None)  # autoincrement is default
-    agent_status: str = Field(default=False, nullable=False)
+    # sqlite won't accept UUID4 for some reason
+    # 2**61 half of UUID4 key space
+    id: str = Field(primary_key=True, default_factory=lambda: str(uuid.uuid4()))
+    agent_status: str = Field(default="inactive", nullable=False)
     max_steps: int = Field(nullable=False)
     model_name: str = Field(nullable=False)
     model_costs: float = Field(nullable=True)
     log_filepath: str = Field(nullable=True) # add this later
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    agent_type: str = Field(nullable=False)
     
     # Opik metadata fields
     opik_prompt_name: Optional[str] = None
     opik_prompt_commit: Optional[str] = None
         
 class ExploitAgent(AgentBase, table=True):
+    vulnerability_title: str = Field(nullable=False)
     agent_steps_data: Optional[List[Dict[str, Any]]] = Field(
         default=None, 
         sa_column=Column(JSON),

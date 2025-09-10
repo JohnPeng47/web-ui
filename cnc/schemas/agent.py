@@ -1,4 +1,4 @@
-from pydantic import BaseModel, UUID4
+from pydantic import BaseModel, UUID4, field_validator
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 
@@ -8,15 +8,15 @@ from cnc.schemas.base import JSONModel
 # from pentest_bot.models.steps import AgentStep as _DiscoveryAgentStep
 
 class AgentOut(BaseModel):
-    id: int
-    # TODO: add this in
-    # agent_status: str
+    id: str
+    agent_status: str
+    agent_type: AgentType
 
     class Config:
         from_attributes = True
 
 class AgentMessage(BaseModel):
-    agent_id: int
+    agent_id: str
 
 class AgentStep(JSONModel):
     def to_dict(self) -> Dict[str, Any]:
@@ -32,13 +32,16 @@ class DiscoveryAgentCreate(BaseModel):
     model_costs: Optional[float] = None
     log_filepath: Optional[str] = None
     agent_status: Optional[str] = "active"
+    agent_type: Optional[AgentType] = AgentType.DISCOVERY
 
 class ExploitAgentCreate(BaseModel):
+    vulnerability_title: str
     max_steps: int
     model_name: str
     model_costs: Optional[float] = None
     log_filepath: Optional[str] = None
     agent_status: Optional[str] = "active"
+    agent_type: Optional[AgentType] = AgentType.EXPLOIT
     
 # TODO: test uploading exploit agent steps first
 class ExploitAgentStep(AgentStep):
