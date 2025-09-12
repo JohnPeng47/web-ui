@@ -33,6 +33,7 @@ class EngagementOut(EngagementBase):
     created_at: datetime
     findings: Optional[List[Dict[str, Any]]] = None
     domain_ownership_verified: bool = False
+    page_data: Optional[List[Dict[str, Any]]] = None
 
     class Config:
         from_attributes = True
@@ -45,3 +46,12 @@ class Finding(BaseModel):
 
 class AddFindingRequest(BaseModel):
     finding: Finding
+
+
+class PageDataMergeRequest(BaseModel):
+    agent_id: str
+    delta: List[Dict[str, Any]]
+
+
+class EngagementPageDataOut(BaseModel):
+    page_data: List[Dict[str, Any]]

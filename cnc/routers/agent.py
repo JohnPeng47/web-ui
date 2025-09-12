@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
-from typing import List
+from typing import List, Any, cast
 
 from cnc.services.queue import BroadcastChannel
 from cnc.schemas.agent import (
@@ -18,7 +18,6 @@ from cnc.database.agent.crud import (
     register_discovery_agent as register_discovery_agent_service,
     register_exploit_agent as register_exploit_agent_service,
     append_discovery_agent_steps as append_discovery_agent_steps_service,
-    update_page_data as update_page_data_service,
     get_agent_steps as get_agent_steps_service,
 )
 from cnc.database.agent.models import ExploitAgentStep
@@ -31,6 +30,7 @@ from src.agent.discovery.pages import PageObservations
 from src.agent.agent_client import AgentClient
 from src.agent.detection.prompts import DetectAndSchedule
 from src.llm_models import LLMHub
+from cnc.services.engagement import merge_page_data as merge_page_data_service
 
 
 async def detect_vulnerabilities(
@@ -147,12 +147,14 @@ def make_agent_router(
             engagement = await get_engagement_by_agent_id(db, agent_id)
             if not engagement:
                 raise Exception("Engagement not found")
-            
+            # Write engagement-level page_data (back-compat shim) first
+            await merge_page_data_service(db, engagement.id, payload.page_data)
+
             # detect and schedule actions for the exploit agent
             actions: List[StartExploitRequest] = await DetectAndSchedule().ainvoke(
                 llm_hub.get("detection"),
                 prompt_args={
-                    "pages": PageObservations.from_json(payload.page_data),
+                    "pages": PageObservations.from_json(cast(Any, payload.page_data)),
                     "num_actions": NUM_SCHEDULED_ACTIONS
                 }
             )
@@ -178,7 +180,7 @@ def make_agent_router(
                         )
                     )
                 )
-            await update_page_data_service(db, agent_id, payload.page_data)
+            # already stored above
         except Exception as e:
             import traceback
             print(f"Exception: {e}")
@@ -197,7 +199,10 @@ def make_agent_router(
             if not agent:
                 raise HTTPException(status_code=404, detail="Agent not found")
 
-            return {"page_data": agent.page_data}
+            engagement = await get_engagement_by_agent_id(db, agent_id)
+            if not engagement:
+                raise Exception("Engagement not found")
+            return {"page_data": engagement.page_data or []}
         except Exception as e:
             import traceback
             print(f"Exception: {e}")
