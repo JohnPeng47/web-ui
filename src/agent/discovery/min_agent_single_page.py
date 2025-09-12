@@ -115,10 +115,15 @@ class MinimalAgentSinglePage(DiscoveryAgent):
                         self.agent_state.step, 
                         self.page_step,
                     )
-                print(self.pages)
                 if self.server_client:
-                    await self.server_client.update_page_data(self.pages)
-
+                    self.page_skip = await self.server_client.update_page_data(
+                        self.agent_state.step,
+                        self.agent_state.max_steps,
+                        self.page_step, 
+                        self.max_page_steps,
+                        self.pages
+                    )
+                    
             self._log(f"Single page visit completed for: {self.curr_url}")
         else:
             # No more URLs to process or already processed

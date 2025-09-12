@@ -79,4 +79,8 @@ class UploadPageData(AgentMessage):
     """Upload model for PageObservations coming from src.agent.discovery.pages.PageObservations.to_json().
     Accepts a list of page dicts as-is to keep schema flexible and aligned with runtime objects.
     """
+    steps: int
+    max_steps: int
+    page_steps: int
+    max_page_steps: int
     page_data: List[Dict[str, Any]]

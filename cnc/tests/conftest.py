@@ -149,7 +149,7 @@ async def test_app_client_with_workers() -> AsyncGenerator[AsyncClient, None]:
     cleaned up when the fixture scope ends.
     """
     # Deferred imports to avoid test collection side-effects
-    from cnc.workers.agent.browser import start_single_browser, get_browser_session
+    from cnc.workers.agent.browser import start_single_browser
 
     async with override_db(TEST_DB_URL):
         await create_db_and_tables()
@@ -157,6 +157,9 @@ async def test_app_client_with_workers() -> AsyncGenerator[AsyncClient, None]:
 
         # Background workers
         browser_task = asyncio.create_task(start_single_browser())
+        
+        await asyncio.sleep(3)
+
         stop_event: asyncio.Event = asyncio.Event()
         discovery_task = asyncio.create_task(
             start_discovery_pool(

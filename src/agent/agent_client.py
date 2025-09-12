@@ -39,7 +39,13 @@ class AgentClient:
         self.client.headers.update(headers)
         self._shutdown = None
 
-    async def update_page_data(self, pages: PageObservations) -> Dict[str, Any]:
+    async def update_page_data(
+        self, 
+        steps: int, 
+        max_steps: int, 
+        page_steps: int, 
+        max_page_steps: int, 
+        pages: PageObservations) -> bool:
         """
         Update page data for an agent.
         
@@ -56,11 +62,16 @@ class AgentClient:
         path = f"/agents/{self.agent_id}/page-data"
         payload = {
             "agent_id": str(self.agent_id),
+            "steps": steps,
+            "max_steps": max_steps,
+            "page_steps": page_steps,
+            "max_page_steps": max_page_steps,
             "page_data": await pages.to_json()
         }
         response = await self.client.post(path, json=payload)
         response.raise_for_status()
-        return response.json()
+        page_skip = response.json()["page_skip"]
+        return page_skip
 
     async def upload_exploit_agent_steps(self, agent_step: AgentStep) -> Dict[str, Any]:
         """
