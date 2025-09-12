@@ -20,6 +20,18 @@ async def create_db_and_tables():
         print("SQLite tables:", tables)
 
         await conn.run_sync(SQLModel.metadata.create_all)
+        # Ensure new columns exist for existing SQLite DBs (lightweight migration)
+        try:
+            cols = await conn.run_sync(
+                lambda c: c.exec_driver_sql("PRAGMA table_info(pentestengagement)").fetchall()
+            )
+            col_names = {row[1] for row in cols}
+            if "page_data" not in col_names:
+                await conn.run_sync(
+                    lambda c: c.exec_driver_sql("ALTER TABLE pentestengagement ADD COLUMN page_data JSON")
+                )
+        except Exception as e:
+            print(f"Schema check failed: {e}")
         
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
