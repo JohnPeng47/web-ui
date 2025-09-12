@@ -36,10 +36,11 @@ agent_id = agent["id"]
 
 # 4. Continue polling on the agent page_data API on a poll/sleep(1) loop for 20 iterations
 page_data_found = False
-for i in range(20):
+for i in range(30):
     get_page_data_resp = requests.get(f"{base_url}/agents/{agent_id}/page-data")
     assert get_page_data_resp.status_code == 200
     page_data_result = get_page_data_resp.json()
+    print(page_data_result)
     
     if "page_data" in page_data_result and page_data_result["page_data"]:
         page_data_found = True

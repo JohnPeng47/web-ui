@@ -223,7 +223,7 @@ class DiscoveryAgent:
         # TODO: MOVE INTO AGENT_CONTEXT
         self.urls = start_urls
         self.max_page_steps = max_page_steps
-        self.page_skip = False
+        self.page_skip = None
         self.pages: PageObservations = PageObservations()
         self.page_step = 0
         self.plan: PlanItem | None = None
@@ -639,8 +639,14 @@ class DiscoveryAgent:
                     self.page_step,
                 )
             if self.server_client:
-                await self.server_client.update_page_data(self.pages)
-
+                self.page_skip = await self.server_client.update_page_data(
+                    self.agent_state.step,
+                    self.agent_state.max_steps,
+                    self.page_step, 
+                    self.max_page_steps,
+                    self.pages
+                )
+                
     async def run(self) -> None:
         while self.agent_state.step < self.agent_state.max_steps:
             await self.step()
@@ -650,8 +656,11 @@ class DiscoveryAgent:
 
             self.agent_state.step += 1
             self.page_step += 1
-            if self.page_step > self.max_page_steps:
-                self.page_step = 0
+            # NOTE: page transition now fully managed by server
+            # if self.page_skip == True or self.page_step > self.max_page_steps:
+            #     self.page_step = 0
+            if self.page_skip == True:
+                self.page_step
                 
     # State update and logging 
     def _log(self, msg: str):
