@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
-from typing import List
+from typing import List, Any, cast
 
 from cnc.services.queue import BroadcastChannel
 from cnc.schemas.agent import (
@@ -38,6 +38,7 @@ from src.agent.discovery.pages import PageObservations
 from src.agent.agent_client import AgentClient
 from src.agent.detection.prompts import DetectAndSchedule
 from src.llm_models import LLMHub
+from cnc.services.engagement import merge_page_data as merge_page_data_service
 
 from logger import get_server_logger, get_agent_loggers, get_server_log_factory
 

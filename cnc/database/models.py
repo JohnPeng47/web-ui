@@ -44,6 +44,10 @@ class PentestEngagement(SQLModel, table=True):
         sa_column=Column(JSON),
         description="JSON array of user role objects with credentials"
     )
+    page_data: Optional[List[Dict[str, Any]]] = Field(
+        default=None,
+        sa_column=Column(JSON),
+    )
     # Many-to-many relationships to different agent types
     exploit_agents: List["ExploitAgentModel"] = Relationship(
         link_model=PentestEngagementExploitAgent,

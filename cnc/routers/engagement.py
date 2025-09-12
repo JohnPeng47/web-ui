@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
-from cnc.schemas.engagement import EngagementCreate, EngagementOut, AddFindingRequest
+from cnc.schemas.engagement import EngagementCreate, EngagementOut, AddFindingRequest, PageDataMergeRequest, EngagementPageDataOut
 from cnc.database.session import get_session
 
 from cnc.database.crud import (
@@ -10,6 +10,7 @@ from cnc.database.crud import (
     get_engagement as get_engagement_service, 
     update_engagement as update_engagement_service,
 )
+from cnc.services.engagement import merge_page_data as merge_page_data_service
 
 def make_engagement_router() -> APIRouter:
     """
@@ -37,6 +38,21 @@ def make_engagement_router() -> APIRouter:
         try:
             app = await get_engagement_service(db, engagement_id)
             return app
+        except ValueError as e:
+            raise HTTPException(status_code=404, detail=str(e))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @router.post("/{engagement_id}/page-data", response_model=EngagementPageDataOut)
+    async def merge_page_data(
+        engagement_id: UUID,
+        payload: PageDataMergeRequest,
+        db: AsyncSession = Depends(get_session),
+    ):
+        """Merge page_data delta into engagement-level page_data."""
+        try:
+            updated = await merge_page_data_service(db, engagement_id, payload.delta)
+            return EngagementPageDataOut(page_data=updated)
         except ValueError as e:
             raise HTTPException(status_code=404, detail=str(e))
         except Exception as e:
