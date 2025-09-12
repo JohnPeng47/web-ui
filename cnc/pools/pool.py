@@ -2,6 +2,7 @@ import asyncio
 import threading
 from dataclasses import dataclass
 from typing import Optional, List, TypeVar, Type
+import logging
 
 from common.agent import AgentPool
 from logger import get_agent_loggers
@@ -22,6 +23,8 @@ class StartDiscoveryRequest:
     scopes: Optional[List[str]] = None
     init_task: Optional[str] = None
     client: Optional[AgentClient] = None
+    agent_log: Optional[logging.Logger] = None
+    full_log: Optional[logging.Logger] = None
 
 @dataclass
 class StartExploitRequest:
@@ -30,6 +33,8 @@ class StartExploitRequest:
     vulnerability_title: str = ""
     max_steps: int = 12    
     client: Optional[AgentClient] = None
+    agent_log: Optional[logging.Logger] = None
+    full_log: Optional[logging.Logger] = None
 
 class LiveQueuePool(AgentPool[T]):
     def __init__(

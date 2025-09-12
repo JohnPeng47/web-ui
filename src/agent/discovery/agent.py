@@ -35,6 +35,7 @@ from eval.client import PagedDiscoveryEvalClient
 
 from common.utils import extract_json
 from logger import get_agent_loggers
+import logging
 
 # Basic logger compatible with this repo
 agent_log, full_log = get_agent_loggers()
@@ -196,7 +197,9 @@ class DiscoveryAgent:
         cdp_handler: CDPHTTPHandler | None = None,
         agent_dir: Path,
         init_task: Optional[str] = None,
-        screenshots: bool = False
+        screenshots: bool = False,
+        agent_log: Optional[logging.Logger] = None,
+        full_log: Optional[logging.Logger] = None,
     ):
         # initiailized in the agent loop
         # self.task = ""
@@ -230,6 +233,12 @@ class DiscoveryAgent:
         self.curr_dom_tree: EnhancedDOMTreeNode | None = None
         self.curr_url: str = ""
         self.curr_dom_str: str = ""
+
+        # override default loggers if provided
+        if agent_log is not None:
+            globals()["agent_log"] = agent_log
+        if full_log is not None:
+            globals()["full_log"] = full_log
 
         if self.take_screenshot:
             self._set_screenshot_service()

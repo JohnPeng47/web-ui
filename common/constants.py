@@ -29,3 +29,6 @@ NUM_SCHEDULED_ACTIONS = 1
 LLM_CONFIG = {
     "detection": "gpt-4o"
 }
+
+# logging
+SERVER_LOG_DIR = ".server_logs"

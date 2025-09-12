@@ -1,4 +1,6 @@
 import asyncio
+import logging
+
 from typing import List, Optional
 from pathlib import Path
 
@@ -41,7 +43,9 @@ class MinimalAgentSinglePage(DiscoveryAgent):
         cdp_handler: MitmProxyHTTPHandler | None = None,
         agent_dir: Path,
         init_task: Optional[str] = None,
-        screenshots: bool = False
+        screenshots: bool = False,
+        agent_log: Optional[logging.Logger] = None,
+        full_log: Optional[logging.Logger] = None,
     ):
         super().__init__(
             llm=llm,
@@ -56,7 +60,9 @@ class MinimalAgentSinglePage(DiscoveryAgent):
             cdp_handler=cdp_handler,
             agent_dir=agent_dir,
             init_task=init_task,
-            screenshots=screenshots
+            screenshots=screenshots,
+            agent_log=agent_log,
+            full_log=full_log,
         )
 
     async def step(self):
