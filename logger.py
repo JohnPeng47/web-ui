@@ -6,9 +6,14 @@ import threading
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, List, Any, cast
+from typing import Optional, List, Any, cast, Tuple, Dict
 
 from src.utils import get_ctxt_id, LoggerProxy
+
+# Logger names as top-level constants
+AGENT_LOGGER_NAME = "agentlog"
+FULL_REQUESTS_LOGGER_NAME = "full_requests"
+SERVER_LOGGER_NAME = "serverlog"
 
 _LOG_FORMAT = "%(asctime)s:[%(funcName)s:%(lineno)s] - %(message)s"
 
@@ -108,18 +113,24 @@ class AgentFileHandler(logging.FileHandler):
         *,
         level: int = logging.INFO,
         thread_id: Optional[int] = None,
-    ):        
+        create_run_subdir: bool = True,
+        add_thread_filter: bool = True,
+    ):
         self.thread_id = thread_id or threading.get_ident()
 
-        try:
-            self.base_logdir = run_id_dir(base_dir)
-            self.base_logdir.mkdir()
-        except FileExistsError: 
-            # race condition with other loggers creating files in same dir, random backoff to avoid 
-            # re-conflicts
-            time.sleep(0.1 + 0.3 * random.random())
-            self.base_logdir = run_id_dir(base_dir)
-            self.base_logdir.mkdir()
+        if create_run_subdir:
+            try:
+                self.base_logdir = run_id_dir(base_dir)
+                self.base_logdir.mkdir()
+            except FileExistsError: 
+                # race condition with other loggers creating files in same dir, random backoff to avoid 
+                # re-conflicts
+                time.sleep(0.1 + 0.3 * random.random())
+                self.base_logdir = run_id_dir(base_dir)
+                self.base_logdir.mkdir()
+        else:
+            # Write directly under the provided base_dir
+            self.base_logdir = base_dir
 
         # Final log file path
         self.log_filepath = self.base_logdir / f"{eval_name}.log"
@@ -129,9 +140,10 @@ class AgentFileHandler(logging.FileHandler):
         self.setLevel(level)
         self.setFormatter(formatter)
 
-        # Per-thread isolation
+        # Per-thread isolation (optional)
         self._thread_id = self.thread_id
-        self.addFilter(_ThreadFilter(self.thread_id))
+        if add_thread_filter:
+            self.addFilter(_ThreadFilter(self.thread_id))
 
     def get_log_dirs(self):
         return self.base_logdir, self.log_filepath
@@ -144,8 +156,10 @@ def setup_agent_logger(
     log_dir: str,
     *,
     parent_dir: Optional[Path] = None, # empty path
-    name: str = "agentlog",
+    name: str = AGENT_LOGGER_NAME,
     level: int = logging.INFO,
+    create_run_subdir: bool = True,
+    add_thread_filter: bool = True,
 ):
     """
     Updated log-directory layout:
@@ -182,12 +196,14 @@ def setup_agent_logger(
             base_dir,
             level=level,
             thread_id=thread_id,
+            create_run_subdir=create_run_subdir,
+            add_thread_filter=add_thread_filter,
         )
         logger.addHandler(fh)
         cast(Any, logger)._run_dir = fh.base_logdir          # keep this public attr
 
     # ─────────── Secondary logger ("full_requests") ────────────────────── #
-    fr_logger = logging.getLogger("full_requests")
+    fr_logger = logging.getLogger(FULL_REQUESTS_LOGGER_NAME)
     fr_logger.setLevel(level)
     fr_logger.propagate = False
 
@@ -202,6 +218,8 @@ def setup_agent_logger(
             fr_dir,
             level=level,
             thread_id=thread_id,
+            create_run_subdir=create_run_subdir,
+            add_thread_filter=add_thread_filter,
         )
         fr_logger.addHandler(fr_fh)
 
@@ -214,7 +232,7 @@ def setup_server_logger(log_dir: str):
     run_dir = run_id_dir(base_dir)
     run_dir.mkdir(parents=True, exist_ok=True)
     
-    logger = logging.getLogger("serverlog")
+    logger = logging.getLogger(SERVER_LOGGER_NAME)
     logger.setLevel(logging.INFO)
     
     # Clear existing handlers to avoid duplicates
@@ -231,11 +249,147 @@ def setup_server_logger(log_dir: str):
     logger.addHandler(file_handler)
 
 def get_server_logger():
-    return logging.getLogger("serverlog")
+    return logging.getLogger(SERVER_LOGGER_NAME)
 
 def unified_log():
     agent_log, full_log = get_agent_loggers()
     return LoggerProxy([agent_log, full_log])
 
 def get_agent_loggers():
-    return logging.getLogger("agentlog"), logging.getLogger("full_requests")
+    return logging.getLogger(AGENT_LOGGER_NAME), logging.getLogger(FULL_REQUESTS_LOGGER_NAME)
+
+# --------------------------------------------------------------------------- #
+#  ServerLogFactory: per-engagement loggers and directory layout
+# --------------------------------------------------------------------------- #
+
+class ServerLogFactory:
+    """
+    Creates engagement-scoped loggers and log directories.
+
+    Layout (under base_dir/<timestamp>/<incr_id>):
+
+        server.log
+        discovery_agents/
+            <run>/<N>.log
+        exploit_agents/
+            <run>/<N>.log
+
+    Notes:
+    - Uses setup_agent_logger for agent logs (discovery/exploit) to ensure
+      per-thread file handlers and console logging.
+    - Server logger writes directly to server.log and also to console.
+    """
+
+    def __init__(self, base_dir: str) -> None:
+        self._base_dir = Path(base_dir)
+        self._engagement_server_loggers: Dict[str, logging.Logger] = {}
+        self._engagement_id_to_dir: Dict[str, Path] = {}
+
+    def _engagement_dir(self, engagement_key: str) -> Path:
+        # Check if we already have a mapping for this engagement
+        key = str(engagement_key)
+        if key in self._engagement_id_to_dir:
+            return self._engagement_id_to_dir[key]
+        
+        # Create timestamp directory
+        timestamp = datetime.now().strftime("%Y-%m-%d")
+        timestamp_dir = self._base_dir / timestamp
+        timestamp_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Find next incremental ID in timestamp directory
+        max_incr = 0
+        for p in timestamp_dir.iterdir():
+            if p.is_dir() and p.name.isdigit():
+                max_incr = max(max_incr, int(p.name))
+        
+        incr_id = max_incr + 1
+        engagement_dir = timestamp_dir / str(incr_id)
+        engagement_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Ensure subfolders exist
+        (engagement_dir / "discovery_agents").mkdir(exist_ok=True)
+        (engagement_dir / "exploit_agents").mkdir(exist_ok=True)
+        
+        # Store mapping
+        self._engagement_id_to_dir[key] = engagement_dir
+        
+        return engagement_dir
+
+    def _next_numeric_name(self, root: Path) -> str:
+        """
+        Determine the next numeric filename stem by scanning existing *.log files
+        recursively and returning max(N)+1.
+        """
+        max_num = 0
+        for p in root.rglob("*.log"):
+            try:
+                num = int(p.stem)
+                if num > max_num:
+                    max_num = num
+            except ValueError:
+                continue
+        return str(max_num + 1)
+
+    def ensure_server_logger(self, engagement_key: str) -> logging.Logger:
+        """Create or return the per-engagement server logger (with console + file)."""
+        key = str(engagement_key)
+        if key in self._engagement_server_loggers:
+            return self._engagement_server_loggers[key]
+
+        e_dir = self._engagement_dir(key)
+        logger_name = f"{SERVER_LOGGER_NAME}.{key}"
+        logger = logging.getLogger(logger_name)
+        logger.setLevel(logging.INFO)
+        logger.propagate = False
+
+        # Avoid duplicate handlers if called multiple times
+        if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
+            logger.addHandler(get_console_handler())
+
+        server_log_path = e_dir / "server.log"
+        if not any(isinstance(h, logging.FileHandler) and getattr(h, "baseFilename", None) == str(server_log_path) for h in logger.handlers):
+            fh = logging.FileHandler(server_log_path, encoding="utf-8")
+            fh.setFormatter(formatter)
+            logger.addHandler(fh)
+
+        self._engagement_server_loggers[key] = logger
+        return logger
+
+    def get_discovery_agent_loggers(self, engagement_key: str) -> Tuple[logging.Logger, logging.Logger]:
+        """
+        Return (parent_dir, logger_name) for a new discovery agent under this engagement.
+        Does not attach handlers; the worker thread should call setup_agent_logger
+        with these values.
+        """
+        e_dir = self._engagement_dir(str(engagement_key))
+        discovery_dir = e_dir / "discovery_agents"
+        name = self._next_numeric_name(discovery_dir)
+        setup_agent_logger(log_dir="", parent_dir=discovery_dir, name=name, create_run_subdir=False, add_thread_filter=False)
+        return logging.getLogger(name), logging.getLogger(FULL_REQUESTS_LOGGER_NAME)
+
+    def get_exploit_agent_loggers(self, engagement_key: str) -> Tuple[logging.Logger, logging.Logger]:
+        """
+        Return (parent_dir, logger_name) for a new exploit agent under this engagement.
+        Does not attach handlers; the worker thread should call setup_agent_logger.
+        """
+        e_dir = self._engagement_dir(str(engagement_key))
+        exploit_dir = e_dir / "exploit_agents"
+        name = self._next_numeric_name(exploit_dir)
+        setup_agent_logger(log_dir="", parent_dir=exploit_dir, name=name, create_run_subdir=False, add_thread_filter=False)
+        return logging.getLogger(name), logging.getLogger(FULL_REQUESTS_LOGGER_NAME)
+
+
+_SERVER_LOG_FACTORY_SINGLETON: Optional[ServerLogFactory] = None
+
+def get_server_log_factory(base_dir: Optional[str] = None) -> ServerLogFactory:
+    """
+    Return a singleton ServerLogFactory. If base_dir is provided on first call,
+    it sets the base directory; otherwise defaults to ".server_logs/engagements".
+    Subsequent calls ignore base_dir.
+    """
+    global _SERVER_LOG_FACTORY_SINGLETON
+    if _SERVER_LOG_FACTORY_SINGLETON is None:
+        root = base_dir or ".server_logs/engagements"
+        Path(root).mkdir(parents=True, exist_ok=True)
+        _SERVER_LOG_FACTORY_SINGLETON = ServerLogFactory(root)
+    return _SERVER_LOG_FACTORY_SINGLETON

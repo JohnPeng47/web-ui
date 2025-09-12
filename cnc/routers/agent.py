@@ -31,6 +31,7 @@ from common.constants import (
     NUM_SCHEDULED_ACTIONS,
     MAX_DISCOVERY_AGENT_STEPS,
     MAX_DISCOVERY_PAGE_STEPS,
+    SERVER_LOG_DIR,
 )
 
 from src.agent.discovery.pages import PageObservations
@@ -38,7 +39,7 @@ from src.agent.agent_client import AgentClient
 from src.agent.detection.prompts import DetectAndSchedule
 from src.llm_models import LLMHub
 
-from logger import get_server_logger
+from logger import get_server_logger, get_agent_loggers, get_server_log_factory
 
 log = get_server_logger()
 
@@ -82,7 +83,13 @@ def make_agent_router(
             if not engagement:
                 raise HTTPException(status_code=404, detail="Engagement not found")
 
-            log.info(f"Starting discovery agent with {[engagement.base_url]}")
+            # Engagement-scoped server logger and agent loggers
+            log_factory = get_server_log_factory(base_dir=SERVER_LOG_DIR)
+            engagement_logger = log_factory.ensure_server_logger(str(engagement.id))
+            engagement_logger.info(f"Starting discovery agent with {[engagement.base_url]}")
+
+            # Create agent loggers for this engagement's discovery_agents
+            agent_logger, full_logger = log_factory.get_discovery_agent_loggers(str(engagement.id))
 
             await discovery_agent_queue.publish(
                 StartDiscoveryRequest(
@@ -92,7 +99,9 @@ def make_agent_router(
                     client=AgentClient(
                         agent_id=agent.id,
                         api_url=f"http://127.0.0.1:{API_SERVER_PORT}",
-                    )
+                    ),
+                    agent_log=agent_logger,
+                    full_log=full_logger,
                 )
             )
             return agent
@@ -167,22 +176,27 @@ def make_agent_router(
                 trigger_detection = True
                 
             if trigger_detection:
-                log.info(f"Detection triggered at {page_steps}/{max_page_steps}")                    
                 engagement = await get_engagement_by_agent_id(db, agent_id)
                 if not engagement:
                     raise Exception("Engagement not found")
+                # Engagement-scoped server logger
+                log_factory = get_server_log_factory(base_dir=SERVER_LOG_DIR)
+                engagement_logger = log_factory.ensure_server_logger(str(engagement.id))
+                engagement_logger.info(f"Detection triggered at {page_steps}/{max_page_steps}")
                 
                 # detect and schedule actions for the exploit agent
+                # Convert incoming list[dict] to Page objects for PageObservations
+                pages_obj = PageObservations.from_json(payload.page_data)  # type: ignore[arg-type]
                 actions: List[StartExploitRequest] = await DetectAndSchedule().ainvoke(
                     llm_hub.get("detection"),
                     prompt_args={
-                        "pages": PageObservations.from_json(payload.page_data),
+                        "pages": pages_obj,
                         "num_actions": NUM_SCHEDULED_ACTIONS
                     }
                 )
                 actions = actions[:1]
                 for action in actions:
-                    log.info(f"Scheduling exploit agent for {action.vulnerability_title}")
+                    engagement_logger.info(f"Scheduling exploit agent for {action.vulnerability_title}")
                     # register and queue up exploit agent
                     create_exploit_config = ExploitAgentCreate(
                         vulnerability_title=action.vulnerability_title,
@@ -191,6 +205,9 @@ def make_agent_router(
                         agent_status="active",
                     )
                     await register_exploit_agent_service(db, engagement.id, create_exploit_config)
+                    # Create agent loggers for this engagement's exploit_agents
+                    agent_logger, full_logger = log_factory.get_exploit_agent_loggers(str(engagement.id))
+
                     await exploit_agent_queue.publish(
                         StartExploitRequest(
                             page_item=action.page_item, 
@@ -200,7 +217,9 @@ def make_agent_router(
                             client=AgentClient(
                                 agent_id=agent_id,
                                 api_url=f"http://127.0.0.1:{API_SERVER_PORT}",
-                            )
+                            ),
+                            agent_log=agent_logger,
+                            full_log=full_logger,
                         )
                     )
             return {"page_skip": True}
@@ -222,7 +241,8 @@ def make_agent_router(
             if not agent:
                 raise HTTPException(status_code=404, detail="Agent not found")
 
-            return {"page_data": agent.page_data}
+            # Discovery agents carry page data
+            return {"page_data": getattr(agent, "page_data", None)}
         except Exception as e:
             import traceback
             print(f"Exception: {e}")

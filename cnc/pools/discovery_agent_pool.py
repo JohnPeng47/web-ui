@@ -117,6 +117,8 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
             init_task=queue_item.init_task,
             server_client=queue_item.client,
             screenshots=SCREENSHOTS,
+            agent_log=queue_item.agent_log,
+            full_log=queue_item.full_log,
         )
         await agent.run()
 
