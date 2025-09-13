@@ -49,13 +49,19 @@ LOGIC_SPLIT
 ======================
 TESTING
 ======================
-> For each CODEEDIT_TASK you *MUST*:
+> For each CODEEDIT_TASK, if testing is requested by the user, then you *MUST*:
+- acknowledge verbally in your output that testing is required
+- use the following guideline for your testing strategy
+
 1. Locate the relevant test cases to run; you are encouraged to select the smallest set of testcases relevant to your task
 2. Determine if:
 a) existing test cases provide full coverage of your new features 
 b) existing test cases need to be modified based on your change 
 c) new test cases need to be created
 3. Make sure that the test is passed before completing your CODEEDIT_TASK
+
+- Important
+> when running any integration that uses *test_app_client_with_workers* fixture, if the test fails at first, try again a second time
 
 ======================
 Additional Guidance

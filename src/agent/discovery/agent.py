@@ -3,7 +3,8 @@ from typing import Any, Dict, List, Optional, Tuple
 import asyncio
 from abc import ABC, abstractmethod
 from pathlib import Path
-
+import requests
+from urllib.parse import urljoin
 from pydantic import BaseModel, ValidationError
 from langchain_core.messages import BaseMessage
 
@@ -33,7 +34,7 @@ from cnc.workers.agent.cdp_handler import CDPHTTPHandler
 from src.agent.agent_client import AgentClient
 from eval.client import PagedDiscoveryEvalClient
 
-from common.utils import extract_json
+from common.utils import extract_json, get_base_url
 from logger import get_agent_loggers
 import logging
 
@@ -223,8 +224,8 @@ class DiscoveryAgent:
         self.ActionModel = self.controller.registry.create_action_model(page_url=None)
         self.AgentOutput = AgentOutput.type_with_custom_actions(self.ActionModel)
 
-        # TODO: MOVE INTO AGENT_CONTEXT
-        self.urls = start_urls
+        # TODO: may want more sophisticated check here such as disregarding query params
+        self.url_queue = set(start_urls)
         self.max_page_steps = max_page_steps
         self.page_skip = None
         self.pages: PageObservations = PageObservations()
@@ -242,6 +243,17 @@ class DiscoveryAgent:
 
         if self.take_screenshot:
             self._set_screenshot_service()
+
+        # Check URL accessibility
+        self._check_urls()
+
+    def _check_urls(self) -> None:
+        """Check URL accessibility"""
+        for url in self.url_queue:
+            response = requests.get(url)
+            if response.status_code != 200:
+                agent_log.warning(f"GET {url} returned {response.status_code}, removing from queue")
+                self.url_queue.remove(url)
 
     def _set_screenshot_service(self) -> None:
         """Initialize screenshot service using agent directory"""
@@ -494,12 +506,16 @@ class DiscoveryAgent:
     def _find_links_on_page(self):
         """Manually scrape links in the DOM string"""
         if not self.curr_dom_tree:
-            raise ValueError("Current DOM tree is not initialized!")
+            agent_log.error("Current DOM tree is not initialized!")
+            return
 
         links = parse_links_from_str(self.curr_dom_tree.to_str())
         for link in links:
             agent_log.info(f"Discovered additional link: {link}")
-            self.pages.curr_page().add_link(link)
+            base_url = get_base_url(self.curr_url)
+            self.url_queue.add(urljoin(base_url, link))
+        
+        self._check_urls()
 
     def _create_new_plan(self):
         new_plan = CreatePlanNested().invoke(
@@ -587,7 +603,7 @@ class DiscoveryAgent:
         """
         One iteration:
           - read browser
-          - build messages
+        - build messages
           - query LLM
           - execute actions
         """
@@ -595,7 +611,7 @@ class DiscoveryAgent:
         if self.page_step == 0:
             self._log(f"[PAGE_TRANSITION]: {self.curr_url}")
 
-            self.curr_url = self.urls.pop(0)
+            self.curr_url = self.url_queue.pop()
             await self._goto_page(self.curr_url)
             self.pages.add_page(Page(url=self.curr_url))
 
@@ -607,6 +623,9 @@ class DiscoveryAgent:
                 self._create_new_plan()
             else:
                 self.task = self._init_task
+
+            # reset page_skip or else infinite loop
+            self.page_skip = False
         try:
             agent_msgs = await self._build_agent_prompt()
             model_output = await self._llm_next_actions(agent_msgs)
@@ -655,6 +674,7 @@ class DiscoveryAgent:
                     self.max_page_steps,
                     self.pages
                 )
+                agent_log.info(f"Page skip: {self.page_skip}")
                 
     async def run(self) -> None:
         while self.agent_state.step < self.agent_state.max_steps:
@@ -665,11 +685,13 @@ class DiscoveryAgent:
 
             self.agent_state.step += 1
             self.page_step += 1
-            # NOTE: page transition now fully managed by server
-            # if self.page_skip == True or self.page_step > self.max_page_steps:
+            # if self.page_step > self.max_page_steps:
             #     self.page_step = 0
+
+            # NOTE: page transition now fully managed by server
+            # > bug, self.page_skip never True
             if self.page_skip == True:
-                self.page_step
+                self.page_step = 0
                 
     # State update and logging 
     def _log(self, msg: str):

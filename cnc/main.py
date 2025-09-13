@@ -61,13 +61,17 @@ def create_app() -> FastAPI:
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
         LOG.warning("Validation error: %s", exc.errors())
 
+    @app.get("/health")
+    async def health_check():
+        """Health check endpoint."""
+        return {"status": "healthy"}
+
     llm_hub = LLMHub(function_map=LLM_CONFIG)
     engagement_router = make_engagement_router()
     agent_router = make_agent_router(discovery_agent_queue, exploit_agent_queue, llm_hub)
     app.include_router(engagement_router)
     app.include_router(agent_router)
     return app
-
 
 def preflight_bind(host: str, port: int) -> None:
     """

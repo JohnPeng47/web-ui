@@ -12,10 +12,13 @@ async def test_discovery_agent_integration(test_app_client_with_workers: AsyncCl
     # 2. Create engagement (API)
     engagement_payload = {
         "name": "Discovery Agent Integration Test",
-        "base_url": "https://example.com",
+        "base_url": "http://147.79.78.153:3000/#/login",
         "description": "Integration test for discovery agent functionality",
-        "scopes_data": ["https://example.com"]
-    }
+        "scopes_data": [
+            "http://147.79.78.153:3000/rest/",
+            "http://147.79.78.153:3000/api/",
+        ]
+    }    
     create_resp = await application_client.post("/engagement/", json=engagement_payload)
     assert create_resp.status_code == 200
     engagement = create_resp.json()
@@ -40,7 +43,7 @@ async def test_discovery_agent_integration(test_app_client_with_workers: AsyncCl
     # 4. Continue polling on the agent page_data API on a poll/sleep(1) loop for 20 iterations
     page_data_found = False
     for i in range(20):
-        get_page_data_resp = await application_client.get(f"/agents/{agent_id}/page-data")
+        get_page_data_resp = await application_client.get(f"/agents/{engagement_id}/page-data")
         assert get_page_data_resp.status_code == 200
         page_data_result = get_page_data_resp.json()
         

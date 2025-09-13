@@ -74,11 +74,11 @@ class MinimalAgentSinglePage(DiscoveryAgent):
         4. Triggers all necessary updates
         """
         # Only process if we have URLs to visit and haven't started this page yet
-        if self.page_step == 0 and self.urls:
+        if self.page_step == 0 and self.url_queue:
             self._log(f"[PAGE_TRANSITION]: Processing single page")
 
             # Dequeue a single URL
-            self.curr_url = self.urls.pop(0)
+            self.curr_url = self.url_queue.pop()
             await self._goto_page(self.curr_url)
             self.pages.add_page(Page(url=self.curr_url))
 
