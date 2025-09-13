@@ -60,7 +60,8 @@ async def start_single_browser():
             except Exception as e:
                 print(f"Error stopping playwright: {e}")
 
-async def get_browser_session():
+async def get_browser_session(sleep_time=10):
+    """Get a browser session from browser-use"""
     retry_count = 3
     browser_session = None
     
@@ -110,7 +111,7 @@ async def get_browser_session():
             
             if attempt < retry_count - 1:
                 print(f"Sleeping before retry...")
-                await asyncio.sleep(10)
+                await asyncio.sleep(sleep_time)
             else:
                 raise Exception(f"Browser session failed after {retry_count} attempts")
 

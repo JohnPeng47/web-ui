@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import List, Optional, Tuple, Literal
 
 from pydantic import BaseModel, Field
@@ -195,9 +196,16 @@ class AddPlanItemList(BaseModel):
 
     def apply(self, plan: PlanItem):
         for item in self.plan_items:
-            agent_log.info(f"Adding plan item: {item.description} to [{item.parent_index}]")
-            plan.add(item.parent_index, item.description)
+            # Extract only x.y.z.a pattern (digits separated by dots)
+            match = re.match(r"^(\d+(?:\.\d+)*)$", item.parent_index)
+            if match:
+                parent_index = match.group(1)
+                agent_log.info(f"Adding plan item: {item.description} to [{parent_index}]")
+                plan.add(parent_index, item.description)
+            else:
+                agent_log.warning(f"Invalid parent_index format: {item.parent_index}, skipping item: {item.description}")
         return plan
+
 
 # TODO: maybe we add the nested goal here to guide the update?
 # TODO: realizing that actually, we probably do need to address deletions

@@ -29,3 +29,23 @@ def extract_json(response: str) -> str:
     
     # If we get here, unmatched braces - return from start to end
     return response[start_idx:]
+
+
+def get_base_url(url: str) -> str:
+    """
+    Extracts the base URL (scheme + netloc) from a properly formed URL.
+    
+    Args:
+        url: A properly formed URL string
+        
+    Returns:
+        The base URL containing scheme and netloc (e.g., "https://example.com")
+        
+    Example:
+        >>> get_base_url("https://example.com/path/to/page?query=value")
+        "https://example.com"
+    """
+    from urllib.parse import urlparse
+    
+    parsed = urlparse(url)
+    return f"{parsed.scheme}://{parsed.netloc}"

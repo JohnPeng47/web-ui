@@ -26,14 +26,12 @@ class Page:
         self, 
         url: str, 
         http_msgs: Optional[List[HTTPMessage]] = None, 
-        links: Optional[List[str]] = None,
         page_id: Optional[int] = None
     ):
         self.page_id = page_id
         self.url = url
         # Maintain the raw list for serialization and analysis
         self.http_msgs: List[HTTPMessage] = []
-        self.links = links if links is not None else []
 
         self._groups: Dict[Tuple[str, str], List[HTTPMessage]] = {}
         self._group_order: List[Tuple[str, str]] = []
@@ -60,10 +58,6 @@ class Page:
             return None
         # Return any associated request; choose the most recent
         return msgs[-1]
-
-    def add_link(self, link: str):
-        if link not in self.links:
-            self.links.append(link)
 
     def _truncate_body(self, body: str) -> str:
         if not body:
@@ -278,7 +272,6 @@ class Page:
         return {
             "url": self.url,
             "http_msgs": [await msg.to_json() for msg in self.http_msgs],
-            "links": self.links
         }
 
     @classmethod
@@ -286,7 +279,6 @@ class Page:
         return cls(
             url=data["url"],
             http_msgs=[HTTPMessage.from_json(msg) for msg in data["http_msgs"]],
-            links=data["links"]
         )
 
 class PageObservations:

@@ -12,7 +12,11 @@ from cnc.schemas.agent import (
     UploadPageData,
 )
 from cnc.database.session import get_session
-from cnc.database.crud import get_engagement_by_agent_id, list_agents_for_engagement
+from cnc.database.crud import (
+    get_engagement_by_agent_id, 
+    list_agents_for_engagement, 
+    get_engagement
+)
 from cnc.database.agent.crud import (
     get_agent_by_id as get_agent_by_id_service,
     register_discovery_agent as register_discovery_agent_service,
@@ -21,7 +25,6 @@ from cnc.database.agent.crud import (
     get_agent_steps as get_agent_steps_service,
 )
 from cnc.database.agent.models import ExploitAgentStep
-from cnc.database.crud import get_engagement
 from cnc.pools.pool import StartDiscoveryRequest, StartExploitRequest
 
 from common.constants import (
@@ -188,7 +191,7 @@ def make_agent_router(
                 trigger_detection = True
 
             if trigger_detection:
-                # TODO: 
+                # TODO:
                 log.info(f"Triggering detection for: {agent_id}")
                 log.info(f"Page steps: {PageObservations.from_json(payload.page_data)}")
                 pass
@@ -196,7 +199,7 @@ def make_agent_router(
                 # engagement = await get_engagement_by_agent_id(db, agent_id)
                 # if not engagement:
                 #     raise Exception("Engagement not found")
-                # # Engagement-scoped server logger
+                # # Engagement-scoped serve r logger
 
                 # # detect and schedule actions for the exploit agent
                 # # Convert incoming list[dict] to Page objects for PageObservations
@@ -236,25 +239,24 @@ def make_agent_router(
                 #             full_log=full_logger,
                 #         )
                 #     )
-            return {"page_skip": True}
+                
+            return {
+                "page_skip": trigger_detection
+            }
         except Exception as e:
             import traceback
             print(f"Exception: {e}")
             print(f"Stacktrace: {traceback.format_exc()}")
             raise HTTPException(status_code=500, detail=str(e))
 
-    @router.get("/agents/{agent_id}/page-data")
+    @router.get("/agents/{engagement_id}/page-data")
     async def get_agent_page_data(
-        agent_id: str,
+        engagement_id: UUID,
         db: AsyncSession = Depends(get_session),
     ):
         """Get page data for a discovery agent."""
         try:
-            agent = await get_agent_by_id_service(db, agent_id)
-            if not agent:
-                raise HTTPException(status_code=404, detail="Agent not found")
-
-            engagement = await get_engagement_by_agent_id(db, agent_id)
+            engagement = await get_engagement(db, engagement_id)
             if not engagement:
                 raise Exception("Engagement not found")
             return {"page_data": engagement.page_data or []}

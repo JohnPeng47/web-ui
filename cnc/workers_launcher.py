@@ -100,13 +100,12 @@ async def start_workers(
         print("Starting workers with dependency injection...")
         asyncio.create_task(start_single_browser())
 
-        await asyncio.sleep(4)
+        # await asyncio.sleep(12)
 
         # Run all workers concurrently
         await asyncio.gather(
             # start_enrichment_worker(raw_channel, enriched_channel, session),
             # start_attacker_worker(enriched_channel, session),
-
             start_discovery_pool(discovery_agent_queue, agent_cls=discovery_agent_cls),
             start_exploit_pool(exploit_agent_queue, override_max_steps=override_max_steps),
         )

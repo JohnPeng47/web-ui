@@ -19,9 +19,9 @@ def make_engagement_router() -> APIRouter:
     Returns:
         Configured APIRouter instance
     """
-    router = APIRouter(prefix="/engagement")
+    router = APIRouter()
     
-    @router.post("/", response_model=EngagementOut)
+    @router.post("/engagement/", response_model=EngagementOut)
     async def create_engagement(payload: EngagementCreate, db: AsyncSession = Depends(get_session)):
         """Create a new engagement."""
         try:
@@ -32,7 +32,7 @@ def make_engagement_router() -> APIRouter:
             raise HTTPException(status_code=400, detail=str(e))
     
     
-    @router.get("/{engagement_id}", response_model=EngagementOut)
+    @router.get("/engagement/{engagement_id}", response_model=EngagementOut)
     async def get_engagement(engagement_id: UUID, db: AsyncSession = Depends(get_session)):
         """Get an engagement by ID."""
         try:
@@ -43,7 +43,7 @@ def make_engagement_router() -> APIRouter:
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 
-    @router.post("/{engagement_id}/page-data", response_model=EngagementPageDataOut)
+    @router.post("/engagement/{engagement_id}/page-data", response_model=EngagementPageDataOut)
     async def merge_page_data(
         engagement_id: UUID,
         payload: PageDataMergeRequest,

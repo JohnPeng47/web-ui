@@ -53,8 +53,6 @@ Error Handling:
 - Finish writing CLAUDE_CODE.md
 - [FIX] generating ALTER syntax for alembic
 - Modify start_agent server to work without the routes, so we can avoid triggering side effects -> create and label these fixtures
-- [BUG] auto-incremented, table specific ID for both discovery/exploit agents, need to consilidate into single ID
-- add the fastapi specific instructions
 2025/09/12:
 - [DESIGN] change page_data API to accept engagementID instead
 - [FEATURE]
@@ -62,8 +60,10 @@ Error Handling:
 > API change:
 >> create agent and start agent separate APIs
 >> start agent can take be used to restart agent
-- [FEATURE]
-> 
+2025/09/13:
+- [BUG] Same requests are not showing signs of real 
+- integration test still not working suspect something wrong with pytest machinery
+> could/should make the start process alot cleaner
 =========================
 ===== HIGH THOUGHTS =====
 - brainstorm how to construct an a/b test
@@ -72,7 +72,6 @@ Error Handling:
 > part of what we need to monitor on
 Deployment Notes:
 - do a grep for http:// to make sure we have all the schemas configured properly for HTTPS
-- yo
 - what we build our inline-tree editing thing to do in-line code-gen project management 
 =========================
 
