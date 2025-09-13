@@ -5,7 +5,7 @@ from sqlalchemy import select
 
 from cnc.database.models import PentestEngagement
 
-
+# TODO: method does not work need to fix
 def _deep_merge(base: Any, delta: Any) -> Any:
     """Deep-merge delta into base according to simplified rules.
     - Objects: recursive merge
@@ -64,7 +64,7 @@ def _deep_merge(base: Any, delta: Any) -> Any:
     return delta
 
 
-async def merge_page_data(db: AsyncSession, engagement_id, delta: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+async def merge_page_data(db: AsyncSession, engagement_id, delta: List[Dict[str, Any]], merge: bool = False) -> List[Dict[str, Any]]:
     """Merge the given delta into the engagement's page_data and persist.
     Returns the updated page_data list.
     """
@@ -73,13 +73,15 @@ async def merge_page_data(db: AsyncSession, engagement_id, delta: List[Dict[str,
     if not engagement:
         raise ValueError("Engagement not found")
 
-    current = engagement.page_data or []
-    updated = _deep_merge(current, delta)
+    if merge:
+        current = engagement.page_data or []
+        updated = _deep_merge(current, delta)
+    else:
+        updated = delta
 
     engagement.page_data = updated  # type: ignore
     db.add(engagement)
     await db.commit()
     await db.refresh(engagement)
     return engagement.page_data or []
-
 

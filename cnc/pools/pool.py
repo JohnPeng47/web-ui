@@ -20,6 +20,8 @@ T = TypeVar("T")
 @dataclass
 class StartDiscoveryRequest:
     start_urls: List[str]
+    max_steps: int
+    max_page_steps: int
     scopes: Optional[List[str]] = None
     init_task: Optional[str] = None
     client: Optional[AgentClient] = None

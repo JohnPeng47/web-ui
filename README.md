@@ -55,7 +55,15 @@ Error Handling:
 - Modify start_agent server to work without the routes, so we can avoid triggering side effects -> create and label these fixtures
 - [BUG] auto-incremented, table specific ID for both discovery/exploit agents, need to consilidate into single ID
 - add the fastapi specific instructions
-
+2025/09/12:
+- [DESIGN] change page_data API to accept engagementID instead
+- [FEATURE]
+> need to have resettable state for agent runs so we can restart failed runs 
+> API change:
+>> create agent and start agent separate APIs
+>> start agent can take be used to restart agent
+- [FEATURE]
+> 
 =========================
 ===== HIGH THOUGHTS =====
 - brainstorm how to construct an a/b test
