@@ -3,11 +3,7 @@ import signal
 from typing import Dict, List, Optional, Type, Union
 
 from common.constants import (
-    MAX_DISCOVERY_AGENT_STEPS, 
-    MAX_DISCOVERY_PAGE_STEPS, 
     SCREENSHOTS,
-    BROWSER_CDP_PORT,
-    BROWSER_CDP_HOST,
 )
 from eval.datasets.detection import DISCOVERY_QUEUE_JSON
 from logger import setup_agent_logger, get_agent_loggers
@@ -107,8 +103,8 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
         agent = self._agent_cls(
             start_urls=list(queue_item.start_urls),
             llm=llm,
-            max_steps=MAX_DISCOVERY_AGENT_STEPS,
-            max_page_steps=MAX_DISCOVERY_PAGE_STEPS,
+            max_steps=queue_item.max_steps,
+            max_page_steps=queue_item.max_page_steps,
             agent_sys_prompt=CUSTOM_SYSTEM_PROMPT,
             browser_session=self._browser_session,
             controller=controller,
