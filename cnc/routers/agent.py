@@ -104,7 +104,7 @@ def make_agent_router(
                     client=AgentClient(
                         agent_id=agent.id,
                         api_url=f"http://127.0.0.1:{API_SERVER_PORT}",
-                ),  
+                    ),  
                     agent_log=agent_logger,
                     full_log=full_logger,
                 )
@@ -144,11 +144,11 @@ def make_agent_router(
     ):
         """Upload discovery agent steps to be appended to the agent."""
         try:
-            # Ensure agent exists
             agent = await get_agent_by_id_service(db, agent_id)
             if not agent:
                 raise HTTPException(status_code=404, detail="Agent not found")
 
+            # we are actually only just receiving a single step per update
             await append_discovery_agent_steps_service(db, agent_id, payload.steps)
         except Exception as e:
             import traceback
@@ -194,51 +194,50 @@ def make_agent_router(
                 # TODO:
                 log.info(f"Triggering detection for: {agent_id}")
                 log.info(f"Page steps: {PageObservations.from_json(payload.page_data)}")
-                pass
+                engagement = await get_engagement_by_agent_id(db, agent_id)
+                if not engagement:
+                    raise Exception("Engagement not found")
+                    
+                # Engagement-scoped serve r logger
 
-                # engagement = await get_engagement_by_agent_id(db, agent_id)
-                # if not engagement:
-                #     raise Exception("Engagement not found")
-                # # Engagement-scoped serve r logger
+                # detect and schedule actions for the exploit agent
+                # Convert incoming list[dict] to Page objects for PageObservations
+                pages_obj = PageObservations.from_json(payload.page_data)  # type: ignore[arg-type]
+                actions: List[StartExploitRequest] = await DetectAndSchedule().ainvoke(
+                    llm_hub.get("detection"),
+                    prompt_args={
+                        "pages": pages_obj,
+                        "num_actions": NUM_SCHEDULED_ACTIONS
+                    }
+                )
+                actions = actions[:1]
+                for action in actions:
+                    log.info(f"Scheduling exploit agent for {action.vulnerability_title}")
+                    # register and queue up exploit agent
+                    create_exploit_config = ExploitAgentCreate(
+                        vulnerability_title=action.vulnerability_title,
+                        max_steps=12,
+                        model_name="gpt-4o-mini",
+                        agent_status="active",
+                    )
+                    await register_exploit_agent_service(db, engagement.id, create_exploit_config)
+                    # Create agent loggers for this engagement's exploit_agents
+                    agent_logger, full_logger = log_factory.get_exploit_agent_loggers(str(engagement.id))
 
-                # # detect and schedule actions for the exploit agent
-                # # Convert incoming list[dict] to Page objects for PageObservations
-                # pages_obj = PageObservations.from_json(payload.page_data)  # type: ignore[arg-type]
-                # actions: List[StartExploitRequest] = await DetectAndSchedule().ainvoke(
-                #     llm_hub.get("detection"),
-                #     prompt_args={
-                #         "pages": pages_obj,
-                #         "num_actions": NUM_SCHEDULED_ACTIONS
-                #     }
-                # )
-                # actions = actions[:1]
-                # for action in actions:
-                #     engagement_logger.info(f"Scheduling exploit agent for {action.vulnerability_title}")
-                #     # register and queue up exploit agent
-                #     create_exploit_config = ExploitAgentCreate(
-                #         vulnerability_title=action.vulnerability_title,
-                #         max_steps=12,
-                #         model_name="gpt-4o-mini",
-                #         agent_status="active",
-                #     )
-                #     await register_exploit_agent_service(db, engagement.id, create_exploit_config)
-                #     # Create agent loggers for this engagement's exploit_agents
-                #     agent_logger, full_logger = log_factory.get_exploit_agent_loggers(str(engagement.id))
-
-                #     await exploit_agent_queue.publish(
-                #         StartExploitRequest(
-                #             page_item=action.page_item,
-                #             vulnerability_description=action.vulnerability_description,
-                #             vulnerability_title=action.vulnerability_title,
-                #             max_steps=12,
-                #             client=AgentClient(
-                #                 agent_id=agent_id,
-                #                 api_url=f"http://127.0.0.1:{API_SERVER_PORT}",
-                #             ),
-                #             agent_log=agent_logger,
-                #             full_log=full_logger,
-                #         )
-                #     )
+                    await exploit_agent_queue.publish(
+                        StartExploitRequest(
+                            page_item=action.page_item,
+                            vulnerability_description=action.vulnerability_description,
+                            vulnerability_title=action.vulnerability_title,
+                            max_steps=12,
+                            client=AgentClient(
+                                agent_id=agent_id,
+                                api_url=f"http://127.0.0.1:{API_SERVER_PORT}",
+                            ),
+                            agent_log=agent_logger,
+                            full_log=full_logger,
+                        )
+                    )
                 
             return {
                 "page_skip": trigger_detection

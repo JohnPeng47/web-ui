@@ -36,6 +36,7 @@ TODO:
 - add agent service to configure things like configuring LLMs before calling 
 DB crud API
 - should implement a GET agent request in AgentClient to confirm agent_id
+
 2025/09/05:
 - CDP traffic interception bonked, using MITMProxy for now
 - [BUG] Proxy handler not catching any response data
@@ -53,6 +54,7 @@ Error Handling:
 - Finish writing CLAUDE_CODE.md
 - [FIX] generating ALTER syntax for alembic
 - Modify start_agent server to work without the routes, so we can avoid triggering side effects -> create and label these fixtures
+
 2025/09/12:
 - [DESIGN] change page_data API to accept engagementID instead
 - [FEATURE]
@@ -60,10 +62,18 @@ Error Handling:
 > API change:
 >> create agent and start agent separate APIs
 >> start agent can take be used to restart agent
+
 2025/09/13:
-- [BUG] Same requests are not showing signs of real 
+- [BUG] Same requests are not showing signs of real
 - integration test still not working suspect something wrong with pytest machinery
-> could/should make the start process alot cleaner
+> test code should be working
+>> actually, would need to start server with config that makes page_steps alot lower (rn timesout because period for page_data update is essentially time for exploring the whole page)
+> worker thread is started after the server, so misses all requests
+> test_discovery_agent and test_exploit_agent are both working just not the actual tests
+
+
+2025/09/14:
+> correct parsing page structure -> use static tests for page class
 =========================
 ===== HIGH THOUGHTS =====
 - brainstorm how to construct an a/b test
