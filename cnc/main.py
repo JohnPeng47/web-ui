@@ -8,6 +8,7 @@ from typing import Callable, Any, Type, Union, Optional
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 
 from logger import setup_server_logger
 from cnc.workers_launcher import start_workers
@@ -45,6 +46,15 @@ def create_app() -> FastAPI:
         description="A hub-and-spoke service for pentest traffic collection and analysis",
         version="0.1.0",
         lifespan=lifespan,
+    )
+
+    # Add CORS middleware with most permissive settings
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     raw_channel = BroadcastChannel[EnrichAuthNZMessage]()
@@ -175,10 +185,12 @@ async def start_all(
     discovery_agent_cls: Type[Union[DiscoveryAgent, MinimalAgentSinglePage]] = DiscoveryAgent,
     override_max_steps: Optional[int] = 12,
 ) -> None:
+    print(f"Starting api server on {'0.0.0.0'}:{API_SERVER_PORT}")
+
+    # TODO: test log rotation
     setup_server_logger(".server_logs")
     app_instance = create_app()
     shutdown_event = asyncio.Event()
-
     workers_task = asyncio.create_task(
         workers_supervisor(
             app=app_instance,

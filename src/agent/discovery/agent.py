@@ -659,22 +659,25 @@ class DiscoveryAgent:
             msgs = await self.cdp_handler.flush()
             for msg in msgs:
                 self.pages.curr_page().add_http_msg(msg)
-            if self.challenge_client:
-                await self.challenge_client.update_status(
-                    msgs, 
-                    self.curr_url, 
-                    self.agent_state.step, 
-                    self.page_step,
-                )
-            if self.server_client:
-                self.page_skip = await self.server_client.update_page_data(
-                    self.agent_state.step,
-                    self.agent_state.max_steps,
-                    self.page_step, 
-                    self.max_page_steps,
-                    self.pages
-                )
-                agent_log.info(f"Page skip: {self.page_skip}")
+            try:
+                if self.challenge_client:
+                    await self.challenge_client.update_status(
+                        msgs, 
+                        self.curr_url, 
+                        self.agent_state.step, 
+                        self.page_step,
+                    )
+                if self.server_client:
+                    self.page_skip = await self.server_client.update_page_data(
+                        self.agent_state.step,
+                        self.agent_state.max_steps,
+                        self.page_step, 
+                        self.max_page_steps,
+                        self.pages
+                    )
+                    agent_log.info(f"Page skip: {self.page_skip}")
+            except Exception as e:
+                agent_log.error("HTTP message update failed")
                 
     async def run(self) -> None:
         while self.agent_state.step < self.agent_state.max_steps:

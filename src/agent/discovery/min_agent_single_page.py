@@ -10,7 +10,6 @@ from browser_use.agent.views import ActionResult
 
 from src.agent.discovery.agent import DiscoveryAgent
 from src.llm_models import LLMHub
-from cnc.workers.agent.cdp_handler import CDPHTTPHandler
 from src.agent.discovery.proxy import MitmProxyHTTPHandler
 from src.agent.discovery.pages import Page
 
@@ -114,21 +113,26 @@ class MinimalAgentSinglePage(DiscoveryAgent):
                 for msg in msgs:
                     self.pages.curr_page().add_http_msg(msg)
                     print(f"[{msg.method}] {msg.url}")
-                if self.challenge_client:
-                    await self.challenge_client.update_status(
-                        msgs, 
-                        self.curr_url, 
-                        self.agent_state.step, 
-                        self.page_step,
-                    )
-                if self.server_client:
-                    self.page_skip = await self.server_client.update_page_data(
-                        self.agent_state.step,
-                        self.agent_state.max_steps,
-                        self.page_step, 
-                        self.max_page_steps,
-                        self.pages
-                    )
+                try:
+                    if self.challenge_client:
+                        await self.challenge_client.update_status(
+                            msgs, 
+                            self.curr_url, 
+                            self.agent_state.step, 
+                            self.page_step,
+                        )
+                    if self.server_client:
+                        payload_len = len(await self.pages.to_json())
+                        print("updating with page data: ", payload_len)
+                        self.page_skip = await self.server_client.update_page_data(
+                            self.agent_state.step,
+                            self.agent_state.max_steps,
+                            self.page_step, 
+                            self.max_page_steps,
+                            self.pages
+                        )
+                except Exception as e:
+                    self._log(f"HTTP message update failed: {e}")
                     
             self._log(f"Single page visit completed for: {self.curr_url}")
         else:
