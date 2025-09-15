@@ -29,7 +29,6 @@ async def test_upload_data(test_app_client_with_workers: AsyncClient):
         "model_name": "gpt-4o-mini",
         "model_costs": 0.01,
         "log_filepath": "/tmp/discovery_agent.log",
-        "agent_status": "active",
     }
     register_resp = await application_client.post(
         f"/engagement/{engagement_id}/agents/discovery/register",

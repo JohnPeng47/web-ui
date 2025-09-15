@@ -10,9 +10,13 @@ from cnc.database.models import (
     PentestEngagementDiscoveryAgent,
     PentestEngagementExploitAgent,
 )
-from cnc.schemas.agent import DiscoveryAgentCreate, ExploitAgentCreate, ExploitAgentStep
+from cnc.schemas.agent import (
+    DiscoveryAgentCreate, 
+    ExploitAgentCreate, 
+    ExploitAgentStep, 
+    AgentStatus
+)
 from cnc.database.crud import get_engagement
-
 
 async def register_discovery_agent(db: AsyncSession, engagement_id: UUID, payload: DiscoveryAgentCreate) -> DiscoveryAgentModel:
     """Create a new DiscoveryAgent under an engagement."""
@@ -25,7 +29,7 @@ async def register_discovery_agent(db: AsyncSession, engagement_id: UUID, payloa
         model_name=payload.model_name,
         model_costs=payload.model_costs or 0.0,
         log_filepath=payload.log_filepath or "",
-        agent_status=payload.agent_status or "active",
+        agent_status=AgentStatus.RUNNING,
         agent_type=payload.agent_type.value if payload.agent_type else "discovery",
     )
     db.add(agent)
@@ -53,7 +57,7 @@ async def register_exploit_agent(db: AsyncSession, engagement_id: UUID, payload:
         model_name=payload.model_name,
         model_costs=payload.model_costs or 0.0,
         log_filepath=payload.log_filepath or "",
-        agent_status=payload.agent_status or "active",
+        agent_status=AgentStatus.RUNNING,
         agent_type=payload.agent_type.value if payload.agent_type else "exploit",
     )
     db.add(agent)
@@ -90,7 +94,7 @@ async def get_agent_steps(db: AsyncSession, agent_id: str) -> List[ExploitAgentS
     return [ExploitAgentStep.from_dict(sd) for sd in steps_data]
 
 async def append_discovery_agent_steps(
-    db: AsyncSession, agent_id: str, steps: List[ExploitAgentStep]
+    db: AsyncSession, agent_id: str, steps: List[ExploitAgentStep], agent_finished: bool, logger
 ) -> Union[DiscoveryAgentModel, ExploitAgentModel]:
     agent = await get_agent_by_id(db, agent_id)
     if not agent:
@@ -99,9 +103,12 @@ async def append_discovery_agent_steps(
     current_steps = list(agent.agent_steps_data or [])
     for step in steps:
         current_steps.append(step.to_dict())
+        logger.info(f"Appending step: {step.to_dict()}")
+    
     agent.agent_steps_data = current_steps
+    agent.agent_status = AgentStatus.COMPLETED if agent_finished else agent.agent_status
 
-    db.add(agent)
+    db.add(agent)   
     await db.commit()
     await db.refresh(agent)
     return agent

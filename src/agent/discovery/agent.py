@@ -688,6 +688,7 @@ class DiscoveryAgent:
 
             self.agent_state.step += 1
             self.page_step += 1
+            agent_log.info(f"Updating agent step: [page_step: {self.page_step}, agent_step: {self.agent_state.step}]")
             # if self.page_step > self.max_page_steps:
             #     self.page_step = 0
 

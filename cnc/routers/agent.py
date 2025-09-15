@@ -10,6 +10,7 @@ from cnc.schemas.agent import (
     ExploitAgentCreate,
     UploadAgentSteps,
     UploadPageData,
+    AgentStatus,
 )
 from cnc.database.session import get_session
 from cnc.database.crud import (
@@ -33,6 +34,7 @@ from common.constants import (
     NUM_SCHEDULED_ACTIONS,
     MAX_DISCOVERY_AGENT_STEPS,
     MAX_DISCOVERY_PAGE_STEPS,
+    MAX_EXPLOIT_AGENT_STEPS,
     SERVER_LOG_DIR,
 )
 
@@ -82,7 +84,7 @@ def make_agent_router(
         """Register a new discovery agent for an engagement."""
         try:
             agent = await register_discovery_agent_service(db, engagement_id, payload)
-            engagement = await get_engagement(db, engagement_id)
+            engagement = await get_engagement(db, engagement_id)            
             if not engagement:
                 raise HTTPException(status_code=404, detail="Engagement not found")
 
@@ -144,12 +146,22 @@ def make_agent_router(
     ):
         """Upload discovery agent steps to be appended to the agent."""
         try:
+            log_factory = get_server_log_factory(base_dir=SERVER_LOG_DIR)
+            engagement = await get_engagement_by_agent_id(db, agent_id)
+            if not engagement:
+                raise Exception("Engagement not found")
+
+            log = log_factory.ensure_server_logger(str(engagement.id))
+            log.info(f"Uploading agent steps for {agent_id}")
+            log.info(f"Payload: {payload}")
+
             agent = await get_agent_by_id_service(db, agent_id)
             if not agent:
                 raise HTTPException(status_code=404, detail="Agent not found")
 
             # we are actually only just receiving a single step per update
-            await append_discovery_agent_steps_service(db, agent_id, payload.steps)
+            agent_finished = payload.max_steps == payload.steps[0].step_num + 1 and payload.found_exploit
+            await append_discovery_agent_steps_service(db, agent_id, payload.steps, agent_finished, log)
         except Exception as e:
             import traceback
             print(f"Exception: {e}")
@@ -216,11 +228,10 @@ def make_agent_router(
                     # register and queue up exploit agent
                     create_exploit_config = ExploitAgentCreate(
                         vulnerability_title=action.vulnerability_title,
-                        max_steps=12,
-                        model_name="gpt-4o-mini",
-                        agent_status="active",
+                        max_steps=MAX_EXPLOIT_AGENT_STEPS,
+                        model_name="gpt-4o-mini"
                     )
-                    await register_exploit_agent_service(db, engagement.id, create_exploit_config)
+                    exploit_agent = await register_exploit_agent_service(db, engagement.id, create_exploit_config)
                     # Create agent loggers for this engagement's exploit_agents
                     agent_logger, full_logger = log_factory.get_exploit_agent_loggers(str(engagement.id))
 
@@ -229,9 +240,9 @@ def make_agent_router(
                             page_item=action.page_item,
                             vulnerability_description=action.vulnerability_description,
                             vulnerability_title=action.vulnerability_title,
-                            max_steps=12,
+                            max_steps=MAX_EXPLOIT_AGENT_STEPS,
                             client=AgentClient(
-                                agent_id=agent_id,
+                                agent_id=exploit_agent.id,
                                 api_url=f"http://127.0.0.1:{API_SERVER_PORT}",
                             ),
                             agent_log=agent_logger,

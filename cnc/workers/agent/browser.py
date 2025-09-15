@@ -22,6 +22,11 @@ async def start_single_browser():
             headless=True,
             executable_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe",
             args=[
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+                "--disable-web-security",
+                "--disable-features=VizDisplayCompositor",
                 f"--remote-debugging-port={BROWSER_CDP_PORT}", 
                 "--remote-debugging-address=127.0.0.1",
                 f"--proxy-server=http://{BROWSER_PROXY_HOST}:{BROWSER_PROXY_PORT}"

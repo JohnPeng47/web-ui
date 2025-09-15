@@ -7,7 +7,7 @@ from uuid import UUID
 from cnc.schemas.auth import PasswordCredentials
 
 from cnc.database.agent.models import ExploitAgentModel, DiscoveryAgentModel
-
+ 
 # Junction tables for many-to-many relationships
 class PentestEngagementExploitAgent(SQLModel, table=True):
     """Junction table for PentestEngagement to ExploitAgent many-to-many relationship"""
@@ -16,7 +16,7 @@ class PentestEngagementExploitAgent(SQLModel, table=True):
 
 
 class PentestEngagementDiscoveryAgent(SQLModel, table=True):
-    """Junction table for PentestEngagement to DiscoveryAgent many-to-many relationship"""
+    """Junction table for PentestEngagement to DiscoveryAgentmany-to-many relationship"""
     pentest_engagement_id: UUID = Field(foreign_key="pentestengagement.id", primary_key=True)
     discovery_agent_id: str = Field(foreign_key="discoveryagent.id", primary_key=True)
 
