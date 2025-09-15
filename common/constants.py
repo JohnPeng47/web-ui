@@ -2,10 +2,10 @@ from pathlib import Path
 
 # temp holding place for application constants, which may or may not be configurable
 # exploit agent
-MAX_EXPLOIT_AGENT_STEPS = 12
+MAX_EXPLOIT_AGENT_STEPS = 3
 
 # discovery agent 
-MAX_DISCOVERY_AGENT_STEPS = 15
+MAX_DISCOVERY_AGENT_STEPS = 4
 MAX_DISCOVERY_PAGE_STEPS = 2
 SCREENSHOTS = False
 

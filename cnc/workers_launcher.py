@@ -100,7 +100,7 @@ async def start_workers(
         print("Starting workers with dependency injection...")
         asyncio.create_task(start_single_browser())
 
-        # await asyncio.sleep(12)
+        await asyncio.sleep(4)
 
         # Run all workers concurrently
         await asyncio.gather(

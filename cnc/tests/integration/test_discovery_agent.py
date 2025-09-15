@@ -30,7 +30,6 @@ async def test_discovery_agent_integration(test_app_client_with_workers: AsyncCl
         "model_name": "gpt-4o-mini",
         "model_costs": 0.01,
         "log_filepath": "/tmp/discovery_agent.log",
-        "agent_status": "active",
     }
     register_resp = await application_client.post(
         f"/engagement/{engagement_id}/agents/discovery/register",

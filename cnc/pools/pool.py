@@ -30,10 +30,10 @@ class StartDiscoveryRequest:
 
 @dataclass
 class StartExploitRequest:
+    max_steps: int
     page_item: Optional[HTTPMessage] = None
     vulnerability_description: str = ""
     vulnerability_title: str = ""
-    max_steps: int = 12    
     client: Optional[AgentClient] = None
     agent_log: Optional[logging.Logger] = None
     full_log: Optional[logging.Logger] = None

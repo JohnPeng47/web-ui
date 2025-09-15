@@ -1,5 +1,6 @@
+import enum
+
 from pydantic import BaseModel, UUID4, field_validator
-from datetime import datetime
 from typing import Dict, Any, List, Optional
 
 from src.agent.base import AgentType
@@ -7,9 +8,14 @@ from cnc.schemas.base import JSONModel
 # NOTE: we should make use and subclass this instead of redefining the fields in DiscoveryAgentStep
 # from pentest_bot.models.steps import AgentStep as _DiscoveryAgentStep
 
+class AgentStatus(str, enum.Enum):
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+
 class AgentOut(BaseModel):
     id: str
-    agent_status: str
+    agent_status: AgentStatus
     agent_type: AgentType
     agent_name: str
 
@@ -32,7 +38,6 @@ class DiscoveryAgentCreate(BaseModel):
     model_name: str
     model_costs: Optional[float] = None
     log_filepath: Optional[str] = None
-    agent_status: Optional[str] = "active"
     agent_type: Optional[AgentType] = AgentType.DISCOVERY
 
 class ExploitAgentCreate(BaseModel):
@@ -41,7 +46,6 @@ class ExploitAgentCreate(BaseModel):
     model_name: str
     model_costs: Optional[float] = None
     log_filepath: Optional[str] = None
-    agent_status: Optional[str] = "active"
     agent_type: Optional[AgentType] = AgentType.EXPLOIT
     
 # TODO: test uploading exploit agent steps first
@@ -65,15 +69,8 @@ class ExploitAgentStep(AgentStep):
 
 class UploadAgentSteps(AgentMessage):
     steps: List[ExploitAgentStep]
-
-
-# class PushMessages(AgentMessage):
-#     http_msgs: List[HTTPMessage]
-#     browser_actions: Optional[BrowserActions]
-
-#     class Config:
-#         arbitrary_types_allowed = True  # Allows non-Pydantic models
-
+    max_steps: int
+    found_exploit: bool
 
 class UploadPageData(AgentMessage):
     """Upload model for PageObservations coming from src.agent.discovery.pages.PageObservations.to_json().

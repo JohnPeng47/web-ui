@@ -11,7 +11,6 @@ async def test_insert_discovery_agent():
         print("giewg")
         # Create an ExploitAgent with the specified values
         agent = ExploitAgentModel(
-            agent_status="active",
             max_steps=5,
             model_name="gpt-4o-mini",
             model_costs=0.01,

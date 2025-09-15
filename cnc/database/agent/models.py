@@ -4,13 +4,14 @@ from sqlmodel import Field, SQLModel, Column, JSON
 import uuid
 
 from cnc.schemas.agent import ExploitAgentStep
+from cnc.schemas.agent import AgentStatus
 from src.agent.base import AgentType
 
 class AgentBase(SQLModel, table=False):    
     # sqlite won't accept UUID4 for some reason
     # 2**61 half of UUID4 key space
     id: str = Field(primary_key=True, default_factory=lambda: str(uuid.uuid4()))
-    agent_status: str = Field(default="inactive", nullable=False)
+    agent_status: AgentStatus = Field(default=AgentStatus.PENDING, nullable=False)
     max_steps: int = Field(nullable=False)
     model_name: str = Field(nullable=False)
     model_costs: float = Field(nullable=True)

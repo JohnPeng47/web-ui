@@ -74,6 +74,7 @@ Error Handling:
 
 2025/09/14:
 > correct parsing page structure -> use static tests for page class
+- add global error handling (https://claude.ai/chat/60b5c53d-845a-4693-820e-10b27229dee8)
 =========================
 ===== HIGH THOUGHTS =====
 - brainstorm how to construct an a/b test

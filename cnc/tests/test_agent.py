@@ -27,7 +27,6 @@ async def test_agent_lifecycle(test_app_client: AsyncClient):
         "model_name": "gpt-4o-mini",
         "model_costs": 0.01,
         "log_filepath": "/tmp/agent.log",
-        "agent_status": "active",
     }
     register_resp = await application_client.post(
         f"/engagement/{engagement_id}/agents/discovery/register",

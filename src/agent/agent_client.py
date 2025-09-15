@@ -73,7 +73,12 @@ class AgentClient:
         page_skip = response.json()["page_skip"]
         return page_skip
 
-    async def upload_exploit_agent_steps(self, agent_step: AgentStep) -> Dict[str, Any]:
+    async def upload_exploit_agent_steps(
+        self, 
+        agent_step: AgentStep, 
+        max_steps: int, 
+        found_exploit: bool
+    ) -> Dict[str, Any]:
         """
         Upload agent steps to be appended to the agent.
         
@@ -89,7 +94,9 @@ class AgentClient:
         path = f"/agents/{self.agent_id}/steps"
         payload = {
             "agent_id": str(self.agent_id),
-            "steps": [agent_step.model_dump()]
+            "steps": [agent_step.model_dump()],
+            "max_steps": max_steps,
+            "found_exploit": found_exploit,
         }
         response = await self.client.post(path, json=payload)
         response.raise_for_status()
