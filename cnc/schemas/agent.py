@@ -1,7 +1,7 @@
 import enum
 
 from pydantic import BaseModel, UUID4, field_validator
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Literal
 
 from src.agent.base import AgentType
 from cnc.schemas.base import JSONModel
@@ -9,9 +9,11 @@ from cnc.schemas.base import JSONModel
 # from pentest_bot.models.steps import AgentStep as _DiscoveryAgentStep
 
 class AgentStatus(str, enum.Enum):
-    PENDING = "pending"
+    PENDING_AUTO = "pending_auto"
+    PENDING_APPROVAL = "pending_approval"
     RUNNING = "running"
     COMPLETED = "completed"
+    CANCELLED = "cancelled"
 
 class AgentOut(BaseModel):
     id: str
@@ -81,3 +83,7 @@ class UploadPageData(AgentMessage):
     page_steps: int
     max_page_steps: int
     page_data: List[Dict[str, Any]]
+    
+class AgentApproveData(BaseModel):
+    agent_id: str
+    decision: Literal["approve", "deny"]

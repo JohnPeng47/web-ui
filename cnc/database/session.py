@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 DB_PATH = Path(__file__).parent.parent / "pentest_hub.db"
+# cnc/pentest_hub.db
 DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite+aiosqlite:///./{str(DB_PATH)}")
 
 engine = create_async_engine(DATABASE_URL, echo=False)

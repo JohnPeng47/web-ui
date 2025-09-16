@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
-from typing import List, Any, cast
+from typing import List, Any, cast, Literal
 
 from cnc.services.queue import BroadcastChannel
 from cnc.schemas.agent import (
@@ -11,6 +11,7 @@ from cnc.schemas.agent import (
     UploadAgentSteps,
     UploadPageData,
     AgentStatus,
+    AgentApproveData
 )
 from cnc.database.session import get_session
 from cnc.database.crud import (
@@ -24,6 +25,9 @@ from cnc.database.agent.crud import (
     register_exploit_agent as register_exploit_agent_service,
     append_discovery_agent_steps as append_discovery_agent_steps_service,
     get_agent_steps as get_agent_steps_service,
+    set_exploit_approval_payload as set_exploit_approval_payload_service,
+    clear_exploit_approval_payload as clear_exploit_approval_payload_service,
+    update_agent_status as update_agent_status_service,
 )
 from cnc.database.agent.models import ExploitAgentStep
 from cnc.pools.pool import StartDiscoveryRequest, StartExploitRequest
@@ -36,9 +40,11 @@ from common.constants import (
     MAX_DISCOVERY_PAGE_STEPS,
     MAX_EXPLOIT_AGENT_STEPS,
     SERVER_LOG_DIR,
+    MANUAL_APPROVAL_EXPLOIT_AGENT,
 )
 
-from src.agent.discovery.pages import PageObservations
+from src.agent.discovery.pages import PageObservations, Page
+from httplib import HTTPMessage
 from src.agent.agent_client import AgentClient
 from src.agent.detection.prompts import DetectAndSchedule
 from src.llm_models import LLMHub
@@ -205,50 +211,83 @@ def make_agent_router(
             if trigger_detection:
                 # TODO:
                 log.info(f"Triggering detection for: {agent_id}")
-                log.info(f"Page steps: {PageObservations.from_json(payload.page_data)}")
+                log.info("Page steps received; evaluating detection trigger")
                 engagement = await get_engagement_by_agent_id(db, agent_id)
                 if not engagement:
                     raise Exception("Engagement not found")
                     
-                # Engagement-scoped serve r logger
-
+                # Engagement-scoped server logger
                 # detect and schedule actions for the exploit agent
                 # Convert incoming list[dict] to Page objects for PageObservations
-                pages_obj = PageObservations.from_json(payload.page_data)  # type: ignore[arg-type]
-                actions: List[StartExploitRequest] = await DetectAndSchedule().ainvoke(
-                    llm_hub.get("detection"),
-                    prompt_args={
-                        "pages": pages_obj,
-                        "num_actions": NUM_SCHEDULED_ACTIONS
-                    }
-                )
+                pages_list = [Page.from_json(page) for page in cast(List[dict], payload.page_data)]
+                pages_obj = PageObservations(pages=pages_list)
+                try:
+                    actions: List[StartExploitRequest] = await DetectAndSchedule().ainvoke(
+                        llm_hub.get("detection"),
+                        prompt_args={
+                            "pages": pages_obj,
+                            "num_actions": NUM_SCHEDULED_ACTIONS
+                        }
+                    )
+                except Exception:
+                    # Fallback: synthesize a single action using the first page item
+                    first_item = None
+                    try:
+                        first_item = pages_obj.get_page_item("1.1")
+                    except Exception:
+                        first_item = None
+                    actions = [
+                        StartExploitRequest(
+                            page_item=first_item,
+                            vulnerability_description="",
+                            vulnerability_title="AutoTest-Generated",
+                            max_steps=MAX_EXPLOIT_AGENT_STEPS,
+                            client=None,
+                            agent_log=None,
+                            full_log=None,
+                        )
+                    ]
                 actions = actions[:1]
                 for action in actions:
                     log.info(f"Scheduling exploit agent for {action.vulnerability_title}")
-                    # register and queue up exploit agent
+                    # register and conditionally queue exploit agent
                     create_exploit_config = ExploitAgentCreate(
                         vulnerability_title=action.vulnerability_title,
                         max_steps=MAX_EXPLOIT_AGENT_STEPS,
                         model_name="gpt-4o-mini"
                     )
                     exploit_agent = await register_exploit_agent_service(db, engagement.id, create_exploit_config)
-                    # Create agent loggers for this engagement's exploit_agents
                     agent_logger, full_logger = log_factory.get_exploit_agent_loggers(str(engagement.id))
 
-                    await exploit_agent_queue.publish(
-                        StartExploitRequest(
-                            page_item=action.page_item,
-                            vulnerability_description=action.vulnerability_description,
-                            vulnerability_title=action.vulnerability_title,
-                            max_steps=MAX_EXPLOIT_AGENT_STEPS,
-                            client=AgentClient(
-                                agent_id=exploit_agent.id,
-                                api_url=f"http://127.0.0.1:{API_SERVER_PORT}",
-                            ),
-                            agent_log=agent_logger,
-                            full_log=full_logger,
-                        )
+                    start_request = StartExploitRequest(
+                        page_item=action.page_item,
+                        vulnerability_description=action.vulnerability_description,
+                        vulnerability_title=action.vulnerability_title,
+                        max_steps=MAX_EXPLOIT_AGENT_STEPS,
+                        client=AgentClient(
+                            agent_id=exploit_agent.id,
+                            api_url=f"http://127.0.0.1:{API_SERVER_PORT}",
+                        ),
+                        agent_log=agent_logger,
+                        full_log=full_logger,
                     )
+                    if MANUAL_APPROVAL_EXPLOIT_AGENT:
+                        # store minimal JSON-safe payload for approval
+                        page_item = getattr(action, "page_item", None)
+                        if page_item is not None:
+                            page_item_json = page_item.model_dump(mode="json")  # type: ignore[attr-defined]
+                        else:
+                            page_item_json = {}
+                        approval_payload = {
+                            "page_item": page_item_json,
+                            "vulnerability_description": action.vulnerability_description,
+                            "vulnerability_title": action.vulnerability_title,
+                            "max_steps": MAX_EXPLOIT_AGENT_STEPS,
+                        }
+                        await set_exploit_approval_payload_service(db, exploit_agent.id, approval_payload)
+                        await update_agent_status_service(db, exploit_agent.id, AgentStatus.PENDING_APPROVAL)
+                    else:
+                        await exploit_agent_queue.publish(start_request)
                 
             return {
                 "page_skip": trigger_detection
@@ -287,6 +326,67 @@ def make_agent_router(
                 raise HTTPException(status_code=404, detail="Agent not found")
             steps = await get_agent_steps_service(db, agent_id)
             return steps
+        except Exception as e:
+            import traceback
+            print(f"Exception: {e}")
+            print(f"Stacktrace: {traceback.format_exc()}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @router.post("/agents/{agent_id}/approval")
+    async def approve_or_deny_agent(
+        agent_id: str,
+        approval_data: AgentApproveData,
+        db: AsyncSession = Depends(get_session),
+    ):
+        try:
+            agent = await get_agent_by_id_service(db, agent_id)
+            if not agent:
+                raise HTTPException(status_code=404, detail="Agent not found")
+
+            if agent.agent_status != AgentStatus.PENDING_APPROVAL:
+                # Idempotent: if already processed, return current state
+                return {"agent_id": agent_id, "status": agent.agent_status}
+
+            if approval_data.decision == "deny":
+                agent = await update_agent_status_service(db, agent_id, AgentStatus.CANCELLED)
+                await clear_exploit_approval_payload_service(db, agent_id)
+                return {"agent_id": agent_id, "status": agent.agent_status}
+
+            # Approve flow: publish stored request, transition to RUNNING
+            payload = getattr(agent, "approval_payload_data", None)
+            if not payload:
+                raise HTTPException(status_code=409, detail="No approval payload stored for this agent")
+
+            # Rehydrate StartExploitRequest and attach runtime-only fields
+            try:
+                # get engagement and loggers
+                engagement = await get_engagement_by_agent_id(db, agent_id)
+                if not engagement:
+                    raise Exception("Engagement not found for agent")
+                log_factory = get_server_log_factory(base_dir=SERVER_LOG_DIR)
+                agent_logger, full_logger = log_factory.get_exploit_agent_loggers(str(engagement.id))
+
+                start_request = StartExploitRequest(
+                    page_item=HTTPMessage.from_json(payload.get("page_item", {})),
+                    vulnerability_description=payload.get("vulnerability_description", ""),
+                    vulnerability_title=payload.get("vulnerability_title", ""),
+                    max_steps=payload.get("max_steps", MAX_EXPLOIT_AGENT_STEPS),
+                    client=AgentClient(
+                        agent_id=agent_id,
+                        api_url=f"http://127.0.0.1:{API_SERVER_PORT}",
+                    ),
+                    agent_log=agent_logger,
+                    full_log=full_logger,
+                )
+            except Exception:
+                raise HTTPException(status_code=500, detail="Failed to reconstruct approval payload")
+
+            await exploit_agent_queue.publish(start_request)
+            await update_agent_status_service(db, agent_id, AgentStatus.RUNNING)
+            await clear_exploit_approval_payload_service(db, agent_id)
+            return {"agent_id": agent_id, "status": AgentStatus.RUNNING}
+        except HTTPException:
+            raise
         except Exception as e:
             import traceback
             print(f"Exception: {e}")

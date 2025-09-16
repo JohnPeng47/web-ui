@@ -51,13 +51,21 @@ async def register_exploit_agent(db: AsyncSession, engagement_id: UUID, payload:
     if not engagement:
         raise ValueError(f"Engagement with ID {engagement_id} not found")
 
+    # Default status depends on manual approval mode (read dynamically)
+    try:
+        from common import constants as _constants  # local import to pick up test-time changes
+        manual_flag = getattr(_constants, "MANUAL_APPROVAL_EXPLOIT_AGENT", False)
+    except Exception:
+        manual_flag = False
+    default_status = AgentStatus.PENDING_APPROVAL if manual_flag else AgentStatus.PENDING_AUTO
+
     agent = ExploitAgentModel(
         vulnerability_title=payload.vulnerability_title,
         max_steps=payload.max_steps,
         model_name=payload.model_name,
         model_costs=payload.model_costs or 0.0,
         log_filepath=payload.log_filepath or "",
-        agent_status=AgentStatus.RUNNING,
+        agent_status=default_status,
         agent_type=payload.agent_type.value if payload.agent_type else "exploit",
     )
     db.add(agent)
@@ -71,6 +79,44 @@ async def register_exploit_agent(db: AsyncSession, engagement_id: UUID, payload:
     )
     db.add(link)
     await db.commit()
+    return agent
+
+async def set_exploit_approval_payload(
+    db: AsyncSession, agent_id: str, payload: Dict[str, Any]
+) -> ExploitAgentModel:
+    agent = await get_agent_by_id(db, agent_id)
+    if not agent or not isinstance(agent, ExploitAgentModel):
+        raise ValueError(f"Exploit agent with ID {agent_id} not found")
+
+    agent.approval_payload_data = payload
+    db.add(agent)
+    await db.commit()
+    await db.refresh(agent)
+    return agent
+
+async def clear_exploit_approval_payload(
+    db: AsyncSession, agent_id: str
+) -> ExploitAgentModel:
+    agent = await get_agent_by_id(db, agent_id)
+    if not agent or not isinstance(agent, ExploitAgentModel):
+        raise ValueError(f"Exploit agent with ID {agent_id} not found")
+
+    agent.approval_payload_data = None
+    db.add(agent)
+    await db.commit()
+    await db.refresh(agent)
+    return agent
+
+async def update_agent_status(
+    db: AsyncSession, agent_id: str, status: AgentStatus
+) -> Union[DiscoveryAgentModel, ExploitAgentModel]:
+    agent = await get_agent_by_id(db, agent_id)
+    if not agent:
+        raise ValueError(f"Agent with ID {agent_id} not found")
+    agent.agent_status = status
+    db.add(agent)
+    await db.commit()
+    await db.refresh(agent)
     return agent
 
 async def get_agent_by_id(db: AsyncSession, agent_id: str) -> Optional[Union[DiscoveryAgentModel, ExploitAgentModel]]:
