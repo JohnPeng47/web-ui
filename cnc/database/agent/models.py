@@ -11,7 +11,7 @@ class AgentBase(SQLModel, table=False):
     # sqlite won't accept UUID4 for some reason
     # 2**61 half of UUID4 key space
     id: str = Field(primary_key=True, default_factory=lambda: str(uuid.uuid4()))
-    agent_status: AgentStatus = Field(default=AgentStatus.PENDING, nullable=False)
+    agent_status: AgentStatus = Field(default=AgentStatus.PENDING_AUTO, nullable=False)
     max_steps: int = Field(nullable=False)
     model_name: str = Field(nullable=False)
     model_costs: float = Field(nullable=True)
@@ -28,9 +28,14 @@ class AgentBase(SQLModel, table=False):
         raise NotImplementedError("Subclasses must implement this method")
         
 class ExploitAgentModel(AgentBase, table=True):
-    __tablename__ = "exploitagent"
+    __tablename__ = "exploitagent"  # type: ignore[assignment]
 
     vulnerability_title: str = Field(nullable=False)
+    approval_payload_data: Optional[Dict[str, Any]] = Field(
+        default=None,
+        sa_column=Column(JSON),
+        description="Pending StartExploitRequest data for manual approval"
+    )
     agent_steps_data: Optional[List[Dict[str, Any]]] = Field(
         default=None, 
         sa_column=Column(JSON),
@@ -50,7 +55,7 @@ class ExploitAgentModel(AgentBase, table=True):
         ]
 
 class DiscoveryAgentModel(AgentBase, table=True):
-    __tablename__ = "discoveryagent"
+    __tablename__ = "discoveryagent"  # type: ignore[assignment]
 
     agent_steps_data: Optional[List[Dict[str, Any]]] = Field(
         default=None, 

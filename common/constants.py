@@ -30,5 +30,8 @@ LLM_CONFIG = {
     "detection": "gpt-4o"
 }
 
+# manual approval for exploit agents
+MANUAL_APPROVAL_EXPLOIT_AGENT: bool = False
+
 # logging
 SERVER_LOG_DIR = ".server_logs"
