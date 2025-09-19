@@ -1,12 +1,12 @@
 from enum import Enum
 from typing import Dict, Any
 
-from cnc.schemas.base import JSONModel
+from cnc.schemas.base import DerivedJSONModel
 
 class UserRoleCredentialsType(str, Enum):
     PASSWORD = "password"
 
-class UserCredentialsBase(JSONModel):
+class UserCredentialsBase(DerivedJSONModel):
     type: UserRoleCredentialsType
 
     def to_dict(self) -> Dict[str, Any]:

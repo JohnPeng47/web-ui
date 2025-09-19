@@ -4,7 +4,7 @@ from pydantic import BaseModel, UUID4, field_validator
 from typing import Dict, Any, List, Optional, Literal
 
 from src.agent.base import AgentType
-from cnc.schemas.base import JSONModel
+from cnc.schemas.base import DerivedJSONModel
 # NOTE: we should make use and subclass this instead of redefining the fields in DiscoveryAgentStep
 # from pentest_bot.models.steps import AgentStep as _DiscoveryAgentStep
 
@@ -27,7 +27,7 @@ class AgentOut(BaseModel):
 class AgentMessage(BaseModel):
     agent_id: str
 
-class AgentStep(JSONModel):
+class AgentStep(DerivedJSONModel):
     def to_dict(self) -> Dict[str, Any]:
         return {}
 
@@ -84,6 +84,29 @@ class UploadPageData(AgentMessage):
     max_page_steps: int
     page_data: List[Dict[str, Any]]
     
-class AgentApproveData(BaseModel):
+# TODO: ask chatGPT to implement this 
+class AgentApproveData(DerivedJSONModel):
+    """Model for structuring """
     agent_id: str
-    decision: Literal["approve", "deny"]
+    approve_data: Dict[str, Any]
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {}
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "AgentApproveData":
+        return cls(**data)
+
+class AgentApproveBinary(DerivedJSONModel):
+    agent_id: str
+    approve_data: bool
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "agent_id": self.agent_id,
+            "decision": self.approve_data,
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "AgentApproveBinary":
+        return cls(**data)

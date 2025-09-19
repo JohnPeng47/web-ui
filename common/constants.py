@@ -31,7 +31,7 @@ LLM_CONFIG = {
 }
 
 # manual approval for exploit agents
-MANUAL_APPROVAL_EXPLOIT_AGENT: bool = False
+MANUAL_APPROVAL_EXPLOIT_AGENT: bool = True
 
 # logging
 SERVER_LOG_DIR = ".server_logs"
