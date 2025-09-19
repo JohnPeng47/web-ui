@@ -11,7 +11,7 @@ from cnc.schemas.agent import (
     UploadAgentSteps,
     UploadPageData,
     AgentStatus,
-    AgentApproveData
+    AgentApproveBinary
 )
 from cnc.database.session import get_session
 from cnc.database.crud import (
@@ -335,7 +335,7 @@ def make_agent_router(
     @router.post("/agents/{agent_id}/approval")
     async def approve_or_deny_agent(
         agent_id: str,
-        approval_data: AgentApproveData,
+        approval_data: AgentApproveBinary,
         db: AsyncSession = Depends(get_session),
     ):
         try:
@@ -347,7 +347,7 @@ def make_agent_router(
                 # Idempotent: if already processed, return current state
                 return {"agent_id": agent_id, "status": agent.agent_status}
 
-            if approval_data.decision == "deny":
+            if approval_data.approve_data == False:
                 agent = await update_agent_status_service(db, agent_id, AgentStatus.CANCELLED)
                 await clear_exploit_approval_payload_service(db, agent_id)
                 return {"agent_id": agent_id, "status": agent.agent_status}
