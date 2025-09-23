@@ -284,7 +284,7 @@ class HTTPHandler:
             if parsed_url.path.startswith(parsed_scope.path):
                 return True
         
-        agent_log.info(f"MSG NOT IN SCOPE: {url}")
+        # agent_log.info(f"MSG NOT IN SCOPE: {url}")
         return False
 
     async def _validate_msg(self, msg: HTTPMessage) -> bool:
@@ -375,7 +375,7 @@ class HTTPHandler:
         self._messages.extend(unmatched_in_scope)
         self._messages.extend(session_valid)
 
-        agent_log.info("Returning %d messages from flush (in-scope & filtered)", len(session_valid))
+        # agent_log.info("Returning %d messages from flush (in-scope & filtered)", len(session_valid))
         return session_valid
 
     def get_history(self) -> List[HTTPMessage]:

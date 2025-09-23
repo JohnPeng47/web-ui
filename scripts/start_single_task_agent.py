@@ -11,7 +11,7 @@ from src.llm_models import LLMHub
 from src.agent.discovery.agent import DiscoveryAgent
 from src.agent.discovery.prompts.sys_prompt import CUSTOM_SYSTEM_PROMPT
 from common.http_handler import HTTPHandler
-from src.agent.proxy import ProxyHandler
+from src.agent.discovery.proxy import MitmProxyHTTPHandler
 from eval.client import PagedDiscoveryEvalClient
 
 from eval.datasets.discovery.juiceshop import JUICE_SHOP_ALL as JUICE_SHOP_ALL_DISCOVERY
@@ -68,7 +68,7 @@ def setup_agent_dir(agent_name: str):
     log_dir.mkdir(exist_ok=True)
     return agent_dir, log_dir
 
-async def main():
+async def main(output_json_path: str):
     """Initialize SimpleAgent using the new BrowserSession-based API."""
     agent_dir, log_dir = setup_agent_dir("min_agent")
     setup_agent_logger(log_dir=str(log_dir))
@@ -83,14 +83,14 @@ async def main():
             "http://147.79.78.153:3000/api/",
         ]
     )
-    proxy_handler = ProxyHandler(
+    proxy_handler = MitmProxyHTTPHandler(
         handler=http_handler,
         listen_host=PROXY_HOST,
         listen_port=PROXY_PORT,
         ssl_insecure=True,
         http2=True,
     )
-    proxy_handler.start()
+    await proxy_handler.connect()
 
     # Launch external Playwright Chromium with proxy + CDP enabled
     pw = await async_playwright().start()
@@ -137,9 +137,7 @@ async def main():
             init_task=TASK,
         )
         await agent.run()
-        for challenges in challenge_client.get_solved()["/login"]:
-            for challenge in challenges:
-                print(challenge)
+        print(agent.pages)
 
         agent_log.info("SimpleAgent execution completed")
 
@@ -152,7 +150,13 @@ async def main():
         finally:
             await browser.close()
             await pw.stop()
-            proxy_handler.stop()
+            # proxy_handler.stop()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    import sys
+    if len(sys.argv) != 2:
+        print("Usage: python start_single_task_agent.py <output_json_path>")
+        sys.exit(1)
+    
+    output_json_path = sys.argv[1]
+    asyncio.run(main(output_json_path))

@@ -35,6 +35,12 @@ async def get_engagement(db: AsyncSession, engagement_id: UUID) -> Optional[Pent
     return result.scalars().first()
 
 
+async def list_engagements(db: AsyncSession) -> List[PentestEngagement]:
+    """Return all pentest engagements."""
+    result = await db.execute(select(PentestEngagement))
+    return list(result.scalars().all())
+
+
 async def update_engagement(db: AsyncSession, app: PentestEngagement) -> PentestEngagement:
     """Update an engagement with new data."""
     db.add(app)

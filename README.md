@@ -15,6 +15,10 @@ Human
 > add support for agent snapshots
 > pause/modify agent responses
 - Try BrowserUse Session rewrite
+- Need to introduce pages
+
+2025/09/23
+- turn on "MSG NOT IN SCOPE" log line
 
 CC:
 - [6] deploy to prod -> use test_discovery_agent, modify and test as successful script
@@ -24,6 +28,7 @@ CC:
 [STRATEGIC]
 - browser pool using MITM
 > investigate browser hosting frameworks
+
 
 Business:
 - Setup meetings with dynamic scanning companies to see prices

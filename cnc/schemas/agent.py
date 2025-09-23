@@ -110,3 +110,6 @@ class AgentApproveBinary(DerivedJSONModel):
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "AgentApproveBinary":
         return cls(**data)
+
+# # Attack Requests
+# class 
