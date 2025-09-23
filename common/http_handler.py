@@ -284,7 +284,7 @@ class HTTPHandler:
             if parsed_url.path.startswith(parsed_scope.path):
                 return True
         
-        # agent_log.info(f"MSG NOT IN SCOPE: {url}")
+        agent_log.info(f"MSG NOT IN SCOPE: {url}")
         return False
 
     async def _validate_msg(self, msg: HTTPMessage) -> bool:
@@ -300,6 +300,40 @@ class HTTPHandler:
     # ─────────────────────────────────────────────────────────────────────
     # Flush logic with hard timeout
     # ─────────────────────────────────────────────────────────────────────
+    def _remove_duplicates(self, messages: List["HTTPMessage"]) -> List["HTTPMessage"]:
+        """
+        Remove duplicates based on (method, url) keeping messages with non-empty response body.
+        If no message has a non-empty response body for a given (method, url), keep any one.
+        """
+        from collections import defaultdict
+        
+        # Group messages by (method, url)
+        groups = defaultdict(list)
+        for msg in messages:
+            key = (msg.request.method, msg.request.url)
+            groups[key].append(msg)
+        
+        result = []
+        for group in groups.values():
+            if len(group) == 1:
+                result.append(group[0])
+                continue
+            
+            # Find messages with non-empty response body
+            with_body = [
+                msg for msg in group 
+                if msg.response and hasattr(msg.response.data, "body") and msg.response.data.body
+            ]
+            
+            if with_body:
+                # Use the first one with a non-empty body
+                result.append(with_body[0])
+            else:
+                # No message has a non-empty body, just take the first one
+                result.append(group[0])
+        
+        return result
+
     async def flush(
         self,
         *,
@@ -319,9 +353,6 @@ class HTTPHandler:
 
         last_seen_response_idx = len(self._step_messages)
         last_response_time     = start_time
-
-        print("len of step messages: ", len(self._step_messages))
-        print("len of request queue: ", len(self._request_queue))
 
         while True:
             await asyncio.sleep(POLL_INTERVAL)
@@ -345,7 +376,7 @@ class HTTPHandler:
                 else:
                     agent_log.debug("[REQUEST STAY] %s stay: %.2f s", req.url, now - started_at)
 
-            # 2️⃣  Quiet-period tracking
+            # 2️⃣  A new request has come in extend the timing window
             if len(self._step_messages) != last_seen_response_idx:
                 last_seen_response_idx = len(self._step_messages)
                 last_response_time     = now
@@ -367,10 +398,18 @@ class HTTPHandler:
         self._request_queue = []
         self._step_messages = []
 
+        print("len of step messages: ", len(session_msgs))
+        print("len of request queue: ", len(unmatched))
+
         # keep unmatched only if in scope (no response => cannot pass full filter)
         unmatched_in_scope = [m for m in unmatched if self._is_in_scope(m.request.url)]
         # keep session messages that fully pass scope + filter
         session_valid = [m for m in session_msgs if await self._validate_msg(m)]
+
+        print("len of session_valid: ", len(session_valid))
+
+        # Remove duplicates from session_valid
+        session_valid = self._remove_duplicates(session_valid)
 
         self._messages.extend(unmatched_in_scope)
         self._messages.extend(session_valid)

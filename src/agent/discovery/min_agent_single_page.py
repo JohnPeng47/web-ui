@@ -113,6 +113,7 @@ class MinimalAgentSinglePage(DiscoveryAgent):
                 for msg in msgs:
                     self.pages.curr_page().add_http_msg(msg)
                     print(f"[{msg.method}] {msg.url}")
+                    print(msg.response.get_body())
                 try:
                     if self.challenge_client:
                         await self.challenge_client.update_status(

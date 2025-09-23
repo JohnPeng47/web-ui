@@ -1,7 +1,8 @@
 import base64
+import json
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 from pydantic import BaseModel, Field, model_validator
 from playwright.sync_api import Request, Response
 
@@ -10,6 +11,156 @@ from src.llm import RequestPart
 DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text"]
 DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
 MAX_PAYLOAD_SIZE = 4000
+
+def decompress(body: bytes, headers: Dict[str, str]) -> bytes:
+    """Decompress body according to Content-Encoding in headers.
+
+    Supports gzip, deflate, br (brotli), zstd, bz2, lzma/xz.
+    Unknown or unavailable encodings are ignored gracefully.
+    """
+    if not body:
+        return body
+    if not headers:
+        return body
+
+    content_encoding = headers.get("content-encoding", "").lower()
+    if not content_encoding:
+        return body
+
+    encodings = [e.strip() for e in content_encoding.split(",") if e.strip()]
+    # Decoders should be applied in reverse order of encodings applied by server
+    data = body
+    for enc in reversed(encodings):
+        try:
+            if enc in ("gzip", "x-gzip"):
+                import gzip
+                data = gzip.decompress(data)
+            elif enc == "deflate":
+                import zlib
+                try:
+                    data = zlib.decompress(data)
+                except Exception:
+                    # Try raw DEFLATE stream
+                    data = zlib.decompress(data, -zlib.MAX_WBITS)
+            elif enc == "br":
+                try:
+                    import brotli  # type: ignore
+                    data = brotli.decompress(data)
+                except Exception:
+                    try:
+                        import brotlicffi  # type: ignore
+                        data = brotlicffi.decompress(data)
+                    except Exception:
+                        # brotli not available; leave as-is
+                        pass
+            elif enc in ("zstd", "zstandard"):
+                try:
+                    import zstandard as zstd  # type: ignore
+                    dctx = zstd.ZstdDecompressor()
+                    data = dctx.decompress(data)
+                except Exception:
+                    # zstd not available; leave as-is
+                    pass
+            elif enc in ("bzip2", "bz2"):
+                import bz2
+                data = bz2.decompress(data)
+            elif enc in ("xz", "lzma"):
+                import lzma
+                data = lzma.decompress(data)
+            elif enc == "identity":
+                # No-op
+                data = data
+            else:
+                # Unknown encoding; stop trying further to avoid corruption
+                data = data
+        except Exception:
+            # If any decoder fails, keep current data unchanged and continue
+            data = data
+    return data
+
+
+def format_body(body_obj: Any, headers: Dict[str, str]) -> Union[str, Dict[str, Any], bytes]:
+    """Return body as JSON (dict) if possible, else string, else bytes.
+
+    The function will attempt to:
+    1) Parse JSON and return a dict when possible
+    2) Fallback to a plain UTF-8 string
+    3) Finally return raw bytes if it's binary
+    """
+    if body_obj is None:
+        return ""
+
+    def is_textual_content_type(hdrs: Dict[str, str]) -> bool:
+        if not hdrs:
+            return False
+        ct = hdrs.get("content-type", "").lower()
+        if not ct:
+            return False
+        textual_indicators = (
+            "text/",
+            "json",
+            "+json",
+            "xml",
+            "javascript",
+            "x-www-form-urlencoded",
+            "html",
+            "csv",
+        )
+        return any(ind in ct for ind in textual_indicators)
+
+    # Already a dict-like payload
+    if isinstance(body_obj, dict):
+        return body_obj
+
+    # Bytes path
+    if isinstance(body_obj, (bytes, bytearray)):
+        raw_bytes = bytes(body_obj)
+        try:
+            raw_bytes = decompress(raw_bytes, headers)
+        except Exception:
+            pass
+
+        # Try JSON first
+        try:
+            text = raw_bytes.decode("utf-8", errors="replace")
+            parsed = json.loads(text)
+            if isinstance(parsed, dict):
+                return parsed
+        except Exception:
+            pass
+
+        # Fallback to string if textual
+        if is_textual_content_type(headers):
+            try:
+                return raw_bytes.decode("utf-8", errors="replace")
+            except Exception:
+                return raw_bytes
+
+        # Otherwise return binary
+        return raw_bytes
+
+    # String path
+    if isinstance(body_obj, str):
+        s = body_obj
+        # Try JSON first when it looks like JSON
+        stripped = s.strip()
+        if (stripped.startswith("{") and stripped.endswith("}")) or (
+            stripped.startswith("[") and stripped.endswith("]")
+        ):
+            try:
+                parsed = json.loads(s)
+                if isinstance(parsed, dict):
+                    return parsed
+            except Exception:
+                pass
+        return s
+
+    # Fallback for other types
+    try:
+        return str(body_obj)
+    except Exception:
+        return ""
+
 
 def post_data_to_dict(post_data: str | None):
     """Convert post data to dictionary format.
@@ -36,7 +187,6 @@ def post_data_to_dict(post_data: str | None):
         # Try to parse as JSON
         elif post_data.strip().startswith("{") and post_data.strip().endswith("}"):
             try:
-                import json
                 result = json.loads(post_data)
             except json.JSONDecodeError:
                 # Not valid JSON, return as is
@@ -92,7 +242,17 @@ class HTTPRequest(BaseModel):
         return self.data.headers
 
     @property
-    def post_data(self) -> Optional[str]:
+    def post_data(self) -> Optional[Dict]:
+        return self.data.post_data
+
+    def get_body(self) -> Union[str, Dict[str, Any], bytes]:
+        """Return request body as dict/string/bytes.
+
+        For requests we typically store structured dicts built from the
+        Playwright post_data, so return that when available; otherwise empty string.
+        """
+        if self.data.post_data is None:
+            return ""
         return self.data.post_data
 
     @property
@@ -190,6 +350,10 @@ class HTTPResponseData(BaseModel):
     is_iframe: bool
     body: Optional[bytes] = None
     body_error: Optional[str] = None
+    content_type: Optional[str] = None
+
+    def get_body(self) -> Union[str, Dict[str, Any], bytes]:
+        return format_body(self.body, self.headers)
 
 class HTTPResponse(BaseModel):
     """HTTP response class with unified implementation"""
@@ -211,12 +375,12 @@ class HTTPResponse(BaseModel):
     def is_iframe(self) -> bool:
         return self.data.is_iframe
 
-    async def get_body(self) -> bytes:
+    def get_body(self) -> Union[str, Dict[str, Any], bytes]:
         if self.data.body_error:
             raise Exception(self.data.body_error)
         if self.data.body is None:
             raise Exception("Response body not available")
-        return self.data.body
+        return self.data.get_body()
 
     def get_content_type(self) -> str:
         """Get content type from response headers"""
@@ -287,8 +451,8 @@ class HTTPResponse(BaseModel):
             return resp_str
             
         try:
-            resp_bytes = await self.get_body()
-            resp_str += str(resp_bytes)
+            body_value = self.get_body()
+            resp_str += str(body_value)
         except Exception as e:
             resp_str += f"[Error getting response body: {str(e)}]"
             
@@ -449,22 +613,26 @@ def parse_burp_xml(filepath: str) -> List[HTTPMessage]:
     
     for item in root.findall(".//item"):
         # Extract basic information
-        url = item.find("url").text
-        method = item.find("method").text
+        url_elem = item.find("url")
+        method_elem = item.find("method")
         status_elem = item.find("status")
-        status = int(status_elem.text) if status_elem is not None else 0
+        url = url_elem.text if url_elem is not None and url_elem.text is not None else ""
+        method = method_elem.text if method_elem is not None and method_elem.text is not None else ""
+        status = int(status_elem.text) if status_elem is not None and status_elem.text is not None else 0
         
         # Parse request
         request_elem = item.find("request")
-        is_request_base64 = request_elem.get("base64") == "true"
-        request = parse_burp_request(request_elem.text, is_request_base64, url, method)
+        is_request_base64 = (request_elem.get("base64") == "true") if request_elem is not None else False
+        request_text = request_elem.text if request_elem is not None and request_elem.text is not None else ""
+        request = parse_burp_request(request_text, is_request_base64, url, method)
         
         # Parse response
         response = None
         response_elem = item.find("response")
         if response_elem is not None and response_elem.text:
-            is_response_base64 = response_elem.get("base64") == "true"
-            response = parse_burp_response(response_elem.text, is_response_base64, url, status)
+            is_response_base64 = (response_elem.get("base64") == "true") if response_elem is not None else False
+            response_text = response_elem.text if response_elem.text is not None else ""
+            response = parse_burp_response(response_text, is_response_base64, url, status)
         
         # Create HTTP message
         message = HTTPMessage(request=request, response=response)

@@ -108,6 +108,7 @@ async def main():
         pw = await async_playwright().start()
         browser = await pw.chromium.launch_persistent_context(
             user_data_dir=str(PROFILE_DIR),
+            # user_data_dir=None,
             headless=False,
             executable_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe",
             args=[f"--remote-debugging-port={PORT}", "--remote-debugging-address=127.0.0.1"],
@@ -150,22 +151,17 @@ async def main():
             )
             await agent.run()
 
-            # Print parsed HTTP messages
-            print("\n=== HTTP Messages Summary ===")
-            for i, page in enumerate(agent.pages.pages):
-                print(f"\nPage {i+1}: {page.url}")
-                for j, msg in enumerate(page.http_msgs):
-                    method = msg.method
-                    url = msg.url
-                    has_body = False
-                    
-                    if hasattr(msg.request, "post_data") and msg.request.post_data:
-                        has_body = True
-                    
-                    body_status = "has body" if has_body else "no body"
-                    print(f"  {j+1}. {method} {url} - {body_status}")
+            # # Print parsed HTTP messages
+            # print("\n=== HTTP Messages Summary ===")
+            # for i, page in enumerate(agent.pages.pages):
+            #     # print(f"\nPage {i+1}: {page.url}")
+            #     for j, msg in enumerate(page.http_msgs):
+            #         method = msg.method
+            #         url = msg.url
+            #         print(method, url)
+            #         print(msg.response.get_body())
 
-            agent_log.info("SimpleAgent execution completed")
+            # agent_log.info("SimpleAgent execution completed")
 
         except Exception as e:
             import traceback
