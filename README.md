@@ -18,7 +18,15 @@ Human
 - Need to introduce pages
 
 2025/09/23
-- turn on "MSG NOT IN SCOPE" log line
+- Http Proxy
+> parse non-JSON responses
+>> script
+>> html
+>> binary
+- test_http_proxy:
+- New Detection Module
+> 3 diff modes for page/req/global scoped action scheduling
+- Start integration 
 
 CC:
 - [6] deploy to prod -> use test_discovery_agent, modify and test as successful script

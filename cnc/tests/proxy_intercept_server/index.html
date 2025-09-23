@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>XHR 304 Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            margin: 2rem;
+        }
+
+        pre {
+            background: #f4f4f4;
+            padding: 1rem;
+            border-radius: 6px;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>XHR to /api/data expecting 304 with JSON</h1>
+    <button id="btn">Send XHR</button>
+    <p>Status: <span class="status" id="status">idle</span></p>
+    <h2>Response Text</h2>
+    <pre id="resp"></pre>
+    <h2>Headers</h2>
+    <pre id="headers"></pre>
+    <script>
+        const btn = document.getElementById("btn");
+        const statusEl = document.getElementById("status");
+        const respEl = document.getElementById("resp");
+        const headersEl = document.getElementById("headers");
+
+        function dumpHeaders(xhr) {
+            const raw = xhr.getAllResponseHeaders();
+            headersEl.textContent = raw || "<no headers>";
+        }
+
+        function sendXHR() {
+            statusEl.textContent = "requesting...";
+            respEl.textContent = "";
+            headersEl.textContent = "";
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", "/api/data", true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    statusEl.textContent = `${xhr.status} ${xhr.statusText}`;
+                    dumpHeaders(xhr);
+                    // Browsers often ignore bodies on 304. Fallback to X-JSON header if empty.
+                    const text = xhr.responseText && xhr.responseText.trim().length > 0
+                        ? xhr.responseText
+                        : (xhr.getResponseHeader("X-JSON") || "<empty>");
+                    respEl.textContent = text;
+                }
+            };
+            xhr.send();
+        }
+
+        btn.addEventListener("click", sendXHR);
+
+        // Automatically send XHR when page loads
+        window.addEventListener("load", sendXHR);
+    </script>
+</body>
+
+</html>

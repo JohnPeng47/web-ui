@@ -247,7 +247,6 @@ class MitmProxyHTTPHandler:
     # ─────────────────────────────────────────────────────────────────────
     # Browser management
     # ─────────────────────────────────────────────────────────────────────
-
     async def _start_browser_instance(self) -> None:
         """Start a browser instance configured to use this proxy."""
         try:
@@ -308,7 +307,6 @@ class MitmProxyHTTPHandler:
     # ─────────────────────────────────────────────────────────────────────
     # Addon → handler bridging
     # ─────────────────────────────────────────────────────────────────────
-
     def _schedule_coro(self, coro) -> None:
         loop = self._loop
         if loop is None:
@@ -327,63 +325,71 @@ class MitmProxyHTTPHandler:
                 agent_log.exception("Handler coroutine failed: %s", exc)
         fut.add_done_callback(_log_err)
 
-    def _flow_to_http_request(self, flow: http.HTTPFlow) -> HTTPRequest:
-        req = flow.request
-        url = req.pretty_url
-        method = req.method
-        headers = dict(req.headers)
-
+    def _flow_to_http_request(self, flow: "http.HTTPFlow") -> HTTPRequest:
+        """
+        Map mitmproxy flow.request to your HTTPRequest.
+        """
+        headers: Dict[str, str] = {k.lower(): v for k, v in flow.request.headers.items()}
         post_dict: Optional[Dict[str, Any]] = None
-        if method in {"POST", "PUT", "PATCH", "DELETE"} and req.content:
-            ctype = headers.get("content-type", "")
-            try:
-                if "application/json" in ctype:
-                    import json
-                    post_dict = json.loads(req.get_text(strict=False) or "")
-                else:
-                    post_dict = post_data_to_dict(req.get_text(strict=False) or "")
-            except Exception:
-                post_dict = post_data_to_dict(req.get_text(strict=False) or "")
+
+        ctype = headers.get("content-type", "")
+        try:
+            # Try urlencoded first
+            if "application/x-www-form-urlencoded" in ctype and flow.request.urlencoded_form:
+                post_dict = {k: v for k, v in flow.request.urlencoded_form.items(multi=False)}
+            # Fallback to JSON
+            elif "application/json" in ctype:
+                try:
+                    post_dict = flow.request.json()
+                except Exception:
+                    txt = flow.request.get_text(strict=False)
+                    if txt and txt.strip().startswith("{") and txt.strip().endswith("}"):
+                        import json  # local import to avoid module load if unused
+                        post_dict = json.loads(txt)
+            # Last resort: plain text
+            else:
+                txt = flow.request.get_text(strict=False)
+                if txt:
+                    # Reuse your existing helper to parse common cases
+                    post_dict = post_data_to_dict(txt)
+        except Exception:
+            post_dict = None  # do not fail ingestion on parsing errors
 
         data = HTTPRequestData(
-            method=method,
-            url=url,
-            headers={k.lower(): v for k, v in headers.items()},
+            method=flow.request.method,
+            url=flow.request.url,
+            headers=headers,
             post_data=post_dict,
             redirected_from_url=None,
             redirected_to_url=None,
             is_iframe=False,
         )
-        return HTTPRequest(data=data)
-
-    def _flow_to_http_response(self, flow: http.HTTPFlow) -> HTTPResponse:
-        resp = flow.response
-        req = flow.request
-
-        status = resp.status_code if resp else 0
-        headers = dict(resp.headers) if resp else {}
-        ctype = headers.get("content-type", "")
-
-        processed_body = None
-        if resp:
-            processed_body = resp.get_text(strict=False)
-        body_error = None
+        request = HTTPRequest(data=data)
+        # agent_log.info(f"Request: {request}")
         
-        # Convert string body to bytes if needed
-        body_bytes = None
-        if processed_body:
-            body_bytes = processed_body.encode("utf-8")
-        
+        return request
+
+    def _flow_to_http_response(self, flow: "http.HTTPFlow") -> HTTPResponse:
+        """
+        Map mitmproxy flow.response to your HTTPResponse.
+        """
+        headers: Dict[str, str] = {k.lower(): v for k, v in flow.response.headers.items()}
+        body_bytes: Optional[bytes] = None
+        try:
+            body_bytes = flow.response.raw_content if flow.response.raw_content is not None else None
+        except Exception:
+            body_bytes = None
+
         data = HTTPResponseData(
-            url=req.pretty_url,
-            status=status,
-            headers={k.lower(): v for k, v in headers.items()},
+            url=flow.request.url,
+            status=flow.response.status_code,
+            headers=headers,
             is_iframe=False,
             body=body_bytes,
-            body_error=body_error,
+            body_error=None,
         )
+        agent_log.info(f"Response: {data}")
         return HTTPResponse(data=data)
-
 
 class _RelayAddon:
     """
