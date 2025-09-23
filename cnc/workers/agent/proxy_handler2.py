@@ -16,6 +16,7 @@ except ImportError as e:
 
 from logger import get_agent_loggers
 from common.http_handler import HTTPHandler
+from common.constants import BROWSER_PROXY_HOST, BROWSER_PROXY_PORT
 from httplib import (
     HTTPRequest, 
     HTTPResponse, 
@@ -41,8 +42,8 @@ class MitmProxyHTTPHandler:
         self,
         handler: HTTPHandler,
         *,
-        listen_host: str = "127.0.0.1",
-        listen_port: int = 8081,
+        listen_host: str = BROWSER_PROXY_HOST,
+        listen_port: int = BROWSER_PROXY_PORT,
         ssl_insecure: bool = True,
         http2: bool = True,
         mode: Optional[str] = None,

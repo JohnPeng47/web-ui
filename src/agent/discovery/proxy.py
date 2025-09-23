@@ -1,7 +1,10 @@
 import asyncio
+import inspect
 import contextlib
 import logging
 import threading
+import socket
+import time
 from typing import Optional, Dict, Any
 from common.constants import BROWSER_PROXY_HOST, BROWSER_PROXY_PORT
 
@@ -32,11 +35,21 @@ agent_log.propagate = False
 def _detach_mitm_logging_handlers() -> None:
     """Detach mitmproxy logging handlers to prevent event loop errors during shutdown."""
     root = logging.getLogger()
-    for h in list(root.handlers):
-        if isinstance(h, mitm_log.MitmLogHandler):
-            root.removeHandler(h)
+    mitm_handler_cls = getattr(mitm_log, "MitmLogHandler", None)
+    for handler in list(root.handlers):
+        try:
+            is_mitm = False
+            if mitm_handler_cls is not None and isinstance(handler, mitm_handler_cls):
+                is_mitm = True
+            elif handler.__class__.__name__ == "MitmLogHandler":
+                is_mitm = True
+            if is_mitm:
+                root.removeHandler(handler)
+                with contextlib.suppress(Exception):
+                    handler.close()
+        except Exception:
             with contextlib.suppress(Exception):
-                h.close()
+                handler.close()
 
 
 class MitmProxyHTTPHandler:
@@ -79,6 +92,7 @@ class MitmProxyHTTPHandler:
         self._master: Optional[DumpMaster] = None
         self._task: Optional[asyncio.Task] = None
         self._browser_task: Optional[asyncio.Task] = None
+        self._thread: Optional[threading.Thread] = None
         self._connected = False
         self._alive = False
 
@@ -111,6 +125,15 @@ class MitmProxyHTTPHandler:
         if self._start_browser:
             await self._start_browser_instance()
 
+        # Wait briefly for port to be released from any previous run
+        released = await self._wait_for_port_release(self._listen_host, self._listen_port, timeout=3.0)
+        if not released:
+            agent_log.warning(
+                "Port %s:%d still in use after grace period; attempting start anyway",
+                self._listen_host,
+                self._listen_port,
+            )
+
         options = Options(
             listen_host=self._listen_host,
             listen_port=self._listen_port,
@@ -123,7 +146,7 @@ class MitmProxyHTTPHandler:
 
         self._alive = True
 
-        async def _run_mitm():
+        def _run_mitm_blocking() -> None:
             try:
                 agent_log.info(
                     "Starting mitmproxy on %s:%d (http2=%s ssl_insecure=%s)",
@@ -132,16 +155,24 @@ class MitmProxyHTTPHandler:
                     self._http2,
                     self._ssl_insecure,
                 )
-                await self._master.run()
+                if self._master is not None:
+                    result = self._master.run()
+                    if inspect.iscoroutine(result):
+                        asyncio.run(result)
             except Exception:
                 agent_log.exception("mitmproxy master crashed")
-                raise
             finally:
                 agent_log.info("mitmproxy master exited")
                 self._alive = False
                 _detach_mitm_logging_handlers()
 
-        self._task = asyncio.create_task(_run_mitm(), name=f"mitm-{self._listen_port}")
+        self._thread = threading.Thread(
+            target=_run_mitm_blocking,
+            name=f"mitm-thread-{self._listen_port}",
+            daemon=True,
+        )
+        self._thread.start()
+
         self._connected = True
 
     async def disconnect(self) -> None:
@@ -152,24 +183,49 @@ class MitmProxyHTTPHandler:
                 # orderly shutdown of mitmproxy
                 self._master.shutdown()
             
-            if self._task and not self._task.done():
-                try:
-                    await asyncio.wait_for(self._task, timeout=5.0)
-                except asyncio.TimeoutError:
-                    agent_log.warning("mitm task did not stop within timeout")
+            if self._thread is not None:
+                self._thread.join(timeout=8.0)
+                if self._thread.is_alive():
+                    agent_log.warning("mitm proxy thread did not stop within timeout")
             
             # Stop browser if we started it
             if self._browser_task and not self._browser_task.done():
                 self._browser_task.cancel()
                 with contextlib.suppress(asyncio.CancelledError):
                     await self._browser_task
+            # small pause to ensure sockets fully released
+            await asyncio.sleep(0.05)
+
         finally:
             _detach_mitm_logging_handlers()
             self._master = None
             self._task = None
+            self._thread = None
             self._browser_task = None
             self._connected = False
             agent_log.info("Handler '%s' disconnected", self._handler_name)
+
+    async def _wait_for_port_release(self, host: str, port: int, *, timeout: float = 3.0, interval: float = 0.1) -> bool:
+        """Poll until a TCP bind to (host, port) succeeds or timeout elapses."""
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            if self._can_bind(host, port):
+                return True
+            await asyncio.sleep(interval)
+        return self._can_bind(host, port)
+
+    @staticmethod
+    def _can_bind(host: str, port: int) -> bool:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            s.bind((host, port))
+            return True
+        except OSError:
+            return False
+        finally:
+            with contextlib.suppress(Exception):
+                s.close()
 
     async def flush(self):
         # If mitm died, either return what you have or raise a controlled error.
@@ -265,7 +321,7 @@ class MitmProxyHTTPHandler:
             # loop is closing/closed
             agent_log.debug("Dropped handler coroutine: %s", e)
             return
-        def _log_err(_fut: "asyncio.Future[Any]") -> None:
+        def _log_err(_fut) -> None:
             exc = _fut.exception()
             if exc:
                 agent_log.exception("Handler coroutine failed: %s", exc)

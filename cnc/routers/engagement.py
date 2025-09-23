@@ -9,6 +9,7 @@ from cnc.database.crud import (
     create_engagement as create_engagement_service, 
     get_engagement as get_engagement_service, 
     update_engagement as update_engagement_service,
+    list_engagements as list_engagements_service,
 )
 from cnc.services.engagement import merge_page_data as merge_page_data_service
 
@@ -21,6 +22,15 @@ def make_engagement_router() -> APIRouter:
     """
     router = APIRouter()
     
+    @router.get("/engagement/", response_model=list[EngagementOut])
+    async def list_engagements(db: AsyncSession = Depends(get_session)):
+        """List all engagements."""
+        try:
+            apps = await list_engagements_service(db)
+            return apps
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
     @router.post("/engagement/", response_model=EngagementOut)
     async def create_engagement(payload: EngagementCreate, db: AsyncSession = Depends(get_session)):
         """Create a new engagement."""

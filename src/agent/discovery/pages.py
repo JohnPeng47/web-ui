@@ -305,6 +305,73 @@ class PageObservations:
         page = self.pages[page_id - 1]
         return page.get_page_item(section_number)
 
+    def http_msgs(self) -> List[Tuple[str, str]]:
+        """Return a list of (method, url) tuples for each http_msg in all pages."""
+        result = []
+        for page in self.pages:
+            for msg in page.http_msgs:
+                result.append(msg)
+        return result
+
+    def _filter(self) -> "PageObservations":
+        """Return a filtered copy of PageObservations with duplicate requests removed.
+        For duplicates, keeps the one with non-empty response body if available, else random."""
+        import random
+        import copy
+        
+        filtered_pages = []
+        
+        for page in self.pages:
+            # Create a new page with filtered http_msgs
+            filtered_page = Page(url=page.url, page_id=page.page_id)
+            
+            # Track which messages to keep for each (method, url) combination
+            unique_msgs = {}
+            
+            for msg in page.http_msgs:
+                key = (msg.method, msg.url)
+                
+                if key not in unique_msgs:
+                    unique_msgs[key] = [msg]
+                else:
+                    unique_msgs[key].append(msg)
+            
+            # For each group, select the best message to keep
+            for key, msgs in unique_msgs.items():
+                if len(msgs) == 1:
+                    # No duplicates, keep the single message
+                    filtered_page.add_http_msg(msgs[0])
+                else:
+                    method, url = key
+                    
+                    # Find messages with non-empty response bodies
+                    msgs_with_response = []
+                    for msg in msgs:
+                        if (msg.response and 
+                            hasattr(msg.response, "data") and 
+                            msg.response.data and 
+                            hasattr(msg.response.data, "body") and 
+                            msg.response.data.body):
+                            body_str = page._format_body(msg.response.data.body)
+                            if body_str.strip():
+                                msgs_with_response.append(msg)
+                    
+                    # Choose which message to keep
+                    if msgs_with_response:
+                        # Keep the first message with a non-empty response body
+                        chosen_msg = msgs_with_response[0]
+                        print(f"Filtered duplicate requests for {method} {url}, kept message with non-empty response body")
+                    else:
+                        # Keep a random message
+                        chosen_msg = random.choice(msgs)
+                        print(f"Filtered duplicate requests for {method} {url}, kept random message")
+                    
+                    filtered_page.add_http_msg(chosen_msg)
+            
+            filtered_pages.append(filtered_page)
+        
+        return PageObservations(pages=filtered_pages)
+
     async def to_json(self):
         return [await page.to_json() for page in self.pages]
 
@@ -313,8 +380,8 @@ class PageObservations:
         return cls(pages=[Page.from_json(page) for page in data])
 
     def __str__(self):
+        filtered_obs = self._filter()
         out = ""
-        for i, page in enumerate(self.pages):
+        for i, page in enumerate(filtered_obs.pages):
             out += f"PAGE: {i+1}.\n{str(page)}\n"
         return out
-        
