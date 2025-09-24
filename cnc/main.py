@@ -29,7 +29,7 @@ from src.agent.discovery.min_agent_single_page import MinimalAgentSinglePage
 
 from src.llm_models import LLMHub
 
-from common.constants import API_SERVER_PORT, LLM_CONFIG
+from common.constants import API_SERVER_PORT, SERVER_MODEL_CONFIG
 
 LOG = logging.getLogger("cnc.main")
 
@@ -76,7 +76,7 @@ def create_app() -> FastAPI:
         """Health check endpoint."""
         return {"status": "healthy"}
 
-    llm_hub = LLMHub(function_map=LLM_CONFIG)
+    llm_hub = LLMHub(function_map=SERVER_MODEL_CONFIG["model_config"])
     engagement_router = make_engagement_router()
     agent_router = make_agent_router(discovery_agent_queue, exploit_agent_queue, llm_hub)
     app.include_router(engagement_router)

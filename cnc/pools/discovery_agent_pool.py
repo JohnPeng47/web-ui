@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Type, Union
 
 from common.constants import (
     SCREENSHOTS,
+    DISCOVERY_MODEL_CONFIG
 )
 from eval.datasets.detection import DISCOVERY_QUEUE_JSON
 from logger import setup_agent_logger, get_agent_loggers
@@ -19,7 +20,6 @@ from src.agent.discovery.min_agent_single_page import MinimalAgentSinglePage
 # local connections
 from cnc.pools.pool import StartDiscoveryRequest
 from cnc.workers.agent.browser import get_browser_session
-from cnc.workers.agent.cdp_handler import CDPHTTPHandler
 from src.agent.discovery.proxy import MitmProxyHTTPHandler
 from common.http_handler import HTTPHandler
 
@@ -31,14 +31,6 @@ agent_log, _ = get_agent_loggers()
 
 MAX_WORKERS = 3 # 1 for testing
 MAX_STEPS = 3
-MODEL_CONFIG = {
-    "model_config": {
-        "browser_use": "gpt-4.1",
-        "update_plan": "o3-mini",
-        "create_plan": "o3-mini",
-        "check_plan_completion": "gpt-4.1",
-    }
-}
 
 class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
     """
@@ -53,7 +45,6 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
         channel,
         item_cls,
         agent_cls: Type[Union[DiscoveryAgent, MinimalAgentSinglePage]],
-        llm_config: Dict,
         browser_session: BrowserSession,
         cdp_port: int = 9899,
         proxy_host: str = "127.0.0.1",
@@ -66,7 +57,6 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
         super().__init__(
             channel=channel,
             item_cls=item_cls,
-            llm_config=llm_config,
             max_workers=max_workers,
             log_subfolder=log_subfolder,
         )
@@ -97,7 +87,7 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
         await proxy_handler.connect()
 
         # LLM and Controller
-        llm = LLMHub(self.llm_config["model_config"])
+        llm = LLMHub(queue_item.model_config["model_config"])
         controller = Controller(exclude_actions=self._exclude_actions)
 
         agent = self._agent_cls(
@@ -131,7 +121,6 @@ async def start_discovery_agent(
 
     agent_pool = DiscoveryAgentPool(
         channel=channel,
-        llm_config=MODEL_CONFIG,
         browser_session=browser_session,
         max_workers=MAX_WORKERS,
         item_cls=StartDiscoveryRequest,

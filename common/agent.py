@@ -90,7 +90,6 @@ class AgentPool(ABC, Generic[T]):
     def __init__(
         self,
         *,
-        llm_config: Dict,
         max_workers: Optional[int] = None,
         log_subfolder: str = "pentest_bot",
         label_steps: bool = False,
@@ -101,9 +100,6 @@ class AgentPool(ABC, Generic[T]):
         parent_dir = create_log_dir_or_noop(log_dir=log_subfolder)
         self.parent_dir = run_id_dir(parent_dir)
         self.parent_dir.mkdir(parents=True, exist_ok=True)
-
-        self.llm_config = llm_config
-        self.model_router = LLMHub(llm_config["model_config"])
 
         self._executor: concurrent.futures.ThreadPoolExecutor = concurrent.futures.ThreadPoolExecutor(
             max_workers=max_workers
@@ -221,9 +217,6 @@ class AgentPool(ABC, Generic[T]):
         preserving the external synchronous API.
         """
         set_ctxt_id(run_id)
-
-        # Fresh model router per run so you can account for per-run costs if needed
-        model_router = LLMHub(self.llm_config["model_config"])
 
         _, log_filepath = setup_agent_logger(
             LOGGER_NAME,

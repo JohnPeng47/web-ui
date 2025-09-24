@@ -31,11 +31,30 @@ Human
 - Deployment
 > Current setup with start proxy/browser combo is not ideal 
 
+2025/09/24
+> Confirm that ainvoke with detection is working
+> Explore:
+>> do the scheduled actions match vulns to be found on these pages
+>> add request level and page level detection triggered by API
+>> test prompt with different levels of automaticity
+>> hierarchal pageData breakdown by pages (maybe not rn since this requires persisted state in DetectScheduler) 
+>> tagging an agent with search tags so that we can better look for the results later
+> Agent:
+>> * add agent results to model -> no matter this should update 
+> Deployment to hostinger server
+
+Think:
+> When should we start building custom web-apps for testing vulns?
+
 CC:
 - [6] deploy to prod -> use test_discovery_agent, modify and test as successful script
 - [10] HTTPMessage.req/res.body no longer has to be async I think since we are not getting them from PW anymore
 > hard refactor task
 - [2] logging not working for exploit agent
+> Refactors
+1. Refactor agents CreateExploit/Discovery agent in [](cnc/schemas/agent.py) to remove model_name, model_cost, and log_filepath
+> these should not be apart of the create 
+
 [STRATEGIC]
 - browser pool using MITM
 > investigate browser hosting frameworks

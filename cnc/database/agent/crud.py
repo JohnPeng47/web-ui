@@ -17,20 +17,25 @@ from cnc.schemas.agent import (
     AgentStatus
 )
 from cnc.database.crud import get_engagement
+from src.agent.base import AgentType
 
-async def register_discovery_agent(db: AsyncSession, engagement_id: UUID, payload: DiscoveryAgentCreate) -> DiscoveryAgentModel:
+async def register_discovery_agent(
+    db: AsyncSession, 
+    engagement_id: UUID, 
+    max_steps: int,
+    agent_type: AgentType) -> DiscoveryAgentModel:
     """Create a new DiscoveryAgent under an engagement."""
     engagement = await get_engagement(db, engagement_id)
     if not engagement:
         raise ValueError(f"Engagement with ID {engagement_id} not found")
 
     agent = DiscoveryAgentModel(
-        max_steps=payload.max_steps,
-        model_name=payload.model_name,
-        model_costs=payload.model_costs or 0.0,
-        log_filepath=payload.log_filepath or "",
+        max_steps=max_steps,
+        model_name="",
+        model_costs=0.0,
+        log_filepath="",
         agent_status=AgentStatus.RUNNING,
-        agent_type=payload.agent_type.value if payload.agent_type else "discovery",
+        agent_type=agent_type.value
     )
     db.add(agent)
     await db.commit()
@@ -45,7 +50,13 @@ async def register_discovery_agent(db: AsyncSession, engagement_id: UUID, payloa
     await db.commit()
     return agent
 
-async def register_exploit_agent(db: AsyncSession, engagement_id: UUID, payload: ExploitAgentCreate) -> ExploitAgentModel:
+async def register_exploit_agent(
+    db: AsyncSession, 
+    engagement_id: UUID, 
+    max_steps: int,
+    agent_type: AgentType,
+    vulnerability_title: str
+) -> ExploitAgentModel:
     """Create a new ExploitAgent under an engagement."""
     engagement = await get_engagement(db, engagement_id)
     if not engagement:
@@ -60,13 +71,13 @@ async def register_exploit_agent(db: AsyncSession, engagement_id: UUID, payload:
     default_status = AgentStatus.PENDING_APPROVAL if manual_flag else AgentStatus.PENDING_AUTO
 
     agent = ExploitAgentModel(
-        vulnerability_title=payload.vulnerability_title,
-        max_steps=payload.max_steps,
-        model_name=payload.model_name,
-        model_costs=payload.model_costs or 0.0,
-        log_filepath=payload.log_filepath or "",
+        vulnerability_title=vulnerability_title,
+        max_steps=max_steps,
+        model_name="",
+        model_costs=0.0,
+        log_filepath="",
         agent_status=default_status,
-        agent_type=payload.agent_type.value if payload.agent_type else "exploit",
+        agent_type=agent_type.value,
     )
     db.add(agent)
     await db.commit()
