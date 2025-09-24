@@ -3,6 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from typing import List, Any, cast, Literal
 
+from src.llm_models import BaseChatModel
+from cnc.services.detection import DetectionScheduler
 from cnc.services.queue import BroadcastChannel
 from cnc.schemas.agent import (
     AgentOut,
@@ -46,24 +48,12 @@ from common.constants import (
 from src.agent.discovery.pages import PageObservations, Page
 from httplib import HTTPMessage
 from src.agent.agent_client import AgentClient
-from src.agent.detection.prompts import DetectAndSchedule
 from src.llm_models import LLMHub
 from cnc.services.engagement import merge_page_data as merge_page_data_service
 
 from logger import get_server_logger, get_agent_loggers, get_server_log_factory
 
 log = get_server_logger()
-
-async def detect_vulnerabilities(
-    payload: PageObservations,
-    llm_model: LLMHub,
-):
-    detect = DetectAndSchedule()
-    actions = await detect.ainvoke(
-        llm_model,
-        prompt_args={"pages": payload}
-    )
-    return actions
 
 def make_agent_router(
     discovery_agent_queue: BroadcastChannel[StartDiscoveryRequest],
@@ -181,72 +171,41 @@ def make_agent_router(
         db: AsyncSession = Depends(get_session),
     ):
         """Upload a PageObservations payload and store as page_data."""
+        engagement = await get_engagement_by_agent_id(db, agent_id)
+        if not engagement:
+            raise HTTPException(status_code=404, detail="Engagement not found")
+            
+        agent = await get_agent_by_id_service(db, agent_id)
+        if not agent:
+            raise HTTPException(status_code=404, detail="Agent not found")
+
+        log_factory = get_server_log_factory(base_dir=SERVER_LOG_DIR)
+        log = log_factory.ensure_server_logger(str(engagement.id))
+        detection_scheduler = DetectionScheduler()
+
+        trigger_detection = False
+        max_steps = payload.max_steps
+        max_page_steps = payload.max_page_steps
+        steps = payload.steps
+        page_steps = payload.page_steps
+
         try:
-            # Write engagement-level page_data via merge
-            engagement = await get_engagement_by_agent_id(db, agent_id)
-            if not engagement:
-                raise Exception("Engagement not found")
-            log_factory = get_server_log_factory(base_dir=SERVER_LOG_DIR)
-            log = log_factory.ensure_server_logger(str(engagement.id))
-
-            agent = await get_agent_by_id_service(db, agent_id)
-            if not agent:
-                raise HTTPException(status_code=404, detail="Agent not found")
-
-            trigger_detection = False
-            max_steps = payload.max_steps
-            max_page_steps = payload.max_page_steps
-            steps = payload.steps
-            page_steps = payload.page_steps
-
             # NOTE: not actually merging rn just overwriting
+            log.info(f"Merging page data for {agent_id}")
             await merge_page_data_service(db, engagement.id, payload.page_data, merge=False)
 
             log.info(f"Progress: {steps}/{max_steps} | Page steps: {page_steps}/{max_page_steps}")
 
-            # NOTE: when do we want to trigger a detection?
-            if page_steps >= max_page_steps:
-                trigger_detection = True
-
-            if trigger_detection:
-                # TODO:
+            actions = await detection_scheduler.generate_actions(
+                cast(BaseChatModel, llm_hub.get("detection")),
+                payload.to_page_observations(),
+                page_steps,
+                max_page_steps,
+                NUM_SCHEDULED_ACTIONS
+            )
+            if actions:
                 log.info(f"Triggering detection for: {agent_id}")
                 log.info("Page steps received; evaluating detection trigger")
-                engagement = await get_engagement_by_agent_id(db, agent_id)
-                if not engagement:
-                    raise Exception("Engagement not found")
-                    
-                # Engagement-scoped server logger
-                # detect and schedule actions for the exploit agent
-                # Convert incoming list[dict] to Page objects for PageObservations
-                pages_list = [Page.from_json(page) for page in cast(List[dict], payload.page_data)]
-                pages_obj = PageObservations(pages=pages_list)
-                try:
-                    actions: List[StartExploitRequest] = await DetectAndSchedule().ainvoke(
-                        llm_hub.get("detection"),
-                        prompt_args={
-                            "pages": pages_obj,
-                            "num_actions": NUM_SCHEDULED_ACTIONS
-                        }
-                    )
-                except Exception:
-                    # Fallback: synthesize a single action using the first page item
-                    first_item = None
-                    try:
-                        first_item = pages_obj.get_page_item("1.1")
-                    except Exception:
-                        first_item = None
-                    actions = [
-                        StartExploitRequest(
-                            page_item=first_item,
-                            vulnerability_description="",
-                            vulnerability_title="AutoTest-Generated",
-                            max_steps=MAX_EXPLOIT_AGENT_STEPS,
-                            client=None,
-                            agent_log=None,
-                            full_log=None,
-                        )
-                    ]
                 actions = actions[:1]
                 for action in actions:
                     log.info(f"Scheduling exploit agent for {action.vulnerability_title}")

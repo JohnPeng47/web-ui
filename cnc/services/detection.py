@@ -1,12 +1,14 @@
+import enum
 from pydantic import BaseModel
-
 from typing import List, Optional
 
 from src.agent.discovery.pages import PageObservations
 from src.llm_provider import LMP
-from common.constants import NUM_SCHEDULED_ACTIONS
+from src.llm_models import BaseChatModel
 
 from httplib import HTTPMessage
+from cnc.database.agent.models import ExploitAgentModel
+
 
 # TMRW: 
 # - add a vulnerability title along with description to display the data
@@ -58,4 +60,42 @@ Some guidance for the response format:
                 )
             )
             
-        return scheduled_actions
+        return scheduled_actions    
+
+
+class DetectionMode(str, enum.Enum):
+    PAGESTEP_TRIGGER = "page_step_trigger"
+
+class DetectionScheduler:
+    """Detects suspicious items on the page and schedules actions for the exploit agent"""
+    def __init__(
+        self,
+        prev_agents: Optional[List[ExploitAgentModel]] = None,
+        trigger_mode: DetectionMode = DetectionMode.PAGESTEP_TRIGGER
+    ):
+        self.prev_agents = prev_agents
+        self.trigger_mode = trigger_mode
+
+    def trigger(self, page_steps: int, max_page_steps: int) -> bool:
+        if self.trigger_mode == DetectionMode.PAGESTEP_TRIGGER:
+            return page_steps >= max_page_steps
+        return False
+
+    async def generate_actions(
+        self,
+        model: BaseChatModel,
+        pages: PageObservations,
+        page_steps: int,
+        max_page_steps: int,
+        num_actions: int
+    ) -> List[StartExploitRequest]:
+        if not self.trigger(page_steps, max_page_steps):
+            return []
+
+        return await DetectAndSchedule().ainvoke(
+            model,
+            prompt_args={
+                "pages": pages,
+                "num_actions": num_actions
+            }
+        )

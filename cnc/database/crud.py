@@ -125,34 +125,45 @@ async def get_engagement_by_agent_id(
     return None
 
 async def list_agents_for_engagement(
-    db: AsyncSession, engagement_id: UUID
+    db: AsyncSession, engagement_id: UUID, agent_type: Optional[str] = None
 ) -> List[Union[ExploitAgentModel, DiscoveryAgentModel]]:
     """Enumerate all agents attached to an engagement id.
 
     Returns list of AgentBase SQLModel ORM objects.
-    """
-    # Exploit agents via subquery to avoid join typing issues
-    exploit_ids_subq = (
-        select(PentestEngagementExploitAgent.exploit_agent_id)
-        .where(PentestEngagementExploitAgent.pentest_engagement_id == engagement_id)
-    )
-    exploit_result = await db.execute(
-        select(ExploitAgentModel).where(
-            cast(Any, ExploitAgentModel.id).in_(exploit_ids_subq)  # type: ignore
-        )
-    )
-    exploit_agents = exploit_result.scalars().all()
-
-    # Discovery agents via subquery
-    discovery_ids_subq = (
-        select(PentestEngagementDiscoveryAgent.discovery_agent_id)
-        .where(PentestEngagementDiscoveryAgent.pentest_engagement_id == engagement_id)
-    )
-    discovery_result = await db.execute(
-        select(DiscoveryAgentModel).where(
-            cast(Any, DiscoveryAgentModel.id).in_(discovery_ids_subq)  # type: ignore
-        )
-    )
-    discovery_agents = discovery_result.scalars().all()
     
-    return list(exploit_agents) + list(discovery_agents)
+    Args:
+        db: Database session
+        engagement_id: ID of the engagement
+        agent_type: Optional filter for agent type ("exploit" or "discovery")
+    """
+    agents = []
+    
+    # Get exploit agents if requested or no filter specified
+    if agent_type is None or agent_type == "exploit":
+        exploit_ids_subq = (
+            select(PentestEngagementExploitAgent.exploit_agent_id)
+            .where(PentestEngagementExploitAgent.pentest_engagement_id == engagement_id)
+        )
+        exploit_result = await db.execute(
+            select(ExploitAgentModel).where(
+                cast(Any, ExploitAgentModel.id).in_(exploit_ids_subq)  # type: ignore
+            )
+        )
+        exploit_agents = exploit_result.scalars().all()
+        agents.extend(exploit_agents)
+
+    # Get discovery agents if requested or no filter specified
+    if agent_type is None or agent_type == "discovery":
+        discovery_ids_subq = (
+            select(PentestEngagementDiscoveryAgent.discovery_agent_id)
+            .where(PentestEngagementDiscoveryAgent.pentest_engagement_id == engagement_id)
+        )
+        discovery_result = await db.execute(
+            select(DiscoveryAgentModel).where(
+                cast(Any, DiscoveryAgentModel.id).in_(discovery_ids_subq)  # type: ignore
+            )
+        )
+        discovery_agents = discovery_result.scalars().all()
+        agents.extend(discovery_agents)
+    
+    return agents
