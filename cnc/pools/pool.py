@@ -22,6 +22,7 @@ class StartDiscoveryRequest:
     start_urls: List[str]
     max_steps: int
     max_page_steps: int
+    model_config: dict
     scopes: Optional[List[str]] = None
     init_task: Optional[str] = None
     client: Optional[AgentClient] = None
@@ -31,6 +32,7 @@ class StartDiscoveryRequest:
 @dataclass
 class StartExploitRequest:
     max_steps: int
+    model_config: dict
     page_item: Optional[HTTPMessage] = None
     vulnerability_description: str = ""
     vulnerability_title: str = ""
@@ -44,13 +46,11 @@ class LiveQueuePool(AgentPool[T]):
         *,
         channel: BroadcastChannel[T],
         item_cls: Optional[Type[T]] = None,
-        llm_config: dict,
         max_workers: Optional[int] = None,
         log_subfolder: str = "pentest_bot",
         label_steps: bool = False,
     ):
         super().__init__(
-            llm_config=llm_config,
             max_workers=max_workers,
             log_subfolder=log_subfolder,
             label_steps=label_steps,

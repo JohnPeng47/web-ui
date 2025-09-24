@@ -38,18 +38,11 @@ class AgentStep(DerivedJSONModel):
         return cls(**data)
 
 class DiscoveryAgentCreate(BaseModel):
-    max_steps: int
-    model_name: str
-    model_costs: Optional[float] = None
-    log_filepath: Optional[str] = None
     agent_type: Optional[AgentType] = AgentType.DISCOVERY
+    start_urls: Optional[List[str]] = None
 
 class ExploitAgentCreate(BaseModel):
     vulnerability_title: str
-    max_steps: int
-    model_name: str
-    model_costs: Optional[float] = None
-    log_filepath: Optional[str] = None
     agent_type: Optional[AgentType] = AgentType.EXPLOIT
     
 # TODO: test uploading exploit agent steps first

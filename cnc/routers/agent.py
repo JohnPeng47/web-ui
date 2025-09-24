@@ -18,7 +18,7 @@ from cnc.schemas.agent import (
 from cnc.database.session import get_session
 from cnc.database.crud import (
     get_engagement_by_agent_id, 
-    list_agents_for_engagement, 
+    list_agents_for_engagement,
     get_engagement
 )
 from cnc.database.agent.crud import (
@@ -33,7 +33,6 @@ from cnc.database.agent.crud import (
 )
 from cnc.database.agent.models import ExploitAgentStep
 from cnc.pools.pool import StartDiscoveryRequest, StartExploitRequest
-
 from common.constants import (
     API_SERVER_HOST, 
     API_SERVER_PORT, 
@@ -43,10 +42,13 @@ from common.constants import (
     MAX_EXPLOIT_AGENT_STEPS,
     SERVER_LOG_DIR,
     MANUAL_APPROVAL_EXPLOIT_AGENT,
+    DISCOVERY_MODEL_CONFIG,
+    EXPLOIT_MODEL_CONFIG,
 )
 
 from src.agent.discovery.pages import PageObservations, Page
 from httplib import HTTPMessage
+from src.agent.base import AgentType
 from src.agent.agent_client import AgentClient
 from src.llm_models import LLMHub
 from cnc.services.engagement import merge_page_data as merge_page_data_service
@@ -78,25 +80,25 @@ def make_agent_router(
         engagement_id: UUID, payload: DiscoveryAgentCreate, db: AsyncSession = Depends(get_session)
     ):
         """Register a new discovery agent for an engagement."""
+        agent = await register_discovery_agent_service(db, engagement_id, MAX_DISCOVERY_AGENT_STEPS, AgentType.DISCOVERY)
+        engagement = await get_engagement(db, engagement_id)            
+        if not engagement:
+            raise HTTPException(status_code=404, detail="Engagement not found")
+
+        # Engagement-scoped server logger and agent loggers
+        log_factory = get_server_log_factory(base_dir=SERVER_LOG_DIR)
+        engagement_logger = log_factory.ensure_server_logger(str(engagement.id))
+        agent_logger, full_logger = log_factory.get_discovery_agent_loggers(str(engagement.id))
+
+        start_urls = payload.start_urls if payload.start_urls else [engagement.base_url]
+        engagement_logger.info(f"Starting discovery agent {agent.id} with {start_urls}")
         try:
-            agent = await register_discovery_agent_service(db, engagement_id, payload)
-            engagement = await get_engagement(db, engagement_id)            
-            if not engagement:
-                raise HTTPException(status_code=404, detail="Engagement not found")
-
-            # Engagement-scoped server logger and agent loggers
-            log_factory = get_server_log_factory(base_dir=SERVER_LOG_DIR)
-            engagement_logger = log_factory.ensure_server_logger(str(engagement.id))
-            engagement_logger.info(f"Starting discovery agent with {[engagement.base_url]}")
-
-            # Create agent loggers for this engagement's discovery_agents
-            agent_logger, full_logger = log_factory.get_discovery_agent_loggers(str(engagement.id))
-
             await discovery_agent_queue.publish(
                 StartDiscoveryRequest(
-                    start_urls=[engagement.base_url], 
+                    start_urls=payload.start_urls if payload.start_urls else [engagement.base_url], 
                     max_steps=MAX_DISCOVERY_AGENT_STEPS,
                     max_page_steps=MAX_DISCOVERY_PAGE_STEPS,
+                    model_config=DISCOVERY_MODEL_CONFIG,
                     scopes=engagement.scopes_data, 
                     init_task=None,
                     client=AgentClient(
@@ -210,12 +212,7 @@ def make_agent_router(
                 for action in actions:
                     log.info(f"Scheduling exploit agent for {action.vulnerability_title}")
                     # register and conditionally queue exploit agent
-                    create_exploit_config = ExploitAgentCreate(
-                        vulnerability_title=action.vulnerability_title,
-                        max_steps=MAX_EXPLOIT_AGENT_STEPS,
-                        model_name="gpt-4o-mini"
-                    )
-                    exploit_agent = await register_exploit_agent_service(db, engagement.id, create_exploit_config)
+                    exploit_agent = await register_exploit_agent_service(db, engagement.id, MAX_EXPLOIT_AGENT_STEPS, AgentType.EXPLOIT, action.vulnerability_title)
                     agent_logger, full_logger = log_factory.get_exploit_agent_loggers(str(engagement.id))
 
                     start_request = StartExploitRequest(
@@ -223,6 +220,7 @@ def make_agent_router(
                         vulnerability_description=action.vulnerability_description,
                         vulnerability_title=action.vulnerability_title,
                         max_steps=MAX_EXPLOIT_AGENT_STEPS,
+                        model_config=EXPLOIT_MODEL_CONFIG,
                         client=AgentClient(
                             agent_id=exploit_agent.id,
                             api_url=f"http://127.0.0.1:{API_SERVER_PORT}",
@@ -330,6 +328,7 @@ def make_agent_router(
                     vulnerability_description=payload.get("vulnerability_description", ""),
                     vulnerability_title=payload.get("vulnerability_title", ""),
                     max_steps=payload.get("max_steps", MAX_EXPLOIT_AGENT_STEPS),
+                    model_config=EXPLOIT_MODEL_CONFIG,
                     client=AgentClient(
                         agent_id=agent_id,
                         api_url=f"http://127.0.0.1:{API_SERVER_PORT}",

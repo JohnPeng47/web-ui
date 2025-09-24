@@ -22,10 +22,13 @@ print("Engagement created: ", engagement_id)
 # 3. Register discovery agent (API)
 agent_payload = {
     "max_steps": 5,
-    "model_name": "gpt-4o-mini",
-    "model_costs": 0.01,
-    "log_filepath": "/tmp/discovery_agent.log",
+    "start_urls": [
+        "http://147.79.78.153:3000/#/login",
+        "http://147.79.78.153:3000/#/contact",
+        "http://147.79.78.153:3000/#/search"
+    ]
 }
+
 register_resp = requests.post(
     f"{base_url}/engagement/{engagement_id}/agents/discovery/register",
     json=agent_payload,
