@@ -13,7 +13,7 @@ ROUTER_STRUCTURE
 > put in router when dealing with HTTP transport logic (ie. rate-limits, HTTP status/responses)
 > logic that pertains to the specific route is implemented in this body
 > has access to the agent queue pools
->> Schemas
+> Schemas
     > @location: routers/schemas
     > auxillary dependency of routers
     > FastAPI res/req shapes

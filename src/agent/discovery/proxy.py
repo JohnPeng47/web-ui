@@ -388,7 +388,7 @@ class MitmProxyHTTPHandler:
             body=body_bytes,
             body_error=None,
         )
-        agent_log.info(f"Response: {data}")
+        # agent_log.info(f"Response: {data}")
         return HTTPResponse(data=data)
 
 class _RelayAddon:

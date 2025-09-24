@@ -1,7 +1,9 @@
 import enum
 
 from pydantic import BaseModel, UUID4, field_validator
-from typing import Dict, Any, List, Optional, Literal
+from typing import Dict, Any, List, Optional, Literal, cast
+
+from src.agent.discovery.pages import PageObservations, Page
 
 from src.agent.base import AgentType
 from cnc.schemas.base import DerivedJSONModel
@@ -83,6 +85,11 @@ class UploadPageData(AgentMessage):
     page_steps: int
     max_page_steps: int
     page_data: List[Dict[str, Any]]
+
+    def to_page_observations(self) -> PageObservations:
+        pages_list = [Page.from_json(page) for page in cast(List[dict], self.page_data)]
+        pages_obj = PageObservations(pages=pages_list)
+        return pages_obj
     
 # TODO: ask chatGPT to implement this 
 class AgentApproveData(DerivedJSONModel):
