@@ -22,13 +22,28 @@ class ScheduledActionLM(BaseModel):
 class ScheduledActionsLM(BaseModel):
     actions: List[ScheduledActionLM]
 
-class StartExploitRequest(BaseModel):
+class StartExploitRequestData(BaseModel):
     page_item: Optional[HTTPMessage]
     vulnerability_description: str
     vulnerability_title: str
 
     class Config:
         arbitrary_types_allowed = True
+
+    async def to_dict(self):
+        return {
+            "page_item": await self.page_item.to_json() if self.page_item else None,
+            "vulnerability_description": self.vulnerability_description,
+            "vulnerability_title": self.vulnerability_title
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return StartExploitRequestData(
+            page_item=HTTPMessage.from_json(data["page_item"]) if data["page_item"] else None,
+            vulnerability_description=data["vulnerability_description"],
+            vulnerability_title=data["vulnerability_title"]
+        )
 
 class DetectAndSchedule(LMP):
     prompt = """
@@ -47,13 +62,13 @@ Some guidance for the response format:
 """
     response_format = ScheduledActionsLM
 
-    def _process_result(self, res: ScheduledActionsLM, **prompt_args) -> List[StartExploitRequest]:
+    def _process_result(self, res: ScheduledActionsLM, **prompt_args) -> List[StartExploitRequestData]:
         pages: PageObservations = prompt_args["pages"]
         scheduled_actions = []
 
         for action in res.actions:
             scheduled_actions.append(
-                StartExploitRequest(
+                StartExploitRequestData(
                     page_item=pages.get_page_item(action.page_item_id), 
                     vulnerability_description=action.vulnerability_description,
                     vulnerability_title=action.vulnerability_title
@@ -88,10 +103,24 @@ class DetectionScheduler:
         page_steps: int,
         max_page_steps: int,
         num_actions: int
-    ) -> List[StartExploitRequest]:
+    ) -> List[StartExploitRequestData]:
         if not self.trigger(page_steps, max_page_steps):
             return []
 
+        return await DetectAndSchedule().ainvoke(
+            model,
+            prompt_args={
+                "pages": pages,
+                "num_actions": num_actions
+            }
+        )
+    
+    async def generate_actions_no_trigger(
+        self,
+        model: BaseChatModel,
+        pages: PageObservations,
+        num_actions: int
+    ) -> List[StartExploitRequestData]:
         return await DetectAndSchedule().ainvoke(
             model,
             prompt_args={

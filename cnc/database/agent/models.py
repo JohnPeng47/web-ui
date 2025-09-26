@@ -36,6 +36,11 @@ class ExploitAgentModel(AgentBase, table=True):
         sa_column=Column(JSON),
         description="Pending StartExploitRequest data for manual approval"
     )
+    start_exploit_request_data: Optional[Dict[str, Any]] = Field(
+        default=None,
+        sa_column=Column(JSON),
+        description="StartExploitRequest data"
+    )
     agent_steps_data: Optional[List[Dict[str, Any]]] = Field(
         default=None, 
         sa_column=Column(JSON),

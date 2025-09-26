@@ -59,6 +59,9 @@ CC:
 1. Refactor agents CreateExploit/Discovery agent in [](cnc/schemas/agent.py) to remove model_name, model_cost, and log_filepath
 > these should not be apart of the create 
 
+Frontend:
+- follow-up to correctly add y-axis scroll on SpiderStats: (https://claude.ai/chat/0328b21e-bda1-4e4a-b28d-56e4f92a375e)
+
 [STRATEGIC]
 - browser pool using MITM
 > investigate browser hosting frameworks
