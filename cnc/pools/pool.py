@@ -5,15 +5,15 @@ from typing import Optional, List, TypeVar, Type
 import logging
 
 from common.agent import AgentPool
-from logger import get_agent_loggers
 from cnc.services.queue import BroadcastChannel
 
 from src.agent.agent_client import AgentClient
 
 from httplib import HTTPMessage
-from logger import get_agent_loggers
+from logger import AGENT_POOL_LOGGER_NAME
+from logging import getLogger
 
-agent_log, full_log = get_agent_loggers()
+pool_log = getLogger(AGENT_POOL_LOGGER_NAME)
 
 T = TypeVar("T")
 
@@ -96,7 +96,7 @@ class LiveQueuePool(AgentPool[T]):
                     except NotImplementedError:
                         pass
                     except Exception:
-                        agent_log.exception("on_exit handler failed.")
+                        pool_log.exception("on_exit handler failed.")
 
             self._consumer_task = loop.create_task(_run())
             return self._consumer_task
@@ -136,9 +136,8 @@ class LiveQueuePool(AgentPool[T]):
             item = get_task.result()
             try:
                 run_id = await asyncio.to_thread(self.start_agent, item)
-                agent_log.info(f"Enqueued run_id {run_id} from broadcast item.")
             except Exception:
-                agent_log.exception("start_agent failed for broadcast item.")
+                pool_log.exception("start_agent failed for broadcast item.")
             finally:
                 self._sub_queue.task_done()
 

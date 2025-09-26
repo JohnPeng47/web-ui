@@ -68,7 +68,7 @@ def setup_agent_dir(agent_name: str):
     log_dir.mkdir(exist_ok=True)
     return agent_dir, log_dir
 
-async def main(output_json_path: str):
+async def main():
     """Initialize SimpleAgent using the new BrowserSession-based API."""
     agent_dir, log_dir = setup_agent_dir("min_agent")
     setup_agent_logger(log_dir=str(log_dir))
@@ -96,7 +96,7 @@ async def main(output_json_path: str):
     pw = await async_playwright().start()
     browser = await pw.chromium.launch_persistent_context(
         user_data_dir=str(PROFILE_DIR),
-        headless=False,
+        headless=True,
         executable_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe",
         args=[f"--remote-debugging-port={PORT}", "--remote-debugging-address=127.0.0.1"],
         proxy={"server": f"http://{PROXY_HOST}:{PROXY_PORT}"},
@@ -131,7 +131,8 @@ async def main(output_json_path: str):
             browser_session=browser_session,
             controller=controller,
             agent_dir=agent_dir,
-            max_steps=10,
+            max_steps=6,
+            # max_page_steps=15,
             cdp_handler=proxy_handler,
             challenge_client=challenge_client,
             init_task=TASK,
@@ -153,10 +154,4 @@ async def main(output_json_path: str):
             # proxy_handler.stop()
 
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv) != 2:
-        print("Usage: python start_single_task_agent.py <output_json_path>")
-        sys.exit(1)
-    
-    output_json_path = sys.argv[1]
-    asyncio.run(main(output_json_path))
+    asyncio.run(main())

@@ -3,7 +3,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 import time
 
 from common.constants import (
-    BROWSER_PROFILE_DIR, 
+    BROWSER_PROFILE_DIR_2,
     BROWSER_CDP_PORT,
     BROWSER_PROXY_HOST,
     BROWSER_PROXY_PORT,
@@ -18,10 +18,13 @@ async def start_single_browser():
     try:
         pw = await async_playwright().start()
         browser = await pw.chromium.launch_persistent_context(
-            user_data_dir=str(BROWSER_PROFILE_DIR),
+            user_data_dir=str(BROWSER_PROFILE_DIR_2),
             headless=True,
             executable_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe",
             args=[
+                "--ignore-certificate-errors",
+                "--ignore-ssl-errors",
+                "--ignore-certificate-errors-spki-list",
                 "--no-sandbox",
                 "--disable-dev-shm-usage",
                 "--disable-gpu",
@@ -32,16 +35,6 @@ async def start_single_browser():
                 f"--proxy-server=http://{BROWSER_PROXY_HOST}:{BROWSER_PROXY_PORT}"
             ],
         )        
-        # idk why but need this here or CDP doesn't work
-        # browser_session = BrowserSession(
-        #     browser_profile=BrowserProfile(
-        #         keep_alive=True,
-        #     ),
-        #     is_local=False,
-        #     cdp_url=f"http://127.0.0.1:{BROWSER_CDP_PORT}/",
-        # )
-        # await browser_session.start()
-
         # Keep browser running until interrupted
         while True:
             await asyncio.sleep(1)

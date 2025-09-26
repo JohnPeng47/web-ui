@@ -245,6 +245,13 @@ This list should be empty if the plan does not need to be updated
 """
     response_format = AddPlanItemList
 
+    def _verify_or_raise(self, res: AddPlanItemList, **prompt_args):
+        """Validate that parent_index values are in correct format (digits separated by dots)."""
+        for item in res.plan_items:
+            if not re.match(r"^(\d+(?:\.\d+)*)$", item.parent_index):
+                raise ValueError(f"Invalid parent_index format: '{item.parent_index}'. Expected format: digits separated by dots (e.g., '1', '1.2', '1.2.3')")
+        return True
+
     def _process_result(self, res: AddPlanItemList, **prompt_args) -> PlanItem:
         plan: PlanItem = prompt_args["plan"]
         res.apply(plan)
@@ -270,7 +277,8 @@ Here are some guidelines:
 - try first determine which sub-level the plan should be added to
 --> the nested sub-plans represent a dfs order of exploration of the web application
 --> by adding it to the appropriate sub-level, you are supplying the next steps in the dfs traversal order
-- then, if the plans need updating, use the tree indexing notation [a.b.c..] to find the parent_index to add the plans to
+- then, if the plans need updating, use the tree indexing notation a.b.c.. to find the parent_index to add the plans to
+ie. 1.4.1 OR 2.3 OR 3
 
 Guidelines for writing the plan:
 - Focus on interacting with DOM elements *only* and *not* responsive interactions like screen resizing, voice-over screen reader, etc.
@@ -282,6 +290,13 @@ Now return your response as a list of plan items that will get added to the plan
 This list should be empty if the plan does not need to be updated
 """
     response_format = AddPlanItemList
+
+    def _verify_or_raise(self, res: AddPlanItemList, **prompt_args):
+        """Validate that parent_index values are in correct format (digits separated by dots)."""
+        for item in res.plan_items:
+            if not re.match(r"^(\d+(?:\.\d+)*)$", item.parent_index):
+                raise ValueError(f"Invalid parent_index format: '{item.parent_index}'. Expected format: digits separated by dots (e.g., '1', '1.2', '1.2.3')")
+        return True
 
     def _process_result(self, res: AddPlanItemList, **prompt_args) -> PlanItem:
         plan: PlanItem = prompt_args["plan"]
@@ -308,6 +323,13 @@ Here is the goal that resulted in a transition to the current webpage:
 Now try to determine which *new* plan items have been completed by the agent and if there are any, use the tree indexing notation [a.b.c..] to refer to the completed plan items
 """
     response_format = CompletedNestedPlanItem
+
+    def _verify_or_raise(self, res: CompletedNestedPlanItem, **prompt_args):
+        """Validate that plan_indices values are in correct format (digits separated by dots)."""
+        for index in res.plan_indices:
+            if not re.match(r"^(\d+(?:\.\d+)*)$", index):
+                raise ValueError(f"Invalid plan_indices format: '{index}'. Expected format: digits separated by dots (e.g., '1', '1.2', '1.2.3')")
+        return True
 
 # -------------------- example usage ----------------------- #
 

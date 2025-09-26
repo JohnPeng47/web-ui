@@ -1,0 +1,4335 @@
+======================================================================
+COMMIT a4f44425470f5cbae4662399ada040bd918cb444
+DATE   2025-09-19T11:59:22-04:00
+SUBJ   approve_data cleanup
+----------------------------------------------------------------------
+diff --git a/README.md b/README.md
+index cb28cc7..6e2b5c8 100644
+--- a/README.md
++++ b/README.md
+@@ -1,109 +1,30 @@
+ 2025/09/02:
++[TODO]
++Human
++- Exploit Agent:
++> Get logging working
++> Change ainvoke
++> Need to test if ainvoke is blocking -> (important write tests)
+ - Start deprecating pentest_bot and moving agent logic into src/exploit and moving eval harnesses into eval/harness/exploit
+---> AMF, should move start_*agent into eval/harness/discovery
+-2025/09/03:
+-- Inventory all hardcoded variaables, remote services (ie. Opik). Especially important are filepaths and env variables that need to be taken into account during deployment to another environment ( linux environment)
+-- DEBT: currently only PageItem is HTTPMessage. Should be genericized to include more things. Affects: 
+-Detect -> Queue (item) -> Convert to Exploit Prompt
+-Files:
+-> src/detection/prompts.py
+-> src/agent/pages.py
+-> eval/harness/exploit/eval_agent_pool.py
+-- DEBT: HTTPMessage.req/res.body no longer has to be async I think since we are not getting them from PW anymore
+-- Logging is fucked for AgentPool
+-2025/09/04:
+-- MITM local proxy will not work for remote browsers
+-> should be deprecating in favor of CDP anyways
+-- Initialize LLM configs at one of the parent layers instead of inside PentestSession
+-2025/09/04:
+-TODO:
+-> make get_browser_session do more retries ..
+-> we should make use of HTTP endpoints to accept queue updates from the clients because this gives us:
+-1. access to db
+-2. flexibility to trigger other logic -> such as queueing up another agent request 
+-- Relationship kinda weird between:
+-1. DB models
+-2. FastAPI schemas
+-3. DB accessors
+-> DB models <- FastAPI schemas
+-> DB accessors are implemented in database folder
+-- move all common type definitions of agents into src/detection, src/discovery, src/exploit
+-> src.agent -> src.exploit
+-- add a dynamic adapter class for handling serializing/deserializing data for UserRole and AgentSteps that:
+-1. encodes the subclass info in JSON format
+-2. can read 1. and dynamically choose the appropriate serialization routine
+-- currently not supporting UserRole based testing
+-- add agent service to configure things like configuring LLMs before calling 
+-DB crud API
+-- should implement a GET agent request in AgentClient to confirm agent_id
+-
+-2025/09/05:
+-- CDP traffic interception bonked, using MITMProxy for now
+-- [BUG] Proxy handler not catching any response data
+-> Seems to catch for some request on homepage
+-- [FIX] BrowserUse browser session connection script
+-- [REFACTOR] Convert _invoke in PentestSession to async
+-- [BUG] Error here:
+-> await self.server_client.update_page_data(self.pages)
+-> httpx timeout error (Big request ??)
+-> or possibly thread is blocked
+-- Split off features that can be completed with CC vs. those that need manual attention
+-Error Handling:
+-- Better error handling at run_mitm (currently mitm loop crashes on http error from agent error)
+-> [DESIGN] need better error isolation between workers
+-- Finish writing CLAUDE_CODE.md
+-- [FIX] generating ALTER syntax for alembic
+-- Modify start_agent server to work without the routes, so we can avoid triggering side effects -> create and label these fixtures
+-
+-2025/09/12:
+-- [DESIGN] change page_data API to accept engagementID instead
+-- [FEATURE]
+-> need to have resettable state for agent runs so we can restart failed runs 
+-> API change:
+->> create agent and start agent separate APIs
+->> start agent can take be used to restart agent
+-
+-2025/09/13:
+-- [BUG] Same requests are not showing signs of real
+-- integration test still not working suspect something wrong with pytest machinery
+-> test code should be working
+->> actually, would need to start server with config that makes page_steps alot lower (rn timesout because period for page_data update is essentially time for exploring the whole page)
+-> worker thread is started after the server, so misses all requests
+-> test_discovery_agent and test_exploit_agent are both working just not the actual tests
+-
+-
+-2025/09/14:
+-> correct parsing page structure -> use static tests for page class
+-- add global error handling (https://claude.ai/chat/60b5c53d-845a-4693-820e-10b27229dee8)
+-=========================
+-===== HIGH THOUGHTS =====
+-- brainstorm how to construct an a/b test
+-> commits!
+-> if we can isolate fully remote commits, and context, then we can do a/b testing to determine the effectiveness of different context patterns
+-> part of what we need to monitor on
+-Deployment Notes:
+-- do a grep for http:// to make sure we have all the schemas configured properly for HTTPS
+-- what we build our inline-tree editing thing to do in-line code-gen project management 
+-=========================
+-
+-# spend last 2 hours on front end UI
+-
+-Goals next week:
+-- get code ready so that it can be refactored on and worked on by CC and systems
+-- continue 
+-=================
+-Claude Code Comments
+-=================
+-# TODO:
+-- should create mapping of doc to live references that change
+-> parse @location and check on every commit, if the mapping has changed
+-> essentially parse every entity relationship in doc and iterate if changes are required in the docs
+-- identify parts of the code that have strong logical components
+-- refactoring check over the import boundaries to assure that these relationships hold
+-- generate grep patterns for each of the lines above
+-- extract from description to add a git commit hook to look at the message
+-- derive a set of rules from above to apply to each commit to check if any of these are broken
+-
+-Positives:
+-1. if we define doc, we can then actually abstract out implementation and make it easy to port code over to Golang eventually
+-2. we can use the same abstractions to generate our vulnerable web apps
+\ No newline at end of file
++- Consolidate cost logging feature:
++> Centralize llm_config initialization and move outside of agents
++- Integrating Authz/AuthN attacker:
++> also integrate user_id into "Agent Activity" component
++>> this in itself might become a sub-workflow for 
++- Support Dynamic Agent Interaction:
++> add support for agent snapshots
++> pause/modify agent responses
++- Try BrowserUse Session rewrite
++
++CC:
++- [6] deploy to prod -> use test_discovery_agent, modify and test as successful script
++- [10] HTTPMessage.req/res.body no longer has to be async I think since we are not getting them from PW anymore
++> hard refactor task
++- [2] logging not working for exploit agent
++[STRATEGIC]
++- browser pool using MITM
++> investigate browser hosting frameworks
++
++Business:
++- Setup meetings with dynamic scanning companies to see prices
++- Probably need to find cheap offering
+\ No newline at end of file
+diff --git a/cnc/routers/agent.py b/cnc/routers/agent.py
+index f27312b..2539e1c 100644
+--- a/cnc/routers/agent.py
++++ b/cnc/routers/agent.py
+@@ -11,7 +11,7 @@ from cnc.schemas.agent import (
+     UploadAgentSteps,
+     UploadPageData,
+     AgentStatus,
+-    AgentApproveData
++    AgentApproveBinary
+ )
+ from cnc.database.session import get_session
+ from cnc.database.crud import (
+@@ -335,7 +335,7 @@ def make_agent_router(
+     @router.post("/agents/{agent_id}/approval")
+     async def approve_or_deny_agent(
+         agent_id: str,
+-        approval_data: AgentApproveData,
++        approval_data: AgentApproveBinary,
+         db: AsyncSession = Depends(get_session),
+     ):
+         try:
+@@ -347,7 +347,7 @@ def make_agent_router(
+                 # Idempotent: if already processed, return current state
+                 return {"agent_id": agent_id, "status": agent.agent_status}
+ 
+-            if approval_data.decision == "deny":
++            if approval_data.approve_data == False:
+                 agent = await update_agent_status_service(db, agent_id, AgentStatus.CANCELLED)
+                 await clear_exploit_approval_payload_service(db, agent_id)
+                 return {"agent_id": agent_id, "status": agent.agent_status}
+diff --git a/cnc/schemas/agent.py b/cnc/schemas/agent.py
+index f7feebc..04da595 100644
+--- a/cnc/schemas/agent.py
++++ b/cnc/schemas/agent.py
+@@ -4,7 +4,7 @@ from pydantic import BaseModel, UUID4, field_validator
+ from typing import Dict, Any, List, Optional, Literal
+ 
+ from src.agent.base import AgentType
+-from cnc.schemas.base import JSONModel
++from cnc.schemas.base import DerivedJSONModel
+ # NOTE: we should make use and subclass this instead of redefining the fields in DiscoveryAgentStep
+ # from pentest_bot.models.steps import AgentStep as _DiscoveryAgentStep
+ 
+@@ -27,7 +27,7 @@ class AgentOut(BaseModel):
+ class AgentMessage(BaseModel):
+     agent_id: str
+ 
+-class AgentStep(JSONModel):
++class AgentStep(DerivedJSONModel):
+     def to_dict(self) -> Dict[str, Any]:
+         return {}
+ 
+@@ -84,6 +84,29 @@ class UploadPageData(AgentMessage):
+     max_page_steps: int
+     page_data: List[Dict[str, Any]]
+     
+-class AgentApproveData(BaseModel):
++# TODO: ask chatGPT to implement this 
++class AgentApproveData(DerivedJSONModel):
++    """Model for structuring """
+     agent_id: str
+-    decision: Literal["approve", "deny"]
+\ No newline at end of file
++    approve_data: Dict[str, Any]
++
++    def to_dict(self) -> Dict[str, Any]:
++        return {}
++    
++    @classmethod
++    def from_dict(cls, data: Dict[str, Any]) -> "AgentApproveData":
++        return cls(**data)
++
++class AgentApproveBinary(DerivedJSONModel):
++    agent_id: str
++    approve_data: bool
++    
++    def to_dict(self) -> Dict[str, Any]:
++        return {
++            "agent_id": self.agent_id,
++            "decision": self.approve_data,
++        }
++    
++    @classmethod
++    def from_dict(cls, data: Dict[str, Any]) -> "AgentApproveBinary":
++        return cls(**data)
+\ No newline at end of file
+diff --git a/cnc/schemas/auth.py b/cnc/schemas/auth.py
+index ae67a5f..71a71d9 100644
+--- a/cnc/schemas/auth.py
++++ b/cnc/schemas/auth.py
+@@ -1,12 +1,12 @@
+ from enum import Enum
+ from typing import Dict, Any
+ 
+-from cnc.schemas.base import JSONModel
++from cnc.schemas.base import DerivedJSONModel
+ 
+ class UserRoleCredentialsType(str, Enum):
+     PASSWORD = "password"
+ 
+-class UserCredentialsBase(JSONModel):
++class UserCredentialsBase(DerivedJSONModel):
+     type: UserRoleCredentialsType
+ 
+     def to_dict(self) -> Dict[str, Any]:
+diff --git a/cnc/schemas/base.py b/cnc/schemas/base.py
+index d88ff04..c4259a9 100644
+--- a/cnc/schemas/base.py
++++ b/cnc/schemas/base.py
+@@ -2,11 +2,12 @@ from pydantic import BaseModel
+ from abc import ABC, abstractmethod
+ from typing import Dict, Any
+ 
+-class JSONModel(BaseModel, ABC):
++class DerivedJSONModel(BaseModel, ABC):
++    """Used for implementing derived fields and their serialization/deserialization"""
+     @abstractmethod
+     def to_dict(self) -> Dict[str, Any]:
+         pass
+ 
+     @classmethod
+-    def from_dict(cls, data: Dict[str, Any]) -> "JSONModel":
++    def from_dict(cls, data: Dict[str, Any]) -> "DerivedJSONModel":
+         return cls(**data)
+\ No newline at end of file
+diff --git a/cnc/tests/integration/test_agent_approval.py b/cnc/tests/integration/test_agent_approval.py
+index e9fea05..50b9dc5 100644
+--- a/cnc/tests/integration/test_agent_approval.py
++++ b/cnc/tests/integration/test_agent_approval.py
+@@ -116,32 +116,36 @@ async def test_manual_approval_flow(test_app_client: AsyncClient):
+ 
+     # List agents and find the exploit agent
+     agents = await _list_agents(client, engagement_id)
+-    exploit = await _find_latest_exploit(agents)
+-    assert exploit is not None
+-    assert exploit["agent_status"] == "pending_approval"
++    agent = await _find_latest_exploit(agents)
++    assert agent is not None
++    assert agent["agent_status"] == "pending_approval"
+ 
+-    exploit_id = exploit["id"]
++    agent_id = agent["id"]
+ 
+     # Approve the exploit agent
+-    approve_resp = await client.post(f"/agents/{exploit_id}/approval", params={"decision": "approve"})
++    approve_resp = await client.post(
++        f"/agents/{agent_id}/approval", 
++        json={"agent_id": agent_id, "approve_data": True}
++    )
+     assert approve_resp.status_code == 200
+     body = approve_resp.json()
+     assert body["status"] in ("running",)
+ 
++# TODO: need to introduce setting MANUAL_TESTING_FLAG
++# async def test_auto_mode_flow(test_app_client: AsyncClient):
++#     await _set_manual_flag(False)
+ 
+-async def test_auto_mode_flow(test_app_client: AsyncClient):
+-    await _set_manual_flag(False)
++#     client = test_app_client
++#     engagement_id = await _create_engagement(client)
++#     disc_agent_id = await _register_discovery_agent(client, engagement_id)
+ 
+-    client = test_app_client
+-    engagement_id = await _create_engagement(client)
+-    disc_agent_id = await _register_discovery_agent(client, engagement_id)
++#     # Trigger detection which should auto-start exploit agent
++#     await _post_page_data_and_trigger(client, disc_agent_id)
++#     agents = await _list_agents(client, engagement_id)
++#     exploit = await _find_latest_exploit(agents)
++#     assert exploit is not None
+ 
+-    # Trigger detection which should auto-start exploit agent
+-    await _post_page_data_and_trigger(client, disc_agent_id)
+-    agents = await _list_agents(client, engagement_id)
+-    exploit = await _find_latest_exploit(agents)
+-    assert exploit is not None
+-    # In auto mode, exploit agent should not be pending approval
+-    assert exploit["agent_status"] in ("pending_auto", "running", "completed")
++#     # In auto mode, exploit agent should not be pending approval
++#     assert exploit["agent_status"] in ("pending_auto", "running", "completed")
+ 
+ 
+diff --git a/common/constants.py b/common/constants.py
+index 8b74c99..5f3997c 100644
+--- a/common/constants.py
++++ b/common/constants.py
+@@ -31,7 +31,7 @@ LLM_CONFIG = {
+ }
+ 
+ # manual approval for exploit agents
+-MANUAL_APPROVAL_EXPLOIT_AGENT: bool = False
++MANUAL_APPROVAL_EXPLOIT_AGENT: bool = True
+ 
+ # logging
+ SERVER_LOG_DIR = ".server_logs"
+\ No newline at end of file
+diff --git a/main b/main
+new file mode 100644
+index 0000000..e69de29
+diff --git a/pentest_bot/web_exploit/agent.py b/pentest_bot/web_exploit/agent.py
+index 15a3515..5b72ee5 100644
+--- a/pentest_bot/web_exploit/agent.py
++++ b/pentest_bot/web_exploit/agent.py
+@@ -264,7 +264,7 @@ Scratchpad (context from previous turns):
+         wait=wait_exponential(multiplier=1, min=1, max=10),
+         retry=retry_if_exception_type(ValidationError),
+         reraise=True,
+-    )
++    )   
+     def _invoke(self, prompt_str: str) -> AgentStep:
+         try:
+             res = self._agent_model.invoke(prompt_str)
+
+======================================================================
+COMMIT eabaa74fbc05e015acc798f6fc7ebc4fe53fde83
+DATE   2025-09-23T09:37:57-04:00
+SUBJ   WIP
+----------------------------------------------------------------------
+diff --git a/1 b/1
+new file mode 100644
+index 0000000..ea5145e
+--- /dev/null
++++ b/1
+@@ -0,0 +1,121 @@
++PAGE: 1.
++Page: http://147.79.78.153:3000/#/login
++HTTP Messages:
++1.1 GET http://147.79.78.153:3000/rest/admin/application-version (msgs:1, dups:0)
++[REQ HEADERS]
++  accept: application/json, text/plain, */*
++  accept-encoding: gzip, deflate
++  accept-language: en-US,en;q=0.9
++  authorization: Bearer <b64>....<b64>....<b64>..._aTbyUZra43f5gjmM7-<b64>..._T05w-<b64>...
++  cookie: welcomebanner_status=dismiss; cookieconsent_status=dismiss; language=en; continueCode=qo61W2w2ZW6a3BeyxzDmjrPKlY5bAyzDdLO4XpRqkJQ8VE7g1ovNMn9kZ9wr; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.<b64>....<b64>..._aTbyUZra43f5gjmM7-<b64>..._T05w-<b64>...
++  host: 147.79.78.153:3000
++  if-none-match: W/"14-HDobv7lxHDIykJrpNwFQC293gqA"
++  proxy-connection: keep-alive
++  referer: http://147.79.78.153:3000/
++  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
++[RES HEADERS]
++  access-control-allow-origin: *
++  connection: keep-alive
++  date: Mon, 22 Sep 2025 17:52:41 GMT
++  etag: W/"14-HDobv7lxHDIykJrpNwFQC293gqA"
++  feature-policy: payment 'self'
++  keep-alive: timeout=5
++  x-content-type-options: nosniff
++  x-frame-options: SAMEORIGIN
++  x-recruiting: /#/jobs
++1.2 GET http://147.79.78.153:3000/rest/admin/application-configuration (msgs:1, dups:0)
++[REQ HEADERS]
++  accept: application/json, text/plain, */*
++  accept-encoding: gzip, deflate
++  accept-language: en-US,en;q=0.9
++  authorization: Bearer <b64>....<b64>....<b64>..._aTbyUZra43f5gjmM7-<b64>..._T05w-<b64>...
++  cookie: welcomebanner_status=dismiss; cookieconsent_status=dismiss; language=en; continueCode=qo61W2w2ZW6a3BeyxzDmjrPKlY5bAyzDdLO4XpRqkJQ8VE7g1ovNMn9kZ9wr; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.<b64>....<b64>..._aTbyUZra43f5gjmM7-<b64>..._T05w-<b64>...
++  host: 147.79.78.153:3000
++  if-none-match: W/"5499-IFxEiq5xq62mcKu1yKR59Bg8q14"
++  proxy-connection: keep-alive
++  referer: http://147.79.78.153:3000/
++  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
++[RES HEADERS]
++  access-control-allow-origin: *
++  connection: keep-alive
++  date: Mon, 22 Sep 2025 17:52:41 GMT
++  etag: W/"5499-IFxEiq5xq62mcKu1yKR59Bg8q14"
++  feature-policy: payment 'self'
++  keep-alive: timeout=5
++  x-content-type-options: nosniff
++  x-frame-options: SAMEORIGIN
++  x-recruiting: /#/jobs
++1.3 GET http://147.79.78.153:3000/rest/user/whoami (msgs:1, dups:0)
++[REQ HEADERS]
++  accept: application/json, text/plain, */*
++  accept-encoding: gzip, deflate
++  accept-language: en-US,en;q=0.9
++  authorization: Bearer <b64>....<b64>....<b64>..._aTbyUZra43f5gjmM7-<b64>..._T05w-<b64>...
++  cookie: welcomebanner_status=dismiss; cookieconsent_status=dismiss; language=en; continueCode=qo61W2w2ZW6a3BeyxzDmjrPKlY5bAyzDdLO4XpRqkJQ8VE7g1ovNMn9kZ9wr; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.<b64>....<b64>..._aTbyUZra43f5gjmM7-<b64>..._T05w-<b64>...
++  host: 147.79.78.153:3000
++  if-none-match: W/"86-qvNTPnC80SHohEbCjxeFF65NC40"
++  proxy-connection: keep-alive
++  referer: http://147.79.78.153:3000/
++  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
++[RES HEADERS]
++  access-control-allow-origin: *
++  connection: keep-alive
++  date: Mon, 22 Sep 2025 17:52:43 GMT
++  etag: W/"86-qvNTPnC80SHohEbCjxeFF65NC40"
++  feature-policy: payment 'self'
++  keep-alive: timeout=5
++  x-content-type-options: nosniff
++  x-frame-options: SAMEORIGIN
++  x-recruiting: /#/jobs
++1.4 GET http://147.79.78.153:3000/rest/languages (msgs:1, dups:0)
++[REQ HEADERS]
++  accept: application/json, text/plain, */*
++  accept-encoding: gzip, deflate
++  accept-language: en-US,en;q=0.9
++  authorization: Bearer <b64>....<b64>....<b64>..._aTbyUZra43f5gjmM7-<b64>..._T05w-<b64>...
++  cookie: welcomebanner_status=dismiss; cookieconsent_status=dismiss; language=en; continueCode=qo61W2w2ZW6a3BeyxzDmjrPKlY5bAyzDdLO4XpRqkJQ8VE7g1ovNMn9kZ9wr; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.<b64>....<b64>..._aTbyUZra43f5gjmM7-<b64>..._T05w-<b64>...
++  host: 147.79.78.153:3000
++  if-none-match: W/"1309-bB4sZiagKwQ3lu+YNYgYJnnxFVA"
++  proxy-connection: keep-alive
++  referer: http://147.79.78.153:3000/
++  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
++[RES HEADERS]
++  access-control-allow-origin: *
++  connection: keep-alive
++  date: Mon, 22 Sep 2025 17:52:43 GMT
++  etag: W/"1309-bB4sZiagKwQ3lu+YNYgYJnnxFVA"
++  feature-policy: payment 'self'
++  keep-alive: timeout=5
++  x-content-type-options: nosniff
++  x-frame-options: SAMEORIGIN
++  x-recruiting: /#/jobs
++1.5 GET http://147.79.78.153:3000/api/Challenges/?name=Score%20Board (msgs:1, dups:0)
++[REQ HEADERS]
++  accept: application/json, text/plain, */*
++  accept-encoding: gzip, deflate
++  accept-language: en-US,en;q=0.9
++  authorization: Bearer <b64>....<b64>....<b64>..._aTbyUZra43f5gjmM7-<b64>..._T05w-<b64>...
++  cookie: welcomebanner_status=dismiss; cookieconsent_status=dismiss; language=en; continueCode=qo61W2w2ZW6a3BeyxzDmjrPKlY5bAyzDdLO4XpRqkJQ8VE7g1ovNMn9kZ9wr; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.<b64>....<b64>..._aTbyUZra43f5gjmM7-<b64>..._T05w-<b64>...
++  host: 147.79.78.153:3000
++  if-none-match: W/"288-66QE6UP/lnm0UaiMWExhpIqgOdQ"
++  proxy-connection: keep-alive
++  referer: http://147.79.78.153:3000/
++  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
++[RES HEADERS]
++  access-control-allow-origin: *
++  connection: keep-alive
++  date: Mon, 22 Sep 2025 17:52:43 GMT
++  etag: W/"288-66QE6UP/lnm0UaiMWExhpIqgOdQ"
++  feature-policy: payment 'self'
++  keep-alive: timeout=5
++  x-content-type-options: nosniff
++  x-frame-options: SAMEORIGIN
++  x-recruiting: /#/jobs
++Interesting headers:
++[Request]
++  authorization: Bearer <b64>....<b64>....<b64>..._aTbyUZra43f5gjmM7-<b64>..._T05w-<b64>... (5)
++  cookie: welcomebanner_status=dismiss; cookieconsent_status=dismiss; language=en; continueCode=qo61W2w2ZW6a3BeyxzDmjrPKlY5bAyzDdLO4XpRqkJQ8VE7g1ovNMn9kZ9wr; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.<b64>....<b64>..._aTbyUZra43f5gjmM7-<b64>..._T05w-<b64>... (5)
++[Response]
++  access-control-allow-origin: * (5)
++  x-content-type-options: nosniff (5)
++  x-frame-options: SAMEORIGIN (5)
+diff --git a/2 b/2
+new file mode 100644
+index 0000000..ce15595
+--- /dev/null
++++ b/2
+@@ -0,0 +1,249 @@
++PAGE: 1.
++Page: http://147.79.78.153:3000/#/login
++HTTP Messages:
++1.1 GET http://147.79.78.153:3000/rest/admin/application-version (msgs:4, dups:3)
++[REQ HEADERS]
++  accept: application/json, text/plain, */*
++  accept-encoding: gzip, deflate
++  accept-language: en-US,en;q=0.9
++  authorization: Bearer <b64>....<b64>....<b64>..._X_4YhXh4ePUJEqj2Q_nLqld8jYh9JivhkjrI_<b64>..._THWHwuKPjuAsD8XjLvEl5QGZc_6m6C_kt0IdoAUimM5a8eOFE
++  cookie: welcomebanner_status=dismiss; cookieconsent_status=dismiss; language=en; continueCode=qo61W2w2ZW6a3BeyxzDmjrPKlY5bAyzDdLO4XpRqkJQ8VE7g1ovNMn9kZ9wr; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.<b64>....<b64>..._X_4YhXh4ePUJEqj2Q_nLqld8jYh9JivhkjrI_<b64>..._THWHwuKPjuAsD8XjLvEl5QGZc_6m6C_kt0IdoAUimM5a8eOFE
++  host: 147.79.78.153:3000
++  if-none-match: W/"14-HDobv7lxHDIykJrpNwFQC293gqA"
++  proxy-connection: keep-alive
++  referer: http://147.79.78.153:3000/
++  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
++[RES HEADERS]
++  access-control-allow-origin: *
++  connection: keep-alive
++  date: Mon, 22 Sep 2025 16:07:44 GMT
++  etag: W/"14-HDobv7lxHDIykJrpNwFQC293gqA"
++  feature-policy: payment 'self'
++  keep-alive: timeout=5
++  x-content-type-options: nosniff
++  x-frame-options: SAMEORIGIN
++  x-recruiting: /#/jobs
++1.2 GET http://147.79.78.153:3000/rest/admin/application-configuration (msgs:8, dups:7)
++[REQ HEADERS]
++  accept: application/json, text/plain, */*
++  accept-encoding: gzip, deflate
++  accept-language: en-US,en;q=0.9
++  authorization: Bearer <b64>....<b64>....<b64>..._X_4YhXh4ePUJEqj2Q_nLqld8jYh9JivhkjrI_<b64>..._THWHwuKPjuAsD8XjLvEl5QGZc_6m6C_kt0IdoAUimM5a8eOFE
++  cookie: welcomebanner_status=dismiss; cookieconsent_status=dismiss; language=en; continueCode=qo61W2w2ZW6a3BeyxzDmjrPKlY5bAyzDdLO4XpRqkJQ8VE7g1ovNMn9kZ9wr; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.<b64>....<b64>..._X_4YhXh4ePUJEqj2Q_nLqld8jYh9JivhkjrI_<b64>..._THWHwuKPjuAsD8XjLvEl5QGZc_6m6C_kt0IdoAUimM5a8eOFE
++  host: 147.79.78.153:3000
++  if-none-match: W/"5499-IFxEiq5xq62mcKu1yKR59Bg8q14"
++  proxy-connection: keep-alive
++  referer: http://147.79.78.153:3000/
++  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
++[RES HEADERS]
++  access-control-allow-origin: *
++  connection: keep-alive
++  date: Mon, 22 Sep 2025 16:07:44 GMT
++  etag: W/"5499-IFxEiq5xq62mcKu1yKR59Bg8q14"
++  feature-policy: payment 'self'
++  keep-alive: timeout=5
++  x-content-type-options: nosniff
++  x-frame-options: SAMEORIGIN
++  x-recruiting: /#/jobs
++1.3 GET http://147.79.78.153:3000/rest/user/whoami (msgs:8, dups:7)
++[REQ HEADERS]
++  accept: application/json, text/plain, */*
++  accept-encoding: gzip, deflate
++  accept-language: en-US,en;q=0.9
++  authorization: Bearer <b64>....<b64>....l-gD2g6FD45hjr-elQTRGLPu5cMBhdjgbO-7li9IrFUfjbLtag-<b64>..._3EBOMD7lGXbzIeBI
++  cookie: welcomebanner_status=dismiss; cookieconsent_status=dismiss; language=en; continueCode=qo61W2w2ZW6a3BeyxzDmjrPKlY5bAyzDdLO4XpRqkJQ8VE7g1ovNMn9kZ9wr; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.<b64>....l-gD2g6FD45hjr-elQTRGLPu5cMBhdjgbO-7li9IrFUfjbLtag-<b64>..._3EBOMD7lGXbzIeBI
++  host: 147.79.78.153:3000
++  if-none-match: W/"86-qvNTPnC80SHohEbCjxeFF65NC40"
++  proxy-connection: keep-alive
++  referer: http://147.79.78.153:3000/
++  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
++[RES HEADERS]
++  access-control-allow-origin: *
++  connection: keep-alive
++  date: Mon, 22 Sep 2025 16:08:07 GMT
++  etag: W/"86-qvNTPnC80SHohEbCjxeFF65NC40"
++  feature-policy: payment 'self'
++  keep-alive: timeout=5
++  x-content-type-options: nosniff
++  x-frame-options: SAMEORIGIN
++  x-recruiting: /#/jobs
++1.4 GET http://147.79.78.153:3000/rest/languages (msgs:2, dups:1)
++[REQ HEADERS]
++  accept: application/json, text/plain, */*
++  accept-encoding: gzip, deflate
++  accept-language: en-US,en;q=0.9
++  authorization: Bearer <b64>....<b64>....<b64>..._X_4YhXh4ePUJEqj2Q_nLqld8jYh9JivhkjrI_<b64>..._THWHwuKPjuAsD8XjLvEl5QGZc_6m6C_kt0IdoAUimM5a8eOFE
++  cookie: welcomebanner_status=dismiss; cookieconsent_status=dismiss; language=en; continueCode=qo61W2w2ZW6a3BeyxzDmjrPKlY5bAyzDdLO4XpRqkJQ8VE7g1ovNMn9kZ9wr; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.<b64>....<b64>..._X_4YhXh4ePUJEqj2Q_nLqld8jYh9JivhkjrI_<b64>..._THWHwuKPjuAsD8XjLvEl5QGZc_6m6C_kt0IdoAUimM5a8eOFE
++  host: 147.79.78.153:3000
++  if-none-match: W/"1309-iEtWUJNITfKFtwELkZ3ZP0ij1vQ"
++  proxy-connection: keep-alive
++  referer: http://147.79.78.153:3000/
++  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
++[RES HEADERS]
++  access-control-allow-origin: *
++  connection: keep-alive
++  content-encoding: gzip
++  content-type: application/json; charset=utf-8
++  date: Mon, 22 Sep 2025 16:07:44 GMT
++  etag: W/"1309-bB4sZiagKwQ3lu+YNYgYJnnxFVA"
++  feature-policy: payment 'self'
++  keep-alive: timeout=5
++  transfer-encoding: chunked
++  vary: Accept-Encoding
++  x-content-type-options: nosniff
++  x-frame-options: SAMEORIGIN
++  x-recruiting: /#/jobs
++[RESPONSE BODIES]
++[{"key":"az_AZ","lang":"Azərbaycanca","icons":["az"],"shortKey":"AZ","percentage":78.66108786610879,"gauge":"three-quarters"},{"key":"id_ID","lang":"Bahasa Indonesia","icons":["id"],"shortKey":"ID","percentage":29.916317991631797,"gauge":"empty"},{"key":"ca_ES","lang":"Catalan","icons":["es-ct"],"shortKey":"CA","percentage":17.154811715481173,"gauge":"empty"},{"key":"cs_CZ","lang":"Česky","icons":["cz"],"shortKey":"CS","percentage":81.58995815899581,"gauge":"three-quarters"},{"key":"da_DK","lang":"Dansk","icons":["dk"],"shortKey":"DA","percentage":82.00836820083683,"gauge":"three-quarters"},{"key":"de_DE","lang":"Deutsch","icons":["de"],"shortKey":"DE","percentage":96.44351464435147,"gauge":"full"},{"key":"et_EE","lang":"Eesti","icons":["ee"],"shortKey":"ET","percentage":81.58995815899581,"gauge":"three-quarters"},{"key":"en","icons":["gb","us"],"shortKey":"EN","lang":"English","percentage":100,"gauge":"full"},{"key":"es_ES","lang":"Español","icons":["es"],"shortKey":"ES","percentage":...
++[{"key":"az_AZ","lang":"Azərbaycanca","icons":["az"],"shortKey":"AZ","percentage":78.66108786610879,"gauge":"three-quarters"},{"key":"id_ID","lang":"Bahasa Indonesia","icons":["id"],"shortKey":"ID","percentage":29.916317991631797,"gauge":"empty"},{"key":"ca_ES","lang":"Catalan","icons":["es-ct"],"shortKey":"CA","percentage":17.154811715481173,"gauge":"empty"},{"key":"cs_CZ","lang":"Česky","icons":["cz"],"shortKey":"CS","percentage":81.58995815899581,"gauge":"three-quarters"},{"key":"da_DK","lang":"Dansk","icons":["dk"],"shortKey":"DA","percentage":82.00836820083683,"gauge":"three-quarters"},{"key":"de_DE","lang":"Deutsch","icons":["de"],"shortKey":"DE","percentage":96.44351464435147,"gauge":"full"},{"key":"et_EE","lang":"Eesti","icons":["ee"],"shortKey":"ET","percentage":81.58995815899581,"gauge":"three-quarters"},{"key":"en","icons":["gb","us"],"shortKey":"EN","lang":"English","percentage":100,"gauge":"full"},{"key":"es_ES","lang":"Español","icons":["es"],"shortKey":"ES","percentage":...
++1.5 GET http://147.79.78.153:3000/api/Challenges/?name=Score%20Board (msgs:4, dups:3)
++[REQ HEADERS]
++  accept: application/json, text/plain, */*
++  accept-encoding: gzip, deflate
++  accept-language: en-US,en;q=0.9
++  authorization: Bearer <b64>....<b64>....<b64>..._X_4YhXh4ePUJEqj2Q_nLqld8jYh9JivhkjrI_<b64>..._THWHwuKPjuAsD8XjLvEl5QGZc_6m6C_kt0IdoAUimM5a8eOFE
++  cookie: welcomebanner_status=dismiss; cookieconsent_status=dismiss; language=en; continueCode=qo61W2w2ZW6a3BeyxzDmjrPKlY5bAyzDdLO4XpRqkJQ8VE7g1ovNMn9kZ9wr; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.<b64>....<b64>..._X_4YhXh4ePUJEqj2Q_nLqld8jYh9JivhkjrI_<b64>..._THWHwuKPjuAsD8XjLvEl5QGZc_6m6C_kt0IdoAUimM5a8eOFE
++  host: 147.79.78.153:3000
++  if-none-match: W/"288-5/tY+cKW63vxZVKgzEzkEP90w6s"
++  proxy-connection: keep-alive
++  referer: http://147.79.78.153:3000/
++  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
++[RES HEADERS]
++  access-control-allow-origin: *
++  connection: keep-alive
++  date: Mon, 22 Sep 2025 16:07:44 GMT
++  etag: W/"288-5/tY+cKW63vxZVKgzEzkEP90w6s"
++  feature-policy: payment 'self'
++  keep-alive: timeout=5
++  x-content-type-options: nosniff
++  x-frame-options: SAMEORIGIN
++  x-recruiting: /#/jobs
++1.6 POST http://147.79.78.153:3000/rest/user/login (msgs:1, dups:0)
++[REQ HEADERS]
++  accept: application/json, text/plain, */*
++  accept-encoding: gzip, deflate
++  accept-language: en-US,en;q=0.9
++  authorization: Bearer <b64>....<b64>....<b64>..._X_4YhXh4ePUJEqj2Q_nLqld8jYh9JivhkjrI_<b64>..._THWHwuKPjuAsD8XjLvEl5QGZc_6m6C_kt0IdoAUimM5a8eOFE
++  content-length: 88
++  content-type: application/json
++  cookie: welcomebanner_status=dismiss; cookieconsent_status=dismiss; language=en; continueCode=qo61W2w2ZW6a3BeyxzDmjrPKlY5bAyzDdLO4XpRqkJQ8VE7g1ovNMn9kZ9wr; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.<b64>....<b64>..._X_4YhXh4ePUJEqj2Q_nLqld8jYh9JivhkjrI_<b64>..._THWHwuKPjuAsD8XjLvEl5QGZc_6m6C_kt0IdoAUimM5a8eOFE
++  host: 147.79.78.153:3000
++  origin: http://147.79.78.153:3000
++  proxy-connection: keep-alive
++  referer: http://147.79.78.153:3000/
++  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
++[RES HEADERS]
++  access-control-allow-origin: *
++  connection: keep-alive
++  content-length: 833
++  content-type: application/json; charset=utf-8
++  date: Mon, 22 Sep 2025 16:08:07 GMT
++  etag: W/"341-Dj2lI2LDXx13//T3Kai2aNVQXDQ"
++  feature-policy: payment 'self'
++  keep-alive: timeout=5
++  vary: Accept-Encoding
++  x-content-type-options: nosniff
++  x-frame-options: SAMEORIGIN
++  x-recruiting: /#/jobs
++[REQUEST BODIES]
++{"email":"bjoern.kimminich@gmail.com","password":"<b64>..."}
++[RESPONSE BODIES]
++{"authentication":{"token":"<b64>....<b64>....l-gD2g6FD45hjr-elQTRGLPu5cMBhdjgbO-7li9IrFUfjbLtag-<b64>..._3EBOMD7lGXbzIeBI","bid":6,"umail":"bjoern.kimminich@gmail.com"}}
++1.7 GET http://147.79.78.153:3000/rest/continue-code (msgs:2, dups:1)
++[REQ HEADERS]
++  accept: application/json, text/plain, */*
++  accept-encoding: gzip, deflate
++  accept-language: en-US,en;q=0.9
++  authorization: Bearer <b64>....<b64>....<b64>..._X_4YhXh4ePUJEqj2Q_nLqld8jYh9JivhkjrI_<b64>..._THWHwuKPjuAsD8XjLvEl5QGZc_6m6C_kt0IdoAUimM5a8eOFE
++  cookie: welcomebanner_status=dismiss; cookieconsent_status=dismiss; language=en; continueCode=qo61W2w2ZW6a3BeyxzDmjrPKlY5bAyzDdLO4XpRqkJQ8VE7g1ovNMn9kZ9wr; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.<b64>....<b64>..._X_4YhXh4ePUJEqj2Q_nLqld8jYh9JivhkjrI_<b64>..._THWHwuKPjuAsD8XjLvEl5QGZc_6m6C_kt0IdoAUimM5a8eOFE
++  host: 147.79.78.153:3000
++  if-none-match: W/"4f-4HusbQr5GF7wkQyDoDJy5j9xQGk"
++  proxy-connection: keep-alive
++  referer: http://147.79.78.153:3000/
++  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
++[RES HEADERS]
++  access-control-allow-origin: *
++  connection: keep-alive
++  date: Mon, 22 Sep 2025 16:08:07 GMT
++  etag: W/"4f-4HusbQr5GF7wkQyDoDJy5j9xQGk"
++  feature-policy: payment 'self'
++  keep-alive: timeout=5
++  x-content-type-options: nosniff
++  x-frame-options: SAMEORIGIN
++  x-recruiting: /#/jobs
++1.8 GET http://147.79.78.153:3000/rest/basket/6 (msgs:1, dups:0)
++[REQ HEADERS]
++  accept: application/json, text/plain, */*
++  accept-encoding: gzip, deflate
++  accept-language: en-US,en;q=0.9
++  authorization: Bearer <b64>....<b64>....l-gD2g6FD45hjr-elQTRGLPu5cMBhdjgbO-7li9IrFUfjbLtag-<b64>..._3EBOMD7lGXbzIeBI
++  cookie: welcomebanner_status=dismiss; cookieconsent_status=dismiss; language=en; continueCode=qo61W2w2ZW6a3BeyxzDmjrPKlY5bAyzDdLO4XpRqkJQ8VE7g1ovNMn9kZ9wr; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.<b64>....l-gD2g6FD45hjr-elQTRGLPu5cMBhdjgbO-7li9IrFUfjbLtag-<b64>..._3EBOMD7lGXbzIeBI
++  host: 147.79.78.153:3000
++  if-none-match: W/"99-0hdwbZKb0yd5i/fDD7bblbIJGSs"
++  proxy-connection: keep-alive
++  referer: http://147.79.78.153:3000/
++  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
++[RES HEADERS]
++  access-control-allow-origin: *
++  connection: keep-alive
++  date: Mon, 22 Sep 2025 16:08:07 GMT
++  etag: W/"99-0hdwbZKb0yd5i/fDD7bblbIJGSs"
++  feature-policy: payment 'self'
++  keep-alive: timeout=5
++  x-content-type-options: nosniff
++  x-frame-options: SAMEORIGIN
++  x-recruiting: /#/jobs
++1.9 GET http://147.79.78.153:3000/rest/products/search?q= (msgs:1, dups:0)
++[REQ HEADERS]
++  accept: application/json, text/plain, */*
++  accept-encoding: gzip, deflate
++  accept-language: en-US,en;q=0.9
++  authorization: Bearer <b64>....<b64>....l-gD2g6FD45hjr-elQTRGLPu5cMBhdjgbO-7li9IrFUfjbLtag-<b64>..._3EBOMD7lGXbzIeBI
++  cookie: welcomebanner_status=dismiss; cookieconsent_status=dismiss; language=en; continueCode=qo61W2w2ZW6a3BeyxzDmjrPKlY5bAyzDdLO4XpRqkJQ8VE7g1ovNMn9kZ9wr; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.<b64>....l-gD2g6FD45hjr-elQTRGLPu5cMBhdjgbO-7li9IrFUfjbLtag-<b64>..._3EBOMD7lGXbzIeBI
++  host: 147.79.78.153:3000
++  if-none-match: W/"355b-cwMzrN2WKnlqxnqz0O75ylVoN/Q"
++  proxy-connection: keep-alive
++  referer: http://147.79.78.153:3000/
++  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
++[RES HEADERS]
++  access-control-allow-origin: *
++  connection: keep-alive
++  date: Mon, 22 Sep 2025 16:08:07 GMT
++  etag: W/"355b-cwMzrN2WKnlqxnqz0O75ylVoN/Q"
++  feature-policy: payment 'self'
++  keep-alive: timeout=5
++  x-content-type-options: nosniff
++  x-frame-options: SAMEORIGIN
++  x-recruiting: /#/jobs
++1.10 GET http://147.79.78.153:3000/api/Quantitys/ (msgs:1, dups:0)
++[REQ HEADERS]
++  accept: application/json, text/plain, */*
++  accept-encoding: gzip, deflate
++  accept-language: en-US,en;q=0.9
++  authorization: Bearer <b64>....<b64>....l-gD2g6FD45hjr-elQTRGLPu5cMBhdjgbO-7li9IrFUfjbLtag-<b64>..._3EBOMD7lGXbzIeBI
++  cookie: welcomebanner_status=dismiss; cookieconsent_status=dismiss; language=en; continueCode=qo61W2w2ZW6a3BeyxzDmjrPKlY5bAyzDdLO4XpRqkJQ8VE7g1ovNMn9kZ9wr; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.<b64>....l-gD2g6FD45hjr-elQTRGLPu5cMBhdjgbO-7li9IrFUfjbLtag-<b64>..._3EBOMD7lGXbzIeBI
++  host: 147.79.78.153:3000
++  if-none-match: W/"1872-+j7wecI9tUtlc8nSyIj7Wgd1Mh0"
++  proxy-connection: keep-alive
++  referer: http://147.79.78.153:3000/
++  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
++[RES HEADERS]
++  access-control-allow-origin: *
++  connection: keep-alive
++  date: Mon, 22 Sep 2025 16:08:07 GMT
++  etag: W/"1872-+j7wecI9tUtlc8nSyIj7Wgd1Mh0"
++  feature-policy: payment 'self'
++  keep-alive: timeout=5
++  x-content-type-options: nosniff
++  x-frame-options: SAMEORIGIN
++  x-recruiting: /#/jobs
++Interesting headers:
++[Request]
++  authorization: Bearer <b64>....<b64>....l-gD2g6FD45hjr-elQTRGLPu5cMBhdjgbO-7li9IrFUfjbLtag-<b64>..._3EBOMD7lGXbzIeBI (32)
++  content-type: application/json (1)
++  cookie: welcomebanner_status=dismiss; cookieconsent_status=dismiss; language=en; continueCode=qo61W2w2ZW6a3BeyxzDmjrPKlY5bAyzDdLO4XpRqkJQ8VE7g1ovNMn9kZ9wr; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.<b64>....l-gD2g6FD45hjr-elQTRGLPu5cMBhdjgbO-7li9IrFUfjbLtag-<b64>..._3EBOMD7lGXbzIeBI (32)
++[Response]
++  access-control-allow-origin: * (32)
++  content-type: application/json; charset=utf-8 (3)
++  x-content-type-options: nosniff (32)
++  x-frame-options: SAMEORIGIN (32)
+diff --git a/README.md b/README.md
+index 6e2b5c8..e50a69b 100644
+--- a/README.md
++++ b/README.md
+@@ -15,6 +15,10 @@ Human
+ > add support for agent snapshots
+ > pause/modify agent responses
+ - Try BrowserUse Session rewrite
++- Need to introduce pages
++
++2025/09/23
++- turn on "MSG NOT IN SCOPE" log line
+ 
+ CC:
+ - [6] deploy to prod -> use test_discovery_agent, modify and test as successful script
+@@ -25,6 +29,7 @@ CC:
+ - browser pool using MITM
+ > investigate browser hosting frameworks
+ 
++
+ Business:
+ - Setup meetings with dynamic scanning companies to see prices
+ - Probably need to find cheap offering
+\ No newline at end of file
+diff --git a/bash.exe.stackdump b/bash.exe.stackdump
+index 501641d..795ee0c 100644
+--- a/bash.exe.stackdump
++++ b/bash.exe.stackdump
+@@ -1,9 +1,9 @@
+ Stack trace:
+ Frame        Function    Args
+-000FFFFAEA0  0018006293E (00180290F28, 0018026FE3E, 00000000000, 000FFFF9DA0)
+-000FFFFAEA0  0018004846A (00000000000, 00000000000, 00000000000, 00000000000)
+-000FFFFAEA0  001800484A2 (00180290FD9, 000FFFFAD58, 00000000000, 00000000000)
+-000FFFFAEA0  001800CD21E (00000000000, 00000000000, 00000000000, 00000000000)
+-000FFFFAEA0  001800CD345 (000FFFFAEB0, 00000000000, 00000000000, 00000000000)
+-000FFFFB160  001800CE905 (000FFFFAEB0, 00000000000, 00000000000, 00000000000)
++000FFFF9820  0018006293E (00180290F28, 0018026FE3E, 00000000000, 000FFFF8720)
++000FFFF9820  0018004846A (00000000000, 00000000000, 00000000000, 00000000000)
++000FFFF9820  001800484A2 (00180290FD9, 000FFFF96D8, 00000000000, 00000000000)
++000FFFF9820  001800CD21E (00000000000, 00000000000, 00000000000, 00000000000)
++000FFFF9820  001800CD345 (000FFFF9830, 00000000000, 00000000000, 00000000000)
++000FFFF9AE0  001800CE905 (000FFFF9830, 00000000000, 00000000000, 00000000000)
+ End of stack trace
+diff --git a/cnc/database/crud.py b/cnc/database/crud.py
+index d7cc983..c777087 100644
+--- a/cnc/database/crud.py
++++ b/cnc/database/crud.py
+@@ -35,6 +35,12 @@ async def get_engagement(db: AsyncSession, engagement_id: UUID) -> Optional[Pent
+     return result.scalars().first()
+ 
+ 
++async def list_engagements(db: AsyncSession) -> List[PentestEngagement]:
++    """Return all pentest engagements."""
++    result = await db.execute(select(PentestEngagement))
++    return list(result.scalars().all())
++
++
+ async def update_engagement(db: AsyncSession, app: PentestEngagement) -> PentestEngagement:
+     """Update an engagement with new data."""
+     db.add(app)
+diff --git a/cnc/migrations/versions/360d3842a325_added_page_data_to_engagement.py b/cnc/migrations/versions/360d3842a325_added_page_data_to_engagement.py
+deleted file mode 100644
+index 6a19118..0000000
+--- a/cnc/migrations/versions/360d3842a325_added_page_data_to_engagement.py
++++ /dev/null
+@@ -1,65 +0,0 @@
+-"""added page_data to engagement
+-
+-Revision ID: 360d3842a325
+-Revises: c77154d1e83e
+-Create Date: 2025-09-12 15:30:18.672967
+-
+-"""
+-from typing import Sequence, Union
+-
+-from alembic import op
+-import sqlalchemy as sa
+-import sqlmodel
+-from sqlalchemy.dialects import sqlite
+-
+-# revision identifiers, used by Alembic.
+-revision: str = '360d3842a325'
+-down_revision: Union[str, None] = 'c77154d1e83e'
+-branch_labels: Union[str, Sequence[str], None] = None
+-depends_on: Union[str, Sequence[str], None] = None
+-
+-
+-def upgrade() -> None:
+-    """Upgrade schema."""
+-    # ### commands auto generated by Alembic - please adjust! ###
+-    # op.drop_table('discoveryagentmodel')
+-    # op.drop_table('exploitagentmodel')
+-    op.add_column('pentestengagement', sa.Column('page_data', sa.JSON(), nullable=True))
+-    # ### end Alembic commands ###
+-
+-
+-def downgrade() -> None:
+-    """Downgrade schema."""
+-    # ### commands auto generated by Alembic - please adjust! ###
+-    op.drop_column('pentestengagement', 'page_data')
+-    op.create_table('exploitagentmodel',
+-    sa.Column('id', sa.VARCHAR(), nullable=False),
+-    sa.Column('agent_status', sa.VARCHAR(), nullable=False),
+-    sa.Column('max_steps', sa.INTEGER(), nullable=False),
+-    sa.Column('model_name', sa.VARCHAR(), nullable=False),
+-    sa.Column('model_costs', sa.FLOAT(), nullable=True),
+-    sa.Column('log_filepath', sa.VARCHAR(), nullable=True),
+-    sa.Column('created_at', sa.DATETIME(), nullable=False),
+-    sa.Column('agent_type', sa.VARCHAR(), nullable=False),
+-    sa.Column('opik_prompt_name', sa.VARCHAR(), nullable=True),
+-    sa.Column('opik_prompt_commit', sa.VARCHAR(), nullable=True),
+-    sa.Column('vulnerability_title', sa.VARCHAR(), nullable=False),
+-    sa.Column('agent_steps_data', sqlite.JSON(), nullable=True),
+-    sa.PrimaryKeyConstraint('id')
+-    )
+-    op.create_table('discoveryagentmodel',
+-    sa.Column('id', sa.VARCHAR(), nullable=False),
+-    sa.Column('agent_status', sa.VARCHAR(), nullable=False),
+-    sa.Column('max_steps', sa.INTEGER(), nullable=False),
+-    sa.Column('model_name', sa.VARCHAR(), nullable=False),
+-    sa.Column('model_costs', sa.FLOAT(), nullable=True),
+-    sa.Column('log_filepath', sa.VARCHAR(), nullable=True),
+-    sa.Column('created_at', sa.DATETIME(), nullable=False),
+-    sa.Column('agent_type', sa.VARCHAR(), nullable=False),
+-    sa.Column('opik_prompt_name', sa.VARCHAR(), nullable=True),
+-    sa.Column('opik_prompt_commit', sa.VARCHAR(), nullable=True),
+-    sa.Column('agent_steps_data', sqlite.JSON(), nullable=True),
+-    sa.Column('page_data', sqlite.JSON(), nullable=True),
+-    sa.PrimaryKeyConstraint('id')
+-    )
+-    # ### end Alembic commands ###
+diff --git a/cnc/migrations/versions/72404a86afc6_added_agent_approval_payload.py b/cnc/migrations/versions/72404a86afc6_added_agent_approval_payload.py
+deleted file mode 100644
+index 046a0fc..0000000
+--- a/cnc/migrations/versions/72404a86afc6_added_agent_approval_payload.py
++++ /dev/null
+@@ -1,33 +0,0 @@
+-"""added agent_approval_payload
+-
+-Revision ID: 72404a86afc6
+-Revises: 9a3505b17b53
+-Create Date: 2025-09-16 13:32:59.466062
+-
+-"""
+-from typing import Sequence, Union
+-
+-from alembic import op
+-import sqlalchemy as sa
+-import sqlmodel
+-
+-
+-# revision identifiers, used by Alembic.
+-revision: str = '72404a86afc6'
+-down_revision: Union[str, None] = '9a3505b17b53'
+-branch_labels: Union[str, Sequence[str], None] = None
+-depends_on: Union[str, Sequence[str], None] = None
+-
+-
+-def upgrade() -> None:
+-    """Upgrade schema."""
+-    # ### commands auto generated by Alembic - please adjust! ###
+-    op.add_column('exploitagent', sa.Column('approval_payload_data', sa.JSON(), nullable=True))
+-    # ### end Alembic commands ###
+-
+-
+-def downgrade() -> None:
+-    """Downgrade schema."""
+-    # ### commands auto generated by Alembic - please adjust! ###
+-    op.drop_column('exploitagent', 'approval_payload_data')
+-    # ### end Alembic commands ###
+diff --git a/cnc/migrations/versions/9a3505b17b53_change_agent_status.py b/cnc/migrations/versions/9a3505b17b53_change_agent_status.py
+deleted file mode 100644
+index 16a283a..0000000
+--- a/cnc/migrations/versions/9a3505b17b53_change_agent_status.py
++++ /dev/null
+@@ -1,33 +0,0 @@
+-"""change agent_status
+-
+-Revision ID: 9a3505b17b53
+-Revises: 360d3842a325
+-Create Date: 2025-09-14 10:49:21.544144
+-
+-"""
+-from typing import Sequence, Union
+-
+-from alembic import op
+-import sqlalchemy as sa
+-import sqlmodel
+-
+-
+-# revision identifiers, used by Alembic.
+-revision: str = '9a3505b17b53'
+-down_revision: Union[str, None] = '360d3842a325'
+-branch_labels: Union[str, Sequence[str], None] = None
+-depends_on: Union[str, Sequence[str], None] = None
+-
+-
+-def upgrade() -> None:
+-    """Upgrade schema."""
+-    # ### commands auto generated by Alembic - please adjust! ###
+-    pass
+-    # ### end Alembic commands ###
+-
+-
+-def downgrade() -> None:
+-    """Downgrade schema."""
+-    # ### commands auto generated by Alembic - please adjust! ###
+-    pass
+-    # ### end Alembic commands ###
+diff --git a/cnc/migrations/versions/c77154d1e83e_init.py b/cnc/migrations/versions/d46774a1d387_init.py
+similarity index 90%
+rename from cnc/migrations/versions/c77154d1e83e_init.py
+rename to cnc/migrations/versions/d46774a1d387_init.py
+index 9e05277..e47e1c5 100644
+--- a/cnc/migrations/versions/c77154d1e83e_init.py
++++ b/cnc/migrations/versions/d46774a1d387_init.py
+@@ -1,8 +1,8 @@
+ """init
+ 
+-Revision ID: c77154d1e83e
++Revision ID: d46774a1d387
+ Revises: 
+-Create Date: 2025-09-09 22:47:58.575347
++Create Date: 2025-09-22 10:33:03.498997
+ 
+ """
+ from typing import Sequence, Union
+@@ -13,7 +13,7 @@ import sqlmodel
+ 
+ 
+ # revision identifiers, used by Alembic.
+-revision: str = 'c77154d1e83e'
++revision: str = 'd46774a1d387'
+ down_revision: Union[str, None] = None
+ branch_labels: Union[str, Sequence[str], None] = None
+ depends_on: Union[str, Sequence[str], None] = None
+@@ -24,7 +24,7 @@ def upgrade() -> None:
+     # ### commands auto generated by Alembic - please adjust! ###
+     op.create_table('discoveryagent',
+     sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+-    sa.Column('agent_status', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
++    sa.Column('agent_status', sa.Enum('PENDING_AUTO', 'PENDING_APPROVAL', 'RUNNING', 'COMPLETED', 'CANCELLED', name='agentstatus'), nullable=False),
+     sa.Column('max_steps', sa.Integer(), nullable=False),
+     sa.Column('model_name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+     sa.Column('model_costs', sa.Float(), nullable=True),
+@@ -39,7 +39,7 @@ def upgrade() -> None:
+     )
+     op.create_table('exploitagent',
+     sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+-    sa.Column('agent_status', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
++    sa.Column('agent_status', sa.Enum('PENDING_AUTO', 'PENDING_APPROVAL', 'RUNNING', 'COMPLETED', 'CANCELLED', name='agentstatus'), nullable=False),
+     sa.Column('max_steps', sa.Integer(), nullable=False),
+     sa.Column('model_name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+     sa.Column('model_costs', sa.Float(), nullable=True),
+@@ -49,6 +49,7 @@ def upgrade() -> None:
+     sa.Column('opik_prompt_name', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+     sa.Column('opik_prompt_commit', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+     sa.Column('vulnerability_title', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
++    sa.Column('approval_payload_data', sa.JSON(), nullable=True),
+     sa.Column('agent_steps_data', sa.JSON(), nullable=True),
+     sa.PrimaryKeyConstraint('id')
+     )
+@@ -62,6 +63,7 @@ def upgrade() -> None:
+     sa.Column('findings', sa.JSON(), nullable=True),
+     sa.Column('scopes_data', sa.JSON(), nullable=True),
+     sa.Column('user_roles_data', sa.JSON(), nullable=True),
++    sa.Column('page_data', sa.JSON(), nullable=True),
+     sa.PrimaryKeyConstraint('id')
+     )
+     op.create_table('authsession',
+diff --git a/cnc/routers/engagement.py b/cnc/routers/engagement.py
+index 4b4f83c..8130b05 100644
+--- a/cnc/routers/engagement.py
++++ b/cnc/routers/engagement.py
+@@ -9,6 +9,7 @@ from cnc.database.crud import (
+     create_engagement as create_engagement_service, 
+     get_engagement as get_engagement_service, 
+     update_engagement as update_engagement_service,
++    list_engagements as list_engagements_service,
+ )
+ from cnc.services.engagement import merge_page_data as merge_page_data_service
+ 
+@@ -21,6 +22,15 @@ def make_engagement_router() -> APIRouter:
+     """
+     router = APIRouter()
+     
++    @router.get("/engagement/", response_model=list[EngagementOut])
++    async def list_engagements(db: AsyncSession = Depends(get_session)):
++        """List all engagements."""
++        try:
++            apps = await list_engagements_service(db)
++            return apps
++        except Exception as e:
++            raise HTTPException(status_code=500, detail=str(e))
++
+     @router.post("/engagement/", response_model=EngagementOut)
+     async def create_engagement(payload: EngagementCreate, db: AsyncSession = Depends(get_session)):
+         """Create a new engagement."""
+diff --git a/cnc/schemas/agent.py b/cnc/schemas/agent.py
+index 04da595..6bd04a7 100644
+--- a/cnc/schemas/agent.py
++++ b/cnc/schemas/agent.py
+@@ -109,4 +109,7 @@ class AgentApproveBinary(DerivedJSONModel):
+     
+     @classmethod
+     def from_dict(cls, data: Dict[str, Any]) -> "AgentApproveBinary":
+-        return cls(**data)
+\ No newline at end of file
++        return cls(**data)
++
++# # Attack Requests
++# class 
+\ No newline at end of file
+diff --git a/cnc/workers/agent/proxy_handler2.py b/cnc/workers/agent/proxy_handler2.py
+index 207994f..45c3fbc 100644
+--- a/cnc/workers/agent/proxy_handler2.py
++++ b/cnc/workers/agent/proxy_handler2.py
+@@ -16,6 +16,7 @@ except ImportError as e:
+ 
+ from logger import get_agent_loggers
+ from common.http_handler import HTTPHandler
++from common.constants import BROWSER_PROXY_HOST, BROWSER_PROXY_PORT
+ from httplib import (
+     HTTPRequest, 
+     HTTPResponse, 
+@@ -41,8 +42,8 @@ class MitmProxyHTTPHandler:
+         self,
+         handler: HTTPHandler,
+         *,
+-        listen_host: str = "127.0.0.1",
+-        listen_port: int = 8081,
++        listen_host: str = BROWSER_PROXY_HOST,
++        listen_port: int = BROWSER_PROXY_PORT,
+         ssl_insecure: bool = True,
+         http2: bool = True,
+         mode: Optional[str] = None,
+diff --git a/common/http_handler.py b/common/http_handler.py
+index 62b2fc8..8ffc025 100644
+--- a/common/http_handler.py
++++ b/common/http_handler.py
+@@ -284,7 +284,7 @@ class HTTPHandler:
+             if parsed_url.path.startswith(parsed_scope.path):
+                 return True
+         
+-        agent_log.info(f"MSG NOT IN SCOPE: {url}")
++        # agent_log.info(f"MSG NOT IN SCOPE: {url}")
+         return False
+ 
+     async def _validate_msg(self, msg: HTTPMessage) -> bool:
+@@ -375,7 +375,7 @@ class HTTPHandler:
+         self._messages.extend(unmatched_in_scope)
+         self._messages.extend(session_valid)
+ 
+-        agent_log.info("Returning %d messages from flush (in-scope & filtered)", len(session_valid))
++        # agent_log.info("Returning %d messages from flush (in-scope & filtered)", len(session_valid))
+         return session_valid
+ 
+     def get_history(self) -> List[HTTPMessage]:
+diff --git a/scripts/start_single_task_agent.py b/scripts/start_single_task_agent.py
+index b512dd9..14546ee 100644
+--- a/scripts/start_single_task_agent.py
++++ b/scripts/start_single_task_agent.py
+@@ -11,7 +11,7 @@ from src.llm_models import LLMHub
+ from src.agent.discovery.agent import DiscoveryAgent
+ from src.agent.discovery.prompts.sys_prompt import CUSTOM_SYSTEM_PROMPT
+ from common.http_handler import HTTPHandler
+-from src.agent.proxy import ProxyHandler
++from src.agent.discovery.proxy import MitmProxyHTTPHandler
+ from eval.client import PagedDiscoveryEvalClient
+ 
+ from eval.datasets.discovery.juiceshop import JUICE_SHOP_ALL as JUICE_SHOP_ALL_DISCOVERY
+@@ -68,7 +68,7 @@ def setup_agent_dir(agent_name: str):
+     log_dir.mkdir(exist_ok=True)
+     return agent_dir, log_dir
+ 
+-async def main():
++async def main(output_json_path: str):
+     """Initialize SimpleAgent using the new BrowserSession-based API."""
+     agent_dir, log_dir = setup_agent_dir("min_agent")
+     setup_agent_logger(log_dir=str(log_dir))
+@@ -83,14 +83,14 @@ async def main():
+             "http://147.79.78.153:3000/api/",
+         ]
+     )
+-    proxy_handler = ProxyHandler(
++    proxy_handler = MitmProxyHTTPHandler(
+         handler=http_handler,
+         listen_host=PROXY_HOST,
+         listen_port=PROXY_PORT,
+         ssl_insecure=True,
+         http2=True,
+     )
+-    proxy_handler.start()
++    await proxy_handler.connect()
+ 
+     # Launch external Playwright Chromium with proxy + CDP enabled
+     pw = await async_playwright().start()
+@@ -137,9 +137,7 @@ async def main():
+             init_task=TASK,
+         )
+         await agent.run()
+-        for challenges in challenge_client.get_solved()["/login"]:
+-            for challenge in challenges:
+-                print(challenge)
++        print(agent.pages)
+ 
+         agent_log.info("SimpleAgent execution completed")
+ 
+@@ -152,7 +150,13 @@ async def main():
+         finally:
+             await browser.close()
+             await pw.stop()
+-            proxy_handler.stop()
++            # proxy_handler.stop()
+ 
+ if __name__ == "__main__":
+-    asyncio.run(main())
++    import sys
++    if len(sys.argv) != 2:
++        print("Usage: python start_single_task_agent.py <output_json_path>")
++        sys.exit(1)
++    
++    output_json_path = sys.argv[1]
++    asyncio.run(main(output_json_path))
+diff --git a/src/agent/discovery/pages.py b/src/agent/discovery/pages.py
+index 98d211a..1e9a1e8 100644
+--- a/src/agent/discovery/pages.py
++++ b/src/agent/discovery/pages.py
+@@ -305,6 +305,73 @@ class PageObservations:
+         page = self.pages[page_id - 1]
+         return page.get_page_item(section_number)
+ 
++    def http_msgs(self) -> List[Tuple[str, str]]:
++        """Return a list of (method, url) tuples for each http_msg in all pages."""
++        result = []
++        for page in self.pages:
++            for msg in page.http_msgs:
++                result.append(msg)
++        return result
++
++    def _filter(self) -> "PageObservations":
++        """Return a filtered copy of PageObservations with duplicate requests removed.
++        For duplicates, keeps the one with non-empty response body if available, else random."""
++        import random
++        import copy
++        
++        filtered_pages = []
++        
++        for page in self.pages:
++            # Create a new page with filtered http_msgs
++            filtered_page = Page(url=page.url, page_id=page.page_id)
++            
++            # Track which messages to keep for each (method, url) combination
++            unique_msgs = {}
++            
++            for msg in page.http_msgs:
++                key = (msg.method, msg.url)
++                
++                if key not in unique_msgs:
++                    unique_msgs[key] = [msg]
++                else:
++                    unique_msgs[key].append(msg)
++            
++            # For each group, select the best message to keep
++            for key, msgs in unique_msgs.items():
++                if len(msgs) == 1:
++                    # No duplicates, keep the single message
++                    filtered_page.add_http_msg(msgs[0])
++                else:
++                    method, url = key
++                    
++                    # Find messages with non-empty response bodies
++                    msgs_with_response = []
++                    for msg in msgs:
++                        if (msg.response and 
++                            hasattr(msg.response, "data") and 
++                            msg.response.data and 
++                            hasattr(msg.response.data, "body") and 
++                            msg.response.data.body):
++                            body_str = page._format_body(msg.response.data.body)
++                            if body_str.strip():
++                                msgs_with_response.append(msg)
++                    
++                    # Choose which message to keep
++                    if msgs_with_response:
++                        # Keep the first message with a non-empty response body
++                        chosen_msg = msgs_with_response[0]
++                        print(f"Filtered duplicate requests for {method} {url}, kept message with non-empty response body")
++                    else:
++                        # Keep a random message
++                        chosen_msg = random.choice(msgs)
++                        print(f"Filtered duplicate requests for {method} {url}, kept random message")
++                    
++                    filtered_page.add_http_msg(chosen_msg)
++            
++            filtered_pages.append(filtered_page)
++        
++        return PageObservations(pages=filtered_pages)
++
+     async def to_json(self):
+         return [await page.to_json() for page in self.pages]
+ 
+@@ -313,8 +380,8 @@ class PageObservations:
+         return cls(pages=[Page.from_json(page) for page in data])
+ 
+     def __str__(self):
++        filtered_obs = self._filter()
+         out = ""
+-        for i, page in enumerate(self.pages):
++        for i, page in enumerate(filtered_obs.pages):
+             out += f"PAGE: {i+1}.\n{str(page)}\n"
+         return out
+-        
+diff --git a/src/agent/discovery/proxy.py b/src/agent/discovery/proxy.py
+index 83b7a71..b1b8663 100644
+--- a/src/agent/discovery/proxy.py
++++ b/src/agent/discovery/proxy.py
+@@ -1,7 +1,10 @@
+ import asyncio
++import inspect
+ import contextlib
+ import logging
+ import threading
++import socket
++import time
+ from typing import Optional, Dict, Any
+ from common.constants import BROWSER_PROXY_HOST, BROWSER_PROXY_PORT
+ 
+@@ -32,11 +35,21 @@ agent_log.propagate = False
+ def _detach_mitm_logging_handlers() -> None:
+     """Detach mitmproxy logging handlers to prevent event loop errors during shutdown."""
+     root = logging.getLogger()
+-    for h in list(root.handlers):
+-        if isinstance(h, mitm_log.MitmLogHandler):
+-            root.removeHandler(h)
++    mitm_handler_cls = getattr(mitm_log, "MitmLogHandler", None)
++    for handler in list(root.handlers):
++        try:
++            is_mitm = False
++            if mitm_handler_cls is not None and isinstance(handler, mitm_handler_cls):
++                is_mitm = True
++            elif handler.__class__.__name__ == "MitmLogHandler":
++                is_mitm = True
++            if is_mitm:
++                root.removeHandler(handler)
++                with contextlib.suppress(Exception):
++                    handler.close()
++        except Exception:
+             with contextlib.suppress(Exception):
+-                h.close()
++                handler.close()
+ 
+ 
+ class MitmProxyHTTPHandler:
+@@ -79,6 +92,7 @@ class MitmProxyHTTPHandler:
+         self._master: Optional[DumpMaster] = None
+         self._task: Optional[asyncio.Task] = None
+         self._browser_task: Optional[asyncio.Task] = None
++        self._thread: Optional[threading.Thread] = None
+         self._connected = False
+         self._alive = False
+ 
+@@ -111,6 +125,15 @@ class MitmProxyHTTPHandler:
+         if self._start_browser:
+             await self._start_browser_instance()
+ 
++        # Wait briefly for port to be released from any previous run
++        released = await self._wait_for_port_release(self._listen_host, self._listen_port, timeout=3.0)
++        if not released:
++            agent_log.warning(
++                "Port %s:%d still in use after grace period; attempting start anyway",
++                self._listen_host,
++                self._listen_port,
++            )
++
+         options = Options(
+             listen_host=self._listen_host,
+             listen_port=self._listen_port,
+@@ -123,7 +146,7 @@ class MitmProxyHTTPHandler:
+ 
+         self._alive = True
+ 
+-        async def _run_mitm():
++        def _run_mitm_blocking() -> None:
+             try:
+                 agent_log.info(
+                     "Starting mitmproxy on %s:%d (http2=%s ssl_insecure=%s)",
+@@ -132,16 +155,24 @@ class MitmProxyHTTPHandler:
+                     self._http2,
+                     self._ssl_insecure,
+                 )
+-                await self._master.run()
++                if self._master is not None:
++                    result = self._master.run()
++                    if inspect.iscoroutine(result):
++                        asyncio.run(result)
+             except Exception:
+                 agent_log.exception("mitmproxy master crashed")
+-                raise
+             finally:
+                 agent_log.info("mitmproxy master exited")
+                 self._alive = False
+                 _detach_mitm_logging_handlers()
+ 
+-        self._task = asyncio.create_task(_run_mitm(), name=f"mitm-{self._listen_port}")
++        self._thread = threading.Thread(
++            target=_run_mitm_blocking,
++            name=f"mitm-thread-{self._listen_port}",
++            daemon=True,
++        )
++        self._thread.start()
++
+         self._connected = True
+ 
+     async def disconnect(self) -> None:
+@@ -152,25 +183,50 @@ class MitmProxyHTTPHandler:
+                 # orderly shutdown of mitmproxy
+                 self._master.shutdown()
+             
+-            if self._task and not self._task.done():
+-                try:
+-                    await asyncio.wait_for(self._task, timeout=5.0)
+-                except asyncio.TimeoutError:
+-                    agent_log.warning("mitm task did not stop within timeout")
++            if self._thread is not None:
++                self._thread.join(timeout=8.0)
++                if self._thread.is_alive():
++                    agent_log.warning("mitm proxy thread did not stop within timeout")
+             
+             # Stop browser if we started it
+             if self._browser_task and not self._browser_task.done():
+                 self._browser_task.cancel()
+                 with contextlib.suppress(asyncio.CancelledError):
+                     await self._browser_task
++            # small pause to ensure sockets fully released
++            await asyncio.sleep(0.05)
++
+         finally:
+             _detach_mitm_logging_handlers()
+             self._master = None
+             self._task = None
++            self._thread = None
+             self._browser_task = None
+             self._connected = False
+             agent_log.info("Handler '%s' disconnected", self._handler_name)
+ 
++    async def _wait_for_port_release(self, host: str, port: int, *, timeout: float = 3.0, interval: float = 0.1) -> bool:
++        """Poll until a TCP bind to (host, port) succeeds or timeout elapses."""
++        deadline = time.monotonic() + timeout
++        while time.monotonic() < deadline:
++            if self._can_bind(host, port):
++                return True
++            await asyncio.sleep(interval)
++        return self._can_bind(host, port)
++
++    @staticmethod
++    def _can_bind(host: str, port: int) -> bool:
++        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
++        try:
++            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
++            s.bind((host, port))
++            return True
++        except OSError:
++            return False
++        finally:
++            with contextlib.suppress(Exception):
++                s.close()
++
+     async def flush(self):
+         # If mitm died, either return what you have or raise a controlled error.
+         if not self._alive:
+@@ -265,7 +321,7 @@ class MitmProxyHTTPHandler:
+             # loop is closing/closed
+             agent_log.debug("Dropped handler coroutine: %s", e)
+             return
+-        def _log_err(_fut: "asyncio.Future[Any]") -> None:
++        def _log_err(_fut) -> None:
+             exc = _fut.exception()
+             if exc:
+                 agent_log.exception("Handler coroutine failed: %s", exc)
+diff --git a/start_single_task_agent.py b/start_single_task_agent.py
+new file mode 100644
+index 0000000..509a2d0
+--- /dev/null
++++ b/start_single_task_agent.py
+@@ -0,0 +1,184 @@
++import asyncio
++from pathlib import Path
++from urllib.parse import urlparse
++import json
++
++from playwright.async_api import async_playwright
++from browser_use.browser import BrowserSession, BrowserProfile
++from browser_use.controller.service import Controller
++
++from src.llm_models import LLMHub
++from src.agent.discovery.agent import DiscoveryAgent
++from src.agent.discovery.prompts.sys_prompt import CUSTOM_SYSTEM_PROMPT
++from common.http_handler import HTTPHandler
++from src.agent.discovery.proxy import MitmProxyHTTPHandler
++# from cnc.workers.agent.proxy_handler2 import MitmProxyHTTPHandler
++# from src.agent.discovery.proxy import MitmProxyHTTPHandler
++
++from src.agent.discovery.min_agent_single_page import MinimalAgentSinglePage
++from eval.client import PagedDiscoveryEvalClient
++
++from eval.datasets.discovery.juiceshop import JUICE_SHOP_ALL as JUICE_SHOP_ALL_DISCOVERY
++from eval.datasets.discovery.juiceshop_exploit import JUICE_SHOP_VULNERABILITIES as JUICE_SHOP_VULNERABILITIES_EXPLOIT
++
++from logger import setup_agent_logger, get_agent_loggers
++
++def normalize_urls(urls):
++    norm_urls = []
++    for url in urls:
++        norm_urls.append(urlparse(url).path)
++        norm_urls.append(urlparse(url).fragment)
++    return norm_urls
++
++MODEL_CONFIG = {
++    "browser_use": "gpt-4.1",
++    "update_plan": "o3-mini",
++    "create_plan": "o3-mini",
++    "check_plan_completion": "gpt-4.1",
++}
++PROFILE_DIR = Path(
++    r"C:\Users\jpeng\AppData\Local\Google\Chrome\User Data\Profile 2"
++)
++PORT = 9899
++PROXY_HOST = "127.0.0.1"
++PROXY_PORT = 8081
++
++TEST_PATHS = [
++    "/login"
++]
++START_URLS = ["http://147.79.78.153:3000/#/login"]
++JUICE_SHOP_BASE_URL = "http://147.79.78.153:3000"
++JUICE_SHOP_ALL = {**JUICE_SHOP_ALL_DISCOVERY, **JUICE_SHOP_VULNERABILITIES_EXPLOIT}
++JUICE_SHOP_SUBSET = {p: JUICE_SHOP_ALL.get(p, []) for p in TEST_PATHS if p}
++
++# Single task for SimpleAgent
++TASK = """
++Visit the login page at http://147.79.78.153:3000/#/login and attempt to log in with test credentials:
++
++email: bjoern.kimminich@gmail.com
++password: 'bW9jLmxpYW1nQGhjaW5pbW1pay5ucmVvamI='
++
++Then exit
++"""
++
++# Single URL for SimpleAgent
++TEST_URL = "http://147.79.78.153:3000/#/login"
++
++def setup_agent_dir(agent_name: str):
++    agent_dir = Path(f".{agent_name}")
++    agent_dir.mkdir(exist_ok=True)
++
++    log_dir = agent_dir / "logs"
++    log_dir.mkdir(exist_ok=True)
++    return agent_dir, log_dir
++
++async def init_proxy_handler():
++    """Initialize and connect the proxy handler."""
++    http_handler = HTTPHandler(
++        scopes=[
++            "http://147.79.78.153:3000/rest/",
++            "http://147.79.78.153:3000/api/",
++        ]
++    )
++    proxy_handler = MitmProxyHTTPHandler(
++        handler=http_handler,
++        listen_host=PROXY_HOST,
++        listen_port=PROXY_PORT,
++        ssl_insecure=True,
++        http2=True,
++    )
++    await proxy_handler.connect()
++    return proxy_handler
++
++async def main():
++    """Initialize SimpleAgent using the new BrowserSession-based API."""
++    from src.agent.discovery.pages import PageObservations
++    
++    agent_dir, log_dir = setup_agent_dir("min_agent")
++    setup_agent_logger(log_dir=str(log_dir))
++
++    agent_log, _ = get_agent_loggers()
++    agent_log.info("Starting SimpleAgent")
++
++    # Initialize proxy handler
++    proxy_handler = await init_proxy_handler()
++
++    try:
++        # Launch external Playwright Chromium with proxy + CDP enabled
++        pw = await async_playwright().start()
++        browser = await pw.chromium.launch_persistent_context(
++            user_data_dir=str(PROFILE_DIR),
++            headless=False,
++            executable_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe",
++            args=[f"--remote-debugging-port={PORT}", "--remote-debugging-address=127.0.0.1"],
++            proxy={"server": f"http://{PROXY_HOST}:{PROXY_PORT}"},
++        )
++        browser_session = BrowserSession(
++            browser_profile=BrowserProfile(
++                keep_alive=True,
++            ),
++            is_local=False,
++            cdp_url=f"http://127.0.0.1:{PORT}/",
++        )
++        await browser_session.start()
++        
++        # Navigate to the test URL
++        page = await browser.new_page()
++        await page.goto(TEST_URL)
++
++        try:
++            challenge_client = PagedDiscoveryEvalClient(
++                challenges=JUICE_SHOP_SUBSET,
++                base_url=JUICE_SHOP_BASE_URL,
++            )
++            # LLM and Controller
++            llm = LLMHub(MODEL_CONFIG)
++            controller = Controller(exclude_actions=["extract_structured_data"])
++
++            # SimpleAgent for single-shot execution
++            agent = MinimalAgentSinglePage(
++                start_urls=START_URLS,
++                llm=llm,
++                agent_sys_prompt=CUSTOM_SYSTEM_PROMPT,
++                browser_session=browser_session,
++                controller=controller,
++                agent_dir=agent_dir,
++                max_steps=10,
++                cdp_handler=proxy_handler,
++                challenge_client=challenge_client,
++                init_task=TASK,
++            )
++            await agent.run()
++
++            # Print parsed HTTP messages
++            print("\n=== HTTP Messages Summary ===")
++            for i, page in enumerate(agent.pages.pages):
++                print(f"\nPage {i+1}: {page.url}")
++                for j, msg in enumerate(page.http_msgs):
++                    method = msg.method
++                    url = msg.url
++                    has_body = False
++                    
++                    if hasattr(msg.request, "post_data") and msg.request.post_data:
++                        has_body = True
++                    
++                    body_status = "has body" if has_body else "no body"
++                    print(f"  {j+1}. {method} {url} - {body_status}")
++
++            agent_log.info("SimpleAgent execution completed")
++
++        except Exception as e:
++            import traceback
++            traceback.print_exc()
++        finally:
++            try:
++                await browser_session.stop()
++            finally:
++                await browser.close()
++                await pw.stop()
++
++    finally:
++        await proxy_handler.disconnect()
++
++if __name__ == "__main__":
++    asyncio.run(main())
+diff --git a/test_start_single.sh b/test_start_single.sh
+new file mode 100644
+index 0000000..5a39c51
+--- /dev/null
++++ b/test_start_single.sh
+@@ -0,0 +1,37 @@
++#!/bin/bash
++
++# Bash script to run start_single_task_agent.py 10 times
++# Usage: ./run_agent_10_times.sh
++
++# Set the output directory
++OUTPUT_DIR="agent_outputs"
++mkdir -p "$OUTPUT_DIR"
++
++# Get current timestamp for unique run identifier
++TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
++
++echo "Starting 10 runs of start_single_task_agent.py..."
++echo "Output files will be saved to: $OUTPUT_DIR"
++
++# Run the script 10 times
++for i in {1..10}; do
++    echo "Running iteration $i/10..."
++    
++    # Create unique output filename
++    OUTPUT_FILE="$OUTPUT_DIR/agent_run_${TIMESTAMP}_${i}.json"
++    
++    # Run the Python script with the output file path
++    python start_single_task_agent.py "$OUTPUT_FILE"
++    
++    if [ $? -eq 0 ]; then
++        echo "  ✅ Iteration $i completed successfully"
++    else
++        echo "  ❌ Iteration $i failed"
++    fi
++    
++    # Add a small delay between runs
++    sleep 2
++done
++
++echo "All 10 runs completed!"
++echo "Results saved in: $OUTPUT_DIR"
+
+======================================================================
+COMMIT ccd23845d87bf52e738e1124d62a60422a23c50d
+DATE   2025-09-23T17:06:35-04:00
+SUBJ   added request deduplication in HTTPHandler.flush() and moved response bytes parsing into HTTPMessages
+----------------------------------------------------------------------
+diff --git a/README.md b/README.md
+index e50a69b..e646d04 100644
+--- a/README.md
++++ b/README.md
+@@ -18,7 +18,15 @@ Human
+ - Need to introduce pages
+ 
+ 2025/09/23
+-- turn on "MSG NOT IN SCOPE" log line
++- Http Proxy
++> parse non-JSON responses
++>> script
++>> html
++>> binary
++- test_http_proxy:
++- New Detection Module
++> 3 diff modes for page/req/global scoped action scheduling
++- Start integration 
+ 
+ CC:
+ - [6] deploy to prod -> use test_discovery_agent, modify and test as successful script
+diff --git a/cnc/README.md b/cnc/README.md
+deleted file mode 100644
+index 7fc1961..0000000
+--- a/cnc/README.md
++++ /dev/null
+@@ -1,119 +0,0 @@
+-# Pentest Hub
+-
+-A hub-and-spoke FastAPI service for pentest traffic collection and analysis.
+-
+-## Overview
+-
+-This application:
+-1. Receives traffic crawled by independent browser agents
+-2. Stores it in a SQLite database
+-3. Fans out that traffic to enrichment workers
+-4. Fans in the enriched stream to attack workers (starting with AuthzAttacker)
+-
+-The system is 100% async, with in-memory queues and SQLite persistence behind a repository pattern.
+-
+-## Architecture
+-
+-### Components
+-
+-- **API Layer**: FastAPI routers handle HTTP requests, validate inputs, and manage dependencies.
+-- **Service Layer**: Contains the business logic, orchestrates database operations, and manages async queues.
+-- **Database Layer**: Models, CRUD operations, and session management using SQLModel/SQLAlchemy.
+-- **Helpers**: Utilities for queue management, UUID generation, etc.
+-- **Workers**: Async tasks that subscribe to queues, process data, and republish to other queues.
+-
+-### Workflow
+-
+-1. Browser agents register with an application
+-2. Agents push HTTP messages (requests/responses) to the API
+-3. Messages are stored in the database and published to the `raw_http_msgs` queue
+-4. The enrichment worker reads from the queue, analyzes messages, and publishes enriched data
+-5. Attack workers (like AuthzAttacker) read enriched data and detect potential vulnerabilities
+-
+-## Setup
+-
+-### Installation
+-
+-```bash
+-# Clone the repository
+-git clone <repository-url>
+-cd pentest-hub
+-
+-# Install dependencies
+-pip install -r requirements.txt
+-```
+-
+-### Running the Application
+-
+-Start the API server:
+-
+-```bash
+-python main.py
+-```
+-
+-Start the workers:
+-
+-```bash
+-python workers_launcher.py
+-```
+-
+-## Usage
+-
+-### Creating an Application
+-
+-```bash
+-curl -X POST "http://localhost:8000/application/" \
+-     -H "Content-Type: application/json" \
+-     -d '{"name": "My Web App", "description": "Web application for testing"}'
+-```
+-
+-### Registering an Agent
+-
+-```bash
+-curl -X POST "http://localhost:8000/application/{app_id}/agents/register" \
+-     -H "Content-Type: application/json" \
+-     -d '{"user_name": "test_agent", "role": "admin"}'
+-```
+-
+-### Pushing HTTP Messages
+-
+-```bash
+-curl -X POST "http://localhost:8000/application/{app_id}/agents/push" \
+-     -H "Content-Type: application/json" \
+-     -H "X-Username: test_agent" \
+-     -H "X-Role: admin" \
+-     -d '{"messages": [{
+-         "request": {
+-             "method": "GET",
+-             "url": "https://example.com/api/users/123",
+-             "headers": {"User-Agent": "Mozilla/5.0"},
+-             "is_iframe": false
+-         },
+-         "response": {
+-             "url": "https://example.com/api/users/123",
+-             "status": 200,
+-             "headers": {"Content-Type": "application/json"},
+-             "is_iframe": false
+-         }
+-     }]}'
+-```
+-
+-## Testing
+-
+-Run tests with pytest:
+-
+-```bash
+-pytest
+-```
+-
+-## Development
+-
+-The project follows a clean architecture with separation of concerns:
+-
+-- `routers/`: API endpoints
+-- `services/`: Business logic
+-- `database/`: Data persistence
+-- `schemas/`: Data validation
+-- `workers/`: Async processing
+-- `helpers/`: Utilities
+-- `tests/`: Test suite
+\ No newline at end of file
+diff --git a/cnc/migrations/README b/cnc/migrations/README
+deleted file mode 100644
+index 98e4f9c..0000000
+--- a/cnc/migrations/README
++++ /dev/null
+@@ -1 +0,0 @@
+-Generic single-database configuration.
+\ No newline at end of file
+diff --git a/cnc/tests/proxy_intercept_server/index.html b/cnc/tests/proxy_intercept_server/index.html
+new file mode 100644
+index 0000000..6f63ecb
+--- /dev/null
++++ b/cnc/tests/proxy_intercept_server/index.html
+@@ -0,0 +1,73 @@
++<!doctype html>
++<html>
++
++<head>
++    <meta charset="utf-8">
++    <meta name="viewport" content="width=device-width, initial-scale=1">
++    <title>XHR 304 Test</title>
++    <style>
++        body {
++            font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
++            margin: 2rem;
++        }
++
++        pre {
++            background: #f4f4f4;
++            padding: 1rem;
++            border-radius: 6px;
++        }
++
++        .status {
++            font-weight: bold;
++        }
++    </style>
++</head>
++
++<body>
++    <h1>XHR to /api/data expecting 304 with JSON</h1>
++    <button id="btn">Send XHR</button>
++    <p>Status: <span class="status" id="status">idle</span></p>
++    <h2>Response Text</h2>
++    <pre id="resp"></pre>
++    <h2>Headers</h2>
++    <pre id="headers"></pre>
++    <script>
++        const btn = document.getElementById("btn");
++        const statusEl = document.getElementById("status");
++        const respEl = document.getElementById("resp");
++        const headersEl = document.getElementById("headers");
++
++        function dumpHeaders(xhr) {
++            const raw = xhr.getAllResponseHeaders();
++            headersEl.textContent = raw || "<no headers>";
++        }
++
++        function sendXHR() {
++            statusEl.textContent = "requesting...";
++            respEl.textContent = "";
++            headersEl.textContent = "";
++
++            const xhr = new XMLHttpRequest();
++            xhr.open("GET", "/api/data", true);
++            xhr.onreadystatechange = function () {
++                if (xhr.readyState === 4) {
++                    statusEl.textContent = `${xhr.status} ${xhr.statusText}`;
++                    dumpHeaders(xhr);
++                    // Browsers often ignore bodies on 304. Fallback to X-JSON header if empty.
++                    const text = xhr.responseText && xhr.responseText.trim().length > 0
++                        ? xhr.responseText
++                        : (xhr.getResponseHeader("X-JSON") || "<empty>");
++                    respEl.textContent = text;
++                }
++            };
++            xhr.send();
++        }
++
++        btn.addEventListener("click", sendXHR);
++
++        // Automatically send XHR when page loads
++        window.addEventListener("load", sendXHR);
++    </script>
++</body>
++
++</html>
+\ No newline at end of file
+diff --git a/cnc/tests/proxy_intercept_server/server.py b/cnc/tests/proxy_intercept_server/server.py
+new file mode 100644
+index 0000000..74fda1f
+--- /dev/null
++++ b/cnc/tests/proxy_intercept_server/server.py
+@@ -0,0 +1,44 @@
++from pathlib import Path
++import json
++
++from fastapi import FastAPI
++from fastapi.responses import FileResponse, Response
++from fastapi.staticfiles import StaticFiles
++
++
++BASE_DIR = Path(__file__).resolve().parent
++
++app = FastAPI(title="Proxy Intercept Test Server")
++
++# Serve the current folder as static, in case you add assets later.
++app.mount("/static", StaticFiles(directory=str(BASE_DIR)), name="static")
++
++
++@app.get("/")
++def get_index() -> FileResponse:
++    return FileResponse(str(BASE_DIR / "index.html"))
++
++
++@app.get("/api/data")
++def get_api_data() -> Response:
++    # Intentionally return 304 with a JSON body to exercise proxy/interceptor behavior.
++    # Some clients may ignore bodies on 304 by spec, so also mirror JSON in X-JSON header.
++    payload = {"message": "Hello from 304", "ok": True}
++    body = json.dumps(payload)
++    body_bytes = body.encode("utf-8")
++    return Response(content=body_bytes, status_code=200)
++
++if __name__ == "__main__":
++    # Run with: python server.py [port]
++    import uvicorn
++    import sys
++
++    port = 8005
++    if len(sys.argv) > 1:
++        try:
++            port = int(sys.argv[1])
++        except ValueError:
++            print(f"Invalid port number: {sys.argv[1]}")
++            sys.exit(1)
++
++    uvicorn.run("server:app", host="127.0.0.1", port=port, reload=False)
+diff --git a/cnc/tests/test_http_proxy.py b/cnc/tests/test_http_proxy.py
+new file mode 100644
+index 0000000..ff67327
+--- /dev/null
++++ b/cnc/tests/test_http_proxy.py
+@@ -0,0 +1,135 @@
++import pytest_asyncio
++import asyncio
++import subprocess
++import sys
++import contextlib
++import time
++from pathlib import Path
++from urllib.request import urlopen
++import pytest
++import os
++
++from playwright.async_api import async_playwright
++
++from common.http_handler import HTTPHandler
++from src.agent.discovery.proxy import MitmProxyHTTPHandler
++from logger import get_agent_loggers
++
++
++SERVER_HOST = "localhost"
++SERVER_PORT = 8005
++SERVER_BASE = f"http://{SERVER_HOST}:{SERVER_PORT}"
++TARGET_URL = SERVER_BASE
++
++PROXY_HOST = "127.0.0.1"
++PROXY_PORT = 8081
++
++def _wait_for_server(url: str, timeout: float = 10.0) -> None:
++    deadline = time.monotonic() + timeout
++    last_err = None
++    while time.monotonic() < deadline:
++        try:
++            with urlopen(url, timeout=1.0) as resp:
++                if resp.status == 200:
++                    return
++        except Exception as e:
++            last_err = e
++            time.sleep(0.2)
++    raise AssertionError(f"Server not reachable at {url}: {last_err}")
++
++
++def setup_agent_dir(agent_name: str):
++    agent_dir = Path(f".{agent_name}")
++    agent_dir.mkdir(exist_ok=True)
++
++    log_dir = agent_dir / "logs"
++    log_dir.mkdir(exist_ok=True)
++    return agent_dir, log_dir
++
++
++@pytest.fixture(scope="module")
++def server_process():
++    """Start the local FastAPI test server as a subprocess and stop it after tests."""
++    server_path = Path(__file__).resolve().parent / "proxy_intercept_server" / "server.py"
++    assert server_path.exists(), f"Missing server.py at {server_path}"
++    # Ensure server binds to the same host/port the test expects
++    env = {**os.environ, "HOST": SERVER_HOST, "PORT": str(SERVER_PORT)}
++    proc = subprocess.Popen([sys.executable, str(server_path)], cwd=str(server_path.parent), env=env)
++    try:
++        _wait_for_server(f"{SERVER_BASE}/")
++        yield proc
++    finally:
++        with contextlib.suppress(Exception):
++            proc.terminate()
++        try:
++            proc.wait(timeout=5)
++        except Exception:
++            with contextlib.suppress(Exception):
++                proc.kill()
++
++
++@pytest_asyncio.fixture
++async def proxy_handler():
++    """Initialize and connect the proxy handler for local server scope."""
++    http_handler = HTTPHandler(
++        scopes=[
++            f"{SERVER_BASE}/",
++        ]
++    )
++    proxy_handler = MitmProxyHTTPHandler(
++        handler=http_handler,
++        listen_host=PROXY_HOST,
++        listen_port=PROXY_PORT,
++        ssl_insecure=True,
++        http2=True,
++    )
++    await proxy_handler.connect()
++    try:
++        yield proxy_handler
++    finally:
++        await proxy_handler.disconnect()
++
++@pytest_asyncio.fixture
++async def browser_context(proxy_handler):
++    """Launch a simple Chromium context configured to use the proxy."""
++    pw = await async_playwright().start()
++    browser = await pw.chromium.launch(headless=True, proxy={"server": f"http://{PROXY_HOST}:{PROXY_PORT}"})
++    context = await browser.new_context()
++    try:
++        yield context
++    finally:
++        await context.close()
++        await browser.close()
++        await pw.stop()
++
++@pytest.mark.asyncio
++async def test_http_proxy_local_server(server_process, proxy_handler, browser_context):
++    """Start local server, drive a browser through proxy, capture 304 JSON message."""
++    agent_log, _ = get_agent_loggers()
++    agent_log.info("Starting local server proxy test")
++
++    # Navigate and trigger XHR
++    page = await browser_context.new_page()
++    await page.goto(f"{TARGET_URL}")
++    # await page.click("#btn")
++
++    # Allow the XHR to complete and be relayed to the handler
++    await asyncio.sleep(0.5)
++    msgs = await proxy_handler.flush()
++
++    # Find the /api/data message and inspect body or X-JSON header
++    target = None
++    for m in msgs:
++        print(m.request.url)
++        print(m.response.get_body())
++        if m.request.url.startswith(f"{SERVER_BASE}/api/data"):
++            target = m
++            break
++
++    assert target is not None, "/api/data request should be captured"
++    assert target.response is not None, "Captured message should include a response"
++
++    body = json.dumps(target.response.get_body())
++    assert "Hello from 304" in body, "Expected 'Hello from 304' in body or X-JSON header"
++
++    agent_log.info("Local server proxy test completed successfully")
+diff --git a/cnc/workers/agent/proxy_handler2.py b/cnc/workers/agent/proxy_handler2.py
+deleted file mode 100644
+index 45c3fbc..0000000
+--- a/cnc/workers/agent/proxy_handler2.py
++++ /dev/null
+@@ -1,268 +0,0 @@
+-import threading
+-import time
+-import logging
+-import asyncio
+-from typing import Optional, Dict, Any
+-
+-try:
+-    # Programmatic mitmproxy API
+-    from mitmproxy.options import Options
+-    from mitmproxy.tools.dump import DumpMaster
+-    from mitmproxy import http
+-except ImportError as e:
+-    raise ImportError(
+-        "mitmproxy is required for ProxyHandler. Install with: pip install mitmproxy"
+-    ) from e
+-
+-from logger import get_agent_loggers
+-from common.http_handler import HTTPHandler
+-from common.constants import BROWSER_PROXY_HOST, BROWSER_PROXY_PORT
+-from httplib import (
+-    HTTPRequest, 
+-    HTTPResponse, 
+-    HTTPRequestData, 
+-    HTTPResponseData, 
+-    post_data_to_dict
+-)
+-
+-agent_log, _ = get_agent_loggers()
+-
+-class MitmProxyHTTPHandler:
+-    """
+-    Wraps an HTTPHandler and runs a local MITM HTTP(S) proxy that captures traffic
+-    and feeds it into the handler as HTTPMessage objects.
+-
+-    Notes:
+-    - You must trust mitmproxy's CA on the client making requests to intercept HTTPS.
+-      Default CA path: ~/.mitmproxy
+-    - Proxy URL will be http://{listen_host}:{listen_port}
+-    """
+-
+-    def __init__(
+-        self,
+-        handler: HTTPHandler,
+-        *,
+-        listen_host: str = BROWSER_PROXY_HOST,
+-        listen_port: int = BROWSER_PROXY_PORT,
+-        ssl_insecure: bool = True,
+-        http2: bool = True,
+-        mode: Optional[str] = None,
+-    ) -> None:
+-        """
+-        Args:
+-            handler: Your HTTPHandler instance (from the code you shared).
+-            listen_host: Address to bind the proxy on.
+-            listen_port: Port to bind the proxy on.
+-            ssl_insecure: If True, do not verify upstream TLS certs.
+-            http2: Enable HTTP/2 interception.
+-            mode: mitmproxy "mode" string if you want upstream mode (e.g., "upstream:http://proxy:port").
+-        """
+-        self._handler = handler
+-        self._listen_host = listen_host
+-        self._listen_port = listen_port
+-        self._ssl_insecure = ssl_insecure
+-        self._http2 = http2
+-        self._mode = mode
+-
+-        self._master: Optional[DumpMaster] = None
+-        self._thread: Optional[threading.Thread] = None
+-        self._lock = threading.Lock()
+-        self._running = False
+-
+-    # ─────────────────────────────────────────────────────────────────────
+-    # Public API
+-    # ─────────────────────────────────────────────────────────────────────
+-    def connect(self) -> None:
+-        """
+-        Start the proxy in a background thread. No-op if already started.
+-        """
+-        if self._running:
+-            agent_log.info("Proxy already running at %s", self.proxy_url)
+-            return
+-
+-        opts = Options(
+-            listen_host=self._listen_host,
+-            listen_port=self._listen_port,
+-            http2=self._http2,
+-            ssl_insecure=self._ssl_insecure,
+-        )
+-        if self._mode:
+-            # Example: "regular" (default), "transparent", or "upstream:http://upstream:3128"
+-            opts.mode = [self._mode]
+-
+-        self._master = DumpMaster(opts, with_termlog=False, with_dumper=False)
+-        self._master.addons.add(_MitmAddon(self))
+-
+-        self._thread = threading.Thread(target=self._run_master, name="mitmproxy-thread", daemon=True)
+-        self._thread.start()
+-        self._running = True
+-        agent_log.info("Proxy listening on %s", self.proxy_url)
+-
+-    def stop(self) -> None:
+-        """
+-        Stop the proxy and join the background thread.
+-        """
+-        if not self._running:
+-            return
+-        try:
+-            if self._master:
+-                self._master.shutdown()
+-            if self._thread and self._thread.is_alive():
+-                self._thread.join(timeout=5.0)
+-        finally:
+-            self._running = False
+-            self._master = None
+-            self._thread = None
+-            agent_log.info("Proxy stopped")
+-
+-    @property
+-    def proxy_url(self) -> str:
+-        return f"http://{self._listen_host}:{self._listen_port}"
+-
+-    async def flush(self):
+-        """
+-        Delegate to your HTTPHandler.flush(). Use this after browser/app requests
+-        should have finished to collect the captured step messages.
+-        """
+-        return await self._handler.flush()
+-
+-    def get_history(self):
+-        """
+-        Delegate to your HTTPHandler.get_history().
+-        """
+-        return self._handler.get_history()
+-
+-    # ─────────────────────────────────────────────────────────────────────
+-    # Internal: mitmproxy master lifecycle
+-    # ─────────────────────────────────────────────────────────────────────
+-    def _run_master(self) -> None:
+-        assert self._master is not None
+-        try:
+-            # mitmproxy's DumpMaster.run() is async; run it in this thread's event loop
+-            asyncio.run(self._master.run())
+-        except Exception as e:
+-            agent_log.exception("mitmproxy master crashed: %s", e)
+-        finally:
+-            self._running = False
+-
+-    # ─────────────────────────────────────────────────────────────────────
+-    # Internal: conversions and ingestion
+-    # ─────────────────────────────────────────────────────────────────────
+-    async def _ingest_request(self, flow: "http.HTTPFlow") -> None:
+-        """
+-        Convert mitmproxy request to your HTTPRequest and push into handler's queue.
+-        """
+-        try:
+-            url = flow.request.url
+-            
+-            if getattr(self._handler, "_is_banned")(url):  # uses your handler's method
+-                agent_log.debug("Proxy dropped banned URL: %s", url)
+-                return
+-
+-            req = self._flow_to_http_request(flow)
+-            await self._handler.handle_request(req)
+-        except Exception as e:
+-            agent_log.exception("Proxy request ingestion failed: %s", e)
+-
+-    async def _ingest_response(self, flow: "http.HTTPFlow") -> None:
+-        """
+-        Convert mitmproxy response to your HTTPResponse and finalize an HTTPMessage.
+-        """
+-        try:
+-            if not flow.response:
+-                return
+-
+-            req = self._flow_to_http_request(flow)
+-            resp = self._flow_to_http_response(flow)
+-
+-            await self._handler.handle_response(resp, req)
+-        except Exception as e:
+-            agent_log.exception("Proxy response ingestion failed: %s", e)
+-
+-    # ─────────────────────────────────────────────────────────────────────
+-    # Internal: mitm→model converters
+-    # ─────────────────────────────────────────────────────────────────────
+-    def _flow_to_http_request(self, flow: "http.HTTPFlow") -> HTTPRequest:
+-        """
+-        Map mitmproxy flow.request to your HTTPRequest.
+-        """
+-        headers: Dict[str, str] = {k.lower(): v for k, v in flow.request.headers.items()}
+-        post_dict: Optional[Dict[str, Any]] = None
+-
+-        ctype = headers.get("content-type", "")
+-        try:
+-            # Try urlencoded first
+-            if "application/x-www-form-urlencoded" in ctype and flow.request.urlencoded_form:
+-                post_dict = {k: v for k, v in flow.request.urlencoded_form.items(multi=False)}
+-            # Fallback to JSON
+-            elif "application/json" in ctype:
+-                try:
+-                    post_dict = flow.request.json()
+-                except Exception:
+-                    txt = flow.request.get_text(strict=False)
+-                    if txt and txt.strip().startswith("{") and txt.strip().endswith("}"):
+-                        import json  # local import to avoid module load if unused
+-                        post_dict = json.loads(txt)
+-            # Last resort: plain text
+-            else:
+-                txt = flow.request.get_text(strict=False)
+-                if txt:
+-                    # Reuse your existing helper to parse common cases
+-                    post_dict = post_data_to_dict(txt)
+-        except Exception:
+-            post_dict = None  # do not fail ingestion on parsing errors
+-
+-        data = HTTPRequestData(
+-            method=flow.request.method,
+-            url=flow.request.url,
+-            headers=headers,
+-            post_data=post_dict,
+-            redirected_from_url=None,
+-            redirected_to_url=None,
+-            is_iframe=False,
+-        )
+-        request = HTTPRequest(data=data)
+-        # agent_log.info(f"Request: [{request.method}] {request.url}\n{request.data}")
+-        return request
+-
+-    def _flow_to_http_response(self, flow: "http.HTTPFlow") -> HTTPResponse:
+-        """
+-        Map mitmproxy flow.response to your HTTPResponse.
+-        """
+-        if not flow.response:
+-            headers: Dict[str, str] = {}
+-            body_bytes: Optional[bytes] = None
+-            status_code: int = 0
+-        else:
+-            headers = {k.lower(): v for k, v in flow.response.headers.items()}
+-            body_bytes = None
+-            try:
+-                body_bytes = flow.response.raw_content if flow.response.raw_content is not None else None
+-            except Exception:
+-                body_bytes = None
+-            status_code = getattr(flow.response, "status_code", 0)
+-
+-        data = HTTPResponseData(
+-            url=flow.request.url,
+-            status=status_code,
+-            headers=headers,
+-            is_iframe=False,
+-            body=body_bytes,
+-            body_error=None,
+-        )
+-        return HTTPResponse(data=data)
+-
+-
+-class _MitmAddon:
+-    """
+-    mitmproxy addon that forwards events into ProxyHandler.
+-    """
+-
+-    def __init__(self, proxy_handler: MitmProxyHTTPHandler) -> None:
+-        self._proxy = proxy_handler
+-
+-    async def request(self, flow: "http.HTTPFlow") -> None:
+-        await self._proxy._ingest_request(flow)
+-
+-    async def response(self, flow: "http.HTTPFlow") -> None:
+-        await self._proxy._ingest_response(flow)
+\ No newline at end of file
+diff --git a/common/http_handler.py b/common/http_handler.py
+index 8ffc025..17dd840 100644
+--- a/common/http_handler.py
++++ b/common/http_handler.py
+@@ -284,7 +284,7 @@ class HTTPHandler:
+             if parsed_url.path.startswith(parsed_scope.path):
+                 return True
+         
+-        # agent_log.info(f"MSG NOT IN SCOPE: {url}")
++        agent_log.info(f"MSG NOT IN SCOPE: {url}")
+         return False
+ 
+     async def _validate_msg(self, msg: HTTPMessage) -> bool:
+@@ -300,6 +300,40 @@ class HTTPHandler:
+     # ─────────────────────────────────────────────────────────────────────
+     # Flush logic with hard timeout
+     # ─────────────────────────────────────────────────────────────────────
++    def _remove_duplicates(self, messages: List["HTTPMessage"]) -> List["HTTPMessage"]:
++        """
++        Remove duplicates based on (method, url) keeping messages with non-empty response body.
++        If no message has a non-empty response body for a given (method, url), keep any one.
++        """
++        from collections import defaultdict
++        
++        # Group messages by (method, url)
++        groups = defaultdict(list)
++        for msg in messages:
++            key = (msg.request.method, msg.request.url)
++            groups[key].append(msg)
++        
++        result = []
++        for group in groups.values():
++            if len(group) == 1:
++                result.append(group[0])
++                continue
++            
++            # Find messages with non-empty response body
++            with_body = [
++                msg for msg in group 
++                if msg.response and hasattr(msg.response.data, "body") and msg.response.data.body
++            ]
++            
++            if with_body:
++                # Use the first one with a non-empty body
++                result.append(with_body[0])
++            else:
++                # No message has a non-empty body, just take the first one
++                result.append(group[0])
++        
++        return result
++
+     async def flush(
+         self,
+         *,
+@@ -320,9 +354,6 @@ class HTTPHandler:
+         last_seen_response_idx = len(self._step_messages)
+         last_response_time     = start_time
+ 
+-        print("len of step messages: ", len(self._step_messages))
+-        print("len of request queue: ", len(self._request_queue))
+-
+         while True:
+             await asyncio.sleep(POLL_INTERVAL)
+             now = loop.time()
+@@ -345,7 +376,7 @@ class HTTPHandler:
+                 else:
+                     agent_log.debug("[REQUEST STAY] %s stay: %.2f s", req.url, now - started_at)
+ 
+-            # 2️⃣  Quiet-period tracking
++            # 2️⃣  A new request has come in extend the timing window
+             if len(self._step_messages) != last_seen_response_idx:
+                 last_seen_response_idx = len(self._step_messages)
+                 last_response_time     = now
+@@ -367,11 +398,19 @@ class HTTPHandler:
+         self._request_queue = []
+         self._step_messages = []
+ 
++        print("len of step messages: ", len(session_msgs))
++        print("len of request queue: ", len(unmatched))
++
+         # keep unmatched only if in scope (no response => cannot pass full filter)
+         unmatched_in_scope = [m for m in unmatched if self._is_in_scope(m.request.url)]
+         # keep session messages that fully pass scope + filter
+         session_valid = [m for m in session_msgs if await self._validate_msg(m)]
+ 
++        print("len of session_valid: ", len(session_valid))
++
++        # Remove duplicates from session_valid
++        session_valid = self._remove_duplicates(session_valid)
++
+         self._messages.extend(unmatched_in_scope)
+         self._messages.extend(session_valid)
+ 
+diff --git a/httplib.py b/httplib.py
+index fd08b77..4c55d8d 100644
+--- a/httplib.py
++++ b/httplib.py
+@@ -1,7 +1,8 @@
+ import base64
++import json
+ import xml.etree.ElementTree as ET
+ from dataclasses import dataclass
+-from typing import List, Optional, Dict, Any
++from typing import List, Optional, Dict, Any, Union
+ from pydantic import BaseModel, Field, model_validator
+ from playwright.sync_api import Request, Response
+ 
+@@ -11,6 +12,156 @@ DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text"]
+ DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
+ MAX_PAYLOAD_SIZE = 4000
+ 
++def decompress(body: bytes, headers: Dict[str, str]) -> bytes:
++    """Decompress body according to Content-Encoding in headers.
++
++    Supports gzip, deflate, br (brotli), zstd, bz2, lzma/xz.
++    Unknown or unavailable encodings are ignored gracefully.
++    """
++    if not body:
++        return body
++    if not headers:
++        return body
++
++    content_encoding = headers.get("content-encoding", "").lower()
++    if not content_encoding:
++        return body
++
++    encodings = [e.strip() for e in content_encoding.split(",") if e.strip()]
++    # Decoders should be applied in reverse order of encodings applied by server
++    data = body
++    for enc in reversed(encodings):
++        try:
++            if enc in ("gzip", "x-gzip"):
++                import gzip
++                data = gzip.decompress(data)
++            elif enc == "deflate":
++                import zlib
++                try:
++                    data = zlib.decompress(data)
++                except Exception:
++                    # Try raw DEFLATE stream
++                    data = zlib.decompress(data, -zlib.MAX_WBITS)
++            elif enc == "br":
++                try:
++                    import brotli  # type: ignore
++                    data = brotli.decompress(data)
++                except Exception:
++                    try:
++                        import brotlicffi  # type: ignore
++                        data = brotlicffi.decompress(data)
++                    except Exception:
++                        # brotli not available; leave as-is
++                        pass
++            elif enc in ("zstd", "zstandard"):
++                try:
++                    import zstandard as zstd  # type: ignore
++                    dctx = zstd.ZstdDecompressor()
++                    data = dctx.decompress(data)
++                except Exception:
++                    # zstd not available; leave as-is
++                    pass
++            elif enc in ("bzip2", "bz2"):
++                import bz2
++                data = bz2.decompress(data)
++            elif enc in ("xz", "lzma"):
++                import lzma
++                data = lzma.decompress(data)
++            elif enc == "identity":
++                # No-op
++                data = data
++            else:
++                # Unknown encoding; stop trying further to avoid corruption
++                data = data
++        except Exception:
++            # If any decoder fails, keep current data unchanged and continue
++            data = data
++    return data
++
++
++def format_body(body_obj: Any, headers: Dict[str, str]) -> Union[str, Dict[str, Any], bytes]:
++    """Return body as JSON (dict) if possible, else string, else bytes.
++
++    The function will attempt to:
++    1) Parse JSON and return a dict when possible
++    2) Fallback to a plain UTF-8 string
++    3) Finally return raw bytes if it's binary
++    """
++    if body_obj is None:
++        return ""
++
++    def is_textual_content_type(hdrs: Dict[str, str]) -> bool:
++        if not hdrs:
++            return False
++        ct = hdrs.get("content-type", "").lower()
++        if not ct:
++            return False
++        textual_indicators = (
++            "text/",
++            "json",
++            "+json",
++            "xml",
++            "javascript",
++            "x-www-form-urlencoded",
++            "html",
++            "csv",
++        )
++        return any(ind in ct for ind in textual_indicators)
++
++    # Already a dict-like payload
++    if isinstance(body_obj, dict):
++        return body_obj
++
++    # Bytes path
++    if isinstance(body_obj, (bytes, bytearray)):
++        raw_bytes = bytes(body_obj)
++        try:
++            raw_bytes = decompress(raw_bytes, headers)
++        except Exception:
++            pass
++
++        # Try JSON first
++        try:
++            text = raw_bytes.decode("utf-8", errors="replace")
++            parsed = json.loads(text)
++            if isinstance(parsed, dict):
++                return parsed
++        except Exception:
++            pass
++
++        # Fallback to string if textual
++        if is_textual_content_type(headers):
++            try:
++                return raw_bytes.decode("utf-8", errors="replace")
++            except Exception:
++                return raw_bytes
++
++        # Otherwise return binary
++        return raw_bytes
++
++    # String path
++    if isinstance(body_obj, str):
++        s = body_obj
++        # Try JSON first when it looks like JSON
++        stripped = s.strip()
++        if (stripped.startswith("{") and stripped.endswith("}")) or (
++            stripped.startswith("[") and stripped.endswith("]")
++        ):
++            try:
++                parsed = json.loads(s)
++                if isinstance(parsed, dict):
++                    return parsed
++            except Exception:
++                pass
++        return s
++
++    # Fallback for other types
++    try:
++        return str(body_obj)
++    except Exception:
++        return ""
++
++
+ def post_data_to_dict(post_data: str | None):
+     """Convert post data to dictionary format.
+     
+@@ -36,7 +187,6 @@ def post_data_to_dict(post_data: str | None):
+         # Try to parse as JSON
+         elif post_data.strip().startswith("{") and post_data.strip().endswith("}"):
+             try:
+-                import json
+                 result = json.loads(post_data)
+             except json.JSONDecodeError:
+                 # Not valid JSON, return as is
+@@ -92,7 +242,17 @@ class HTTPRequest(BaseModel):
+         return self.data.headers
+ 
+     @property
+-    def post_data(self) -> Optional[str]:
++    def post_data(self) -> Optional[Dict]:
++        return self.data.post_data
++
++    def get_body(self) -> Union[str, Dict[str, Any], bytes]:
++        """Return request body as dict/string/bytes.
++
++        For requests we typically store structured dicts built from the
++        Playwright post_data, so return that when available; otherwise empty string.
++        """
++        if self.data.post_data is None:
++            return ""
+         return self.data.post_data
+ 
+     @property
+@@ -190,6 +350,10 @@ class HTTPResponseData(BaseModel):
+     is_iframe: bool
+     body: Optional[bytes] = None
+     body_error: Optional[str] = None
++    content_type: Optional[str] = None
++
++    def get_body(self) -> Union[str, Dict[str, Any], bytes]:
++        return format_body(self.body, self.headers)
+ 
+ class HTTPResponse(BaseModel):
+     """HTTP response class with unified implementation"""
+@@ -211,12 +375,12 @@ class HTTPResponse(BaseModel):
+     def is_iframe(self) -> bool:
+         return self.data.is_iframe
+ 
+-    async def get_body(self) -> bytes:
++    def get_body(self) -> Union[str, Dict[str, Any], bytes]:
+         if self.data.body_error:
+             raise Exception(self.data.body_error)
+         if self.data.body is None:
+             raise Exception("Response body not available")
+-        return self.data.body
++        return self.data.get_body()
+ 
+     def get_content_type(self) -> str:
+         """Get content type from response headers"""
+@@ -287,8 +451,8 @@ class HTTPResponse(BaseModel):
+             return resp_str
+             
+         try:
+-            resp_bytes = await self.get_body()
+-            resp_str += str(resp_bytes)
++            body_value = self.get_body()
++            resp_str += str(body_value)
+         except Exception as e:
+             resp_str += f"[Error getting response body: {str(e)}]"
+             
+@@ -449,22 +613,26 @@ def parse_burp_xml(filepath: str) -> List[HTTPMessage]:
+     
+     for item in root.findall(".//item"):
+         # Extract basic information
+-        url = item.find("url").text
+-        method = item.find("method").text
++        url_elem = item.find("url")
++        method_elem = item.find("method")
+         status_elem = item.find("status")
+-        status = int(status_elem.text) if status_elem is not None else 0
++        url = url_elem.text if url_elem is not None and url_elem.text is not None else ""
++        method = method_elem.text if method_elem is not None and method_elem.text is not None else ""
++        status = int(status_elem.text) if status_elem is not None and status_elem.text is not None else 0
+         
+         # Parse request
+         request_elem = item.find("request")
+-        is_request_base64 = request_elem.get("base64") == "true"
+-        request = parse_burp_request(request_elem.text, is_request_base64, url, method)
++        is_request_base64 = (request_elem.get("base64") == "true") if request_elem is not None else False
++        request_text = request_elem.text if request_elem is not None and request_elem.text is not None else ""
++        request = parse_burp_request(request_text, is_request_base64, url, method)
+         
+         # Parse response
+         response = None
+         response_elem = item.find("response")
+         if response_elem is not None and response_elem.text:
+-            is_response_base64 = response_elem.get("base64") == "true"
+-            response = parse_burp_response(response_elem.text, is_response_base64, url, status)
++            is_response_base64 = (response_elem.get("base64") == "true") if response_elem is not None else False
++            response_text = response_elem.text if response_elem.text is not None else ""
++            response = parse_burp_response(response_text, is_response_base64, url, status)
+         
+         # Create HTTP message
+         message = HTTPMessage(request=request, response=response)
+diff --git a/scripts/test_proxy.py b/scripts/test_proxy.py
+new file mode 100644
+index 0000000..2e093d9
+--- /dev/null
++++ b/scripts/test_proxy.py
+@@ -0,0 +1,151 @@
++import asyncio
++import subprocess
++import sys
++import contextlib
++import time
++from pathlib import Path
++from urllib.request import urlopen
++import os
++import json
++
++from playwright.async_api import async_playwright
++
++from common.http_handler import HTTPHandler
++from src.agent.discovery.proxy import MitmProxyHTTPHandler
++from logger import get_agent_loggers
++
++PROFILE_DIR = Path(
++    r"C:\Users\jpeng\AppData\Local\Google\Chrome\User Data\Profile 2"
++)
++SERVER_HOST = "localhost"
++SERVER_PORT = 8005
++SERVER_BASE = f"http://{SERVER_HOST}:{SERVER_PORT}"
++TARGET_URL = "http://147.79.78.153:3000/#/login"
++
++PROXY_HOST = "127.0.0.1"
++PROXY_PORT = 8081
++
++
++def _wait_for_server(url: str, timeout: float = 10.0) -> None:
++    deadline = time.monotonic() + timeout
++    last_err = None
++    while time.monotonic() < deadline:
++        try:
++            with urlopen(url, timeout=1.0) as resp:
++                if resp.status == 200:
++                    return
++        except Exception as e:
++            last_err = e
++            time.sleep(0.2)
++    raise AssertionError(f"Server not reachable at {url}: {last_err}")
++
++
++def setup_agent_dir(agent_name: str):
++    agent_dir = Path(f".{agent_name}")
++    agent_dir.mkdir(exist_ok=True)
++
++    log_dir = agent_dir / "logs"
++    log_dir.mkdir(exist_ok=True)
++    return agent_dir, log_dir
++
++
++def start_server():
++    """Start the local FastAPI test server as a subprocess."""
++    server_path = Path(__file__).resolve().parent / "proxy_intercept_server" / "server.py"
++    assert server_path.exists(), f"Missing server.py at {server_path}"
++    # Ensure server binds to the same host/port the test expects
++    env = {**os.environ, "HOST": SERVER_HOST, "PORT": str(SERVER_PORT)}
++    proc = subprocess.Popen([sys.executable, str(server_path)], cwd=str(server_path.parent), env=env)
++    _wait_for_server(f"{SERVER_BASE}/")
++    return proc
++
++
++def stop_server(proc):
++    """Stop the server process."""
++    with contextlib.suppress(Exception):
++        proc.terminate()
++    try:
++        proc.wait(timeout=5)
++    except Exception:
++        with contextlib.suppress(Exception):
++            proc.kill()
++
++
++async def create_proxy_handler():
++    """Initialize and connect the proxy handler for local server scope."""
++    http_handler = HTTPHandler(
++        scopes=[
++            "http://147.79.78.153:3000/rest/",
++            "http://147.79.78.153:3000/api/",
++        ]
++    )
++    proxy_handler = MitmProxyHTTPHandler(
++        handler=http_handler,
++        listen_host=PROXY_HOST,
++        listen_port=PROXY_PORT,
++        ssl_insecure=True,
++        http2=True,
++    )
++    await proxy_handler.connect()
++    return proxy_handler
++
++
++async def create_browser_context(proxy_handler):
++    """Launch a simple Chromium context configured to use the proxy."""
++    pw = await async_playwright().start()
++    browser = await pw.chromium.launch_persistent_context(
++        user_data_dir=str(PROFILE_DIR),
++        # user_data_dir=None,
++        headless=False,
++        executable_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe",
++        proxy={"server": f"http://{PROXY_HOST}:{PROXY_PORT}"},
++    )
++    return browser
++
++
++async def test_http_proxy_local_server():
++    """Start local server, drive a browser through proxy, capture 304 JSON message."""
++    agent_log, _ = get_agent_loggers()
++    agent_log.info("Starting local server proxy test")
++    
++    try:
++        # Create proxy handler
++        proxy_handler = await create_proxy_handler()
++        
++        try:
++            # Create browser context
++            browser = await create_browser_context(proxy_handler)
++            
++            try:
++                # Navigate and trigger XHR
++                page = await browser.new_page()
++                await page.goto(f"{TARGET_URL}")
++                # await page.click("#btn")
++
++                # Allow the XHR to complete and be relayed to the handler
++                await asyncio.sleep(2)
++                msgs = await proxy_handler.flush()
++
++                # Find the /api/data message and inspect body or X-JSON header
++                target = None
++                for m in msgs:
++                    print(m.request.url)
++                    print(m.response.get_body())
++
++            finally:
++                await browser.close()
++                
++        finally:
++            await proxy_handler.disconnect()
++            
++    finally:
++        pass
++
++
++async def main():
++    """Main entry point for the script."""
++    await test_http_proxy_local_server()
++
++
++if __name__ == "__main__":
++    asyncio.run(main())
+diff --git a/src/agent/discovery/min_agent_single_page.py b/src/agent/discovery/min_agent_single_page.py
+index 81f92da..c5a89ef 100644
+--- a/src/agent/discovery/min_agent_single_page.py
++++ b/src/agent/discovery/min_agent_single_page.py
+@@ -113,6 +113,7 @@ class MinimalAgentSinglePage(DiscoveryAgent):
+                 for msg in msgs:
+                     self.pages.curr_page().add_http_msg(msg)
+                     print(f"[{msg.method}] {msg.url}")
++                    print(msg.response.get_body())
+                 try:
+                     if self.challenge_client:
+                         await self.challenge_client.update_status(
+diff --git a/src/agent/discovery/pages.py b/src/agent/discovery/pages.py
+index 1e9a1e8..5d501d6 100644
+--- a/src/agent/discovery/pages.py
++++ b/src/agent/discovery/pages.py
+@@ -231,7 +231,11 @@ class Page:
+             seen_req: Set[str] = set()
+             req_bodies_out = ""
+             for m in msgs:
+-                req_body_str = self._format_body(getattr(m.request, "post_data", None))
++                try:
++                    req_body_obj = m.request.get_body()
++                except Exception:
++                    req_body_obj = None
++                req_body_str = self._format_body(req_body_obj)
+                 if not req_body_str:
+                     continue
+                 if req_body_str in seen_req:
+@@ -247,7 +251,10 @@ class Page:
+             for m in msgs:
+                 if not m.response:
+                     continue
+-                body_obj = getattr(m.response.data, "body", None)
++                try:
++                    body_obj = m.response.get_body()
++                except Exception:
++                    body_obj = None
+                 body_str = self._format_body(body_obj)
+                 if not body_str:
+                     continue
+@@ -313,65 +320,6 @@ class PageObservations:
+                 result.append(msg)
+         return result
+ 
+-    def _filter(self) -> "PageObservations":
+-        """Return a filtered copy of PageObservations with duplicate requests removed.
+-        For duplicates, keeps the one with non-empty response body if available, else random."""
+-        import random
+-        import copy
+-        
+-        filtered_pages = []
+-        
+-        for page in self.pages:
+-            # Create a new page with filtered http_msgs
+-            filtered_page = Page(url=page.url, page_id=page.page_id)
+-            
+-            # Track which messages to keep for each (method, url) combination
+-            unique_msgs = {}
+-            
+-            for msg in page.http_msgs:
+-                key = (msg.method, msg.url)
+-                
+-                if key not in unique_msgs:
+-                    unique_msgs[key] = [msg]
+-                else:
+-                    unique_msgs[key].append(msg)
+-            
+-            # For each group, select the best message to keep
+-            for key, msgs in unique_msgs.items():
+-                if len(msgs) == 1:
+-                    # No duplicates, keep the single message
+-                    filtered_page.add_http_msg(msgs[0])
+-                else:
+-                    method, url = key
+-                    
+-                    # Find messages with non-empty response bodies
+-                    msgs_with_response = []
+-                    for msg in msgs:
+-                        if (msg.response and 
+-                            hasattr(msg.response, "data") and 
+-                            msg.response.data and 
+-                            hasattr(msg.response.data, "body") and 
+-                            msg.response.data.body):
+-                            body_str = page._format_body(msg.response.data.body)
+-                            if body_str.strip():
+-                                msgs_with_response.append(msg)
+-                    
+-                    # Choose which message to keep
+-                    if msgs_with_response:
+-                        # Keep the first message with a non-empty response body
+-                        chosen_msg = msgs_with_response[0]
+-                        print(f"Filtered duplicate requests for {method} {url}, kept message with non-empty response body")
+-                    else:
+-                        # Keep a random message
+-                        chosen_msg = random.choice(msgs)
+-                        print(f"Filtered duplicate requests for {method} {url}, kept random message")
+-                    
+-                    filtered_page.add_http_msg(chosen_msg)
+-            
+-            filtered_pages.append(filtered_page)
+-        
+-        return PageObservations(pages=filtered_pages)
+-
+     async def to_json(self):
+         return [await page.to_json() for page in self.pages]
+ 
+@@ -380,8 +328,7 @@ class PageObservations:
+         return cls(pages=[Page.from_json(page) for page in data])
+ 
+     def __str__(self):
+-        filtered_obs = self._filter()
+         out = ""
+-        for i, page in enumerate(filtered_obs.pages):
++        for i, page in enumerate(self.pages):
+             out += f"PAGE: {i+1}.\n{str(page)}\n"
+         return out
+diff --git a/src/agent/discovery/proxy.py b/src/agent/discovery/proxy.py
+index b1b8663..f848a96 100644
+--- a/src/agent/discovery/proxy.py
++++ b/src/agent/discovery/proxy.py
+@@ -247,7 +247,6 @@ class MitmProxyHTTPHandler:
+     # ─────────────────────────────────────────────────────────────────────
+     # Browser management
+     # ─────────────────────────────────────────────────────────────────────
+-
+     async def _start_browser_instance(self) -> None:
+         """Start a browser instance configured to use this proxy."""
+         try:
+@@ -308,7 +307,6 @@ class MitmProxyHTTPHandler:
+     # ─────────────────────────────────────────────────────────────────────
+     # Addon → handler bridging
+     # ─────────────────────────────────────────────────────────────────────
+-
+     def _schedule_coro(self, coro) -> None:
+         loop = self._loop
+         if loop is None:
+@@ -327,64 +325,72 @@ class MitmProxyHTTPHandler:
+                 agent_log.exception("Handler coroutine failed: %s", exc)
+         fut.add_done_callback(_log_err)
+ 
+-    def _flow_to_http_request(self, flow: http.HTTPFlow) -> HTTPRequest:
+-        req = flow.request
+-        url = req.pretty_url
+-        method = req.method
+-        headers = dict(req.headers)
+-
++    def _flow_to_http_request(self, flow: "http.HTTPFlow") -> HTTPRequest:
++        """
++        Map mitmproxy flow.request to your HTTPRequest.
++        """
++        headers: Dict[str, str] = {k.lower(): v for k, v in flow.request.headers.items()}
+         post_dict: Optional[Dict[str, Any]] = None
+-        if method in {"POST", "PUT", "PATCH", "DELETE"} and req.content:
+-            ctype = headers.get("content-type", "")
+-            try:
+-                if "application/json" in ctype:
+-                    import json
+-                    post_dict = json.loads(req.get_text(strict=False) or "")
+-                else:
+-                    post_dict = post_data_to_dict(req.get_text(strict=False) or "")
+-            except Exception:
+-                post_dict = post_data_to_dict(req.get_text(strict=False) or "")
++
++        ctype = headers.get("content-type", "")
++        try:
++            # Try urlencoded first
++            if "application/x-www-form-urlencoded" in ctype and flow.request.urlencoded_form:
++                post_dict = {k: v for k, v in flow.request.urlencoded_form.items(multi=False)}
++            # Fallback to JSON
++            elif "application/json" in ctype:
++                try:
++                    post_dict = flow.request.json()
++                except Exception:
++                    txt = flow.request.get_text(strict=False)
++                    if txt and txt.strip().startswith("{") and txt.strip().endswith("}"):
++                        import json  # local import to avoid module load if unused
++                        post_dict = json.loads(txt)
++            # Last resort: plain text
++            else:
++                txt = flow.request.get_text(strict=False)
++                if txt:
++                    # Reuse your existing helper to parse common cases
++                    post_dict = post_data_to_dict(txt)
++        except Exception:
++            post_dict = None  # do not fail ingestion on parsing errors
+ 
+         data = HTTPRequestData(
+-            method=method,
+-            url=url,
+-            headers={k.lower(): v for k, v in headers.items()},
++            method=flow.request.method,
++            url=flow.request.url,
++            headers=headers,
+             post_data=post_dict,
+             redirected_from_url=None,
+             redirected_to_url=None,
+             is_iframe=False,
+         )
+-        return HTTPRequest(data=data)
+-
+-    def _flow_to_http_response(self, flow: http.HTTPFlow) -> HTTPResponse:
+-        resp = flow.response
+-        req = flow.request
+-
+-        status = resp.status_code if resp else 0
+-        headers = dict(resp.headers) if resp else {}
+-        ctype = headers.get("content-type", "")
+-
+-        processed_body = None
+-        if resp:
+-            processed_body = resp.get_text(strict=False)
+-        body_error = None
+-        
+-        # Convert string body to bytes if needed
+-        body_bytes = None
+-        if processed_body:
+-            body_bytes = processed_body.encode("utf-8")
++        request = HTTPRequest(data=data)
++        # agent_log.info(f"Request: {request}")
+         
++        return request
++
++    def _flow_to_http_response(self, flow: "http.HTTPFlow") -> HTTPResponse:
++        """
++        Map mitmproxy flow.response to your HTTPResponse.
++        """
++        headers: Dict[str, str] = {k.lower(): v for k, v in flow.response.headers.items()}
++        body_bytes: Optional[bytes] = None
++        try:
++            body_bytes = flow.response.raw_content if flow.response.raw_content is not None else None
++        except Exception:
++            body_bytes = None
++
+         data = HTTPResponseData(
+-            url=req.pretty_url,
+-            status=status,
+-            headers={k.lower(): v for k, v in headers.items()},
++            url=flow.request.url,
++            status=flow.response.status_code,
++            headers=headers,
+             is_iframe=False,
+             body=body_bytes,
+-            body_error=body_error,
++            body_error=None,
+         )
++        agent_log.info(f"Response: {data}")
+         return HTTPResponse(data=data)
+ 
+-
+ class _RelayAddon:
+     """
+     mitmproxy addon that relays request/response events into MitmProxyHTTPHandler.
+diff --git a/start_single_task_agent.py b/start_single_task_agent.py
+index 509a2d0..9c1fd6d 100644
+--- a/start_single_task_agent.py
++++ b/start_single_task_agent.py
+@@ -108,6 +108,7 @@ async def main():
+         pw = await async_playwright().start()
+         browser = await pw.chromium.launch_persistent_context(
+             user_data_dir=str(PROFILE_DIR),
++            # user_data_dir=None,
+             headless=False,
+             executable_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe",
+             args=[f"--remote-debugging-port={PORT}", "--remote-debugging-address=127.0.0.1"],
+@@ -150,22 +151,17 @@ async def main():
+             )
+             await agent.run()
+ 
+-            # Print parsed HTTP messages
+-            print("\n=== HTTP Messages Summary ===")
+-            for i, page in enumerate(agent.pages.pages):
+-                print(f"\nPage {i+1}: {page.url}")
+-                for j, msg in enumerate(page.http_msgs):
+-                    method = msg.method
+-                    url = msg.url
+-                    has_body = False
+-                    
+-                    if hasattr(msg.request, "post_data") and msg.request.post_data:
+-                        has_body = True
+-                    
+-                    body_status = "has body" if has_body else "no body"
+-                    print(f"  {j+1}. {method} {url} - {body_status}")
+-
+-            agent_log.info("SimpleAgent execution completed")
++            # # Print parsed HTTP messages
++            # print("\n=== HTTP Messages Summary ===")
++            # for i, page in enumerate(agent.pages.pages):
++            #     # print(f"\nPage {i+1}: {page.url}")
++            #     for j, msg in enumerate(page.http_msgs):
++            #         method = msg.method
++            #         url = msg.url
++            #         print(method, url)
++            #         print(msg.response.get_body())
++
++            # agent_log.info("SimpleAgent execution completed")
+ 
+         except Exception as e:
+             import traceback
+
+======================================================================
+COMMIT e36b4921f25ba4debda86ca7229ce5b54dcd9c55
+DATE   2025-09-23T22:18:37-04:00
+SUBJ   added DetectionScheduler object to handle triggering/creating/scheduling exploit agent tasks
+----------------------------------------------------------------------
+diff --git a/.cursor/rules/fastapi.mdc b/.cursor/rules/fastapi.mdc
+index 337c178..de504f0 100644
+--- a/.cursor/rules/fastapi.mdc
++++ b/.cursor/rules/fastapi.mdc
+@@ -13,7 +13,7 @@ ROUTER_STRUCTURE
+ > put in router when dealing with HTTP transport logic (ie. rate-limits, HTTP status/responses)
+ > logic that pertains to the specific route is implemented in this body
+ > has access to the agent queue pools
+->> Schemas
++> Schemas
+     > @location: routers/schemas
+     > auxillary dependency of routers
+     > FastAPI res/req shapes
+diff --git a/README.md b/README.md
+index e646d04..1ae9668 100644
+--- a/README.md
++++ b/README.md
+@@ -18,15 +18,18 @@ Human
+ - Need to introduce pages
+ 
+ 2025/09/23
++- Test
++- New Detection Module
++> 3 diff modes for page/req/global scoped action scheduling
+ - Http Proxy
+ > parse non-JSON responses
+ >> script
+ >> html
+ >> binary
+ - test_http_proxy:
+-- New Detection Module
+-> 3 diff modes for page/req/global scoped action scheduling
+-- Start integration 
++> future: put
++- Deployment
++> Current setup with start proxy/browser combo is not ideal 
+ 
+ CC:
+ - [6] deploy to prod -> use test_discovery_agent, modify and test as successful script
+diff --git a/cnc/database/crud.py b/cnc/database/crud.py
+index c777087..1e7ef4c 100644
+--- a/cnc/database/crud.py
++++ b/cnc/database/crud.py
+@@ -125,34 +125,45 @@ async def get_engagement_by_agent_id(
+     return None
+ 
+ async def list_agents_for_engagement(
+-    db: AsyncSession, engagement_id: UUID
++    db: AsyncSession, engagement_id: UUID, agent_type: Optional[str] = None
+ ) -> List[Union[ExploitAgentModel, DiscoveryAgentModel]]:
+     """Enumerate all agents attached to an engagement id.
+ 
+     Returns list of AgentBase SQLModel ORM objects.
++    
++    Args:
++        db: Database session
++        engagement_id: ID of the engagement
++        agent_type: Optional filter for agent type ("exploit" or "discovery")
+     """
+-    # Exploit agents via subquery to avoid join typing issues
+-    exploit_ids_subq = (
+-        select(PentestEngagementExploitAgent.exploit_agent_id)
+-        .where(PentestEngagementExploitAgent.pentest_engagement_id == engagement_id)
+-    )
+-    exploit_result = await db.execute(
+-        select(ExploitAgentModel).where(
+-            cast(Any, ExploitAgentModel.id).in_(exploit_ids_subq)  # type: ignore
++    agents = []
++    
++    # Get exploit agents if requested or no filter specified
++    if agent_type is None or agent_type == "exploit":
++        exploit_ids_subq = (
++            select(PentestEngagementExploitAgent.exploit_agent_id)
++            .where(PentestEngagementExploitAgent.pentest_engagement_id == engagement_id)
+         )
+-    )
+-    exploit_agents = exploit_result.scalars().all()
+-
+-    # Discovery agents via subquery
+-    discovery_ids_subq = (
+-        select(PentestEngagementDiscoveryAgent.discovery_agent_id)
+-        .where(PentestEngagementDiscoveryAgent.pentest_engagement_id == engagement_id)
+-    )
+-    discovery_result = await db.execute(
+-        select(DiscoveryAgentModel).where(
+-            cast(Any, DiscoveryAgentModel.id).in_(discovery_ids_subq)  # type: ignore
++        exploit_result = await db.execute(
++            select(ExploitAgentModel).where(
++                cast(Any, ExploitAgentModel.id).in_(exploit_ids_subq)  # type: ignore
++            )
+         )
+-    )
+-    discovery_agents = discovery_result.scalars().all()
++        exploit_agents = exploit_result.scalars().all()
++        agents.extend(exploit_agents)
++
++    # Get discovery agents if requested or no filter specified
++    if agent_type is None or agent_type == "discovery":
++        discovery_ids_subq = (
++            select(PentestEngagementDiscoveryAgent.discovery_agent_id)
++            .where(PentestEngagementDiscoveryAgent.pentest_engagement_id == engagement_id)
++        )
++        discovery_result = await db.execute(
++            select(DiscoveryAgentModel).where(
++                cast(Any, DiscoveryAgentModel.id).in_(discovery_ids_subq)  # type: ignore
++            )
++        )
++        discovery_agents = discovery_result.scalars().all()
++        agents.extend(discovery_agents)
+     
+-    return list(exploit_agents) + list(discovery_agents)
+\ No newline at end of file
++    return agents
+\ No newline at end of file
+diff --git a/cnc/diff.txt b/cnc/diff.txt
+deleted file mode 100644
+index 4b2e3a0..0000000
+--- a/cnc/diff.txt
++++ /dev/null
+@@ -1,575 +0,0 @@
+-diff --git a/.gitignore b/.gitignore
+-index 59011fa..bbef074 100644
+---- a/.gitignore
+-+++ b/.gitignore
+-@@ -206,5 +206,4 @@ scrapers/h1/high_reports
+- .min_agent/
+- .simp_agent/
+- 
+--# 
+- browser_profile/
+-\ No newline at end of file
+-diff --git a/cnc/database/agent/crud.py b/cnc/database/agent/crud.py
+-index 54e9e74..be8661f 100644
+---- a/cnc/database/agent/crud.py
+-+++ b/cnc/database/agent/crud.py
+-@@ -17,6 +17,7 @@ from cnc.schemas.agent import (
+-     AgentStatus
+- )
+- from cnc.database.crud import get_engagement
+-+from common.constants import MANUAL_APPROVAL_EXPLOIT_AGENT
+- 
+- async def register_discovery_agent(db: AsyncSession, engagement_id: UUID, payload: DiscoveryAgentCreate) -> DiscoveryAgentModel:
+-     """Create a new DiscoveryAgent under an engagement."""
+-@@ -51,13 +52,16 @@ async def register_exploit_agent(db: AsyncSession, engagement_id: UUID, payload:
+-     if not engagement:
+-         raise ValueError(f"Engagement with ID {engagement_id} not found")
+- 
+-+    # Default status depends on manual approval mode
+-+    default_status = AgentStatus.PENDING_APPROVAL if MANUAL_APPROVAL_EXPLOIT_AGENT else AgentStatus.PENDING_AUTO
+-+
+-     agent = ExploitAgentModel(
+-         vulnerability_title=payload.vulnerability_title,
+-         max_steps=payload.max_steps,
+-         model_name=payload.model_name,
+-         model_costs=payload.model_costs or 0.0,
+-         log_filepath=payload.log_filepath or "",
+--        agent_status=AgentStatus.RUNNING,
+-+        agent_status=default_status,
+-         agent_type=payload.agent_type.value if payload.agent_type else "exploit",
+-     )
+-     db.add(agent)
+-@@ -73,6 +77,44 @@ async def register_exploit_agent(db: AsyncSession, engagement_id: UUID, payload:
+-     await db.commit()
+-     return agent
+- 
+-+async def set_exploit_approval_payload(
+-+    db: AsyncSession, agent_id: str, payload: Dict[str, Any]
+-+) -> ExploitAgentModel:
+-+    agent = await get_agent_by_id(db, agent_id)
+-+    if not agent or not isinstance(agent, ExploitAgentModel):
+-+        raise ValueError(f"Exploit agent with ID {agent_id} not found")
+-+
+-+    agent.approval_payload_data = payload
+-+    db.add(agent)
+-+    await db.commit()
+-+    await db.refresh(agent)
+-+    return agent
+-+
+-+async def clear_exploit_approval_payload(
+-+    db: AsyncSession, agent_id: str
+-+) -> ExploitAgentModel:
+-+    agent = await get_agent_by_id(db, agent_id)
+-+    if not agent or not isinstance(agent, ExploitAgentModel):
+-+        raise ValueError(f"Exploit agent with ID {agent_id} not found")
+-+
+-+    agent.approval_payload_data = None
+-+    db.add(agent)
+-+    await db.commit()
+-+    await db.refresh(agent)
+-+    return agent
+-+
+-+async def update_agent_status(
+-+    db: AsyncSession, agent_id: str, status: AgentStatus
+-+) -> Union[DiscoveryAgentModel, ExploitAgentModel]:
+-+    agent = await get_agent_by_id(db, agent_id)
+-+    if not agent:
+-+        raise ValueError(f"Agent with ID {agent_id} not found")
+-+    agent.agent_status = status
+-+    db.add(agent)
+-+    await db.commit()
+-+    await db.refresh(agent)
+-+    return agent
+-+
+- async def get_agent_by_id(db: AsyncSession, agent_id: str) -> Optional[Union[DiscoveryAgentModel, ExploitAgentModel]]:
+-     # Try to find DiscoveryAgent first
+-     result = await db.execute(select(DiscoveryAgentModel).where(DiscoveryAgentModel.id == agent_id))
+-diff --git a/cnc/database/agent/models.py b/cnc/database/agent/models.py
+-index ae968fb..6d1d58a 100644
+---- a/cnc/database/agent/models.py
+-+++ b/cnc/database/agent/models.py
+-@@ -11,7 +11,7 @@ class AgentBase(SQLModel, table=False):
+-     # sqlite won't accept UUID4 for some reason
+-     # 2**61 half of UUID4 key space
+-     id: str = Field(primary_key=True, default_factory=lambda: str(uuid.uuid4()))
+--    agent_status: AgentStatus = Field(default=AgentStatus.PENDING, nullable=False)
+-+    agent_status: AgentStatus = Field(default=AgentStatus.PENDING_AUTO, nullable=False)
+-     max_steps: int = Field(nullable=False)
+-     model_name: str = Field(nullable=False)
+-     model_costs: float = Field(nullable=True)
+-@@ -28,9 +28,14 @@ class AgentBase(SQLModel, table=False):
+-         raise NotImplementedError("Subclasses must implement this method")
+-         
+- class ExploitAgentModel(AgentBase, table=True):
+--    __tablename__ = "exploitagent"
+-+    __tablename__ = "exploitagent"  # type: ignore[assignment]
+- 
+-     vulnerability_title: str = Field(nullable=False)
+-+    approval_payload_data: Optional[Dict[str, Any]] = Field(
+-+        default=None,
+-+        sa_column=Column(JSON),
+-+        description="Pending StartExploitRequest data for manual approval"
+-+    )
+-     agent_steps_data: Optional[List[Dict[str, Any]]] = Field(
+-         default=None, 
+-         sa_column=Column(JSON),
+-@@ -50,7 +55,7 @@ class ExploitAgentModel(AgentBase, table=True):
+-         ]
+- 
+- class DiscoveryAgentModel(AgentBase, table=True):
+--    __tablename__ = "discoveryagent"
+-+    __tablename__ = "discoveryagent"  # type: ignore[assignment]
+- 
+-     agent_steps_data: Optional[List[Dict[str, Any]]] = Field(
+-         default=None, 
+-diff --git a/cnc/migrations/versions/72404a86afc6_added_agent_approval_payload.py b/cnc/migrations/versions/72404a86afc6_added_agent_approval_payload.py
+-new file mode 100644
+-index 0000000..046a0fc
+---- /dev/null
+-+++ b/cnc/migrations/versions/72404a86afc6_added_agent_approval_payload.py
+-@@ -0,0 +1,33 @@
+-+"""added agent_approval_payload
+-+
+-+Revision ID: 72404a86afc6
+-+Revises: 9a3505b17b53
+-+Create Date: 2025-09-16 13:32:59.466062
+-+
+-+"""
+-+from typing import Sequence, Union
+-+
+-+from alembic import op
+-+import sqlalchemy as sa
+-+import sqlmodel
+-+
+-+
+-+# revision identifiers, used by Alembic.
+-+revision: str = '72404a86afc6'
+-+down_revision: Union[str, None] = '9a3505b17b53'
+-+branch_labels: Union[str, Sequence[str], None] = None
+-+depends_on: Union[str, Sequence[str], None] = None
+-+
+-+
+-+def upgrade() -> None:
+-+    """Upgrade schema."""
+-+    # ### commands auto generated by Alembic - please adjust! ###
+-+    op.add_column('exploitagent', sa.Column('approval_payload_data', sa.JSON(), nullable=True))
+-+    # ### end Alembic commands ###
+-+
+-+
+-+def downgrade() -> None:
+-+    """Downgrade schema."""
+-+    # ### commands auto generated by Alembic - please adjust! ###
+-+    op.drop_column('exploitagent', 'approval_payload_data')
+-+    # ### end Alembic commands ###
+-diff --git a/cnc/routers/agent.py b/cnc/routers/agent.py
+-index 92b9649..f27312b 100644
+---- a/cnc/routers/agent.py
+-+++ b/cnc/routers/agent.py
+-@@ -1,7 +1,7 @@
+- from fastapi import APIRouter, Depends, HTTPException
+- from sqlalchemy.ext.asyncio import AsyncSession
+- from uuid import UUID
+--from typing import List, Any, cast
+-+from typing import List, Any, cast, Literal
+- 
+- from cnc.services.queue import BroadcastChannel
+- from cnc.schemas.agent import (
+-@@ -11,6 +11,7 @@ from cnc.schemas.agent import (
+-     UploadAgentSteps,
+-     UploadPageData,
+-     AgentStatus,
+-+    AgentApproveData
+- )
+- from cnc.database.session import get_session
+- from cnc.database.crud import (
+-@@ -24,6 +25,9 @@ from cnc.database.agent.crud import (
+-     register_exploit_agent as register_exploit_agent_service,
+-     append_discovery_agent_steps as append_discovery_agent_steps_service,
+-     get_agent_steps as get_agent_steps_service,
+-+    set_exploit_approval_payload as set_exploit_approval_payload_service,
+-+    clear_exploit_approval_payload as clear_exploit_approval_payload_service,
+-+    update_agent_status as update_agent_status_service,
+- )
+- from cnc.database.agent.models import ExploitAgentStep
+- from cnc.pools.pool import StartDiscoveryRequest, StartExploitRequest
+-@@ -36,9 +40,11 @@ from common.constants import (
+-     MAX_DISCOVERY_PAGE_STEPS,
+-     MAX_EXPLOIT_AGENT_STEPS,
+-     SERVER_LOG_DIR,
+-+    MANUAL_APPROVAL_EXPLOIT_AGENT,
+- )
+- 
+--from src.agent.discovery.pages import PageObservations
+-+from src.agent.discovery.pages import PageObservations, Page
+-+from httplib import HTTPMessage
+- from src.agent.agent_client import AgentClient
+- from src.agent.detection.prompts import DetectAndSchedule
+- from src.llm_models import LLMHub
+-@@ -205,50 +211,83 @@ def make_agent_router(
+-             if trigger_detection:
+-                 # TODO:
+-                 log.info(f"Triggering detection for: {agent_id}")
+--                log.info(f"Page steps: {PageObservations.from_json(payload.page_data)}")
+-+                log.info("Page steps received; evaluating detection trigger")
+-                 engagement = await get_engagement_by_agent_id(db, agent_id)
+-                 if not engagement:
+-                     raise Exception("Engagement not found")
+-                     
+--                # Engagement-scoped serve r logger
+--
+-+                # Engagement-scoped server logger
+-                 # detect and schedule actions for the exploit agent
+-                 # Convert incoming list[dict] to Page objects for PageObservations
+--                pages_obj = PageObservations.from_json(payload.page_data)  # type: ignore[arg-type]
+--                actions: List[StartExploitRequest] = await DetectAndSchedule().ainvoke(
+--                    llm_hub.get("detection"),
+--                    prompt_args={
+--                        "pages": pages_obj,
+--                        "num_actions": NUM_SCHEDULED_ACTIONS
+--                    }
+--                )
+-+                pages_list = [Page.from_json(page) for page in cast(List[dict], payload.page_data)]
+-+                pages_obj = PageObservations(pages=pages_list)
+-+                try:
+-+                    actions: List[StartExploitRequest] = await DetectAndSchedule().ainvoke(
+-+                        llm_hub.get("detection"),
+-+                        prompt_args={
+-+                            "pages": pages_obj,
+-+                            "num_actions": NUM_SCHEDULED_ACTIONS
+-+                        }
+-+                    )
+-+                except Exception:
+-+                    # Fallback: synthesize a single action using the first page item
+-+                    first_item = None
+-+                    try:
+-+                        first_item = pages_obj.get_page_item("1.1")
+-+                    except Exception:
+-+                        first_item = None
+-+                    actions = [
+-+                        StartExploitRequest(
+-+                            page_item=first_item,
+-+                            vulnerability_description="",
+-+                            vulnerability_title="AutoTest-Generated",
+-+                            max_steps=MAX_EXPLOIT_AGENT_STEPS,
+-+                            client=None,
+-+                            agent_log=None,
+-+                            full_log=None,
+-+                        )
+-+                    ]
+-                 actions = actions[:1]
+-                 for action in actions:
+-                     log.info(f"Scheduling exploit agent for {action.vulnerability_title}")
+--                    # register and queue up exploit agent
+-+                    # register and conditionally queue exploit agent
+-                     create_exploit_config = ExploitAgentCreate(
+-                         vulnerability_title=action.vulnerability_title,
+-                         max_steps=MAX_EXPLOIT_AGENT_STEPS,
+-                         model_name="gpt-4o-mini"
+-                     )
+-                     exploit_agent = await register_exploit_agent_service(db, engagement.id, create_exploit_config)
+--                    # Create agent loggers for this engagement's exploit_agents
+-                     agent_logger, full_logger = log_factory.get_exploit_agent_loggers(str(engagement.id))
+- 
+--                    await exploit_agent_queue.publish(
+--                        StartExploitRequest(
+--                            page_item=action.page_item,
+--                            vulnerability_description=action.vulnerability_description,
+--                            vulnerability_title=action.vulnerability_title,
+--                            max_steps=MAX_EXPLOIT_AGENT_STEPS,
+--                            client=AgentClient(
+--                                agent_id=exploit_agent.id,
+--                                api_url=f"http://127.0.0.1:{API_SERVER_PORT}",
+--                            ),
+--                            agent_log=agent_logger,
+--                            full_log=full_logger,
+--                        )
+-+                    start_request = StartExploitRequest(
+-+                        page_item=action.page_item,
+-+                        vulnerability_description=action.vulnerability_description,
+-+                        vulnerability_title=action.vulnerability_title,
+-+                        max_steps=MAX_EXPLOIT_AGENT_STEPS,
+-+                        client=AgentClient(
+-+                            agent_id=exploit_agent.id,
+-+                            api_url=f"http://127.0.0.1:{API_SERVER_PORT}",
+-+                        ),
+-+                        agent_log=agent_logger,
+-+                        full_log=full_logger,
+-                     )
+-+                    if MANUAL_APPROVAL_EXPLOIT_AGENT:
+-+                        # store minimal JSON-safe payload for approval
+-+                        page_item = getattr(action, "page_item", None)
+-+                        if page_item is not None:
+-+                            page_item_json = page_item.model_dump(mode="json")  # type: ignore[attr-defined]
+-+                        else:
+-+                            page_item_json = {}
+-+                        approval_payload = {
+-+                            "page_item": page_item_json,
+-+                            "vulnerability_description": action.vulnerability_description,
+-+                            "vulnerability_title": action.vulnerability_title,
+-+                            "max_steps": MAX_EXPLOIT_AGENT_STEPS,
+-+                        }
+-+                        await set_exploit_approval_payload_service(db, exploit_agent.id, approval_payload)
+-+                        await update_agent_status_service(db, exploit_agent.id, AgentStatus.PENDING_APPROVAL)
+-+                    else:
+-+                        await exploit_agent_queue.publish(start_request)
+-                 
+-             return {
+-                 "page_skip": trigger_detection
+-@@ -293,4 +332,65 @@ def make_agent_router(
+-             print(f"Stacktrace: {traceback.format_exc()}")
+-             raise HTTPException(status_code=500, detail=str(e))
+- 
+-+    @router.post("/agents/{agent_id}/approval")
+-+    async def approve_or_deny_agent(
+-+        agent_id: str,
+-+        approval_data: AgentApproveData,
+-+        db: AsyncSession = Depends(get_session),
+-+    ):
+-+        try:
+-+            agent = await get_agent_by_id_service(db, agent_id)
+-+            if not agent:
+-+                raise HTTPException(status_code=404, detail="Agent not found")
+-+
+-+            if agent.agent_status != AgentStatus.PENDING_APPROVAL:
+-+                # Idempotent: if already processed, return current state
+-+                return {"agent_id": agent_id, "status": agent.agent_status}
+-+
+-+            if approval_data.decision == "deny":
+-+                agent = await update_agent_status_service(db, agent_id, AgentStatus.CANCELLED)
+-+                await clear_exploit_approval_payload_service(db, agent_id)
+-+                return {"agent_id": agent_id, "status": agent.agent_status}
+-+
+-+            # Approve flow: publish stored request, transition to RUNNING
+-+            payload = getattr(agent, "approval_payload_data", None)
+-+            if not payload:
+-+                raise HTTPException(status_code=409, detail="No approval payload stored for this agent")
+-+
+-+            # Rehydrate StartExploitRequest and attach runtime-only fields
+-+            try:
+-+                # get engagement and loggers
+-+                engagement = await get_engagement_by_agent_id(db, agent_id)
+-+                if not engagement:
+-+                    raise Exception("Engagement not found for agent")
+-+                log_factory = get_server_log_factory(base_dir=SERVER_LOG_DIR)
+-+                agent_logger, full_logger = log_factory.get_exploit_agent_loggers(str(engagement.id))
+-+
+-+                start_request = StartExploitRequest(
+-+                    page_item=HTTPMessage.from_json(payload.get("page_item", {})),
+-+                    vulnerability_description=payload.get("vulnerability_description", ""),
+-+                    vulnerability_title=payload.get("vulnerability_title", ""),
+-+                    max_steps=payload.get("max_steps", MAX_EXPLOIT_AGENT_STEPS),
+-+                    client=AgentClient(
+-+                        agent_id=agent_id,
+-+                        api_url=f"http://127.0.0.1:{API_SERVER_PORT}",
+-+                    ),
+-+                    agent_log=agent_logger,
+-+                    full_log=full_logger,
+-+                )
+-+            except Exception:
+-+                raise HTTPException(status_code=500, detail="Failed to reconstruct approval payload")
+-+
+-+            await exploit_agent_queue.publish(start_request)
+-+            await update_agent_status_service(db, agent_id, AgentStatus.RUNNING)
+-+            await clear_exploit_approval_payload_service(db, agent_id)
+-+            return {"agent_id": agent_id, "status": AgentStatus.RUNNING}
+-+        except HTTPException:
+-+            raise
+-+        except Exception as e:
+-+            import traceback
+-+            print(f"Exception: {e}")
+-+            print(f"Stacktrace: {traceback.format_exc()}")
+-+            raise HTTPException(status_code=500, detail=str(e))
+-+
+-     return router
+-\ No newline at end of file
+-diff --git a/cnc/schemas/agent.py b/cnc/schemas/agent.py
+-index 3f3c0cb..f7feebc 100644
+---- a/cnc/schemas/agent.py
+-+++ b/cnc/schemas/agent.py
+-@@ -1,7 +1,7 @@
+- import enum
+- 
+- from pydantic import BaseModel, UUID4, field_validator
+--from typing import Dict, Any, List, Optional
+-+from typing import Dict, Any, List, Optional, Literal
+- 
+- from src.agent.base import AgentType
+- from cnc.schemas.base import JSONModel
+-@@ -9,9 +9,11 @@ from cnc.schemas.base import JSONModel
+- # from pentest_bot.models.steps import AgentStep as _DiscoveryAgentStep
+- 
+- class AgentStatus(str, enum.Enum):
+--    PENDING = "pending"
+-+    PENDING_AUTO = "pending_auto"
+-+    PENDING_APPROVAL = "pending_approval"
+-     RUNNING = "running"
+-     COMPLETED = "completed"
+-+    CANCELLED = "cancelled"
+- 
+- class AgentOut(BaseModel):
+-     id: str
+-@@ -80,4 +82,8 @@ class UploadPageData(AgentMessage):
+-     max_steps: int
+-     page_steps: int
+-     max_page_steps: int
+--    page_data: List[Dict[str, Any]]
+-\ No newline at end of file
+-+    page_data: List[Dict[str, Any]]
+-+    
+-+class AgentApproveData(BaseModel):
+-+    agent_id: str
+-+    decision: Literal["approve", "deny"]
+-\ No newline at end of file
+-diff --git a/cnc/tests/integration/test_agent_approval.py b/cnc/tests/integration/test_agent_approval.py
+-new file mode 100644
+-index 0000000..e9fea05
+---- /dev/null
+-+++ b/cnc/tests/integration/test_agent_approval.py
+-@@ -0,0 +1,147 @@
+-+import asyncio
+-+import os
+-+import importlib
+-+
+-+import pytest
+-+from httpx import AsyncClient
+-+
+-+
+-+pytestmark = pytest.mark.asyncio
+-+
+-+
+-+async def _set_manual_flag(value: bool):
+-+    # Reload constants module to apply flag change for test
+-+    import common.constants as constants
+-+    constants.MANUAL_APPROVAL_EXPLOIT_AGENT = value
+-+    importlib.reload(constants)
+-+
+-+
+-+async def _create_engagement(client: AsyncClient) -> str:
+-+    resp = await client.post(
+-+        "/engagement/",
+-+        json={
+-+            "name": "Approval Flow Test",
+-+            "base_url": "http://example.test/",
+-+            "description": "",
+-+            "scopes_data": ["http://example.test/api"],
+-+        },
+-+    )
+-+    assert resp.status_code == 200
+-+    return resp.json()["id"]
+-+
+-+
+-+async def _register_discovery_agent(client: AsyncClient, engagement_id: str) -> str:
+-+    resp = await client.post(
+-+        f"/engagement/{engagement_id}/agents/discovery/register",
+-+        json={
+-+            "max_steps": 1,
+-+            "model_name": "gpt-4o-mini",
+-+            "model_costs": 0.0,
+-+            "log_filepath": "",
+-+        },
+-+    )
+-+    assert resp.status_code == 200
+-+    return resp.json()["id"]
+-+
+-+
+-+def _fake_page_observations_payload():
+-+    # Minimal synthetic page data that triggers detection after one page step
+-+    page = {
+-+        "url": "http://example.test/",
+-+        "http_msgs": [
+-+            {
+-+                "request": {
+-+                    "data": {
+-+                        "method": "GET",
+-+                        "url": "http://example.test/",
+-+                        "headers": {},
+-+                        "post_data": None,
+-+                        "redirected_from_url": None,
+-+                        "redirected_to_url": None,
+-+                        "is_iframe": False,
+-+                    }
+-+                },
+-+                "response": {
+-+                    "data": {
+-+                        "url": "http://example.test/",
+-+                        "status": 200,
+-+                        "headers": {"content-type": "text/html"},
+-+                        "is_iframe": False,
+-+                        "body": None,
+-+                        "body_error": None,
+-+                    }
+-+                },
+-+            }
+-+        ],
+-+    }
+-+    return [page]
+-+
+-+
+-+async def _post_page_data_and_trigger(client: AsyncClient, agent_id: str):
+-+    payload = {
+-+        "agent_id": agent_id,
+-+        "steps": 1,
+-+        "max_steps": 1,
+-+        "page_steps": 2,
+-+        "max_page_steps": 2,
+-+        "page_data": _fake_page_observations_payload(),
+-+    }
+-+    resp = await client.post(f"/agents/{agent_id}/page-data", json=payload)
+-+    assert resp.status_code == 200
+-+    return resp.json()
+-+
+-+
+-+async def _list_agents(client: AsyncClient, engagement_id: str):
+-+    resp = await client.get(f"/engagement/{engagement_id}/agents")
+-+    assert resp.status_code == 200
+-+    return resp.json()
+-+
+-+
+-+async def _find_latest_exploit(agents):
+-+    for a in agents:
+-+        if a["agent_type"] == "exploit":
+-+            return a
+-+    return None
+-+
+-+
+-+async def test_manual_approval_flow(test_app_client: AsyncClient):
+-+    await _set_manual_flag(True)
+-+
+-+    client = test_app_client
+-+    engagement_id = await _create_engagement(client)
+-+    disc_agent_id = await _register_discovery_agent(client, engagement_id)
+-+
+-+    # Trigger detection which registers an exploit agent but does not start it
+-+    await _post_page_data_and_trigger(client, disc_agent_id)
+-+
+-+    # List agents and find the exploit agent
+-+    agents = await _list_agents(client, engagement_id)
+-+    exploit = await _find_latest_exploit(agents)
+-+    assert exploit is not None
+-+    assert exploit["agent_status"] == "pending_approval"
+-+
+-+    exploit_id = exploit["id"]
+-+
+-+    # Approve the exploit agent
+-+    approve_resp = await client.post(f"/agents/{exploit_id}/approval", params={"decision": "approve"})
+-+    assert approve_resp.status_code == 200
+-+    body = approve_resp.json()
+-+    assert body["status"] in ("running",)
+-+
+-+
+-+async def test_auto_mode_flow(test_app_client: AsyncClient):
+-+    await _set_manual_flag(False)
+-+
+-+    client = test_app_client
+-+    engagement_id = await _create_engagement(client)
+-+    disc_agent_id = await _register_discovery_agent(client, engagement_id)
+-+
+-+    # Trigger detection which should auto-start exploit agent
+-+    await _post_page_data_and_trigger(client, disc_agent_id)
+-+    agents = await _list_agents(client, engagement_id)
+-+    exploit = await _find_latest_exploit(agents)
+-+    assert exploit is not None
+-+    # In auto mode, exploit agent should not be pending approval
+-+    assert exploit["agent_status"] in ("pending_auto", "running", "completed")
+-+
+-+
+diff --git a/cnc/routers/agent.py b/cnc/routers/agent.py
+index 2539e1c..e5a517c 100644
+--- a/cnc/routers/agent.py
++++ b/cnc/routers/agent.py
+@@ -3,6 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
+ from uuid import UUID
+ from typing import List, Any, cast, Literal
+ 
++from src.llm_models import BaseChatModel
++from cnc.services.detection import DetectionScheduler
+ from cnc.services.queue import BroadcastChannel
+ from cnc.schemas.agent import (
+     AgentOut,
+@@ -46,7 +48,6 @@ from common.constants import (
+ from src.agent.discovery.pages import PageObservations, Page
+ from httplib import HTTPMessage
+ from src.agent.agent_client import AgentClient
+-from src.agent.detection.prompts import DetectAndSchedule
+ from src.llm_models import LLMHub
+ from cnc.services.engagement import merge_page_data as merge_page_data_service
+ 
+@@ -54,17 +55,6 @@ from logger import get_server_logger, get_agent_loggers, get_server_log_factory
+ 
+ log = get_server_logger()
+ 
+-async def detect_vulnerabilities(
+-    payload: PageObservations,
+-    llm_model: LLMHub,
+-):
+-    detect = DetectAndSchedule()
+-    actions = await detect.ainvoke(
+-        llm_model,
+-        prompt_args={"pages": payload}
+-    )
+-    return actions
+-
+ def make_agent_router(
+     discovery_agent_queue: BroadcastChannel[StartDiscoveryRequest],
+     exploit_agent_queue: BroadcastChannel[StartExploitRequest],
+@@ -181,72 +171,41 @@ def make_agent_router(
+         db: AsyncSession = Depends(get_session),
+     ):
+         """Upload a PageObservations payload and store as page_data."""
+-        try:
+-            # Write engagement-level page_data via merge
+-            engagement = await get_engagement_by_agent_id(db, agent_id)
+-            if not engagement:
+-                raise Exception("Engagement not found")
+-            log_factory = get_server_log_factory(base_dir=SERVER_LOG_DIR)
+-            log = log_factory.ensure_server_logger(str(engagement.id))
+-
+-            agent = await get_agent_by_id_service(db, agent_id)
+-            if not agent:
+-                raise HTTPException(status_code=404, detail="Agent not found")
+-
+-            trigger_detection = False
+-            max_steps = payload.max_steps
+-            max_page_steps = payload.max_page_steps
+-            steps = payload.steps
+-            page_steps = payload.page_steps
++        engagement = await get_engagement_by_agent_id(db, agent_id)
++        if not engagement:
++            raise HTTPException(status_code=404, detail="Engagement not found")
++            
++        agent = await get_agent_by_id_service(db, agent_id)
++        if not agent:
++            raise HTTPException(status_code=404, detail="Agent not found")
++
++        log_factory = get_server_log_factory(base_dir=SERVER_LOG_DIR)
++        log = log_factory.ensure_server_logger(str(engagement.id))
++        detection_scheduler = DetectionScheduler()
++
++        trigger_detection = False
++        max_steps = payload.max_steps
++        max_page_steps = payload.max_page_steps
++        steps = payload.steps
++        page_steps = payload.page_steps
+ 
++        try:
+             # NOTE: not actually merging rn just overwriting
++            log.info(f"Merging page data for {agent_id}")
+             await merge_page_data_service(db, engagement.id, payload.page_data, merge=False)
+ 
+             log.info(f"Progress: {steps}/{max_steps} | Page steps: {page_steps}/{max_page_steps}")
+ 
+-            # NOTE: when do we want to trigger a detection?
+-            if page_steps >= max_page_steps:
+-                trigger_detection = True
+-
+-            if trigger_detection:
+-                # TODO:
++            actions = await detection_scheduler.generate_actions(
++                cast(BaseChatModel, llm_hub.get("detection")),
++                payload.to_page_observations(),
++                page_steps,
++                max_page_steps,
++                NUM_SCHEDULED_ACTIONS
++            )
++            if actions:
+                 log.info(f"Triggering detection for: {agent_id}")
+                 log.info("Page steps received; evaluating detection trigger")
+-                engagement = await get_engagement_by_agent_id(db, agent_id)
+-                if not engagement:
+-                    raise Exception("Engagement not found")
+-                    
+-                # Engagement-scoped server logger
+-                # detect and schedule actions for the exploit agent
+-                # Convert incoming list[dict] to Page objects for PageObservations
+-                pages_list = [Page.from_json(page) for page in cast(List[dict], payload.page_data)]
+-                pages_obj = PageObservations(pages=pages_list)
+-                try:
+-                    actions: List[StartExploitRequest] = await DetectAndSchedule().ainvoke(
+-                        llm_hub.get("detection"),
+-                        prompt_args={
+-                            "pages": pages_obj,
+-                            "num_actions": NUM_SCHEDULED_ACTIONS
+-                        }
+-                    )
+-                except Exception:
+-                    # Fallback: synthesize a single action using the first page item
+-                    first_item = None
+-                    try:
+-                        first_item = pages_obj.get_page_item("1.1")
+-                    except Exception:
+-                        first_item = None
+-                    actions = [
+-                        StartExploitRequest(
+-                            page_item=first_item,
+-                            vulnerability_description="",
+-                            vulnerability_title="AutoTest-Generated",
+-                            max_steps=MAX_EXPLOIT_AGENT_STEPS,
+-                            client=None,
+-                            agent_log=None,
+-                            full_log=None,
+-                        )
+-                    ]
+                 actions = actions[:1]
+                 for action in actions:
+                     log.info(f"Scheduling exploit agent for {action.vulnerability_title}")
+diff --git a/cnc/schemas/agent.py b/cnc/schemas/agent.py
+index 6bd04a7..7f23c76 100644
+--- a/cnc/schemas/agent.py
++++ b/cnc/schemas/agent.py
+@@ -1,7 +1,9 @@
+ import enum
+ 
+ from pydantic import BaseModel, UUID4, field_validator
+-from typing import Dict, Any, List, Optional, Literal
++from typing import Dict, Any, List, Optional, Literal, cast
++
++from src.agent.discovery.pages import PageObservations, Page
+ 
+ from src.agent.base import AgentType
+ from cnc.schemas.base import DerivedJSONModel
+@@ -83,6 +85,11 @@ class UploadPageData(AgentMessage):
+     page_steps: int
+     max_page_steps: int
+     page_data: List[Dict[str, Any]]
++
++    def to_page_observations(self) -> PageObservations:
++        pages_list = [Page.from_json(page) for page in cast(List[dict], self.page_data)]
++        pages_obj = PageObservations(pages=pages_list)
++        return pages_obj
+     
+ # TODO: ask chatGPT to implement this 
+ class AgentApproveData(DerivedJSONModel):
+diff --git a/src/agent/detection/prompts.py b/cnc/services/detection.py
+similarity index 61%
+rename from src/agent/detection/prompts.py
+rename to cnc/services/detection.py
+index ea81aa5..ca6522f 100644
+--- a/src/agent/detection/prompts.py
++++ b/cnc/services/detection.py
+@@ -1,12 +1,14 @@
++import enum
+ from pydantic import BaseModel
+-
+ from typing import List, Optional
+ 
+ from src.agent.discovery.pages import PageObservations
+ from src.llm_provider import LMP
+-from common.constants import NUM_SCHEDULED_ACTIONS
++from src.llm_models import BaseChatModel
+ 
+ from httplib import HTTPMessage
++from cnc.database.agent.models import ExploitAgentModel
++
+ 
+ # TMRW: 
+ # - add a vulnerability title along with description to display the data
+@@ -58,4 +60,42 @@ Some guidance for the response format:
+                 )
+             )
+             
+-        return scheduled_actions
+\ No newline at end of file
++        return scheduled_actions    
++
++
++class DetectionMode(str, enum.Enum):
++    PAGESTEP_TRIGGER = "page_step_trigger"
++
++class DetectionScheduler:
++    """Detects suspicious items on the page and schedules actions for the exploit agent"""
++    def __init__(
++        self,
++        prev_agents: Optional[List[ExploitAgentModel]] = None,
++        trigger_mode: DetectionMode = DetectionMode.PAGESTEP_TRIGGER
++    ):
++        self.prev_agents = prev_agents
++        self.trigger_mode = trigger_mode
++
++    def trigger(self, page_steps: int, max_page_steps: int) -> bool:
++        if self.trigger_mode == DetectionMode.PAGESTEP_TRIGGER:
++            return page_steps >= max_page_steps
++        return False
++
++    async def generate_actions(
++        self,
++        model: BaseChatModel,
++        pages: PageObservations,
++        page_steps: int,
++        max_page_steps: int,
++        num_actions: int
++    ) -> List[StartExploitRequest]:
++        if not self.trigger(page_steps, max_page_steps):
++            return []
++
++        return await DetectAndSchedule().ainvoke(
++            model,
++            prompt_args={
++                "pages": pages,
++                "num_actions": num_actions
++            }
++        )
+\ No newline at end of file
+diff --git a/eval/harness/exploit/create_vuln_queue.py b/eval/harness/exploit/create_vuln_queue.py
+index e29d233..006af9a 100644
+--- a/eval/harness/exploit/create_vuln_queue.py
++++ b/eval/harness/exploit/create_vuln_queue.py
+@@ -1,7 +1,8 @@
+ from src.llm_models import openai_5
+-from src.agent.detection.prompts import DetectAndSchedule
+ from src.agent.discovery.pages import PageObservations
+ 
++from cnc.services.detection import DetectAndSchedule
++
+ from eval.datasets.detection import PAGE_DATA_JSON, VULN_QUEUE_JSON
+ 
+ import json
+diff --git a/test_discovery_agent.py b/scripts/tests/test_discovery_agent.py
+similarity index 59%
+copy from test_discovery_agent.py
+copy to scripts/tests/test_discovery_agent.py
+index 457a7ca..8586f81 100644
+--- a/test_discovery_agent.py
++++ b/scripts/tests/test_discovery_agent.py
+@@ -36,22 +36,22 @@ agent_id = agent["id"]
+ print(agent)
+ 
+ # # 4. Continue polling on the agent page_data API on a poll/sleep(1) loop for 20 iterations
+-# page_data_found = False
+-# for i in range(30):
+-#     get_page_data_resp = requests.get(f"{base_url}/agents/{engagement_id}/page-data")
+-#     assert get_page_data_resp.status_code == 200
+-#     page_data_result = get_page_data_resp.json()
+-#     print(page_data_result)
++page_data_found = False
++for i in range(30):
++    get_page_data_resp = requests.get(f"{base_url}/agents/{engagement_id}/page-data")
++    assert get_page_data_resp.status_code == 200
++    page_data_result = get_page_data_resp.json()
++    print(page_data_result)
+     
+-#     if "page_data" in page_data_result and page_data_result["page_data"]:
+-#         page_data_found = True
+-#         break
++    if "page_data" in page_data_result and page_data_result["page_data"]:
++        page_data_found = True
++        break
+         
+-#     time.sleep(2)
++    time.sleep(2)
+ 
+-# # 5. Confirm that the page data is not empty and has been updated by the agent
+-# assert page_data_found, "Discovery agent did not collect any page data within 20 seconds"
++# 5. Confirm that the page data is not empty and has been updated by the agent
++assert page_data_found, "Discovery agent did not collect any page data within 20 seconds"
+ 
+-# # Verify the structure of collected page data
+-# final_resp = requests.get(f"{base_url}/agents/{agent_id}/page-data")
+-# final_data = final_resp.json()
++# Verify the structure of collected page data
++final_resp = requests.get(f"{base_url}/agents/{agent_id}/page-data")
++final_data = final_resp.json()
+diff --git a/test_exploit_agent.py b/scripts/tests/test_exploit_agent.py
+similarity index 77%
+copy from test_exploit_agent.py
+copy to scripts/tests/test_exploit_agent.py
+index d208a85..3352977 100644
+--- a/test_exploit_agent.py
++++ b/scripts/tests/test_exploit_agent.py
+@@ -52,16 +52,16 @@ while retries > 0:
+     retries -= 1
+     time.sleep(2)
+ 
+-retries = 20
+-while retries > 0:
+-    # Get agent steps
+-    get_agent_steps_resp = requests.get(f"{base_url}/agents/{exploit_agent_id}/steps")
+-    assert get_agent_steps_resp.status_code == 200
+-    steps = get_agent_steps_resp.json()
+-    print("Num steps: ", len(steps))
++# retries = 20
++# while retries > 0:
++#     # Get agent steps
++#     get_agent_steps_resp = requests.get(f"{base_url}/agents/{exploit_agent_id}/steps")
++#     assert get_agent_steps_resp.status_code == 200
++#     steps = get_agent_steps_resp.json()
++#     print("Num steps: ", len(steps))
+ 
+-    for step in steps:
+-        print("Step: ", step)
++#     for step in steps:
++#         print("Step: ", step)
+ 
+-    retries -= 1
+-    time.sleep(2)
+\ No newline at end of file
++#     retries -= 1
++#     time.sleep(2)
+\ No newline at end of file
+diff --git a/src/agent/discovery/proxy.py b/src/agent/discovery/proxy.py
+index f848a96..b781f27 100644
+--- a/src/agent/discovery/proxy.py
++++ b/src/agent/discovery/proxy.py
+@@ -388,7 +388,7 @@ class MitmProxyHTTPHandler:
+             body=body_bytes,
+             body_error=None,
+         )
+-        agent_log.info(f"Response: {data}")
++        # agent_log.info(f"Response: {data}")
+         return HTTPResponse(data=data)
+ 
+ class _RelayAddon:
+diff --git a/test_discovery_agent.py b/test_discovery_agent.py
+index 457a7ca..4f68a3c 100644
+--- a/test_discovery_agent.py
++++ b/test_discovery_agent.py
+@@ -36,22 +36,22 @@ agent_id = agent["id"]
+ print(agent)
+ 
+ # # 4. Continue polling on the agent page_data API on a poll/sleep(1) loop for 20 iterations
+-# page_data_found = False
+-# for i in range(30):
+-#     get_page_data_resp = requests.get(f"{base_url}/agents/{engagement_id}/page-data")
+-#     assert get_page_data_resp.status_code == 200
+-#     page_data_result = get_page_data_resp.json()
+-#     print(page_data_result)
++page_data_found = False
++for i in range(40):
++    get_page_data_resp = requests.get(f"{base_url}/agents/{engagement_id}/page-data")
++    assert get_page_data_resp.status_code == 200
++    page_data_result = get_page_data_resp.json()
++    print(page_data_result)
+     
+-#     if "page_data" in page_data_result and page_data_result["page_data"]:
+-#         page_data_found = True
+-#         break
++    if "page_data" in page_data_result and page_data_result["page_data"]:
++        page_data_found = True
++        break
+         
+-#     time.sleep(2)
++    time.sleep(2)
+ 
+-# # 5. Confirm that the page data is not empty and has been updated by the agent
+-# assert page_data_found, "Discovery agent did not collect any page data within 20 seconds"
++# 5. Confirm that the page data is not empty and has been updated by the agent
++assert page_data_found, "Discovery agent did not collect any page data within 20 seconds"
+ 
+-# # Verify the structure of collected page data
+-# final_resp = requests.get(f"{base_url}/agents/{agent_id}/page-data")
+-# final_data = final_resp.json()
++# Verify the structure of collected page data
++final_resp = requests.get(f"{base_url}/agents/{agent_id}/page-data")
++final_data = final_resp.json()
+diff --git a/test_exploit_agent.py b/test_exploit_agent.py
+index d208a85..3352977 100644
+--- a/test_exploit_agent.py
++++ b/test_exploit_agent.py
+@@ -52,16 +52,16 @@ while retries > 0:
+     retries -= 1
+     time.sleep(2)
+ 
+-retries = 20
+-while retries > 0:
+-    # Get agent steps
+-    get_agent_steps_resp = requests.get(f"{base_url}/agents/{exploit_agent_id}/steps")
+-    assert get_agent_steps_resp.status_code == 200
+-    steps = get_agent_steps_resp.json()
+-    print("Num steps: ", len(steps))
++# retries = 20
++# while retries > 0:
++#     # Get agent steps
++#     get_agent_steps_resp = requests.get(f"{base_url}/agents/{exploit_agent_id}/steps")
++#     assert get_agent_steps_resp.status_code == 200
++#     steps = get_agent_steps_resp.json()
++#     print("Num steps: ", len(steps))
+ 
+-    for step in steps:
+-        print("Step: ", step)
++#     for step in steps:
++#         print("Step: ", step)
+ 
+-    retries -= 1
+-    time.sleep(2)
+\ No newline at end of file
++#     retries -= 1
++#     time.sleep(2)
+\ No newline at end of file
+diff --git a/test_page_serialize.py b/test_page_serialize.py
+deleted file mode 100644
+index 3737a87..0000000
+--- a/test_page_serialize.py
++++ /dev/null
+@@ -1,16 +0,0 @@
+-from src.llm_models import openai_5
+-
+-from src.agent.detection.prompts import DetectAndSchedule
+-from src.agent.discovery.pages import Page, PageObservations
+-import json
+-
+-model = openai_5()
+-page_contents = json.loads(open("agent_summary.json", "r").read())
+-page_observations = PageObservations.from_json(page_contents)
+-
+-detect = DetectAndSchedule()
+-res = detect.invoke(model, prompt_args={"pages": page_observations})
+-
+-for action in res:
+-    print(action.vulnerability_description)
+-    # print(action.page_item)
+

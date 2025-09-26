@@ -46,6 +46,10 @@ Human
 Think:
 > When should we start building custom web-apps for testing vulns?
 
+TODOs:
+- Discovery
+--> [OPTIMIZATION] save completed tasks in discovery agents so we dont end up completing the same tasks again
+
 CC:
 - [6] deploy to prod -> use test_discovery_agent, modify and test as successful script
 - [10] HTTPMessage.req/res.body no longer has to be async I think since we are not getting them from PW anymore

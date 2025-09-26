@@ -12,6 +12,13 @@
             "console": "integratedTerminal"
         },
         {
+            "name": "Discovery AgentPool",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.start_agent",
+            "console": "integratedTerminal"
+        },
+        {
             "name": "test serialize",
             "type": "debugpy",
             "request": "launch",

@@ -40,7 +40,7 @@ class MinimalAgentSinglePage(DiscoveryAgent):
         challenge_client: Optional[PagedDiscoveryEvalClient] = None,
         server_client: Optional[AgentClient] = None,
         cdp_handler: MitmProxyHTTPHandler | None = None,
-        agent_dir: Path,
+        agent_dir: Path | None = None,
         init_task: Optional[str] = None,
         screenshots: bool = False,
         agent_log: Optional[logging.Logger] = None,
