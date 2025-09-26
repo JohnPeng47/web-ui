@@ -1,0 +1,236 @@
+[
+  {
+    "url": "http://147.79.78.153:3000/#/login",
+    "http_msgs": [
+      {
+        "request": {
+          "data": {
+            "method": "GET",
+            "url": "http://147.79.78.153:3000/rest/admin/application-version",
+            "headers": {
+              "host": "147.79.78.153:3000",
+              "proxy-connection": "keep-alive",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/134.0.0.0 Safari/537.36",
+              "accept": "application/json, text/plain, */*",
+              "authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdGF0dXMiOiJzdWNjZXNzIiwiZGF0YSI6eyJpZCI6NCwidXNlcm5hbWUiOiJia2ltbWluaWNoIiwiZW1haWwiOiJiam9lcm4ua2ltbWluaWNoQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiNmVkZDlkNzI2Y2JkYzg3M2M1MzllNDFhZTg3NTdiOGMiLCJyb2xlIjoiYWRtaW4iLCJkZWx1eGVUb2tlbiI6IiIsImxhc3RMb2dpbklwIjoiOTkuMjQ2LjkwLjUxIiwicHJvZmlsZUltYWdlIjoiYXNzZXRzL3B1YmxpYy9pbWFnZXMvdXBsb2Fkcy9kZWZhdWx0QWRtaW4ucG5nIiwidG90cFNlY3JldCI6IiIsImlzQWN0aXZlIjp0cnVlLCJjcmVhdGVkQXQiOiIyMDI1LTA5LTIzIDEzOjExOjMxLjYyOSArMDA6MDAiLCJ1cGRhdGVkQXQiOiIyMDI1LTA5LTI0IDIwOjIzOjQ5LjAyNiArMDA6MDAiLCJkZWxldGVkQXQiOm51bGx9LCJpYXQiOjE3NTg3NjkzOTR9.J2Y7RC4o3c2l56sjid3hXH8dCEmXA17dtwLXFbIoriWJM4z9lQCPtPuaXYadfYAjDKSrhPid08Zx2ornEXw56lYnsrJYsdxT42kQ1bP5XP8E1oB2-4Li5yW49ghrcpCDkBl3pWtcY4cBCMJ8H_Banx2b7Au3AxO0zieJ8_-SW94",
+              "referer": "http://147.79.78.153:3000/",
+              "accept-encoding": "gzip, deflate",
+              "accept-language": "en-US,en;q=0.9",
+              "cookie": "welcomebanner_status=dismiss; cookieconsent_status=dismiss; continueCode=4vgoQMVrapgqJ1BKbnExlORLvyABaZcDY0mjZo78N25946XwkzPYW3DeZy16; language=az_AZ",
+              "if-none-match": "W/\"14-HDobv7lxHDIykJrpNwFQC293gqA\""
+            },
+            "post_data": null,
+            "redirected_from_url": null,
+            "redirected_to_url": null,
+            "is_iframe": false
+          }
+        },
+        "response": {
+          "data": {
+            "url": "http://147.79.78.153:3000/rest/admin/application-version",
+            "status": 304,
+            "headers": {
+              "access-control-allow-origin": "*",
+              "x-content-type-options": "nosniff",
+              "x-frame-options": "SAMEORIGIN",
+              "feature-policy": "payment 'self'",
+              "x-recruiting": "/#/jobs",
+              "etag": "W/\"14-HDobv7lxHDIykJrpNwFQC293gqA\"",
+              "date": "Thu, 25 Sep 2025 14:27:31 GMT",
+              "connection": "keep-alive",
+              "keep-alive": "timeout=5"
+            },
+            "content_type": "",
+            "content_length": 0,
+            "is_iframe": false
+          }
+        }
+      },
+      {
+        "request": {
+          "data": {
+            "method": "GET",
+            "url": "http://147.79.78.153:3000/rest/admin/application-configuration",
+            "headers": {
+              "host": "147.79.78.153:3000",
+              "proxy-connection": "keep-alive",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/134.0.0.0 Safari/537.36",
+              "accept": "application/json, text/plain, */*",
+              "authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdGF0dXMiOiJzdWNjZXNzIiwiZGF0YSI6eyJpZCI6NCwidXNlcm5hbWUiOiJia2ltbWluaWNoIiwiZW1haWwiOiJiam9lcm4ua2ltbWluaWNoQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiNmVkZDlkNzI2Y2JkYzg3M2M1MzllNDFhZTg3NTdiOGMiLCJyb2xlIjoiYWRtaW4iLCJkZWx1eGVUb2tlbiI6IiIsImxhc3RMb2dpbklwIjoiOTkuMjQ2LjkwLjUxIiwicHJvZmlsZUltYWdlIjoiYXNzZXRzL3B1YmxpYy9pbWFnZXMvdXBsb2Fkcy9kZWZhdWx0QWRtaW4ucG5nIiwidG90cFNlY3JldCI6IiIsImlzQWN0aXZlIjp0cnVlLCJjcmVhdGVkQXQiOiIyMDI1LTA5LTIzIDEzOjExOjMxLjYyOSArMDA6MDAiLCJ1cGRhdGVkQXQiOiIyMDI1LTA5LTI0IDIwOjIzOjQ5LjAyNiArMDA6MDAiLCJkZWxldGVkQXQiOm51bGx9LCJpYXQiOjE3NTg3NjkzOTR9.J2Y7RC4o3c2l56sjid3hXH8dCEmXA17dtwLXFbIoriWJM4z9lQCPtPuaXYadfYAjDKSrhPid08Zx2ornEXw56lYnsrJYsdxT42kQ1bP5XP8E1oB2-4Li5yW49ghrcpCDkBl3pWtcY4cBCMJ8H_Banx2b7Au3AxO0zieJ8_-SW94",
+              "referer": "http://147.79.78.153:3000/",
+              "accept-encoding": "gzip, deflate",
+              "accept-language": "en-US,en;q=0.9",
+              "cookie": "welcomebanner_status=dismiss; cookieconsent_status=dismiss; continueCode=4vgoQMVrapgqJ1BKbnExlORLvyABaZcDY0mjZo78N25946XwkzPYW3DeZy16; language=az_AZ",
+              "if-none-match": "W/\"5499-IFxEiq5xq62mcKu1yKR59Bg8q14\""
+            },
+            "post_data": null,
+            "redirected_from_url": null,
+            "redirected_to_url": null,
+            "is_iframe": false
+          }
+        },
+        "response": {
+          "data": {
+            "url": "http://147.79.78.153:3000/rest/admin/application-configuration",
+            "status": 304,
+            "headers": {
+              "access-control-allow-origin": "*",
+              "x-content-type-options": "nosniff",
+              "x-frame-options": "SAMEORIGIN",
+              "feature-policy": "payment 'self'",
+              "x-recruiting": "/#/jobs",
+              "etag": "W/\"5499-IFxEiq5xq62mcKu1yKR59Bg8q14\"",
+              "date": "Thu, 25 Sep 2025 14:27:31 GMT",
+              "connection": "keep-alive",
+              "keep-alive": "timeout=5"
+            },
+            "content_type": "",
+            "content_length": 0,
+            "is_iframe": false
+          }
+        }
+      },
+      {
+        "request": {
+          "data": {
+            "method": "GET",
+            "url": "http://147.79.78.153:3000/rest/user/whoami",
+            "headers": {
+              "host": "147.79.78.153:3000",
+              "proxy-connection": "keep-alive",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/134.0.0.0 Safari/537.36",
+              "accept": "application/json, text/plain, */*",
+              "authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdGF0dXMiOiJzdWNjZXNzIiwiZGF0YSI6eyJpZCI6NCwidXNlcm5hbWUiOiJia2ltbWluaWNoIiwiZW1haWwiOiJiam9lcm4ua2ltbWluaWNoQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiNmVkZDlkNzI2Y2JkYzg3M2M1MzllNDFhZTg3NTdiOGMiLCJyb2xlIjoiYWRtaW4iLCJkZWx1eGVUb2tlbiI6IiIsImxhc3RMb2dpbklwIjoiOTkuMjQ2LjkwLjUxIiwicHJvZmlsZUltYWdlIjoiYXNzZXRzL3B1YmxpYy9pbWFnZXMvdXBsb2Fkcy9kZWZhdWx0QWRtaW4ucG5nIiwidG90cFNlY3JldCI6IiIsImlzQWN0aXZlIjp0cnVlLCJjcmVhdGVkQXQiOiIyMDI1LTA5LTIzIDEzOjExOjMxLjYyOSArMDA6MDAiLCJ1cGRhdGVkQXQiOiIyMDI1LTA5LTI0IDIwOjIzOjQ5LjAyNiArMDA6MDAiLCJkZWxldGVkQXQiOm51bGx9LCJpYXQiOjE3NTg3NjkzOTR9.J2Y7RC4o3c2l56sjid3hXH8dCEmXA17dtwLXFbIoriWJM4z9lQCPtPuaXYadfYAjDKSrhPid08Zx2ornEXw56lYnsrJYsdxT42kQ1bP5XP8E1oB2-4Li5yW49ghrcpCDkBl3pWtcY4cBCMJ8H_Banx2b7Au3AxO0zieJ8_-SW94",
+              "referer": "http://147.79.78.153:3000/",
+              "accept-encoding": "gzip, deflate",
+              "accept-language": "en-US,en;q=0.9",
+              "cookie": "welcomebanner_status=dismiss; cookieconsent_status=dismiss; continueCode=4vgoQMVrapgqJ1BKbnExlORLvyABaZcDY0mjZo78N25946XwkzPYW3DeZy16; language=az_AZ",
+              "if-none-match": "W/\"b-/5bSboVjVhGw3qRgvUfZjE1r1Ns\""
+            },
+            "post_data": null,
+            "redirected_from_url": null,
+            "redirected_to_url": null,
+            "is_iframe": false
+          }
+        },
+        "response": {
+          "data": {
+            "url": "http://147.79.78.153:3000/rest/user/whoami",
+            "status": 304,
+            "headers": {
+              "access-control-allow-origin": "*",
+              "x-content-type-options": "nosniff",
+              "x-frame-options": "SAMEORIGIN",
+              "feature-policy": "payment 'self'",
+              "x-recruiting": "/#/jobs",
+              "etag": "W/\"b-/5bSboVjVhGw3qRgvUfZjE1r1Ns\"",
+              "date": "Thu, 25 Sep 2025 14:27:31 GMT",
+              "connection": "keep-alive",
+              "keep-alive": "timeout=5"
+            },
+            "content_type": "",
+            "content_length": 0,
+            "is_iframe": false
+          }
+        }
+      },
+      {
+        "request": {
+          "data": {
+            "method": "GET",
+            "url": "http://147.79.78.153:3000/rest/languages",
+            "headers": {
+              "host": "147.79.78.153:3000",
+              "proxy-connection": "keep-alive",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/134.0.0.0 Safari/537.36",
+              "accept": "application/json, text/plain, */*",
+              "authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdGF0dXMiOiJzdWNjZXNzIiwiZGF0YSI6eyJpZCI6NCwidXNlcm5hbWUiOiJia2ltbWluaWNoIiwiZW1haWwiOiJiam9lcm4ua2ltbWluaWNoQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiNmVkZDlkNzI2Y2JkYzg3M2M1MzllNDFhZTg3NTdiOGMiLCJyb2xlIjoiYWRtaW4iLCJkZWx1eGVUb2tlbiI6IiIsImxhc3RMb2dpbklwIjoiOTkuMjQ2LjkwLjUxIiwicHJvZmlsZUltYWdlIjoiYXNzZXRzL3B1YmxpYy9pbWFnZXMvdXBsb2Fkcy9kZWZhdWx0QWRtaW4ucG5nIiwidG90cFNlY3JldCI6IiIsImlzQWN0aXZlIjp0cnVlLCJjcmVhdGVkQXQiOiIyMDI1LTA5LTIzIDEzOjExOjMxLjYyOSArMDA6MDAiLCJ1cGRhdGVkQXQiOiIyMDI1LTA5LTI0IDIwOjIzOjQ5LjAyNiArMDA6MDAiLCJkZWxldGVkQXQiOm51bGx9LCJpYXQiOjE3NTg3NjkzOTR9.J2Y7RC4o3c2l56sjid3hXH8dCEmXA17dtwLXFbIoriWJM4z9lQCPtPuaXYadfYAjDKSrhPid08Zx2ornEXw56lYnsrJYsdxT42kQ1bP5XP8E1oB2-4Li5yW49ghrcpCDkBl3pWtcY4cBCMJ8H_Banx2b7Au3AxO0zieJ8_-SW94",
+              "referer": "http://147.79.78.153:3000/",
+              "accept-encoding": "gzip, deflate",
+              "accept-language": "en-US,en;q=0.9",
+              "cookie": "welcomebanner_status=dismiss; cookieconsent_status=dismiss; continueCode=4vgoQMVrapgqJ1BKbnExlORLvyABaZcDY0mjZo78N25946XwkzPYW3DeZy16; language=az_AZ",
+              "if-none-match": "W/\"1309-bB4sZiagKwQ3lu+YNYgYJnnxFVA\""
+            },
+            "post_data": null,
+            "redirected_from_url": null,
+            "redirected_to_url": null,
+            "is_iframe": false
+          }
+        },
+        "response": {
+          "data": {
+            "url": "http://147.79.78.153:3000/rest/languages",
+            "status": 200,
+            "headers": {
+              "access-control-allow-origin": "*",
+              "x-content-type-options": "nosniff",
+              "x-frame-options": "SAMEORIGIN",
+              "feature-policy": "payment 'self'",
+              "x-recruiting": "/#/jobs",
+              "content-type": "application/json; charset=utf-8",
+              "etag": "W/\"1309-iEtWUJNITfKFtwELkZ3ZP0ij1vQ\"",
+              "vary": "Accept-Encoding",
+              "content-encoding": "gzip",
+              "date": "Thu, 25 Sep 2025 14:27:31 GMT",
+              "connection": "keep-alive",
+              "keep-alive": "timeout=5",
+              "transfer-encoding": "chunked"
+            },
+            "content_type": "application/json; charset=utf-8",
+            "content_length": 0,
+            "is_iframe": false,
+            "body": "b'\\x1f\\x8b\\x08\\x00\\x00\\x00\\x00\\x00\\x00\\x03\\xad\\x98\\xcdk\\x1bG\\x18\\xc6\\xff\\x15\\xb3\\xa7\\x14\\x9cawgwv\\xd77\\x7f(\\xb6\\xe2\\x8f\\x18KihC\\x18\\xc6\\xd2Z\\xbb\\xd1z\\xa5\\xee\\xae\\x1c\\xecR\\xb0\\xa3@!\\xe4\\xd0\\x96$\\xaeK(%u\\x9c\\x90&\\x90\\xb4M\\xfc\\x91\\x8f\\x1e\\x9cK/B:9\\xbd\\xad\\xa0\\xa4\\x1f\\xb4\\xffC\\xb1\\xa4zg^E\\xaeZzz\\x0c\\xd6\\xf0\\x9b\\x99\\xf7\\x99\\xf7\\x99\\xd9\\xf3\\x1fJE{Y\\x1a\\x92\\xd8\\n\\x1d~_\\x1a\\x94<\\xe6\\x17\\xa4!ix\\xe5\\xc7\\x8d`\\x9e-\\xe7\\x98\\x9fc\\xd2\\xa0\\xe4\\xe6J~(\\r\\x9d\\x97\\xd8\\x8ataP\\n\\x9dR\\x10M\\xb6\\x06\\xb6F\\x95\\xed g\\xfb\\x11+\\xd8\\xd2\\x90a\"B\\x14\\xd94\\xcc\\xb6X\\x83R\\x81U\\x0e\\xff#EN`\\xdb\\'?\\xa8\\xb0 \\xb2\\x83P\\xfah\\xf0o\\xba\\x9b\\xa7\\xe9\\xb1\\x84>\\xc2\\x1c\\x16\\xb2\\x81\\xb4\\x9f/\\xf9v\\xe8\\n\\x13p\\xf3`\\x02\\xad\\x81\\xfc\\x04T\\x0bY\\n\\xc1\\x8aau\\xc4Hf`/\\x96\\xa3e\\x0e\\x9cc4\\x95I\\xc0\\xa3,b\\x1e\\xf3y\\x9e\\x1d\\x9e\\xccE\\x009:\\x0c\\x90\\x8a\\x81\\x14]3\\x15\\xc5\\xe8\\x08>\\x06\\x19\\xd2Qn\\xa7_]\\xb3\\xc3\\xe22O\\xcc\\xc1-\\x1e\\xcd\\x00\\x9c\\xa9 \\xdd\\xb4,\\xddT:\\xd2\\xc7\\x16\\xe7\\x19\\x1d\\x9bL\\xb0c\\xcc\\x0f\\x8b<5_\\x04\\xd41\\xb8HSE\\xb2lbb\\xaam\\xc1\\xfdPm:\\x96\\xe2\\xa8v%\\ns\\x8e\\xc0\\xb5!7\\x05\\xb8\\x16A\\x9a\\x86uE#m\\xe1\\xca\\xb9P\\xf1<\\x8efG4\\xc5\\xd1Rv\\x18\\xb9B-!+\\x95\\xfd\\x1fv\\xd6\\x16\\xfcR\\x98\\x97\\x06\\xa5J\\x08A3\\xdc\\xb4\\xfc\\x82\\xe7\\x86\\x0e\\xb4\\x90,\\xf7^W(\\xb84\\x15\\x96\\xd9\\xfe\\xe3\\x92\\'\\xda\\x14\\x12\\xbbL\\xa3\"S\\xd3\\x15\\xd3T\\xdb\\xd2O\\xf9\\x16\\x02zj.\\x01\\x9f\\n\\x98\\xbf\\x7f\\x97\\xb9!O^\\x08\\x00\\xb95B ctd\\x9a\\x96\\xf4A.0\\x9a\\xe6J9\\xcel\\xd7+\\xd8B#\\x80\\xc5\\x1c\\x87\\x86\\x95\\x11Q\\r\\xa2\\xe8\\xf2\\x91\\xf4>\\x95nD\\xd3\\xd9\\x84\\x97\\x8e\\x98\\xe72\\xbf$\\x00a\\x1bHC\\xf7\\xe8\\x06\\xb24\\xcb\\xb0d\\xa3-f\\xc2s\\x98\\xb7\\xc0\\xe1\\xca\\x1e\\x9d\\x9dJp\\xa7_m\\xac,\\x17\\x07fK^X\\x14\\x1c[\\xf6\\x00\\xb35J8\\x1d\\x18%G\\x83h\\x9a\\xd6\\xd3E\\xde\\x12\\x9dz7aN\\xb1h\\xc9\\xbd\\xc8\\x84ZzK\\x00\\xd7\\x1a\\xc0\\xe3\\xb0\\x8c,\\xa2b\\r\\xcb\\x1d!\\t\\xafSF\\x0e\\xe9T\\xe8\\xc4\\xd9\\x049\\xcd\\n\\xcb,\\xe0\\x81N\\x05\\x00[?\\x17\\xcf\\x05\"\\xc4\\xd2t\"w\\xe4\\x98n\\xee{t\\x86\\xdb\\xd5\\x19;o\\x07\\x1e\\xf3\\xf3\\xc2\\x1a}\\xb8\\xa53pKM\\x8cd]\\xc3\\x16\\xc6\\x1d\\xe9\\xc3\\xaf~\\x89\\xce\\x9c\\xe1\\xd0\\xa5@l\\xaf~\\tR\\xcf\\xc0\\xdc\\xd4\\x90f\\x10\\xcb4\\xb4\\xb6\\xf4C-Gt\\x96s\\xedl)\\x88*\\x85\\xca\\xfe}a\\xc1e\\xe8\\xdbY\\xe8[CABz\\xa9\\xfd\\xa1G\\xe6\\xde\\x86\\x1e81\\x12\\xb0\\xd0\\xf5\\xde\\xe1\\xe70\\x0f\\x9b\\xc4\\xc8[\\x9a\\x84J\\xb0n\\x99\\xb8-Z\\x1fs\\x08*t\\x8e\\xb3\\xd7l\\xa3\\xdaXk\\xac\\xd5\\xf7\\xea;\\xf5]\\x9e\\x1e@\\x97\\xcdA\\x97\\x99\\x04\\t\\x1d\\x8a\\xf4C/\\xd19\\xae\\xe4s\\xa5\\xc5\\xfd\\xdb\\xfe\\xab\\xaa\\x00\\x86U\\x9f\\x83U75tt\\x94\\x0eE\\xef/TG\\'\\x12p&\\xe7\\\\rW\\xec \\xbf\\xff\\x1c\\x86k\\xce\\x81W\\x89\\x89\\xeep%\\xbaj(\\x16iK\\xefp]p\\xe9\\xa94G\\xad\\x94\\x16\\x99\\xc7\\\\_\\x8c\\xbf\\x05\\x17\\xa6A\\x1a\\x9aME\\xa6\\x8c\\xb1f\\xa8m\\xe9\\xc7\\xe7\\xe1\\x12\\xcdpi\\x90Y\\xb2\\xfd\\xb0(\\\\\\x0bC\\x98\\x06\\x19\\xd8\\xb9t\\r)\\xa6\\xa6\\xc8\\xb2\\xd6\\x91\\x9e\\xcd9\\nh\\x96\\xb3vv\\xffyP\\xdc\\xbf+\\x84O\\x04\\xfd\\x9c\\xed\\xf2\\xb3\\x8et\\xa2\\x99:\\xd6\\xdb\\xd2\\x8f\\xa3l\\x8f\\x8es\\xe0\\xda\\x8d\\xda\\xb3\\xda\\xb3\\xdav\\xedEm\\xb7\\xb6W{ \\\\3\\xe0\\x04R\\xb0\\x8ba\\x13\\xc9\\x86\\x8e\\x15lv\\xe4\\xb8F=_\\xa0#\\xe3\\t\\xb9\\xfe\\xb8q\\xb5\\xfe\\xac\\xfe]\\xfdQc\\xb5}\\xa0\\x06N\\xd4\\x9f\\xd4\\xb7\\xeb;\\xf5=\\xf1\\\\\\x17\\xe0\\xb9\\x1e\\xef\\x0e\\x0ca\\x16|\\xff\\xee\\x9eG\\xa5H\\xcf\\x0e\\'\\xf3hT\\xeb{\\x8d\\xd5\\xfa\\xa3\\xc6z\\xfdEc\\xadq\\xad\\xfbhW\\x18\\x98\\xc0\\xd9\\xee[\\x80*[\\xaa\\xac\\xcbGb\\xf6N\\x90\"\\xa3\\xe3\\x9c\\xd1\\x9a\\xd5;\\xcd\\xea\\'\\xcd\\xeaW\\xcd\\xeaz\\xb3\\xfau\\xb3\\xfaE\\xb3\\xfa\\xb9P\\x06h\\xbbI\\x88\\xc72\\xe2\\xcc~(\\xc7\\x06\\xa6M\\xd3\\\\\\x82\\x1d\\xdc>\\xf8\\xf4\\xe0\\xde\\xc1\\xc6\\xc1}\\xe1\"\\x02\\x13l\\x02^\\x99u\\x82d!5{z\\x9d\\x054\\xc3m\\xf8\\xeb\\xdd\\xd7\\x8f_\\xdf\\xfb\\xe9\\xaa\\xf0\\xe4;t~\\xe4\\xc3w\\x1f4<1\\x11Q,U#fK\\x8c\\x9eH\\xc7\\xa5i\\xee:\\x1co\\xee\\xc6\\x9b?\\xc4\\x9b\\x97\\xe3\\xcd\\xad\\xf8\\xce\\xaa\\xb0P\\x08\\x9d\\x80\\xcd\\x04\\xcbHH\\xea\\xe3\\xdd5\\xef\\xd3\\x11\\xee\\x99\\x19o=\\x88\\xb7^\\xc6[\\x97\\xe3\\xado\\xe3\\xad\\x97\\x82\\xaf\\xe1+s\\x04\\xbe2\\xff\\x95\\xadB\\x97Nq\\x8f\\xafx\\xbb\\x1ao\\x7f\\x16?\\xbd\\x1co_\\x89\\x9f\\xbe\\x10\\xfa\\x18\\xec\\x9f\\x19\\xb8d\\x15\\x89\\\\\\xa576rh\\x96\\x0b\\x8ax\\xf7J\\xbc\\xb3\\x1e\\xef\\xdc\\x16:\\x19\\x8c\\x88,\\x8c\\x08\\xa2!Y!\\x06&ZGzVvq\\x99NOs\\xa7gu\\xa3\\xb9\\xfa\\xbc\\xb9z\\xbd\\xb9\\xba\\xd7\\xfa[\\xe8`\\x8b\\x8b\\x00<\\xfd^\\xf7\\xabZ7\\xb0\\xaa*FG\\x8eyU\\x17Kt\\x92k\\x9d\\x7f\\xde\\xb8\\xf5\\xfb\\x93\\x87\\x7f\\xdc\\xfc\\x9e\\'\\x16a\\xcf\\x9c\\x84ilYH\\xf8r`\\xf5L\\xc3\\x15\\x87\\x8er&\\xfey\\xe7\\xe1\\x9b\\x9b\\x1f\\x0b\\xd1\\x0b\\xbd\\xdb\\xfa9\\x80aC\\xc5\\xa6f\\xb5D\\xef\\xc9\\xba\\xc8\\xe8\\xe9\\xd9\\x84\\xf5f\\xfd\\xce\\x9b[\\x0f~\\xbd\\xff%\\x8f\\xbbX\\x06\\xb8\\xd3]\\xcf\\xf7\\xff\\x10H+\\x0e\\xcd\\x9eK\\xc8\\xbf\\xec\\xae\\xfd\\xf6\\xcd\\xf5\\xee\\xb5F\\x97\\xa0\\x87\\xceu\\xdf\\xaf\\xf8oB\\xa6\\xd1\\x1f|b\\xf2\\x9f\\xe1\\x0e\\xfcp\\xd1\\x1a$\\x9c\\x18\\x82tb\\xc9\\xd8 \\x1d\\xe9~B\\\\\\xf8\\x0b%\\xd4R\\xba\\t\\x13\\x00\\x00'"
+          }
+        }
+      },
+      {
+        "request": {
+          "data": {
+            "method": "GET",
+            "url": "http://147.79.78.153:3000/api/Challenges/?name=Score%20Board",
+            "headers": {
+              "host": "147.79.78.153:3000",
+              "proxy-connection": "keep-alive",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/134.0.0.0 Safari/537.36",
+              "accept": "application/json, text/plain, */*",
+              "authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdGF0dXMiOiJzdWNjZXNzIiwiZGF0YSI6eyJpZCI6NCwidXNlcm5hbWUiOiJia2ltbWluaWNoIiwiZW1haWwiOiJiam9lcm4ua2ltbWluaWNoQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiNmVkZDlkNzI2Y2JkYzg3M2M1MzllNDFhZTg3NTdiOGMiLCJyb2xlIjoiYWRtaW4iLCJkZWx1eGVUb2tlbiI6IiIsImxhc3RMb2dpbklwIjoiOTkuMjQ2LjkwLjUxIiwicHJvZmlsZUltYWdlIjoiYXNzZXRzL3B1YmxpYy9pbWFnZXMvdXBsb2Fkcy9kZWZhdWx0QWRtaW4ucG5nIiwidG90cFNlY3JldCI6IiIsImlzQWN0aXZlIjp0cnVlLCJjcmVhdGVkQXQiOiIyMDI1LTA5LTIzIDEzOjExOjMxLjYyOSArMDA6MDAiLCJ1cGRhdGVkQXQiOiIyMDI1LTA5LTI0IDIwOjIzOjQ5LjAyNiArMDA6MDAiLCJkZWxldGVkQXQiOm51bGx9LCJpYXQiOjE3NTg3NjkzOTR9.J2Y7RC4o3c2l56sjid3hXH8dCEmXA17dtwLXFbIoriWJM4z9lQCPtPuaXYadfYAjDKSrhPid08Zx2ornEXw56lYnsrJYsdxT42kQ1bP5XP8E1oB2-4Li5yW49ghrcpCDkBl3pWtcY4cBCMJ8H_Banx2b7Au3AxO0zieJ8_-SW94",
+              "referer": "http://147.79.78.153:3000/",
+              "accept-encoding": "gzip, deflate",
+              "accept-language": "en-US,en;q=0.9",
+              "cookie": "welcomebanner_status=dismiss; cookieconsent_status=dismiss; continueCode=4vgoQMVrapgqJ1BKbnExlORLvyABaZcDY0mjZo78N25946XwkzPYW3DeZy16; language=az_AZ",
+              "if-none-match": "W/\"288-eROVcP26Pexwsmbnu7dy05mDpYg\""
+            },
+            "post_data": null,
+            "redirected_from_url": null,
+            "redirected_to_url": null,
+            "is_iframe": false
+          }
+        },
+        "response": {
+          "data": {
+            "url": "http://147.79.78.153:3000/api/Challenges/?name=Score%20Board",
+            "status": 200,
+            "headers": {
+              "access-control-allow-origin": "*",
+              "x-content-type-options": "nosniff",
+              "x-frame-options": "SAMEORIGIN",
+              "feature-policy": "payment 'self'",
+              "x-recruiting": "/#/jobs",
+              "content-type": "application/json; charset=utf-8",
+              "content-length": "715",
+              "etag": "W/\"2cb-Jf9cpke21Ei4rE6wv68EC9FA7iY\"",
+              "vary": "Accept-Encoding",
+              "date": "Thu, 25 Sep 2025 14:27:31 GMT",
+              "connection": "keep-alive",
+              "keep-alive": "timeout=5"
+            },
+            "content_type": "application/json; charset=utf-8",
+            "content_length": 715,
+            "is_iframe": false,
+            "body": "b'{\"status\":\"success\",\"data\":[{\"id\":74,\"key\":\"scoreBoardChallenge\",\"name\":\"Score Board\",\"category\":\"Miscellaneous\",\"tags\":\"Tutorial,Code Analysis\",\"description\":\"Diqq\\xc9\\x99tlic\\xc9\\x99 gizl\\xc9\\x99dilmi\\xc5\\x9f \\\\\"Xal L\\xc3\\xb6vh\\xc9\\x99si\\\\\" s\\xc9\\x99hif\\xc9\\x99sini tap\\xc4\\xb1n.\",\"difficulty\":1,\"hint\":\"S\\xc9\\x99hn\\xc9\\x99 arxas\\xc4\\xb1nda bir referans v\\xc9\\x99 ya ipucu tapma\\xc4\\x9fa \\xc3\\xa7al\\xc4\\xb1\\xc5\\x9f\\xc4\\xb1n. V\\xc9\\x99 ya sad\\xc9\\x99c\\xc9\\x99 Xal C\\xc9\\x99dv\\xc9\\x99linin hans\\xc4\\xb1 URL-\\xc9\\x99 sahib ola bil\\xc9\\x99c\\xc9\\x99yini t\\xc9\\x99xmin edin.\",\"hintUrl\":\"https://pwning.owasp-juice.shop/companion-guide/latest/part2/score-board.html#_find_the_carefully_hidden_score_board_page\",\"mitigationUrl\":null,\"solved\":false,\"disabledEnv\":null,\"tutorialOrder\":1,\"codingChallengeStatus\":0,\"createdAt\":\"2025-09-23T13:11:31.966Z\",\"updatedAt\":\"2025-09-23T13:11:31.966Z\"}]}'"
+          }
+        }
+      }
+    ]
+  }
+]

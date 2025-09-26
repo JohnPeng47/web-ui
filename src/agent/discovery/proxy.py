@@ -17,8 +17,6 @@ except ImportError as e:
     raise ImportError(
         "mitmproxy is required. Install with: pip install mitmproxy"
     ) from e
-
-from logger import get_agent_loggers
 from common.http_handler import HTTPHandler
 from httplib import (
     HTTPRequest,
@@ -27,10 +25,10 @@ from httplib import (
     HTTPResponseData,
     post_data_to_dict,
 )
+from logger import PROXY_LOGGER_NAME
+from logging import getLogger
 
-agent_log, _ = get_agent_loggers()
-agent_log.propagate = False
-
+proxy_log = getLogger(PROXY_LOGGER_NAME)
 
 def _detach_mitm_logging_handlers() -> None:
     """Detach mitmproxy logging handlers to prevent event loop errors during shutdown."""
@@ -78,7 +76,6 @@ class MitmProxyHTTPHandler:
         ssl_insecure: bool = True,
         http2: bool = True,
         handler_name: Optional[str] = None,
-        start_browser: bool = False,
     ) -> None:
         self._handler = handler
         self._handler_name = handler_name or f"mitm_handler_{id(self)}"
@@ -87,19 +84,16 @@ class MitmProxyHTTPHandler:
         self._listen_port = listen_port
         self._ssl_insecure = ssl_insecure
         self._http2 = http2
-        self._start_browser = start_browser
 
         self._master: Optional[DumpMaster] = None
         self._task: Optional[asyncio.Task] = None
-        self._browser_task: Optional[asyncio.Task] = None
         self._thread: Optional[threading.Thread] = None
         self._connected = False
         self._alive = False
 
         # We need the loop where handler coroutines should run
         self._loop: Optional[asyncio.AbstractEventLoop] = None
-
-        agent_log.info(
+        proxy_log.info(
             "Initialized MitmProxyHTTPHandler '%s' on %s:%d",
             self._handler_name,
             self._listen_host,
@@ -109,10 +103,9 @@ class MitmProxyHTTPHandler:
     # ─────────────────────────────────────────────────────────────────────
     # Public API (mirrors CDPHTTPHandler)
     # ─────────────────────────────────────────────────────────────────────
-
     async def connect(self) -> None:
         if self._connected:
-            agent_log.info("Handler '%s' already connected", self._handler_name)
+            proxy_log.info("Handler '%s' already connected", self._handler_name)
             return
 
         # Capture the loop where we will schedule handler coroutines
@@ -121,14 +114,10 @@ class MitmProxyHTTPHandler:
         except RuntimeError as e:
             raise RuntimeError("connect() must be called from within an asyncio loop") from e
 
-        # Start browser if requested
-        if self._start_browser:
-            await self._start_browser_instance()
-
         # Wait briefly for port to be released from any previous run
         released = await self._wait_for_port_release(self._listen_host, self._listen_port, timeout=3.0)
         if not released:
-            agent_log.warning(
+            proxy_log.warning(
                 "Port %s:%d still in use after grace period; attempting start anyway",
                 self._listen_host,
                 self._listen_port,
@@ -148,7 +137,7 @@ class MitmProxyHTTPHandler:
 
         def _run_mitm_blocking() -> None:
             try:
-                agent_log.info(
+                proxy_log.info(
                     "Starting mitmproxy on %s:%d (http2=%s ssl_insecure=%s)",
                     self._listen_host,
                     self._listen_port,
@@ -159,10 +148,11 @@ class MitmProxyHTTPHandler:
                     result = self._master.run()
                     if inspect.iscoroutine(result):
                         asyncio.run(result)
-            except Exception:
-                agent_log.exception("mitmproxy master crashed")
+            except Exception as e:
+                proxy_log.exception("mitmproxy master crashed")
+                proxy_log.exception(e)
             finally:
-                agent_log.info("mitmproxy master exited")
+                proxy_log.info("mitmproxy master exited")
                 self._alive = False
                 _detach_mitm_logging_handlers()
 
@@ -186,13 +176,8 @@ class MitmProxyHTTPHandler:
             if self._thread is not None:
                 self._thread.join(timeout=8.0)
                 if self._thread.is_alive():
-                    agent_log.warning("mitm proxy thread did not stop within timeout")
+                    proxy_log.warning("mitm proxy thread did not stop within timeout")
             
-            # Stop browser if we started it
-            if self._browser_task and not self._browser_task.done():
-                self._browser_task.cancel()
-                with contextlib.suppress(asyncio.CancelledError):
-                    await self._browser_task
             # small pause to ensure sockets fully released
             await asyncio.sleep(0.05)
 
@@ -203,7 +188,7 @@ class MitmProxyHTTPHandler:
             self._thread = None
             self._browser_task = None
             self._connected = False
-            agent_log.info("Handler '%s' disconnected", self._handler_name)
+            proxy_log.info("Handler '%s' disconnected", self._handler_name)
 
     async def _wait_for_port_release(self, host: str, port: int, *, timeout: float = 3.0, interval: float = 0.1) -> bool:
         """Poll until a TCP bind to (host, port) succeeds or timeout elapses."""
@@ -245,85 +230,29 @@ class MitmProxyHTTPHandler:
         return self._connected
 
     # ─────────────────────────────────────────────────────────────────────
-    # Browser management
-    # ─────────────────────────────────────────────────────────────────────
-    async def _start_browser_instance(self) -> None:
-        """Start a browser instance configured to use this proxy."""
-        try:
-            from common.constants import BROWSER_PROFILE_DIR, BROWSER_CDP_PORT
-            from playwright.async_api import async_playwright
-            
-            agent_log.info("Starting browser with proxy configuration")
-            
-            async def _run_browser():
-                pw = None
-                browser = None
-                try:
-                    pw = await async_playwright().start()
-                    browser = await pw.chromium.launch_persistent_context(
-                        user_data_dir=str(BROWSER_PROFILE_DIR),
-                        headless=True,
-                        executable_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe",
-                        args=[
-                            f"--remote-debugging-port={BROWSER_CDP_PORT}", 
-                            "--remote-debugging-address=127.0.0.1",
-                            f"--proxy-server={self.proxy_url}"
-                        ],
-                    )
-                    
-                    agent_log.info("Browser started with proxy %s", self.proxy_url)
-                    
-                    # Keep browser running until cancelled
-                    while True:
-                        await asyncio.sleep(1)
-                        
-                except asyncio.CancelledError:
-                    agent_log.info("Browser shutdown requested")
-                    raise
-                except Exception as e:
-                    agent_log.error("Browser error: %s", e)
-                finally:
-                    if browser:
-                        try:
-                            await browser.close()
-                            agent_log.info("Browser closed")
-                        except Exception as e:
-                            agent_log.error("Error closing browser: %s", e)
-                    
-                    if pw:
-                        try:
-                            await pw.stop()
-                            agent_log.info("Playwright stopped")
-                        except Exception as e:
-                            agent_log.error("Error stopping playwright: %s", e)
-            
-            self._browser_task = asyncio.create_task(_run_browser())
-            
-        except ImportError as e:
-            agent_log.warning("Could not start browser - missing dependencies: %s", e)
-        except Exception as e:
-            agent_log.error("Failed to start browser: %s", e)
-
-    # ─────────────────────────────────────────────────────────────────────
     # Addon → handler bridging
     # ─────────────────────────────────────────────────────────────────────
     def _schedule_coro(self, coro) -> None:
         loop = self._loop
         if loop is None:
+            proxy_log.warning("Cannot schedule coroutine: no event loop")
+            # Properly close the coroutine to avoid warning
+            coro.close()
             return
         if loop.is_closed():
+            proxy_log.warning("Cannot schedule coroutine: event loop closed")
+            coro.close()
             return
         try:
             fut = asyncio.run_coroutine_threadsafe(coro, loop)
+            def _log_err(_fut) -> None:
+                exc = _fut.exception()
+                if exc:
+                    proxy_log.exception("Handler coroutine failed: %s", exc)
+            fut.add_done_callback(_log_err)
         except RuntimeError as e:
-            # loop is closing/closed
-            agent_log.debug("Dropped handler coroutine: %s", e)
-            return
-        def _log_err(_fut) -> None:
-            exc = _fut.exception()
-            if exc:
-                agent_log.exception("Handler coroutine failed: %s", exc)
-        fut.add_done_callback(_log_err)
+            proxy_log.debug("Dropped handler coroutine: %s", e)
+            coro.close()  # Clean up the coroutine
 
     def _flow_to_http_request(self, flow: "http.HTTPFlow") -> HTTPRequest:
         """
@@ -365,7 +294,7 @@ class MitmProxyHTTPHandler:
             is_iframe=False,
         )
         request = HTTPRequest(data=data)
-        # agent_log.info(f"Request: {request}")
+        # proxy_log.info(f"Request: {request}")
         
         return request
 
@@ -379,7 +308,7 @@ class MitmProxyHTTPHandler:
             body_bytes = flow.response.raw_content if flow.response.raw_content is not None else None
         except Exception:
             body_bytes = None
-
+            
         data = HTTPResponseData(
             url=flow.request.url,
             status=flow.response.status_code,
@@ -388,7 +317,7 @@ class MitmProxyHTTPHandler:
             body=body_bytes,
             body_error=None,
         )
-        # agent_log.info(f"Response: {data}")
+        # proxy_log.info(f"Response: {data}")
         return HTTPResponse(data=data)
 
 class _RelayAddon:
@@ -408,7 +337,7 @@ class _RelayAddon:
             http_request = self.outer._flow_to_http_request(flow)
             self.outer._schedule_coro(self.outer._handler.handle_request(http_request))
         except Exception:
-            agent_log.exception("Failed to relay request")
+            proxy_log.exception("Failed to relay request")
 
     def response(self, flow: http.HTTPFlow) -> None:
         try:
@@ -421,7 +350,7 @@ class _RelayAddon:
                 self.outer._handler.handle_response(http_response, http_request)
             )
         except Exception:
-            agent_log.exception("Failed to relay response")
+            proxy_log.exception("Failed to relay response")
 
     def error(self, flow: http.HTTPFlow) -> None:
         # You could synthesize an error HTTPResponse and forward it if needed.

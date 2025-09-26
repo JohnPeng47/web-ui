@@ -10,7 +10,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
-from logger import setup_server_logger
+from logger import get_or_init_log_factory, SERVER_LOGGER_NAME
 from cnc.workers_launcher import start_workers
 
 from cnc.schemas.http import EnrichedRequest, EnrichAuthNZMessage
@@ -30,9 +30,6 @@ from src.agent.discovery.min_agent_single_page import MinimalAgentSinglePage
 from src.llm_models import LLMHub
 
 from common.constants import API_SERVER_PORT, SERVER_MODEL_CONFIG
-
-LOG = logging.getLogger("cnc.main")
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -69,7 +66,7 @@ def create_app() -> FastAPI:
 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
-        LOG.warning("Validation error: %s", exc.errors())
+        print("Validation error: %s", exc.errors())
 
     @app.get("/health")
     async def health_check():
@@ -144,7 +141,7 @@ async def serve_uvicorn(app: FastAPI, host: str, port: int, shutdown_event: asyn
         try:
             await asyncio.wait_for(task, timeout=10.0)
         except asyncio.TimeoutError:
-            LOG.warning("Uvicorn did not stop within timeout; forcing exit")
+            print("Uvicorn did not stop within timeout; forcing exit")
             server.force_exit = True
             with contextlib.suppress(Exception):
                 await task
@@ -173,7 +170,7 @@ async def workers_supervisor(
             override_max_steps=override_max_steps,
         )
     except Exception as e:
-        LOG.exception("Worker subsystem failed: %r", e)
+        print("Worker subsystem failed: %r", e)
         shutdown_event.set()
         raise
     finally:
@@ -187,8 +184,8 @@ async def start_all(
 ) -> None:
     print(f"Starting api server on {'0.0.0.0'}:{API_SERVER_PORT}")
 
-    # TODO: test log rotation
-    setup_server_logger(".server_logs")
+    get_or_init_log_factory(base_dir=".server_logs")
+    
     app_instance = create_app()
     shutdown_event = asyncio.Event()
     workers_task = asyncio.create_task(
@@ -228,10 +225,10 @@ if __name__ == "__main__":
         asyncio.run(start_all(start_discovery_pool))
     except PermissionError as e:
         # Clean, explicit message for the Windows bind case
-        LOG.error("%s", e)
+        print("%s", e)
         raise
     except RuntimeError as e:
         # Includes "bind_failed" from uvicorn/SystemExit translation
         if "bind_failed" in str(e):
-            LOG.error("%s", e)
+            print("%s", e)
         raise

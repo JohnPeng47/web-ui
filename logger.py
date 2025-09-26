@@ -13,7 +13,6 @@ from src.utils import get_ctxt_id, LoggerProxy
 # Logger names as top-level constants
 AGENT_LOGGER_NAME = "agentlog"
 FULL_REQUESTS_LOGGER_NAME = "full_requests"
-SERVER_LOGGER_NAME = "serverlog"
 
 _LOG_FORMAT = "%(asctime)s:[%(funcName)s:%(lineno)s] - %(message)s"
 
@@ -152,7 +151,7 @@ class AgentFileHandler(logging.FileHandler):
 #  updated helpers
 # --------------------------------------------------------------------------- #
 # TODO: swap the order of eval_name and subfolder
-def setup_agent_logger(
+def _setup_agent_logger(
     log_dir: str,
     *,
     parent_dir: Optional[Path] = None, # empty path
@@ -245,8 +244,11 @@ def setup_server_logger(log_dir: str):
         "%(asctime)s:[%(funcName)s:%(lineno)s] - %(message)s",
         datefmt="%H:%M:%S"
     ))
-    
     logger.addHandler(file_handler)
+    logger.addHandler(get_console_handler())
+
+    for h in logger.handlers:
+        print(f"SERVER LOGGER HANDLER: ", h)
 
 def get_server_logger():
     return logging.getLogger(SERVER_LOGGER_NAME)
@@ -262,34 +264,38 @@ def get_agent_loggers():
 #  ServerLogFactory: per-engagement loggers and directory layout
 # --------------------------------------------------------------------------- #
 
-class ServerLogFactory:
+# static logger names
+SERVER_LOGGER_NAME = "serverlog"
+PROXY_LOGGER_NAME = "proxylog"
+UVICORN_LOG = "uvicorn"
+UVICORN_ACCESSS_LOG = "uvicorn.access"
+UVICORN_ERROR_LOG = "uvicorn.error"
+AGENT_POOL_LOGGER_NAME = "agentpool"
+
+class _ServerLogFactory:
     """
-    Creates engagement-scoped loggers and log directories.
+    Singleton application-wide logger factory.
+    3-tier file-level logging:
 
-    Layout (under base_dir/<timestamp>/<incr_id>):
+    1. base_dir (server / single-run agents)
+        2. timestamp (represents a run instance)
+            3. agents (discovery/exploit)
 
-        server.log
-        discovery_agents/
-            <run>/<N>.log
-        exploit_agents/
-            <run>/<N>.log
-
-    Notes:
-    - Uses setup_agent_logger for agent logs (discovery/exploit) to ensure
-      per-thread file handlers and console logging.
-    - Server logger writes directly to server.log and also to console.
+    - tier 1 represents a logical application container for the logs ie. single run of server
+    - tier 2 [static] represents log processes where only a single log file is created ie. server logs
+    - tier 3 [dynamic] represents log processes where multiple log files may be created ie. mutliple agents running in pool 
     """
-
     def __init__(self, base_dir: str) -> None:
         self._base_dir = Path(base_dir)
-        self._engagement_server_loggers: Dict[str, logging.Logger] = {}
-        self._engagement_id_to_dir: Dict[str, Path] = {}
+        self._server_logger: Optional[logging.Logger] = None
+        self._engagement_dir: Optional[Path] = None
 
-    def _engagement_dir(self, engagement_key: str) -> Path:
-        # Check if we already have a mapping for this engagement
-        key = str(engagement_key)
-        if key in self._engagement_id_to_dir:
-            return self._engagement_id_to_dir[key]
+        self.setup_static_loggers()
+
+    def _get_engagement_dir(self) -> Path:
+        # Return cached directory if already created
+        if self._engagement_dir is not None:
+            return self._engagement_dir
         
         # Create timestamp directory
         timestamp = datetime.now().strftime("%Y-%m-%d")
@@ -310,8 +316,8 @@ class ServerLogFactory:
         (engagement_dir / "discovery_agents").mkdir(exist_ok=True)
         (engagement_dir / "exploit_agents").mkdir(exist_ok=True)
         
-        # Store mapping
-        self._engagement_id_to_dir[key] = engagement_dir
+        # Cache the directory
+        self._engagement_dir = engagement_dir
         
         return engagement_dir
 
@@ -330,14 +336,9 @@ class ServerLogFactory:
                 continue
         return str(max_num + 1)
 
-    def ensure_server_logger(self, engagement_key: str) -> logging.Logger:
-        """Create or return the per-engagement server logger (with console + file)."""
-        key = str(engagement_key)
-        if key in self._engagement_server_loggers:
-            return self._engagement_server_loggers[key]
-
-        e_dir = self._engagement_dir(key)
-        logger_name = f"{SERVER_LOGGER_NAME}.{key}"
+    # static loggers
+    def _create_static_logger(self, logger_name: str, log_filepath: Path) -> logging.Logger:
+        """Create a static logger with console and file handlers."""
         logger = logging.getLogger(logger_name)
         logger.setLevel(logging.INFO)
         logger.propagate = False
@@ -346,42 +347,77 @@ class ServerLogFactory:
         if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
             logger.addHandler(get_console_handler())
 
-        server_log_path = e_dir / "server.log"
-        if not any(isinstance(h, logging.FileHandler) and getattr(h, "baseFilename", None) == str(server_log_path) for h in logger.handlers):
-            fh = logging.FileHandler(server_log_path, encoding="utf-8")
+        if not any(isinstance(h, logging.FileHandler) and getattr(h, "baseFilename", None) == str(log_filepath) for h in logger.handlers):
+            fh = logging.FileHandler(log_filepath, encoding="utf-8")
             fh.setFormatter(formatter)
             logger.addHandler(fh)
 
-        self._engagement_server_loggers[key] = logger
-        return logger
+    def setup_server_logger(self, logger_name: str):
+        """Create or return the server logger (with console + file)."""
+        e_dir = self._get_engagement_dir()
+        server_log_path = e_dir / "server.log"
+        self._create_static_logger(logger_name, server_log_path)
 
-    def get_discovery_agent_loggers(self, engagement_key: str) -> Tuple[logging.Logger, logging.Logger]:
+    def setup_proxy_logger(self, logger_name: str):
+        """Create or return the proxy logger (with console + file)."""
+        e_dir = self._get_engagement_dir()
+        proxy_log_path = e_dir / "proxy.log"
+        self._create_static_logger(logger_name, proxy_log_path)
+
+    def setup_uvicorn_logger(self, logger_name: str):
+        e_dir = self._get_engagement_dir()
+        uvicorn_log_path = e_dir / "server.log"
+        self._create_static_logger(logger_name, uvicorn_log_path)
+    
+    def setup_agent_pool_logger(self, logger_name: str):
+        e_dir = self._get_engagement_dir()
+        agent_pool_log_path = e_dir / "agent_pool.log"
+        self._create_static_logger(logger_name, agent_pool_log_path)
+
+    def setup_static_loggers(self) -> None:
+        """Setup the static loggers."""
+        self.setup_server_logger(SERVER_LOGGER_NAME)
+        self.setup_proxy_logger(PROXY_LOGGER_NAME)
+        self.setup_uvicorn_logger(UVICORN_LOG)
+        self.setup_uvicorn_logger(UVICORN_ACCESSS_LOG)
+        self.setup_uvicorn_logger(UVICORN_ERROR_LOG)
+        self.setup_agent_pool_logger(AGENT_POOL_LOGGER_NAME)
+
+        # should include?
+        # self.get_discovery_agent_loggers()
+        # self.get_exploit_agent_loggers()
+
+    # dynamic loggers
+    def get_discovery_agent_loggers(self) -> Tuple[logging.Logger, logging.Logger]:
         """
-        Return (parent_dir, logger_name) for a new discovery agent under this engagement.
+        Return loggers for a new discovery agent.
         Does not attach handlers; the worker thread should call setup_agent_logger
         with these values.
         """
-        e_dir = self._engagement_dir(str(engagement_key))
+        e_dir = self._get_engagement_dir()
         discovery_dir = e_dir / "discovery_agents"
+        
         name = self._next_numeric_name(discovery_dir)
-        setup_agent_logger(log_dir="", parent_dir=discovery_dir, name=name, create_run_subdir=False, add_thread_filter=False)
-        return logging.getLogger(name), logging.getLogger(FULL_REQUESTS_LOGGER_NAME)
 
-    def get_exploit_agent_loggers(self, engagement_key: str) -> Tuple[logging.Logger, logging.Logger]:
+        _setup_agent_logger(log_dir="", parent_dir=discovery_dir, name=name, create_run_subdir=False, add_thread_filter=False)
+        return logging.getLogger(name), logging.getLogger(FULL_REQUESTS_LOGGER_NAME)
+    
+    def get_exploit_agent_loggers(self) -> Tuple[logging.Logger, logging.Logger]:
         """
-        Return (parent_dir, logger_name) for a new exploit agent under this engagement.
+        Return loggers for a new exploit agent.
         Does not attach handlers; the worker thread should call setup_agent_logger.
         """
-        e_dir = self._engagement_dir(str(engagement_key))
+        e_dir = self._get_engagement_dir()
         exploit_dir = e_dir / "exploit_agents"
+
         name = self._next_numeric_name(exploit_dir)
-        setup_agent_logger(log_dir="", parent_dir=exploit_dir, name=name, create_run_subdir=False, add_thread_filter=False)
+
+        _setup_agent_logger(log_dir="", parent_dir=exploit_dir, name=name, create_run_subdir=False, add_thread_filter=False)
         return logging.getLogger(name), logging.getLogger(FULL_REQUESTS_LOGGER_NAME)
 
+_SERVER_LOG_FACTORY_SINGLETON: Optional[_ServerLogFactory] = None
 
-_SERVER_LOG_FACTORY_SINGLETON: Optional[ServerLogFactory] = None
-
-def get_server_log_factory(base_dir: Optional[str] = None) -> ServerLogFactory:
+def get_or_init_log_factory(base_dir: Optional[str] = None) -> _ServerLogFactory:
     """
     Return a singleton ServerLogFactory. If base_dir is provided on first call,
     it sets the base directory; otherwise defaults to ".server_logs/engagements".
@@ -391,5 +427,5 @@ def get_server_log_factory(base_dir: Optional[str] = None) -> ServerLogFactory:
     if _SERVER_LOG_FACTORY_SINGLETON is None:
         root = base_dir or ".server_logs/engagements"
         Path(root).mkdir(parents=True, exist_ok=True)
-        _SERVER_LOG_FACTORY_SINGLETON = ServerLogFactory(root)
+        _SERVER_LOG_FACTORY_SINGLETON = _ServerLogFactory(root)
     return _SERVER_LOG_FACTORY_SINGLETON

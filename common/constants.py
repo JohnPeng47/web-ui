@@ -6,7 +6,7 @@ MAX_EXPLOIT_AGENT_STEPS = 3
 
 # discovery agent 
 MAX_DISCOVERY_AGENT_STEPS = 6
-MAX_DISCOVERY_PAGE_STEPS = 2
+MAX_DISCOVERY_PAGE_STEPS = 15
 SCREENSHOTS = False
 
 # server workers
@@ -16,6 +16,9 @@ BROWSER_CDP_HOST = "127.0.0.1"
 BROWSER_CDP_PORT = 9899
 BROWSER_PROFILE_DIR = Path(
     r"C:\Users\jpeng\AppData\Local\Google\Chrome\User Data\Profile 2"
+)
+BROWSER_PROFILE_DIR_2 = Path(
+    r".profiles"
 )
 
 # cnc server url

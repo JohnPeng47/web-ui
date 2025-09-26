@@ -1,3 +1,11 @@
+import tiktoken
+
+def num_tokens_from_string(string: str, encoding_name: str = "cl100k_base") -> int:
+    """Returns the number of tokens in a text string."""
+    encoding = tiktoken.get_encoding(encoding_name)
+    num_tokens = len(encoding.encode(string, disallowed_special=()))
+    return num_tokens
+
 def extract_json(response: str) -> str:
     """
     Extracts the JSON from the response using stack-based parsing to match braces.
@@ -49,3 +57,74 @@ def get_base_url(url: str) -> str:
     
     parsed = urlparse(url)
     return f"{parsed.scheme}://{parsed.netloc}"
+
+class OrderedSet:
+    """
+    A data structure that maintains unique elements in insertion order.
+    Supports deduplication, order preservation, and efficient operations.
+    """
+    
+    def __init__(self, iterable=None):
+        """
+        Initialize OrderedSet with optional iterable.
+        
+        Args:
+            iterable: Optional iterable to initialize the set with
+        """
+        self._items = {}  # Use dict to maintain insertion order (Python 3.7+)
+        if iterable:
+            for item in iterable:
+                self.add(item)
+    
+    def add(self, item):
+        """
+        Add an item to the set. If item already exists, no change occurs.
+        
+        Args:
+            item: Item to add to the set
+        """
+        self._items[item] = None
+    
+    def remove(self, item):
+        """
+        Remove an item from the set. Raises KeyError if item not found.
+        
+        Args:
+            item: Item to remove from the set
+            
+        Raises:
+            KeyError: If item is not in the set
+        """
+        del self._items[item]
+    
+    def pop(self):
+        """
+        Remove and return the first item from the set.
+        
+        Returns:
+            The first item in the set
+            
+        Raises:
+            KeyError: If the set is empty
+        """
+        if not self._items:
+            raise KeyError("pop from empty OrderedSet")
+        item = next(iter(self._items))
+        del self._items[item]
+        return item
+    
+    def __contains__(self, item):
+        """Check if item is in the set."""
+        return item in self._items
+    
+    def __len__(self):
+        """Return the number of items in the set."""
+        return len(self._items)
+    
+    def __iter__(self):
+        """Return an iterator over the items in insertion order."""
+        return iter(self._items)
+    
+    def __repr__(self):
+        """Return string representation of the OrderedSet."""
+        return f"OrderedSet({list(self._items.keys())})"

@@ -7,7 +7,6 @@ from common.constants import (
     DISCOVERY_MODEL_CONFIG
 )
 from eval.datasets.detection import DISCOVERY_QUEUE_JSON
-from logger import setup_agent_logger, get_agent_loggers
 from src.agent.discovery.prompts.sys_prompt import CUSTOM_SYSTEM_PROMPT
 from src.llm_models import LLMHub
 from cnc.pools.pool import LiveQueuePool
@@ -27,7 +26,10 @@ from common.http_handler import HTTPHandler
 from browser_use.browser import BrowserSession
 from browser_use.controller.service import Controller
 
-agent_log, _ = get_agent_loggers()
+from logger import AGENT_POOL_LOGGER_NAME
+from logging import getLogger
+
+pool_log = getLogger(AGENT_POOL_LOGGER_NAME)
 
 MAX_WORKERS = 3 # 1 for testing
 MAX_STEPS = 3
@@ -67,7 +69,6 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
         self._proxy_port = proxy_port
         self._exclude_actions = exclude_actions or ["extract_structured_data"]
         self._chromium_executable_path = chromium_executable_path
-        self._agent_log, _ = get_agent_loggers()
 
     async def start_agent_session(self, queue_item: StartDiscoveryRequest):
         """
@@ -79,6 +80,7 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
         #     cdp_port=BROWSER_CDP_PORT
         # )
         # await cdp_handler.connect()
+        
         proxy_handler = MitmProxyHTTPHandler(
             handler=HTTPHandler(scopes=queue_item.scopes),
             listen_host=self._proxy_host,
@@ -99,7 +101,7 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
             browser_session=self._browser_session,
             controller=controller,
             cdp_handler=proxy_handler,
-            agent_dir=self.parent_dir,
+            agent_dir=None,
             init_task=queue_item.init_task,
             server_client=queue_item.client,
             screenshots=SCREENSHOTS,
@@ -108,14 +110,16 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
         )
         await agent.run()
 
+        pool_log.info("Agent successfully completed!")
+        
         # dun matter
         return True
+
 
 async def start_discovery_agent(
     channel: BroadcastChannel,
     agent_cls: Type[Union[DiscoveryAgent, MinimalAgentSinglePage]] = DiscoveryAgent,
 ):
-    setup_agent_logger(log_dir=".min_agent/logs")
     loop = asyncio.get_running_loop()
     browser_session = await get_browser_session()
 

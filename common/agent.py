@@ -24,21 +24,17 @@ from pentest_bot.web_exploit.tools.browser_tools import create_browser_check_xss
 from pentest_bot.web_exploit.tools.browser import BrowserClient
 from pentest_bot.models.steps import AgentStep, StepState as LLMStep
 
-from logger import (
-    create_log_dir_or_noop,
-    get_agent_loggers,
-    run_id_dir,
-    setup_agent_logger,
-)
 from src.llm_models import LLMHub
 from src.utils import set_ctxt_id
 
-agent_log, full_log = get_agent_loggers()
+from logger import AGENT_POOL_LOGGER_NAME
+from logging import getLogger
+
+pool_log = getLogger(AGENT_POOL_LOGGER_NAME)
 
 # Optional request type for your agents. Replace or specialize as needed.
 T = TypeVar("T")
 
-LOGGER_NAME = "agentlog"
 MAX_OUTPUT_LOG_LEN = 8192  # characters
 DEFAULT_MAX_AGENT_STEPS = 12
 
@@ -95,12 +91,6 @@ class AgentPool(ABC, Generic[T]):
         label_steps: bool = False,
     ):
         self.label_steps = label_steps
-
-        # TODO: we probably need 
-        parent_dir = create_log_dir_or_noop(log_dir=log_subfolder)
-        self.parent_dir = run_id_dir(parent_dir)
-        self.parent_dir.mkdir(parents=True, exist_ok=True)
-
         self._executor: concurrent.futures.ThreadPoolExecutor = concurrent.futures.ThreadPoolExecutor(
             max_workers=max_workers
         )
@@ -109,9 +99,6 @@ class AgentPool(ABC, Generic[T]):
         self._lock = threading.Lock()
         self._futures: Dict[str, concurrent.futures.Future[AgentRunResult]] = {}
         self._statuses: Dict[str, AgentStatus] = {}
-        self._logs: Dict[str, Optional[Path]] = {}
-
-    # ----------------------- Public API -----------------------
 
     def update_status(self, run_id: str, state: AgentRunState, result: Optional[AgentRunResult] = None, error: Optional[str] = None) -> None:
         """
@@ -137,11 +124,14 @@ class AgentPool(ABC, Generic[T]):
 
         # REFACTOR: keep default done_cb but allow done_db specified via args
         def _done_cb(fut: concurrent.futures.Future[AgentRunResult]) -> None:
+            # NOTE: catch all error logging for agents
             try:
                 result = fut.result()
                 self.update_status(run_id, AgentRunState.COMPLETED, result=result)
             except Exception as e:
-                logging.getLogger(LOGGER_NAME).exception("Run %s failed", run_id)
+                # print("Error is caught ", e)
+                pool_log.exception("Run %s failed", run_id)
+                pool_log.error(f"Error: {e}")
                 self.update_status(run_id, AgentRunState.FAILED, error=str(e))
 
         future.add_done_callback(_done_cb)
@@ -218,13 +208,6 @@ class AgentPool(ABC, Generic[T]):
         """
         set_ctxt_id(run_id)
 
-        _, log_filepath = setup_agent_logger(
-            LOGGER_NAME,
-            parent_dir=self.parent_dir,
-        )
-        run_logger = logging.getLogger("agentlog")
-        run_logger.info("agent started: run_id %s", run_id)
-
         session = await self.start_agent_session(request)
 
         # NOTE: placeholder for now
@@ -234,7 +217,7 @@ class AgentPool(ABC, Generic[T]):
             max_steps=0,
             model_name="",
             agent_steps=[],
-            log_filepath=log_filepath,
+            log_filepath=None,
         )
         
         # # Support async start_pentest_session

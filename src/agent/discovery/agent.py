@@ -34,7 +34,13 @@ from cnc.workers.agent.cdp_handler import CDPHTTPHandler
 from src.agent.agent_client import AgentClient
 from eval.client import PagedDiscoveryEvalClient
 
-from common.utils import extract_json, get_base_url
+from common.utils import (
+    extract_json, 
+    get_base_url, 
+    OrderedSet,
+    num_tokens_from_string
+)
+
 from logger import get_agent_loggers
 import logging
 
@@ -75,11 +81,6 @@ class LLMNextActionsError(Exception):
 class AgentState(BaseModel):
     step: int
     max_steps: int
-    is_done: bool = False
-
-    def curr_step(self) -> int:
-        """Always print 1-indexed"""
-        return self.step + 1
 
 # Wrapper classes for action and result to introduce a layer of indirection
 # for when we potentially want to switch to stagehand
@@ -196,7 +197,7 @@ class DiscoveryAgent:
         challenge_client: Optional[PagedDiscoveryEvalClient] = None,
         server_client: Optional[AgentClient] = None,
         cdp_handler: CDPHTTPHandler | None = None,
-        agent_dir: Path,
+        agent_dir: Optional[Path] = None,
         init_task: Optional[str] = None,
         screenshots: bool = False,
         agent_log: Optional[logging.Logger] = None,
@@ -209,7 +210,7 @@ class DiscoveryAgent:
         self.browser_session = browser_session
         self.controller = controller
         self.agent_context = AgentContext([])
-        self.agent_state = AgentState(step=1, max_steps=max_steps, is_done=False)
+        self.agent_state = AgentState(step=1, max_steps=max_steps)
         self.agent_dir = agent_dir
         self.cdp_handler = cdp_handler
         self.server_client = server_client
@@ -225,24 +226,34 @@ class DiscoveryAgent:
         self.AgentOutput = AgentOutput.type_with_custom_actions(self.ActionModel)
 
         # TODO: may want more sophisticated check here such as disregarding query params
-        self.url_queue = set(start_urls)
+        self.url_queue = OrderedSet(start_urls)
         self.max_page_steps = max_page_steps
         self.page_skip = None
         self.pages: PageObservations = PageObservations()
-        self.page_step = 0
+        self.page_step = 1
         self.plan: PlanItem | None = None
         self.curr_dom_tree: EnhancedDOMTreeNode | None = None
         self.curr_url: str = ""
         self.curr_dom_str: str = ""
 
+        # control states
+        self.is_done = False
+        self.noop = False
+
         # override default loggers if provided
+        # checking if passed in loggers are not None
         if agent_log is not None:
             globals()["agent_log"] = agent_log
         if full_log is not None:
             globals()["full_log"] = full_log
 
-        if self.take_screenshot:
+        if self.take_screenshot and self.agent_dir:
             self._set_screenshot_service()
+
+        agent_log.info("Starting discovery agent with:")
+        agent_log.info(f"Max steps: {self.agent_state.max_steps}")
+        agent_log.info(f"Max page steps: {self.max_page_steps}")
+        agent_log.info(f"Start urls: {self.url_queue}")
 
         # Check URL accessibility
         self._check_urls()
@@ -295,7 +306,7 @@ class DiscoveryAgent:
             "Current url: {curr_url}\n"
             "Interactive Elements: {interactive_elements}\n"
         ).format(
-            step_number=self.agent_state.curr_step(),
+            step_number=self.agent_state.step,
             max_steps=self.agent_state.max_steps,
             task=self.task,
             curr_url=self.curr_url,
@@ -306,7 +317,7 @@ class DiscoveryAgent:
             actions = agent_step.actions
             results = agent_step.results
             agent_prompt += "\n**Previous Actions**\n"
-            agent_prompt += f"Previous step: {self.agent_state.curr_step() - 1}/{self.agent_state.max_steps} \n"
+            agent_prompt += f"Previous step: {self.agent_state.step - 1}/{self.agent_state.max_steps} \n"
             for i, result in enumerate(results):
                 action = actions[i]
                 agent_prompt += f"Previous action {i + 1}/{len(results)}: {str(action)}\n"
@@ -319,7 +330,9 @@ class DiscoveryAgent:
             "role": "user",
             "content": agent_prompt,
         }
-        return [sys_msg, history_msg, agent_msg]
+        msgs = [sys_msg, history_msg, agent_msg]
+        agent_log.info(f"Agent prompt len: {sum(num_tokens_from_string(json.dumps(msg)) for msg in msgs)}")
+        return msgs
 
     async def _curr_page_check(self) -> bool:
         """Checks check if we accidentally went to a new page before officially transitioning and go back if so"""
@@ -562,7 +575,7 @@ class DiscoveryAgent:
 
             try:
                 # If your .invoke(...) is async, replace with: ai_msg = await ...
-                ai_msg: BaseMessage = self.llm.get("browser_use").invoke(input_messages)
+                ai_msg: BaseMessage = await self.llm.get("browser_use").ainvoke(input_messages)
                 content = ai_msg.content
                 if not isinstance(content, str):
                     raise ValueError(f"Expected content to be a string, got {type(content)}")
@@ -608,7 +621,7 @@ class DiscoveryAgent:
           - execute actions
         """
         # 1) Create plan if this is the first step we take on the page
-        if self.page_step == 0:
+        if self.page_step == 1:
             self._log(f"[PAGE_TRANSITION]: {self.curr_url}")
 
             self.curr_url = self.url_queue.pop()
@@ -616,6 +629,8 @@ class DiscoveryAgent:
             self.pages.add_page(Page(url=self.curr_url))
 
             browser_state = await self._get_browser_state()
+            agent_log.info("Retrieved browser state")
+
             self.curr_dom_str = browser_state.dom_state.llm_representation(include_attributes=INCLUDE_ATTRIBUTES)
             self.curr_dom_tree = browser_state.dom_tree
 
@@ -633,16 +648,19 @@ class DiscoveryAgent:
             # this action can potentially invalidate the last agent action
             if not self._init_task:
                 new_page = await self._curr_page_check()
+                agent_log.info(f"New page, exiting curr step")
                 if new_page:
                     return
         except Exception as e:
             self._handle_error(e)
-            self.agent_state.is_done = True
+            self.is_done = True
             return
 
         # 3) Everything after this relies on new agent state as result of executed action
         # new browser state after executing actions
         new_browser_state = await self._get_browser_state()
+        agent_log.info("Retrieved new browser state")
+        
         new_dom = new_browser_state.dom_state.llm_representation(include_attributes=INCLUDE_ATTRIBUTES)
 
         await self._update_state(new_browser_state, model_output, results)
@@ -651,10 +669,10 @@ class DiscoveryAgent:
             # TODO: move these into update_state
             await self._check_plan_complete(new_dom)
             await self._update_plan(new_dom)
+            agent_log.info(f"Successfully updated plan")
 
         self._log_state(model_output, agent_msgs)
-        
-        # update page state
+
         if self.cdp_handler:
             msgs = await self.cdp_handler.flush()
             for msg in msgs:
@@ -668,6 +686,7 @@ class DiscoveryAgent:
                         self.page_step,
                     )
                 if self.server_client:
+                    agent_log.info(f"Uploading page data")
                     self.page_skip = await self.server_client.update_page_data(
                         self.agent_state.step,
                         self.agent_state.max_steps,
@@ -676,27 +695,38 @@ class DiscoveryAgent:
                         self.pages
                     )
                     agent_log.info(f"Page skip: {self.page_skip}")
+                else:
+                    agent_log.info(f"Page step: {self.page_step}, max page steps: {self.max_page_steps}")
+                    if self.page_step > self.max_page_steps:
+                        # agent_log.info(f)
+                        self.page_skip = True
             except Exception as e:
                 agent_log.error("HTTP message update failed")
                 
     async def run(self) -> None:
         while self.agent_state.step < self.agent_state.max_steps:
             await self.step()
-            if self.agent_state.is_done:
-                self._log(f"Agent completed successfully @ {self.agent_state.curr_step()}/{self.agent_state.max_steps} steps!")
+
+            # continue without updating steps
+            if self.noop:
+                continue
+
+            if self.is_done:
+                self._log(f"Agent completed successfully @ {self.agent_state.step}/{self.agent_state.max_steps} steps!")
                 break
 
             self.agent_state.step += 1
             self.page_step += 1
             agent_log.info(f"Updating agent step: [page_step: {self.page_step}, agent_step: {self.agent_state.step}]")
             # if self.page_step > self.max_page_steps:
-            #     self.page_step = 0
+            #     self.page_step = 1
 
             # NOTE: page transition now fully managed by server
             # > bug, self.page_skip never True
             if self.page_skip == True:
-                self.page_step = 0
-                
+                self.page_step = 1        
+
+            
     # State update and logging 
     def _log(self, msg: str):
         agent_log.info(msg)
@@ -705,6 +735,7 @@ class DiscoveryAgent:
     def _handle_error(self, e: Exception):
         if isinstance(e, LLMNextActionsError):
             self._log(f"LLMNextActionsError: {e.errors}")
+            self._log(f"Initiating noop, skipping to next step wihtout updating step count")
         else:
             import traceback
             self._log(f"Error in step, skipping to next step")
@@ -714,7 +745,7 @@ class DiscoveryAgent:
         self.curr_dom_str = browser_state.dom_state.llm_representation(include_attributes=INCLUDE_ATTRIBUTES)
         self.curr_dom_tree = browser_state.dom_tree
         self.agent_context.update(self.agent_state.step, model_output.action, results, model_output.current_state)
-        self.agent_state.is_done = self._check_done(results)
+        self.is_done = self._check_done(results)
 
         if browser_state.screenshot and self.take_screenshot:
             self._log(
@@ -726,7 +757,7 @@ class DiscoveryAgent:
             self._log(f'📸 No screenshot in browser_state_summary for step {self.agent_state.step}')
 
     def _log_state(self, model_output: AgentOutput, agent_msgs: List[Any]) -> None:
-        self._log(f"========== Agent State: {self.agent_state.curr_step()}/{self.agent_state.max_steps} ==========")
+        self._log(f"========== Agent State: {self.agent_state.step}/{self.agent_state.max_steps} ==========")
         
         full_log.info("[HISTORY]")
         for msg in agent_msgs[:-1]:

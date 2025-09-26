@@ -211,7 +211,7 @@ Make sure to return an instance of the JSON, not the schema itself
 
     def invoke(self, 
                model: Any,
-               max_retries: int = 3,
+               max_retries: int = 5,
                retry_delay: int = 1,
                prompt_args: Dict = {},
                prompt_logger: Optional[Logger] = None,

@@ -55,7 +55,20 @@ class ChatModelWithName:
             model = self._model
 
         res = model.invoke(*args, **kwargs)
-        self.log_cost(res)
+        if hasattr(res, "usage_metadata"):
+            self.log_cost(res)
+        return res
+
+    async def ainvoke(self, *args: Any, **kwargs: Any) -> Any:
+        structured_output = kwargs.pop("structured_output", None)
+        if structured_output:
+            model = self._model.with_structured_output(structured_output)
+        else:
+            model = self._model
+
+        res = await model.ainvoke(*args, **kwargs)
+        if hasattr(res, "usage_metadata"):
+            self.log_cost(res)
         return res
     
     def __getattr__(self, name: str) -> Any:
