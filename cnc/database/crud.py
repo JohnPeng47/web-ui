@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from cnc.helpers.uuid import generate_uuid
-from cnc.schemas.engagement import EngagementCreate
+from cnc.schemas.engagement import EngagementCreate, EngagementUpdate
 from cnc.database.models import (
     PentestEngagement,
     AuthSession,
@@ -40,14 +40,29 @@ async def list_engagements(db: AsyncSession) -> List[PentestEngagement]:
     result = await db.execute(select(PentestEngagement))
     return list(result.scalars().all())
 
-
-async def update_engagement(db: AsyncSession, app: PentestEngagement) -> PentestEngagement:
+async def update_engagement(
+    db: AsyncSession, 
+    engagement_id: str,  # Need the ID to find the record
+    update_data: EngagementUpdate
+) -> PentestEngagement:  # Return the DB model, not the schema
     """Update an engagement with new data."""
-    db.add(app)
+    
+    result = await db.execute(
+        select(PentestEngagement).where(PentestEngagement.id == engagement_id)
+    )
+    db_engagement = result.scalar_one_or_none()
+    
+    if not db_engagement:
+        raise ValueError(f"Engagement {engagement_id} not found")
+    
+    update_dict = update_data.model_dump(exclude_unset=True)
+    for field, value in update_dict.items():
+        setattr(db_engagement, field, value)
+    
     await db.commit()
-    await db.refresh(app)
-    return app
-
+    await db.refresh(db_engagement)
+    
+    return db_engagement
 
 async def create_or_update_session(
     db: AsyncSession, 
