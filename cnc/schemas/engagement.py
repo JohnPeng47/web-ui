@@ -28,6 +28,10 @@ class EngagementBase(BaseModel):
 class EngagementCreate(EngagementBase):
     pass
 
+class EngagementUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+
 class EngagementOut(EngagementBase):
     id: UUID
     created_at: datetime

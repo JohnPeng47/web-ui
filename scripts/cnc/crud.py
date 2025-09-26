@@ -6,7 +6,8 @@ import click
 import json
 
 from cnc.database.session import get_session, create_db_and_tables
-from cnc.database.crud import get_engagement_by_agent_id
+from cnc.database.crud import get_engagement_by_agent_id, update_engagement
+from cnc.schemas.engagement import EngagementUpdate
 
 async def run_get_engagement_by_agent_id(agent_id: str):
     """Get engagement by agent ID."""
@@ -27,6 +28,31 @@ async def run_get_engagement_by_agent_id(agent_id: str):
             click.echo(f"No engagement found for agent ID: {agent_id}")
         break
 
+async def run_update_engagement(engagement_id: str, name: str = None, description: str = None):
+    """Update an engagement."""
+    await create_db_and_tables()
+    async for db in get_session():
+        try:
+            update_data = EngagementUpdate()
+            
+            if name:
+                update_data.name = name
+            if description:
+                update_data.description = description
+                
+            updated_engagement = await update_engagement(db, UUID(engagement_id), update_data)
+            
+            click.echo(f"Updated engagement:")
+            click.echo(f"ID: {updated_engagement.id}")
+            click.echo(f"Name: {updated_engagement.name}")
+            click.echo(f"Description: {updated_engagement.description}")
+            
+        except ValueError as e:
+            click.echo(f"Error: {e}")
+        except Exception as e:
+            click.echo(f"Unexpected error: {e}")
+        break
+
 
 @click.group()
 def cli():
@@ -45,6 +71,15 @@ def engagement():
 def get_engagement_by_agent_id_cmd(agent_id: str):
     """Get engagement by agent ID"""
     asyncio.run(run_get_engagement_by_agent_id(agent_id))
+
+
+@engagement.command("update")
+@click.argument("engagement_id")
+@click.option("--name", help="New name for the engagement")
+@click.option("--description", help="New description for the engagement")
+def update_engagement_cmd(engagement_id: str, name: str = None, description: str = None):
+    """Update an engagement"""
+    asyncio.run(run_update_engagement(engagement_id, name, description))
 
 
 if __name__ == "__main__":
