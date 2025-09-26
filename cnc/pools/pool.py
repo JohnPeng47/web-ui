@@ -1,6 +1,6 @@
 import asyncio
 import threading
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import Optional, List, TypeVar, Type
 import logging
 
@@ -39,6 +39,13 @@ class StartExploitRequest:
     client: Optional[AgentClient] = None
     agent_log: Optional[logging.Logger] = None
     full_log: Optional[logging.Logger] = None
+
+    def to_dict(self):
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return StartExploitRequest(**data)
 
 class LiveQueuePool(AgentPool[T]):
     def __init__(

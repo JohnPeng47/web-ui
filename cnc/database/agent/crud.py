@@ -20,8 +20,7 @@ from src.agent.base import AgentType
 async def register_discovery_agent(
     db: AsyncSession, 
     engagement_id: UUID, 
-    max_steps: int,
-    agent_type: AgentType) -> DiscoveryAgentModel:
+    max_steps: int) -> DiscoveryAgentModel:
     """Create a new DiscoveryAgent under an engagement."""
     engagement = await get_engagement(db, engagement_id)
     if not engagement:
@@ -33,7 +32,7 @@ async def register_discovery_agent(
         model_costs=0.0,
         log_filepath="",
         agent_status=AgentStatus.RUNNING,
-        agent_type=agent_type.value
+        agent_type=AgentType.DISCOVERY.value
     )
     db.add(agent)
     await db.commit()
@@ -52,8 +51,8 @@ async def register_exploit_agent(
     db: AsyncSession, 
     engagement_id: UUID,
     max_steps: int,
-    agent_type: AgentType,
-    vulnerability_title: str
+    vulnerability_title: str,
+    start_exploit_request_data: Optional[Dict[str, Any]] = None,
 ) -> ExploitAgentModel:
     """Create a new ExploitAgent under an engagement."""
     engagement = await get_engagement(db, engagement_id)
@@ -75,7 +74,8 @@ async def register_exploit_agent(
         model_costs=0.0,
         log_filepath="",
         agent_status=default_status,
-        agent_type=agent_type.value,
+        agent_type=AgentType.EXPLOIT.value,
+        start_exploit_request_data=start_exploit_request_data,
     )
     db.add(agent)
     await db.commit()
@@ -90,7 +90,7 @@ async def register_exploit_agent(
     await db.commit()
     return agent
 
-async def set_exploit_approval_payload(
+async def update_exploit_approval_data(
     db: AsyncSession, agent_id: str, payload: Dict[str, Any]
 ) -> ExploitAgentModel:
     agent = await get_agent_by_id(db, agent_id)
@@ -103,20 +103,7 @@ async def set_exploit_approval_payload(
     await db.refresh(agent)
     return agent
 
-async def clear_exploit_approval_payload(
-    db: AsyncSession, agent_id: str
-) -> ExploitAgentModel:
-    agent = await get_agent_by_id(db, agent_id)
-    if not agent or not isinstance(agent, ExploitAgentModel):
-        raise ValueError(f"Exploit agent with ID {agent_id} not found")
-
-    agent.approval_payload_data = None
-    db.add(agent)
-    await db.commit()
-    await db.refresh(agent)
-    return agent
-
-async def update_agent_status(
+async def update_exploit_agent_status(
     db: AsyncSession, agent_id: str, status: AgentStatus
 ) -> Union[DiscoveryAgentModel, ExploitAgentModel]:
     agent = await get_agent_by_id(db, agent_id)
