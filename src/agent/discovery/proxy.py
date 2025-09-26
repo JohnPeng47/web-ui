@@ -1,10 +1,7 @@
 import asyncio
-import inspect
 import contextlib
 import logging
 import threading
-import socket
-import time
 from typing import Optional, Dict, Any
 from common.constants import BROWSER_PROXY_HOST, BROWSER_PROXY_PORT
 
@@ -17,6 +14,8 @@ except ImportError as e:
     raise ImportError(
         "mitmproxy is required. Install with: pip install mitmproxy"
     ) from e
+
+from logger import get_agent_loggers
 from common.http_handler import HTTPHandler
 from httplib import (
     HTTPRequest,
@@ -25,29 +24,19 @@ from httplib import (
     HTTPResponseData,
     post_data_to_dict,
 )
-from logger import PROXY_LOGGER_NAME
-from logging import getLogger
 
-proxy_log = getLogger(PROXY_LOGGER_NAME)
+agent_log, _ = get_agent_loggers()
+agent_log.propagate = False
+
 
 def _detach_mitm_logging_handlers() -> None:
     """Detach mitmproxy logging handlers to prevent event loop errors during shutdown."""
     root = logging.getLogger()
-    mitm_handler_cls = getattr(mitm_log, "MitmLogHandler", None)
-    for handler in list(root.handlers):
-        try:
-            is_mitm = False
-            if mitm_handler_cls is not None and isinstance(handler, mitm_handler_cls):
-                is_mitm = True
-            elif handler.__class__.__name__ == "MitmLogHandler":
-                is_mitm = True
-            if is_mitm:
-                root.removeHandler(handler)
-                with contextlib.suppress(Exception):
-                    handler.close()
-        except Exception:
+    for h in list(root.handlers):
+        if isinstance(h, mitm_log.MitmLogHandler):
+            root.removeHandler(h)
             with contextlib.suppress(Exception):
-                handler.close()
+                h.close()
 
 
 class MitmProxyHTTPHandler:
@@ -87,13 +76,14 @@ class MitmProxyHTTPHandler:
 
         self._master: Optional[DumpMaster] = None
         self._task: Optional[asyncio.Task] = None
-        self._thread: Optional[threading.Thread] = None
+        self._browser_task: Optional[asyncio.Task] = None
         self._connected = False
         self._alive = False
 
         # We need the loop where handler coroutines should run
         self._loop: Optional[asyncio.AbstractEventLoop] = None
-        proxy_log.info(
+
+        agent_log.info(
             "Initialized MitmProxyHTTPHandler '%s' on %s:%d",
             self._handler_name,
             self._listen_host,
@@ -103,9 +93,10 @@ class MitmProxyHTTPHandler:
     # ─────────────────────────────────────────────────────────────────────
     # Public API (mirrors CDPHTTPHandler)
     # ─────────────────────────────────────────────────────────────────────
+
     async def connect(self) -> None:
         if self._connected:
-            proxy_log.info("Handler '%s' already connected", self._handler_name)
+            agent_log.info("Handler '%s' already connected", self._handler_name)
             return
 
         # Capture the loop where we will schedule handler coroutines
@@ -113,15 +104,6 @@ class MitmProxyHTTPHandler:
             self._loop = asyncio.get_running_loop()
         except RuntimeError as e:
             raise RuntimeError("connect() must be called from within an asyncio loop") from e
-
-        # Wait briefly for port to be released from any previous run
-        released = await self._wait_for_port_release(self._listen_host, self._listen_port, timeout=3.0)
-        if not released:
-            proxy_log.warning(
-                "Port %s:%d still in use after grace period; attempting start anyway",
-                self._listen_host,
-                self._listen_port,
-            )
 
         options = Options(
             listen_host=self._listen_host,
@@ -135,34 +117,25 @@ class MitmProxyHTTPHandler:
 
         self._alive = True
 
-        def _run_mitm_blocking() -> None:
+        async def _run_mitm():
             try:
-                proxy_log.info(
+                agent_log.info(
                     "Starting mitmproxy on %s:%d (http2=%s ssl_insecure=%s)",
                     self._listen_host,
                     self._listen_port,
                     self._http2,
                     self._ssl_insecure,
                 )
-                if self._master is not None:
-                    result = self._master.run()
-                    if inspect.iscoroutine(result):
-                        asyncio.run(result)
-            except Exception as e:
-                proxy_log.exception("mitmproxy master crashed")
-                proxy_log.exception(e)
+                await self._master.run()
+            except Exception:
+                agent_log.exception("mitmproxy master crashed")
+                raise
             finally:
-                proxy_log.info("mitmproxy master exited")
+                agent_log.info("mitmproxy master exited")
                 self._alive = False
                 _detach_mitm_logging_handlers()
 
-        self._thread = threading.Thread(
-            target=_run_mitm_blocking,
-            name=f"mitm-thread-{self._listen_port}",
-            daemon=True,
-        )
-        self._thread.start()
-
+        self._task = asyncio.create_task(_run_mitm(), name=f"mitm-{self._listen_port}")
         self._connected = True
 
     async def disconnect(self) -> None:
@@ -173,44 +146,24 @@ class MitmProxyHTTPHandler:
                 # orderly shutdown of mitmproxy
                 self._master.shutdown()
             
-            if self._thread is not None:
-                self._thread.join(timeout=8.0)
-                if self._thread.is_alive():
-                    proxy_log.warning("mitm proxy thread did not stop within timeout")
+            if self._task and not self._task.done():
+                try:
+                    await asyncio.wait_for(self._task, timeout=5.0)
+                except asyncio.TimeoutError:
+                    agent_log.warning("mitm task did not stop within timeout")
             
-            # small pause to ensure sockets fully released
-            await asyncio.sleep(0.05)
-
+            # Stop browser if we started it
+            if self._browser_task and not self._browser_task.done():
+                self._browser_task.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    await self._browser_task
         finally:
             _detach_mitm_logging_handlers()
             self._master = None
             self._task = None
-            self._thread = None
             self._browser_task = None
             self._connected = False
-            proxy_log.info("Handler '%s' disconnected", self._handler_name)
-
-    async def _wait_for_port_release(self, host: str, port: int, *, timeout: float = 3.0, interval: float = 0.1) -> bool:
-        """Poll until a TCP bind to (host, port) succeeds or timeout elapses."""
-        deadline = time.monotonic() + timeout
-        while time.monotonic() < deadline:
-            if self._can_bind(host, port):
-                return True
-            await asyncio.sleep(interval)
-        return self._can_bind(host, port)
-
-    @staticmethod
-    def _can_bind(host: str, port: int) -> bool:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            s.bind((host, port))
-            return True
-        except OSError:
-            return False
-        finally:
-            with contextlib.suppress(Exception):
-                s.close()
+            agent_log.info("Handler '%s' disconnected", self._handler_name)
 
     async def flush(self):
         # If mitm died, either return what you have or raise a controlled error.
@@ -235,90 +188,78 @@ class MitmProxyHTTPHandler:
     def _schedule_coro(self, coro) -> None:
         loop = self._loop
         if loop is None:
-            proxy_log.warning("Cannot schedule coroutine: no event loop")
-            # Properly close the coroutine to avoid warning
-            coro.close()
             return
         if loop.is_closed():
-            proxy_log.warning("Cannot schedule coroutine: event loop closed")
-            coro.close()
             return
         try:
             fut = asyncio.run_coroutine_threadsafe(coro, loop)
-            def _log_err(_fut) -> None:
-                exc = _fut.exception()
-                if exc:
-                    proxy_log.exception("Handler coroutine failed: %s", exc)
-            fut.add_done_callback(_log_err)
         except RuntimeError as e:
-            proxy_log.debug("Dropped handler coroutine: %s", e)
-            coro.close()  # Clean up the coroutine
+            # loop is closing/closed
+            agent_log.debug("Dropped handler coroutine: %s", e)
+            return
+        def _log_err(_fut: "asyncio.Future[Any]") -> None:
+            exc = _fut.exception()
+            if exc:
+                agent_log.exception("Handler coroutine failed: %s", exc)
+        fut.add_done_callback(_log_err)
 
-    def _flow_to_http_request(self, flow: "http.HTTPFlow") -> HTTPRequest:
-        """
-        Map mitmproxy flow.request to your HTTPRequest.
-        """
-        headers: Dict[str, str] = {k.lower(): v for k, v in flow.request.headers.items()}
+    def _flow_to_http_request(self, flow: http.HTTPFlow) -> HTTPRequest:
+        req = flow.request
+        url = req.pretty_url
+        method = req.method
+        headers = dict(req.headers)
+
         post_dict: Optional[Dict[str, Any]] = None
-
-        ctype = headers.get("content-type", "")
-        try:
-            # Try urlencoded first
-            if "application/x-www-form-urlencoded" in ctype and flow.request.urlencoded_form:
-                post_dict = {k: v for k, v in flow.request.urlencoded_form.items(multi=False)}
-            # Fallback to JSON
-            elif "application/json" in ctype:
-                try:
-                    post_dict = flow.request.json()
-                except Exception:
-                    txt = flow.request.get_text(strict=False)
-                    if txt and txt.strip().startswith("{") and txt.strip().endswith("}"):
-                        import json  # local import to avoid module load if unused
-                        post_dict = json.loads(txt)
-            # Last resort: plain text
-            else:
-                txt = flow.request.get_text(strict=False)
-                if txt:
-                    # Reuse your existing helper to parse common cases
-                    post_dict = post_data_to_dict(txt)
-        except Exception:
-            post_dict = None  # do not fail ingestion on parsing errors
+        if method in {"POST", "PUT", "PATCH", "DELETE"} and req.content:
+            ctype = headers.get("content-type", "")
+            try:
+                if "application/json" in ctype:
+                    import json
+                    post_dict = json.loads(req.get_text(strict=False) or "")
+                else:
+                    post_dict = post_data_to_dict(req.get_text(strict=False) or "")
+            except Exception:
+                post_dict = post_data_to_dict(req.get_text(strict=False) or "")
 
         data = HTTPRequestData(
-            method=flow.request.method,
-            url=flow.request.url,
-            headers=headers,
+            method=method,
+            url=url,
+            headers={k.lower(): v for k, v in headers.items()},
             post_data=post_dict,
             redirected_from_url=None,
             redirected_to_url=None,
             is_iframe=False,
         )
-        request = HTTPRequest(data=data)
-        # proxy_log.info(f"Request: {request}")
-        
-        return request
+        return HTTPRequest(data=data)
 
-    def _flow_to_http_response(self, flow: "http.HTTPFlow") -> HTTPResponse:
-        """
-        Map mitmproxy flow.response to your HTTPResponse.
-        """
-        headers: Dict[str, str] = {k.lower(): v for k, v in flow.response.headers.items()}
-        body_bytes: Optional[bytes] = None
-        try:
-            body_bytes = flow.response.raw_content if flow.response.raw_content is not None else None
-        except Exception:
-            body_bytes = None
-            
+    def _flow_to_http_response(self, flow: http.HTTPFlow) -> HTTPResponse:
+        resp = flow.response
+        req = flow.request
+
+        status = resp.status_code if resp else 0
+        headers = dict(resp.headers) if resp else {}
+        ctype = headers.get("content-type", "")
+
+        processed_body = None
+        if resp:
+            processed_body = resp.get_text(strict=False)
+        body_error = None
+        
+        # Convert string body to bytes if needed
+        body_bytes = None
+        if processed_body:
+            body_bytes = processed_body.encode("utf-8")
+        
         data = HTTPResponseData(
-            url=flow.request.url,
-            status=flow.response.status_code,
-            headers=headers,
+            url=req.pretty_url,
+            status=status,
+            headers={k.lower(): v for k, v in headers.items()},
             is_iframe=False,
             body=body_bytes,
-            body_error=None,
+            body_error=body_error,
         )
-        # proxy_log.info(f"Response: {data}")
         return HTTPResponse(data=data)
+
 
 class _RelayAddon:
     """
@@ -337,7 +278,7 @@ class _RelayAddon:
             http_request = self.outer._flow_to_http_request(flow)
             self.outer._schedule_coro(self.outer._handler.handle_request(http_request))
         except Exception:
-            proxy_log.exception("Failed to relay request")
+            agent_log.exception("Failed to relay request")
 
     def response(self, flow: http.HTTPFlow) -> None:
         try:
@@ -350,7 +291,7 @@ class _RelayAddon:
                 self.outer._handler.handle_response(http_response, http_request)
             )
         except Exception:
-            proxy_log.exception("Failed to relay response")
+            agent_log.exception("Failed to relay response")
 
     def error(self, flow: http.HTTPFlow) -> None:
         # You could synthesize an error HTTPResponse and forward it if needed.
