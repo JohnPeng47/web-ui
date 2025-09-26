@@ -611,7 +611,7 @@ class DiscoveryAgent:
             error_outputs,
         )
 
-    # TODO: consider moving out single task execution logic into a subclass 
+    # TODO: consider moving out single task execution logic into a subclass
     async def step(self):
         """
         One iteration:
@@ -620,10 +620,11 @@ class DiscoveryAgent:
           - query LLM
           - execute actions
         """
+        self._log(f"[AGENT_PHASE] Starting Step")
+
         # 1) Create plan if this is the first step we take on the page
         if self.page_step == 1:
             self._log(f"[PAGE_TRANSITION]: {self.curr_url}")
-
             self.curr_url = self.url_queue.pop()
             await self._goto_page(self.curr_url)
             self.pages.add_page(Page(url=self.curr_url))
@@ -642,6 +643,7 @@ class DiscoveryAgent:
             # reset page_skip or else infinite loop
             self.page_skip = False
         try:
+            self._log(f"[AGENT_PHASE] Execute actions")
             agent_msgs = await self._build_agent_prompt()
             model_output = await self._llm_next_actions(agent_msgs)
             results = await self._execute_actions(model_output.action)
@@ -656,6 +658,7 @@ class DiscoveryAgent:
             self.is_done = True
             return
 
+        self._log(f"[AGENT_PHASE] Update state")
         # 3) Everything after this relies on new agent state as result of executed action
         # new browser state after executing actions
         new_browser_state = await self._get_browser_state()
@@ -666,6 +669,7 @@ class DiscoveryAgent:
         await self._update_state(new_browser_state, model_output, results)
 
         if not self._init_task:
+            self._log(f"[AGENT_PHASE] Update plan")
             # TODO: move these into update_state
             await self._check_plan_complete(new_dom)
             await self._update_plan(new_dom)
@@ -674,6 +678,7 @@ class DiscoveryAgent:
         self._log_state(model_output, agent_msgs)
 
         if self.cdp_handler:
+            self._log(f"[AGENT_PHASE] Update page data")
             msgs = await self.cdp_handler.flush()
             for msg in msgs:
                 self.pages.curr_page().add_http_msg(msg)

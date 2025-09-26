@@ -11,8 +11,6 @@ from cnc.database.models import (
     PentestEngagementExploitAgent,
 )
 from cnc.schemas.agent import (
-    DiscoveryAgentCreate, 
-    ExploitAgentCreate, 
     ExploitAgentStep, 
     AgentStatus
 )
@@ -52,7 +50,7 @@ async def register_discovery_agent(
 
 async def register_exploit_agent(
     db: AsyncSession, 
-    engagement_id: UUID, 
+    engagement_id: UUID,
     max_steps: int,
     agent_type: AgentType,
     vulnerability_title: str
