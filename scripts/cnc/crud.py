@@ -54,6 +54,43 @@ async def run_update_engagement(engagement_id: str, name: str = None, descriptio
         break
 
 
+async def run_get_agent_steps(agent_id: str, reflection: bool = False, script: bool = False, output: bool = False):
+    """Get agent steps by agent ID."""
+    await create_db_and_tables()
+    async for db in get_session():
+        try:
+            from cnc.database.agent.crud import get_agent_steps
+            
+            steps = await get_agent_steps(db, agent_id)
+            
+            if steps:
+                click.echo(f"Found {len(steps)} steps for agent {agent_id}:")
+                for i, step in enumerate(steps, 1):
+                    click.echo(f"Step {i}:")
+                    click.echo(f"  Step Number: {step.step_num}")
+                    
+                    # If no flags are provided, show reflection by default
+                    if not reflection and not script and not output:
+                        click.echo(f"  Reflection: {step.reflection}")
+                    else:
+                        # Show only the requested parts
+                        if reflection:
+                            click.echo(f"  Reflection: {step.reflection}")
+                        if script:
+                            click.echo(f"  Script: {step.script}")
+                        if output and step.execution_output:
+                            click.echo(f"  Output: {step.execution_output}")
+                    click.echo()
+            else:
+                click.echo(f"No steps found for agent ID: {agent_id}")
+                
+        except ValueError as e:
+            click.echo(f"Error: {e}")
+        except Exception as e:
+            click.echo(f"Unexpected error: {e}")
+        break
+
+
 @click.group()
 def cli():
     """CNC Database CLI Tool"""
@@ -63,6 +100,12 @@ def cli():
 @cli.group()
 def engagement():
     """Engagement management commands"""
+    pass
+
+
+@cli.group()
+def agent():
+    """Agent management commands"""
     pass
 
 
@@ -81,6 +124,15 @@ def update_engagement_cmd(engagement_id: str, name: str = None, description: str
     """Update an engagement"""
     asyncio.run(run_update_engagement(engagement_id, name, description))
 
+
+@agent.command("get-steps")
+@click.argument("agent_id")
+@click.option("--reflection", is_flag=True, help="Show reflection text")
+@click.option("--script", is_flag=True, help="Show script text")
+@click.option("--output", is_flag=True, help="Show execution output")
+def get_agent_steps_cmd(agent_id: str, reflection: bool, script: bool, output: bool):
+    """Get agent steps by agent ID"""
+    asyncio.run(run_get_agent_steps(agent_id, reflection, script, output))
 
 if __name__ == "__main__":
     cli()
