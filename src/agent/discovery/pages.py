@@ -1,7 +1,6 @@
-from typing import Optional, List, Dict, Tuple, Set
-from httplib import HTTPMessage, HTTPResponse, HTTPRequest
-
-from src.utils import get_token_count
+from typing import Optional, List, Dict, Tuple, Set, Union, Any
+from httplib import HTTPMessage
+import inspect
 
 # TODO: this should be moved into HTTPMessage so we can use later down the line
 def concat_output(output_str: str, new_str: str) -> str:
@@ -19,19 +18,42 @@ def concat_output(output_str: str, new_str: str) -> str:
         redacted = new_str
     return (output_str or "") + redacted
 
+class PageItem:
+    """Generic wrapper that carries a stable string id and a payload item.
+
+    Used to guarantee ordering and id assignment for both pages and http messages.
+    """
+
+    def __init__(self, item_id: str, payload: Any):
+        self.id: str = item_id
+        self.payload: Any = payload
+
+    async def to_json(self):
+        item = self.payload
+        if hasattr(item, "to_json"):
+            result = item.to_json()
+            if inspect.iscoroutine(result):
+                result = await result
+            return {"id": self.id, "item": result}
+        return {"id": self.id, "item": item}
+
+
 class Page:
     PAYLOAD_RES_SIZE = 1000
 
     def __init__(
         self, 
         url: str, 
-        http_msgs: Optional[List[HTTPMessage]] = None, 
-        page_id: Optional[int] = None
+        http_msgs: Optional[List[Union[HTTPMessage, PageItem]]] = None, 
+        item_id: Optional[str] = None
     ):
-        self.page_id = page_id
+        # Single ID system using PageItem-style ids (e.g., "1", "1.2", "1.2.3")
+        self.id: str = item_id or ""
         self.url = url
         # Maintain the raw list for serialization and analysis
         self.http_msgs: List[HTTPMessage] = []
+        # Parallel list of wrapped items that include stable ids
+        self.http_msg_items: List[PageItem] = []
 
         self._groups: Dict[Tuple[str, str], List[HTTPMessage]] = {}
         self._group_order: List[Tuple[str, str]] = []
@@ -40,13 +62,49 @@ class Page:
             for msg in http_msgs:
                 self.add_http_msg(msg)
 
-    def add_http_msg(self, msg: HTTPMessage):
-        self.http_msgs.append(msg)
-        key = (msg.method, msg.url)
+    def add_http_msg(self, msg: Union[HTTPMessage, PageItem]):
+        # Normalize to HTTPMessage and PageItem wrapper
+        if isinstance(msg, PageItem):
+            raw_msg = msg.payload
+            if not isinstance(raw_msg, HTTPMessage):
+                # If payload came from JSON, reconstruct HTTPMessage
+                try:
+                    raw_msg = HTTPMessage.from_json(raw_msg)
+                except Exception:
+                    raw_msg = raw_msg
+            wrapper_id = msg.id or ""
+            wrapper = PageItem(wrapper_id, raw_msg)
+        else:
+            raw_msg = msg
+            # Assign nested id if page id known; otherwise temporary empty id to be recalculated later
+            wrapper = PageItem("", raw_msg)
+
+        self.http_msg_items.append(wrapper)
+        self.http_msgs.append(raw_msg)
+        key = (raw_msg.method, raw_msg.url)
         if key not in self._groups:
             self._groups[key] = []
             self._group_order.append(key)
-        self._groups[key].append(msg)
+        self._groups[key].append(raw_msg)
+        # Recalculate ids if we have a page id
+        if self.id:
+            self._recalculate_http_msg_ids()
+
+    def _recalculate_http_msg_ids(self):
+        if not self.id:
+            return
+        # Map group key to 1-based group index
+        group_index_map: Dict[Tuple[str, str], int] = {
+            key: idx + 1 for idx, key in enumerate(self._group_order)
+        }
+        # Count occurrences within each group to assign the third component
+        group_counts: Dict[Tuple[str, str], int] = {}
+        for item in self.http_msg_items:
+            msg = item.payload
+            key = (msg.method, msg.url)
+            group_counts[key] = group_counts.get(key, 0) + 1
+            section = group_index_map[key]
+            item.id = f"{self.id}.{section}.{group_counts[key]}"
 
     def get_page_item(self, section_number: int) -> Optional[HTTPMessage]:
         """Return an example HTTP request for the given section (1-based)."""
@@ -194,7 +252,7 @@ class Page:
         return out
 
     def __str__(self):
-        if not self.page_id:
+        if not self.id:
             raise ValueError("Page ID is not set")
         
         output = f"Page: {self.url}\n"
@@ -210,7 +268,7 @@ class Page:
             # Duplicates are extra messages with the same method+url
             duplicates = max(0, total - 1)
 
-            group_header = f"{self.page_id}.{i+1} {method} {url} (msgs:{total}, dups:{duplicates})\n"
+            group_header = f"{self.id}.{i+1} {method} {url} (msgs:{total}, dups:{duplicates})\n"
             http_msgs_out = concat_output(http_msgs_out, group_header)
 
             # Aggregate headers
@@ -276,40 +334,64 @@ class Page:
         return output.rstrip()
 
     async def to_json(self):
+        # Emit only PageItem for http messages; page id is carried by the wrapper at higher level
         return {
             "url": self.url,
-            "http_msgs": [await msg.to_json() for msg in self.http_msgs],
+            "http_msgs": [await item.to_json() for item in self.http_msg_items],
         }
 
     @classmethod
     def from_json(cls, data: dict):
-        return cls(
-            url=data["url"],
-            http_msgs=[HTTPMessage.from_json(msg) for msg in data["http_msgs"]],
-        )
+        url = data["url"]
+        raw_msgs = data.get("http_msgs", [])
+
+        # Determine if entries are wrapped PageItem or raw HTTPMessage json
+        normalized: List[Union[HTTPMessage, PageItem]] = []
+        for entry in raw_msgs:
+            if isinstance(entry, dict) and "id" in entry and "item" in entry:
+                # Wrapped item; reconstruct HTTPMessage payload
+                payload = entry.get("item")
+                if isinstance(payload, dict):
+                    http_msg = HTTPMessage.from_json(payload)
+                else:
+                    http_msg = payload
+                normalized.append(PageItem(entry["id"], http_msg))
+            else:
+                # Legacy raw HTTPMessage json
+                if isinstance(entry, dict):
+                    normalized.append(HTTPMessage.from_json(entry))
+                else:
+                    normalized.append(entry)
+
+        return cls(url=url, http_msgs=normalized)
 
 class PageObservations:
     """Important class for holding Pages containing the info observed by the agent during the Discovery phase"""
     def __init__(self, pages: List[Page] = []):
-        self.pages: List[Page] = pages
+        self.pages: List[Page] = []
+        self.pages_items: List[PageItem] = []
         self.curr_id = 1
 
-        for page in self.pages:
-            page.page_id = self.curr_id
-            self.curr_id += 1
+        for page in pages:
+            self.add_page(page)
 
     def add_page(self, page: Page):
+        if not getattr(page, "id", ""):
+            page.id = str(self.curr_id)
         self.pages.append(page)
-        page.page_id = self.curr_id
+        self.pages_items.append(PageItem(page.id, page))
+        self.curr_id += 1
+        page._recalculate_http_msg_ids()
 
     def curr_page(self):
         return self.pages[-1]
 
     def get_page_item(self, compound_id: str):
-        page_id = int(compound_id.split(".")[0])
+        page_id_str = compound_id.split(".")[0]
         section_number = int(compound_id.split(".")[1])
-        
-        page = self.pages[page_id - 1]
+        page = next((p for p in self.pages if p.id == page_id_str), None)
+        if not page:
+            raise ValueError(f"Page with id {page_id_str} not found")
         return page.get_page_item(section_number)
 
     def http_msgs(self) -> List[Tuple[str, str]]:
@@ -321,14 +403,25 @@ class PageObservations:
         return result
 
     async def to_json(self):
-        return [await page.to_json() for page in self.pages]
+        # Emit only PageItem wrappers for pages
+        return [await item.to_json() for item in self.pages_items]
 
     @classmethod
     def from_json(cls, data: dict):
-        return cls(pages=[Page.from_json(page) for page in data])
+        pages: List[Page] = []
+        for entry in data:
+            if isinstance(entry, dict) and "id" in entry and "item" in entry:
+                # Wrapped PageItem
+                page_obj = Page.from_json(entry["item"])
+                page_obj.id = entry["id"]
+                pages.append(page_obj)
+            else:
+                # Legacy Page payload
+                pages.append(Page.from_json(entry))
+        return cls(pages=pages)
 
     def __str__(self):
         out = ""
-        for i, page in enumerate(self.pages):
-            out += f"PAGE: {i+1}.\n{str(page)}\n"
+        for _, page in enumerate(self.pages):
+            out += f"PAGE: {page.id}.\n{str(page)}\n"
         return out
