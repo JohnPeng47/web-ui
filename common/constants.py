@@ -31,7 +31,7 @@ NUM_SCHEDULED_ACTIONS = 5
 # llm configurations
 SERVER_MODEL_CONFIG = {
     "model_config": {
-        "detection": "gpt-5",
+        "detection": "gpt-4.1",
         "observations": "o3-mini"
     }
 }
