@@ -159,6 +159,7 @@ def _setup_agent_logger(
     level: int = logging.INFO,
     create_run_subdir: bool = True,
     add_thread_filter: bool = True,
+    no_console: bool = False,
 ):
     """
     Updated log-directory layout:
@@ -180,7 +181,7 @@ def _setup_agent_logger(
     logger = logging.getLogger(name)
     logger.setLevel(level)
 
-    if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
+    if not no_console and not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
         logger.addHandler(get_console_handler())
     existing_fh = next((
         h for h in logger.handlers
@@ -352,6 +353,8 @@ class _ServerLogFactory:
             fh.setFormatter(formatter)
             logger.addHandler(fh)
 
+        return logger
+
     def setup_server_logger(self, logger_name: str):
         """Create or return the server logger (with console + file)."""
         e_dir = self._get_engagement_dir()
@@ -388,7 +391,7 @@ class _ServerLogFactory:
         # self.get_exploit_agent_loggers()
 
     # dynamic loggers
-    def get_discovery_agent_loggers(self) -> Tuple[logging.Logger, logging.Logger]:
+    def get_discovery_agent_loggers(self, *, no_console: bool = False) -> Tuple[logging.Logger, logging.Logger]:
         """
         Return loggers for a new discovery agent.
         Does not attach handlers; the worker thread should call setup_agent_logger
@@ -399,10 +402,10 @@ class _ServerLogFactory:
         
         name = self._next_numeric_name(discovery_dir)
 
-        _setup_agent_logger(log_dir="", parent_dir=discovery_dir, name=name, create_run_subdir=False, add_thread_filter=False)
+        _setup_agent_logger(log_dir="", parent_dir=discovery_dir, name=name, create_run_subdir=False, add_thread_filter=False, no_console=no_console)
         return logging.getLogger(name), logging.getLogger(FULL_REQUESTS_LOGGER_NAME)
     
-    def get_exploit_agent_loggers(self) -> Tuple[logging.Logger, logging.Logger]:
+    def get_exploit_agent_loggers(self, *, no_console: bool = False) -> Tuple[logging.Logger, logging.Logger]:
         """
         Return loggers for a new exploit agent.
         Does not attach handlers; the worker thread should call setup_agent_logger.
@@ -412,7 +415,7 @@ class _ServerLogFactory:
 
         name = self._next_numeric_name(exploit_dir)
 
-        _setup_agent_logger(log_dir="", parent_dir=exploit_dir, name=name, create_run_subdir=False, add_thread_filter=False)
+        _setup_agent_logger(log_dir="", parent_dir=exploit_dir, name=name, create_run_subdir=False, add_thread_filter=False, no_console=no_console)
         return logging.getLogger(name), logging.getLogger(FULL_REQUESTS_LOGGER_NAME)
 
 _SERVER_LOG_FACTORY_SINGLETON: Optional[_ServerLogFactory] = None

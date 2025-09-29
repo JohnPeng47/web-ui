@@ -11,14 +11,14 @@ class AgentBase(SQLModel, table=False):
     # sqlite won't accept UUID4 for some reason
     # 2**61 half of UUID4 key space
     id: str = Field(primary_key=True, default_factory=lambda: str(uuid.uuid4()))
-    agent_status: AgentStatus = Field(default=AgentStatus.PENDING_AUTO, nullable=False)
+    agent_status: AgentStatus = Field(nullable=False)
     max_steps: int = Field(nullable=False)
     model_name: str = Field(nullable=False)
     model_costs: float = Field(nullable=True)
     log_filepath: str = Field(nullable=True) # add this later
     created_at: datetime = Field(default_factory=datetime.utcnow)
     agent_type: str = Field(nullable=False)
-    
+
     # Opik metadata fields
     opik_prompt_name: Optional[str] = None
     opik_prompt_commit: Optional[str] = None
@@ -31,6 +31,7 @@ class ExploitAgentModel(AgentBase, table=True):
     __tablename__ = "exploitagent"  # type: ignore[assignment]
 
     vulnerability_title: str = Field(nullable=False)
+    vulnerability_description: str = Field(nullable=False)
     approval_payload_data: Optional[Dict[str, Any]] = Field(
         default=None,
         sa_column=Column(JSON),
@@ -45,7 +46,13 @@ class ExploitAgentModel(AgentBase, table=True):
         default=None, 
         sa_column=Column(JSON),
         description="JSON array of agent"
-    )    
+    )
+    complete_data: Optional[Dict[str, Any]] = Field(
+        default=None,
+        sa_column=Column(JSON),
+        description="Data uploaded by agent upon completion of task"
+    )
+
     @property
     def agent_name(self) -> str:
         return self.vulnerability_title

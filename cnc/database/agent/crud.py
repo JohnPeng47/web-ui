@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Optional, Dict, Any, Union
+from sqlalchemy import delete as sa_delete
+from typing import List, Optional, Dict, Any, Union, cast
 from uuid import UUID
 
 from sqlmodel import select
@@ -52,7 +53,9 @@ async def register_exploit_agent(
     engagement_id: UUID,
     max_steps: int,
     vulnerability_title: str,
+    vulnerability_description: str,
     start_exploit_request_data: Optional[Dict[str, Any]] = None,
+    agent_status: AgentStatus = AgentStatus.RUNNING,
 ) -> ExploitAgentModel:
     """Create a new ExploitAgent under an engagement."""
     engagement = await get_engagement(db, engagement_id)
@@ -65,15 +68,15 @@ async def register_exploit_agent(
         manual_flag = getattr(_constants, "MANUAL_APPROVAL_EXPLOIT_AGENT", False)
     except Exception:
         manual_flag = False
-    default_status = AgentStatus.PENDING_APPROVAL if manual_flag else AgentStatus.PENDING_AUTO
 
     agent = ExploitAgentModel(
         vulnerability_title=vulnerability_title,
+        vulnerability_description=vulnerability_description,
         max_steps=max_steps,
         model_name="",
         model_costs=0.0,
         log_filepath="",
-        agent_status=default_status,
+        agent_status=agent_status,
         agent_type=AgentType.EXPLOIT.value,
         start_exploit_request_data=start_exploit_request_data,
     )
@@ -136,7 +139,7 @@ async def get_agent_steps(db: AsyncSession, agent_id: str) -> List[ExploitAgentS
     return [ExploitAgentStep.from_dict(sd) for sd in steps_data]
 
 async def append_discovery_agent_steps(
-    db: AsyncSession, agent_id: str, steps: List[ExploitAgentStep], agent_finished: bool, logger
+    db: AsyncSession, agent_id: str, steps: List[ExploitAgentStep], agent_finished: bool, finished_data: Optional[Dict[str, Any]] = None
 ) -> Union[DiscoveryAgentModel, ExploitAgentModel]:
     agent = await get_agent_by_id(db, agent_id)
     if not agent:
@@ -145,10 +148,10 @@ async def append_discovery_agent_steps(
     current_steps = list(agent.agent_steps_data or [])
     for step in steps:
         current_steps.append(step.to_dict())
-        logger.info(f"Appending step: {step.to_dict()}")
     
     agent.agent_steps_data = current_steps
     agent.agent_status = AgentStatus.COMPLETED if agent_finished else agent.agent_status
+    agent.complete_data = finished_data
 
     db.add(agent)   
     await db.commit()
@@ -170,4 +173,38 @@ async def update_page_data(
     db.add(agent)
     await db.commit()
     await db.refresh(agent)
+    return agent
+
+
+async def delete_agent(
+    db: AsyncSession, agent_id: str
+) -> Optional[Union[DiscoveryAgentModel, ExploitAgentModel]]:
+    """Delete an agent and its engagement link rows.
+
+    Returns the deleted agent object (detached) for reference.
+    """
+    agent = await get_agent_by_id(db, agent_id)
+    if not agent:
+        raise ValueError(f"Agent with ID {agent_id} not found")
+
+    # Remove junction table links first to satisfy FK constraints
+    if isinstance(agent, DiscoveryAgentModel):
+        await db.execute(
+            sa_delete(PentestEngagementDiscoveryAgent).where(
+                cast(Any, PentestEngagementDiscoveryAgent.discovery_agent_id) == agent_id
+            )
+        )
+    elif isinstance(agent, ExploitAgentModel):
+        await db.execute(
+            sa_delete(PentestEngagementExploitAgent).where(
+                cast(Any, PentestEngagementExploitAgent.exploit_agent_id) == agent_id
+            )
+        )
+    else:
+        raise ValueError(f"Unknown agent type for agent {agent_id}")
+
+    # Delete the agent row
+    await db.delete(agent)
+    await db.commit()
+
     return agent

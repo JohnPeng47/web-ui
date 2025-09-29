@@ -4,14 +4,14 @@ from pydantic import BaseModel, UUID4, field_validator
 from typing import Dict, Any, List, Optional, Literal, cast
 
 from src.agent.discovery.pages import PageObservations, Page
-
+from src.agent.exploit.observations import Observation
 from src.agent.base import AgentType
 from cnc.schemas.base import DerivedJSONModel
+
 # NOTE: we should make use and subclass this instead of redefining the fields in DiscoveryAgentStep
 # from pentest_bot.models.steps import AgentStep as _DiscoveryAgentStep
 
 class AgentStatus(str, enum.Enum):
-    PENDING_AUTO = "pending_auto"
     PENDING_APPROVAL = "pending_approval"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -22,6 +22,7 @@ class AgentOut(BaseModel):
     agent_status: AgentStatus
     agent_type: AgentType
     agent_name: str
+    data: Dict[str, Any]
 
     class Config:
         from_attributes = True
@@ -43,8 +44,12 @@ class DiscoveryAgentCreate(BaseModel):
 
 class ExploitAgentCreate(BaseModel):
     vulnerability_title: str
+    vulnerability_description: str
     agent_type: Optional[AgentType] = AgentType.EXPLOIT
     
+class ExploitAgentObservation(Observation):
+    pass
+
 # TODO: test uploading exploit agent steps first
 class ExploitAgentStep(AgentStep):
     step_num: int
@@ -67,7 +72,7 @@ class ExploitAgentStep(AgentStep):
 class UploadAgentSteps(AgentMessage):
     steps: List[ExploitAgentStep]
     max_steps: int
-    found_exploit: bool
+    completed: bool
 
 class UploadPageData(AgentMessage):
     """Upload model for PageObservations coming from src.agent.discovery.pages.PageObservations.to_json().

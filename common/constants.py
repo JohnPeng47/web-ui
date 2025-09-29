@@ -2,7 +2,7 @@ from pathlib import Path
 
 # temp holding place for application constants, which may or may not be configurable
 # exploit agent
-MAX_EXPLOIT_AGENT_STEPS = 3
+MAX_EXPLOIT_AGENT_STEPS = 6
 
 # discovery agent 
 MAX_DISCOVERY_AGENT_STEPS = 6
@@ -31,7 +31,8 @@ NUM_SCHEDULED_ACTIONS = 5
 # llm configurations
 SERVER_MODEL_CONFIG = {
     "model_config": {
-        "detection": "gpt-4.1"
+        "detection": "gpt-5",
+        "observations": "o3-mini"
     }
 }
 DISCOVERY_MODEL_CONFIG = {

@@ -13,7 +13,8 @@ from cnc.schemas.agent import (
     UploadAgentSteps,
     UploadPageData,
     AgentStatus,
-    AgentApproveBinary
+    AgentApproveBinary,
+    ExploitAgentObservation
 )
 from cnc.database.session import get_session
 from cnc.database.crud import (
@@ -45,8 +46,8 @@ from common.constants import (
     EXPLOIT_MODEL_CONFIG,
 )
 
+from src.agent.exploit.observations import GatherObservations
 from src.agent.discovery.pages import PageObservations, Page
-from httplib import HTTPMessage
 from src.agent.base import AgentType
 from src.agent.agent_client import AgentClient
 from src.llm_models import LLMHub
@@ -136,12 +137,16 @@ def make_agent_router(
             if actions:
                 for action in actions:
                     server_log.info(f"Scheduling exploit agent for {action.vulnerability_title}")
+                    server_log.info(f"-> {action.vulnerability_description}")
+                    agent_status = AgentStatus.PENDING_APPROVAL if MANUAL_APPROVAL_EXPLOIT_AGENT else AgentStatus.RUNNING
                     exploit_agent = await register_exploit_agent_service(
                         db, 
                         engagement.id, 
                         MAX_EXPLOIT_AGENT_STEPS, 
                         action.vulnerability_title, 
-                        await action.to_dict()
+                        action.vulnerability_description,
+                        await action.to_dict(),
+                        agent_status
                     )
                     start_request = StartExploitRequest(
                         page_item=action.page_item,
@@ -157,9 +162,7 @@ def make_agent_router(
                         full_log=full_logger,
                     )
                     # TODO: this logic should be placed inside DetectionScheduler
-                    if MANUAL_APPROVAL_EXPLOIT_AGENT:
-                        await update_agent_status_service(db, exploit_agent.id, AgentStatus.PENDING_APPROVAL)
-                    else:
+                    if not MANUAL_APPROVAL_EXPLOIT_AGENT:
                         await exploit_agent_queue.publish(start_request)
                 
         except ValueError as e:
@@ -179,7 +182,20 @@ def make_agent_router(
             if not engagement:
                 raise HTTPException(status_code=404, detail="Engagement not found")
             agents = await list_agents_for_engagement(db, engagement_id)
-            return agents
+            agents_out = []
+            for agent in agents:
+                if isinstance(agent, ExploitAgentModel):
+                    agents_out.append(AgentOut(
+                        id=agent.id,
+                        agent_status=agent.agent_status,
+                        agent_type=AgentType(agent.agent_type),
+                        agent_name=agent.vulnerability_title,
+                        data={
+                            "vulnerability_description": agent.vulnerability_description,
+                            "complete_data": agent.complete_data if agent.complete_data else {}
+                        }
+                    )) 
+            return agents_out
         except HTTPException:
             raise
         except Exception as e:
@@ -195,21 +211,30 @@ def make_agent_router(
         db: AsyncSession = Depends(get_session),
     ):
         """Upload discovery agent steps to be appended to the agent."""
-        try:
-            engagement = await get_engagement_by_agent_id(db, agent_id)
-            if not engagement:
-                raise Exception("Engagement not found")
+        engagement = await get_engagement_by_agent_id(db, agent_id)
+        if not engagement:
+            raise Exception("Engagement not found")
+        agent = await get_agent_by_id_service(db, agent_id)
+        if not agent:
+            raise HTTPException(status_code=404, detail="Agent not found")
 
+        try:
             server_log.info(f"Uploading agent steps for {agent_id}")
             server_log.info(f"Payload: {payload}")
 
-            agent = await get_agent_by_id_service(db, agent_id)
-            if not agent:
-                raise HTTPException(status_code=404, detail="Agent not found")
-
-            # we are actually only just receiving a single step per update
-            agent_finished = payload.max_steps == payload.steps[0].step_num + 1 and payload.found_exploit
-            await append_discovery_agent_steps_service(db, agent_id, payload.steps, agent_finished, server_log)
+            # TODO: add agent result summary here
+            res = GatherObservations().invoke(
+                model=llm_hub.get("observations"), 
+                prompt_args={"agent_trace": "\n".join([f"Step {i}: {step.reflection}" 
+                    for i, step in enumerate(payload.steps, start=1)])}
+            )
+            await append_discovery_agent_steps_service(
+                db, 
+                agent_id, 
+                payload.steps, 
+                payload.completed, 
+                finished_data=[obs.model_dump() for obs in res.observations]
+            )
         except Exception as e:
             import traceback
             print(f"Exception: {e}")
@@ -348,7 +373,7 @@ def make_agent_router(
         db: AsyncSession = Depends(get_session),
     ):
         log_factory = get_or_init_log_factory(base_dir=SERVER_LOG_DIR)
-        agent_logger, full_logger = log_factory.get_exploit_agent_loggers()
+        agent_logger, full_logger = log_factory.get_exploit_agent_loggers(no_console=True)
 
         agent: Optional[ExploitAgentModel] = await get_agent_by_id_service(db, agent_id)
         if not agent:
