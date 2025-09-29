@@ -1,0 +1,454 @@
+.
+├── 1
+├── 2
+├── README.md
+├── __pycache__
+├── agent_summary.json
+├── agent_summary.txt
+├── assets
+│   ├── examples
+│   │   └── test.png
+│   └── web-ui.png
+├── bash.exe.stackdump
+├── cli_db.bat
+├── cnc
+│   ├── CLAUDE_CODE.md
+│   ├── SUMMARY.txt
+│   ├── __init__.py
+│   ├── __pycache__
+│   ├── alembic.ini
+│   ├── client.py
+│   ├── database
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   ├── agent
+│   │   │   ├── __pycache__
+│   │   │   ├── crud.py
+│   │   │   └── models.py
+│   │   ├── crud.py
+│   │   ├── models.py
+│   │   └── session.py
+│   ├── helpers
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   ├── queue.py
+│   │   └── uuid.py
+│   ├── logger.py
+│   ├── main.py
+│   ├── migrations
+│   │   ├── __pycache__
+│   │   ├── env.py
+│   │   ├── script.py.mako
+│   │   └── versions
+│   │       ├── __pycache__
+│   │       └── d46774a1d387_init.py
+│   ├── pentest_hub.db
+│   ├── pools
+│   │   ├── __pycache__
+│   │   ├── discovery_agent_pool.py
+│   │   ├── exploit_agent_pool.py
+│   │   └── pool.py
+│   ├── requirements.txt
+│   ├── routers
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   ├── agent.py
+│   │   └── engagement.py
+│   ├── schemas
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   ├── agent.py
+│   │   ├── auth.py
+│   │   ├── base.py
+│   │   ├── engagement.py
+│   │   └── http.py
+│   ├── services
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   ├── attack.py
+│   │   ├── detection.py
+│   │   ├── engagement.py
+│   │   ├── enrichment.py
+│   │   └── queue.py
+│   ├── test_db.sqlite
+│   ├── tests
+│   │   ├── __init__.py
+│   │   ├── challenges
+│   │   │   ├── __init__.py
+│   │   │   ├── data.py
+│   │   │   └── vulnerability.py
+│   │   ├── conftest.py
+│   │   ├── integration
+│   │   │   ├── test_agent_approval.py
+│   │   │   └── test_discovery_agent.py
+│   │   ├── proxy_intercept_server
+│   │   │   ├── index.html
+│   │   │   └── server.py
+│   │   ├── pytest.ini
+│   │   ├── queues
+│   │   │   ├── test_attack_intruder_3.py
+│   │   │   ├── test_enrich_attack_2.py
+│   │   │   └── test_in_enrich_1.py
+│   │   ├── test_agent.py
+│   │   ├── test_engagement.py
+│   │   ├── test_engagement_page_data.py
+│   │   ├── test_http_proxy.py
+│   │   ├── test_intruder.py
+│   │   └── test_upload_data.py
+│   ├── workers
+│   │   ├── agent
+│   │   │   ├── __pycache__
+│   │   │   ├── browser.py
+│   │   │   └── cdp_handler.py
+│   │   └── attackers
+│   │       └── authnz
+│   │           ├── __pycache__
+│   │           ├── attacker.py
+│   │           ├── intruder.py
+│   │           └── models.py
+│   └── workers_launcher.py
+├── common
+│   ├── __pycache__
+│   ├── agent.py
+│   ├── constants.py
+│   ├── eval_pool.py
+│   ├── http_handler.py
+│   ├── prompt.py
+│   └── utils.py
+├── dom_tree_1.json
+├── dom_tree_2.json
+├── eval
+│   ├── __pycache__
+│   ├── client.py
+│   ├── complex
+│   │   └── 270981
+│   │       ├── prompt1.txt
+│   │       └── prompt2.txt
+│   ├── complex_reports.py
+│   ├── core.py
+│   ├── datasets
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   ├── base.py
+│   │   ├── detection
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   ├── pages
+│   │   │   │   └── agent_summary.json
+│   │   │   └── queue
+│   │   │       ├── discovery_queue.json
+│   │   │       ├── exploit_queue.json
+│   │   │       └── exploit_queue_single.json
+│   │   ├── discovery
+│   │   │   ├── __pycache__
+│   │   │   ├── juiceshop.py
+│   │   │   └── juiceshop_exploit.py
+│   │   └── exploit
+│   │       └── portswigger
+│   │           ├── data
+│   │           │   ├── __init__.py
+│   │           │   ├── client_side
+│   │           │   │   ├── __init__.py
+│   │           │   │   └── cross_site_scripting.py
+│   │           │   └── server_side
+│   │           │       ├── __init__.py
+│   │           │       ├── access_control_vulnerabilities.json
+│   │           │       ├── all_server_side.txt
+│   │           │       ├── authentication.json
+│   │           │       ├── business_logic_vulnerabilities.json
+│   │           │       ├── file_upload_vulnerabilities.py
+│   │           │       ├── information_disclosure.json
+│   │           │       ├── os_command_injection.json
+│   │           │       ├── path_traversal.py
+│   │           │       ├── race_conditions.json
+│   │           │       ├── server_side_request_forgery.py
+│   │           │       └── sql_injection.py
+│   │           ├── labs_backup.json
+│   │           ├── port_swigger_labs.json
+│   │           ├── scrape_lab.py
+│   │           ├── start_labs.py
+│   │           └── vulnerabilities.txt
+│   ├── eval_pool.py
+│   ├── extract_params.py
+│   ├── harness
+│   │   ├── discovery
+│   │   │   └── pool.py
+│   │   └── exploit
+│   │       ├── create_vuln_queue.py
+│   │       ├── eval_agent_pool.py
+│   │       ├── pool.py
+│   │       └── queue.py
+│   └── scores.py
+├── extract_burp_lab.py
+├── get_all_labs.py
+├── good_runs
+│   ├── 12_alt.txt
+│   ├── dom_xss_stuck.txt
+│   ├── xbow_aura.txt
+│   ├── xbow_aura_just_scripts.txt
+│   └── xss_12.txt
+├── httplib.py
+├── logger.py
+├── logs
+│   └── 2025-07-05
+│       └── xss_agent
+│           └── gemini_2_5_pro
+│               └── concat.py
+├── main
+├── min_agent
+│   └── 2025-09-24
+│       ├── 0
+│       └── 1
+├── model_api_prices.json
+├── osv
+│   ├── __init__.py
+│   ├── classify_vuln.py
+│   ├── clean_json.py
+│   ├── docker.py
+│   ├── filter_list.py
+│   ├── filtered_list.csv
+│   ├── find_candidates.py
+│   ├── fix_json.py
+│   ├── osv_scanner.py
+│   ├── search_terms.txt
+│   └── test.csv
+├── payload_upload.json
+├── pentest_bot
+│   ├── 2025-09-24
+│   │   ├── 0
+│   │   ├── 1
+│   │   ├── 2
+│   │   └── 3
+│   ├── __init__.py
+│   ├── __pycache__
+│   ├── alembic
+│   │   ├── README
+│   │   ├── env.py
+│   │   ├── script.py.mako
+│   │   └── versions
+│   │       ├── 04d5f7425f13_first.py
+│   │       ├── 2d6745e05bc5_removed_step_descr.py
+│   │       ├── 3b2dfcd9947c_made_steps_optional.py
+│   │       ├── 54be2e05759a_repair_results_group_ids_sqlite_safe_.py
+│   │       ├── 91bf5df60aa2_added_group_id_to_agentsteps.py
+│   │       ├── ada29215906c_added_is_eval_to_run.py
+│   │       ├── be44afdeb392_.py
+│   │       ├── ccb3ea306411_added_opik_prompt_fields.py
+│   │       ├── e2a99b62112d_first.py
+│   │       ├── f23d552ad32f_added_step_descr_to_agentstep.py
+│   │       └── f59092f0e5f3_added_execution_output_and_step_type_to_.py
+│   ├── alembic.ini
+│   ├── cli_db
+│   │   ├── __init__.py
+│   │   ├── cli_db.py
+│   │   ├── cmds
+│   │   │   ├── compare_steps
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── cli.py
+│   │   │   ├── cost
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── cli.py
+│   │   │   ├── delete
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── cli.py
+│   │   │   ├── label_steps
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── cli.py
+│   │   │   ├── list_runs
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── cli.py
+│   │   │   ├── search_steps
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── cli.py
+│   │   │   │   ├── parser.py
+│   │   │   │   └── search.py
+│   │   │   └── show_run
+│   │   │       ├── __init__.py
+│   │   │       └── cli.py
+│   │   ├── helpers.py
+│   │   ├── pyproject.toml
+│   │   └── setup.py
+│   ├── db
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   ├── tables
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   ├── discovery_agent.py
+│   │   │   ├── experiments.py
+│   │   │   └── exploit_agent.py
+│   │   └── utils.py
+│   ├── models
+│   │   ├── __pycache__
+│   │   └── steps.py
+│   ├── test_logger.py
+│   ├── tests
+│   │   ├── data
+│   │   │   ├── server.py
+│   │   │   └── xss_demo.html
+│   │   └── test_interpreter.py
+│   └── web_exploit
+│       ├── __init__.py
+│       ├── __pycache__
+│       ├── agent.py
+│       ├── confirm_agent.py
+│       ├── ctf_agent.py
+│       ├── data
+│       │   ├── bc_sites.py
+│       │   └── ctf
+│       │       ├── ast_eval.patched
+│       │       └── cal.py
+│       ├── discovery_agent.py
+│       ├── exploit_agent.py
+│       ├── full_agent.py
+│       ├── launch_agent.py
+│       ├── launch_agent_real.py
+│       ├── prompts
+│       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   ├── base.py
+│       │   ├── classify_solution.py
+│       │   ├── classify_steps.py
+│       │   ├── confirm_solution.py
+│       │   ├── exploit_agent.py
+│       │   ├── site_agent.py
+│       │   └── update.py
+│       ├── prompts.py
+│       ├── site_agent.py
+│       ├── steps_class.txt
+│       ├── tools
+│       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   ├── browser.py
+│       │   ├── browser_tools.py
+│       │   ├── interpreter.py
+│       │   ├── proxy
+│       │   │   ├── __init__.py
+│       │   │   ├── __pycache__
+│       │   │   ├── _map_endpoints.py
+│       │   │   ├── _print.py
+│       │   │   ├── _request.py
+│       │   │   └── base.py
+│       │   ├── think.py
+│       │   └── zap
+│       │       └── zap.py
+│       ├── utils.py
+│       └── xss_client.py
+├── process_xss_agent_steps.py
+├── prompt_tests
+│   └── create_plan.py
+├── pyproject.toml
+├── pyrightconfig.json
+├── pytest.ini
+├── random_tests
+│   ├── test_agent_intruder.py
+│   ├── test_agent_multi.py
+│   ├── test_interp.py
+│   ├── test_models.py
+│   ├── test_multi_pw.py
+│   ├── test_o3_web_search.py
+│   ├── test_pw.py
+│   └── test_zap.py
+├── read_reports.py
+├── requirements.txt
+├── screenshot.png
+├── scripts
+│   ├── __pycache__
+│   ├── bounty_payouts
+│   │   ├── companies.txt
+│   │   ├── get_bounty_payouts.py
+│   │   └── payouts.json
+│   ├── find_urls.txt
+│   ├── get_model_api_costs.py
+│   ├── start_agent.py
+│   ├── start_browser.py
+│   ├── start_cnc.py
+│   ├── start_one_page_agent.py
+│   ├── start_single_task_agent.py
+│   ├── start_test_cnc.py
+│   ├── test_proxy.py
+│   └── tests
+│       ├── test_discovery_agent.py
+│       └── test_exploit_agent.py
+├── src
+│   ├── __init__.py
+│   ├── __pycache__
+│   ├── agent
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   ├── agent_client.py
+│   │   ├── base.py
+│   │   ├── controllers
+│   │   │   └── observation_contoller.py
+│   │   ├── discovery
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   ├── agent.py
+│   │   │   ├── links.py
+│   │   │   ├── min_agent_single_page.py
+│   │   │   ├── pages.py
+│   │   │   ├── prompts
+│   │   │   │   ├── __pycache__
+│   │   │   │   ├── complete.py
+│   │   │   │   ├── planv1.py
+│   │   │   │   ├── planv2.py
+│   │   │   │   ├── planv3.py
+│   │   │   │   ├── planv4.py
+│   │   │   │   └── sys_prompt.py
+│   │   │   └── proxy.py
+│   │   └── utils.py
+│   ├── llm
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   └── resource_params.py
+│   ├── llm_models.py
+│   ├── llm_provider.py
+│   └── utils.py
+├── start_single_task_agent.py
+├── submodules
+│   └── johnllm
+├── test_discovery_agent.py
+├── test_dom_diff.py
+├── test_dom_str_diff.py
+├── test_exploit_agent.py
+├── test_exploit_test.py
+├── test_insert_db.py
+├── test_llm_diff_dom.py
+├── test_non_terminating.py
+├── test_parse_links.py
+├── test_plan_agent.py
+├── test_pw.py
+├── test_start_single.sh
+├── test_termination_working.py
+├── test_test.py
+├── tests
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── data
+│   │   └── http_requests.json
+│   ├── integration
+│   │   ├── cross_tenant_idor
+│   │   ├── cross_tenant_requests
+│   │   ├── test_authnz_queue.py
+│   │   └── test_full_authnz.py
+│   ├── pytest.ini
+│   ├── server.py
+│   ├── templates
+│   │   ├── login.html
+│   │   └── protected.html
+│   ├── test_browser_use.py
+│   ├── test_browsing.py
+│   ├── test_filter.py
+│   ├── test_httplib.py
+│   ├── test_intruder.py
+│   ├── test_llm_api.py
+│   ├── test_observation.py
+│   ├── test_plan_item.py
+│   └── test_score_equals_json.py
+├── tree.txt
+├── trigger_discovery.py
+├── update-prompt.bat
+├── zap_scan.py
+└── zap_urls.txt
+
+127 directories, 325 files

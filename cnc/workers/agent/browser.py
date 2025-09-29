@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 
 from common.constants import (
-    BROWSER_PROFILE_DIR_2,
+    BROWSER_PROFILE_DIR,
     BROWSER_CDP_PORT,
     BROWSER_PROXY_HOST,
     BROWSER_PROXY_PORT,
