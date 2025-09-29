@@ -1,4 +1,3 @@
-import logging
 from typing import Any, Dict, Optional
 
 import httpx
@@ -7,7 +6,6 @@ from src.agent.discovery.pages import PageObservations
 
 from pentest_bot.models.steps import AgentStep
 
-logger = logging.getLogger(__name__)
 
 class AgentClient:
     """
@@ -96,7 +94,7 @@ class AgentClient:
             "agent_id": str(self.agent_id),
             "steps": [agent_step.model_dump()],
             "max_steps": max_steps,
-            "found_exploit": found_exploit,
+            "completed": agent_step.step_num == max_steps,
         }
         response = await self.client.post(path, json=payload)
         response.raise_for_status()

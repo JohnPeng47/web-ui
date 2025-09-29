@@ -9,10 +9,6 @@ from src.llm_models import BaseChatModel
 from httplib import HTTPMessage
 from cnc.database.agent.models import ExploitAgentModel
 
-
-# TMRW: 
-# - add a vulnerability title along with description to display the data
-
 # TODO: potentially change to being able to specify multiple page items
 class ScheduledActionLM(BaseModel):
     page_item_id: str
@@ -56,7 +52,9 @@ You are given the above notes collected during the recond phase of a pentest. Re
 Come up with a list of {{num_actions}} actions, prioritized by likelihood/impact
 
 Some guidance for the response format:
-- return a short, descriptive vulnerability title
+- your output should contain:
+    - a short, descriptive vulnerability title
+    - a description of the vulnerability that highlights the specific part of the page item that raised your suspicion 
 - every identifiable page item is prefixed with a id string in the format "a.b"
 - while each page item covers alot of content, you can tailor your vulnerability description to the specific aspect of the page item that is most relevant to the vulnerability you are looking for
 """

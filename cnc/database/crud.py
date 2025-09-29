@@ -1,6 +1,7 @@
 from typing import Optional, Union, List, Any, cast
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import delete as sa_delete
 from sqlmodel import select
 
 from cnc.helpers.uuid import generate_uuid
@@ -182,3 +183,77 @@ async def list_agents_for_engagement(
         agents.extend(discovery_agents)
     
     return agents
+
+
+async def delete_all_agents_for_engagement(
+    db: AsyncSession, engagement_id: UUID, agent_type: Optional[str] = None
+) -> int:
+    """Delete all agents attached to an engagement.
+
+    Removes junction table rows first, then deletes agent rows.
+
+    Args:
+        db: Database session
+        engagement_id: Engagement ID
+        agent_type: Optional filter ("exploit" or "discovery"). Deletes both if None.
+
+    Returns:
+        Total number of agent rows deleted.
+    """
+    total_deleted = 0
+
+    # Exploit agents
+    if agent_type is None or agent_type == "exploit":
+        exploit_ids_result = await db.execute(
+            select(PentestEngagementExploitAgent.exploit_agent_id).where(
+                PentestEngagementExploitAgent.pentest_engagement_id == engagement_id
+            )
+        )
+        exploit_ids = list(exploit_ids_result.scalars().all())
+
+        if exploit_ids:
+            # Remove junctions first
+            await db.execute(
+                sa_delete(PentestEngagementExploitAgent).where(
+                    cast(Any, PentestEngagementExploitAgent.pentest_engagement_id) == engagement_id
+                )
+            )
+
+            # Delete agents
+            delete_result = await db.execute(
+                sa_delete(ExploitAgentModel).where(cast(Any, ExploitAgentModel.id).in_(exploit_ids))  # type: ignore
+            )
+            total_deleted += delete_result.rowcount or 0
+
+    # Discovery agents
+    if agent_type is None or agent_type == "discovery":
+        discovery_ids_result = await db.execute(
+            select(PentestEngagementDiscoveryAgent.discovery_agent_id).where(
+                PentestEngagementDiscoveryAgent.pentest_engagement_id == engagement_id
+            )
+        )
+        discovery_ids = list(discovery_ids_result.scalars().all())
+
+        if discovery_ids:
+            # Remove junctions first
+            await db.execute(
+                sa_delete(PentestEngagementDiscoveryAgent).where(
+                    cast(Any, PentestEngagementDiscoveryAgent.pentest_engagement_id) == engagement_id
+                )
+            )
+
+            # Delete agents
+            delete_result = await db.execute(
+                sa_delete(DiscoveryAgentModel).where(cast(Any, DiscoveryAgentModel.id).in_(discovery_ids))  # type: ignore
+            )
+            total_deleted += delete_result.rowcount or 0
+
+    await db.commit()
+    return total_deleted
+
+
+async def delete_all_agents(
+    db: AsyncSession, engagement_id: UUID, agent_type: Optional[str] = None
+) -> int:
+    """Compatibility wrapper to delete all agents for an engagement."""
+    return await delete_all_agents_for_engagement(db, engagement_id, agent_type)
