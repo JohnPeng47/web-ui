@@ -97,7 +97,6 @@ async def main():
     browser = await pw.chromium.launch_persistent_context(
         user_data_dir=str(PROFILE_DIR),
         headless=True,
-        executable_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe",
         args=[f"--remote-debugging-port={PORT}", "--remote-debugging-address=127.0.0.1"],
         proxy={"server": f"http://{PROXY_HOST}:{PROXY_PORT}"},
     )

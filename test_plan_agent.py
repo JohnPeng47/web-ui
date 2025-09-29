@@ -11,7 +11,7 @@ from src.llm_models import LLMHub
 from src.agent.discovery.prompts.sys_prompt import CUSTOM_SYSTEM_PROMPT
 
 from eval.client import PagedDiscoveryEvalClient
-from eval.discovery import JUICE_SHOP_ALL
+from eval.discovery import JUICE_SHOP_ALL   
 
 from logger import setup_agent_logger
 

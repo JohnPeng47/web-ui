@@ -1,6 +1,7 @@
 import asyncio
 from tenacity import retry, stop_after_attempt, wait_exponential
 import time
+from pathlib import Path
 
 from common.constants import (
     BROWSER_PROFILE_DIR_2,
@@ -18,9 +19,9 @@ async def start_single_browser():
     try:
         pw = await async_playwright().start()
         browser = await pw.chromium.launch_persistent_context(
-            user_data_dir=str(BROWSER_PROFILE_DIR_2),
+            user_data_dir=str(BROWSER_PROFILE_DIR),
+            executable_path=Path("/root/chromium/chrome-linux/chrome"),
             headless=True,
-            executable_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe",
             args=[
                 "--ignore-certificate-errors",
                 "--ignore-ssl-errors",

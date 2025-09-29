@@ -29,7 +29,8 @@ Human
 - test_http_proxy:
 > future: put
 - Deployment
-> Current setup with start proxy/browser combo is not ideal 
+> Add browser-use as submodule
+> Create .profile dir for browser profiles
 
 2025/09/24
 > Confirm that ainvoke with detection is working
@@ -41,7 +42,8 @@ Human
 >> tagging an agent with search tags so that we can better look for the results later
 > Agent:
 >> * add agent results to model -> no matter this should update 
-> Deployment to hostinger server
+- Deployment to hostinger server
+> 
 
 Think:
 > When should we start building custom web-apps for testing vulns?

@@ -443,7 +443,7 @@ class DiscoveryAgent:
             file_system=None,  # pass a real FileSystem if you use done() attachments
             context=None,
         )
-        await asyncio.sleep(self.browser_session.browser_profile.wait_between_actions)
+        # await asyncio.sleep(self.browser_session.browser_profile.wait_between_actions)
 
         agent_log.info(f"[Action]: {GoToUrlActionModel(**{'go_to_url': GoToUrlAction(url=url, new_tab=False)})}")
         agent_log.info(f"[Result]: {res}")

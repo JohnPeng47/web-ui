@@ -15,7 +15,7 @@ BROWSER_PROXY_PORT = 8081
 BROWSER_CDP_HOST = "127.0.0.1"
 BROWSER_CDP_PORT = 9899
 BROWSER_PROFILE_DIR = Path(
-    r"C:\Users\jpeng\AppData\Local\Google\Chrome\User Data\Profile 2"
+    r".profiles"
 )
 BROWSER_PROFILE_DIR_2 = Path(
     r".profiles"
@@ -23,7 +23,7 @@ BROWSER_PROFILE_DIR_2 = Path(
 
 # cnc server url
 API_SERVER_HOST = "127.0.0.1"
-API_SERVER_PORT = 8000
+API_SERVER_PORT = 8080
 
 # detection prompt
 NUM_SCHEDULED_ACTIONS = 5

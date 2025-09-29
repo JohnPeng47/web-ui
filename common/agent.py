@@ -8,11 +8,10 @@ import threading
 import uuid
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, List, Optional, Type, TypeVar, Generic, Callable, Coroutine
+from typing import Any, Dict, List, Optional, Type, TypeVar, Generic, Callable, Coroutine
 
 
 from enum import Enum
-from bubus.models import Any
 from pydantic import BaseModel
 
 from pentest_bot.web_exploit.agent import PentestSession
