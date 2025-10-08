@@ -58,11 +58,12 @@ async def start_attacker_worker(enriched_channel: BroadcastChannel, session: Asy
     await authz_worker.run()
 
 async def start_workers(
-    start_discovery_pool: Callable[[BroadcastChannel], Any],
-    start_exploit_pool: Callable[[BroadcastChannel], Any],
+    start_discovery_pool: Callable[..., Any],
+    start_exploit_pool: Callable[..., Any],
     app: Optional[FastAPI] = None,
     discovery_agent_cls: Type[Union[DiscoveryAgent, MinimalAgentSinglePage]] = MinimalAgentSinglePage,
     override_max_steps: Optional[int] = 3,
+    stop_event: Optional[asyncio.Event] = None,
 ):
     """
     Launch all worker processes.
@@ -106,8 +107,16 @@ async def start_workers(
         await asyncio.gather(
             # start_enrichment_worker(raw_channel, enriched_channel, session),
             # start_attacker_worker(enriched_channel, session),
-            start_discovery_pool(discovery_agent_queue, agent_cls=discovery_agent_cls),
-            start_exploit_pool(exploit_agent_queue, override_max_steps=override_max_steps),
+            start_discovery_pool(
+                discovery_agent_queue,
+                agent_cls=discovery_agent_cls,
+                stop_event=stop_event,
+            ),
+            start_exploit_pool(
+                exploit_agent_queue,
+                override_max_steps=override_max_steps,
+                stop_event=stop_event,
+            ),
         )
 
 if __name__ == "__main__":

@@ -6,7 +6,6 @@ from uuid import UUID
 import httpx
 
 from cnc.tests.challenges.vulnerability import Vulnerability
-from common.agent import BrowserActions
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +103,7 @@ class AgentClient:
                             app_id: UUID, 
                             agent_id: UUID,
                             messages: List[Dict[str, Any]],
-                            browser_actions: Optional[BrowserActions]) -> Dict[str, int]:
+                            browser_actions: Optional[Any]) -> Dict[str, int]:
         """
         Push HTTP messages to the system for processing.
         
@@ -134,7 +133,7 @@ class AgentClient:
                                   app_id: UUID, 
                                   agent_id: UUID,
                                   messages: List[Dict[str, Any]],
-                                  browser_actions: Optional[BrowserActions]) -> None:
+                                  browser_actions: Optional[Any]) -> None:
         """
         Push HTTP messages to the system for processing.
         

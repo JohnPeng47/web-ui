@@ -19,7 +19,7 @@ async def start_single_browser():
         pw = await async_playwright().start()
         browser = await pw.chromium.launch_persistent_context(
             user_data_dir=str(BROWSER_PROFILE_DIR_2),
-            headless=True,
+            headless=False,
             executable_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe",
             args=[
                 "--ignore-certificate-errors",
@@ -32,7 +32,7 @@ async def start_single_browser():
                 "--disable-features=VizDisplayCompositor",
                 f"--remote-debugging-port={BROWSER_CDP_PORT}", 
                 "--remote-debugging-address=127.0.0.1",
-                f"--proxy-server=http://{BROWSER_PROXY_HOST}:{BROWSER_PROXY_PORT}"
+                # f"--proxy-server=http://{BROWSER_PROXY_HOST}:{BROWSER_PROXY_PORT}"
             ],
         )        
         # Keep browser running until interrupted

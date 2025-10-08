@@ -1,0 +1,717 @@
+{
+  "name": "AgentOutput",
+  "module": "browser_use.agent.views",
+  "doc": "AgentOutput model with custom actions",
+  "bases": [
+    "AgentOutput"
+  ],
+  "fields": {
+    "evaluation_previous_goal": {
+      "type": "str | None",
+      "required": false,
+      "description": null
+    },
+    "next_goal": {
+      "type": "str | None",
+      "required": false,
+      "description": null
+    },
+    "action": {
+      "type": "list[browser_use.controller.registry.service.ActionModel]",
+      "required": true,
+      "description": "List of actions to execute",
+      "default": "PydanticUndefined",
+      "json_schema_extra": {
+        "min_items": 1
+      },
+      "nested_models": [
+        {
+          "name": "ActionModel",
+          "module": "browser_use.controller.registry.service",
+          "doc": "Union of all available action models that maintains ActionModel interface",
+          "bases": [
+            "RootModel[Union[DoneActionModel, SearchGoogleActionModel, GoToUrlActionModel, GoBackActionModel, WaitActionModel, ClickElementByIndexActionModel, InputTextActionModel, UploadFileToElementActionModel, SwitchTabActionModel, CloseTabActionModel, ScrollActionModel, SendKeysActionModel, ScrollToTextActionModel, GetDropdownOptionsActionModel, SelectDropdownOptionActionModel, WriteFileActionModel, ReplaceFileStrActionModel, ReadFileActionModel]]"
+          ],
+          "fields": {
+            "root": {
+              "type": "typing.Union[browser_use.controller.registry.service.DoneActionModel, browser_use.controller.registry.service.SearchGoogleActionModel, browser_use.controller.registry.service.GoToUrlActionModel, browser_use.controller.registry.service.GoBackActionModel, browser_use.controller.registry.service.WaitActionModel, browser_use.controller.registry.service.ClickElementByIndexActionModel, browser_use.controller.registry.service.InputTextActionModel, browser_use.controller.registry.service.UploadFileToElementActionModel, browser_use.controller.registry.service.SwitchTabActionModel, browser_use.controller.registry.service.CloseTabActionModel, browser_use.controller.registry.service.ScrollActionModel, browser_use.controller.registry.service.SendKeysActionModel, browser_use.controller.registry.service.ScrollToTextActionModel, browser_use.controller.registry.service.GetDropdownOptionsActionModel, browser_use.controller.registry.service.SelectDropdownOptionActionModel, browser_use.controller.registry.service.WriteFileActionModel, browser_use.controller.registry.service.ReplaceFileStrActionModel, browser_use.controller.registry.service.ReadFileActionModel]",
+              "required": true,
+              "description": null,
+              "default": "PydanticUndefined",
+              "nested_models": [
+                {
+                  "name": "DoneActionModel",
+                  "module": "browser_use.controller.registry.service",
+                  "doc": null,
+                  "bases": [
+                    "ActionModel"
+                  ],
+                  "fields": {
+                    "done": {
+                      "type": "<class 'browser_use.controller.views.DoneAction'>",
+                      "required": true,
+                      "description": "Complete task - provide a summary of results for the user. Set success=True if task completed successfully, false otherwise. Text should be your response to the user summarizing results. Include files you would like to display to the user in files_to_display.",
+                      "default": "PydanticUndefined",
+                      "nested_models": [
+                        {
+                          "name": "DoneAction",
+                          "module": "browser_use.controller.views",
+                          "doc": null,
+                          "bases": [],
+                          "fields": {
+                            "text": {
+                              "type": "<class 'str'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            },
+                            "success": {
+                              "type": "<class 'bool'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            },
+                            "files_to_display": {
+                              "type": "list[str] | None",
+                              "required": false,
+                              "description": null,
+                              "default": "[]"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "SearchGoogleActionModel",
+                  "module": "browser_use.controller.registry.service",
+                  "doc": null,
+                  "bases": [
+                    "ActionModel"
+                  ],
+                  "fields": {
+                    "search_google": {
+                      "type": "<class 'browser_use.controller.views.SearchGoogleAction'>",
+                      "required": true,
+                      "description": "Search the query in Google, the query should be a search query like humans search in Google, concrete and not vague or super long.",
+                      "default": "PydanticUndefined",
+                      "nested_models": [
+                        {
+                          "name": "SearchGoogleAction",
+                          "module": "browser_use.controller.views",
+                          "doc": null,
+                          "bases": [],
+                          "fields": {
+                            "query": {
+                              "type": "<class 'str'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "GoToUrlActionModel",
+                  "module": "browser_use.controller.registry.service",
+                  "doc": null,
+                  "bases": [
+                    "ActionModel"
+                  ],
+                  "fields": {
+                    "go_to_url": {
+                      "type": "<class 'browser_use.controller.views.GoToUrlAction'>",
+                      "required": true,
+                      "description": "Navigate to URL, set new_tab=True to open in new tab, False to navigate in current tab",
+                      "default": "PydanticUndefined",
+                      "nested_models": [
+                        {
+                          "name": "GoToUrlAction",
+                          "module": "browser_use.controller.views",
+                          "doc": null,
+                          "bases": [],
+                          "fields": {
+                            "url": {
+                              "type": "<class 'str'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            },
+                            "new_tab": {
+                              "type": "<class 'bool'>",
+                              "required": false,
+                              "description": null,
+                              "default": "False"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "GoBackActionModel",
+                  "module": "browser_use.controller.registry.service",
+                  "doc": null,
+                  "bases": [
+                    "ActionModel"
+                  ],
+                  "fields": {
+                    "go_back": {
+                      "type": "<class 'browser_use.controller.views.NoParamsAction'>",
+                      "required": true,
+                      "description": "Go back",
+                      "default": "PydanticUndefined",
+                      "nested_models": [
+                        {
+                          "name": "NoParamsAction",
+                          "module": "browser_use.controller.views",
+                          "doc": "\n\tAccepts absolutely anything in the incoming data\n\tand discards it, so the final parsed model is empty.\n\t",
+                          "bases": [],
+                          "fields": {}
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "WaitActionModel",
+                  "module": "browser_use.controller.registry.service",
+                  "doc": null,
+                  "bases": [
+                    "ActionModel"
+                  ],
+                  "fields": {
+                    "wait": {
+                      "type": "<class 'browser_use.controller.registry.service.wait_Params'>",
+                      "required": true,
+                      "description": "Wait for x seconds default 3 (max 10 seconds). This can be used to wait until the page is fully loaded.",
+                      "default": "PydanticUndefined",
+                      "nested_models": [
+                        {
+                          "name": "wait_Params",
+                          "module": "browser_use.controller.registry.service",
+                          "doc": null,
+                          "bases": [
+                            "ActionModel"
+                          ],
+                          "fields": {
+                            "seconds": {
+                              "type": "<class 'int'>",
+                              "required": false,
+                              "description": null,
+                              "default": "3"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "ClickElementByIndexActionModel",
+                  "module": "browser_use.controller.registry.service",
+                  "doc": null,
+                  "bases": [
+                    "ActionModel"
+                  ],
+                  "fields": {
+                    "click_element_by_index": {
+                      "type": "<class 'browser_use.controller.views.ClickElementAction'>",
+                      "required": true,
+                      "description": "Click element by index, set new_tab=True to open any resulting navigation in a new tab. Only click on indices that are inside your current browser_state. Never click or assume not existing indices.",
+                      "default": "PydanticUndefined",
+                      "nested_models": [
+                        {
+                          "name": "ClickElementAction",
+                          "module": "browser_use.controller.views",
+                          "doc": null,
+                          "bases": [],
+                          "fields": {
+                            "index": {
+                              "type": "<class 'int'>",
+                              "required": true,
+                              "description": "index of the element to click",
+                              "default": "PydanticUndefined"
+                            },
+                            "new_tab": {
+                              "type": "<class 'bool'>",
+                              "required": false,
+                              "description": "set True to open any resulting navigation in a new tab, False otherwise",
+                              "default": "False"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "InputTextActionModel",
+                  "module": "browser_use.controller.registry.service",
+                  "doc": null,
+                  "bases": [
+                    "ActionModel"
+                  ],
+                  "fields": {
+                    "input_text": {
+                      "type": "<class 'browser_use.controller.views.InputTextAction'>",
+                      "required": true,
+                      "description": "Click and input text into a input interactive element. Only input text into indices that are inside your current browser_state. Never input text into indices that are not inside your current browser_state.",
+                      "default": "PydanticUndefined",
+                      "nested_models": [
+                        {
+                          "name": "InputTextAction",
+                          "module": "browser_use.controller.views",
+                          "doc": null,
+                          "bases": [],
+                          "fields": {
+                            "index": {
+                              "type": "<class 'int'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            },
+                            "text": {
+                              "type": "<class 'str'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "UploadFileToElementActionModel",
+                  "module": "browser_use.controller.registry.service",
+                  "doc": null,
+                  "bases": [
+                    "ActionModel"
+                  ],
+                  "fields": {
+                    "upload_file_to_element": {
+                      "type": "<class 'browser_use.controller.views.UploadFileAction'>",
+                      "required": true,
+                      "description": "Upload file to interactive element with file path",
+                      "default": "PydanticUndefined",
+                      "nested_models": [
+                        {
+                          "name": "UploadFileAction",
+                          "module": "browser_use.controller.views",
+                          "doc": null,
+                          "bases": [],
+                          "fields": {
+                            "index": {
+                              "type": "<class 'int'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            },
+                            "path": {
+                              "type": "<class 'str'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "SwitchTabActionModel",
+                  "module": "browser_use.controller.registry.service",
+                  "doc": null,
+                  "bases": [
+                    "ActionModel"
+                  ],
+                  "fields": {
+                    "switch_tab": {
+                      "type": "<class 'browser_use.controller.views.SwitchTabAction'>",
+                      "required": true,
+                      "description": "Switch tab",
+                      "default": "PydanticUndefined",
+                      "nested_models": [
+                        {
+                          "name": "SwitchTabAction",
+                          "module": "browser_use.controller.views",
+                          "doc": null,
+                          "bases": [],
+                          "fields": {
+                            "page_id": {
+                              "type": "<class 'int'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "CloseTabActionModel",
+                  "module": "browser_use.controller.registry.service",
+                  "doc": null,
+                  "bases": [
+                    "ActionModel"
+                  ],
+                  "fields": {
+                    "close_tab": {
+                      "type": "<class 'browser_use.controller.views.CloseTabAction'>",
+                      "required": true,
+                      "description": "Close an existing tab",
+                      "default": "PydanticUndefined",
+                      "nested_models": [
+                        {
+                          "name": "CloseTabAction",
+                          "module": "browser_use.controller.views",
+                          "doc": null,
+                          "bases": [],
+                          "fields": {
+                            "page_id": {
+                              "type": "<class 'int'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "ScrollActionModel",
+                  "module": "browser_use.controller.registry.service",
+                  "doc": null,
+                  "bases": [
+                    "ActionModel"
+                  ],
+                  "fields": {
+                    "scroll": {
+                      "type": "<class 'browser_use.controller.views.ScrollAction'>",
+                      "required": true,
+                      "description": "Scroll the page by specified number of pages (set down=True to scroll down, down=False to scroll up, num_pages=number of pages to scroll like 0.5 for half page, 1.0 for one page, etc.). Optional index parameter to scroll within a specific element or its scroll container (works well for dropdowns and custom UI components). Use index=0 or omit index to scroll the entire page.",
+                      "default": "PydanticUndefined",
+                      "nested_models": [
+                        {
+                          "name": "ScrollAction",
+                          "module": "browser_use.controller.views",
+                          "doc": null,
+                          "bases": [],
+                          "fields": {
+                            "down": {
+                              "type": "<class 'bool'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            },
+                            "num_pages": {
+                              "type": "<class 'float'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            },
+                            "index": {
+                              "type": "int | None",
+                              "required": false,
+                              "description": null
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "SendKeysActionModel",
+                  "module": "browser_use.controller.registry.service",
+                  "doc": null,
+                  "bases": [
+                    "ActionModel"
+                  ],
+                  "fields": {
+                    "send_keys": {
+                      "type": "<class 'browser_use.controller.views.SendKeysAction'>",
+                      "required": true,
+                      "description": "Send strings of special keys to use Playwright page.keyboard.press - examples include Escape, Backspace, Insert, PageDown, Delete, Enter, or Shortcuts such as `Control+o`, `Control+Shift+T`",
+                      "default": "PydanticUndefined",
+                      "nested_models": [
+                        {
+                          "name": "SendKeysAction",
+                          "module": "browser_use.controller.views",
+                          "doc": null,
+                          "bases": [],
+                          "fields": {
+                            "keys": {
+                              "type": "<class 'str'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "ScrollToTextActionModel",
+                  "module": "browser_use.controller.registry.service",
+                  "doc": null,
+                  "bases": [
+                    "ActionModel"
+                  ],
+                  "fields": {
+                    "scroll_to_text": {
+                      "type": "<class 'browser_use.controller.registry.service.scroll_to_text_Params'>",
+                      "required": true,
+                      "description": "Scroll to a text in the current page",
+                      "default": "PydanticUndefined",
+                      "nested_models": [
+                        {
+                          "name": "scroll_to_text_Params",
+                          "module": "browser_use.controller.registry.service",
+                          "doc": null,
+                          "bases": [
+                            "ActionModel"
+                          ],
+                          "fields": {
+                            "text": {
+                              "type": "<class 'str'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "GetDropdownOptionsActionModel",
+                  "module": "browser_use.controller.registry.service",
+                  "doc": null,
+                  "bases": [
+                    "ActionModel"
+                  ],
+                  "fields": {
+                    "get_dropdown_options": {
+                      "type": "<class 'browser_use.controller.views.GetDropdownOptionsAction'>",
+                      "required": true,
+                      "description": "Get all options from any dropdown (native <select>, ARIA menus, or custom dropdowns like Semantic UI). Searches target element and up to 4 levels of children to find dropdowns. This only works on dropdown elements.",
+                      "default": "PydanticUndefined",
+                      "nested_models": [
+                        {
+                          "name": "GetDropdownOptionsAction",
+                          "module": "browser_use.controller.views",
+                          "doc": null,
+                          "bases": [],
+                          "fields": {
+                            "index": {
+                              "type": "<class 'int'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "SelectDropdownOptionActionModel",
+                  "module": "browser_use.controller.registry.service",
+                  "doc": null,
+                  "bases": [
+                    "ActionModel"
+                  ],
+                  "fields": {
+                    "select_dropdown_option": {
+                      "type": "<class 'browser_use.controller.views.SelectDropdownOptionAction'>",
+                      "required": true,
+                      "description": "Select dropdown option by exact text from any dropdown type (native <select>, ARIA menus, or custom dropdowns). Searches target element and children to find selectable options.",
+                      "default": "PydanticUndefined",
+                      "nested_models": [
+                        {
+                          "name": "SelectDropdownOptionAction",
+                          "module": "browser_use.controller.views",
+                          "doc": null,
+                          "bases": [],
+                          "fields": {
+                            "index": {
+                              "type": "<class 'int'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            },
+                            "text": {
+                              "type": "<class 'str'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "WriteFileActionModel",
+                  "module": "browser_use.controller.registry.service",
+                  "doc": null,
+                  "bases": [
+                    "ActionModel"
+                  ],
+                  "fields": {
+                    "write_file": {
+                      "type": "<class 'browser_use.controller.registry.service.write_file_Params'>",
+                      "required": true,
+                      "description": "Write or append content to file_name in file system. Allowed extensions are .md, .txt, .json, .csv, .pdf. For .pdf files, write the content in markdown format and it will automatically be converted to a properly formatted PDF document.",
+                      "default": "PydanticUndefined",
+                      "nested_models": [
+                        {
+                          "name": "write_file_Params",
+                          "module": "browser_use.controller.registry.service",
+                          "doc": null,
+                          "bases": [
+                            "ActionModel"
+                          ],
+                          "fields": {
+                            "file_name": {
+                              "type": "<class 'str'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            },
+                            "content": {
+                              "type": "<class 'str'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            },
+                            "append": {
+                              "type": "<class 'bool'>",
+                              "required": false,
+                              "description": null,
+                              "default": "False"
+                            },
+                            "trailing_newline": {
+                              "type": "<class 'bool'>",
+                              "required": false,
+                              "description": null,
+                              "default": "True"
+                            },
+                            "leading_newline": {
+                              "type": "<class 'bool'>",
+                              "required": false,
+                              "description": null,
+                              "default": "False"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "ReplaceFileStrActionModel",
+                  "module": "browser_use.controller.registry.service",
+                  "doc": null,
+                  "bases": [
+                    "ActionModel"
+                  ],
+                  "fields": {
+                    "replace_file_str": {
+                      "type": "<class 'browser_use.controller.registry.service.replace_file_str_Params'>",
+                      "required": true,
+                      "description": "Replace old_str with new_str in file_name. old_str must exactly match the string to replace in original text. Recommended tool to mark completed items in todo.md or change specific contents in a file.",
+                      "default": "PydanticUndefined",
+                      "nested_models": [
+                        {
+                          "name": "replace_file_str_Params",
+                          "module": "browser_use.controller.registry.service",
+                          "doc": null,
+                          "bases": [
+                            "ActionModel"
+                          ],
+                          "fields": {
+                            "file_name": {
+                              "type": "<class 'str'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            },
+                            "old_str": {
+                              "type": "<class 'str'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            },
+                            "new_str": {
+                              "type": "<class 'str'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "ReadFileActionModel",
+                  "module": "browser_use.controller.registry.service",
+                  "doc": null,
+                  "bases": [
+                    "ActionModel"
+                  ],
+                  "fields": {
+                    "read_file": {
+                      "type": "<class 'browser_use.controller.registry.service.read_file_Params'>",
+                      "required": true,
+                      "description": "Read file_name from file system",
+                      "default": "PydanticUndefined",
+                      "nested_models": [
+                        {
+                          "name": "read_file_Params",
+                          "module": "browser_use.controller.registry.service",
+                          "doc": null,
+                          "bases": [
+                            "ActionModel"
+                          ],
+                          "fields": {
+                            "file_name": {
+                              "type": "<class 'str'>",
+                              "required": true,
+                              "description": null,
+                              "default": "PydanticUndefined"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

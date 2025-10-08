@@ -65,8 +65,32 @@ Frontend:
 [STRATEGIC]
 - browser pool using MITM
 > investigate browser hosting frameworks
-
+[BUGS]
+- HANDLE LATER BUT BEFORE COMIIT!!!!!
+- that the config.json loading is not working properly
+-> right now to change hosting I have to use the
 
 Business:
 - Setup meetings with dynamic scanning companies to see prices
-- Probably need to find cheap offering
+- Probably need to find cheap 
+
+2025/10/05
+Small Business Discovery:
+- small business customers
+> look up other similar consultant in the toronto area
+> can partner with Anoaur on this
+> report generation logic
+> build this and we have e2e money-making
+
+Website benchmarking on completion [EVAL_REQUIRED]:
+* change prompt to focus on write actions only
+> select a couple of manual pages with the DOM dump script
+> manually construct this dataset with Burp
+>> https://app.aikido.dev/issues/fix/sast
+
+Setup MonoRepo:
+> pointing out to agents where the directory configs are
+
+Benchmarking day:
+1. Web crawling benchmarks
+2. SSRF benchmarks

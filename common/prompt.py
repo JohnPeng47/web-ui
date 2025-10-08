@@ -77,3 +77,23 @@ class PromptConfig(BaseModel):
     def is_manual_strategy(self) -> bool:
         """Returns True if this config uses manual prompt strategy."""
         return self.strategy == PromptStrategy.MANUAL
+
+def construct_clean_prompt(prompt: str, **args) -> str:
+    """
+    Constructs a clean prompt by wrapping JSON control characters in *%*.
+    
+    Args:
+        prompt: The prompt string to clean
+        **args: Additional arguments (unused)
+        
+    Returns:
+        The cleaned prompt string with JSON control characters wrapped
+    """
+    # JSON control characters that need to be wrapped
+    json_chars = ["[", "]", "{", "}", ":", ",", "\""]
+    
+    cleaned_prompt = prompt
+    for char in json_chars:
+        cleaned_prompt = cleaned_prompt.replace(char, f"*%*{char}*%*")
+    
+    return cleaned_prompt

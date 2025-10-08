@@ -119,6 +119,7 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
 async def start_discovery_agent(
     channel: BroadcastChannel,
     agent_cls: Type[Union[DiscoveryAgent, MinimalAgentSinglePage]] = DiscoveryAgent,
+    stop_event: Optional[asyncio.Event] = None,
 ):
     loop = asyncio.get_running_loop()
     browser_session = await get_browser_session()
@@ -154,5 +155,11 @@ async def start_discovery_agent(
     # - second, after asyncio.run() finishes, the main thread enters shutdown process
     # > while it waits for non-daemon threads to join (ThreadPoolExecutor threads)
     # > during this process no signal handlers are active to catch the signals
-    while True:
-        await asyncio.sleep(1)
+    # Cooperatively exit when stop_event is set
+    try:
+        while True:
+            if stop_event is not None and stop_event.is_set():
+                break
+            await asyncio.sleep(0.5)
+    finally:
+        agent_pool.stop_channel_consumer()

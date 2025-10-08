@@ -290,6 +290,16 @@ class DiscoveryAgent:
             "content": sys_text,
         }
 
+        # Retrieve latest browser state to include tab information in prompt
+        try:
+            state: Optional[BrowserStateSummary] = await self.browser_session.get_browser_state_summary(
+                include_screenshot=False,
+                cached=False,
+                include_recent_events=False,
+            )
+        except Exception:
+            state = None  # Fallback: proceed without tab details if retrieval fails
+
         agent_history = self.agent_context.history(self.agent_state.step)
         history_msg = (
             {
@@ -300,16 +310,46 @@ class DiscoveryAgent:
             else EMPTY_MSG
         )
 
+        # Build tabs description similar to AgentMessagePrompt
+        current_tab_text = ""
+        tabs_text = ""
+        if state and getattr(state, "tabs", None):
+            current_tab_candidates: list[Any] = []
+            for tab in state.tabs:
+                try:
+                    if tab.url == state.url and tab.title == state.title:
+                        current_tab_candidates.append(getattr(tab, "page_id", None))
+                except Exception:
+                    # If any tab field is missing, skip matching for that tab
+                    continue
+
+            current_tab_index = (
+                current_tab_candidates[0] if len(current_tab_candidates) == 1 else None
+            )
+
+            for tab in state.tabs:
+                tab_title = getattr(tab, "title", "") or ""
+                tab_url = getattr(tab, "url", "") or ""
+                tab_id = getattr(tab, "page_id", "?")
+                tabs_text += f"Tab {tab_id}: {tab_url} - {tab_title[:30]}\n"
+
+            if current_tab_index is not None:
+                current_tab_text = f"Current tab: {current_tab_index}\n"
+
         agent_prompt = (
             "Current step: {step_number}/{max_steps}\n\n"
             "Task: {task}\n"
             "Current url: {curr_url}\n"
+            "{current_tab_text}"
+            "Available tabs:\n{tabs_text}"
             "Interactive Elements: {interactive_elements}\n"
         ).format(
             step_number=self.agent_state.step,
             max_steps=self.agent_state.max_steps,
             task=self.task,
             curr_url=self.curr_url,
+            current_tab_text=current_tab_text,
+            tabs_text=tabs_text,
             interactive_elements=self.curr_dom_str,
         )
         agent_step = self.agent_context.prev_agent_step()
@@ -738,6 +778,9 @@ class DiscoveryAgent:
         full_log.info(msg)
 
     def _handle_error(self, e: Exception):
+        if isinstance(e, json.JSONDecodeError):
+            self._log(f"JSONDecodeError: {e.msg}")
+            self._log(f"We should be handling this ... :(")
         if isinstance(e, LLMNextActionsError):
             self._log(f"LLMNextActionsError: {e.errors}")
             self._log(f"Initiating noop, skipping to next step wihtout updating step count")

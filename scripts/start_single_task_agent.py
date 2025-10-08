@@ -17,7 +17,7 @@ from eval.client import PagedDiscoveryEvalClient
 from eval.datasets.discovery.juiceshop import JUICE_SHOP_ALL as JUICE_SHOP_ALL_DISCOVERY
 from eval.datasets.discovery.juiceshop_exploit import JUICE_SHOP_VULNERABILITIES as JUICE_SHOP_VULNERABILITIES_EXPLOIT
 
-from logger import setup_agent_logger, get_agent_loggers
+from logger import get_or_init_log_factory
 
 def normalize_urls(urls):
     norm_urls = []
@@ -70,12 +70,11 @@ def setup_agent_dir(agent_name: str):
 
 async def main():
     """Initialize SimpleAgent using the new BrowserSession-based API."""
-    agent_dir, log_dir = setup_agent_dir("min_agent")
-    setup_agent_logger(log_dir=str(log_dir))
+    server_log_factory = get_or_init_log_factory(base_dir=".min_agent")
+    agent_log, full_log = server_log_factory.get_discovery_agent_loggers()
 
-    agent_log, _ = get_agent_loggers()
     agent_log.info("Starting SimpleAgent")
-    
+
     # Start proxy handler (mitmproxy)
     http_handler = HTTPHandler(
         scopes=[
@@ -130,15 +129,16 @@ async def main():
             agent_sys_prompt=CUSTOM_SYSTEM_PROMPT,
             browser_session=browser_session,
             controller=controller,
-            agent_dir=agent_dir,
+            agent_dir=None,
             max_steps=6,
             # max_page_steps=15,
             cdp_handler=proxy_handler,
             challenge_client=challenge_client,
             init_task=TASK,
+            agent_log=agent_log,
+            full_log=full_log,
         )
         await agent.run()
-        print(agent.pages)
 
         agent_log.info("SimpleAgent execution completed")
 

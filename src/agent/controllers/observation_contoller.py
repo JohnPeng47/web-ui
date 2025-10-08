@@ -7,8 +7,11 @@ from abc import ABC, abstractmethod
 
 class ObservationModel(ABC, BaseModel):
     @abstractmethod
-    def to_msg(self):
-        pass
+    def to_msg(self) -> str:
+        """
+        Return a short string representation of the observation suitable for logs/memory.
+        """
+        raise NotImplementedError
 
 # Define a TypeVar for the Observation type
 ObservationType = TypeVar('ObservationType', bound=ObservationModel)

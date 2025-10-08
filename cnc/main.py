@@ -168,6 +168,7 @@ async def workers_supervisor(
             app=app,
             discovery_agent_cls=discovery_agent_cls,
             override_max_steps=override_max_steps,
+            stop_event=shutdown_event,
         )
     except Exception as e:
         print("Worker subsystem failed: %r", e)

@@ -1,0 +1,273 @@
+[2025-09-29 10:44:02 -0400] cnc/routers/agent.py:225
+              # TODO: add agent result summary here
+
+[2025-09-26 16:27:50 -0400] cnc/services/detection.py:208
+      # TODO: maybe should return multiple (because there could be multiple requests of the same (meth, url)) 
+
+[2025-09-26 16:27:50 -0400] cnc/routers/agent.py:164
+                      # TODO: this logic should be placed inside DetectionScheduler
+
+[2025-09-26 10:45:28 -0400] src/agent/discovery/agent.py:614
+      # TODO: consider moving out single task execution logic into a subclass
+
+[2025-09-25 21:04:33 -0400] commit_range_diffs.txt:4056
+   # TODO: ask chatGPT to implement this 
+
+[2025-09-25 21:04:33 -0400] commit_range_diffs.txt:3982
+  -                # TODO:
+
+[2025-09-25 21:04:33 -0400] commit_range_diffs.txt:35
+  -TODO:
+
+[2025-09-25 21:04:33 -0400] commit_range_diffs.txt:3526
+  -                 # TODO:
+
+[2025-09-25 21:04:33 -0400] commit_range_diffs.txt:304
+  +# TODO: need to introduce setting MANUAL_TESTING_FLAG
+
+[2025-09-25 21:04:33 -0400] commit_range_diffs.txt:208
+  +# TODO: ask chatGPT to implement this 
+
+[2025-09-25 21:04:33 -0400] commit_range_diffs.txt:12
+  +[TODO]
+
+[2025-09-25 21:04:33 -0400] commit_range_diffs.txt:113
+  -# TODO:
+
+[2025-09-25 21:04:33 -0400] README.md:52
+  TODOs:
+
+[2025-09-25 21:04:33 -0400] README.md:49
+  TODO SECTOR:
+
+[2025-09-19 11:59:22 -0400] cnc/tests/integration/test_agent_approval.py:134
+  # TODO: need to introduce setting MANUAL_TESTING_FLAG
+
+[2025-09-19 11:59:22 -0400] cnc/schemas/agent.py:92
+  # TODO: ask chatGPT to implement this 
+
+[2025-09-19 11:59:22 -0400] README.md:2
+  [TODO]
+
+[2025-09-13 16:29:44 -0400] src/agent/discovery/agent.py:228
+          # TODO: may want more sophisticated check here such as disregarding query params
+
+[2025-09-12 20:27:09 -0400] cnc/services/engagement.py:8
+  # TODO: method does not work need to fix
+
+[2025-09-07 13:41:51 -0400] src/llm_provider.py:274
+          # TODO: make this decorator
+
+[2025-09-07 13:41:51 -0400] cnc/tests/test_agent.py:7
+  # TODO: add optional queue to agent_router so we can test without triggering queueing action
+
+[2025-09-07 13:41:51 -0400] cnc/schemas/agent.py:53
+  # TODO: test uploading exploit agent steps first
+
+[2025-09-07 13:41:51 -0400] cnc/pools/exploit_agent_pool.py:67
+          # TODO: only tool we need is the xss_check_tool
+
+[2025-09-06 18:38:23 -0400] cnc/routers/agent.py:77
+      # TODO: test this format of request and se how well cascades
+
+[2025-09-05 17:48:52 -0400] pentest_bot/web_exploit/agent.py:352
+              # TODO: add client here
+
+[2025-09-05 11:32:12 -0400] eval/harness/exploit/pool.py:83
+          # TODO: only tool we need is the xss_check_tool
+
+[2025-09-03 14:33:31 -0400] eval/harness/exploit/eval_agent_pool.py:150
+          # TODO: only tool we need is the xss_check_tool
+
+[2025-09-02 17:36:44 -0400] logger.py:153
+  # TODO: swap the order of eval_name and subfolder
+
+[2025-09-02 15:42:59 -0400] src/llm/resource_params.py:8
+      # TODO: still need to decide on a unique way of identifying requests
+
+[2025-09-02 15:42:59 -0400] src/llm/resource_params.py:5
+  # TODO: create an ExtractInjectionInformation request that takes into account the webpage context
+
+[2025-09-02 15:42:59 -0400] src/llm/resource_params.py:32
+  # TODO: roll user_ids into resource_ids
+
+[2025-09-02 15:42:59 -0400] src/llm/resource_params.py:31
+  # TODO: switch this output to ResourceLocator
+
+[2025-09-02 15:42:59 -0400] src/agent/discovery/pages.py:7
+  # TODO: this should be moved into HTTPMessage so we can use later down the line
+
+[2025-09-02 15:42:59 -0400] cnc/services/detection.py:71
+          # TODO: probably dont need description for this
+
+[2025-09-02 15:42:59 -0400] cnc/services/detection.py:12
+  # TODO: potentially change to being able to specify multiple page items
+
+[2025-09-02 11:18:15 -0400] pentest_bot/web_exploit/launch_agent_real.py:257
+      # TODO: 
+
+[2025-09-02 11:18:15 -0400] pentest_bot/web_exploit/data/ctf/ast_eval.patched:467
+          """TODO: docstring in public method."""
+
+[2025-09-02 11:18:15 -0400] pentest_bot/web_exploit/data/ctf/ast_eval.patched:441
+          """TODO: docstring in magic method."""
+
+[2025-09-02 11:18:15 -0400] pentest_bot/web_exploit/data/ctf/ast_eval.patched:410
+          """TODO: docstring in public method."""
+
+[2025-09-02 11:18:15 -0400] pentest_bot/web_exploit/data/ctf/ast_eval.patched:271
+          """TODO: docstring in public method."""
+
+[2025-09-02 11:18:15 -0400] pentest_bot/web_exploit/data/ctf/ast_eval.patched:266
+          """TODO: docstring in public method."""
+
+[2025-09-02 11:18:15 -0400] pentest_bot/web_exploit/data/ctf/ast_eval.patched:226
+          """TODO: docstring in public method."""
+
+[2025-09-02 11:18:15 -0400] pentest_bot/web_exploit/data/ctf/ast_eval.patched:218
+          """Empty is TODO: docstring in magic method."""
+
+[2025-09-02 11:18:15 -0400] pentest_bot/web_exploit/data/ctf/ast_eval.patched:214
+          """Empty is TODO: docstring in magic method."""
+
+[2025-09-02 11:18:15 -0400] pentest_bot/web_exploit/data/ctf/ast_eval.patched:210
+          """TODO: docstring in public method."""
+
+[2025-09-02 10:49:10 -0400] pentest_bot/web_exploit/agent.py:99
+  # TODO:
+
+[2025-09-02 10:49:10 -0400] pentest_bot/web_exploit/agent.py:366
+          # TODO: add opik prompt commit here
+
+[2025-09-02 10:49:10 -0400] pentest_bot/web_exploit/agent.py:322
+              # TODO: this is hard fail, balloons context insanely
+
+[2025-09-02 10:49:10 -0400] pentest_bot/web_exploit/agent.py:321
+              # TODO: rename to agent context and track token count
+
+[2025-09-02 10:49:10 -0400] common/http_handler.py:179
+  # TODO: major error here in response/request matching, unable to pair res/req with absolute confidence
+
+[2025-09-02 10:49:10 -0400] common/http_handler.py:118
+      # TODO: this part is completely fucked
+
+[2025-09-01 17:53:06 -0400] src/agent/discovery/agent.py:673
+              # TODO: move these into update_state
+
+[2025-08-20 11:17:33 -0400] src/agent/discovery/links.py:361
+  # TODO: use the links with context to try to filter for a better api endpoint capturing regex
+
+[2025-08-20 11:17:33 -0400] src/agent/discovery/agent.py:400
+          # TODO: should only update if we have different plans
+
+[2025-08-20 11:17:33 -0400] src/agent/discovery/agent.py:371
+      # TODO: replace with method that piggybacks off of dom_str
+
+[2025-08-17 12:13:28 -0400] src/agent/discovery/prompts/planv4.py:213
+  # TODO: this eventuality need to be tested for
+
+[2025-08-17 12:13:28 -0400] src/agent/discovery/prompts/planv4.py:212
+  # TODO: potentially may need to issue backtrack order, say, if an action removes visibility from nodes that implicated in the plan ie. changing the filter
+
+[2025-08-17 12:13:28 -0400] src/agent/discovery/prompts/planv4.py:211
+  # TODO: realizing that actually, we probably do need to address deletions
+
+[2025-08-17 12:13:28 -0400] src/agent/discovery/prompts/planv4.py:210
+  # TODO: maybe we add the nested goal here to guide the update?
+
+[2025-08-14 13:08:02 -0400] src/agent/discovery/agent.py:346
+          # TODO_IMPORTANT: need to change this back to support regular URL checking after juice_shop 
+
+[2025-08-14 13:08:02 -0400] src/agent/discovery/agent.py:339
+          # TODO: try to cache calls to this method and track url change with every call
+
+[2025-08-14 13:08:02 -0400] src/agent/discovery/agent.py:150
+      # TODO: unify this API with update()
+
+[2025-08-14 10:27:07 -0400] test_plan_agent.py:46
+          # TODO: test fileupload later
+
+[2025-08-13 17:35:53 -0400] src/agent/discovery/prompts/sys_prompt.py:1
+  # TODO:
+
+[2025-08-12 21:20:16 -0400] eval/client.py:14
+  # TODO: remove this when we 100% dont need old eval juiceshop anymore
+
+[2025-08-09 14:07:39 -0400] pentest_bot/web_exploit/site_agent.py:68
+              # TODO: include XSS tool?
+
+[2025-08-09 14:07:39 -0400] pentest_bot/web_exploit/site_agent.py:153
+      # TODO: configure a tools use interface on init ???
+
+[2025-08-09 14:07:39 -0400] pentest_bot/web_exploit/prompts/site_agent.py:39
+  # TODO: Add following changes to prompt
+
+[2025-08-08 22:26:57 -0400] eval/scores.py:34
+          self._case_sensitive = case_sensitive # TODO: Implement case-insensitive logic
+
+[2025-08-08 22:26:57 -0400] eval/scores.py:27
+                  Defaults to True. TODO: Implement case-insensitive comparison.
+
+[2025-08-08 22:26:57 -0400] eval/scores.py:140
+              # TODO: Add case-insensitive comparison if self._case_sensitive is False
+
+[2025-08-08 22:26:57 -0400] eval/extract_params.py:95
+      # TODO: implement this as decorator
+
+[2025-08-08 18:17:51 -0400] src/agent/discovery/agent.py:73
+  # TODO List:
+
+[2025-08-08 18:17:24 -0400] cnc/services/enrichment.py:54
+      # TODO: blocking async calls
+
+[2025-08-08 18:17:24 -0400] cnc/services/attack.py:22
+  # TODO: check during ingestion later that result is set
+
+[2025-08-08 10:06:33 -0400] src/llm_models.py:21
+  # TODO: this is for all contents and purposes a BaseChatModel
+
+[2025-08-08 10:06:33 -0400] pentest_bot/web_exploit/full_agent.py:122
+      # TODO: configure a tools use interface on init ???
+
+[2025-08-07 18:07:27 -0400] pentest_bot/web_exploit/confirm_agent.py:94
+      # TODO: configure a tools use interface on init ???
+
+[2025-07-26 20:31:00 -0400] pentest_bot/web_exploit/prompts/exploit_agent.py:98
+  # TODO: Add following changes to prompt
+
+[2025-07-26 20:31:00 -0400] pentest_bot/db/tables/exploit_agent.py:404
+  # TODO: filter for eval only
+
+[2025-07-25 09:59:52 -0400] pentest_bot/models/steps.py:52
+      # TODO: should deprecate and use agentContext instead to construct prompt_str repr
+
+[2025-07-24 17:31:28 -0400] pentest_bot/web_exploit/prompts/classify_steps.py:42
+  # TODO:
+
+[2025-07-23 18:23:01 -0400] random_tests/test_agent_multi.py:114
+              # TODO: in factory we just pass in users wihtout having to apply the filter
+
+[2025-07-19 21:35:48 -0400] pentest_bot/web_exploit/prompts.py:145
+  # TODO: add to this prompt a section that includes examples which can be added
+
+[2025-07-17 10:11:48 -0400] pentest_bot/web_exploit/ctf_agent.py:85
+      # TODO: configure a tools use interface on init ???
+
+[2025-07-11 15:52:17 -0400] pentest_bot/web_exploit/exploit_agent.py:132
+      # TODO: configure a tools use interface on init ???
+
+[2025-07-11 11:03:22 -0400] eval/datasets/exploit/portswigger/data/client_side/cross_site_scripting.py:120
+          # TODO: dont think this is legit
+
+[2025-07-07 17:31:26 -0400] pentest_bot/web_exploit/prompts.py:103
+  # TODO: we need to give a set of modules to call, possibly with very well defined flow
+
+[2025-07-06 16:48:25 -0400] pentest_bot/web_exploit/prompts.py:61
+  # TODO: prompt to try multiple payloads
+
+[2025-07-05 12:37:35 -0400] src/llm_provider.py:134
+  # TODO: change to use generic[t]
+
+[2025-07-03 18:27:51 -0400] httplib.py:203
+  # TODO: support for CSRF tokens
+
