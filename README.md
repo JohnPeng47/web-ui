@@ -1,100 +1,24 @@
-2025/09/02:
-[TODO]
-Human
-- Exploit Agent:
-> Get logging working
-> Change ainvoke
-> Need to test if ainvoke is blocking -> (important write tests)
-- Start deprecating pentest_bot and moving agent logic into src/exploit and moving eval harnesses into eval/harness/exploit
-- Consolidate cost logging feature:
-> Centralize llm_config initialization and move outside of agents
+TODOS:
+
+Bugs:
+- should do periodic performance testing to ensure that slowdown issue from e6f36ec doesnt show up
+- check if ainvoke is blocking in exploitAgent
+
+Internal:
+- construct dataset for web agents
+- consolidate cost logging for LLMs
+- HTTPRequest parsing different payload data
+> how to handle error?
+> handling more exotic datatypes?
+- set up monoRepo for integrated FE/BE agent dev
+
+Features:
 - Integrating Authz/AuthN attacker:
-> also integrate user_id into "Agent Activity" component
->> this in itself might become a sub-workflow for 
-- Support Dynamic Agent Interaction:
-> add support for agent snapshots
-> pause/modify agent responses
-- Try BrowserUse Session rewrite
-- Need to introduce pages
+> also integrate user_id into
+- Resetable agents via snapshots
+> pausing/editing/rerunning agent
 
-2025/09/23
-- Test
-- New Detection Module
-> 3 diff modes for page/req/global scoped action scheduling
-- Http Proxy
-> parse non-JSON responses
->> script
->> html
->> binary
-- test_http_proxy:
-> future: put
-- Deployment
-> Current setup with start proxy/browser combo is not ideal 
-
-2025/09/24
-> Confirm that ainvoke with detection is working
-> Explore:
->> do the scheduled actions match vulns to be found on these pages
->> add request level and page level detection triggered by API
->> test prompt with different levels of automaticity
->> hierarchal pageData breakdown by pages (maybe not rn since this requires persisted state in DetectScheduler) 
->> tagging an agent with search tags so that we can better look for the results later
-> Agent:
->> * add agent results to model -> no matter this should update 
-> Deployment to hostinger server
-
-Think:
-> When should we start building custom web-apps for testing vulns?
-
-TODOs:
-- Discovery
---> [OPTIMIZATION] save completed tasks in discovery agents so we dont end up completing the same tasks again
-
-CC:
-- [6] deploy to prod -> use test_discovery_agent, modify and test as successful script
-- [10] HTTPMessage.req/res.body no longer has to be async I think since we are not getting them from PW anymore
-> hard refactor task
-- [2] logging not working for exploit agent
-> Refactors
-1. Refactor agents CreateExploit/Discovery agent in [](cnc/schemas/agent.py) to remove model_name, model_cost, and log_filepath
-> these should not be apart of the create 
-
-Frontend:
-- follow-up to correctly add y-axis scroll on SpiderStats: (https://claude.ai/chat/0328b21e-bda1-4e4a-b28d-56e4f92a375e)
-
-[STRATEGIC]
-- browser pool using MITM
-> investigate browser hosting frameworks
-[BUGS]
-- HANDLE LATER BUT BEFORE COMIIT!!!!!
-- that the config.json loading is not working properly
--> right now to change hosting I have to use the
-
-Business:
-- Setup meetings with dynamic scanning companies to see prices
-- Probably need to find cheap 
-
-2025/10/05
-Small Business Discovery:
-- small business customers
-> look up other similar consultant in the toronto area
-> can partner with Anoaur on this
-> report generation logic
-> build this and we have e2e money-making
-
-Website benchmarking on completion [EVAL_REQUIRED]:
-* change prompt to focus on write actions only
-> select a couple of manual pages with the DOM dump script
-> manually construct this dataset with Burp
->> https://app.aikido.dev/issues/fix/sast
-
-Setup MonoRepo:
-> pointing out to agents where the directory configs are
-
-IMPORTANT:
-> should do periodic performance testing to ensure that slowdown issue from e6f36ec doesnt show up
-> check if ainvoke is blocking the 
-
-Benchmarking day:
-1. Web crawling benchmarks
-2. SSRF benchmarks
+Design:
+- Workflow for saving/running deterministic test cases
+- Plugin system?
+> where to expose the APIs
