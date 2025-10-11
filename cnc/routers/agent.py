@@ -222,18 +222,21 @@ def make_agent_router(
             server_log.info(f"Uploading agent steps for {agent_id}")
             server_log.info(f"Payload: {payload}")
 
-            # TODO: add agent result summary here
-            res = GatherObservations().invoke(
-                model=llm_hub.get("observations"), 
-                prompt_args={"agent_trace": "\n".join([f"Step {i}: {step.reflection}" 
-                    for i, step in enumerate(payload.steps, start=1)])}
-            )
+            observations = []
+            if payload.completed:
+                res = GatherObservations().invoke(
+                    model=llm_hub.get("observations"), 
+                    prompt_args={"agent_trace": "\n".join([f"Step {i}: {step.reflection}" 
+                        for i, step in enumerate(payload.steps, start=1)])}
+                )
+                observations = res.observations
+
             await append_discovery_agent_steps_service(
                 db, 
                 agent_id, 
                 payload.steps, 
                 payload.completed, 
-                finished_data=[obs.model_dump() for obs in res.observations]
+                finished_data=[obs.model_dump() for obs in observations]
             )
         except Exception as e:
             import traceback

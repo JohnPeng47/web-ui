@@ -91,6 +91,10 @@ Website benchmarking on completion [EVAL_REQUIRED]:
 Setup MonoRepo:
 > pointing out to agents where the directory configs are
 
+IMPORTANT:
+> should do periodic performance testing to ensure that slowdown issue from e6f36ec doesnt show up
+> check if ainvoke is blocking the 
+
 Benchmarking day:
 1. Web crawling benchmarks
 2. SSRF benchmarks

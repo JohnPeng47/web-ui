@@ -289,14 +289,14 @@ class _ServerLogFactory:
     def __init__(self, base_dir: str) -> None:
         self._base_dir = Path(base_dir)
         self._server_logger: Optional[logging.Logger] = None
-        self._engagement_dir: Optional[Path] = None
+        # self._parent_logdir: Optional[Path] = None
 
         self.setup_static_loggers()
 
-    def _get_engagement_dir(self) -> Path:
+    def _get_parent_logdir(self) -> Path:
         # Return cached directory if already created
-        if self._engagement_dir is not None:
-            return self._engagement_dir
+        if self._parent_logdir is not None:
+            return self._parent_logdir
         
         # Create timestamp directory
         timestamp = datetime.now().strftime("%Y-%m-%d")
@@ -310,17 +310,17 @@ class _ServerLogFactory:
                 max_incr = max(max_incr, int(p.name))
         
         incr_id = max_incr + 1
-        engagement_dir = timestamp_dir / str(incr_id)
-        engagement_dir.mkdir(parents=True, exist_ok=True)
+        _parent_logdir = timestamp_dir / str(incr_id)
+        _parent_logdir.mkdir(parents=True, exist_ok=True)
         
         # Ensure subfolders exist
-        (engagement_dir / "discovery_agents").mkdir(exist_ok=True)
-        (engagement_dir / "exploit_agents").mkdir(exist_ok=True)
+        (_parent_logdir / "discovery_agents").mkdir(exist_ok=True)
+        (_parent_logdir / "exploit_agents").mkdir(exist_ok=True)
         
         # Cache the directory
-        self._engagement_dir = engagement_dir
+        self._parent_logdir = _parent_logdir
         
-        return engagement_dir
+        return _parent_logdir
 
     def _next_numeric_name(self, root: Path) -> str:
         """
@@ -357,23 +357,23 @@ class _ServerLogFactory:
 
     def setup_server_logger(self, logger_name: str):
         """Create or return the server logger (with console + file)."""
-        e_dir = self._get_engagement_dir()
+        e_dir = self._get_parent_logdir()
         server_log_path = e_dir / "server.log"
         self._create_static_logger(logger_name, server_log_path)
 
     def setup_proxy_logger(self, logger_name: str):
         """Create or return the proxy logger (with console + file)."""
-        e_dir = self._get_engagement_dir()
+        e_dir = self._get_parent_logdir()
         proxy_log_path = e_dir / "proxy.log"
         self._create_static_logger(logger_name, proxy_log_path)
 
     def setup_uvicorn_logger(self, logger_name: str):
-        e_dir = self._get_engagement_dir()
+        e_dir = self._get_parent_logdir()
         uvicorn_log_path = e_dir / "server.log"
         self._create_static_logger(logger_name, uvicorn_log_path)
     
     def setup_agent_pool_logger(self, logger_name: str):
-        e_dir = self._get_engagement_dir()
+        e_dir = self._get_parent_logdir()
         agent_pool_log_path = e_dir / "agent_pool.log"
         self._create_static_logger(logger_name, agent_pool_log_path)
 
@@ -397,7 +397,7 @@ class _ServerLogFactory:
         Does not attach handlers; the worker thread should call setup_agent_logger
         with these values.
         """
-        e_dir = self._get_engagement_dir()
+        e_dir = self._get_parent_logdir()
         discovery_dir = e_dir / "discovery_agents"
         
         name = self._next_numeric_name(discovery_dir)
@@ -410,13 +410,16 @@ class _ServerLogFactory:
         Return loggers for a new exploit agent.
         Does not attach handlers; the worker thread should call setup_agent_logger.
         """
-        e_dir = self._get_engagement_dir()
+        e_dir = self._get_parent_logdir()
         exploit_dir = e_dir / "exploit_agents"
 
         name = self._next_numeric_name(exploit_dir)
 
         _setup_agent_logger(log_dir="", parent_dir=exploit_dir, name=name, create_run_subdir=False, add_thread_filter=False, no_console=no_console)
         return logging.getLogger(name), logging.getLogger(FULL_REQUESTS_LOGGER_NAME)
+
+    def get_log_dir(self) -> Path:
+        return self._parent_logdir
 
 _SERVER_LOG_FACTORY_SINGLETON: Optional[_ServerLogFactory] = None
 
@@ -425,6 +428,10 @@ def get_or_init_log_factory(base_dir: Optional[str] = None) -> _ServerLogFactory
     Return a singleton ServerLogFactory. If base_dir is provided on first call,
     it sets the base directory; otherwise defaults to ".server_logs/engagements".
     Subsequent calls ignore base_dir.
+
+    Usage (always use like so):
+    log_factory = get_or_init_log_factory(base_dir=SERVER_LOG_DIR)
+    agent_logger, full_logger = log_factory.get_exploit_agent_loggers()
     """
     global _SERVER_LOG_FACTORY_SINGLETON
     if _SERVER_LOG_FACTORY_SINGLETON is None:

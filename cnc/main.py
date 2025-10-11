@@ -1,6 +1,5 @@
 import asyncio
 import contextlib
-import logging
 import socket
 import uvicorn
 from contextlib import asynccontextmanager
@@ -10,7 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
-from logger import get_or_init_log_factory, SERVER_LOGGER_NAME
+from logger import get_or_init_log_factory
 from cnc.workers_launcher import start_workers
 
 from cnc.schemas.http import EnrichedRequest, EnrichAuthNZMessage
