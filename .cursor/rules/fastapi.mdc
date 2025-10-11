@@ -47,9 +47,17 @@ LOGIC_SPLIT
 > crud should be bare minimum db wrapper
 
 ======================
-AGENTS
+AGENT POOLS AND AGENTS
 ======================
-
+- agents are initialized and launched from agent pools
+- Discovery AgentPool
+@location: cnc/pools/discovery_agent_pool.py
+- Exploit AgentPool
+@location: cnc/pools/exploit_agent_pool.py
+- Discovery Agent
+@location: src/agent/discovery/agent.py
+- Exploit Agent
+@location: pentest_bot/web_exploit/agent.py
 
 ======================
 TESTING

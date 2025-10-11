@@ -15,7 +15,7 @@ from enum import Enum
 from bubus.models import Any
 from pydantic import BaseModel
 
-from pentest_bot.web_exploit.agent import PentestSession
+from pentest_bot.web_exploit.agent import ExploitAgent
 from pentest_bot.db.tables.exploit_agent import AgentStepORM as AgentStepORM, PentestResultORM
 
 # interpreter and tools

@@ -7,6 +7,9 @@ from pydantic import BaseModel, Field, model_validator
 from playwright.sync_api import Request, Response
 
 from src.llm import RequestPart
+from logger import get_agent_loggers
+
+agent_log, _ = get_agent_loggers()
 
 DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text"]
 DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
@@ -192,6 +195,10 @@ def post_data_to_dict(post_data: str | None):
                 # Not valid JSON, return as is
                 pass
     
+    if not result and len(post_data) > 0:
+        agent_log.warning(f"Failed to parse post data: {post_data}")
+        result = {"error": "Failed to parse post data"}
+
     return result
 
 class ResourceLocator(BaseModel):
