@@ -1,5 +1,4 @@
-TODOS:
-
+==================== TODOS =====================
 Bugs:
 - should do periodic performance testing to ensure that slowdown issue from e6f36ec doesnt show up
 - check if ainvoke is blocking in exploitAgent
@@ -22,3 +21,8 @@ Design:
 - Workflow for saving/running deterministic test cases
 - Plugin system?
 > where to expose the APIs
+
+==================== DEV NOTES ====================
+2025/10/11:
+- added tests that confirmed MITMProxy handles edge cases without crashing
+> probably will still need more robust HTTP handling a la httptoolkit

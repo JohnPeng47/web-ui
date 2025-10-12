@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-from eval.datasets.exploit.portswigger.src.llm_provider import LMP
+from src.agent.old_agent.llm_provider import LMP
 from logger import get_agent_loggers
 
 agent_log, full_log = get_agent_loggers()

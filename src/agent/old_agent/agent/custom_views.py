@@ -12,7 +12,7 @@ from old_browser_use.agent.views import (
 from old_browser_use.controller.registry.views import ActionModel
 from pydantic import BaseModel, Field, create_model
 
-from eval.datasets.exploit.portswigger.src.agent.discovery import Plan
+from src.agent.old_agent.agent.discovery import Plan
 
 @dataclass
 class CustomAgentStepInfo(AgentStepInfo):

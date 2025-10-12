@@ -1,4 +1,4 @@
-from eval.datasets.exploit.portswigger.src.llm_provider import LMP
+from src.agent.old_agent.llm_provider import LMP
 from pydantic import BaseModel
 from typing import List, Type
 import enum

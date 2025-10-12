@@ -17,7 +17,7 @@ class CustomSystemPrompt(SystemPrompt):
         """Load the prompt template from the markdown file."""
         try:
             # This works both in development and when installed as a package
-            with importlib.resources.files('eval.datasets.exploit.portswigger.src.agent').joinpath('custom_system_prompt.md').open('r') as f:
+            with importlib.resources.files('src.agent.old_agent.agent').joinpath('custom_system_prompt.md').open('r') as f:
             # with importlib.resources.files('src.agent').joinpath('new_sys_prompt.md').open('r') as f:
                 self.prompt_template = f.read()
         except Exception as e:
@@ -51,7 +51,7 @@ class CustomAgentMessagePrompt(AgentMessagePrompt):
 
         time_str = datetime.now().strftime("%Y-%m-%d %H:%M")
         step_info_description += f"Current date and time: {time_str}"
-
+ 
         elements_text = self.state.element_tree.clickable_elements_to_string(include_attributes=self.include_attributes)
 
         has_content_above = (self.state.pixels_above or 0) > 0

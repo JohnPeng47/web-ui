@@ -19,7 +19,7 @@ from instructor.function_calls import OpenAISchema, openai_schema
 # from langchain_core.language_models.chat_models import BaseChatModel
 # from langchain_core.messages import BaseMessage
 
-from eval.datasets.exploit.portswigger.src.llm_models import openai_41 as lazy_openai_41
+from src.agent.old_agent.llm_models import openai_41 as lazy_openai_41
 
 manual_rewrite_model = lazy_openai_41
 

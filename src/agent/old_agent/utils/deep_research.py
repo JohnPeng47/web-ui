@@ -9,8 +9,8 @@ import sys
 import logging
 from pprint import pprint
 from uuid import uuid4
-from eval.datasets.exploit.portswigger.src.utils import utils
-from eval.datasets.exploit.portswigger.src.agent.custom_agent import CustomAgent
+from src.agent.old_agent.utils import utils
+from src.agent.old_agent.agent.custom_agent import CustomAgent
 import json
 import re
 from old_browser_use.agent.service import Agent
@@ -21,10 +21,10 @@ from old_browser_use.controller.service import Controller, DoneAction
 from main_content_extractor import MainContentExtractor
 from langchain.schema import SystemMessage, HumanMessage
 from json_repair import repair_json
-from eval.datasets.exploit.portswigger.src.agent.custom_prompts import CustomSystemPrompt, CustomAgentMessagePrompt
-from eval.datasets.exploit.portswigger.src.controller.custom_controller import CustomController
-from eval.datasets.exploit.portswigger.src.browser.custom_browser import CustomBrowser
-from eval.datasets.exploit.portswigger.src.browser.custom_context import BrowserContextConfig, BrowserContext
+from src.agent.old_agent.agent.custom_prompts import CustomSystemPrompt, CustomAgentMessagePrompt
+from src.agent.old_agent.controller.custom_controller import CustomController
+from src.agent.old_agent.browser.custom_browser import CustomBrowser
+from src.agent.old_agent.browser.custom_context import BrowserContextConfig, BrowserContext
 from old_browser_use.browser.context import (
     BrowserContextConfig,
     BrowserContextWindowSize,

@@ -1,25 +1,14 @@
 import asyncio
-import json
-import re
-import sys
-import traceback
 from pathlib import Path
 from typing import Dict, List, Tuple
 
 import aiohttp
-from old_browser_use.browser.browser import Browser, BrowserConfig
-from old_browser_use.browser.context import BrowserContextConfig
-from johnllm import LLMModel
 from logging import getLogger
 
-from src.llm_models import LLMHub
-from common.constants import DISCOVERY_MODEL_CONFIG
-
-from eval.datasets.exploit.portswigger.harness import AgentHarness
 from eval.datasets.exploit.portswigger.data import PORT_SWIGGER_LABS
-from eval.datasets.exploit.portswigger.src.agent.controllers.observation_contoller import ObservationController, ObservationModel
-from eval.datasets.exploit.portswigger.src.agent.custom_agent import CustomAgent as BrowserAgent
-from eval.datasets.exploit.portswigger.src.agent.custom_prompts import CustomAgentMessagePrompt, CustomSystemPrompt
+from src.agent.old_agent.agent.controllers.observation_contoller import ObservationModel
+
+from src.agent.single_task_agent import start_single_task_agent
 
 # ────────────────────────────────────────────
 # Configuration constants
@@ -43,7 +32,6 @@ class LabURLObservation(ObservationModel):
 
     def to_msg(self) -> str:
         return self.lab_url
-
 
 # ────────────────────────────────────────────
 # Main runner class
@@ -195,40 +183,10 @@ class PortSwiggerLabRunner:
         """
         Launches a PortSwigger browser/LLM agent that:
         1. Navigates to the lab listing.
-        2. Clicks “Access the lab”.
+        2. Clicks "Access the lab".
         3. Logs in if redirected.
         4. Captures the redirected, unique lab URL.
         """
-        class _LabURLObservation(LabURLObservation):
-            """Local subclass to avoid mypy/name-conflict warnings."""
-
-        # Browser config.
-        llm = LLMHub(function_map=DISCOVERY_MODEL_CONFIG["model_config"])
-        window_w, window_h = 1920, 1080
-        browser = Browser(
-            config=BrowserConfig(
-                headless=self._headless,
-                disable_security=True,
-                # user_data_dir=str(DATA_DIR_PATH / "browser"),
-                extra_chromium_args=[f"--window-size={window_w},{window_h}", "--incognito"],
-                # chrome_instance_path=(
-                #     r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe"
-                # ),
-        )
-        )
-
-        shared_cfg = {
-            "llm": llm,
-            "use_vision": False,
-            "tool_calling_method": "function_calling",
-            "system_prompt_class": CustomSystemPrompt,
-            "agent_prompt_class": CustomAgentMessagePrompt,
-            "controller": ObservationController(_LabURLObservation),
-            "app_id": None,
-            "context_cfg": BrowserContextConfig(no_viewport=False),
-            "close_browser": True
-        }
-
         agent_prompt = """
 Navigate to the following URL:
 {url}
@@ -243,41 +201,8 @@ After being redirected, make a note of the redirected to URL in memory
 </important>
 Once this is done, you can exit 
 """.format(url=PORTSWIGGER_URL + lab_href, creds=str(PORTSWIGGER_CREDS))
-        # agent_prompt = (
-        #     "Navigate to the following URL:\n"
-        #     f"{PORTSWIGGER_URL}{lab_href}\n\n"
-        #     "Click on “Access THE LAB”. If redirected to login, use these creds:\n"
-        #     f"{PORTSWIGGER_CREDS}\n\n"
-        #     "After successful login, capture the redirected lab URL with "
-        #     "`record_observation` and exit."
-        # )
 
-        harness = AgentHarness(
-            agent_cls=BrowserAgent,
-            browser=browser,
-            agents_config=[{"start_task": agent_prompt, "agent_client": None}],
-            common_kwargs=shared_cfg,
-        )
-
-        try:
-            await harness.start_all(max_steps=self._max_steps)
-            await harness.wait()
-
-            history_str = str(harness.get_history())
-            match = re.search(
-                r"https://[0-9a-f]{32}\.web-security-academy\.net/",
-                history_str,
-            )
-            return match.group(0) if match else None
-    
-        except Exception:
-            logger.error(">>>> Error during runnning the agent: ")
-            traceback.print_exc(file=sys.stderr)
-            return None
-        finally:
-            logger.error(">>>> Forcibly shutting down the agent: ")
-            await harness.kill_all(reason="Done")
-            await browser.close()
+        return await start_single_task_agent(agent_prompt, self._headless, self._max_steps)
 
 if __name__ == "__main__":
     from eval.datasets.exploit.portswigger.data import SSRF_SINGLE as TEST_LABS

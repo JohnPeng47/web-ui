@@ -29,10 +29,10 @@ from langchain_core.messages import BaseMessage, AIMessage
 from old_browser_use.browser.views import BrowserState
 
 from json_repair import repair_json
-from eval.datasets.exploit.portswigger.src.utils.agent_state import AgentState
-from eval.datasets.exploit.portswigger.src.agent.client import AgentClient
-from eval.datasets.exploit.portswigger.src.llm_models import LLMHub
-from eval.datasets.exploit.portswigger.src.agent.utils import Pages
+from src.agent.old_agent.utils.agent_state import AgentState
+from src.agent.old_agent.agent.client import AgentClient
+from src.agent.old_agent.llm_models import LLMHub
+from src.agent.old_agent.agent.utils import Pages
 
 from eval.client import AgentEvalClient
 
@@ -43,12 +43,12 @@ from playwright._impl._errors import TargetClosedError
 
 
 # from .state import CustomAgentOutput
-from eval.datasets.exploit.portswigger.src.agent.custom_views import CustomAgentOutput
-from eval.datasets.exploit.portswigger.src.agent.custom_message_manager import CustomMessageManager, CustomMessageManagerSettings
-from eval.datasets.exploit.portswigger.src.agent.custom_views import CustomAgentStepInfo, CustomAgentState
-from eval.datasets.exploit.portswigger.src.agent.http_history import HTTPHistory, HTTPHandler
+from src.agent.old_agent.agent.custom_views import CustomAgentOutput
+from src.agent.old_agent.agent.custom_message_manager import CustomMessageManager, CustomMessageManagerSettings
+from src.agent.old_agent.agent.custom_views import CustomAgentStepInfo, CustomAgentState
+from src.agent.old_agent.agent.http_history import HTTPHistory, HTTPHandler
 
-from eval.datasets.exploit.portswigger.src.agent.discovery import (
+from src.agent.old_agent.agent.discovery import (
     # CreatePlan,
     # UpdatePlan,
     CreatePlanNested,

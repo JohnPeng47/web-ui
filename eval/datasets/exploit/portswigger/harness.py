@@ -34,7 +34,7 @@ from old_browser_use.browser.browser import Browser, BrowserConfig
 from old_browser_use.browser.context import BrowserContext, BrowserContextConfig
 from pydantic import BaseModel
 
-from eval.datasets.exploit.portswigger.src.agent.custom_agent import CustomAgent
+from src.agent.old_agent.agent.custom_agent import CustomAgent
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
