@@ -60,6 +60,26 @@ AGENT POOLS AND AGENTS
 @location: pentest_bot/web_exploit/agent.py
 
 ======================
+HTTP HANDLING STACK
+======================
+- HTTP traffic capture and processing pipeline for agents
+- HTTPLib (Core Models)
+@location: common/http_handler.py
+> manages request/response pairing and filtering
+> handles flush logic with timeouts
+> applies scope/ban-list filtering
+> deduplicates messages
+- MitmProxyHTTPHandler (Proxy Implementation)
+@location: src/agent/discovery/proxy.py
+> wraps mitmproxy for traffic interception
+> converts mitmproxy flows to HTTPRequest/HTTPResponse
+> relays to HTTPHandler via _RelayAddon
+> used by discovery agents for passive traffic capture
+- Error Handling
+> parsing errors in httplib functions should be caught to prevent proxy crashes
+> type validation critical in parse_post_data (expects str | None)
+
+======================
 TESTING
 ======================
 > For each CODEEDIT_TASK, if testing is requested by the user, then you *MUST*:

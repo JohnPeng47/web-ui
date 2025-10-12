@@ -5,8 +5,8 @@ from httplib import (
     HTTPMessage, 
     HTTPRequest, 
     HTTPRequestData,
-    post_data_to_dict,
-    format_body
+    parse_post_data,
+    parse_res_data
 )
 
 BURP_REQUEST_FILE = "tests/integration/cross_tenant_requests"
@@ -190,7 +190,7 @@ def test_http_request_nested_json_payload():
 def test_post_data_to_dict_urlencoded():
     """Test post_data_to_dict with URL-encoded data"""
     post_data = "username=test&password=secret123&remember=true"
-    result = post_data_to_dict(post_data)
+    result = parse_post_data(post_data)
     
     assert result["username"] == "test"
     assert result["password"] == "secret123"
@@ -201,7 +201,7 @@ def test_post_data_to_dict_json_string():
     """Test post_data_to_dict with JSON string"""
     json_data = {"username": "test", "password": "secret"}
     post_data = json.dumps(json_data)
-    result = post_data_to_dict(post_data)
+    result = parse_post_data(post_data)
     
     assert result["username"] == "test"
     assert result["password"] == "secret"
@@ -209,14 +209,14 @@ def test_post_data_to_dict_json_string():
 
 def test_post_data_to_dict_empty():
     """Test post_data_to_dict with empty data"""
-    assert post_data_to_dict(None) == {}
-    assert post_data_to_dict("") == {}
+    assert parse_post_data(None) == {}
+    assert parse_post_data("") == {}
 
 
 def test_post_data_to_dict_special_characters():
     """Test post_data_to_dict with special characters"""
     post_data = "email=test%40example.com&name=John+Doe&message=Hello%20World"
-    result = post_data_to_dict(post_data)
+    result = parse_post_data(post_data)
     
     assert "email" in result
     assert "name" in result
@@ -227,7 +227,7 @@ def test_format_body_json_dict():
     """Test format_body with JSON dict"""
     body = {"key": "value", "number": 42}
     headers = {"content-type": "application/json"}
-    result = format_body(body, headers)
+    result = parse_res_data(body, headers)
     
     assert isinstance(result, dict)
     assert result["key"] == "value"
@@ -239,7 +239,7 @@ def test_format_body_json_bytes():
     json_data = {"test": "data", "count": 100}
     body = json.dumps(json_data).encode("utf-8")
     headers = {"content-type": "application/json"}
-    result = format_body(body, headers)
+    result = parse_res_data(body, headers)
     
     assert isinstance(result, dict)
     assert result["test"] == "data"
@@ -251,7 +251,7 @@ def test_format_body_html_bytes():
     html = "<html><body>Test</body></html>"
     body = html.encode("utf-8")
     headers = {"content-type": "text/html"}
-    result = format_body(body, headers)
+    result = parse_res_data(body, headers)
     
     assert isinstance(result, str)
     assert "<html>" in result
@@ -262,7 +262,7 @@ def test_format_body_plain_text():
     """Test format_body with plain text"""
     body = "This is plain text content"
     headers = {"content-type": "text/plain"}
-    result = format_body(body, headers)
+    result = parse_res_data(body, headers)
     
     assert isinstance(result, str)
     assert result == body
@@ -272,7 +272,7 @@ def test_format_body_xml_string():
     """Test format_body with XML string"""
     xml = "<root><item>value</item></root>"
     headers = {"content-type": "application/xml"}
-    result = format_body(xml, headers)
+    result = parse_res_data(xml, headers)
     
     assert isinstance(result, str)
     assert "<root>" in result
@@ -282,7 +282,7 @@ def test_format_body_binary_data():
     """Test format_body with binary data"""
     body = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
     headers = {"content-type": "image/png"}
-    result = format_body(body, headers)
+    result = parse_res_data(body, headers)
     
     assert isinstance(result, bytes)
 
@@ -291,7 +291,7 @@ def test_format_body_form_urlencoded():
     """Test format_body with URL-encoded form"""
     body = "key1=value1&key2=value2"
     headers = {"content-type": "application/x-www-form-urlencoded"}
-    result = format_body(body, headers)
+    result = parse_res_data(body, headers)
     
     assert isinstance(result, str)
     assert "key1=value1" in result
@@ -382,7 +382,7 @@ def test_post_data_to_dict_malformed_data_logs_warning(caplog):
     
     # Set log level to capture warnings
     with caplog.at_level(logging.WARNING):
-        result = post_data_to_dict(malformed_data)
+        result = parse_post_data(malformed_data)
     
     # Verify the result contains error message
     assert result == {"error": "Failed to parse post data"}

@@ -19,7 +19,7 @@ from httplib import (
     HTTPResponse, 
     HTTPRequestData, 
     HTTPResponseData, 
-    post_data_to_dict
+    parse_post_data
 )
 
 agent_log, _ = get_agent_loggers()
@@ -437,9 +437,9 @@ class CDPHTTPHandler:
                 try:
                     post_dict = json.loads(post_data)
                 except:
-                    post_dict = post_data_to_dict(post_data)
+                    post_dict = parse_post_data(post_data)
             else:
-                post_dict = post_data_to_dict(post_data)
+                post_dict = parse_post_data(post_data)
         
         # Check for redirects
         redirect_response = params.get("redirectResponse")

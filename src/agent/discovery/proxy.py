@@ -22,7 +22,7 @@ from httplib import (
     HTTPResponse,
     HTTPRequestData,
     HTTPResponseData,
-    post_data_to_dict,
+    parse_post_data,
 )
 
 agent_log, _ = get_agent_loggers()
@@ -217,9 +217,9 @@ class MitmProxyHTTPHandler:
                     import json
                     post_dict = json.loads(req.get_text(strict=False) or "")
                 else:
-                    post_dict = post_data_to_dict(req.get_text(strict=False) or "")
+                    post_dict = parse_post_data(req.get_text(strict=False) or "")
             except Exception:
-                post_dict = post_data_to_dict(req.get_text(strict=False) or "")
+                post_dict = parse_post_data(req.get_text(strict=False) or "")
 
         data = HTTPRequestData(
             method=method,

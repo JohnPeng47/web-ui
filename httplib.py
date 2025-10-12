@@ -15,7 +15,7 @@ DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text"]
 DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
 MAX_PAYLOAD_SIZE = 4000
 
-def decompress(body: bytes, headers: Dict[str, str]) -> bytes:
+def _decompress(body: bytes, headers: Dict[str, str]) -> bytes:
     """Decompress body according to Content-Encoding in headers.
 
     Supports gzip, deflate, br (brotli), zstd, bz2, lzma/xz.
@@ -82,7 +82,7 @@ def decompress(body: bytes, headers: Dict[str, str]) -> bytes:
     return data
 
 
-def format_body(body_obj: Any, headers: Dict[str, str]) -> Union[str, Dict[str, Any], bytes]:
+def parse_res_data(body_obj: Any, headers: Dict[str, str]) -> Union[str, Dict[str, Any], bytes]:
     """Return body as JSON (dict) if possible, else string, else bytes.
 
     The function will attempt to:
@@ -119,7 +119,7 @@ def format_body(body_obj: Any, headers: Dict[str, str]) -> Union[str, Dict[str, 
     if isinstance(body_obj, (bytes, bytearray)):
         raw_bytes = bytes(body_obj)
         try:
-            raw_bytes = decompress(raw_bytes, headers)
+            raw_bytes = _decompress(raw_bytes, headers)
         except Exception:
             pass
 
@@ -164,8 +164,7 @@ def format_body(body_obj: Any, headers: Dict[str, str]) -> Union[str, Dict[str, 
     except Exception:
         return ""
 
-
-def post_data_to_dict(post_data: str | None):
+def parse_post_data(post_data: str | None):
     """Convert post data to dictionary format.
     
     Args:
@@ -320,7 +319,7 @@ class HTTPRequest(BaseModel):
             method=request.method,
             url=request.url,
             headers=dict(request.headers),
-            post_data=post_data_to_dict(request.post_data),
+            post_data=parse_post_data(request.post_data),
             redirected_from_url=request.redirected_from.url if request.redirected_from else None,
             redirected_to_url=request.redirected_to.url if request.redirected_to else None,
             is_iframe=bool(request.frame.parent_frame)
@@ -360,7 +359,7 @@ class HTTPResponseData(BaseModel):
     content_type: Optional[str] = None
 
     def get_body(self) -> Union[str, Dict[str, Any], bytes]:
-        return format_body(self.body, self.headers)
+        return parse_res_data(self.body, self.headers)
 
 class HTTPResponse(BaseModel):
     """HTTP response class with unified implementation"""
