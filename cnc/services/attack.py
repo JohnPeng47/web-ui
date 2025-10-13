@@ -10,7 +10,7 @@ from cnc.schemas.http import EnrichedRequest
 from cnc.schemas.engagement import Finding
 from cnc.services.queue import BroadcastChannel
 from cnc.database.models import AuthSession as DBAuthSession
-from httplib import HTTPRequest, HTTPRequestData
+from common.httplib import HTTPRequest, HTTPRequestData
 from logger import get_server_logger
 
 

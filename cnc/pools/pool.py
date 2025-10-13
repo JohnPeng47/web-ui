@@ -9,7 +9,7 @@ from cnc.services.queue import BroadcastChannel
 
 from src.agent.agent_client import AgentClient
 
-from httplib import HTTPMessage
+from common.httplib import HTTPMessage
 from logger import AGENT_POOL_LOGGER_NAME
 from logging import getLogger
 

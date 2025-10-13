@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from urllib.parse import urlparse
 from pydantic import BaseModel
 
-from httplib import HTTPMessage
+from common.httplib import HTTPMessage
 from logger import get_agent_loggers
 from eval.datasets.base import Challenge
 

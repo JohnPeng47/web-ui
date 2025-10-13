@@ -1,6 +1,6 @@
 from typing import Optional, List
 from pydantic import BaseModel
-from httplib import HTTPRequest, HTTPMessage, ResourceLocator, AuthSession
+from common.httplib import HTTPRequest, HTTPMessage, ResourceLocator, AuthSession
 
 class EnrichAuthNZMessage(BaseModel):
     http_msg: HTTPMessage

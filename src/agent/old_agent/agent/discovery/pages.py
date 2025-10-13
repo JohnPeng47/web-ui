@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
 
-from httplib import HTTPMessage
+from common.httplib import HTTPMessage
 
 class Subpage(BaseModel):
     url: str

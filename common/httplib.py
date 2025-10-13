@@ -7,9 +7,11 @@ from pydantic import BaseModel, Field, model_validator
 from playwright.sync_api import Request, Response
 
 from src.llm import RequestPart
-from logger import get_agent_loggers
+from logger import PROXY_LOGGER_NAME
+from logging import getLogger
 
-agent_log, _ = get_agent_loggers()
+proxy_log = getLogger(PROXY_LOGGER_NAME)
+
 
 DEFAULT_INCLUDE_MIME = ["html", "script", "xml", "flash", "other_text"]
 DEFAULT_INCLUDE_STATUS = ["2xx", "3xx", "4xx", "5xx"]
@@ -195,7 +197,7 @@ def parse_post_data(post_data: str | None):
                 pass
     
     if not result and len(post_data) > 0:
-        agent_log.warning(f"Failed to parse post data: {post_data}")
+        proxy_log.warning(f"Failed to parse post data: {post_data}")
         result = {"error": "Failed to parse post data"}
 
     return result

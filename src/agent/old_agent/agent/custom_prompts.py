@@ -7,7 +7,7 @@ from old_browser_use.browser.views import BrowserState
 from langchain_core.messages import HumanMessage, SystemMessage
 from datetime import datetime
 import importlib
-from httplib import HTTPMessage
+from common.httplib import HTTPMessage
 
 from .custom_views import CustomAgentStepInfo
 

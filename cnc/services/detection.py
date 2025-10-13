@@ -6,7 +6,7 @@ from src.agent.discovery.pages import PageObservations, Page
 from src.llm_provider import LMP
 from src.llm_models import BaseChatModel
 
-from httplib import HTTPMessage
+from common.httplib import HTTPMessage
 from cnc.database.agent.models import ExploitAgentModel
 
 # TODO: potentially change to being able to specify multiple page items

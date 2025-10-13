@@ -1072,7 +1072,7 @@ index 207994f..45c3fbc 100644
  from logger import get_agent_loggers
  from common.http_handler import HTTPHandler
 +from common.constants import BROWSER_PROXY_HOST, BROWSER_PROXY_PORT
- from httplib import (
+ from common.httplib import (
      HTTPRequest, 
      HTTPResponse, 
 @@ -41,8 +42,8 @@ class MitmProxyHTTPHandler:
@@ -2120,7 +2120,7 @@ index 45c3fbc..0000000
 -from logger import get_agent_loggers
 -from common.http_handler import HTTPHandler
 -from common.constants import BROWSER_PROXY_HOST, BROWSER_PROXY_PORT
--from httplib import (
+-from common.httplib import (
 -    HTTPRequest, 
 -    HTTPResponse, 
 -    HTTPRequestData, 
@@ -3517,7 +3517,7 @@ index 4b2e3a0..0000000
 - 
 --from src.agent.discovery.pages import PageObservations
 -+from src.agent.discovery.pages import PageObservations, Page
--+from httplib import HTTPMessage
+-+from common.httplib import HTTPMessage
 - from src.agent.agent_client import AgentClient
 - from src.agent.detection.prompts import DetectAndSchedule
 - from src.llm_models import LLMHub
@@ -3904,7 +3904,7 @@ index 2539e1c..e5a517c 100644
      AgentOut,
 @@ -46,7 +48,6 @@ from common.constants import (
  from src.agent.discovery.pages import PageObservations, Page
- from httplib import HTTPMessage
+ from common.httplib import HTTPMessage
  from src.agent.agent_client import AgentClient
 -from src.agent.detection.prompts import DetectAndSchedule
  from src.llm_models import LLMHub
@@ -4073,7 +4073,7 @@ index ea81aa5..ca6522f 100644
 -from common.constants import NUM_SCHEDULED_ACTIONS
 +from src.llm_models import BaseChatModel
  
- from httplib import HTTPMessage
+ from common.httplib import HTTPMessage
 +from cnc.database.agent.models import ExploitAgentModel
 +
  

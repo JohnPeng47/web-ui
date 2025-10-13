@@ -6,7 +6,7 @@ import httpx  # Added import
 import logging
 
 from playwright.sync_api import Request
-from httplib import HTTPRequest, HTTPRequestData, AuthSession, ResourceLocator
+from common.httplib import HTTPRequest, HTTPRequestData, AuthSession, ResourceLocator
 from src.llm import RequestResources, Resource, ResourceType, RequestPart
 
 from cnc.services.attack import FindingsStore

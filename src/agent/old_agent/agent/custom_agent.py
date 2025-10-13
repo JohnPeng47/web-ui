@@ -36,7 +36,7 @@ from src.agent.old_agent.agent.utils import Pages
 
 from eval.client import AgentEvalClient
 
-from httplib import HTTPMessage
+from common.httplib import HTTPMessage
 
 from playwright._impl._errors import TargetClosedError
 # from logger import get_agent_loggers

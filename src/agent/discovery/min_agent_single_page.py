@@ -39,7 +39,7 @@ class MinimalAgentSinglePage(DiscoveryAgent):
         *,
         challenge_client: Optional[PagedDiscoveryEvalClient] = None,
         server_client: Optional[AgentClient] = None,
-        cdp_handler: MitmProxyHTTPHandler | None = None,
+        proxy_handler: MitmProxyHTTPHandler | None = None,
         agent_dir: Path | None = None,
         init_task: Optional[str] = None,
         screenshots: bool = False,
@@ -56,7 +56,7 @@ class MinimalAgentSinglePage(DiscoveryAgent):
             max_page_steps=max_page_steps,
             challenge_client=challenge_client,
             server_client=server_client,
-            cdp_handler=cdp_handler,
+            proxy_handler=proxy_handler,
             agent_dir=agent_dir,
             init_task=init_task,
             screenshots=screenshots,
@@ -108,8 +108,8 @@ class MinimalAgentSinglePage(DiscoveryAgent):
             # self.agent_state.is_done = True  # Mark as done after visiting the page
 
             # Update page state with proxy handler messages if available
-            if self.cdp_handler:
-                msgs = await self.cdp_handler.flush()
+            if self.proxy_handler:
+                msgs = await self.proxy_handler.flush()
                 for msg in msgs:
                     self.pages.curr_page().add_http_msg(msg)
                     print(f"[{msg.method}] {msg.url}")

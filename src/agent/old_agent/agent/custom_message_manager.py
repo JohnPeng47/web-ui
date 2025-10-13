@@ -12,7 +12,7 @@ from langchain_core.messages import (
     HumanMessage,
     SystemMessage
 )
-from httplib import HTTPMessage
+from common.httplib import HTTPMessage
 
 from .custom_prompts import CustomAgentMessagePrompt
 from .custom_views import CustomAgentStepInfo

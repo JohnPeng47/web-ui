@@ -12,7 +12,7 @@ from typing import (
     Set,
 )
 
-from httplib import HTTPMessage, HTTPRequest, HTTPResponse
+from common.httplib import HTTPMessage, HTTPRequest, HTTPResponse
 from playwright.sync_api import Request, Response
 
 from logger import get_agent_loggers

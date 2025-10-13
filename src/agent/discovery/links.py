@@ -26,7 +26,7 @@ from gzip import GzipFile
 from string import Template
 from logging import getLogger
 
-# from httplib import HTTPMessage
+# from common.httplib import HTTPMessage
 
 try:
     from StringIO import StringIO

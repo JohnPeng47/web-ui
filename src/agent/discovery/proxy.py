@@ -15,18 +15,19 @@ except ImportError as e:
         "mitmproxy is required. Install with: pip install mitmproxy"
     ) from e
 
-from logger import get_agent_loggers
 from common.http_handler import HTTPHandler
-from httplib import (
+from common.httplib import (
     HTTPRequest,
     HTTPResponse,
     HTTPRequestData,
     HTTPResponseData,
     parse_post_data,
 )
+from logger import PROXY_LOGGER_NAME
+from logging import getLogger
 
-agent_log, _ = get_agent_loggers()
-agent_log.propagate = False
+proxy_log = getLogger(PROXY_LOGGER_NAME)
+proxy_log.propagate = False
 
 
 def _detach_mitm_logging_handlers() -> None:
@@ -83,7 +84,7 @@ class MitmProxyHTTPHandler:
         # We need the loop where handler coroutines should run
         self._loop: Optional[asyncio.AbstractEventLoop] = None
 
-        agent_log.info(
+        proxy_log.info(
             "Initialized MitmProxyHTTPHandler '%s' on %s:%d",
             self._handler_name,
             self._listen_host,
@@ -96,7 +97,7 @@ class MitmProxyHTTPHandler:
 
     async def connect(self) -> None:
         if self._connected:
-            agent_log.info("Handler '%s' already connected", self._handler_name)
+            proxy_log.info("Handler '%s' already connected", self._handler_name)
             return
 
         # Capture the loop where we will schedule handler coroutines
@@ -119,7 +120,7 @@ class MitmProxyHTTPHandler:
 
         async def _run_mitm():
             try:
-                agent_log.info(
+                proxy_log.info(
                     "Starting mitmproxy on %s:%d (http2=%s ssl_insecure=%s)",
                     self._listen_host,
                     self._listen_port,
@@ -128,10 +129,10 @@ class MitmProxyHTTPHandler:
                 )
                 await self._master.run()
             except Exception:
-                agent_log.exception("mitmproxy master crashed")
+                proxy_log.exception("mitmproxy master crashed")
                 raise
             finally:
-                agent_log.info("mitmproxy master exited")
+                proxy_log.info("mitmproxy master exited")
                 self._alive = False
                 _detach_mitm_logging_handlers()
 
@@ -150,7 +151,7 @@ class MitmProxyHTTPHandler:
                 try:
                     await asyncio.wait_for(self._task, timeout=5.0)
                 except asyncio.TimeoutError:
-                    agent_log.warning("mitm task did not stop within timeout")
+                    proxy_log.warning("mitm task did not stop within timeout")
             
             # Stop browser if we started it
             if self._browser_task and not self._browser_task.done():
@@ -163,7 +164,7 @@ class MitmProxyHTTPHandler:
             self._task = None
             self._browser_task = None
             self._connected = False
-            agent_log.info("Handler '%s' disconnected", self._handler_name)
+            proxy_log.info("Handler '%s' disconnected", self._handler_name)
 
     async def flush(self):
         # If mitm died, either return what you have or raise a controlled error.
@@ -195,12 +196,12 @@ class MitmProxyHTTPHandler:
             fut = asyncio.run_coroutine_threadsafe(coro, loop)
         except RuntimeError as e:
             # loop is closing/closed
-            agent_log.debug("Dropped handler coroutine: %s", e)
+            proxy_log.debug("Dropped handler coroutine: %s", e)
             return
         def _log_err(_fut: "asyncio.Future[Any]") -> None:
             exc = _fut.exception()
             if exc:
-                agent_log.exception("Handler coroutine failed: %s", exc)
+                proxy_log.exception("Handler coroutine failed: %s", exc)
         fut.add_done_callback(_log_err)
 
     def _flow_to_http_request(self, flow: http.HTTPFlow) -> HTTPRequest:
@@ -222,7 +223,7 @@ class MitmProxyHTTPHandler:
                 post_dict = parse_post_data(req.get_text(strict=False) or "")
 
         data = HTTPRequestData(
-            method=method,
+            method=method, 
             url=url,
             headers={k.lower(): v for k, v in headers.items()},
             post_data=post_dict,
@@ -230,7 +231,10 @@ class MitmProxyHTTPHandler:
             redirected_to_url=None,
             is_iframe=False,
         )
-        return HTTPRequest(data=data)
+        request = HTTPRequest(data=data)
+        proxy_log.info(f"Request: {request.to_str()}")
+
+        return request
 
     def _flow_to_http_response(self, flow: http.HTTPFlow) -> HTTPResponse:
         resp = flow.response
@@ -278,7 +282,7 @@ class _RelayAddon:
             http_request = self.outer._flow_to_http_request(flow)
             self.outer._schedule_coro(self.outer._handler.handle_request(http_request))
         except Exception:
-            agent_log.exception("Failed to relay request")
+            proxy_log.exception("Failed to relay request")
 
     def response(self, flow: http.HTTPFlow) -> None:
         try:
@@ -291,7 +295,7 @@ class _RelayAddon:
                 self.outer._handler.handle_response(http_response, http_request)
             )
         except Exception:
-            agent_log.exception("Failed to relay response")
+            proxy_log.exception("Failed to relay response")
 
     def error(self, flow: http.HTTPFlow) -> None:
         # You could synthesize an error HTTPResponse and forward it if needed.

@@ -1,6 +1,5 @@
-import asyncio
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 import json
 
 from playwright.async_api import async_playwright
@@ -23,8 +22,6 @@ from common.constants import (
 )
 
 from eval.client import PagedDiscoveryEvalClient
-from eval.datasets.discovery.juiceshop import JUICE_SHOP_ALL as JUICE_SHOP_ALL_DISCOVERY
-from eval.datasets.discovery.juiceshop_exploit import JUICE_SHOP_VULNERABILITIES as JUICE_SHOP_VULNERABILITIES_EXPLOIT
 
 from logger import get_or_init_log_factory
 
@@ -35,13 +32,12 @@ PORT = 9898
 PROXY_HOST = "127.0.0.1"
 PROXY_PORT = 8083
 
-# Single URL for SimpleAgent
-TEST_URL = "http://147.79.78.153:3000/#/login"
-
 async def start_discovery_agent(
     start_urls: List[str], 
     scopes: List[str], 
-    challenge_client: PagedDiscoveryEvalClient | None = None
+    challenge_client: PagedDiscoveryEvalClient | None = None,
+    init_task: str | None = None,
+    auth_cookies: List[Dict[str, str]] | None = None,
 ):
     """Initialize SimpleAgent using the new BrowserSession-based API."""
     server_log_factory = get_or_init_log_factory(base_dir=".min_agent")
@@ -100,7 +96,8 @@ async def start_discovery_agent(
             proxy_handler=proxy_handler,
             agent_log=agent_log,
             full_log=full_log,
-            # init_task=TASK,
+            init_task=init_task,
+            auth_cookies=auth_cookies,
         )
         await agent.run()
 
@@ -119,31 +116,3 @@ async def start_discovery_agent(
             await browser.close()
             await pw.stop()
             # proxy_handler.stop()
-
-
-async def main():
-    START_URLS = [
-        "http://147.79.78.153:3000/#/login",
-        "http://147.79.78.153:3000/#/contact",
-        "http://147.79.78.153:3000/#/search"
-    ]
-    SCOPES = [
-        "http://147.79.78.153:3000/rest/",
-        "http://147.79.78.153:3000/api/",
-    ]
-    TEST_PATHS = [
-        "/login"
-    ]
-    JUICE_SHOP_BASE_URL = "http://147.79.78.153:3000"
-    JUICE_SHOP_ALL = {**JUICE_SHOP_ALL_DISCOVERY, **JUICE_SHOP_VULNERABILITIES_EXPLOIT}
-    JUICE_SHOP_SUBSET = {p: JUICE_SHOP_ALL.get(p, []) for p in TEST_PATHS if p}
-
-    challenge_client=PagedDiscoveryEvalClient(
-        challenges=JUICE_SHOP_SUBSET,
-        base_url=JUICE_SHOP_BASE_URL,
-    )
-
-    await start_discovery_agent(START_URLS, SCOPES, challenge_client)
-
-if __name__ == "__main__":
-    asyncio.run(main())

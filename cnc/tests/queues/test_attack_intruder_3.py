@@ -27,7 +27,7 @@ from cnc.services.queue import BroadcastChannel
 from cnc.workers.attackers.authnz.attacker import AuthzAttacker
 from cnc.workers.attackers.authnz.models import AuthNZAttack
 from cnc.schemas.http import EnrichedRequest
-from httplib import HTTPRequest, HTTPRequestData, ResourceLocator, RequestPart
+from common.httplib import HTTPRequest, HTTPRequestData, ResourceLocator, RequestPart
 
 # ---------------------------------------------------------------------------
 # Helper builders

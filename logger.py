@@ -402,7 +402,9 @@ class _ServerLogFactory:
         
         name = self._next_numeric_name(discovery_dir)
 
-        _setup_agent_logger(log_dir="", parent_dir=discovery_dir, name=name, create_run_subdir=False, add_thread_filter=False, no_console=no_console)
+        _setup_agent_logger(
+            log_dir="", parent_dir=discovery_dir, name=name, create_run_subdir=False, add_thread_filter=False, no_console=no_console
+        )
         return logging.getLogger(name), logging.getLogger(FULL_REQUESTS_LOGGER_NAME)
     
     def get_exploit_agent_loggers(self, *, no_console: bool = False) -> Tuple[logging.Logger, logging.Logger]:
@@ -415,7 +417,9 @@ class _ServerLogFactory:
 
         name = self._next_numeric_name(exploit_dir)
 
-        _setup_agent_logger(log_dir="", parent_dir=exploit_dir, name=name, create_run_subdir=False, add_thread_filter=False, no_console=no_console)
+        _setup_agent_logger(
+            log_dir="", parent_dir=exploit_dir, name=name, create_run_subdir=False, add_thread_filter=False, no_console=no_console
+        )
         return logging.getLogger(name), logging.getLogger(FULL_REQUESTS_LOGGER_NAME)
 
     def get_log_dir(self) -> Path:

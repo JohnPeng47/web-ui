@@ -1,6 +1,6 @@
 import json
 from typing import List, Dict, Any
-from httplib import (
+from common.httplib import (
     parse_burp_xml, 
     HTTPMessage, 
     HTTPRequest, 

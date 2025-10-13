@@ -28,7 +28,7 @@ from src.agent.discovery.links import parse_links_from_str
 from src.llm_models import LLMHub
 from src.agent.utils import url_did_change
 from src.agent.discovery.pages import Page, PageObservations
-from cnc.workers.agent.cdp_handler import CDPHTTPHandler
+from src.agent.discovery.proxy import MitmProxyHTTPHandler
 
 # clients
 from src.agent.agent_client import AgentClient
@@ -196,12 +196,13 @@ class DiscoveryAgent:
         *,
         challenge_client: Optional[PagedDiscoveryEvalClient] = None,
         server_client: Optional[AgentClient] = None,
-        cdp_handler: CDPHTTPHandler | None = None,
+        proxy_handler: MitmProxyHTTPHandler | None = None,
         agent_dir: Optional[Path] = None,
         init_task: Optional[str] = None,
         screenshots: bool = False,
         agent_log: Optional[logging.Logger] = None,
         full_log: Optional[logging.Logger] = None,
+        auth_cookies: Optional[List[Dict[str, str]]] = None,
     ):
         # initiailized in the agent loop
         # self.task = ""
@@ -212,9 +213,10 @@ class DiscoveryAgent:
         self.agent_context = AgentContext([])
         self.agent_state = AgentState(step=1, max_steps=max_steps)
         self.agent_dir = agent_dir
-        self.cdp_handler = cdp_handler
+        self.proxy_handler = proxy_handler
         self.server_client = server_client
         self.challenge_client = challenge_client
+        self.auth_cookies = auth_cookies
 
         self._init_task = init_task
 
@@ -421,6 +423,43 @@ class DiscoveryAgent:
         )
         return result["result"]["value"]
     
+    async def set_cookies(self, cookies: List[Dict[str, str]]) -> None:
+        cdp_session = await self.browser_session.get_or_create_cdp_session()
+        await cdp_session.cdp_client.send.Network.enable(
+            params={},
+            session_id=cdp_session.session_id,
+        )
+        
+        cookie_list = []
+        for cookie in cookies:
+            print("Setting cookie: ", cookie)
+            
+            # Build CDP cookie with required fields
+            cdp_cookie = {
+                "name": cookie["name"],
+                "value": cookie["value"],
+                "domain": cookie["domain"],
+                "path": cookie.get("path", "/"),  # Default to "/" if missing
+            }
+            
+            # Add optional fields if present
+            # if "secure" in cookie:
+            #     cdp_cookie["secure"] = cookie["secure"]
+            # if "httpOnly" in cookie:
+            #     cdp_cookie["httpOnly"] = cookie["httpOnly"]
+            # if "sameSite" in cookie:
+            #     cdp_cookie["sameSite"] = cookie["sameSite"]
+            # if "expirationDate" in cookie:
+            #     cdp_cookie["expires"] = cookie["expirationDate"]
+                
+            cookie_list.append(cdp_cookie)
+        
+        await cdp_session.cdp_client.send.Network.setCookies(
+            params={"cookies": cookie_list},
+            session_id=cdp_session.session_id,
+        )
+        agent_log.info(f"Set cookies: {[cookie['name'] for cookie in cookies]}")
+        
     async def _update_plan(self, new_dom_str: str):
         """
         Updates the plan based on changes to the DOM tree 
@@ -717,9 +756,9 @@ class DiscoveryAgent:
 
         self._log_state(model_output, agent_msgs)
 
-        if self.cdp_handler:
+        if self.proxy_handler:
             self._log(f"[AGENT_PHASE] Update page data")
-            msgs = await self.cdp_handler.flush()
+            msgs = await self.proxy_handler.flush()
             for msg in msgs:
                 self.pages.curr_page().add_http_msg(msg)
             try:
@@ -749,6 +788,10 @@ class DiscoveryAgent:
                 agent_log.error("HTTP message update failed")
                 
     async def run(self) -> None:
+        # Set auth headers if provided
+        if self.auth_cookies:
+            await self.set_cookies(self.auth_cookies)
+        
         while self.agent_state.step < self.agent_state.max_steps:
             await self.step()
 

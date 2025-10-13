@@ -132,7 +132,7 @@ async def main():
             agent_dir=None,
             max_steps=6,
             # max_page_steps=15,
-            cdp_handler=proxy_handler,
+            proxy_handler=proxy_handler,
             challenge_client=challenge_client,
             init_task=TASK,
             agent_log=agent_log,

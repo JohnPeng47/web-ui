@@ -6,7 +6,7 @@ from datetime import datetime
 
 from src.agent.client import AgentClient
 from src.llm import RequestPart
-from httplib import parse_burp_xml
+from common.httplib import parse_burp_xml
 from intruder import (
     AuthzTester,
     HTTPClient,

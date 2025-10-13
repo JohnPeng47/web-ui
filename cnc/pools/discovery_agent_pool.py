@@ -100,7 +100,7 @@ class DiscoveryAgentPool(LiveQueuePool[StartDiscoveryRequest]):
             agent_sys_prompt=CUSTOM_SYSTEM_PROMPT,
             browser_session=self._browser_session,
             controller=controller,
-            cdp_handler=proxy_handler,
+            proxy_handler=proxy_handler,
             agent_dir=None,
             init_task=queue_item.init_task,
             server_client=queue_item.client,

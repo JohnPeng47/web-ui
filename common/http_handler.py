@@ -14,13 +14,14 @@ from typing import (
 )
 from urllib.parse import urlparse
 
-from httplib import HTTPMessage, HTTPRequest, HTTPResponse
+from common.httplib import HTTPMessage, HTTPRequest, HTTPResponse
 from playwright.sync_api import Request, Response
 
 from src.utils import ContentTypeDetector
-from logger import get_agent_loggers
+from logger import PROXY_LOGGER_NAME
+from logging import getLogger
 
-agent_log, _ = get_agent_loggers()
+proxy_log = getLogger(PROXY_LOGGER_NAME)
 
 BAN_LIST = [
     # 1 Google / DoubleClick
@@ -114,19 +115,16 @@ class HTTPFilter:
         self.content_detector = ContentTypeDetector()
         self.cfg = http_filter_config or HTTPFilterConfig()
 
-
-    # TODO: this part is completely fucked
-    # ------------------------------------------------------------------ internal helpers
     async def _passes_all_filters(self, msg: "HTTPMessage") -> bool:
         """Evaluate every gate in order and short-circuit on the first failure."""
         url = msg.request.url
 
         if msg.response is None:
-            agent_log.info("Reject %s – no response", msg.request.url)
+            proxy_log.info("Reject %s – no response", msg.request.url)
             return False
 
         if is_uninteresting(url) or any(pat in url for pat in self.URL_FILTERS):
-            agent_log.info("Reject %s – disallowed URL", url)
+            proxy_log.info("Reject %s – disallowed URL", url)
             return False
 
         # try:
@@ -138,16 +136,16 @@ class HTTPFilter:
         #     # Fallback to header-based detection
         #     content_type = msg.response.get_content_type()
         
-        agent_log.info("CONTENT TYPE: %s", content_type)
+        proxy_log.info("CONTENT TYPE: %s", content_type)
         if not self._mime_allowed(content_type):
-            agent_log.info("Reject %s – MIME %s", url, content_type)
+            proxy_log.info("Reject %s – MIME %s", url, content_type)
             return False
         if not self._status_allowed(msg.response.status):
-            agent_log.info("Reject %s – status %s not allowed", url, msg.response.status)
+            proxy_log.info("Reject %s – status %s not allowed", url, msg.response.status)
             return False
 
         if self.cfg.max_payload_size is not None and msg.response.get_response_size() > self.cfg.max_payload_size:
-            agent_log.info("Reject %s – payload too large", url)
+            proxy_log.info("Reject %s – payload too large", url)
             return False
 
         return True
@@ -213,7 +211,7 @@ class HTTPHandler:
             
             # Check that we have at least a netloc (host)
             if not parsed.netloc:
-                agent_log.warning(f"Invalid scope '{scope}' - missing host, skipping")
+                proxy_log.warning(f"Invalid scope '{scope}' - missing host, skipping")
                 continue
                 
             validated_scopes.append(scope)
@@ -227,7 +225,7 @@ class HTTPHandler:
             self._request_queue.append(http_request)
             self._req_start[http_request] = asyncio.get_running_loop().time()
         except Exception as e:
-            agent_log.error("Error handling request: %s", e)
+            proxy_log.error("Error handling request: %s", e)
 
     async def handle_response(self, http_response: HTTPResponse, http_request: HTTPRequest):
         try:
@@ -244,7 +242,7 @@ class HTTPHandler:
                 HTTPMessage(request=http_request, response=http_response)
             )
         except Exception as e:
-            agent_log.error("Error handling response: %s", e)
+            proxy_log.error("Error handling response: %s", e)
 
     # ─────────────────────────────────────────────────────────────────────
     # Helper
@@ -252,12 +250,12 @@ class HTTPHandler:
     def _is_banned(self, url: str) -> bool:
         """Return True if the URL matches any ban-substring or was added at runtime."""
         if url in self._ban_list:
-            agent_log.info(f"MSG BANNED: {url}")
+            proxy_log.info(f"MSG BANNED: {url}")
             return True
         for s in self._ban_substrings:
             if s in url:
                 self._ban_list.add(url)      # cache for fast positive lookup next time
-                agent_log.info(f"MSG BANNED: {url}")
+                proxy_log.info(f"MSG BANNED: {url}")
                 return True
 
         return False
@@ -284,7 +282,7 @@ class HTTPHandler:
             if parsed_url.path.startswith(parsed_scope.path):
                 return True
         
-        agent_log.info(f"MSG NOT IN SCOPE: {url}")
+        proxy_log.info(f"MSG NOT IN SCOPE: {url}")
         return False
 
     async def _validate_msg(self, msg: HTTPMessage) -> bool:
@@ -347,7 +345,7 @@ class HTTPHandler:
             has been quiet for `settle_timeout` seconds, **or**
           • `flush_timeout` seconds have elapsed in total.
         """
-        agent_log.info("Starting HTTP flush")
+        proxy_log.info("Starting HTTP flush")
         loop        = asyncio.get_running_loop()
         start_time  = loop.time()
 
@@ -360,7 +358,7 @@ class HTTPHandler:
 
             # 0️⃣  Hard timeout check
             if now - start_time >= flush_timeout:
-                agent_log.warning(
+                proxy_log.warning(
                     "Flush hit hard timeout of %.1f s; returning immediately", flush_timeout
                 )
                 break
@@ -369,12 +367,12 @@ class HTTPHandler:
             for req in list(self._request_queue):
                 started_at = self._req_start.get(req, now)
                 if now - started_at >= per_request_timeout:
-                    agent_log.info("Request timed out: %s", req.url)
+                    proxy_log.info("Request timed out: %s", req.url)
                     self._messages.append(HTTPMessage(request=req, response=None))
                     self._request_queue.remove(req)
                     self._req_start.pop(req, None)
                 else:
-                    agent_log.debug("[REQUEST STAY] %s stay: %.2f s", req.url, now - started_at)
+                    proxy_log.debug("[REQUEST STAY] %s stay: %.2f s", req.url, now - started_at)
 
             # 2️⃣  A new request has come in extend the timing window
             if len(self._step_messages) != last_seen_response_idx:
@@ -385,7 +383,7 @@ class HTTPHandler:
             queue_empty  = not self._request_queue
             quiet_enough = (now - last_response_time) >= settle_timeout
             if queue_empty and quiet_enough:
-                agent_log.info("Flush complete")
+                proxy_log.info("Flush complete")
                 break
 
         # ────────────────────────────────────────────────────────────────
@@ -398,15 +396,22 @@ class HTTPHandler:
         self._request_queue = []
         self._step_messages = []
 
-        print("len of step messages: ", len(session_msgs))
-        print("len of request queue: ", len(unmatched))
+        proxy_log.info("len of step messages: %d", len(session_msgs))
+        proxy_log.info("len of request queue: %d", len(unmatched))
 
         # keep unmatched only if in scope (no response => cannot pass full filter)
         unmatched_in_scope = [m for m in unmatched if self._is_in_scope(m.request.url)]
         # keep session messages that fully pass scope + filter
         session_valid = [m for m in session_msgs if await self._validate_msg(m)]
+        session_invalid = [m for m in session_msgs if not await self._validate_msg(m)]
 
-        print("len of session_valid: ", len(session_valid))
+        proxy_log.info("len of session_valid: %d", len(session_valid))
+        proxy_log.info("len of session_invalid: %d", len(session_invalid))
+        
+        # Print invalid requests details
+        for msg in session_invalid:
+            parsed_url = urlparse(msg.request.url)
+            proxy_log.info("Invalid request: (%s, %s)", parsed_url.hostname, msg.request.method)
 
         # Remove duplicates from session_valid
         session_valid = self._remove_duplicates(session_valid)
@@ -414,7 +419,6 @@ class HTTPHandler:
         self._messages.extend(unmatched_in_scope)
         self._messages.extend(session_valid)
 
-        # agent_log.info("Returning %d messages from flush (in-scope & filtered)", len(session_valid))
         return session_valid
 
     def get_history(self) -> List[HTTPMessage]:

@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from cnc.schemas.http import EnrichedRequest, EnrichAuthNZMessage
 from cnc.services.queue import BroadcastChannel
 
-from httplib import HTTPMessage, ResourceLocator
+from common.httplib import HTTPMessage, ResourceLocator
 # from johnllm import LMP, LLMModel
 
 from src.llm import RequestResources, EXTRACT_REQUESTS_PROMPT

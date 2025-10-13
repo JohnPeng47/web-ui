@@ -2,7 +2,7 @@ from browser_use.agent.views import AgentHistoryList
 from src.agent.discovery.pages import PageObservations
 
 from typing import List
-from httplib import HTTPMessage
+from common.httplib import HTTPMessage
 
 from pathlib import Path
 import json

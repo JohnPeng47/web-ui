@@ -105,7 +105,7 @@ class DiscoveryAgentPool(EvalAgentPool[StartDiscoveryRequest]):
             # listen_port=PORT,
             # start_browser=False,
         )
-        cdp_handler.connect()
+        await cdp_handler.connect()
 
         # cdp_handler = CDPHTTPHandler(
         #     handler=HTTPHandler(scopes=queue_item.scopes),
@@ -125,7 +125,7 @@ class DiscoveryAgentPool(EvalAgentPool[StartDiscoveryRequest]):
             agent_sys_prompt=CUSTOM_SYSTEM_PROMPT,
             browser_session=self._browser_session,
             controller=controller,
-            cdp_handler=cdp_handler,
+            proxy_handler=cdp_handler,
             agent_dir=self.parent_dir,
             init_task=queue_item.init_task,
             server_client=queue_item.server_client,

@@ -14,7 +14,7 @@ except ImportError as e:
 
 from logger import get_agent_loggers
 from common.http_handler import HTTPHandler
-from httplib import (
+from common.httplib import (
     HTTPRequest, 
     HTTPResponse, 
     HTTPRequestData, 
