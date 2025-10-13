@@ -22,7 +22,7 @@ class AgentOut(BaseModel):
     agent_status: AgentStatus
     agent_type: AgentType
     agent_name: str
-    data: Dict[str, Any]
+    data: Optional[Dict[str, Any]]
 
     class Config:
         from_attributes = True

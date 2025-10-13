@@ -1,4 +1,8 @@
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # temp holding place for application constants, which may or may not be configurable
 # exploit agent
@@ -23,7 +27,7 @@ BROWSER_PROFILE_DIR_2 = Path(
 
 # cnc server url
 API_SERVER_HOST = "127.0.0.1"
-API_SERVER_PORT = 8000
+API_SERVER_PORT = int(os.environ["API_SERVER_PORT"])
 
 # detection prompt
 NUM_SCHEDULED_ACTIONS = 5

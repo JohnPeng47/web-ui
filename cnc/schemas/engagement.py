@@ -24,6 +24,8 @@ class EngagementBase(BaseModel):
     base_url: str
     scopes_data: Optional[List[str]] = None
     description: Optional[str] = None
+    # login_page_url: Optional[str] = None
+    # user_roles_data: Optional[List[UserRole]] = None
 
 class EngagementCreate(EngagementBase):
     pass
@@ -31,6 +33,7 @@ class EngagementCreate(EngagementBase):
 class EngagementUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
+    page_data: Optional[List[Dict[str, Any]]] = None
 
 class EngagementOut(EngagementBase):
     id: UUID

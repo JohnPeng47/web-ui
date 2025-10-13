@@ -289,7 +289,7 @@ class _ServerLogFactory:
     def __init__(self, base_dir: str) -> None:
         self._base_dir = Path(base_dir)
         self._server_logger: Optional[logging.Logger] = None
-        # self._parent_logdir: Optional[Path] = None
+        self._parent_logdir: Optional[Path] = None
 
         self.setup_static_loggers()
 

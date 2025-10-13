@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from typing import AsyncGenerator
+import platform
 
 from contextlib import asynccontextmanager
 from sqlmodel import SQLModel, create_engine
@@ -9,7 +10,14 @@ from sqlalchemy.orm import sessionmaker
 
 DB_PATH = Path(__file__).parent.parent / "pentest_hub.db"
 # cnc/pentest_hub.db
-DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite+aiosqlite:///./{str(DB_PATH)}")
+
+# Platform-specific database URL handling
+if platform.system() == "Windows":
+    # Windows: Use absolute path without leading slash
+    DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite+aiosqlite:///./{str(DB_PATH.absolute())}")
+else:
+    # Linux/Unix: Use relative path with leading slash
+    DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite+aiosqlite:///{str(DB_PATH.absolute())}")
 
 engine = create_async_engine(DATABASE_URL, echo=False)
 

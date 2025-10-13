@@ -170,6 +170,43 @@ async def run_delete_all_agents_for_engagement(engagement_id: str, agent_type: O
         break
 
 
+async def run_upload_page_data(engagement_id: str, file_path: str):
+    """Upload page data from a JSON file to an engagement."""
+    await create_db_and_tables()
+    async for db in get_session():
+        try:
+            # Verify the engagement exists
+            engagement = await get_engagement(db, UUID(engagement_id))
+            if not engagement:
+                click.echo(f"No engagement found with ID: {engagement_id}")
+                return
+            
+            # Read the JSON file
+            try:
+                with open(file_path, "r") as f:
+                    page_data = json.load(f)
+            except FileNotFoundError:
+                click.echo(f"Error: File not found: {file_path}")
+                return
+            except json.JSONDecodeError as e:
+                click.echo(f"Error: Invalid JSON file: {e}")
+                return
+            
+            # Update the engagement with the page data
+            update_data = EngagementUpdate(page_data=page_data)
+            updated_engagement = await update_engagement(db, engagement_id, update_data)
+            
+            click.echo(f"Successfully uploaded page data to engagement {engagement_id}")
+            click.echo(f"Engagement: {updated_engagement.name}")
+            click.echo(f"Page data entries: {len(page_data) if isinstance(page_data, (list, dict)) else 'N/A'}")
+            
+        except ValueError as e:
+            click.echo(f"Error: {e}")
+        except Exception as e:
+            click.echo(f"Unexpected error: {e}")
+        break
+
+
 @click.group()
 def cli():
     """CNC Database CLI Tool"""
@@ -235,6 +272,15 @@ def delete_agent_cmd(agent_id: str):
 def delete_all_agents_for_engagement_cmd(engagement_id: str, agent_type: Optional[str] = None):
     """Delete all agents for an engagement (optionally filtered by type)"""
     asyncio.run(run_delete_all_agents_for_engagement(engagement_id, agent_type))
+
+
+@engagement.command("upload-page-data")
+@click.argument("engagement_id")
+@click.argument("file_path", type=click.Path(exists=True))
+def upload_page_data_cmd(engagement_id: str, file_path: str):
+    """Upload page data from a JSON file to an engagement"""
+    asyncio.run(run_upload_page_data(engagement_id, file_path))
+
 
 if __name__ == "__main__":
     cli()

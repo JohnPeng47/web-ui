@@ -19,8 +19,8 @@ async def start_single_browser():
         pw = await async_playwright().start()
         browser = await pw.chromium.launch_persistent_context(
             user_data_dir=str(BROWSER_PROFILE_DIR_2),
-            headless=False,
-            executable_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe",
+            headless=True,
+            # executable_path=r"C:\Users\jpeng\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe",
             args=[
                 "--ignore-certificate-errors",
                 "--ignore-ssl-errors",

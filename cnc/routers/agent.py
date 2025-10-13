@@ -90,6 +90,7 @@ def make_agent_router(
         log_factory = get_or_init_log_factory(base_dir=SERVER_LOG_DIR)
         agent_logger, full_logger = log_factory.get_discovery_agent_loggers()
         server_log.info(f"Starting discovery agent {agent.id} with for {engagement.id}")
+
         try:
             await discovery_agent_queue.publish(
                 StartDiscoveryRequest(
@@ -107,7 +108,13 @@ def make_agent_router(
                     full_log=full_logger,
                 )
             )
-            return agent
+            return AgentOut(
+                id=agent.id,
+                agent_status=agent.agent_status,
+                agent_type=AgentType(agent.agent_type),
+                agent_name=agent.agent_name,
+                data={}
+            )
         except ValueError as e:
             raise HTTPException(status_code=404, detail=str(e))
         except Exception as e:
@@ -185,16 +192,18 @@ def make_agent_router(
             agents_out = []
             for agent in agents:
                 if isinstance(agent, ExploitAgentModel):
-                    agents_out.append(AgentOut(
-                        id=agent.id,
-                        agent_status=agent.agent_status,
-                        agent_type=AgentType(agent.agent_type),
-                        agent_name=agent.vulnerability_title,
-                        data={
-                            "vulnerability_description": agent.vulnerability_description,
-                            "complete_data": agent.complete_data if agent.complete_data else {}
-                        }
-                    )) 
+                    agents_out.append(
+                        AgentOut(
+                            id=agent.id,
+                            agent_status=agent.agent_status,
+                            agent_type=AgentType(agent.agent_type),
+                            agent_name=agent.vulnerability_title,
+                            data={
+                                "vulnerability_description": agent.vulnerability_description,
+                                "complete_data": agent.complete_data if agent.complete_data else {}
+                            }
+                        )
+                    ) 
             return agents_out
         except HTTPException:
             raise
